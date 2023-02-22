@@ -1,0 +1,7 @@
+0.1.2b
+- SP system is replaced with Skill Crystals.
+  . Skill crystals, upon use, grant a new ability to a user based on their profession
+  . Can be bought or found.
+  . Disappear on use
+
+- fixed a bug where loading saves would make items unconsumable

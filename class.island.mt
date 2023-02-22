@@ -299,6 +299,7 @@
                         events->push(value:event);
                     });
 
+                    professions = [];
                     value.professions->foreach(do:::(index, professionData) {
                         @:prof = Profession.new(state:professionData);
                         professions->push(value:prof);

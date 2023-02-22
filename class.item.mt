@@ -1944,6 +1944,43 @@ Item.Base.database = Database.new(items: [
 
     }),
     
+    Item.Base.new(data : {
+        name : "Skill Crystal",
+        description: "Irridescent cyrstal that imparts knowledge when used.",
+        examine : 'Quite sought after, highly skilled mages usually produce them for the public',
+        equipType: TYPE.HAND,
+        rarity : 100,
+        weight : 3,
+        canBeColored : false,
+        keyItem : false,
+        canHaveModifier : false,
+        hasMaterial : false,
+        isUnique : false,
+        levelMinimum : 100000,
+        useTargetHint : USE_TARGET_HINT.ONE,
+        basePrice: 600,
+
+        equipMod : StatSet.new(
+            ATK: 10, // well. its hard!
+            DEF: 2, // well. its hard!
+            SPD: -10,
+            DEX: -20
+        ),
+        useEffects : [
+            'Learn Skill',
+            'Consume Item'       
+        ],
+        equipEffects : [],
+        attributes : [
+            ATTRIBUTE.SHARP
+        ],
+        onCreate ::(item, user, creationHint) {}
+
+    }),
+        
+    
+    
+    
     
     Item.Base.new(data : {
         name : "Runestone",

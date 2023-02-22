@@ -71,7 +71,7 @@ return class(
                     items = [];
                     value.items->foreach(do:::(i, itemData) {
                         @:item = Item.Base.database.find(name:itemData.baseName).new(state:itemData);
-                        items->push(value:item);
+                        this.add(item);
                     });
                 },
             

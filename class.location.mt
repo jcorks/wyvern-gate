@@ -461,6 +461,9 @@ Location.Base.database = Database.new(
 
 
                 location.inventory.add(item:Item.Base.database.find(
+                    name: 'Skill Crystal'
+                ).new(from:location.ownedBy));                
+                location.inventory.add(item:Item.Base.database.find(
                     name: 'Pickaxe'
                 ).new(from:location.ownedBy));                
                 location.inventory.add(item:Item.Base.database.find(

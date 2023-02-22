@@ -21,7 +21,8 @@
 
 
 @: nextSPLevel ::(spLevel) {
-    return (((spLevel+1)*0.75 * 10) + (spLevel+1) * 5)->ceil;
+    return 1;
+    //return (((spLevel+1)*0.75 * 10) + (spLevel+1) * 5)->ceil;
 };
 
 @:Profession = class(

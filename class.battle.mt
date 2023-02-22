@@ -381,22 +381,14 @@
                     dialogue.message(text: 'The battle is won.');
 
                     @exp = 0;
-                    @sp = 0;
                     enemies_->foreach(do:::(index, enemy) {
                         exp += enemy.dropExp();
-                        sp += 1;
                     });                
                     exp /= allies_->keycount;
                     exp = exp->ceil;
                     dialogue.message(text: 'Each party member gains ' + exp + ' EXP.');
-                    dialogue.message(text: 'Each party member gains ' + sp + ' SP.');
                     allies_->foreach(do:::(index, ally) {
                         ally.stats.resetMod();
-                        @:learned = ally.profession.gainSP(amount:sp);
-                        learned->foreach(do:::(index, ability) {
-                            ally.learnAbility(name:ability);
-                            dialogue.message(text: ally.name + ' learned the ability: ' + ability);                        
-                        });
                         
                         @stats = StatSet.new();
                         @level = ally.level;

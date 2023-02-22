@@ -1829,6 +1829,48 @@ Effect.database = Database.new(
                 }
             }
         ),     
+
+        Effect.new(
+            data : {
+                name : 'Learn Skill',
+                description: 'Acquire a new skill',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                    
+                ),
+                onAffliction : ::(user, item, holder) {
+
+                    @:learned = holder.profession.gainSP(amount:1);
+                    learned->foreach(do:::(index, ability) {
+                        holder.learnAbility(name:ability);
+                        dialogue.message(text: holder.name + ' learned the ability: ' + ability);                        
+                    });
+                
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ), 
+        
+
+
+        
+        
         
         //////////////////////////////
         /// STATUS AILMENTS

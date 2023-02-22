@@ -570,8 +570,9 @@ return class(
                 island = keyhome.islandEntry;
                 world.island = island;
                 party = world.party;
-                //party.inventory.addGold(amount:100);
-                party.inventory.addGold(amount:100000);
+                party.inventory.addGold(amount:100);
+                // debug
+                //party.inventory.addGold(amount:100000);
                 
                 
                 // since both the party members are from this island, 
@@ -598,6 +599,11 @@ return class(
                 @:arm0 = Item.Base.database.find(name:'Tunic').new(from:p0);
                 @:arm1 = Item.Base.database.find(name:'Robe').new(from:p1);
 
+                @:crystal0 = Item.Base.database.find(name:'Skill Crystal').new(from:p0);
+                @:crystal1 = Item.Base.database.find(name:'Skill Crystal').new(from:p0);
+
+                party.inventory.add(item:crystal0);
+                party.inventory.add(item:crystal1);
 
 
 
