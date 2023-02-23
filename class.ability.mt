@@ -51,6 +51,7 @@
                 description : String,
                 targetMode : Number,
                 usageHintAI : Number,
+                oncePerBattle : Boolean,
                 durationTurns : Number, // multiduration turns supercede the choice of action
                 mpCost : Number,
                 hpCost : Number,
@@ -80,6 +81,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' attacks ' + targets[0].name + '!'
@@ -105,6 +107,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 10,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' attacks ' + targets[0].name + ' as a follow-up!'
@@ -139,6 +142,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 5,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' attacks twice!'
@@ -171,6 +175,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 24,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' attacks three times!'
@@ -207,6 +212,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI : USAGE_HINT.DONTUSE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         user.addEffect(from:user, name: 'Running', durationTurns: 1);                        
                     }
@@ -222,6 +228,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 8,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(text:user.name + ' focuses their perception, increasing their ATK temporarily!');
                         user.addEffect(from:user, name: 'Focus Perception', durationTurns: 5);                        
@@ -238,6 +245,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 16,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(text:user.name + ' cheers for the party!');
                         user.allies->foreach(do:::(index, ally) {
@@ -258,6 +266,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 4, 
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:world = import(module:'singleton.world.mt');
                         [::] {
@@ -282,6 +291,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 4, 
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:world = import(module:'singleton.world.mt');
                         [::] {
@@ -307,6 +317,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 5,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' fires a glowing beam of moonlight!'
@@ -341,6 +352,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 5,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' fires a glowing beam of sunlight!'
@@ -375,6 +387,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 25,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' lets loose a burst of sunlight!'
@@ -411,6 +424,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 8,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Night Veil on ' + targets[0].name + '!'
@@ -443,6 +457,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 8,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Dayshroud on ' + targets[0].name + '!'
@@ -474,6 +489,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 32,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Call of the Night on ' + targets[0].name + '!'
@@ -507,6 +523,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 54,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Lunacy on ' + targets[0].name + '!'
@@ -538,6 +555,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 26,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Moonsong on ' + targets[0].name + '!'
@@ -569,6 +587,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 26,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Sol Attunement on ' + targets[0].name + '!'
@@ -600,6 +619,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 15,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' tries to sweep everyone\'s legs!'
@@ -629,6 +649,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 5,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' does a big swing!'
@@ -656,6 +677,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 2,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' bashes ' + targets[0].name + '!'
@@ -679,6 +701,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 2,
                     usageHintAI : USAGE_HINT.DONTUSE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:pickItem = import(module:'function.pickitem.mt');
                         @:world = import(module:'singleton.world.mt');
@@ -711,6 +734,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 5,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' tries to stun ' + targets[0].name + '!'
@@ -739,6 +763,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 20,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' tries to grapple ' + targets[0].name + '!'
@@ -763,6 +788,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 5,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' does a swipe kick on ' + targets[0].name + '!'
@@ -785,11 +811,12 @@ Ability.database = Database.new(
                 data: {
                     name: 'Poison Attack',
                     targetMode : TARGET_MODE.ONE,
-                    description: "Damages a target based on the user's strength.",
+                    description: "Damages a target based on the user's strength with a poisoned weapon.",
                     durationTurns: 0,
                     hpCost : 0,
                     mpCost : 5,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' attacks ' + targets[0].name + ' with a poisoned weapon!'
@@ -807,6 +834,74 @@ Ability.database = Database.new(
             
             Ability.new(
                 data: {
+                    name: 'Petrify',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Damages a target based on the user's strength with a special petrification poison.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    mpCost : 15,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(
+                            text: user.name + ' attacks ' + targets[0].name + ' with a poisoned weapon!'
+                        );
+                        user.attack(
+                            target: targets[0],
+                            amount:user.stats.ATK * (0.3),
+                            damageType : Damage.TYPE.PHYS,
+                            damageClass: Damage.CLASS.HP
+                        );
+                        targets[0].addEffect(from:user, name: 'Petrified', durationTurns: 5);                        
+                    }
+                }
+            ),            
+            Ability.new(
+                data: {
+                    name: 'Tripwire',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Activates a tripwire set up prior to battle, causing the target to be stunned for 3 turns. Only works once per battle.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    mpCost : 0,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(
+                            text: user.name + ' activates the tripwire right under ' + targets[0].name + '!'
+                        );
+                        targets[0].addEffect(from:user, name: 'Stunned', durationTurns: 2);                        
+                    }
+                }
+            ),
+
+
+            Ability.new(
+                data: {
+                    name: 'Trip Explosive',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Activates a tripwire-activated explosive set up prior to battle, causing the target to be damaged. Only works once per battle.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    mpCost : 0,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(
+                            text: user.name + ' activates the tripwire explosive right under ' + targets[0].name + '!'
+                        );
+                        user.attack(
+                            target: targets[0],
+                            amount:100, // always 100
+                            damageType : Damage.TYPE.FIRE,
+                            damageClass: Damage.CLASS.HP
+                        );
+                    }
+                }
+            ),
+            
+            Ability.new(
+                data: {
                     name: 'Stab',
                     targetMode : TARGET_MODE.ONE,
                     description: "Damages a target based on the user's strength and causes bleeding.",
@@ -814,6 +909,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 20,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' attacks ' + targets[0].name + '!'
@@ -838,6 +934,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 3,
                     usageHintAI : USAGE_HINT.HEAL,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' does first aid on ' + targets[0].name + '!'
@@ -857,6 +954,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 5,
                     usageHintAI : USAGE_HINT.HEAL,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' gives a snack to ' + targets[0].name + '!'
@@ -899,6 +997,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 4,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Fire on ' + targets[0].name + '!'
@@ -922,6 +1021,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 20,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Flare on ' + targets[0].name + '!'
@@ -947,6 +1047,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 8,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Ice!'
@@ -972,6 +1073,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 38,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Explosion!'
@@ -997,6 +1099,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 18,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Flash!'
@@ -1017,6 +1120,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 16,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Thunder!'
@@ -1044,6 +1148,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 25,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' wildly swings!'
@@ -1071,6 +1176,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 5,
                     usageHintAI : USAGE_HINT.HEAL,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Cure on ' + targets[0].name + '!'
@@ -1089,6 +1195,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 20,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Cleanse on ' + targets[0].name + '!'
@@ -1118,6 +1225,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 5,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Effect = import(module:'class.effect.mt');
                         dialogue.message(
@@ -1142,6 +1250,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 15,
                     usageHintAI : USAGE_HINT.HEAL,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Greater Cure on ' + targets[0].name + '!'
@@ -1161,6 +1270,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 10,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Protect on ' + targets[0].name + '!'
@@ -1180,6 +1290,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 10,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' challenges ' + targets[0].name + ' to a duel!'
@@ -1199,6 +1310,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 55,
                     usageHintAI : USAGE_HINT.HEAL,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Grace on ' + targets[0].name + '!'
@@ -1218,6 +1330,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 42,
                     usageHintAI : USAGE_HINT.HEAL,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Pheonix Soul on ' + targets[0].name + '!'
@@ -1243,6 +1356,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 25,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Protect All!'
@@ -1262,6 +1376,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' uses Soothe on ' + targets[0].name +'!'
@@ -1280,6 +1395,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI : USAGE_HINT.HEAL,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' meditates!'
@@ -1299,6 +1415,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 5,
                     usageHintAI : USAGE_HINT.HEAL,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Soothe on ' + targets[0].name + '!'
@@ -1319,6 +1436,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 3,
                     usageHintAI : USAGE_HINT.DEBUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:world = import(module:'singleton.world.mt');
 
@@ -1358,6 +1476,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 3,
                     usageHintAI : USAGE_HINT.DEBUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:world = import(module:'singleton.world.mt');
                         @:Entity = import(module:'class.entity.mt');
@@ -1399,6 +1518,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 4,
                     usageHintAI : USAGE_HINT.DEBUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' mugs ' + targets[0].name + '!'
@@ -1440,6 +1560,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 8,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         targets[0].addEffect(from:user, name: 'Sneaked', durationTurns: 2);
 
@@ -1456,6 +1577,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 8,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         targets[0].addEffect(from:user, name: 'Mind Focused', durationTurns: 5);
                     }
@@ -1471,6 +1593,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         user.addEffect(from:user, name: 'Defend', durationTurns:1);
                     }
@@ -1486,6 +1609,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Effect = import(module:'class.effect.mt');
                         @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -1504,6 +1628,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Effect = import(module:'class.effect.mt');
                         @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -1522,6 +1647,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Effect = import(module:'class.effect.mt');
                         @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -1540,6 +1666,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Effect = import(module:'class.effect.mt');
                         @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -1558,6 +1685,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Effect = import(module:'class.effect.mt');
                         @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -1576,6 +1704,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Effect = import(module:'class.effect.mt');
                         @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -1595,6 +1724,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Effect = import(module:'class.effect.mt');
                         @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -1613,6 +1743,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Effect = import(module:'class.effect.mt');
                         @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -1631,6 +1762,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(text:'' + user.name + ' waits.');
                     }
@@ -1647,6 +1779,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI: USAGE_HINT.DONTUSE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:item = extraData[0];
                         item.base.useEffects->foreach(do:::(index, effect) {    
@@ -1667,6 +1800,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI: USAGE_HINT.DONTUSE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @item = extraData[0];
                         item.base.useEffects->foreach(do:::(index, effect) {    
@@ -1695,6 +1829,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI: USAGE_HINT.DONTUSE,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:item = extraData[0];
                         user.equip(
@@ -1715,6 +1850,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI: USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         targets[0].addEffect(
                             from:user, name: 'Defend Other', durationTurns: 4 
@@ -1732,6 +1868,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI: USAGE_HINT.BUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Entity = import(module:'class.entity.mt');
                         when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L).base.name == 'None')
@@ -1757,6 +1894,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI: USAGE_HINT.DEBUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Entity = import(module:'class.entity.mt');
                         when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.ARMOR).base.name == 'None')
@@ -1782,6 +1920,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI: USAGE_HINT.DEBUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Entity = import(module:'class.entity.mt');
                         when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L).base.name == 'None')
@@ -1807,6 +1946,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 0,
                     usageHintAI: USAGE_HINT.DEBUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Entity = import(module:'class.entity.mt');
                         when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.ARMOR).base.name == 'None')
@@ -1832,6 +1972,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 5,
                     usageHintAI: USAGE_HINT.DEBUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(text:user.name + ' tries to convince ' + targets[0].name + ' to wait!');
                         
@@ -1857,6 +1998,7 @@ Ability.database = Database.new(
                     hpCost : 0,
                     mpCost : 5,
                     usageHintAI: USAGE_HINT.DEBUFF,
+                    oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         when (user.allies->any(condition:::(value) <- value == targets[0]))
                             dialogue.message(text: "Are you... trying to bribe me? we're... we're on the same team..");

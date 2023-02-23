@@ -301,7 +301,8 @@
 
                     professions = [];
                     value.professions->foreach(do:::(index, professionData) {
-                        @:prof = Profession.new(state:professionData);
+                        @:prof = professionData;
+                        prof.profession = Profession.Base.database.find(name:prof.profession);                       
                         professions->push(value:prof);
                     });
 
@@ -310,6 +311,8 @@
                 },
             
                 get :: {
+                    breakpoint();
+                
                     return {
                         name : name,
                         levelMin : levelMin,
@@ -323,7 +326,7 @@
                         species : [...species]->map(to:::(value) <- {rarity:value.rarity, name:value.species.name}),
                         significantLandmarks : [...significantLandmarks]->map(to:::(value) <- value.state),
                         events : [...events]->map(to:::(value) <- value.state),
-                        professions : [...professions]->map(to:::(value) <- value.state)
+                        professions : [...professions]->map(to:::(value) <- {rarity:value.rarity, profession:value.profession.name})
                     
                     };
                 }

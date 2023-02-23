@@ -589,7 +589,9 @@ return class(
                 
                 
                 @:p0 = island.newInhabitant(professionHint: 'Adventurer', speciesHint: island.species[0], levelHint:2);
-                @:p1 = island.newInhabitant(professionHint: 'Field Mage', speciesHint: island.species[1]);
+                //@:p1 = island.newInhabitant(professionHint: 'Field Mage', speciesHint: island.species[1]);
+                // debug
+                @:p1 = island.newInhabitant(professionHint: 'Assassin', speciesHint: island.species[1]);
 
                 p1.inventory.clear();
                 p0.inventory.clear();
@@ -599,11 +601,11 @@ return class(
                 @:arm0 = Item.Base.database.find(name:'Tunic').new(from:p0);
                 @:arm1 = Item.Base.database.find(name:'Robe').new(from:p1);
 
-                @:crystal0 = Item.Base.database.find(name:'Skill Crystal').new(from:p0);
-                @:crystal1 = Item.Base.database.find(name:'Skill Crystal').new(from:p0);
 
-                party.inventory.add(item:crystal0);
-                party.inventory.add(item:crystal1);
+                [0, 5]->for(do:::(i) {
+                    @:crystal = Item.Base.database.find(name:'Skill Crystal').new(from:p0);
+                    party.inventory.add(item:crystal);
+                });
 
 
 

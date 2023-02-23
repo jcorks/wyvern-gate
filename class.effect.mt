@@ -37,6 +37,7 @@
                 skipTurn : Boolean, // whether this effect makes the user not act for a turn
                 stats : StatSet.type,
                 onAffliction : Function, //Called once when first activated
+                onGivenDamage : Function, // Called AFTER the user has explicitly damaged a target
                 onGiveDamage : Function, // called when user is giving damage
                 onRemoveEffect : Function, //Called once when removed. All effects will be removed at some point.
                 onDamage : Function, // when the holder of the effect is hurt
@@ -69,6 +70,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     Scene.database.find(name:'scene0_0_sylviaenter').act();
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -109,6 +113,9 @@ Effect.database = Database.new(
 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -143,6 +150,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -176,6 +186,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -208,6 +221,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -240,6 +256,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -273,6 +292,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -306,6 +328,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -338,6 +363,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -386,6 +414,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -424,6 +455,9 @@ Effect.database = Database.new(
 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -462,6 +496,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     dialogue.message(text:holder.name + '\'s focus returns to normal.');
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -490,6 +527,9 @@ Effect.database = Database.new(
                 onAffliction : ::(user, item, holder) {
                     dialogue.message(text:holder.name + ' is covered in a shell of light');
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -523,6 +563,9 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -552,6 +595,9 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -582,6 +628,9 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -612,6 +661,9 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -644,6 +696,9 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -683,6 +738,9 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -713,6 +771,9 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -744,6 +805,9 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -773,6 +837,9 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -802,6 +869,9 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -831,6 +901,9 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -860,6 +933,9 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -890,6 +966,9 @@ Effect.database = Database.new(
                 onAffliction : ::(user, item, holder) {
                     dialogue.message(text:'A halo appears above ' + holder.name + '!');
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -936,6 +1015,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -969,6 +1051,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1016,6 +1101,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1044,6 +1132,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1075,6 +1166,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1118,6 +1212,9 @@ Effect.database = Database.new(
                     });
                     
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1159,6 +1256,9 @@ Effect.database = Database.new(
                     world.party.addGold(amount:amt);
                     
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1190,6 +1290,9 @@ Effect.database = Database.new(
                 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1217,6 +1320,9 @@ Effect.database = Database.new(
                 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1244,6 +1350,9 @@ Effect.database = Database.new(
                 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1270,6 +1379,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     dialogue.message(text:user.name + ' resumes a normal stance!');
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1313,6 +1425,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1343,6 +1458,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1373,6 +1491,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1403,6 +1524,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1431,6 +1555,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1458,6 +1585,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     dialogue.message(text:holder.name + ' came to their senses!');
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1486,6 +1616,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1514,6 +1647,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1542,6 +1678,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1570,6 +1709,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1601,6 +1743,9 @@ Effect.database = Database.new(
                         dialogue.message(text:'The moon shimmers... ' + holder.name +' softly glows');                    
                     };
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1638,6 +1783,9 @@ Effect.database = Database.new(
                         dialogue.message(text:'The sun intensifies... ' + holder.name +' softly glows');                    
                     };
                 },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1672,6 +1820,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1706,8 +1857,53 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                
+                onGivenDamage : ::(user, item, holder, to) {
+                    if (to.isIncapacitated()) ::<= {
+                        dialogue.message(text:holder.name + "'s ending blow to " + to.name + " increases "+ holder.name + "'s abilities due to their Assassin's Pride.");                        
+                        user.addEffect(from:holder, name: 'Pride', durationTurns: 10);                        
+                    };
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
+
+
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),        
+        Effect.new(
+            data : {
+                name : 'Pride',
+                description: 'SPD, ATK +25%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                    ATK:25,
+                    SPD:25
+                ),
+                onAffliction : ::(user, item, holder) {
+                    dialogue.message(text:holder.name + " is feeling prideful.");
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+
+
                 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
@@ -1732,6 +1928,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1771,6 +1970,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
                 
@@ -1805,6 +2007,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     dialogue.message(text:holder.name + " is no longer bleeding out.");
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -1851,6 +2056,9 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -1890,6 +2098,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     dialogue.message(text:holder.name + " is no longer poisoned.");
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -1930,6 +2141,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     dialogue.message(text:holder.name + " is no longer blind.");
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                     when (Number.random() > 0.5) empty;
                     dialogue.message(text:holder.name + " missed in their blindness!");
@@ -1965,6 +2179,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     dialogue.message(text:holder.name + " is no longer burned.");
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -2004,6 +2221,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     dialogue.message(text:holder.name + " is no longer frozen.");
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -2037,6 +2257,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     dialogue.message(text:holder.name + " is no longer paralyzed.");
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 
@@ -2069,6 +2292,9 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     dialogue.message(text:holder.name + " is no longer petrified!");
                 },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
                 onGiveDamage : ::(user, item, holder, to, damage) {
                 },
 

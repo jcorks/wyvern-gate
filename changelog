@@ -1,4 +1,10 @@
 0.1.2b
+- fixed a bug where island's professions would be not saved properly
+- added Assassin abilities: 
+  . tripwire
+  . tripwire explosive
+- added Assassin passive: Assassin's Pride
+  
 - SP system is replaced with Skill Crystals.
   . Skill crystals, upon use, grant a new ability to a user based on their profession
   . Can be bought or found.

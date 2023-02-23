@@ -98,6 +98,7 @@
         @growth = StatSet.new();
         @enemies_ = [];
         @allies_ = [];
+        @abilitiesUsedBattle = empty;
         @adventurous = Number.random() <= 0.5;
         @battleAI = BattleAI.new(
             user: this
@@ -222,7 +223,6 @@
                         professions->push(value:p);
                     });                
                     profession = professions[value.professionIndex];
-                    breakpoint();
                     personality = Personality.database.find(name:value.personalityName);
                     favoritePlace = Location.Base.database.find(name:value.favoritePlace);
                     growth.state = value.growth;
@@ -292,8 +292,10 @@
                 enemies_ = enemies;
                 allies_ = allies;
                 requestsRemove = false;
+                abilitiesUsedBattle = {};
                 resetEffects();              
             },
+            
 
             // called to signal that a battle has started involving this entity
             battleEnd :: {
@@ -307,6 +309,7 @@
                 });
                 allies_ = [];
                 enemies_ = [];
+                abilitiesUsedBattle = empty;                
                 resetEffects();
             },
 
@@ -444,6 +447,7 @@
                     damageClass
                 );
                 
+                @:damaged = [];
                 // TODO: add weapon affinities if phys and equip weapon
                 // phys is always assumed to be with equipped weapon
                 effects->foreach(do:::(index, effect) {
@@ -452,6 +456,13 @@
                 });
                 when(dmg.amount <= 0) empty;
                 target.damage(from:this, damage:dmg);
+
+
+                
+                effects->foreach(do:::(index, effect) {
+                    effect.effect.onGivenDamage(user:effect.from, item:effect.item, holder:this, to:target);
+                });
+
             },
             
             damage ::(from => this.type, damage => Damage.type) {
@@ -843,6 +854,11 @@
                 when(hp < ability.hpCost) dialogue.message(
                     text: this.name + " tried to use " + ability.name + ", but couldn't muster the strength!"
                 );
+                
+                when (abilitiesUsedBattle != empty && ability.oncePerBattle && abilitiesUsedBattle[ability.name] == true) dialogue.message(
+                    text: this.name + " tried to use " + ability.name + ", but it worked the first time!"
+                );
+                if (abilitiesUsedBattle) abilitiesUsedBattle[ability.name] = true;
                 
                 mp -= ability.mpCost;
                 hp -= ability.hpCost;
