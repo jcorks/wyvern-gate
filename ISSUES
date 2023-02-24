@@ -14,8 +14,4 @@ Coming changes:
   . Dice poker
   . others?
 - inventory limit
-- Different map navigation that is more inline with dungeon crawls
-  . you only occupy a small visible quadrant
-  . can navigate NWES
-  . reduced encounter rate
-  . map visual generation required
+

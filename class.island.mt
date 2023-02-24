@@ -23,7 +23,7 @@
 @:Landmark = import(module:'class.landmark.mt');
 @:dialogue = import(module:'singleton.dialogue.mt');
 @:canvas = import(module:'singleton.canvas.mt');
-@:Map = import(module:'class.map.mt');
+@:LargeMap = import(module:'class.largemap.mt');
 @:Party = import(module:'class.party.mt');
 @:Profession = import(module:'class.profession.mt');
 @:Event = import(module:'class.event.mt');
@@ -119,13 +119,13 @@
         @encounterRate = Number.random();        
         
         // Size of the island... Islands are always square-ish
-        @size  = random.integer(from:5, to:20);
+        @size  = random.integer(from:3, to:5);
         
         // steps since the last event
         @stepsSinceLastEvent = 0;
         
         // map of the region
-        @map = Map.new();
+        @map = LargeMap.new(size);
         
         @id = genID();
 
@@ -258,7 +258,6 @@
 
             
             
-            map.size = size;
 
             return this;
         };
@@ -284,7 +283,7 @@
                     });
 
                     significantLandmarks = [];
-                    map = Map.new();
+                    map = LargeMap.new(state:value.map);
 
                     value.significantLandmarks->foreach(do:::(index, landmarkData) {
                         @:landmark = Landmark.Base.database.find(name:landmarkData.baseName).new(x:0, y:0, state:landmarkData, island:this);
@@ -307,7 +306,6 @@
                     });
 
 
-                    map.state = value.map;
                 },
             
                 get :: {
@@ -371,8 +369,8 @@
             
             incrementTime:: {
                 // every step, an event can occur.
-                if (stepsSinceLastEvent > 4) ::<= {
-                    if (Number.random() > 1 - (stepsSinceLastEvent-4) / 5) ::<={
+                if (stepsSinceLastEvent > 20) ::<= {
+                    if (Number.random() > 1 - (stepsSinceLastEvent-20) / 5) ::<={
 
                         // mostly its encounters. 80% chance of encounter 
                         if (Number.random() < 0.8) ::<= {

@@ -314,7 +314,13 @@ return class(
                             forever(do:::{
                                 renderMain();
 
-                                @:choices = [];
+                                @:choices = [
+                                    'North',
+                                    'East',
+                                    'West',
+                                    'South'
+                                ];
+                                /*
                                 island.landmarks->foreach(do:::(index, landmark){
                                     @:dist = island.map.getDistanceFromItem(item:landmark);
                                     choices->push(value:(if(landmark.discovered) 
@@ -328,13 +334,14 @@ return class(
                                         ('????: ~')) + dist->ceil + ' away'
                                     );
                                 });
+                                */
 
                                 
                                 
                                 choice = dialogue.choices(
                                     leftWeight: 1,
                                     topWeight: 1,
-                                    prompt: 'Travel to which?',
+                                    prompt: 'Travel which way?',
                                     choices,
                                     canCancel: true,
                                     defaultChoice:lastChoice
@@ -346,11 +353,13 @@ return class(
                                 
                                 @:target = island.landmarks[choice-1];
                                 
+                                
+                                
                                 // move by one unit in that direction
                                 // or ON it if its within one unit.
                                 island.map.movePointer(
-                                    towards: target,
-                                    units: 1
+                                    x: if (choice == 2) 0.15 else if (choice == 3) -0.15 else 0,
+                                    y: if (choice == 4) 0.15 else if (choice == 1) -0.15 else 0
                                 );
                                 world.stepTime();                                    
                                 island.incrementTime();
@@ -589,9 +598,8 @@ return class(
                 
                 
                 @:p0 = island.newInhabitant(professionHint: 'Adventurer', speciesHint: island.species[0], levelHint:2);
-                //@:p1 = island.newInhabitant(professionHint: 'Field Mage', speciesHint: island.species[1]);
+                @:p1 = island.newInhabitant(professionHint: 'Field Mage', speciesHint: island.species[1]);
                 // debug
-                @:p1 = island.newInhabitant(professionHint: 'Assassin', speciesHint: island.species[1]);
 
                 p1.inventory.clear();
                 p0.inventory.clear();
@@ -602,7 +610,7 @@ return class(
                 @:arm1 = Item.Base.database.find(name:'Robe').new(from:p1);
 
 
-                [0, 5]->for(do:::(i) {
+                [0, 2]->for(do:::(i) {
                     @:crystal = Item.Base.database.find(name:'Skill Crystal').new(from:p0);
                     party.inventory.add(item:crystal);
                 });

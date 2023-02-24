@@ -330,7 +330,7 @@ Landmark.Base.database = Database.new(
         Landmark.Base.new(
             data: {
                 name : 'town',
-                symbol : '#',
+                symbol : '(#)',
                 rarity : 100000,
                 minLocations : 3,
                 maxLocations : 5,
@@ -353,7 +353,7 @@ Landmark.Base.database = Database.new(
         Landmark.Base.new(
             data: {
                 name : 'city',
-                symbol : '|',
+                symbol : '(|)',
                 rarity : 5,
                 minLocations : 3,
                 isUnique : false,
@@ -381,7 +381,7 @@ Landmark.Base.database = Database.new(
         Landmark.Base.new(
             data: {
                 name : 'Mine',
-                symbol : 'O',
+                symbol : '(O)',
                 rarity : 5,
                 minLocations : 3,
                 isUnique : false,
@@ -405,7 +405,7 @@ Landmark.Base.database = Database.new(
         Landmark.Base.new(
             data: {
                 name : 'Wyvern Gate',
-                symbol : '@',
+                symbol : '(@)',
                 rarity : 10,
                 isUnique : true,
                 minLocations : 4,
@@ -423,7 +423,7 @@ Landmark.Base.database = Database.new(
         Landmark.Base.new(
             data: {
                 name : 'Dungeon',
-                symbol : 'O',
+                symbol : '(O)',
                 rarity : 100000,      
                 isUnique : true,
                 minLocations : 1,
@@ -456,21 +456,7 @@ Landmark.Base.database = Database.new(
                 ]
             }
         ),
-        
-        Landmark.Base.new(
-            data: {
-                name : 'The Outlook',
-                symbol : '^',
-                rarity : 0,      
-                isUnique : true,
-                minLocations : 0,
-                maxLocations : 0,
-                peaceful: true,
-                possibleLocations : [
-                ],
-                requiredLocations : []
-            }
-        ),        
+      
         
         
 /*

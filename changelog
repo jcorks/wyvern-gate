@@ -1,4 +1,7 @@
 0.1.2b
+-  changed the map system on island view to be more exploration based
+  . open-world exploration using cardinal directions
+  . terrain scenery generated
 - fixed a bug where island's professions would be not saved properly
 - added Assassin abilities: 
   . tripwire
