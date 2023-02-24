@@ -36,7 +36,7 @@ void matte_external_unhandled_error(
         );
     }
     external_unhandled_error(
-        WYRVEN_GIT_COMMIT,
+        WYVERN_GIT_COMMIT,
         matte_string_get_c_str(err)
     );
     matte_string_destroy(err);
