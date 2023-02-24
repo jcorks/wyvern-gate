@@ -1,0 +1,52 @@
+@font-face {
+  font-family: gamefont;
+  src: url('monof55.ttf') format('truetype');
+}
+
+:root {
+ --canvas__font-height: 21px;
+  --canvas__font-width: 10px;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+
+  text-rendering: optimizeLegibility !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+* {
+  box-sizing: content-box;
+}
+
+body {
+  background-color: rgb(50, 50, 50);
+  color: #e4F5F5;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wrapper {
+  display: flex;
+  margin: 40px;
+}
+
+#canvas {
+  display: block;
+  font-family: gamefont, monospace;
+  text-shadow: 0px 1px 0px #666666, 0px 2px 0px #333333, 0px 3px 0px #000000;
+  line-height: var(--canvas__font-height);
+  font-kerning: none;
+  font-size: var(--canvas__font-height);
+}
+
+#canvas span {
+  display: inline-block;
+  width: var(--canvas__font-width);
+}
