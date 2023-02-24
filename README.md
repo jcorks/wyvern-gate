@@ -19,5 +19,9 @@ Updated every now and then.
 A fun little test of [my language](http://github.com/jcorks/matte) 
 and iterative project.
 
-Playable web version coming soon.
+See the changelog file for current changes.
+
+
+(Playable webversion!)[https://jcorks.github.io/wyvern-gate/]
+Web version styling and help by [Adrian Hernik](https://skie.me), thanks a ton!
   
