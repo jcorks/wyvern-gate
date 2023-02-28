@@ -2028,10 +2028,9 @@ Ability.database = Database.new(
                             (world.party.isMember(entity:targets[0])) ::<= {
                                 dialogue.message(text: user.name + ' has offered ' + cost + 'G for ' + targets[0].name + ' to stop acting for the rest of the battle.');
                                 when(
-                                    dialogue.choices(
-                                        prompt: 'Accept offer for ' + cost + 'G?',
-                                        choices : ['Yes', 'No']                    
-                                    ) == 2
+                                    dialogue.askBoolean(
+                                        prompt: 'Accept offer for ' + cost + 'G?'
+                                    ) == false
                                 ) empty;              
                                               
                                 dialogue.message(text: user.name + ' bribes ' + targets[0].name + '!');

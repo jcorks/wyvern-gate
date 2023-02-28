@@ -403,7 +403,7 @@
                             stats.printDiff(other:ally.stats, prompt:ally.name + ' - (Level:  ' + level  + ' -> ' + (ally.level+1) + ': Base Stats)');                        
                             stats = StatSet.new();
                             stats.add(stats:ally.stats);                        
-                            return dialogue.choices(
+                            return dialogue.choicesNow(
                                 prompt: ally.name + ' - Focus which?',
                                 choices: [
                                     'HP  (+' + hp + ')',
@@ -468,7 +468,7 @@
                 renderStatusBox();
                 renderTurnOrder();
                 when (choices == empty) -1;
-                return dialogue.choiceColumns(
+                return dialogue.choiceColumnsNow(
                     leftWeight: 1,
                     topWeight: 1,
                     choices,

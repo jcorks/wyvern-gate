@@ -875,7 +875,7 @@
                     speaker: name,
                     text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.GREET])
                 );                
-                @:choice = dialogue.choices(
+                @:choice = dialogue.choicesNow(
                     canCancel : true,
                     prompt: 'Talking to ' + name,
                     choices: [
@@ -919,12 +919,10 @@
 
                     this.describe();
 
-                    @choice = dialogue.choices(
-                        prompt: 'Hire for ' + cost + 'G?',
-                        choices: ['yes', 'no']
-                    );
+                    when(dialogue.askBoolean(
+                        prompt: 'Hire for ' + cost + 'G?'
+                    ) == false) empty;
                     
-                    when(choice == 2) empty;
                     when(party.inventory.gold < cost)
                         dialogue.message(
                             text: 'The party cannot afford to hire ' + name

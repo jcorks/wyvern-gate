@@ -33,7 +33,7 @@ return ::(
     return [::]{
         @:item = pickItem(inventory:party.inventory, canCancel:true);
         when(item == empty) empty;
-        @choice = dialogue.choices(
+        @choice = dialogue.choicesNow(
             leftWeight: 1,
             topWeight: 1,
             prompt: '[' + item.name + ']',
@@ -67,7 +67,7 @@ return ::(
                 });
               
               
-                choice = dialogue.choices(
+                choice = dialogue.choicesNow(
                   leftWeight: 1,
                   topWeight: 1,
                   prompt: 'On whom?',
@@ -87,7 +87,7 @@ return ::(
               },
               
               (Item.USE_TARGET_HINT.GROUP): ::<={
-                choice = dialogue.choices(
+                choice = dialogue.choicesNow(
                   leftWeight: 1,
                   topWeight: 1,
                   prompt: 'On whom?',

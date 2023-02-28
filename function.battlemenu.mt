@@ -64,7 +64,7 @@ return ::(
                     );
                 });
                 
-                choice = dialogue.choices(
+                choice = dialogue.choicesNow(
                     leftWeight: 1,
                     topWeight: 1,
                     prompt:'What ability should ' + user.name + ' use?',
@@ -94,7 +94,7 @@ return ::(
                     });
                   
                   
-                    choice = dialogue.choices(
+                    choice = dialogue.choicesNow(
                       leftWeight: 1,
                       topWeight: 1,
                       prompt: 'Against whom?',
@@ -177,7 +177,7 @@ return ::(
               },
               
               (1): ::<={ // Info
-                choice = dialogue.choices(
+                choice = dialogue.choicesNow(
                   topWeight: 1,
                   prompt: 'Check which?', 
                   leftWeight: 1,
@@ -197,7 +197,7 @@ return ::(
                   (0): ::<={ // abilities
                     @:names = [...user.abilitiesAvailable]->map(to:::(value){return value.name;});
                     
-                    choice = dialogue.choices(
+                    choice = dialogue.choicesNow(
                       leftWeight: 1,
                       topWeight: 1,
                       prompt: 'Check which ability?',
@@ -217,7 +217,7 @@ return ::(
                   (1): ::<={ // allies
                     @:names = [...allies]->map(to:::(value){return value.name;});
                     
-                    choice = dialogue.choices(
+                    choice = dialogue.choicesNow(
                         topWeight: 1,
                         leftWeight: 1,
                         prompt:'Check which ally?',

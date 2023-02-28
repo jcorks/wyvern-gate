@@ -62,7 +62,7 @@ return class(
         
         
         @:aggress::(location, party) {
-            @choice = dialogue.choices(
+            @choice = dialogue.choicesNow(
                 prompt: 'Aggress how?',
                 choices: location.base.aggressiveInteractions,
                 canCancel : true
@@ -70,7 +70,7 @@ return class(
             
             when(choice == 0) empty;
             
-            when (location.landmark.peaceful && (dialogue.choices(
+            when (location.landmark.peaceful && (dialogue.choicesNow(
                 prompt: 'Are you sure?',
                 choices: ['Yes', 'No']
             ) == 2)) empty;
@@ -92,7 +92,7 @@ return class(
         };
         
         @:systemMenu :: {
-            @:choice = dialogue.choices(
+            @:choice = dialogue.choicesNow(
                 choices: [
                     'Save',
                     'Quit'
@@ -104,7 +104,7 @@ return class(
             match(choice-1) {
               // save 
               (0)::<= {
-                @:choice = dialogue.choices(
+                @:choice = dialogue.choicesNow(
                     prompt:'Save which slot?',
                     choices: [
                         'Slot 1',
@@ -122,7 +122,7 @@ return class(
               },
               // quit
               (1)::<= {
-                @:choice = dialogue.choices(
+                @:choice = dialogue.choicesNow(
                     prompt:'Quit?',
                     choices: [
                         'Yes',
@@ -165,7 +165,7 @@ return class(
                         choices->push(value:'Visit ' + locationAt.name);
                     };
                     
-                    @choice = dialogue.choices(
+                    @choice = dialogue.choicesNow(
                         leftWeight: 1,
                         topWeight: 1,
                         prompt: 'What next?',
@@ -185,7 +185,7 @@ return class(
                                     choices->push(value:location.name);
                                 });
 
-                                @choice = dialogue.choices(
+                                @choice = dialogue.choicesNow(
                                     leftWeight: 1,
                                     topWeight: 1,
                                     prompt: 'Walk where?',
@@ -242,7 +242,7 @@ return class(
                         if (locationAt.base.aggressiveInteractions->keycount)
                             choices->push(value: 'Aggress...');
                             
-                        @choice = dialogue.choices(
+                        @choice = dialogue.choicesNow(
                             prompt: 'Interaction',
                             choices:choices,
                             canCancel : true
@@ -293,7 +293,7 @@ return class(
                         choices->push(value:'Visit ' + visitable.base.name);                
 
 
-                    @choice = dialogue.choices(
+                    @choice = dialogue.choicesNow(
                         leftWeight: 1,
                         topWeight: 1,
                         prompt: 'What next?',
@@ -338,7 +338,7 @@ return class(
 
                                 
                                 
-                                choice = dialogue.choices(
+                                choice = dialogue.choicesNow(
                                     leftWeight: 1,
                                     topWeight: 1,
                                     prompt: 'Travel which way?',
@@ -381,7 +381,7 @@ return class(
                     
                       // check
                       (1): ::<= {
-                        choice = dialogue.choices(
+                        choice = dialogue.choicesNow(
                             leftWeight: 1,
                             topWeight: 1,
                             prompt: 'Check which?',
@@ -467,7 +467,7 @@ return class(
                         
                         
 
-                        @:choice = dialogue.choices(
+                        @:choice = dialogue.choicesNow(
                             choices : ['Load', 'New', 'Quit'],
                             topWeight: 0.75           
                         );
@@ -477,7 +477,7 @@ return class(
                         
                           // Load 
                           (0)::<= {
-                            @:choice = dialogue.choices(
+                            @:choice = dialogue.choicesNow(
                                 choices: [
                                     'Slot 1',
                                     'Slot 2',

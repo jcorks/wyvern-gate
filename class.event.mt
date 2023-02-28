@@ -405,16 +405,12 @@ Event.Base.database = Database.new(
                     @:party = event.party;
                     dialogue.message(text:'What\'s this?');
                     dialogue.message(text:'The party trips over a hidden chest!');
-                    when(dialogue.choices(
-                        prompt: 'Open the chest?',
-                        choices : [
-                            'Yes',
-                            'No'
-                        ]
-                    ) == 2) 0;
+                    when(dialogue.askBoolean(
+                        prompt: 'Open the chest?'
+                    ) == false) 0;
                     
                     
-                    @:opener = party.members[dialogue.choices(
+                    @:opener = party.members[dialogue.choicesNow(
                         prompt: 'Who opens up the chest?',
                         choices : [...party.members]->map(to:::(value) <- value.name)
                     )-1];
@@ -474,13 +470,9 @@ Event.Base.database = Database.new(
                     dialogue.message(text:'They are by a fire enjoying a meal.');
                     dialogue.message(speaker: '???', text:'"Care to join me? There\'s plenty to share!"');
 
-                    when(dialogue.choices(
-                        prompt:'Sit by the fire?',
-                        choices : [
-                            'Yes',
-                            'No'
-                        ]
-                    ) == 2) ::<= {
+                    when(dialogue.askBoolean(
+                        prompt:'Sit by the fire?'
+                    ) == false) ::<= {
                         dialogue.message(speaker:'???', text:'"Ah, I understand. Stay safe out there!"');
                         return 0;
                     };
@@ -551,13 +543,9 @@ Event.Base.database = Database.new(
                         );
                     };
 
-                    when(dialogue.choices(
-                        prompt:'Rest?',
-                        choices : [
-                            'Yes',
-                            'No'
-                        ]
-                    ) == 2) ::<= {
+                    when(dialogue.askBoolean(
+                        prompt:'Rest?'
+                    ) == false) ::<= {
                         dialogue.message(speaker:'???', text:'The party continues on their way.');
                         return 0;
                     };

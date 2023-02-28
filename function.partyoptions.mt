@@ -58,7 +58,7 @@ return ::{
     renderPartyOverview();
     
 
-    @choice = dialogue.choices(
+    @choice = dialogue.choicesNow(
         leftWeight: 1,
         topWeight: 1,
         prompt: 'Party Options',
@@ -106,7 +106,7 @@ return ::{
             names->push(value:member.name);
         });
         
-        @:choice = dialogue.choices(
+        @:choice = dialogue.choicesNow(
             leftWeight: 1,
             topWeight: 1,
             choices: names,
@@ -128,7 +128,7 @@ return ::{
         world.party.members->foreach(do:::(index, member) {
             names->push(value:member.name);
         });
-        choice = dialogue.choices(
+        choice = dialogue.choicesNow(
             leftWeight: 1,
             topWeight: 1,
             prompt: "Who's looking?",

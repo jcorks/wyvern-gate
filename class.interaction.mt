@@ -140,7 +140,7 @@ Interaction.database = Database.new(
                     if (choices->keycount == 1) ::<= {
                         talkee = choices[0];                    
                     } else ::<= {
-                        @choice = dialogue.choices(
+                        @choice = dialogue.choicesNow(
                             prompt: 'Talk to whom?',
                             choices : [...choices]->map(to:::(value) <- value.name),
                             canCancel : true
@@ -176,13 +176,9 @@ Interaction.database = Database.new(
                         );
                     };
                     
-                    when(dialogue.choices(
-                        prompt: 'Buy a drink? (1G)',
-                        choices : [
-                            'Yes',
-                            'No'
-                        ]
-                    ) == 2) empty;   
+                    when(dialogue.askBoolean(
+                        prompt: 'Buy a drink? (1G)'
+                    ) == false) empty;   
                     
                     when (party.inventory.gold < 5)
                         dialogue.message(text:'Not enough gold...');
@@ -324,7 +320,7 @@ Interaction.database = Database.new(
 
                     
                     @:minerNames = [...miners]->map(to:::(value) <- value.name);
-                    @choice = dialogue.choices(
+                    @choice = dialogue.choicesNow(
                         prompt: 'Who will mine?',
                         choices: minerNames,
                         canCancel : true
@@ -354,10 +350,9 @@ Interaction.database = Database.new(
                                 dialogue.message(text:'Nothing yet...');
 
                             };
-                            when(dialogue.choices(
-                                prompt:'Continue?',
-                                choices: ['Yes', 'No']
-                            ) == 2) send();
+                            when(dialogue.askBoolean(
+                                prompt:'Continue?'
+                            ) == false) send();
                         });
                     };
 
@@ -440,7 +435,7 @@ Interaction.database = Database.new(
                                 choices->push(value: item.name + '(' + basePrices[index] + 'G)');
                             });
                             
-                            @choice = dialogue.choices(
+                            @choice = dialogue.choicesNow(
                                 choices,
                                 prompt: 'Sell which? (current: ' + party.inventory.gold + 'G)',
                                 canCancel : true
@@ -517,7 +512,7 @@ Interaction.database = Database.new(
                                 choices->push(value: item.name + '(' + basePrices[index] + 'G)');
                             });
                             
-                            @choice = dialogue.choices(
+                            @choice = dialogue.choicesNow(
                                 choices,
                                 prompt: 'Buy which? (current: ' + party.inventory.gold + 'G)',
                                 canCancel : true
@@ -527,7 +522,7 @@ Interaction.database = Database.new(
                             @item = items[choice-1];
                             @price = basePrices[choice-1];
                             
-                            choice = dialogue.choices(
+                            choice = dialogue.choicesNow(
                                 prompt: item.name,
                                 choices: ['Buy', 'Compare Equipment'],
                                 canCancel: true
@@ -562,7 +557,7 @@ Interaction.database = Database.new(
                               // compare 
                               (1)::<= {
                                 @:memberNames = [...party.members]->map(to:::(value) <- value.name);
-                                @:choice = dialogue.choices(
+                                @:choice = dialogue.choicesNow(
                                     prompt: 'Compare equipment for whom?',
                                     choices: memberNames
                                 );
@@ -603,10 +598,9 @@ Interaction.database = Database.new(
                             dialogue.message(text:'The blacksmith here would normally be able to forge for you, but the blacksmith is gone for the night.');
 
                         dialogue.message(text:'The blacksmith offers to work the forge for you.');
-                        when(dialogue.choices(
-                            prompt: 'Hire to forge for 100G?',
-                            choices: ['Yes', 'No']
-                        ) == 2) empty;
+                        when(dialogue.askBoolean(
+                            prompt: 'Hire to forge for 100G?'
+                        ) == false) empty;
                         
                         when(party.inventory.gold < 100)
                             dialogue.message(text:'The party cannot afford to pay the blacksmith.');
@@ -616,7 +610,7 @@ Interaction.database = Database.new(
                     } else ::<= {                            
                         @:names = [...smiths]->map(to:::(value) <- value.name);
                         
-                        @choice = dialogue.choices(
+                        @choice = dialogue.choicesNow(
                             prompt: 'Who should work the forge?',
                             choices: names,
                             canCancel: true
@@ -637,7 +631,7 @@ Interaction.database = Database.new(
 
                     @:itemNames = [...items]->map(to:::(value) <- value.name);
     
-                    @choice = dialogue.choices(
+                    @choice = dialogue.choicesNow(
                         prompt: 'Which material?',
                         choices: itemNames,
                         canCancel: true
@@ -653,12 +647,9 @@ Interaction.database = Database.new(
                     );
 
                     @:outputBase = random.pickArrayItem(list:toMake);
-                    choice = dialogue.choices(
-                        prompt:'Smith with ' + ore.base.name + '?',
-                        choices: ['Yes', 'No']
-                    );
-                    
-                    when(choice == 2) empty;
+                    when(dialogue.askBoolean(
+                        prompt:'Smith with ' + ore.base.name + '?'
+                    ) == false) empty;
     
                     @:output = outputBase.new(
                         materialHint: ore.base.name->split(token:' ')[0],
@@ -703,7 +694,7 @@ Interaction.database = Database.new(
                         
                     
                         
-                    @choice = dialogue.choices(
+                    @choice = dialogue.choicesNow(
                         prompt: 'Enter with which?',
                         choices: keynames,
                         canCancel: true                        
@@ -866,12 +857,10 @@ Interaction.database = Database.new(
                 
                     @:cost = (level * (party.members->keycount)) * 2;
                 
-                    @:choice = dialogue.choices(
-                        prompt: 'Rest for ' + cost + 'G?',
-                        choices: ['Yes', 'No']
-                    );
+                    when(dialogue.askBoolean(
+                        prompt: 'Rest for ' + cost + 'G?'
+                    ) == false) empty;
 
-                    when(choice == 2) empty;
                     when(party.inventory.gold < cost)
                         dialogue.message(text:'Not enough gold...');
 
@@ -915,7 +904,7 @@ Interaction.database = Database.new(
                         names->push(value:member.name);
                     });
                     
-                    @choice = dialogue.choices(
+                    @choice = dialogue.choicesNow(
                         leftWeight: 1,
                         topWeight: 1,
                         choices: names,
@@ -952,10 +941,9 @@ Interaction.database = Database.new(
                         );
 
 
-                    when (dialogue.choices(
-                        prompt: 'Continue?',
-                        choices: ['Yes', 'No']
-                    ) == 2) empty;
+                    when (dialogue.askBoolean(
+                        prompt: 'Continue?'
+                    ) == false) empty;
 
                     party.inventory.subtractGold(amount:cost);       
                     whom.profession = Profession.Base.database.find(name: location.ownedBy.profession.base.name).new();
@@ -1019,7 +1007,7 @@ Interaction.database = Database.new(
 
                     [::]{
                         forever(do:::{
-                            @:choice = dialogue.choices(
+                            @:choice = dialogue.choicesNow(
                                 choices: [
                                     teamAname + ' stats',
                                     teamBname + ' stats',
@@ -1062,7 +1050,7 @@ Interaction.database = Database.new(
                                     100000,
                                     1000000
                                 ];
-                                @choice = dialogue.choices(
+                                @choice = dialogue.choicesNow(
                                     prompt: 'Bet how much? (payout - 2:1)',
                                     choices: [...bets]->map(to:::(value) <- String(from:value)),
                                     canCancel: true
@@ -1073,7 +1061,7 @@ Interaction.database = Database.new(
                                 when(party.inventory.gold < bet)
                                     dialogue.message(text:'The party cannot afford this bet.');
                                     
-                                choice = dialogue.choices(
+                                choice = dialogue.choicesNow(
                                     prompt: 'Bet on which team?',
                                     choices: [
                                         teamAname,
@@ -1209,7 +1197,7 @@ Interaction.database = Database.new(
                     };
                     
                     @:tabletNames = [...tablets]->map(to:::(value) <- value.name);
-                    @choice = dialogue.choices(
+                    @choice = dialogue.choicesNow(
                         choices : tabletNames,
                         prompt: 'Give which?',
                         canCancel : true
@@ -1217,13 +1205,9 @@ Interaction.database = Database.new(
                     when(choice == 0) empty;
                     @:tablet = tablets[choice-1];
                     
-                    when(dialogue.choices(
-                        prompt: 'Give the ' + tablet.name + '?',
-                        choices : [
-                            'Yes',
-                            'No'
-                        ]                 
-                    ) == 2) empty;
+                    when(dialogue.askBoolean(
+                        prompt: 'Give the ' + tablet.name + '?'
+                    ) == false) empty;
                     
                     world.party.inventory.remove(item:tablet);
                     dialogue.message(speaker: 'Sylvia', text: 'Let\'s see what this one says...');

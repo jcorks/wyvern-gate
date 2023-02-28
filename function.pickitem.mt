@@ -27,7 +27,7 @@ return ::(inventory => Inventory.type, canCancel => Boolean) {
     };
 
 
-    @:choice = dialogue.choices(
+    @:choice = dialogue.choicesNow(
         leftWeight: 1,
         topWeight: 1,
         prompt: 'Choose an item:',

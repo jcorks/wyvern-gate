@@ -87,10 +87,21 @@ return class(
     define:::(this) {
         @onInput;
         @isCursor = true;
+        @choiceStack = [];
     
-        @:choicesNumber ::(choices, prompt, leftWeight, topWeight, canCancel) {
+    
+    
+    
+        @:choicesNumber ::(data => Object) {
+            @choices = data.choices;
+            @prompt = data.prompt;
+            @leftWeight = data.leftWeight; 
+            @topWeight = data.topWeight; 
+            @canCancel = data.canCancel;
+            @onChoice = data.onChoice; 
+        
             @:PAGE_SIZE = 7;        
-            return [::] {
+            onChoice(choice:[::] {
                 @page = 0;
                 @pageCount = (choices->keycount / PAGE_SIZE)->ceil;
 
@@ -173,11 +184,20 @@ return class(
                     };
                     
                 });
-            };        
+            });
         };
 
 
-        @:choicesCursor ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice) {
+        @:choicesCursor ::(data => Object) {
+            @:choices = data.choices;
+            @:prompt = data.prompt; 
+            @:leftWeight = data.leftWeight; 
+            @:topWeight = data.topWeight; 
+            @:canCancel = data.canCancel;
+            @:defaultChoice = data.defaultChoice;
+            @:onChoice = data.onChoice;
+            
+            
             @:PAGE_SIZE = 7;        
             @:WIDTH = ::<= {
                 @max = 0;
@@ -188,7 +208,7 @@ return class(
                 
                 return max;
             };
-            return [::] {
+            onChoice(choice:[::] {
                 @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
                 @cursorPageTop = 0;
                 forever(do:::{
@@ -275,11 +295,21 @@ return class(
 
                     
                 });
-            };        
+            });        
         };
     
     
-        @:choiceColumnsNumber ::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel) {
+        @:choiceColumnsNumber ::(data => Object) {
+        
+            @:choices = data.choices;
+            @:prompt = data.prompt; 
+            @:itemsPerColumn = data.itemsPerColumn;
+            @:leftWeight = data.leftWeight;
+            @:topWeight = data.topWeight;
+            @:canCancel = data.canCancel;
+            @:onChoice = data.onChoice;
+            
+            
             @:choicesModified = [];
             @column = 0;
             
@@ -324,7 +354,7 @@ return class(
                 choicesModified->push(value:choice);
             });
             
-            return [::] {
+            onChoice(choice:[::] {
                 forever(do:::{
                     canvas.pushState();
                     renderText(
@@ -343,14 +373,22 @@ return class(
                     if (choice >= 0 && choice <= choices->keycount)
                         send(message:choice);
                 });
-            };
-        
+            });
         };
     
-        @:choiceColumnsCursor ::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel) {
+        @:choiceColumnsCursor ::(data => Object) {
+        
+            @:choices = data.choices;
+            @:prompt = data.prompt;
+            @:itemsPerColumn = data.itemsPerColumn;
+            @:leftWeight = data.leftWeight;
+            @:topWeight = data.topWeight;
+            @:canCancel = data.canCancel;
+            @:onChoice = data.onChoice;
+            
             @x = 0;
             @y = 0;
-            return [::] {
+            onChoice(choice:[::] {
                 forever(do:::{
 
                     @:choicesModified = [];
@@ -456,9 +494,42 @@ return class(
                     if (y >= height) y = height-1;
                         
                 });
-            };
+            });
         
         };
+        
+        
+        @:CHOICE_MODE = {
+            CURSOR : 0,
+            NUMBER : 1,
+            COLUMN_CURSOR : 2,
+            COLUMN_NUMBER : 3
+        };
+        
+        @:commitChoice ::{    
+            @:val = choiceStack->pop;
+            if (val.jail == true) ::<= {
+                choiceStack->push(value:val);
+                breakpoint();
+            };
+            match(val.mode) {
+              (CHOICE_MODE.CURSOR): choicesCursor(data:val),
+              (CHOICE_MODE.NUMBER): choicesNumber(data:val),
+              (CHOICE_MODE.COLUMN_CURSOR): choiceColumnsCursor(data:val),
+              (CHOICE_MODE.COLUMN_NUMBER): choiceColumnsNumber(data:val)                  
+            };        
+        };
+       
+        
+        @:startChoices ::{
+            [::] {
+                forever(do:::{
+                    when(choiceStack->keycount == 0) send();
+                    commitChoice();
+                });
+            };
+        };
+        
         this.interface = {
             
             // Posts a message to the screen. In the case that a 
@@ -591,29 +662,122 @@ return class(
             // Like all UI choices, the weight can be chosen.
             // Prompt will be displayed, like speaker in the message callback
             //
-            choices ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice) {
-
-                return if (isCursor) 
-                    choicesCursor(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice)
-                else 
-                    choicesNumber(choices, prompt, leftWeight, topWeight, canCancel);
+            pushChoices ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, jail, onChoice => Function) {
+                choiceStack->push(value:{
+                    mode: if (isCursor) CHOICE_MODE.CURSOR else CHOICE_MODE.NUMBER,
+                    choices: choices,
+                    prompt: prompt,
+                    leftWeight: leftWeight,
+                    topWeight: topWeight,
+                    canCancel: canCancel,
+                    defaultChoice: defaultChoice,
+                    onChoice: onChoice,
+                    jail: jail
+                });
+                
+                if (jail == true) ::<= {
+                    @count = choiceStack->keycount - 1;
+                    [::] {
+                        forever(do:::{
+                            when(choiceStack->keycount <= count)
+                                send();
+                                
+                            commitChoice();
+                        });                        
+                    };
+                };
             },
+            
+            
+            choicesNow ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice) {
+                @out;
+                choiceStack->push(value:{
+                    mode: if (isCursor) CHOICE_MODE.CURSOR else CHOICE_MODE.NUMBER,
+                    choices: choices,
+                    prompt: prompt,
+                    leftWeight: leftWeight,
+                    topWeight: topWeight,
+                    canCancel: canCancel,
+                    defaultChoice: defaultChoice,
+                    onChoice::(choice) {
+                        out = choice;
+                    }
+                });
+                commitChoice();
+                return out;
+            },            
+            
             
             // like choices(), but instead displays it column-wise.
             // It's pretty limited, though.
-            choiceColumns ::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel) {
-                return if (isCursor)
-                    choiceColumnsCursor(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel)
-                else 
-                    choiceColumnsNumber(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel);
+            pushChoiceColumns ::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function) {
+                choiceStack->push(value:{
+                    mode:if (isCursor) CHOICE_MODE.COLUMN_CURSOR else CHOICE_MODE.COLUMN_NUMBER,
+                    choices: choices,
+                    prompt: prompt,
+                    itemsPerColumn: itemsPerColumn,
+                    leftWeight : leftWeight,
+                    topWeight : topWeight,
+                    canCancel : canCancel,
+                    onChoice : onChoice
+                });
             
             },
+
+            choiceColumnsNow ::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel) {
+                @out;
+                choiceStack->push(value:{
+                    mode:if (isCursor) CHOICE_MODE.COLUMN_CURSOR else CHOICE_MODE.COLUMN_NUMBER,
+                    choices: choices,
+                    prompt: prompt,
+                    itemsPerColumn: itemsPerColumn,
+                    leftWeight : leftWeight,
+                    topWeight : topWeight,
+                    canCancel : canCancel,
+                    onChoice ::(choice) {
+                        out = choice;
+                    }
+                });
+                commitChoice();
+                return out;
+            },
             
+            // ask yes or no immediately.
+            askBoolean::(prompt) {
+                @out;
+                this.pushChoices(prompt, choices:['Yes', 'No'],
+                    onChoice::(choice) {
+                        out = choice;
+                    }
+                );
+                this.showChoices();
+                return if(out == 1) true else false;
+            },
+            
+            
+            showChoices :: {
+                commitChoice();
+            },
+            
+            
+            popChoice :: {
+                choiceStack->pop;
+            },
+            
+            choiceCount : {
+                get ::{
+                    return choiceStack->keycount;
+                }
+            },
             
             
             setInput ::(function, cursorMode) {
                 isCursor = cursorMode;
                 onInput = function;
+            },
+            
+            startChoiceStack ::{
+                startChoices();
             }
         };    
     }
