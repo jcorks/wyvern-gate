@@ -72,10 +72,6 @@ Interaction.database = Database.new(
                           },
                           
                           (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                            forever(do:::{
-                                canvas.clear();
-                                dialogue.message(text: 'Perhaps adventuring could wait another day...');                            
-                            });
                           }
                         
                         }; 
@@ -251,10 +247,6 @@ Interaction.database = Database.new(
                           },
                           
                           (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                            forever(do:::{
-                                canvas.clear();
-                                dialogue.message(text: 'Perhaps adventuring could wait another day...');                            
-                            });
                           }
                         
                         }; 
@@ -406,10 +398,6 @@ Interaction.database = Database.new(
                           },
                           
                           (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                            forever(do:::{
-                                canvas.clear();
-                                dialogue.message(text: 'Perhaps adventuring could wait another day...');                            
-                            });
                           }
                         
                         }; 
@@ -423,6 +411,12 @@ Interaction.database = Database.new(
                     [::]{
                         forever(do:::{                    
                             @items = party.inventory.items;
+                            
+                            when(items->keycount == 0) ::<= {
+                                dialogue.message(text: "The inventory is empty.");
+                                send();
+                            };                                
+                            
                             //@basePrices = [...items]->map(to:::(value) <- (((value.price * 0.4)/5)->ceil)*5); // compiler bug here if uncomment
                             @basePrices = [];
                             items->foreach(do:::(index, item) {
@@ -483,10 +477,6 @@ Interaction.database = Database.new(
                           },
                           
                           (false): ::<= {
-                            forever(do:::{
-                                canvas.clear();
-                                dialogue.message(text: 'Perhaps adventuring could wait another day...');                            
-                            });
                           }
                         
                         }; 
@@ -824,10 +814,6 @@ Interaction.database = Database.new(
                           },
                           
                           (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                            forever(do:::{
-                                canvas.clear();
-                                dialogue.message(text: 'Perhaps adventuring could wait another day...');                            
-                            });
                           }
                         
                         };                        

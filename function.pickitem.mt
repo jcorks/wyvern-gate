@@ -25,7 +25,8 @@ return ::(inventory => Inventory.type, canCancel => Boolean) {
     when(names->keycount == 0) ::<={
         dialogue.message(text: "The inventory is empty.");
     };
-
+    breakpoint();
+    
 
     @:choice = dialogue.choicesNow(
         leftWeight: 1,

@@ -272,10 +272,6 @@ Event.Base.database = Database.new(
                               },
                               
                               (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                                forever(do:::{
-                                    canvas.clear();
-                                    dialogue.message(text: 'Perhaps adventuring could wait another day...');                            
-                                });
                                 send();
                               },
                               
@@ -369,10 +365,6 @@ Event.Base.database = Database.new(
                               },
                               
                               (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                                forever(do:::{
-                                    canvas.clear();
-                                    dialogue.message(text: 'Perhaps adventuring could wait another day...');                            
-                                });
                                 send();
                               },
                               
@@ -682,32 +674,10 @@ Event.Base.database = Database.new(
                     ).result) {
                       (Battle.RESULTS.ALLIES_WIN,
                        Battle.RESULTS.NOONE_WIN): ::<= {
-                        @:loot = [];
-                        enemies->foreach(do:::(index, enemy) {
-                            enemy.inventory.items->foreach(do:::(index, item) {
-                                if (Number.random() > 0.7 && loot->keycount == 0) ::<= {
-                                    loot->push(value:enemy.inventory.remove(item));
-                                };
-                            });
-                        });
-                        
-                        if (loot->keycount > 0) ::<= {
-                            dialogue.message(text: 'It looks like they dropped some items during the fight...');
-                            @message = 'The party found:\n\n';
-                            loot->foreach(do:::(index, item) {
-                                @message = 'The party found a(n) ';
-                                message = message + item.name;
-                                dialogue.message(text: message);
-                                party.inventory.add(item);
-                            });
-                        };
+
                       },
                       
                       (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                        forever(do:::{
-                            canvas.clear();
-                            dialogue.message(text: 'Perhaps adventuring could wait another day...');                            
-                        });
                       }
                     
                     };
@@ -829,34 +799,9 @@ Event.Base.database = Database.new(
                     ).result) {
                       (Battle.RESULTS.ALLIES_WIN,
                        Battle.RESULTS.NOONE_WIN): ::<= {
-                        @:loot = [];
-                        enemies->foreach(do:::(index, enemy) {
-                            enemy.inventory.items->foreach(do:::(index, item) {
-                                if (Number.random() > 0.7  && loot->keycount == 0) ::<= {
-                                    loot->push(value:enemy.inventory.remove(item));
-                                };
-                            });
-                        });
-                        
-                        if (loot->keycount > 0) ::<= {
-                            dialogue.message(text: 'It looks like they dropped some items during the fight...');
-                            @message = 'The party found:\n\n';
-                            loot->foreach(do:::(index, item) {
-                                message = message + item.name + '\n';
-                                party.inventory.add(item);
-                            });
-                            
-                            
-                            
-                            dialogue.message(text: message);
-                        };
                       },
                       
                       (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                        forever(do:::{
-                            canvas.clear();
-                            dialogue.message(text: 'Perhaps adventuring could wait another day...');                            
-                        });
                       }
                     
                     };

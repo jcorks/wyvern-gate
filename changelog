@@ -7,6 +7,10 @@
   . tripwire
   . tripwire explosive
 - added Assassin passive: Assassin's Pride
+- When the party is incapacitated, the game now boots back to the menu
+- map system changed to be "paged". The island sizes have ben adjusted to better match the feel 
+  of this system.
+- fixed a bug where selling items with an empty inventory resulted in a chosen list of entirely the word "empty"
   
 - SP system is replaced with Skill Crystals.
   . Skill crystals, upon use, grant a new ability to a user based on their profession

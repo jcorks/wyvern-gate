@@ -70,6 +70,11 @@ return class(
                 get ::<- members
             },
             
+            clear :: {
+                inventory.clear();
+                members = [];            
+            },
+            
             state : {
                 set ::(value) {
                     inventory.state = value.inventory;

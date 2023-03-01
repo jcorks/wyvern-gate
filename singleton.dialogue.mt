@@ -510,7 +510,6 @@ return class(
             @:val = choiceStack->pop;
             if (val.jail == true) ::<= {
                 choiceStack->push(value:val);
-                breakpoint();
             };
             match(val.mode) {
               (CHOICE_MODE.CURSOR): choicesCursor(data:val),

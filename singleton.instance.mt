@@ -154,6 +154,8 @@ return class(
             canvas.pushState();
             @:early = [::]{
                 forever(do:::{
+                    when(party.isIncapacitated()) send();
+                
                     renderLandmark();
                     @choices = [
                         'Walk to...',
@@ -209,6 +211,7 @@ return class(
                                         stepsSinceLast = 0;
                                     };
                                 };
+                                when(party.isIncapacitated()) send();
 
                                 @:arrival = landmark.map.getItemUnderPointer();
                                 if (arrival != empty) ::<= {
@@ -276,6 +279,8 @@ return class(
 
             return [::] {
                 forever(do:::{
+                    when(party.isIncapacitated()) send();
+                
                     // check if we're AT a location.
                     @:choices = [
                         'Travel',
@@ -307,48 +312,24 @@ return class(
                       // travel
                       (0): ::<= {
 
-
-                        // for convenience: stay in travel mode until user cancels.
-                        [::]{
-                            @lastChoice = 0;
-                            forever(do:::{
-                                renderMain();
-
-                                @:choices = [
-                                    'North',
-                                    'East',
-                                    'West',
-                                    'South'
-                                ];
-                                /*
-                                island.landmarks->foreach(do:::(index, landmark){
-                                    @:dist = island.map.getDistanceFromItem(item:landmark);
-                                    choices->push(value:(if(landmark.discovered) 
-                                        (
-                                            if (landmark.name == '')
-                                                landmark.base.name
-                                            else
-                                                landmark.name + ' (' + landmark.base.name + ')'
-                                        )  + ': ~'
-                                    else 
-                                        ('????: ~')) + dist->ceil + ' away'
-                                    );
-                                });
-                                */
-
+                        @lastChoice = 0;
+                        dialogue.pushChoices(
+                            leftWeight: 1,
+                            topWeight: 1,
+                            prompt: 'Travel which way?',
+                            choices : [
+                                'North',
+                                'East',
+                                'West',
+                                'South'
+                            ],
+                            canCancel: true,
+                            defaultChoice:lastChoice,
+                            jail: true,
+                            onChoice ::(choice) {
                                 
                                 
-                                choice = dialogue.choicesNow(
-                                    leftWeight: 1,
-                                    topWeight: 1,
-                                    prompt: 'Travel which way?',
-                                    choices,
-                                    canCancel: true,
-                                    defaultChoice:lastChoice
-                                );
-                                
-                                
-                                when(choice == 0) send();
+                                when(choice == 0) dialogue.popChoice();
                                 lastChoice = choice;
                                 
                                 @:target = island.landmarks[choice-1];
@@ -363,7 +344,7 @@ return class(
                                 );
                                 world.stepTime();                                    
                                 island.incrementTime();
-
+                                when(party.isIncapacitated()) dialogue.popChoice();
                                 
                                 // cancel if we've arrived somewhere
                                 @:arrival = island.map.getItemUnderPointer();
@@ -372,10 +353,17 @@ return class(
                                         text:"The party has arrived at the " + if (arrival.name == '') arrival.base.name else arrival.base.name + ' of ' + arrival.name
                                     );
                                     arrival.discover();
-                                    send();
-                                };
-                            });
-                        };
+                                    island.map.setPointer(
+                                        x: arrival.x,
+                                        y: arrival.y
+                                    );
+                                    
+                                };                            
+                                renderMain();
+
+                            }
+                        
+                        );
                             
                       },
                     
@@ -447,34 +435,19 @@ return class(
                     text: 'Note: this game is under heavy development. Depending on your platform, use either Number keys + Enter, gamepad up/down/left/right / confirm / cancel, or arrow keys / enter / backspace to navigate.\nGoodluck!'
                 );
 
-                dialogue.message(
-                    pageAfter:14,
-                    text: 
-"Release updates ("+VERSION+"):
- - Fixed a bug with battle effects being counted twice
- - Improved descriptions of entities, now displaying effects and stat mods
- - Added all features of classes: Adventurer, Martial Artist, Field Mage, Cleric, Divine Lunist, Divine Solist, Blacksmith, Warrior
- - Added weapon affinities
- - Added profession description when switching professions
-"
-                );
 
 
+                canvas.clear();
+                
+                
 
-                [::] {
-                    forever(do:::{
-                        canvas.clear();
-                        
-                        
-
-                        @:choice = dialogue.choicesNow(
-                            choices : ['Load', 'New', 'Quit'],
-                            topWeight: 0.75           
-                        );
-                        
+                @:choice = dialogue.pushChoices(
+                    choices : ['Load', 'New', 'Quit'],
+                    topWeight: 0.75,
+                    jail: true,
+                    
+                    onChoice ::(choice) {
                         match(choice-1) {
-                        
-                        
                           // Load 
                           (0)::<= {
                             @:choice = dialogue.choicesNow(
@@ -501,11 +474,13 @@ return class(
                           },
                           
                           (2)::<= {
-                            send();
+                            dialogue.popChoice();
                           }
-                        };
-                    });
-                };
+                        };                            
+                    }
+                );
+                
+
             },
         
             startInstance ::{
@@ -562,6 +537,12 @@ return class(
 
                         // fallback op                        
                         destination = visitIsland();
+                        when(party.isIncapacitated()) ::<= {
+                            canvas.clear();
+                            dialogue.message(text: 'Perhaps fate has entrusted someone else with the future...');                            
+                            party.clear();
+                            send();
+                        };
                     });                
                 }; 
             },
@@ -591,8 +572,8 @@ return class(
                 });
                 
                 island.map.setPointer(
-                    x: island.size * Number.random(),
-                    y: island.size * Number.random()
+                    x: island.sizeW * Number.random(),
+                    y: island.sizeH * Number.random()
                 );               
                 
                 

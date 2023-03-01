@@ -20,7 +20,7 @@
 @:random = import(module:'singleton.random.mt');
 
 
-@:mapSizeW  = 28;
+@:mapSizeW  = 38;
 @:mapSizeH  = 16;
 
 @:EPSILON = 0.000001;
@@ -32,15 +32,17 @@
 };
 
 
-@:generateTerrain::(size) {
+@:generateTerrain::(width, height) {
     @:out = {};
-    [0, 60]->for(do:::(i) {
+    [0, width*height*4]->for(do:::(i) {
         out->push(value:{
-            x: Number.random() * size,
-            y: Number.random() * size,
+            x: Number.random() * width,
+            y: Number.random() * height,
             symbol: random.pickArrayItem(list:[',', '.', '`', '^'])
         });
     });
+
+
     
     @xIncr = 1 / mapSizeW;
     @yIncr = 1 / mapSizeH;
@@ -77,21 +79,23 @@ return class(
             discovered : true
         };
         @title = '';
-        @size_ = 1;
+        @width = 1;
+        @height = 1;
         @:distanceFrom::(item) {
             return distance(x0:pointer.x, y0:pointer.y, x1:item.x, y1:item.y);
         };
 
-        this.constructor = ::(state, size) {
+        this.constructor = ::(state, sizeW, sizeH) {
             when (state) ::<= {
                 this.state = state;
                 return this;
             };
             
-            size_ = size;
+            width = sizeW;
+            height = sizeH;
             
             
-            scenery = generateTerrain(size);
+            scenery = generateTerrain(width, height);
             return this;
                     
         };
@@ -102,7 +106,8 @@ return class(
                 set ::(value) {
                     pointer = value.pointer;
                     title = value.title;
-                    size_ = value.size;
+                    width = value.width;
+                    height = value.height;
                     scenery = value.scenery;
                 },
                 get :: {
@@ -110,7 +115,8 @@ return class(
                     return {
                         pointer : pointer,
                         title : title,
-                        size : size_,
+                        width: width,
+                        height: height,
                         scenery : scenery
                     };
                 }
@@ -164,15 +170,15 @@ return class(
                 
                 if (pointer.x < 0) pointer.x  = 0;
                 if (pointer.y < 0) pointer.y  = 0;
-                if (pointer.x > size_) pointer.x  = size_;
-                if (pointer.y > size_) pointer.y  = size_;
+                if (pointer.x > width) pointer.x  = width;
+                if (pointer.y > height) pointer.y  = height;
                          
             },
             
             getItemUnderPointer :: {
                 return [::] {
                     items->foreach(do:::(item, data) {
-                        if (distanceFrom(item:data) < 0.1)
+                        if (distanceFrom(item:data) < 0.125)
                             send(message:item);
                     });
                     
@@ -181,8 +187,11 @@ return class(
                 };
             },
             
-            size : {
-                get ::<- size_
+            width : {
+                get ::<- width
+            },
+            height : {
+                get ::<- height
             },
             
             items : {
@@ -191,6 +200,8 @@ return class(
             },
             
             render ::  {
+            
+            
             
                 
                 @:left = canvas.width/2 - mapSizeW/2;
@@ -203,26 +214,51 @@ return class(
                 
                 );
                 
+
+
+                @:regionX = pointer.x->floor;
+                @:regionY = pointer.y->floor;
+
+
                 @:centerX = (mapSizeW / 2)->floor;
                 @:centerY = (mapSizeH / 2)->floor;
                 
-                
-                @map = [...scenery, ...items->values];
-                map->foreach(do:::(item, data) {
-                    @itemX = centerX + ((data.x - pointer.x) * mapSizeW)->floor;
-                    @itemY = centerY + ((data.y - pointer.y) * mapSizeH)->floor;
+                @:map = [...scenery, ...items->values];
+                /*
+                scenery->foreach(do:::(item, data) {
+                    @itemX = ((data.x - regionX) * mapSizeW)->floor;
+                    @itemY = ((data.y - regionY) * mapSizeH)->floor;
                 
                     when(itemX < 1 || itemY < 1 || itemX >= mapSizeW || itemY >= mapSizeH) empty;
                     canvas.movePen(x:left-1 + itemX, y:top-1 + itemY);  
                     canvas.drawText(text:data.symbol);
+                });*/
+                map->foreach(do:::(item, data) {
+                    @itemX = ((data.x - regionX) * mapSizeW)->floor;
+                    @itemY = ((data.y - regionY) * mapSizeH)->floor;
+                
+                    when(itemX < 1 || itemY < 1 || itemX >= mapSizeW || itemY >= mapSizeH) empty;
+                    canvas.movePen(x:left-1 + itemX, y:top + itemY);  
+                    canvas.drawText(text:data.symbol);
+
+                    canvas.movePen(x:left-1 + itemX+1, y:top + itemY+1);  
+                    canvas.drawText(text:data.symbol);
+
+                    canvas.movePen(x:left-1 + itemX, y:top + itemY+1);  
+                    canvas.drawText(text:data.symbol);
+
+                    canvas.movePen(x:left-1 + itemX+1, y:top + itemY);  
+                    canvas.drawText(text:data.symbol);
+
+
                 });
                 
                 [0, mapSizeH+1]->for(do:::(y) {
                     [0, mapSizeW+1]->for(do:::(x) {
-                        @itemX = (((x - (mapSizeW/2)->floor) / mapSizeW) + pointer.x);
-                        @itemY = (((y - (mapSizeH/2)->floor) / mapSizeH) + pointer.y);
+                        @itemX = (((x) / mapSizeW) + regionX);
+                        @itemY = (((y) / mapSizeH) + regionY);
                         
-                        when(itemX < 0 || itemY < 0 || itemX >= size_ || itemY >= size_) ::<= {
+                        when(itemX < 0 || itemY < 0 || itemX >= width || itemY >= height) ::<= {
                             canvas.movePen(x:left + x, y:top + y);  
                             canvas.drawChar(text:'~');
                         };
@@ -231,11 +267,10 @@ return class(
                                 
  
                 
-
-  
+      
                 canvas.movePen(
-                    x:left + (mapSizeW / 2)->floor,
-                    y:top  + (mapSizeH / 2)->floor                
+                    x:left + ((pointer.x - regionX) * mapSizeW)->floor,
+                    y:top  + ((pointer.y - regionY) * mapSizeH)->floor         
                 );
                 
                 canvas.drawText(text:'P');

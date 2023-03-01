@@ -432,15 +432,33 @@
                         
      
                     }); 
+
+                    @:loot = [];
+                    enemies->foreach(do:::(index, enemy) {
+                        enemy.inventory.items->foreach(do:::(index, item) {
+                            if (Number.random() > 0.7 && loot->keycount == 0) ::<= {
+                                loot->push(value:enemy.inventory.remove(item));
+                            };
+                        });
+                    });
+                    
+                    if (loot->keycount > 0) ::<= {
+                        dialogue.message(text: 'It looks like they dropped some items during the fight...');
+                        @message = 'The party found:\n\n';
+                        loot->foreach(do:::(index, item) {
+                            @message = 'The party found a(n) ';
+                            message = message + item.name;
+                            dialogue.message(text: message);
+                            party.inventory.add(item);
+                        });
+                    };
+
                                    
                     canvas.popState();
 
                 } else ::<= {
                     if (party.members->all(condition:::(value) <- value.isIncapacitated())) ::<= {
                         dialogue.message(text: 'The battle is lost.');
-                        forever(do:::{
-                            dialogue.message(text: 'Perhaps fate has entrusted someone else with the future...');
-                        });
                     };
                     canvas.popState();
                 };

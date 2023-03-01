@@ -119,13 +119,14 @@
         @encounterRate = Number.random();        
         
         // Size of the island... Islands are always square-ish
-        @size  = random.integer(from:3, to:5);
+        @sizeW  = Number.random()*2 + 1.5;
+        @sizeH  = Number.random()*2 + 1.5;
         
         // steps since the last event
         @stepsSinceLastEvent = 0;
         
         // map of the region
-        @map = LargeMap.new(size);
+        @map = LargeMap.new(sizeW, sizeH);
         
         @id = genID();
 
@@ -214,8 +215,8 @@
                     filter:::(value) <- value.isUnique == false
                 ).new(
                     island:this,
-                    x: random.range(from:0, to:size-1),
-                    y: random.range(from:0, to:size-1)                    
+                    x: Number.random()*(sizeW - 0.2) + 0.2,
+                    y: Number.random()*(sizeH - 0.2) + 0.2
                 );
 
                 map.setItem(object:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol);
@@ -226,8 +227,8 @@
             // guaranteed gate
             @:gate = Landmark.Base.database.find(name:'Wyvern Gate').new(
                 island:this,
-                x: random.range(from:0, to:size-1),
-                y: random.range(from:0, to:size-1)                    
+                x: Number.random()*(sizeW - 0.2) + 0.2,
+                y: Number.random()*(sizeH - 0.2) + 0.2
             );
 
             map.setItem(object:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol);
@@ -238,16 +239,16 @@
             // guaranteed town
             @:gate = Landmark.Base.database.find(name:'Dungeon').new(
                 island:this,
-                x: random.range(from:0, to:size-1),
-                y: random.range(from:0, to:size-1)                    
+                x: Number.random()*(sizeW - 0.2) + 0.2,
+                y: Number.random()*(sizeH - 0.2) + 0.2
             );
             map.setItem(object:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol);
             significantLandmarks->push(value:gate);
 
             @:gate = Landmark.Base.database.find(name:'town').new(
                 island:this,
-                x: random.range(from:0, to:size-1),
-                y: random.range(from:0, to:size-1)                    
+                x: Number.random()*(sizeW - 0.2) + 0.2,
+                y: Number.random()*(sizeH - 0.2) + 0.2
             );
 
 
@@ -271,7 +272,8 @@
                     levelMin = value.levelMin;
                     levelMax = value.levelMax;
                     encounterRate = value.encounterRate;
-                    size = value.size;
+                    sizeW = value.sizeW;
+                    sizeH = value.sizeH;
                     stepsSinceLastEvent = value.stepsSinceLastEvent;
                     climate = value.climate;
                     species = [];
@@ -317,7 +319,8 @@
                         levelMax : levelMax,
                         id : id,
                         encounterRate : encounterRate,
-                        size : size,
+                        sizeW : sizeW,
+                        sizeH : sizeH,
                         stepsSinceLastEvent : stepsSinceLastEvent,
                         map : map.state,
                         climate : climate,
@@ -359,8 +362,11 @@
                 get ::<- id
             },
             
-            size : {
-                get ::<- size
+            sizeW : {
+                get ::<- sizeW
+            },
+            sizeH : {
+                get ::<- sizeH
             },
             
             map : {
@@ -369,6 +375,7 @@
             
             incrementTime:: {
                 // every step, an event can occur.
+                //if (stepsSinceLastEvent > 200000) ::<= {
                 if (stepsSinceLastEvent > 20) ::<= {
                     if (Number.random() > 1 - (stepsSinceLastEvent-20) / 5) ::<={
 
