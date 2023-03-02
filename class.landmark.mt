@@ -422,7 +422,26 @@ Landmark.Base.database = Database.new(
 
         Landmark.Base.new(
             data: {
-                name : 'Dungeon',
+                name : 'Wyvern Temple',
+                symbol : '{}',
+                rarity : 10000000,
+                isUnique : true,
+                minLocations : 4,
+                maxLocations : 10,
+                peaceful : true,
+                possibleLocations : [                    
+                ],
+                requiredLocations : [
+                    'Stairs Up',
+                ]
+            }
+        ),
+
+
+
+        Landmark.Base.new(
+            data: {
+                name : 'Grotto',
                 symbol : 'O',
                 rarity : 100000,      
                 isUnique : true,
@@ -456,46 +475,24 @@ Landmark.Base.database = Database.new(
                 ]
             }
         ),
-      
-        
-        
-/*
-        Landmark.Base.new(
-            data: {
-                name : 'city',
-                symbol : '@',
-                rarity : 20,                
-                minLocations : 5,
-                maxLocations : 10,
-                possibleLocations : [
-                    'guild',
-                    'jail', // basically same as guild, functionally, can bail people out
-                    'guardpost',
-                    'school',
-                    'home',
-                    'shop',
-                    'tavern'
-                    
-                ],
-                requiredLocations : []
-            }
-        ),
 
         Landmark.Base.new(
             data: {
                 name : 'port',
                 rarity : 30,                
                 symbol : '~',
-                minLocations : 0,
-                maxLocations : 0,
+                minLocations : 3,
+                maxLocations : 10,
+                peaceful: true,
+                isUnique : false,
                 possibleLocations : [
-                    'home',
-                    'shop',
-                    'guild',
-                    'guardpost',
-                    'tavern'
+                    {name:'home', rarity:5},
+                    {name:'shop', rarity:40}
+                    //'guild',
+                    //'guardpost',
                 ],
                 requiredLocations : [
+                    'Tavern'
                     //'shipyard'
                 ]
             }
@@ -506,14 +503,15 @@ Landmark.Base.database = Database.new(
                 name : 'village',
                 rarity : 5,                
                 symbol : '*',
-
-                minLocations : 0,
-                maxLocations : 0,
+                peaceful: true,
+                minLocations : 3,
+                maxLocations : 7,
+                isUnique : false,
                 possibleLocations : [
-                    'home',
-                    'tavern',
-                    'shop',
-                    'farm'
+                    {name:'home', rarity:1},
+                    {name:'Tavern', rarity:7},
+                    {name:'shop', rarity:7},
+                    {name:'farm', rarity:4}
                 ],
                 requiredLocations : []
             }
@@ -523,19 +521,21 @@ Landmark.Base.database = Database.new(
             data: {
                 name : 'villa',
                 symbol : '=',
-                rarity : 100,                
-                minLocations : 0,
-                maxLocations : 0,
+                rarity : 20,
+                peaceful: true,                
+                isUnique : false,
+                minLocations : 5,
+                maxLocations : 10,
                 possibleLocations : [
-                    'home',
-                    'tavern',
-                    'farm'
+                    {name:'home', rarity:1},
+                    {name:'Tavern', rarity:7},
+                    {name:'farm', rarity:4}
                 ],
                 requiredLocations : []
             }
         ),
 
-        Landmark.Base.new(
+        /*Landmark.Base.new(
             data: {
                 name : 'Outpost',
                 symbol : '[]',
@@ -547,13 +547,15 @@ Landmark.Base.database = Database.new(
                 ],
                 requiredLocations : []
             }
-        ),
+        ),*/
 
         Landmark.Base.new(
             data: {
                 name : 'forest',
-                symbol : '^',
+                symbol : 'T',
                 rarity : 40,                
+                peaceful: true,
+                isUnique : false,
                 minLocations : 0,
                 maxLocations : 0,
                 possibleLocations : [],
@@ -566,7 +568,8 @@ Landmark.Base.database = Database.new(
                 name : 'cave',
                 symbol : 'O',
                 rarity : 200,                
-
+                peaceful: true,
+                isUnique : false,
                 minLocations : 0,
                 maxLocations : 0,
                 possibleLocations : [],
@@ -578,7 +581,10 @@ Landmark.Base.database = Database.new(
             data: {
                 name : 'abandoned castle',
                 symbol : 'X',
-                rarity : 10000,                
+                rarity : 10000,
+                peaceful: false,
+                isUnique : false,
+                
                 minLocations : 0,
                 maxLocations : 0,
                 possibleLocations : [],
@@ -590,6 +596,8 @@ Landmark.Base.database = Database.new(
                 name : 'abandoned town',
                 rarity : 400,                
                 symbol : 'x',
+                peaceful: false,
+                isUnique : false,
                 minLocations : 0,
                 maxLocations : 0,
                 possibleLocations : [],
@@ -598,18 +606,11 @@ Landmark.Base.database = Database.new(
         ),
 
 
-        Landmark.Base.new(
-            data: {
-                name : 'grotto',
-                symbol : '_',
-                rarity : 50,                
+      
+        
+        
 
-                minLocations : 0,
-                maxLocations : 0,
-                possibleLocations : [],
-                requiredLocations : []
-            }
-        )*/
+
     
     ]
 

@@ -34,7 +34,7 @@
         @occupants = []; // entities. non-owners can shift
         @ownedBy;// entity
         @description;
-        @inventory = Inventory.new();
+        @inventory = Inventory.new(size:30);
         @landmark_;
         @x;
         @y;
@@ -266,6 +266,57 @@ Location.Base.database = Database.new(
                 //};
             }
         }),
+
+        Location.Base.new(data:{
+            name: 'farm',
+            rarity: 100,
+            ownVerb: 'owned',
+            owned : true,
+            symbol: 'F',
+
+            descriptions: [
+                "A well-maintained farm. Looks like an experienced farmer works it.",
+                "An old farm. It looks like it has a rich history.",
+                "A modest farm. A little sparse, but well-maintained",
+            ],
+            
+            interactions : [
+                'talk',
+                'examine'
+            ],
+            
+            aggressiveInteractions : [            
+                'steal',
+            ],
+            
+            
+            minOccupants : 0,
+            maxOccupants : 0,
+            
+            onInteract ::(location) {
+                return true;
+
+            },            
+            
+            onCreate ::(location) {
+                @:Profession = import(module:'class.profession.mt');
+            
+                location.ownedBy.profession = Profession.Base.database.find(name:'Farmer').new();
+            
+            },
+                        
+            onTimeChange ::(location, time) {
+                // make everyone come home
+                //if (time == WORLD.TIME.EVENING) ::<={
+                    
+                //} else ::<={
+                
+                //};
+            }
+            
+        
+        }),
+
 
         Location.Base.new(data:{
             name: 'home',

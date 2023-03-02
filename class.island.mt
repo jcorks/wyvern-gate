@@ -208,7 +208,7 @@
   
 
 
-            @locationCount = if (levelHint == 1) 1 else (1+ (Number.random()*2)->ceil); 
+            @locationCount = (1 + (Number.random()*4)->floor); 
             if (locationCount < 1) locationCount = 1;
             [0, locationCount]->for(do:::(i) {
                 @:landmark = Landmark.Base.database.getRandomWeightedFiltered(
@@ -237,14 +237,14 @@
 
 
             // guaranteed town
-            @:gate = Landmark.Base.database.find(name:'Dungeon').new(
+            @:gate = Landmark.Base.database.find(name:'Grotto').new(
                 island:this,
                 x: Number.random()*(sizeW - 0.2) + 0.2,
                 y: Number.random()*(sizeH - 0.2) + 0.2
             );
             map.setItem(object:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol);
             significantLandmarks->push(value:gate);
-
+            
             @:gate = Landmark.Base.database.find(name:'town').new(
                 island:this,
                 x: Number.random()*(sizeW - 0.2) + 0.2,

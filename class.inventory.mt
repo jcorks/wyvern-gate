@@ -24,12 +24,19 @@ return class(
 
         @items = [];    
         @gold = 0;
+        @maxItems;
+        this.constructor = ::(size) {
+            maxItems = size;
+            return this;
+        };
     
         this.interface = {
             add::(item) {
-                when (item.base.name == 'None') empty; // never accept None as a real item
+                when (item.base.name == 'None') false; // never accept None as a real item
+                when (items->keycount == maxItems) false;
                 items->push(value:item);
                 item.container = this;
+                return true;
             },
             
             remove::(item) {
@@ -62,6 +69,10 @@ return class(
                 get :: {
                     return items;
                 }
+            },
+            
+            isFull : {
+                get :: <- items->keycount >= maxItems
             },
             state: {
                 set ::(value) {

@@ -11,10 +11,11 @@
 - map system changed to be "paged". The island sizes have ben adjusted to better match the feel 
   of this system.
 - fixed a bug where selling items with an empty inventory resulted in a chosen list of entirely the word "empty"
-  
+- Slight terrain generation upgrades
 - SP system is replaced with Skill Crystals.
   . Skill crystals, upon use, grant a new ability to a user based on their profession
   . Can be bought or found.
   . Disappear on use
-
 - fixed a bug where loading saves would make items unconsumable
+- inventory is now limited. The party can hold 20 items.
+- Fixed a bug where if an inventory is empty and an item needs to be selected, a full inventory of "empty" is displayed when selling

@@ -214,6 +214,8 @@ Interaction.database = Database.new(
                             party,
                             location
                         );
+                        
+                        dialogue.message(text:'You finish your drink.');
                       },
 
                       // drunkard
@@ -329,8 +331,16 @@ Interaction.database = Database.new(
                                 dialogue.message(text:'Oh...?');
 
                                 @:item = Item.Base.database.find(name:'Ore').new(from:miner);
-                                party.inventory.add(item);
+                                
                                 dialogue.message(text:'The party obtained some Ore!');     
+
+                                when (party.inventory.isFull) ::<= {
+                                    dialogue.message(text:'The party\'s inventory is full...');     
+                                    send();
+                                };
+                                party.inventory.add(item);
+
+
                                 location.data.charges -= 1;      
                                 
                                 when (location.data.charges <= 0) ::<= {
@@ -522,6 +532,11 @@ Interaction.database = Database.new(
                             match(choice-1) {
                               // buy
                               (0)::<= {
+                                when(world.party.inventory.isFull) ::<= {
+                                    dialogue.message(text: 'The party\'s inventory is full.');
+                                    send();
+                                };
+                                    
                                 
                                 when(!party.inventory.subtractGold(amount:price)) dialogue.message(text:'The party cannot afford this.');
                                 location.inventory.remove(item);
@@ -826,6 +841,12 @@ Interaction.database = Database.new(
                     
                     @:item = random.pickArrayItem(list:location.inventory.items);
                     dialogue.message(text:'Stole ' + item.name);
+
+                    when(party.inventory.isFull) ::<= {
+                        dialogue.message(text: '...but the party\'s inventory was full.');
+                    };
+
+
                     location.inventory.remove(item);
                     party.inventory.add(item);                    
                 },
@@ -1127,6 +1148,10 @@ Interaction.database = Database.new(
                         dialogue.message(text:'The chest was empty.');
                     
                     dialogue.message(text:'The party opened the chest...');
+                    
+                    when(world.party.inventory.isFull) ::<= {
+                        dialogue.message(text: '...but the party\'s inventory was full.');
+                    };
                     
                     location.inventory.items->foreach(do:::(i, item) {
                         dialogue.message(text:'The party found a(n) ' + item.name + '.');

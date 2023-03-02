@@ -24,7 +24,7 @@ return class(
     name: 'Wyvern.Party',
     
     define:::(this) {
-        @:inventory = Inventory.new();
+        @:inventory = Inventory.new(size:20);
         @members = [];
         this.interface = {    
             add::(member => Entity.type) {

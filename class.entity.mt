@@ -125,7 +125,7 @@
         ]; // active that can choose in combat
         @abilitiesLearned = []; // abilities that can choose outside battle.
         
-        @:inventory = Inventory.new();
+        @:inventory = Inventory.new(size:10);
         inventory.addGold(amount:(Number.random() * 100)->ceil);
         
         @expNext = 10;

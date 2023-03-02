@@ -38,9 +38,43 @@
         out->push(value:{
             x: Number.random() * width,
             y: Number.random() * height,
-            symbol: random.pickArrayItem(list:[',', '.', '`', '^'])
+            symbol: random.pickArrayItem(list:['╿', '.', '`', '^', '░'])
         });
     });
+
+
+    [0, width*height*4]->for(do:::(i) {
+        out->push(value:{
+            x: 0,
+            y: Number.random() * height,
+            symbol: '▓'
+        });
+    });
+
+    [0, width*height*4]->for(do:::(i) {
+        out->push(value:{
+            x: width,
+            y: Number.random() * height,
+            symbol: '▓'
+        });
+    });
+
+    [0, width*height*4]->for(do:::(i) {
+        out->push(value:{
+            x: Number.random()*width,
+            y: 0,
+            symbol: '▓'
+        });
+    });
+
+    [0, width*height*4]->for(do:::(i) {
+        out->push(value:{
+            x: Number.random()*width,
+            y: height,
+            symbol: '▓'
+        });
+    });
+
 
 
     
@@ -81,6 +115,8 @@ return class(
         @title = '';
         @width = 1;
         @height = 1;
+        @x;
+        @y;
         @:distanceFrom::(item) {
             return distance(x0:pointer.x, y0:pointer.y, x1:item.x, y1:item.y);
         };
@@ -93,6 +129,8 @@ return class(
             
             width = sizeW;
             height = sizeH;
+            x = Number.random()*2;
+            y = Number.random()*2;
             
             
             scenery = generateTerrain(width, height);
@@ -108,6 +146,8 @@ return class(
                     title = value.title;
                     width = value.width;
                     height = value.height;
+                    x = value.x;
+                    y = value.y;
                     scenery = value.scenery;
                 },
                 get :: {
@@ -117,6 +157,8 @@ return class(
                         title : title,
                         width: width,
                         height: height,
+                        x : x,
+                        y : y,
                         scenery : scenery
                     };
                 }
@@ -216,8 +258,8 @@ return class(
                 
 
 
-                @:regionX = pointer.x->floor;
-                @:regionY = pointer.y->floor;
+                @:regionX = (pointer.x+x)->floor;
+                @:regionY = (pointer.y+y)->floor;
 
 
                 @:centerX = (mapSizeW / 2)->floor;
@@ -234,8 +276,8 @@ return class(
                     canvas.drawText(text:data.symbol);
                 });*/
                 map->foreach(do:::(item, data) {
-                    @itemX = ((data.x - regionX) * mapSizeW)->floor;
-                    @itemY = ((data.y - regionY) * mapSizeH)->floor;
+                    @itemX = ((x+data.x - regionX) * mapSizeW)->floor;
+                    @itemY = ((y+data.y - regionY) * mapSizeH)->floor;
                 
                     when(itemX < 1 || itemY < 1 || itemX >= mapSizeW || itemY >= mapSizeH) empty;
                     canvas.movePen(x:left-1 + itemX, y:top + itemY);  
@@ -252,15 +294,16 @@ return class(
 
 
                 });
-                
+                @offsetX = x;
+                @offsetY = y;
                 [0, mapSizeH+1]->for(do:::(y) {
                     [0, mapSizeW+1]->for(do:::(x) {
                         @itemX = (((x) / mapSizeW) + regionX);
                         @itemY = (((y) / mapSizeH) + regionY);
                         
-                        when(itemX < 0 || itemY < 0 || itemX >= width || itemY >= height) ::<= {
+                        when(itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY) ::<= {
                             canvas.movePen(x:left + x, y:top + y);  
-                            canvas.drawChar(text:'~');
+                            canvas.drawChar(text:'▓');
                         };
                     });                
                 });                
@@ -269,8 +312,8 @@ return class(
                 
       
                 canvas.movePen(
-                    x:left + ((pointer.x - regionX) * mapSizeW)->floor,
-                    y:top  + ((pointer.y - regionY) * mapSizeH)->floor         
+                    x:left + ((pointer.x - regionX+offsetX) * mapSizeW)->floor,
+                    y:top  + ((pointer.y - regionY+offsetY) * mapSizeH)->floor         
                 );
                 
                 canvas.drawText(text:'P');

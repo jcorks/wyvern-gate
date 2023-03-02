@@ -2099,16 +2099,11 @@ Item.Base.database = Database.new(items: [
             };
             
             @:levelToStratum = ::(level) {
-                return match((level / 10)->floor) {
-                  (0): 'IX',
-                  (1): 'VIII',
-                  (2): 'VII',
-                  (3): 'VI',
-                  (4): 'V',
-                  (5): 'IV',
-                  (6): 'III',
-                  (7): 'II',
-                  (8): 'I',
+                return match((level / 5)->floor) {
+                  (0): 'IV',
+                  (1): 'III',
+                  (2): 'II',
+                  (3): 'I',
                   default: 'Unknown'
                 };
             };

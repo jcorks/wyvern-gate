@@ -2,13 +2,15 @@ Known bugs / concerns:
 - Menus often exit down too far. Ideally they should menu down one level at a time and allow cancelling.
 - Missing skills in professions
   . Assassin
+  . Farmer
 - Skills are not used by AI yet.
-- If an inventory is empty and an item needs to be selected, 
-  a full inventory of "empty" is displayed
 - killed enamies do not yield exp.
 
 
 Coming changes:
+- Endgame
+- Research Hall
+    . Tablet exchange
 - area plots for towns and cities to give it a better sense of order
 - Books containing lore and other fun things
 - Gambling Tent

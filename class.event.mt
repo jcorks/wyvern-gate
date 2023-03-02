@@ -266,8 +266,17 @@ Event.Base.database = Database.new(
                                 @:item = Item.new(
                                     base: Item.Base.database.find(name:'Tablet')
                                 );
-                                party.inventory.add(item);
+
+                                
                                 dialogue.message(text: message);
+                                when(world.party.inventory.isFull) ::<= {
+                                    dialogue.message(text: '...but the party\'s inventory was full.');
+                                    send();
+                                };
+                                
+                                party.inventory.add(item);
+
+
                                 send();
                               },
                               
@@ -412,15 +421,19 @@ Event.Base.database = Database.new(
                     @:Damage = import(module:'class.damage.mt');
                     
                     when(Number.random() < 0.5) ::<= {
-                        dialogue.message(text:'It explodes violently.'); 
-                        opener.damage(
-                            from: opener,
-                            damage: Damage.new(
-                                amount:opener.stats.HP * (0.7),
-                                damageType : Damage.TYPE.PHYS,
-                                damageClass: Damage.CLASS.HP
-                            )
-                        );
+                        dialogue.message(text:'A trap is triggered, and a volley of arrows springs form the chest!'); 
+                        if (Number.random() < 0.5) ::<= {
+                            dialogue.message(text:opener.name + ' narrowly dodges the trap.');                         
+                        } else ::<= {
+                            opener.damage(
+                                from: opener,
+                                damage: Damage.new(
+                                    amount:opener.stats.HP * (0.7),
+                                    damageType : Damage.TYPE.PHYS,
+                                    damageClass: Damage.CLASS.HP
+                                )
+                            );
+                        };
                         return 0;
                     }; 
                     
@@ -433,6 +446,11 @@ Event.Base.database = Database.new(
                         @message = 'The party found a(n) ';
                         message = message + item.name;
                         dialogue.message(text: message);
+
+                        when(party.inventory.isFull) ::<= {
+                            dialogue.message(text: '...but the party\'s inventory was full.');
+                        };
+
                         party.inventory.add(item);
                         
                     });    
