@@ -250,6 +250,7 @@ Event.Base.database = Database.new(
                                 
                                 allies: party.members,
                                 enemies,
+                                
                                 landmark: {},
                                 onStart :: {
 
@@ -261,12 +262,16 @@ Event.Base.database = Database.new(
                                 dialogue.message(text:'The world around you warps until you are brought to your feet on a new land.');                              
                                 dialogue.message(text:'Something falls to your feet.');                              
                                 
-                                
+                                /*
                                 @message = 'The party was given a Tablet.';
                                 @:item = Item.new(
                                     base: Item.Base.database.find(name:'Tablet')
                                 );
-
+                                */
+                                @message = 'The party picks it up and puts it in their inventory.';
+                                @:item = Item.new(
+                                    base: Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique)
+                                );
                                 
                                 dialogue.message(text: message);
                                 when(world.party.inventory.isFull) ::<= {
@@ -344,6 +349,7 @@ Event.Base.database = Database.new(
                                 
                                 allies: party.members,
                                 enemies,
+                                exp:true,
                                 landmark: {},
                                 onStart :: {
                                 }
@@ -489,17 +495,29 @@ Event.Base.database = Database.new(
 
                     dialogue.message(text:'The party is given some food.');
 
+                    @StatSet = import(module:'class.statset.mt');
                     if (Number.random() < 0.8) ::<= {
                         dialogue.message(text:'The food is delicious.');
                         event.party.members->foreach(do:::(index, member) {
+                            @oldStats = StatSet.new();
+                            oldStats.state = member.stats.state;
+                            member.stats.add(stats:StatSet.new(HP:(oldStats.HP*0.1)->ceil, MP:(oldStats.MP*0.1)->ceil));
+                            oldStats.printDiff(other:member.stats, prompt:member.name + ': Mmmm...');
+
                             member.heal(amount:member.stats.HP * 0.1);
                             member.healMP(amount:member.stats.MP * 0.1);
                         });
                         
                     } else ::<= {
-                        dialogue.message(text:'The food tastes terrible.');
+                        dialogue.message(text:'The food tastes terrible. The party feels ill.');
                         @:Damage = import(module:'class.damage.mt');
                         event.party.members->foreach(do:::(index, member) {
+                            @oldStats = StatSet.new();
+                            oldStats.state = member.stats.state;
+                            member.stats.add(stats:StatSet.new(HP:-(oldStats.HP*0.1)->ceil, MP:-(oldStats.MP*0.1)->ceil));
+                            oldStats.printDiff(other:member.stats, prompt:member.name + ': Ugh...');
+
+
                             member.damage(
                                 from: member,
                                 damage: Damage.new(
@@ -617,7 +635,9 @@ Event.Base.database = Database.new(
                     @:party = event.party;
                     
                     @:world = import(module:'singleton.world.mt');
-                    
+                    dialogue.message(
+                        text: 'A shadow emerges; the party is caught off-guard!'
+                    );                    
                     @enemies = 
                         if (world.time < world.TIME.EVENING) 
                             match(true) {

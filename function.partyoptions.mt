@@ -36,7 +36,7 @@
         canvas.renderFrame(top, left: (canvas.width - width) / 2, width, height);
         
         canvas.movePen(x: x+3, y: top + 2);
-        canvas.drawText(text: member.name + ' - Lv ' + member.level + ' (' + member.species.name + ' ' + member.profession.base.name + ')');
+        canvas.drawText(text: member.name + ' - (' + member.species.name + ' ' + member.profession.base.name + ')');
         canvas.movePen(x: x+3, y: top + 3);
         canvas.drawText(text: member.renderHP() + 'HP: ' + member.hp + ' / ' + member.stats.HP + '    MP: ' + member.mp + ' / ' + member.stats.MP + '\n');
         canvas.movePen(x: x+3, y: top + 4);
@@ -77,7 +77,7 @@ return ::{
         @:party = world.party;
         
         party.members->foreach(do:::(i, member) {
-            lines->push(value:member.renderHP() + ' ' + member.hp + ' / ' + member.stats.HP + ' HP ' + member.name + '(Lv' + member.level + ')');
+            lines->push(value:member.renderHP() + ' ' + member.hp + ' / ' + member.stats.HP + ' HP ' + member.name); //'(Lv' + member.level + ')');
         });
         
         lines->push(value:'');

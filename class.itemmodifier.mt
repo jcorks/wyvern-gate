@@ -122,7 +122,7 @@ ItemMod.database = Database.new(
                     DEX: 10
                 ),
                 pricePercentMod: 10,
-                levelMinimum : 3,
+                levelMinimum : 1,
                 equipEffects : [
                 ],
                 
@@ -160,7 +160,7 @@ ItemMod.database = Database.new(
                     DEF: -10
                 ),
                 pricePercentMod: 30,
-                levelMinimum : 3,
+                levelMinimum : 1,
                 equipEffects : [
                 ],
                 
@@ -218,7 +218,7 @@ ItemMod.database = Database.new(
                     INT: -50
                 ),
                 pricePercentMod: 1200,
-                levelMinimum : 15,
+                levelMinimum : 1,
                 equipEffects : [
                 ],
                 
@@ -238,7 +238,7 @@ ItemMod.database = Database.new(
                     INT: -50
                 ),
                 pricePercentMod: 1200,
-                levelMinimum : 15,
+                levelMinimum : 1,
                 equipEffects : [
                 ],
                 
@@ -258,7 +258,7 @@ ItemMod.database = Database.new(
                     INT: -50
                 ),
                 pricePercentMod: 1200,
-                levelMinimum : 15,
+                levelMinimum : 1,
                 equipEffects : [
                 ],
                 
@@ -278,7 +278,7 @@ ItemMod.database = Database.new(
                     INT: 100
                 ),
                 pricePercentMod: 1200,
-                levelMinimum : 15,
+                levelMinimum : 1,
                 equipEffects : [
                 ],
                 
@@ -292,7 +292,7 @@ ItemMod.database = Database.new(
             data : {
                 name : 'Masterwork',
                 description : "A crowning achievement by a craftsperson representing a life's work.",
-                levelMinimum: 40,
+                levelMinimum: 1,
                 equipMod : StatSet.new(
                     DEF: 100,
                     ATK: 100,

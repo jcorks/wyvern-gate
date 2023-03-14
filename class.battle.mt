@@ -42,6 +42,7 @@
         @onEnemyTurn_;
         @onAllyTurn_;
         @landmark_;
+        @active;
     
         // some actions last multiple turns.
         // indexed by Entity.
@@ -200,7 +201,7 @@
                 
             @lines = [];
             allies_->foreach(do:::(index, ally) {
-                lines->push(value:ally.renderHP() + '  ' + ally.name + ' - Lv ' + ally.level);
+                lines->push(value:ally.renderHP() + '  ' + ally.name);// + ' - Lv ' + ally.level);
                 lines->push(value:'HP: ' + ally.hp + ' / ' + ally.stats.HP + '    MP: ' + ally.mp + ' / ' + ally.stats.MP);
             });
             lines->push(value:'');
@@ -208,7 +209,7 @@
             lines->push(value:'');
 
             enemies_->foreach(do:::(index, enemy) {
-                lines->push(value:enemy.renderHP() + '  ' + enemy.name + ' - Lv ' + enemy.level);
+                lines->push(value:enemy.renderHP() + '  ' + enemy.name);// + ' - Lv ' + enemy.level);
                 lines->push(value:'HP: ' + enemy.hp + ' / ' + enemy.stats.HP);
             });
 
@@ -257,6 +258,10 @@
                 enemies => Object,
                 landmark => Object,
                 
+                onTurn,
+                noLoot,
+                exp,
+                
                 onStart
             ) {
                 allies = [...allies];
@@ -264,6 +269,7 @@
                 canvas.pushState();
                 turn = [];
                 turnIndex = 0;
+                active = true;
                 
                 @:isPlayerParty = party.isMember(entity:allies[0]);
             
@@ -311,7 +317,7 @@
                     
                     enemies->foreach(do:::(index, enemy) {
                         dialogue.message(
-                            text: enemy.name + '(Lv ' + enemy.level + ', ' + enemy.stats.HP + ' HP) blocks your path!'
+                            text: enemy.name + '(' + enemy.stats.HP + ' HP) blocks your path!'
                         );                    
                     });
                 };
@@ -347,6 +353,8 @@
                         })) send(message:true);
                                     
                         doTurn();
+                        if (onTurn != empty)
+                            onTurn();
                     });
                 };
                 
@@ -367,6 +375,7 @@
                             
                 
                 when (npcBattle != empty) ::<= {
+                    active = false;
                     dialogue.message(text: 'The battle is over.');
                     canvas.popState();
 
@@ -380,79 +389,81 @@
                 if (alliesWin) ::<= {            
                     dialogue.message(text: 'The battle is won.');
 
-                    @exp = 0;
-                    enemies_->foreach(do:::(index, enemy) {
-                        exp += enemy.dropExp();
-                    });                
-                    exp /= allies_->keycount;
-                    exp = exp->ceil;
-                    dialogue.message(text: 'Each party member gains ' + exp + ' EXP.');
-                    allies_->foreach(do:::(index, ally) {
-                        ally.stats.resetMod();
-                        
-                        @stats = StatSet.new();
-                        @level = ally.level;
-                        stats.add(stats:ally.stats);
-                        ally.gainExp(amount:exp, chooseStat:::(
-                            hp, mp, atk, def, int, luk, dex, spd
-                        ) {
-                            dialogue.message(text: ally.name + ' has leveled up.');
-
-
+                    if (exp == true) ::<= {
+                        @exp = 0;
+                        enemies_->foreach(do:::(index, enemy) {
+                            exp += enemy.dropExp();
+                        });                
+                        exp /= allies_->keycount;
+                        exp = exp->ceil;
+                        dialogue.message(text: 'Each party member gains ' + exp + ' EXP.');
+                        allies_->foreach(do:::(index, ally) {
                             ally.stats.resetMod();
-                            stats.printDiff(other:ally.stats, prompt:ally.name + ' - (Level:  ' + level  + ' -> ' + (ally.level+1) + ': Base Stats)');                        
-                            stats = StatSet.new();
-                            stats.add(stats:ally.stats);                        
-                            return dialogue.choicesNow(
-                                prompt: ally.name + ' - Focus which?',
-                                choices: [
-                                    'HP  (+' + hp + ')',
-                                    'MP  (+' + mp + ')',
-                                    'ATK (+' + atk + ')',
-                                    'INT (+' + int + ')',
-                                    'DEF (+' + def + ')',
-                                    'SPD (+' + spd + ')',
-                                    'LUK (+' + luk + ')',
-                                    'DEX (+' + dex + ')'
-                                ]
-                            )-1;
-                        },
-                        
-                        afterLevel :::{
-                            ally.stats.resetMod();
-                            stats.printDiff(other:ally.stats, prompt:'(Level:  ' + level  + ' -> ' + (ally.level+1) + ': Focus)');                        
-                        
-                        });
-                        @:Entity = import(module:'class.entity.mt');
-                        @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
-                        if (wep != empty) ::<= {
-                            wep.addVictory();
-                        };
-                        ally.recalculateStats();
-                        
-     
-                    }); 
+                            
+                            @stats = StatSet.new();
+                            @level = ally.level;
+                            stats.add(stats:ally.stats);
+                            ally.gainExp(amount:exp, chooseStat:::(
+                                hp, mp, atk, def, int, luk, dex, spd
+                            ) {
+                                dialogue.message(text: ally.name + ' has leveled up.');
 
-                    @:loot = [];
-                    enemies->foreach(do:::(index, enemy) {
-                        enemy.inventory.items->foreach(do:::(index, item) {
-                            if (Number.random() > 0.7 && loot->keycount == 0) ::<= {
-                                loot->push(value:enemy.inventory.remove(item));
+
+                                ally.stats.resetMod();
+                                stats.printDiff(other:ally.stats, prompt:ally.name + ' - (Level:  ' + level  + ' -> ' + (ally.level+1) + ': Base Stats)');                        
+                                stats = StatSet.new();
+                                stats.add(stats:ally.stats);                        
+                                return dialogue.choicesNow(
+                                    prompt: ally.name + ' - Focus which?',
+                                    choices: [
+                                        'HP  (+' + hp + ')',
+                                        'MP  (+' + mp + ')',
+                                        'ATK (+' + atk + ')',
+                                        'INT (+' + int + ')',
+                                        'DEF (+' + def + ')',
+                                        'SPD (+' + spd + ')',
+                                        'LUK (+' + luk + ')',
+                                        'DEX (+' + dex + ')'
+                                    ]
+                                )-1;
+                            },
+                            
+                            afterLevel :::{
+                                ally.stats.resetMod();
+                                stats.printDiff(other:ally.stats, prompt:'(Level:  ' + level  + ' -> ' + (ally.level+1) + ': Focus)');                        
+                            
+                            });
+                            @:Entity = import(module:'class.entity.mt');
+                            @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
+                            if (wep != empty) ::<= {
+                                wep.addVictory();
                             };
-                        });
-                    });
-                    
-                    if (loot->keycount > 0) ::<= {
-                        dialogue.message(text: 'It looks like they dropped some items during the fight...');
-                        @message = 'The party found:\n\n';
-                        loot->foreach(do:::(index, item) {
-                            @message = 'The party found a(n) ';
-                            message = message + item.name;
-                            dialogue.message(text: message);
-                            party.inventory.add(item);
-                        });
+                            ally.recalculateStats();
+                            
+         
+                        }); 
                     };
-
+                    if (noLoot == empty) ::<= {
+                        @:loot = [];
+                        enemies->foreach(do:::(index, enemy) {
+                            enemy.inventory.items->foreach(do:::(index, item) {
+                                if (Number.random() > 0.7 && loot->keycount == 0) ::<= {
+                                    loot->push(value:enemy.inventory.remove(item));
+                                };
+                            });
+                        });
+                        
+                        if (loot->keycount > 0) ::<= {
+                            dialogue.message(text: 'It looks like they dropped some items during the fight...');
+                            @message = 'The party found:\n\n';
+                            loot->foreach(do:::(index, item) {
+                                @message = 'The party found a(n) ';
+                                message = message + item.name;
+                                dialogue.message(text: message);
+                                party.inventory.add(item);
+                            });
+                        };
+                    };
                                    
                     canvas.popState();
 
@@ -464,6 +475,7 @@
                 };
                 allies_ = [];
                 enemies_ = [];
+                active = false;
                 
                 return this;            
             },        
@@ -478,6 +490,24 @@
 
             allies : {
                 get ::<- [...allies_]
+            },
+            
+            isActive : {
+                get ::<- active
+            },
+            
+            join ::(enemy, ally) {
+                if (enemy != empty) ::<= {
+                    when (enemies_->findIndex(value:enemy) != -1) empty;
+                    dialogue.message(text:enemy.name + ' joins the fray!');
+                    enemies_->push(value:enemy);
+                };
+                if (ally != empty) ::<= {
+                    when (allies_->findIndex(value:ally) != -1) empty;
+                    dialogue.message(text:ally.name + ' joins the fray!');
+                    allies_->push(value:ally);
+                };
+                    
             },
             
             prompt :: (text, choices, canCancel){                                

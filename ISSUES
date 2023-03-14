@@ -6,8 +6,24 @@ Known bugs / concerns:
 - Skills are not used by AI yet.
 - killed enamies do not yield exp.
 
-
 Coming changes:
+- Game restructure
+  . Random encounters will be very rare
+  . Dungeon crawl-style maps for:
+    - grottos 
+    - abandoned castles
+  . Dungeon crawls will have physical spawns of enemies (*), chests
+  . One stair per level 
+  . Chance for Treasure room is available after 6 floors, but still only a chance 
+  . large chest ALWAYS contains a key to next stratum
+  . shops no longer sell keys 
+  . random event changes:
+    - eating food with a stranger increases or decreases max HP / MP by 5%
+    - failing a chest trap check will decrease HP 5% and hurt
+    
+- additional weapons:
+  . rapier
+  . lance
 - Endgame
 - Research Hall
     . Tablet exchange

@@ -750,7 +750,7 @@ Interaction.database = Database.new(
                         
 
                         location.targetLandmark = 
-                            Landmark.Base.database.find(name:'Dungeon').new(
+                            Landmark.Base.database.find(name:'Grotto').new(
                                 island:location.landmark.island,
                                 x:-1,
                                 y:-1
@@ -759,7 +759,7 @@ Interaction.database = Database.new(
                         
                         
                         location.targetLandmark.floor = location.landmark.floor+1;
-                        location.targetLandmark.name = 'Dungeon ('+location.targetLandmark.floor+'F)';
+                        location.targetLandmark.name = 'Grotto ('+location.targetLandmark.floor+'F)';
                     };
 
                     canvas.clear();
@@ -1170,6 +1170,37 @@ Interaction.database = Database.new(
                 }
             }
         ),              
+
+        Interaction.new(
+            data : {
+                displayName : 'Loot',
+                name : 'loot',
+                onInteract ::(location, party) {
+                    @:world = import(module:'singleton.world.mt');
+                    when(location.inventory.items->keycount == 0)
+                        dialogue.message(text:location.ownedBy.name + '\'s body contained no items');
+                    
+                    dialogue.message(text:'The party looted the body...');
+                    
+                    when(world.party.inventory.isFull) ::<= {
+                        dialogue.message(text: '...but the party\'s inventory was full.');
+                    };
+                    
+                    location.inventory.items->foreach(do:::(i, item) {
+                        dialogue.message(text:'The party found a(n) ' + item.name + '.');
+                    });
+                    
+                    location.inventory.items->foreach(do:::(i, item) {
+                        world.party.inventory.add(item);
+                    });                   
+                    location.inventory.clear();
+
+
+                }
+            }
+        ), 
+
+
         Interaction.new(
             data : {
                 displayName : 'Compete',

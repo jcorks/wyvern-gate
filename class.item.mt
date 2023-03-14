@@ -1923,7 +1923,7 @@ Item.Base.database = Database.new(items: [
         canHaveModifier : false,
         hasMaterial : false,
         isUnique : false,
-        levelMinimum : 100000,
+        levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 5,
 
@@ -1956,7 +1956,7 @@ Item.Base.database = Database.new(items: [
         canHaveModifier : false,
         hasMaterial : false,
         isUnique : false,
-        levelMinimum : 100000,
+        levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 600,
 
@@ -1993,8 +1993,8 @@ Item.Base.database = Database.new(items: [
         keyItem : true,
         canHaveModifier : false,
         hasMaterial : false,
-        isUnique : true,
-        levelMinimum : 1,
+        isUnique : false,
+        levelMinimum : 1000000,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 0,
 
@@ -2027,8 +2027,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : false,
         canHaveModifier : false,
         hasMaterial : false,
-        isUnique : true,
-        levelMinimum : 1,
+        isUnique : false,
+        levelMinimum : 10000000,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 1,
 
@@ -2060,7 +2060,7 @@ Item.Base.database = Database.new(items: [
         canBeColored : false,
         basePrice: 100,
         keyItem : false,
-        levelMinimum : 1,
+        levelMinimum : 1000000000,
         canHaveModifier : false,
         hasMaterial : false,
         isUnique : true,

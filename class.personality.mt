@@ -146,7 +146,7 @@ Personality.database = Database.new(items: [
             SPEECH_EVENT.GREET : [
                 "..What do you want?",
                 "I don't have time for this.",
-                "Get out of my way."
+                "Do we really have to talk?"
             ],
             
             SPEECH_EVENT.ADVENTURE_DENY : [
@@ -274,8 +274,7 @@ Personality.database = Database.new(items: [
         ),
         phrases : {
             SPEECH_EVENT.HURT : [
-                'Urgh, be careful.',
-                'Why all this violence..'
+                'Urgh, be careful.'
             ],
             
             SPEECH_EVENT.DEATH : [

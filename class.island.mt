@@ -119,8 +119,8 @@
         @encounterRate = Number.random();        
         
         // Size of the island... Islands are always square-ish
-        @sizeW  = Number.random()*2 + 1.5;
-        @sizeH  = Number.random()*2 + 1.5;
+        @sizeW  = Number.random()*40 + 50;
+        @sizeH  = Number.random()*40 + 50;
         
         // steps since the last event
         @stepsSinceLastEvent = 0;
@@ -219,7 +219,7 @@
                     y: Number.random()*(sizeH - 0.2) + 0.2
                 );
 
-                map.setItem(object:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol);
+                map.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.name);
 
                 significantLandmarks->push(value:landmark);
             });
@@ -231,7 +231,7 @@
                 y: Number.random()*(sizeH - 0.2) + 0.2
             );
 
-            map.setItem(object:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol);
+            map.setItem(data:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol, name:gate.base.name);
 
             significantLandmarks->push(value:gate);
 
@@ -242,7 +242,7 @@
                 x: Number.random()*(sizeW - 0.2) + 0.2,
                 y: Number.random()*(sizeH - 0.2) + 0.2
             );
-            map.setItem(object:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol);
+            map.setItem(data:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol, name:gate.base.name);
             significantLandmarks->push(value:gate);
             
             @:gate = Landmark.Base.database.find(name:'town').new(
@@ -252,7 +252,7 @@
             );
 
 
-            map.setItem(object:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol);
+            map.setItem(data:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol, name:gate.base.name);
 
             significantLandmarks->push(value:gate);
 
@@ -289,7 +289,7 @@
 
                     value.significantLandmarks->foreach(do:::(index, landmarkData) {
                         @:landmark = Landmark.Base.database.find(name:landmarkData.baseName).new(x:0, y:0, state:landmarkData, island:this);
-                        map.setItem(object:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol);
+                        map.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.name);
                         significantLandmarks->push(value:landmark);
                     });
                     
@@ -377,10 +377,10 @@
                 // every step, an event can occur.
                 //if (stepsSinceLastEvent > 200000) ::<= {
                 if (stepsSinceLastEvent > 20) ::<= {
-                    if (Number.random() > 1 - (stepsSinceLastEvent-20) / 5) ::<={
+                    if (Number.random() > 20 - (stepsSinceLastEvent-20) / 5) ::<={
 
-                        // mostly its encounters. 80% chance of encounter 
-                        if (Number.random() < 0.8) ::<= {
+                        // mostly its encounters. 0.1% chance of encounter 
+                        if (Number.random() < 0.001) ::<= {
                             this.addEvent(
                                 event:Event.Base.database.find(name:'Encounter:Normal').new(
                                     island:this, 

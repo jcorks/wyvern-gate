@@ -38,7 +38,7 @@
             
     stats.add(stats:StatSet.new(
         HP  : 2+(Number.random()*3)->floor,
-        MP  : (Number.random()*3)->floor,
+        MP  : 1+(Number.random()*3)->floor,
         ATK : (Number.random()*3)->floor,
         INT : (Number.random()*3)->floor,
         DEF : (Number.random()*3)->floor,
@@ -189,7 +189,7 @@
             });
 
             ::<={
-                [0, (Number.random()*5)->floor]->for(do:::(i) {
+                [0, 1+(Number.random()*3)->floor]->for(do:::(i) {
                     @:item = Item.Base.database.getRandomWeightedFiltered(
                         filter:::(value) <- level >= value.levelMinimum &&
                                             value.isUnique == false
@@ -976,9 +976,9 @@
                           '         MP: ' + this.mp + ' / ' + this.stats.MP + '\n\n' + 
                           '    species: ' + species.name + '\n' +
                           ' profession: ' + profession.base.name + '\n' +
-                          'personality: ' + personality.name + '\n\n' +
-                                'Level: ' + level + ' (would drop ' + this.dropExp() + ' EXP) \n' +
-                          'Exp to next: ' + expNext + '\n',
+                          'personality: ' + personality.name + '\n\n',
+                        //        'Level: ' + level + ' (would drop ' + this.dropExp() + ' EXP) \n' +
+                        //  'Exp to next: ' + expNext + '\n',
 
                     pageAfter:canvas.height-4
                 );

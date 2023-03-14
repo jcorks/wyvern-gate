@@ -20,7 +20,14 @@
 @:NameGen = import(module:'singleton.namegen.mt');
 @:Database = import(module:'class.database.mt');
 @:Map = import(module:'class.map.mt');
+@:DungeonMap = import(module:'class.dungeonmap.mt');
 @Location = empty; // circular dep.
+
+
+
+
+
+
 
 @:Landmark = class(  
     name : 'Wyvern.Landmark',
@@ -36,13 +43,26 @@
         @discovered = false;
         @locations = [];
         @island_;
-        @size = random.integer(from:5, to:10)->ceil;
+        @sizeW;
+        @sizeH;
         @peaceful;
         @floor = 0;
-        @map = Map.new();
-        map.size = size;
+        @map;
         @gate;
+        @entities = [];
 
+        @:ROOM_MAX_ENTITY = 10;
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        @:Entity = import(module:'class.entity.mt');
 
 
         this.constructor = ::(base, island, x, y, state){
@@ -50,6 +70,59 @@
             when(state != empty) ::<= {
                 this.state = state;
                 return this;
+            };
+
+            if (base.dungeonMap) ::<= {
+                map = DungeonMap.new();
+                sizeW = map.width;
+                sizeH = map.height;
+
+
+                @area = map.getRandomArea();                
+
+                gate = Location.Base.database.find(name:'Entrance').new(
+                    landmark:this, 
+                    xHint:area.x + (area.width/2)->floor + 2,
+                    yHint:area.y + (area.height/2)->floor + 2
+                );                
+
+
+            } else ::<= {
+                map = Map.new();
+                sizeW = random.integer(from:30, to:60)->ceil;
+                sizeH = random.integer(from:30, to:60)->ceil;
+
+                match ((Number.random()*4)->floor) {
+                  (0)::<= {
+                    gate = Location.Base.database.find(name:'Entrance').new(
+                        landmark:this, 
+                        xHint:1,
+                        yHint:Number.random()*sizeH
+                    );                
+                  },
+                  (1)::<= {
+                    gate = Location.Base.database.find(name:'Entrance').new(
+                        landmark:this, 
+                        xHint:sizeW - 1,
+                        yHint:Number.random()*sizeH
+                    );                
+                  },
+                  (2)::<= {
+                    gate = Location.Base.database.find(name:'Entrance').new(
+                        landmark:this, 
+                        xHint:Number.random()*sizeH,
+                        yHint:1
+                    );                
+                  },
+                  (3)::<= {
+                    gate = Location.Base.database.find(name:'Entrance').new(
+                        landmark:this, 
+                        xHint:Number.random()*sizeW,
+                        yHint:sizeH-1
+                    );                
+                  }
+              };           
+
             };
 
             if (base.isUnique)
@@ -65,49 +138,19 @@
                 locations->push(value:island.newInhabitant());            
             });
             */
-            map.size = size;
             @mapIndex = 0;
 
 
 
 
-            match ((Number.random()*4)->floor) {
-              (0)::<= {
-                gate = Location.Base.database.find(name:'Entrance').new(
-                    landmark:this, 
-                    xHint:0,
-                    yHint:Number.random()*size
-                );                
-              },
-              (1)::<= {
-                gate = Location.Base.database.find(name:'Entrance').new(
-                    landmark:this, 
-                    xHint:size - 0.1,
-                    yHint:Number.random()*size
-                );                
-              },
-              (2)::<= {
-                gate = Location.Base.database.find(name:'Entrance').new(
-                    landmark:this, 
-                    xHint:Number.random()*size,
-                    yHint:0
-                );                
-              },
-              (3)::<= {
-                gate = Location.Base.database.find(name:'Entrance').new(
-                    landmark:this, 
-                    xHint:Number.random()*size,
-                    yHint:size-0.1
-                );                
-              }
 
 
-            };           
+
 
             
             
             locations->push(value:gate);
-            map.setItem(object:gate, x:gate.x, y:gate.y, symbol: gate.base.symbol);
+            map.setItem(data:gate, x:gate.x, y:gate.y, symbol: gate.base.symbol, discovered:true, name:gate.name);
             map.title = landmark.name + (
                 if (name == '') '' else (' of ' + name)
             );
@@ -121,7 +164,7 @@
 
             base.requiredLocations->foreach(do:::(i, loc) {
                 @loc = Location.Base.database.find(name:loc).new(landmark:this);
-                map.setItem(object:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol);
+                map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
                 mapIndex += 1;
                 locations->push(value:loc);
             });
@@ -130,11 +173,12 @@
                 when(base.possibleLocations->keycount == 0) empty;
                 @:which = random.pickArrayItemWeighted(list:base.possibleLocations);
                 @:loc = Location.Base.database.find(name:which.name).new(landmark:this);
-                map.setItem(object:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol);
+                map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
                 mapIndex += 1;
 
                 locations->push(value:loc);
             });
+            
             
             
             return this;
@@ -148,7 +192,8 @@
                     y_ = value.y;
                     discovered = value.discovered;
                     name = value.name;
-                    size = value.size;
+                    sizeW = value.sizeW;
+                    sizeH = value.sizeH;
                     peaceful = value.peaceful;
                     floor = value.floor;
                     locations = [];
@@ -160,10 +205,11 @@
                             gate = loc;
 
                         map.setItem(
-                            object:loc,
+                            data:loc,
                             x: loc.x,
                             y: loc.y,
-                            symbol: loc.base.symbol
+                            symbol: loc.base.symbol,
+                            discovered: true
                         );
                         locations->push(value:loc);
                     });
@@ -179,7 +225,8 @@
                         name : name,
                         x: x_,
                         y: y_,
-                        size : size,
+                        sizeW : sizeW,
+                        sizeH : sizeH,
                         peaceful : peaceful,
                         map : map.state,
                         floor : floor,
@@ -226,8 +273,11 @@
                 get ::<- y_
             },
             
-            size : {
-                get ::<- size
+            width : {
+                get ::<- sizeW
+            },
+            height : {
+                get ::<- sizeH
             },
             
             peaceful : {
@@ -240,6 +290,78 @@
                 set ::(value) <- floor = value
             },
 
+            step :: {
+                when(!landmark.dungeonMap) empty;
+                // update movement of entity
+                @toRemove = [];
+                entities->foreach(do:::(i, ent) {
+                    if (map.getDistanceFromItem(data:ent) < 2) ::<= {
+                        @:world = import(module:'singleton.world.mt');
+                        @:Battle = import(module:'class.battle.mt');
+                        
+                        when (world.battle.isActive) ::<= {
+                            world.battle.join(enemy:ent.ref);
+                        };
+                        
+                        match(world.battle.start(
+                            party:island_.world.party,                            
+                            allies: island_.world.party.members,
+                            enemies: [ent.ref],
+                            landmark: this,
+                            noLoot: true,
+                            onTurn ::{
+                                this.step();
+                            }
+                        ).result) {
+                          (Battle.RESULTS.ALLIES_WIN):::<= {
+                            toRemove->push(value:ent);
+                            @xHint = ent.x / map.width;
+                            @yHint = ent.y / map.height;
+                            @loc = Location.Base.database.find(name:'Body').new(landmark:this, ownedByHint: ent.ref, xHint, yHint);
+                            map.setItem(data:loc, x:xHint, y:yHint, symbol: loc.base.symbol, discovered: false);
+                            locations->push(value:loc);                            
+                          },
+                          
+                          (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                          }
+                        };                     
+                    };
+                    //if (map.entityDistancePointer(ent) > 5)
+                    //    map.moveEntity(ent, x:Number.random() - 0.5, y:Number.random() - 0.5)
+                    //else
+                    //    map.moveTowardPointer(ent);
+                    map.moveTowardPointer(data:ent);
+                });
+                
+                toRemove->foreach(do:::(i, ent) {
+                    map.removeItem(data:ent);
+                    entities->remove(key:entities->findIndex(value:ent));
+                });
+                
+                // add additional entities out of spawn points (stairs)
+                if (entities->keycount < ROOM_MAX_ENTITY) ::<= {
+                    @area = random.pickArrayItem(list:map.areas);
+                    @:tileX = area.x + (area.width/2)->floor;
+                    @:tileY = area.y + (area.height/2)->floor;
+                    
+                    // only add an entity when not visible. Makes it 
+                    // feel more alive and unknown
+                    //when (map.isTileVisible(x:tileX, y:tileY)) empty;
+                    
+                    
+                    // who knows whos down here. Can be anything and anyone, regardless of 
+                    // the inhabitants of the island.
+                    @ent = {x:tileX, y:tileY, ref:Entity.new(
+                        levelHint: random.integer(from:island_.levelMin, to:island_.levelMax)
+                    )};
+                    ent.ref.anonymize();
+                    entities->push(value:ent);
+                    map.setItem(data:ent, x:ent.x, y:ent.y, discovered:false, symbol:'*');
+                };
+
+        
+                
+            },
             
             kind : {
                 get :: {
@@ -308,6 +430,7 @@ Landmark.Base = class(
                 possibleLocations : Object,
                 requiredLocations : Object,
                 peaceful: Boolean,
+                dungeonMap: Boolean
 
             }
         );
@@ -336,6 +459,7 @@ Landmark.Base.database = Database.new(
                 maxLocations : 5,
                 isUnique : false,
                 peaceful : true,
+                dungeonMap : false,
                 possibleLocations : [
                     {name:'home', rarity: 1},
                     {name:'Tavern', rarity: 3},
@@ -359,6 +483,7 @@ Landmark.Base.database = Database.new(
                 isUnique : false,
                 maxLocations : 5,
                 peaceful : true,
+                dungeonMap : false,
                 possibleLocations : [
                     {name:'home', rarity: 1},
                     //{name:'inn', rarity: 3},
@@ -387,6 +512,7 @@ Landmark.Base.database = Database.new(
                 isUnique : false,
                 maxLocations : 5,
                 peaceful : true,
+                dungeonMap : false,
                 possibleLocations : [
                     {name:'ore vein', rarity: 1},
                     //{name:'inn', rarity: 3},
@@ -411,6 +537,7 @@ Landmark.Base.database = Database.new(
                 minLocations : 4,
                 maxLocations : 10,
                 peaceful : true,
+                dungeonMap : false,
                 possibleLocations : [
 
                 ],
@@ -429,6 +556,7 @@ Landmark.Base.database = Database.new(
                 minLocations : 4,
                 maxLocations : 10,
                 peaceful : true,
+                dungeonMap : true,
                 possibleLocations : [                    
                 ],
                 requiredLocations : [
@@ -448,12 +576,14 @@ Landmark.Base.database = Database.new(
                 minLocations : 1,
                 maxLocations : 3,
                 peaceful: false,
+                dungeonMap : true,
                 possibleLocations : [
                     {name: 'Stairs Down', rarity:1},
-                    {name: 'Small Chest', rarity:5},
-                    {name: '?????',       rarity:10},                    
+                    {name: 'Small Chest', rarity:3},
+                    {name: '?????',       rarity:6},                    
                 ],
                 requiredLocations : [
+                    'Stairs Down'
                 ]
             }
         ),
@@ -467,6 +597,7 @@ Landmark.Base.database = Database.new(
                 minLocations : 1,
                 maxLocations : 4,
                 peaceful: true,
+                dungeonMap : true,
                 possibleLocations : [
                     {name: 'Small Chest', rarity:5},
                 ],
@@ -485,6 +616,7 @@ Landmark.Base.database = Database.new(
                 maxLocations : 10,
                 peaceful: true,
                 isUnique : false,
+                dungeonMap : false,
                 possibleLocations : [
                     {name:'home', rarity:5},
                     {name:'shop', rarity:40}
@@ -507,6 +639,7 @@ Landmark.Base.database = Database.new(
                 minLocations : 3,
                 maxLocations : 7,
                 isUnique : false,
+                dungeonMap : false,
                 possibleLocations : [
                     {name:'home', rarity:1},
                     {name:'Tavern', rarity:7},
@@ -524,6 +657,7 @@ Landmark.Base.database = Database.new(
                 rarity : 20,
                 peaceful: true,                
                 isUnique : false,
+                dungeonMap : false,
                 minLocations : 5,
                 maxLocations : 10,
                 possibleLocations : [
@@ -556,6 +690,7 @@ Landmark.Base.database = Database.new(
                 rarity : 40,                
                 peaceful: true,
                 isUnique : false,
+                dungeonMap : false,
                 minLocations : 0,
                 maxLocations : 0,
                 possibleLocations : [],
@@ -570,6 +705,7 @@ Landmark.Base.database = Database.new(
                 rarity : 200,                
                 peaceful: true,
                 isUnique : false,
+                dungeonMap : true,
                 minLocations : 0,
                 maxLocations : 0,
                 possibleLocations : [],
@@ -584,6 +720,7 @@ Landmark.Base.database = Database.new(
                 rarity : 10000,
                 peaceful: false,
                 isUnique : false,
+                dungeonMap : true,
                 
                 minLocations : 0,
                 maxLocations : 0,
@@ -598,6 +735,7 @@ Landmark.Base.database = Database.new(
                 symbol : 'x',
                 peaceful: false,
                 isUnique : false,
+                dungeonMap : true,
                 minLocations : 0,
                 maxLocations : 0,
                 possibleLocations : [],

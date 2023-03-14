@@ -152,6 +152,9 @@
     'Giant',
     'Spotted',
     'Shrieking',
+    'Skulking',
+    'Menacing',
+    'Grotesque'
 ];
 
 
@@ -172,7 +175,9 @@
     'Wasp',
     'Chicken',
     'Manticore',
-    'Chimera'
+    'Chimera',
+    'Squirrel',
+    'Mustelid'
 ];
 
 return class(

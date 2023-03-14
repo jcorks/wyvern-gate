@@ -158,13 +158,15 @@ return class(
                 
                     renderLandmark();
                     @choices = [
-                        'Walk to...',
+                        'Walk...',
                         'Party'
                     ];
                     
-                    @locationAt = landmark.map.getItemUnderPointer();
+                    @locationAt = landmark.map.getNamedItemsUnderPointer();
                     if (locationAt != empty) ::<= {
-                        choices->push(value:'Visit ' + locationAt.name);
+                        locationAt->foreach(do:::(i, loc) {
+                            choices->push(value:'Visit ' + loc.name);
+                        });
                     };
                     
                     @choice = dialogue.choicesNow(
@@ -180,53 +182,112 @@ return class(
                         [::] {
                             @lastChoice = 0;
                             forever(do:::{
+                                when(party.isIncapacitated()) send();
                                 renderLandmark();
 
-                                choices = [];
-                                landmark.locations->foreach(do:::(index, location) {
-                                    choices->push(value:location.name);
-                                });
+                                if (!landmark.base.dungeonMap) ::<= {
 
-                                @choice = dialogue.choicesNow(
-                                    leftWeight: 1,
-                                    topWeight: 1,
-                                    prompt: 'Walk where?',
-                                    choices,
-                                    defaultChoice: lastChoice,
-                                    canCancel : true
-                                );                 
-                                
-                                when(choice == 0) send();
-                                lastChoice = choice;
-                                
-                                landmark.map.movePointer(towards:landmark.locations[choice-1], units: 1);
-                                stepsSinceLast += 1;
-                                if (landmark.peaceful == false) ::<= {
-                                    if (stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
-                                        island.addEvent(
-                                            event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
-                                                island, party, landmark //, currentTime
-                                            )
-                                        );
-                                        stepsSinceLast = 0;
+                                    choices = [];
+                                    landmark.locations->foreach(do:::(index, location) {
+                                        choices->push(value:location.name);
+                                    });
+
+                                    @choice = dialogue.choicesNow(
+                                        leftWeight: 1,
+                                        topWeight: 1,
+                                        prompt: 'Walk where?',
+                                        choices,
+                                        defaultChoice: lastChoice,
+                                        canCancel : true
+                                    );                 
+                                    
+                                    when(choice == 0) send();
+                                    lastChoice = choice;
+                                    landmark.map.movePointerToward(x:landmark.locations[choice-1].x, y:landmark.locations[choice-1].y);
+                                    stepsSinceLast += 1;
+                                    if (landmark.peaceful == false) ::<= {
+                                        if (stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
+                                            island.addEvent(
+                                                event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
+                                                    island, party, landmark //, currentTime
+                                                )
+                                            );
+                                            stepsSinceLast = 0;
+                                        };
                                     };
-                                };
-                                when(party.isIncapacitated()) send();
+                                    when(party.isIncapacitated()) send();
 
-                                @:arrival = landmark.map.getItemUnderPointer();
-                                if (arrival != empty) ::<= {
-                                    dialogue.message(
-                                        text:"The party has arrived at " + arrival.name
+                                    @:arrival = landmark.map.getNamedItemsUnderPointer();
+                                    if (arrival != empty) ::<= {
+                                        arrival->foreach(do:::(index, arr) {
+                                            dialogue.message(
+                                                text:"The party has arrived at " + arr.name
+                                            );
+                                        });
+                                        send();
+                                    };
+                                } else ::<= {
+                                    dialogue.pushChoices(
+                                        leftWeight: 1,
+                                        topWeight: 1,
+                                        prompt: 'Walk which way?',
+                                        choices : [
+                                            'North',
+                                            'East',
+                                            'West',
+                                            'South'
+                                        ],
+                                        canCancel: true,
+                                        defaultChoice:lastChoice,
+                                        jail: true,
+                                        onChoice ::(choice) {
+                                            
+                                            
+                                            when(choice == 0) dialogue.popChoice();
+                                            lastChoice = choice;
+                                            
+                                            
+                                            // move by one unit in that direction
+                                            // or ON it if its within one unit.
+                                            landmark.map.movePointerAdjacent(
+                                                x: if (choice == 2) 1 else if (choice == 3) -1 else 0,
+                                                y: if (choice == 4) 1 else if (choice == 1) -1 else 0
+                                            );
+                                            landmark.step();
+                                            when(party.isIncapacitated()) dialogue.popChoice();
+                                            
+                                            // cancel if we've arrived somewhere
+                                            @:arrival = landmark.map.getNamedItemsUnderPointer();
+                                            if (arrival != empty) ::<= {
+                                                arrival->foreach(do:::(index, arr) {
+                                                    dialogue.message(
+                                                        text:"The party has arrived at the " + arr.name
+                                                    );
+                                                });
+                                                landmark.map.setPointer(
+                                                    x: arrival.x,
+                                                    y: arrival.y
+                                                );
+                                                
+                                            };                            
+                                            //renderMain();
+                                            renderLandmark();
+
+                                        }
+                                    
                                     );
                                     send();
+                            
                                 };
-
                             });
                         };
                       },
-                      (1): partyOptions(),                      
-                      (2)::<= {
-                      
+                      (1): ::<={
+                        partyOptions();
+                        landmark.step();
+                      },
+                      default: ::<= {
+                        locationAt = locationAt[choice-1];
                         // initial interaction 
                         // Initial interaction triggers an event.
                         
@@ -262,6 +323,7 @@ return class(
                             location: locationAt,
                             party
                         );
+                        landmark.step();
                       }
                     
                     };
@@ -291,13 +353,13 @@ return class(
                     ];
 
                     renderMain();
-                    @visitable = island.map.getItemUnderPointer();
+                    @visitable = island.map.getNamedItemsUnderPointer();
 
-                    
-                    if (visitable != empty)
-                        choices->push(value:'Visit ' + visitable.base.name);                
-
-
+                    if (visitable != empty) ::<= {
+                        visitable->foreach(do:::(i, vis) {
+                            choices->push(value:'Visit ' + vis.name);                
+                        });
+                    };
                     @choice = dialogue.choicesNow(
                         leftWeight: 1,
                         topWeight: 1,
@@ -338,25 +400,28 @@ return class(
                                 
                                 // move by one unit in that direction
                                 // or ON it if its within one unit.
-                                island.map.movePointer(
-                                    x: if (choice == 2) 0.15 else if (choice == 3) -0.15 else 0,
-                                    y: if (choice == 4) 0.15 else if (choice == 1) -0.15 else 0
+                                island.map.movePointerFree(
+                                    x: if (choice == 2) 4 else if (choice == 3) -4 else 0,
+                                    y: if (choice == 4) 4 else if (choice == 1) -4 else 0
                                 );
                                 world.stepTime();                                    
                                 island.incrementTime();
                                 when(party.isIncapacitated()) dialogue.popChoice();
                                 
                                 // cancel if we've arrived somewhere
-                                @:arrival = island.map.getItemUnderPointer();
+                                @:arrival = island.map.getNamedItemsUnderPointerRadius(radius:5);
                                 if (arrival != empty) ::<= {
-                                    dialogue.message(
-                                        text:"The party has arrived at the " + if (arrival.name == '') arrival.base.name else arrival.base.name + ' of ' + arrival.name
-                                    );
-                                    arrival.discover();
-                                    island.map.setPointer(
-                                        x: arrival.x,
-                                        y: arrival.y
-                                    );
+                                    arrival->foreach(do:::(i, arr) {
+                                        dialogue.message(
+                                            text:"The party has arrived at the " + if (arr.data.name == '') arr.data.base.name else arr.data.base.name + ' of ' + arr.data.name
+                                        );
+                                        arr.data.discover();
+                                        island.map.setPointer(
+                                            x: arr.x,
+                                            y: arr.y
+                                        );
+                                    
+                                    });
                                     
                                 };                            
                                 renderMain();
@@ -401,8 +466,9 @@ return class(
                       },                          
                       
                       // visit landmark
-                      (5): ::<= {
-                        send(message:visitable);
+                      default: ::<= {
+                        breakpoint();
+                        send(message:visitable[choice-6].data);
                       }
                     };
                 });   
@@ -498,8 +564,8 @@ return class(
                                 
                                 // place the player on a random location in the island
                                 island.map.setPointer(
-                                    x: island.size * Number.random(),
-                                    y: island.size * Number.random()
+                                    x: Number.random()*island.map.size,
+                                    y: Number.random()*island.map.size
                                 );                                                
 
                               },
@@ -537,6 +603,7 @@ return class(
 
                         // fallback op                        
                         destination = visitIsland();
+                        breakpoint();
                         when(party.isIncapacitated()) ::<= {
                             canvas.clear();
                             dialogue.message(text: 'Perhaps fate has entrusted someone else with the future...');                            
@@ -551,7 +618,7 @@ return class(
             
                 @:keyhome = Item.Base.database.find(name:'Wyvern Key').new(
                     creationHint: {
-                        nameHint:namegen.island(), levelHint:1                    
+                        nameHint:namegen.island(), levelHint:10    
                     }
                 );
                     
@@ -578,28 +645,24 @@ return class(
                 
                 
                 
-                @:p0 = island.newInhabitant(professionHint: 'Adventurer', speciesHint: island.species[0], levelHint:2);
-                @:p1 = island.newInhabitant(professionHint: 'Field Mage', speciesHint: island.species[1]);
+                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:10);
+                @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:10);
                 // debug
 
                 p1.inventory.clear();
                 p0.inventory.clear();
 
-                @:sword0 = Item.Base.database.find(name:'Shortsword').new(from:p0);
-                @:sword1 = Item.Base.database.find(name:'Shortsword').new(from:p1);
                 @:arm0 = Item.Base.database.find(name:'Tunic').new(from:p0);
                 @:arm1 = Item.Base.database.find(name:'Robe').new(from:p1);
 
 
-                [0, 2]->for(do:::(i) {
+                [0, 3]->for(do:::(i) {
                     @:crystal = Item.Base.database.find(name:'Skill Crystal').new(from:p0);
                     party.inventory.add(item:crystal);
                 });
 
 
 
-                p0.equip(item:sword0, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true, inventory:party.inventory);
-                p1.equip(item:sword1, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true, inventory:party.inventory);
                 p0.equip(item:arm0, slot:Entity.EQUIP_SLOTS.ARMOR, silent:true, inventory:party.inventory);
                 p1.equip(item:arm1, slot:Entity.EQUIP_SLOTS.ARMOR, silent:true, inventory:party.inventory);
 

@@ -62,8 +62,8 @@ Scene.database = Database.new(
                 script: [
                     ['', '...Hey...you up?'],
                     ['', 'Guess we slept longer than we were hoping...'],
-                    ['', 'Its morning now though, so at least it won\'t be dangerous now!'],
-                    ['', '...Well... y\'know. Not AS dangerous...'],
+                    ['', 'Its morning now though, so we should get going and find that grotto.'],
+                    ['', 'They say it\'s the only place to get Gate Keys.'],
                 ]
             }
         ),     

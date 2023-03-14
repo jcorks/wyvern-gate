@@ -41,7 +41,7 @@
         @contested = false;
         @name;
         @data = {}; // simple table
-        this.constructor = ::(base, landmark, xHint, yHint, state, targetLandmarkHint) {
+        this.constructor = ::(base, landmark, xHint, yHint, state, targetLandmarkHint, ownedByHint) {
             landmark_ = landmark;     
 
             when(state != empty) ::<={
@@ -49,10 +49,14 @@
                 return this;
             };
             base_ = base;
-            x = if (xHint == empty) (Number.random() * landmark.size) else xHint;  
-            y = if (yHint == empty) (Number.random() * landmark.size) else yHint;
+            x = if (xHint == empty) (Number.random() * landmark.width ) else xHint;  
+            y = if (yHint == empty) (Number.random() * landmark.height) else yHint;
             if (base.owned) ::<= {
-                ownedBy = landmark.island.newInhabitant();
+                if (ownedByHint == empty)
+                    ownedBy = landmark.island.newInhabitant()
+                else
+                    ownedBy = ownedByHint;
+                    
                 description = random.pickArrayItem(list:base.descriptions) + ' This ' + base.name + ' is ' + base.ownVerb + ' by ' + ownedBy.name + '.';
             } else ::<= {
                 description = random.pickArrayItem(list:base.descriptions);            
@@ -216,7 +220,7 @@ Location.Base = class(
         );
         
         this.interface = {
-            new ::(landmark => Landmark.type, xHint, yHint, state) <- Location.new(base:this, landmark, xHint, yHint, state) 
+            new ::(landmark => Landmark.type, xHint, yHint, state, ownedByHint) <- Location.new(base:this, landmark, xHint, yHint, state, ownedByHint) 
         };
     }
 
@@ -493,15 +497,7 @@ Location.Base.database = Database.new(
 
                 @:nameGen = import(module:'singleton.namegen.mt');
 
-                location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key').new(from:location.ownedBy, creationHint:{
-                    levelHint: ((location.ownedBy.level * 1.3) + 3)->floor,
-                    nameHint: nameGen.island()
-                }));
-                location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key').new(from:location.ownedBy, creationHint:{
-                    levelHint: ((location.ownedBy.level * 1.1) + 5)->floor,
-                    nameHint: nameGen.island()
-                }));
-                [0, 2 + (location.ownedBy.level / 4)->ceil]->for(do:::(i) {
+                [0, 4 + (location.ownedBy.level / 4)->ceil]->for(do:::(i) {
                     // no weight, as the value scales
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false &&
@@ -987,6 +983,11 @@ Location.Base.database = Database.new(
             },
             
             onCreate ::(location) {
+                @:nameGen = import(module:'singleton.namegen.mt');
+                location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key').new(from:location.ownedBy, creationHint:{
+                    levelHint: ((location.landmark.island.levelMax * 1.1) + 5)->floor,
+                    nameHint: nameGen.island()
+                }));
                 [0, 3+(Number.random()*2)->ceil]->for(do:::(i) <-
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false
@@ -998,6 +999,43 @@ Location.Base.database = Database.new(
             
             }
         }),
+        
+        Location.Base.new(data:{
+            name: 'Body',
+            rarity: 1000000000000,
+            ownVerb : 'owned',
+            symbol: 'x',
+            owned : true,
+
+            descriptions: [
+                'An incapacitated individual.'
+            ],
+            interactions : [
+                'loot'
+            ],
+            
+            aggressiveInteractions : [
+            ],
+
+
+            
+            minOccupants : 0,
+            maxOccupants : 0,
+            
+            onInteract ::(location) {
+            },
+            
+            onCreate ::(location) {
+                location.ownedBy.inventory.items->foreach(do:::(i, item) {
+                    location.inventory.add(item);
+                });
+                location.ownedBy.inventory.clear();
+            },
+            
+            onTimeChange::(location, time) {
+            
+            }
+        }),        
         
         Location.Base.new(data:{
             name: 'Sylvia\'s Library',
