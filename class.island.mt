@@ -239,8 +239,8 @@
             // guaranteed town
             @:gate = Landmark.Base.database.find(name:'Grotto').new(
                 island:this,
-                x: Number.random()*(sizeW - 0.2) + 0.2,
-                y: Number.random()*(sizeH - 0.2) + 0.2
+                x: 30, //Number.random()*(sizeW - 0.2) + 0.2,
+                y: 30  //Number.random()*(sizeH - 0.2) + 0.2
             );
             map.setItem(data:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol, name:gate.base.name);
             significantLandmarks->push(value:gate);
@@ -376,8 +376,8 @@
             incrementTime:: {
                 // every step, an event can occur.
                 //if (stepsSinceLastEvent > 200000) ::<= {
-                if (stepsSinceLastEvent > 20) ::<= {
-                    if (Number.random() > 20 - (stepsSinceLastEvent-20) / 5) ::<={
+                if (stepsSinceLastEvent > 13) ::<= {
+                    if (Number.random() > 13 - (stepsSinceLastEvent-5) / 5) ::<={
 
                         // mostly its encounters. 0.1% chance of encounter 
                         if (Number.random() < 0.001) ::<= {

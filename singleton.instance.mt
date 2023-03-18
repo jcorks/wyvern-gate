@@ -176,7 +176,7 @@ return class(
                         choices
                     );
                     
-                    
+                    @:MAX_STATIC_CHOICES = 2;
                     match(choice-1) {
                       (0)::<= {
                         [::] {
@@ -258,15 +258,15 @@ return class(
                                             
                                             // cancel if we've arrived somewhere
                                             @:arrival = landmark.map.getNamedItemsUnderPointer();
-                                            if (arrival != empty) ::<= {
+                                            if (arrival != empty && arrival->keycount > 0) ::<= {
                                                 arrival->foreach(do:::(index, arr) {
                                                     dialogue.message(
                                                         text:"The party has arrived at the " + arr.name
                                                     );
                                                 });
                                                 landmark.map.setPointer(
-                                                    x: arrival.x,
-                                                    y: arrival.y
+                                                    x: arrival[0].x,
+                                                    y: arrival[0].y
                                                 );
                                                 
                                             };                            
@@ -287,7 +287,13 @@ return class(
                         landmark.step();
                       },
                       default: ::<= {
-                        locationAt = locationAt[choice-1];
+                        when(choice == empty) empty;
+                        choice -= MAX_STATIC_CHOICES + 1;
+                        when(choice >= locationAt->keycount) empty;
+                        locationAt = locationAt[choice].data;
+                        
+                        breakpoint();
+                        
                         // initial interaction 
                         // Initial interaction triggers an event.
                         
@@ -306,7 +312,7 @@ return class(
                         if (locationAt.base.aggressiveInteractions->keycount)
                             choices->push(value: 'Aggress...');
                             
-                        @choice = dialogue.choicesNow(
+                        choice = dialogue.choicesNow(
                             prompt: 'Interaction',
                             choices:choices,
                             canCancel : true
@@ -618,7 +624,7 @@ return class(
             
                 @:keyhome = Item.Base.database.find(name:'Wyvern Key').new(
                     creationHint: {
-                        nameHint:namegen.island(), levelHint:10    
+                        nameHint:namegen.island(), levelHint:5
                     }
                 );
                     
@@ -645,8 +651,8 @@ return class(
                 
                 
                 
-                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:10);
-                @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:10);
+                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
+                @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
                 // debug
 
                 p1.inventory.clear();

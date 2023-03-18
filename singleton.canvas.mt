@@ -105,6 +105,7 @@ return class(
         @peny = 0;
         @penColor = hints.NEUTRAL;
         @onCommit;
+        @debugLines = [];
         
         @savestates = [];
         
@@ -159,7 +160,10 @@ return class(
                 get ::<- penColor
             },
             
-
+            debugLine : {
+                set ::(value) <- debugLines[0] = value => String,
+                get ::<- debugLines[0]
+            },
 
             renderFrame ::(top, left, width, height) {
 
@@ -290,6 +294,13 @@ return class(
             },
             
             commit :: {
+                // debug lines happen as the LAST possible thing 
+                // the canvas does to ensure that its always on top.
+                if (debugLines[0] != empty) ::<= {
+                    this.movePen(x:0, y:0);
+                    this.drawText(text: debugLines[0]);
+                };
+                
                 @:lines = [];
 
                 [0, CANVAS_HEIGHT]->for(do:::(row) {

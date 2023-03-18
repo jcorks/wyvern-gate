@@ -21,6 +21,8 @@
 @:Database = import(module:'class.database.mt');
 @:Map = import(module:'class.map.mt');
 @:DungeonMap = import(module:'class.dungeonmap.mt');
+@:DungeonController = import(module:'class.dungeoncontroller.mt');
+@:distance = import(module:'function.distance.mt');
 @Location = empty; // circular dep.
 
 
@@ -49,9 +51,8 @@
         @floor = 0;
         @map;
         @gate;
-        @entities = [];
+        @dungeonLogic;
 
-        @:ROOM_MAX_ENTITY = 10;
         
         
         
@@ -74,6 +75,7 @@
 
             if (base.dungeonMap) ::<= {
                 map = DungeonMap.new();
+                dungeonLogic = DungeonController.new(map, island, landmark:this);
                 sizeW = map.width;
                 sizeH = map.height;
 
@@ -82,8 +84,8 @@
 
                 gate = Location.Base.database.find(name:'Entrance').new(
                     landmark:this, 
-                    xHint:area.x + (area.width/2)->floor + 2,
-                    yHint:area.y + (area.height/2)->floor + 2
+                    xHint:area.x + (area.width/2)->floor,
+                    yHint:area.y + (area.height/2)->floor
                 );                
 
 
@@ -292,75 +294,7 @@
 
             step :: {
                 when(!landmark.dungeonMap) empty;
-                // update movement of entity
-                @toRemove = [];
-                entities->foreach(do:::(i, ent) {
-                    if (map.getDistanceFromItem(data:ent) < 2) ::<= {
-                        @:world = import(module:'singleton.world.mt');
-                        @:Battle = import(module:'class.battle.mt');
-                        
-                        when (world.battle.isActive) ::<= {
-                            world.battle.join(enemy:ent.ref);
-                        };
-                        
-                        match(world.battle.start(
-                            party:island_.world.party,                            
-                            allies: island_.world.party.members,
-                            enemies: [ent.ref],
-                            landmark: this,
-                            noLoot: true,
-                            onTurn ::{
-                                this.step();
-                            }
-                        ).result) {
-                          (Battle.RESULTS.ALLIES_WIN):::<= {
-                            toRemove->push(value:ent);
-                            @xHint = ent.x / map.width;
-                            @yHint = ent.y / map.height;
-                            @loc = Location.Base.database.find(name:'Body').new(landmark:this, ownedByHint: ent.ref, xHint, yHint);
-                            map.setItem(data:loc, x:xHint, y:yHint, symbol: loc.base.symbol, discovered: false);
-                            locations->push(value:loc);                            
-                          },
-                          
-                          (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                          }
-                        };                     
-                    };
-                    //if (map.entityDistancePointer(ent) > 5)
-                    //    map.moveEntity(ent, x:Number.random() - 0.5, y:Number.random() - 0.5)
-                    //else
-                    //    map.moveTowardPointer(ent);
-                    map.moveTowardPointer(data:ent);
-                });
-                
-                toRemove->foreach(do:::(i, ent) {
-                    map.removeItem(data:ent);
-                    entities->remove(key:entities->findIndex(value:ent));
-                });
-                
-                // add additional entities out of spawn points (stairs)
-                if (entities->keycount < ROOM_MAX_ENTITY) ::<= {
-                    @area = random.pickArrayItem(list:map.areas);
-                    @:tileX = area.x + (area.width/2)->floor;
-                    @:tileY = area.y + (area.height/2)->floor;
-                    
-                    // only add an entity when not visible. Makes it 
-                    // feel more alive and unknown
-                    //when (map.isTileVisible(x:tileX, y:tileY)) empty;
-                    
-                    
-                    // who knows whos down here. Can be anything and anyone, regardless of 
-                    // the inhabitants of the island.
-                    @ent = {x:tileX, y:tileY, ref:Entity.new(
-                        levelHint: random.integer(from:island_.levelMin, to:island_.levelMax)
-                    )};
-                    ent.ref.anonymize();
-                    entities->push(value:ent);
-                    map.setItem(data:ent, x:ent.x, y:ent.y, discovered:false, symbol:'*');
-                };
-
-        
-                
+                dungeonLogic.step();
             },
             
             kind : {
@@ -390,6 +324,16 @@
             
             locations : {
                 get :: <- locations 
+            },
+
+            addLocation ::(location) {
+                locations->push(value:location);                
+            },
+
+            removeLocation ::(location) {
+                @:index = locations->findIndex(value:location);
+                when(index < 0) empty;
+                locations->remove(key:index);
             },
 
             

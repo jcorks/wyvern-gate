@@ -36,14 +36,12 @@
 @:THE_BIG_ONE = 100000000;
 @:mapSizeW  = 50;
 @:mapSizeH  = 16;
+@:UNPAGED_ROOM_SIZE_LIMIT = 70;
+@:SIGHT_RAY_LIMIT = 6;
+@:SIGHT_RAY_EPSILON = 0.2;
 
 
-
-@:distance::(x0, y0, x1, y1) {
-    @xd = x1 - x0;
-    @yd = y1 - y0;
-    return (xd**2 + yd**2)**0.5;
-};
+@:distance = import(module:'function.distance.mt');
 
 
 return class(
@@ -73,95 +71,168 @@ return class(
         @offsetY = 0;
         @drawLegend = false;
         @paged = true;
+        @outOfBoundsCharacter = '▓';
+        
+        @:aStarIndex = [];
+        @obscured = []; 
+        [0, UNPAGED_ROOM_SIZE_LIMIT]->for(do:::(x) {
+            aStarIndex[x] = [];
+            obscured[x] = [];
+            [0, UNPAGED_ROOM_SIZE_LIMIT]->for(do:::(y) {
+                aStarIndex[x][y] = ''+x+'-'+y;
+                obscured[x][y] = false;
+            });
+        });
         
         @:isWalled ::(x, y) {
+        
             when(wallIndex->keycount == 0) false;
             @wallY = wallIndex[x];
             when(wallY == empty) false;
             return wallY[y] == true;
         };
+        
+        @renderOutOfBounds = true;
 
         @:aStarHeuristicH::(from, to) <-
-            distance(x0:from.x, y0:from.y, x1:to.x, y1:to.y);
+            distance(x0:from.x, y0:from.y, x1:to.x, y1:to.y)
         ;
 
         @:aStarMapEmplace::(map, key, value) {
-            map[''+key.x+'-'+key.y] = value;
+            //when(map.index[key.id] != empty) empty;
+            map.index[key.id] = value;
+            //map.list->push(value:value);
         };
         @:aStarMapFind::(map, key) {
-            return map[''+key.x+'-'+key.y];
+            return map.index[key.id];
         };
         @:aStarMapRemove::(map, key) {
-            map->remove(key:''+key.x+'-'+key.y);
+            map.index->remove(key:key.id);
+            //map.list->remove(key:map->findIndex(value:key));
+        };
+        @:aStarMapNew :: {
+            return {
+                //list: [],
+                index: []
+            };
+        };
+        
+        @:aStarPQNew :: {
+            return [];
         };
 
 
-        @:aStarReconstructPath::(cameFrom, current) {
-            @:total_path = [current];
+        @:aStarReconstructPath::(cameFrom, current, start) {
+            @last = current;
+            
             return [::] {
                 forever(do:::{
                     @:contains = aStarMapFind(map:cameFrom, key:current);
-                    when(contains == empty) send(message:total_path);
+                    when(contains.id == start.id) send(message:current);
                     current = contains;
-                    total_path->insert(at:0, value:current);        
                 });
             };
         };
 
 
-        @:aStartFindLowestFscore::(fScore, openSet) {
-            @lowestVal = THE_BIG_ONE;
-            @lowest = empty;
-            openSet->foreach(do:::(key, set) {
-                @:val = aStarMapFind(map:fScore, key:set);
-                if (val < lowestVal) ::<= {
-                    lowestVal = val;
-                    lowest = set;
-                };
-            });
-            
-            return lowest;
+        @:aStarFindLowestFscore::(fScore, openSet) {
+            return aStarPQGetFirst(pq:openSet);
+        };
+
+        @:aStarNewNode::(x, y) {
+            when (!isWalled(x, y) && x >= 0 && y >= 0 && x < width && y < height)
+                {x:x, y:y, id:aStarIndex[x][y]};
         };
 
         @:aStarGetNeighbors::(current) {
             return [
-                {x:current.x-1, y:current.y  },
-                {x:current.x-1, y:current.y+1},
-                {x:current.x-1, y:current.y-1},
-                {x:current.x+1, y:current.y  },
-                {x:current.x+1, y:current.y+1},
-                {x:current.x+1, y:current.y-1},
-                {x:current.x  , y:current.y+1},
-                {x:current.x  , y:current.y-1}
-            ]->filter(by::(value) <- !isWalled(x:value.x, y:value.y));
+                aStarNewNode(x:current.x-1, y:current.y),
+                aStarNewNode(x:current.x-1, y:current.y+1),
+                aStarNewNode(x:current.x-1, y:current.y-1),
+                aStarNewNode(x:current.x+1, y:current.y  ),
+                aStarNewNode(x:current.x+1, y:current.y+1),
+                aStarNewNode(x:current.x+1, y:current.y-1),
+                aStarNewNode(x:current.x  , y:current.y+1),
+                aStarNewNode(x:current.x  , y:current.y-1)
+            ]->filter(by::(value) <- value != empty);
         };
         
         @:aStarGetScore::(value) <- if (value == empty) THE_BIG_ONE else value;
         
 
+        @aStarPQCompareTable;
+
+
+        @:aStarPQCompare::(a, b) {
+            @:as = aStarMapFind(map:aStarPQCompareTable, key:a);
+            @:bs = aStarMapFind(map:aStarPQCompareTable, key:b);
+            when(as < bs) -1;
+            when(as > bs)  1;
+            return 0;
+        };
+        
+        // returns the placement of the value within the 
+        // priority queue. The  
+        @:aStarPQBinarySearch::(pq, value, fScore) {
+            aStarPQCompareTable = fScore;
+            @m = 0;
+            @n = pq->keycount - 1;
+            return [::] {
+                forever (do:::{
+                    when(m > n) send(message:pq->keycount+m);
+                    @k = ((n + m) / 2)->floor;
+                    @cmp = aStarPQCompare(a:value, b:pq[k]);
+                    when(cmp > 0) m = k + 1;
+                    when(cmp < 0) n = k - 1;
+                    send(message:k);
+                });
+            };
+        };
+        
+        @:aStarPQGetFirst::(pq) <- pq[0];
+        
+        @:aStarPQAdd::(pq, value, fScore) {
+            @:in = aStarPQBinarySearch(pq, value, fScore);
+            if (in < pq->keycount) empty; // already in 
+            pq->insert(at:in-pq->keycount, value);
+        };
+
+        @:aStarPQRemove::(pq, value, fScore) {
+            @:in = aStarPQBinarySearch(pq, value, fScore);
+            if (in >= pq->keycount) empty; // not in 
+            pq->remove(key:in);            
+        };
+
+        @:Timer = import(module:'class.logtimer.mt').new();
+        
         // A* finds a path from start to goal.
         // h is the heuristic function. h(n) estimates the cost to reach goal from node n.
-        @:aStar::(start, goal) {
+        @:aStarPathNext::(start, goal) {        
+            start = aStarNewNode(x:start.x, y:start.y);
+            goal = aStarNewNode(x:goal.x, y:goal.y);
+            
+            when(start.id == goal.id) empty;
             // The set of discovered nodes that may need to be (re-)expanded.
             // Initially, only the start node is known.
             // This is usually implemented as a min-heap or priority queue rather than a hash-set.
-            @openSet = {};
-            aStarMapEmplace(map:openSet, key:start, value:start);
+            @openSet = aStarPQNew();
+            aStarPQAdd(pq:openSet, value:start);
 
             // For node n, cameFrom[n] is the node immediately preceding it on the cheapest path from the start
             // to n currently known.
-            @cameFrom = {};
+            @cameFrom = aStarMapNew();
 
             // For node n, gScore[n] is the cost of the cheapest path from start to n currently known.
-            @gScore = {};
+            @gScore = aStarMapNew();
             aStarMapEmplace(map:gScore, key:start, value:0);
 
             // For node n, fScore[n] := gScore[n] + h(n). fScore[n] represents our current best guess as to
             // how cheap a path could be from start to finish if it goes through n.
-            @fScore = {};
+            @fScore = aStarMapNew();
             aStarMapEmplace(map:fScore, key:start, value:aStarHeuristicH(from:start, to:goal));
 
             @path;
+            @iter = 0;
             
             return [::] {
                 forever(do:::{
@@ -169,27 +240,76 @@ return class(
                     when(openSet->keycount == 0) send();
                 
                     // This operation can occur in O(Log(N)) time if openSet is a min-heap or a priority queue
-                    
-                    @current = aStartFindLowestFscore(fScore, openSet);
-                    if (current.x == goal.x && current.y == goal.y) ::<= {
-                        send(message:aStarReconstructPath(cameFrom, current));
+                    @current = openSet[0];
+                    //@current = aStarFindLowestFscore(fScore, openSet);
+                    if (current.id == goal.id) ::<= {
+                        @out = aStarReconstructPath(cameFrom, current, start);
+                        send(message:out);
                         
                     };
-
-                    aStarMapRemove(map:openSet, key:current);
+                    openSet->remove(key:0);
                     aStarGetNeighbors(current)->foreach(do:::(i, neighbor) {
                         // d(current,neighbor) is the weight of the edge from current to neighbor
                         // tentative_gScore is the distance from start to the neighbor through current
-                        @:tentative_gScore = aStarGetScore(value:aStarMapFind(map:gScore, key:current)) + 1;//d(current, neighbor)
+                        @:tentative_gScore = aStarMapFind(map:gScore, key:current) + 1;//d(current, neighbor)
                         if (tentative_gScore < aStarGetScore(value:aStarMapFind(map:gScore, key:neighbor))) ::<= {
                             // This path to neighbor is better than any previous one. Record it!
                             aStarMapEmplace(map:cameFrom, key:neighbor, value:current);
                             aStarMapEmplace(map:gScore, key:neighbor, value:tentative_gScore);
                             aStarMapEmplace(map:fScore, key:neighbor, value:tentative_gScore + aStarHeuristicH(from:neighbor, to:goal));
-                            if (aStarMapFind(map:openSet, key:neighbor) == empty)
-                                aStarMapEmplace(map:openSet, key:neighbor, value:neighbor);
+                            aStarPQAdd(pq:openSet, value:neighbor, fScore);
                         };
                     });
+                });
+            };
+        };
+        
+        
+        @:bfsPathNext::(start, goal) {
+            start = aStarNewNode(x:start.x, y:start.y);
+            goal = aStarNewNode(x:goal.x, y:goal.y);
+            Timer.start();
+            when(start.id == goal.id) empty;
+            @:q = [];
+            @:visited = {};
+            visited[start.id] = true;
+            q->push(value:start);
+            
+            return [::] {
+                forever(do:::{
+                    when(q->keycount == 0) empty;
+                    
+                    @v = q[0];
+                    q->remove(key:0);
+
+
+                    when(v.id == goal.id) ::<= {
+                        // build path
+                        send(message: (::{
+                            return [::] {
+                                @a = v;
+                                @last;
+                                forever(do:::{
+                                    when(a.parent.id == start.id) ::<= {
+                                        Timer.end(note:'BFS');
+                                        canvas.debugLine = Timer.trials[Timer.trials->keycount-1];
+                                        send(message:a);                
+                                    };                
+                                    a = a.parent; 
+                                });
+                            };
+                        })());
+                    };
+
+                    aStarGetNeighbors(current:v)->foreach(do:::(i, w) {
+                        when(visited[w.id] == true) empty;
+                        
+                        visited[w.id] = true;
+                        w.parent = v;
+                        q->push(value:w);
+                    });
+
+                
                 });
             };
         };
@@ -266,8 +386,9 @@ return class(
                     };
                     
                     when(itemX < 0 || itemY < 0 || itemX >= width+0 || itemY >= height+0) ::<= {
+                        when(!renderOutOfBounds) empty;
                         canvas.movePen(x:left + x, y:top + y);  
-                        canvas.drawChar(text:'▓');
+                        canvas.drawChar(text:outOfBoundsCharacter);
                     };
                     canvas.movePen(x:left + x, y:top + y);  
                     canvas.drawChar(text:' ');
@@ -319,24 +440,79 @@ return class(
                 canvas.drawText(text:data.symbol);
             });*/
             
+            
+            
+            @:sightRay ::(degrees) {
+                @x = pointer.x + 0.5;
+                @y = pointer.y + 0.5;
+                [::] {
+                    forever(do:::{
+                        @:rads = (Number.PI() / 180)*degrees;
+                        x += rads->cos * SIGHT_RAY_EPSILON;
+                        y += rads->sin * SIGHT_RAY_EPSILON;
+                        
+                        when(distance(x0:pointer.x, y0:pointer.y, x1:x, y1:y) > SIGHT_RAY_LIMIT) send();
+
+                        when((x < offsetX || y < offsetY || x >= width+offsetX || y >= height+offsetY)) send();
+
+                        obscured[x->floor][y->floor] = false;                        
+                        if (isWalled(x:x->floor, y:y->floor))
+                            send();
+                    });
+                };
+            };
+            
+            [0, 365]->for(do:::(i) {
+                sightRay(degrees:i);
+            });
+            
+            /*
             [0, mapSizeH+1]->for(do:::(y) {
                 [0, mapSizeW+1]->for(do:::(x) {
                     @itemX = ((x + pointer.x - mapSizeW/2))->floor;
                     @itemY = ((y + pointer.y - mapSizeH/2))->floor;
+
+                    when((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY)) empty;
+                    
+                    
+                    if (obscured[itemX][itemY])
+                        if (distance(x0:pointer.x, y0:pointer.y, x1:itemX, y1:itemY) < 5)
+                            obscured[itemX][itemY] = false;
+                });
+            }); 
+            */           
+            
+            [0, mapSizeH+1]->for(do:::(y) {
+                [0, mapSizeW+1]->for(do:::(x) {
+                    @itemX = ((x + pointer.x - mapSizeW/2))->floor;
+                    @itemY = ((y + pointer.y - mapSizeH/2))->floor;
+
+                    when((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY)) ::<= {
+                        when(renderOutOfBounds) ::<= {
+                            canvas.movePen(x:left + x, y:top + y);  
+                            canvas.drawChar(text:outOfBoundsCharacter);
+                        };
+                    };
+
+                    
+                    
+                    //if (obscured[itemX][itemY])
+                    //    if (distance(x0:pointer.x, y0:pointer.y, x1:itemX, y1:itemY) < 5)
+                    //        obscured[itemX][itemY] = false;
+                    
+                    when(obscured[itemX][itemY]) ::<= {
+                        canvas.movePen(x:left + x, y:top + y);  
+                        canvas.drawChar(text:'`');                        
+                    };
 
                     when(isWalled(x:itemX, y:itemY)) ::<= {
                         canvas.movePen(x:left + x, y:top + y);  
                         canvas.drawChar(text:'░');
                     };
                     @:items = this.itemsAt(x:itemX, y:itemY);
-                    when(items != empty) ::<= {
+                    when(items != empty && items->keycount > 0) ::<= {
                         canvas.movePen(x:left + x, y:top + y);
                         canvas.drawChar(text:if (items[0].discovered) items[0].symbol else '?');
-                    };
-                    
-                    when(itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY) ::<= {
-                        canvas.movePen(x:left + x, y:top + y);  
-                        canvas.drawChar(text:'▓');
                     };
                 });                
             });               
@@ -357,7 +533,7 @@ return class(
             
   
             canvas.movePen(
-                x:left + (mapSizeW/2)->floor - 1,
+                x:left + (mapSizeW/2)->floor,
                 y:top  + (mapSizeH/2)->floor         
             );
             
@@ -442,10 +618,24 @@ return class(
                     legendEntries->push(value:val);
             },
             
+            getItem::(data) {
+                return retrieveItem(data);
+            },
+            
             itemsAt::(x, y) {
                 @itemY = itemIndex[x];
                 when(itemY == empty) empty;
                 return itemY[y];
+            },
+            
+            obscure::{
+                [0, UNPAGED_ROOM_SIZE_LIMIT]->for(do:::(x) {
+                    obscured[x] = [];
+                    [0, UNPAGED_ROOM_SIZE_LIMIT]->for(do:::(y) {
+                        obscured[x][y] = true;
+                    });
+                });
+                            
             },
                 
             removeItem::(
@@ -519,10 +709,10 @@ return class(
                         y: ydiff
                     );
                 };  
-                @:path = aStar(start:pointer, goal:{x:x, y:y});                
-                when(path == empty || path->keycount <= 1) empty;
-                pointer.x = path[1].x;
-                pointer.y = path[1].y;
+                @:path = aStarPathNext(start:pointer, goal:{x:x, y:y});                
+                when(path == empty) empty;
+                pointer.x = path.x;
+                pointer.y = path.y;
                 
             },
 
@@ -541,10 +731,27 @@ return class(
                     ent.y += ydiff;
                 };  
             
-                @:path = aStar(start:ent, goal:{x:x, y:y});
-                when(path == empty || path->keycount <= 1) empty;
-                ent.x = path[1].x;
-                ent.y = path[1].y;
+                @items = itemIndex[ent.x][ent.y];
+                items->remove(key:items->findIndex(value:ent));
+            
+                @:path = aStarPathNext(start:ent, goal:{x:x, y:y});
+                when(path == empty) empty;
+                ent.x = path.x;
+                ent.y = path.y;
+
+
+                @itemIndexY = itemIndex[ent.x];
+                if (itemIndexY == empty) ::<= {
+                    itemIndexY = [];
+                    itemIndex[ent.x] = itemIndexY;
+                };
+                @loc = itemIndexY[ent.y];
+                if (loc == empty) ::<= {
+                    loc = [];
+                    itemIndexY[ent.y] = loc;
+                };
+                loc->push(value:ent);
+
             },
 
             
@@ -555,6 +762,11 @@ return class(
             
             pointerY : {
                 get ::<- pointer.y            
+            },
+            
+            outOfBoundsCharacter : {
+                get::<- outOfBoundsCharacter,
+                set::(value) <- outOfBoundsCharacter = value
             },
             
             movePointerAdjacent::(
@@ -576,8 +788,8 @@ return class(
                 
                 @:oldX = pointer.x;
                 @:oldY = pointer.y;
-
-
+                
+                
 
                 pointer.x += x;
                 pointer.y += y;
@@ -648,6 +860,11 @@ return class(
             offsetY : {
                 get::<- offsetY,
                 set::(value) <- offsetY = value
+            },
+            
+            renderOutOfBounds : {
+                get::<- renderOutOfBounds,
+                set::(value) <- renderOutOfBounds = value
             },
             
             render :: {

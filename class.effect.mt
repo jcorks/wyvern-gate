@@ -1253,7 +1253,7 @@ Effect.database = Database.new(
                     dialogue.message(
                         text: 'After the battle, ' + holder.name + ' found ' + amt + 'G on the ground dropped from the battling party.'
                     );
-                    world.party.addGold(amount:amt);
+                    world.party.inventory.addGold(amount:amt);
                     
                 },                
                 onGivenDamage : ::(user, item, holder, to) {

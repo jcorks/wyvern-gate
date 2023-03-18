@@ -69,11 +69,11 @@ return class(
         @:areas = [];
         @cavities = [];
         
-        @:ROOM_AREA_SIZE = 7;
-        @:ROOM_AREA_SIZE_LARGE = 12;
+        @:ROOM_AREA_SIZE = 5;
+        @:ROOM_AREA_SIZE_LARGE = 9;
         @:ROOM_AREA_VARIANCE = 0.2;
-        @:ROOM_SIZE = 85;
-        @:ROOM_EMPTY_AREA_COUNT = 14;
+        @:ROOM_SIZE = 50;
+        @:ROOM_EMPTY_AREA_COUNT = 13;
 
         
         
@@ -268,6 +268,9 @@ return class(
             this.paged = false;
             this.width = ROOM_SIZE;
             this.height = ROOM_SIZE;
+            this.renderOutOfBounds = true;
+            this.outOfBoundsCharacter = '`';
+            this.obscure();
             generateLayout();
             return this;
         };   
