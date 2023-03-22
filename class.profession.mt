@@ -153,7 +153,7 @@ Profession.Base.database = Database.new(
                 weaponAffinity : 'Shortsword',
                 growth: StatSet.new(
                     HP:  4,
-                    MP:  4,
+                    AP:  4,
                     ATK: 4,
                     INT: 4,
                     DEF: 4,
@@ -185,7 +185,7 @@ Profession.Base.database = Database.new(
                 description : 'A fighter that uses various stances to bend to the flow of battle.', 
                 growth: StatSet.new(
                     HP:  6,
-                    MP:  2,
+                    AP:  2,
                     ATK: 5,
                     INT: 2,
                     DEF: 4,
@@ -220,7 +220,7 @@ Profession.Base.database = Database.new(
                 weaponAffinity: 'Wand',
                 growth: StatSet.new(
                     HP:  3,
-                    MP:  7,
+                    AP:  7,
                     ATK: 3,
                     INT: 6,
                     DEF: 3,
@@ -236,7 +236,7 @@ Profession.Base.database = Database.new(
                 abilities : [
                     'Fire',
                     'Ice',      // all enemies
-                    'Meditate', // MP recover, self
+                    'Meditate', // AP recover, self
                     'Thunder',  // 4 random strikes
                     'Mind Focus', // +100% INT for 10 turns
                     'Flash',    // all enemies, 50% chance cant act for a turn
@@ -254,7 +254,7 @@ Profession.Base.database = Database.new(
                 weaponAffinity: 'Mage-rod',
                 growth: StatSet.new(
                     HP:  5,
-                    MP:  6,
+                    AP:  6,
                     ATK: 4,
                     INT: 6,
                     DEF: 2,
@@ -273,7 +273,7 @@ Profession.Base.database = Database.new(
                     'Protect',
                     'Greater Cure',
                     'Protect All',
-                    'Soothe', // mp recovery, any
+                    'Soothe', // ap recovery, any
                     'Cleanse', // removal of standard status ailments
                     'Grace', // save from death, once    
                 ],
@@ -287,7 +287,7 @@ Profession.Base.database = Database.new(
                 description : 'Blessed by the moon, their magicks are entwined with the night.', 
                 growth: StatSet.new(
                     HP:  3,
-                    MP:  8,
+                    AP:  8,
                     ATK: 2,
                     INT: 9,
                     DEF: 4,
@@ -320,7 +320,7 @@ Profession.Base.database = Database.new(
                 description : 'Blessed by the sun, their magicks are entwined with daylight.', 
                 growth: StatSet.new(
                     HP:  3,
-                    MP:  8,
+                    AP:  8,
                     ATK: 2,
                     INT: 9,
                     DEF: 4,
@@ -354,7 +354,7 @@ Profession.Base.database = Database.new(
                 description : 'Skilled with metalworking, their skills are revered.', 
                 growth: StatSet.new(
                     HP:  14,
-                    MP:  3,
+                    AP:  3,
                     ATK: 14,
                     INT: 2,
                     DEF: 11,
@@ -383,7 +383,7 @@ Profession.Base.database = Database.new(
                 description : 'A silver tongue and a quick hand make this profession both lauded and loathed.', 
                 growth: StatSet.new(
                     HP:  4,
-                    MP:  12,
+                    AP:  12,
                     ATK: 4,
                     INT: 16,
                     DEF: 4,
@@ -412,7 +412,7 @@ Profession.Base.database = Database.new(
                 description : "Excelling in raw strength and technique, users of this profession are fearsome.", 
                 growth: StatSet.new(
                     HP:  9,
-                    MP:  1,
+                    AP:  1,
                     ATK: 9,
                     INT: 2,
                     DEF: 4,
@@ -444,7 +444,7 @@ Profession.Base.database = Database.new(
                 description : "Standard profession excelling in defending others, for better or for worse.", 
                 growth: StatSet.new(
                     HP:  6,
-                    MP:  1,
+                    AP:  1,
                     ATK: 5,
                     INT: 3,
                     DEF: 7,
@@ -460,7 +460,7 @@ Profession.Base.database = Database.new(
                 abilities : [
                     'Guard',   // defend 2.0
                     'Proceed with Caution', // defense buff for team
-                    'Mend',    // heal other, no MP cost!!!! but weak
+                    'Mend',    // heal other, no AP cost!!!! but weak
                     'Defend Other',
                     'Retaliate',    // auto-attack if hit
                     'Tandem', // stat boost for every other in party with same profession 
@@ -478,7 +478,7 @@ Profession.Base.database = Database.new(
                 description : "A scholar first, their large knowledge of the arcane yields interesting magicks for any situation.", 
                 growth: StatSet.new(
                     HP:  3,
-                    MP:  14,
+                    AP:  14,
                     ATK: 2,
                     INT: 20,
                     DEF: 3,
@@ -510,7 +510,7 @@ Profession.Base.database = Database.new(
                 description : "An arcanist scholar who focuses on runes.", 
                 growth: StatSet.new(
                     HP:  3,
-                    MP:  13,
+                    AP:  13,
                     ATK: 2,
                     INT: 16,
                     DEF: 3,
@@ -545,7 +545,7 @@ Profession.Base.database = Database.new(
                 description : "Capable of infusing magicks into normal objects for combat.", 
                 growth: StatSet.new(
                     HP:  5,
-                    MP:  6,
+                    AP:  6,
                     ATK: 6,
                     INT: 6,
                     DEF: 4,
@@ -579,7 +579,7 @@ Profession.Base.database = Database.new(
                 description : "Skilled individual who knows their way around the fields.", 
                 growth: StatSet.new(
                     HP:  12,
-                    MP:  4,
+                    AP:  4,
                     ATK: 5,
                     INT: 6,
                     DEF: 11,
@@ -608,7 +608,7 @@ Profession.Base.database = Database.new(
                 description : "Skilled at brewing potions for all sorts of purposes.", 
                 growth: StatSet.new(
                     HP:  3,
-                    MP:  5,
+                    AP:  5,
                     ATK: 2,
                     INT: 4,
                     DEF: 3,
@@ -626,9 +626,9 @@ Profession.Base.database = Database.new(
                     'Cyan Brew',     // -1 ingredient pack, +1 cyan ption 
                     'Green Brew',    // etc (poison)
                     'Orange Brew',   // etc (explosion)
-                    'Purple Brew',   // etc (health + mp)
+                    'Purple Brew',   // etc (health + ap)
                     'Grey Brew',     // petrify
-                    'Purple Elixir', // heal + mp for party 
+                    'Purple Elixir', // heal + ap for party 
                 ],
                 passives : [
                     'Alchemist\'s Scavenging' // find 2-5 Ingredient Packs
@@ -641,7 +641,7 @@ Profession.Base.database = Database.new(
                 description : "Skilled individual who can cook a mean meal.", 
                 growth: StatSet.new(
                     HP:  12,
-                    MP:  4,
+                    AP:  4,
                     ATK: 8,
                     INT: 10,
                     DEF: 4,
@@ -671,7 +671,7 @@ Profession.Base.database = Database.new(
                 description : "", 
                 growth: StatSet.new(
                     HP:  4,
-                    MP:  4,
+                    AP:  4,
                     ATK: 6,
                     INT: 6,
                     DEF: 4,
@@ -702,7 +702,7 @@ Profession.Base.database = Database.new(
                 description : "", 
                 growth: StatSet.new(
                     HP:  7,
-                    MP:  4,
+                    AP:  4,
                     ATK: 4,
                     INT: 6,
                     DEF: 4,
@@ -722,7 +722,7 @@ Profession.Base.database = Database.new(
                     'Blind Faith', // - 50% HP, ATK + 100%
                     'Soulbound',   // - 50% HP, any damage to self is caused to target
                     'Wither',      // - 50% HP, DEF - 100%, SPD - 100%
-                    'Divine Gift', // - 50% HP, +25% MP target
+                    'Divine Gift', // - 50% HP, +25% AP target
                     'Sacrifice',   // - 99% HP, heal party + 75% hp
                 ],
                 passives : [
@@ -736,7 +736,7 @@ Profession.Base.database = Database.new(
                 description : "Efficient, silent movements are this profession's assets.", 
                 growth: StatSet.new(
                     HP:  4,
-                    MP:  3,
+                    AP:  3,
                     ATK: 4,
                     INT: 3,
                     DEF: 2,
@@ -771,7 +771,7 @@ Profession.Base.database = Database.new(
                 description : "Unparalleled in their ability to take down a target, this profession is respected for its abilities.", 
                 growth: StatSet.new(
                     HP:  2,
-                    MP:  5,
+                    AP:  5,
                     ATK: 10,
                     INT: 5,
                     DEF: 3,
@@ -805,7 +805,7 @@ Profession.Base.database = Database.new(
                 description : "", 
                 growth: StatSet.new(
                     HP:  5,
-                    MP:  3,
+                    AP:  3,
                     ATK: 6,
                     INT: 5,
                     DEF: 2,
@@ -830,7 +830,7 @@ Profession.Base.database = Database.new(
                 description : "", 
                 growth: StatSet.new(
                     HP:  6,
-                    MP:  3,
+                    AP:  3,
                     ATK: 6,
                     INT: 3,
                     DEF: 6,
@@ -856,7 +856,7 @@ Profession.Base.database = Database.new(
                 description : "", 
                 growth: StatSet.new(
                     HP:  6,
-                    MP:  3,
+                    AP:  3,
                     ATK: 6,
                     INT: 3,
                     DEF: 6,
@@ -882,7 +882,7 @@ Profession.Base.database = Database.new(
                 description : "", 
                 growth: StatSet.new(
                     HP:  3,
-                    MP:  7,
+                    AP:  7,
                     ATK: 3,
                     INT: 7,
                     DEF: 1,
@@ -908,7 +908,7 @@ Profession.Base.database = Database.new(
                 description : "", 
                 growth: StatSet.new(
                     HP:  5,
-                    MP:  8,
+                    AP:  8,
                     ATK: 4,
                     INT: 4,
                     DEF: 2,
@@ -934,7 +934,7 @@ Profession.Base.database = Database.new(
                 description : "", 
                 growth: StatSet.new(
                     HP:  3,
-                    MP:  7,
+                    AP:  7,
                     ATK: 4,
                     INT: 7,
                     DEF: 2,
@@ -960,7 +960,7 @@ Profession.Base.database = Database.new(
                 description : "Excelling in their forward manner, highwaymen are a feared profession", 
                 growth: StatSet.new(
                     HP:  5,
-                    MP:  2,
+                    AP:  2,
                     ATK: 5,
                     INT: 5,
                     DEF: 3,
@@ -991,7 +991,7 @@ Profession.Base.database = Database.new(
 
                 growth: StatSet.new(
                     HP:  7,
-                    MP:  7,
+                    AP:  7,
                     ATK: 7,
                     INT: 7,
                     DEF: 7,
@@ -1020,7 +1020,7 @@ Profession.Base.database = Database.new(
 
                 growth: StatSet.new(
                     HP:  10,
-                    MP:  10,
+                    AP:  10,
                     ATK: 10,
                     INT: 10,
                     DEF: 10,
@@ -1050,7 +1050,7 @@ Profession.Base.database = Database.new(
 
                 growth: StatSet.new(
                     HP:  7,
-                    MP:  7,
+                    AP:  7,
                     ATK: 7,
                     INT: 7,
                     DEF: 7,

@@ -119,14 +119,20 @@
                     description = description + mod.description;
                 };
 
-                if (Number.random() > 0.95) ::<= {
-                    @:mod = ItemModifier.database.getRandomFiltered(
-                        filter:::(value) <- from.level >= value.levelMinimum
-                    );
-                    mods->push(value:mod);
-                    customName = base.name + ' (' + mod.name + ')';
-                    stats.add(stats:mod.equipMod);
-                    description = description + mod.description;
+                
+                if (Number.random() > 0.5) ::<= {
+                    @:count = (Number.random()*3+1)->floor;
+                    if(count > 1)
+                        customName = base.name + ' (Custom)';
+                    [0, count]->for(do:::(i) {
+                        @:mod = ItemModifier.database.getRandom();
+                        if (count == 1)
+                            customName = base.name + ' (' + mod.name + ')';
+
+                        mods->push(value:mod);
+                        stats.add(stats:mod.equipMod);
+                        description = description + mod.description;
+                    });
                 };
             };
             
@@ -258,7 +264,7 @@
                     oldStats.add(stats);
                     stats.add(stats:StatSet.new(
                         HP: if (choice == 0) 1 else 0,
-                        MP: if (choice == 1) 1 else 0,
+                        AP: if (choice == 1) 1 else 0,
                         ATK: if (choice == 2) 1 else 0,
                         DEF: if (choice == 3) 1 else 0,
                         INT: if (choice == 4) 1 else 0,
@@ -486,7 +492,7 @@ Item.Base.database = Database.new(items: [
 
         // fatigued
         equipMod : StatSet.new(
-            MP: -20, // 
+            AP: -20, // 
             DEF: -20, // 
             SPD: -20, // 
             ATK: -40 // 
@@ -515,7 +521,7 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         basePrice: 20,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveModifier : false,
         hasMaterial : false,
         isUnique : false,        
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -551,7 +557,7 @@ Item.Base.database = Database.new(items: [
         levelMinimum : 1,
         keyItem : false,
         isUnique : false,
-        canHaveModifier : true,
+        canHaveModifier : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         equipMod : StatSet.new(
             SPD: -2, // itll slow you down
@@ -586,14 +592,14 @@ Item.Base.database = Database.new(items: [
         levelMinimum : 1,
         hasMaterial : false,
         isUnique : false,
-        canHaveModifier : true,
+        canHaveModifier : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         equipMod : StatSet.new(
             SPD: -2, // itll slow you down
             DEX: -10   // its oddly shaped.
         ),
         useEffects : [
-            'MP Recovery: Minor',
+            'AP Recovery: Minor',
             'Consume Item'       
         ],
         equipEffects : [

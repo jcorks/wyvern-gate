@@ -30,7 +30,7 @@
 
 @:CLASS = {
     HP : 0,
-    MP : 1
+    AP : 1
 };
 
 return class(

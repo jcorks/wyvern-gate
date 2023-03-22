@@ -202,7 +202,7 @@
             @lines = [];
             allies_->foreach(do:::(index, ally) {
                 lines->push(value:ally.renderHP() + '  ' + ally.name);// + ' - Lv ' + ally.level);
-                lines->push(value:'HP: ' + ally.hp + ' / ' + ally.stats.HP + '    MP: ' + ally.mp + ' / ' + ally.stats.MP);
+                lines->push(value:'HP: ' + ally.hp + ' / ' + ally.stats.HP + '    AP: ' + ally.ap + ' / ' + ally.stats.AP);
             });
             lines->push(value:'');
             lines->push(value:'  - vs -   ');
@@ -404,7 +404,7 @@
                             @level = ally.level;
                             stats.add(stats:ally.stats);
                             ally.gainExp(amount:exp, chooseStat:::(
-                                hp, mp, atk, def, int, luk, dex, spd
+                                hp, ap, atk, def, int, luk, dex, spd
                             ) {
                                 dialogue.message(text: ally.name + ' has leveled up.');
 
@@ -417,7 +417,7 @@
                                     prompt: ally.name + ' - Focus which?',
                                     choices: [
                                         'HP  (+' + hp + ')',
-                                        'MP  (+' + mp + ')',
+                                        'AP  (+' + ap + ')',
                                         'ATK (+' + atk + ')',
                                         'INT (+' + int + ')',
                                         'DEF (+' + def + ')',

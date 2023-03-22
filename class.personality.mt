@@ -58,7 +58,7 @@ Personality.database = Database.new(items: [
         name: 'Calm',
         growth : StatSet.new(
             HP : 0,
-            MP : 1,
+            AP : 1,
             ATK: 0,
             DEF: 2,
             INT: 1,
@@ -115,7 +115,7 @@ Personality.database = Database.new(items: [
         name: 'Short-tempered',
         growth : StatSet.new(
             HP : 2,
-            MP : -2,
+            AP : -2,
             ATK: 3,
             DEF: -1,
             INT: 0,
@@ -167,7 +167,7 @@ Personality.database = Database.new(items: [
         name: 'Quiet',
         growth : StatSet.new(
             HP : 1,
-            MP : 3,
+            AP : 3,
             ATK: 0,
             DEF: 0,
             INT: 5,
@@ -216,7 +216,7 @@ Personality.database = Database.new(items: [
         name: 'Charismatic',
         growth : StatSet.new(
             HP : -2,
-            MP : 2,
+            AP : 2,
             ATK: -2,
             DEF: 2,
             INT: 5,
@@ -264,7 +264,7 @@ Personality.database = Database.new(items: [
         name: 'Caring',
         growth : StatSet.new(
             HP : 1,
-            MP : 2,
+            AP : 2,
             ATK: -2,
             DEF: 3,
             INT: 3,
@@ -309,7 +309,7 @@ Personality.database = Database.new(items: [
         name: 'Cold',
         growth : StatSet.new(
             HP : 0,
-            MP : 4,
+            AP : 4,
             ATK: 2,
             DEF: -1,
             INT: 2,
@@ -354,7 +354,7 @@ Personality.database = Database.new(items: [
         name: 'Disconnected',
         growth : StatSet.new(
             HP : -4,
-            MP : 6,
+            AP : 6,
             ATK: -3,
             DEF: -2,
             INT: 10,
@@ -394,7 +394,7 @@ Personality.database = Database.new(items: [
         name: 'Unpredictable',
         growth : StatSet.new(
             HP : 1,
-            MP : 2,
+            AP : 2,
             ATK: 2,
             DEF: 4,
             INT: 5,
@@ -439,7 +439,7 @@ Personality.database = Database.new(items: [
         name: 'Inquisitive',
         growth : StatSet.new(
             HP : 2,
-            MP : 3,
+            AP : 3,
             ATK: 0,
             DEF: 1,
             INT: 8,
@@ -480,7 +480,7 @@ Personality.database = Database.new(items: [
         name: 'Curious',
         growth : StatSet.new(
             HP : 2,
-            MP : 4,
+            AP : 4,
             ATK: 1,
             DEF: 5,
             INT: 4,

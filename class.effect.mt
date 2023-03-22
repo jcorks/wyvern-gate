@@ -133,6 +133,43 @@ Effect.database = Database.new(
                 }
             }
         ),
+
+        Effect.new(
+            data : {
+                name : 'Guard',
+                description: 'Reduces damage by 90%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                    dialogue.message(
+                        text: holder.name + ' takes a guarding stance!'
+                    );
+                
+                },
+
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    dialogue.message(text:holder.name + "'s defending stance reduces damage significantly!");
+                    damage.amount *= 0.9;
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                    
+                }
+            }
+        ),
         
         Effect.new(
             data : {
@@ -1208,7 +1245,7 @@ Effect.database = Database.new(
                     );
                     world.party.members->foreach(do:::(index, member) {
                         member.heal(amount:member.stats.HP * 0.1);
-                        member.healMP(amount:member.stats.MP * 0.1);
+                        member.healAP(amount:member.stats.AP * 0.1);
                     });
                     
                 },                
@@ -1766,6 +1803,41 @@ Effect.database = Database.new(
                 }
             }
         ),
+
+
+        Effect.new(
+            data : {
+                name : 'Proceed with Caution',
+                description: 'DEF + 50%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                    
+                ),
+                onAffliction : ::(user, item, holder) {
+                    dialogue.message(text:holder.name +' braces for incoming damage!');                    
+                },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                    dialogue.message(text:holder.name + ' no longer braces for damage.');
+                },                
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                    stats.modRate(stats:StatSet.new(DEF:50));
+                }
+            }
+        ),
+
 
         Effect.new(
             data : {

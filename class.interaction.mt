@@ -194,8 +194,8 @@ Interaction.database = Database.new(
 
                     
                     party.members->foreach(do:::(index, member) {
-                        if (member.mp < member.stats.MP)
-                            member.healMP(amount:member.stats.MP * 0.1);
+                        if (member.ap < member.stats.AP)
+                            member.healAP(amount:member.stats.AP * 0.1);
                     });
 
 

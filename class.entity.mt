@@ -38,7 +38,7 @@
             
     stats.add(stats:StatSet.new(
         HP  : 2+(Number.random()*3)->floor,
-        MP  : 1+(Number.random()*3)->floor,
+        AP  : 2+(Number.random()*3)->floor,
         ATK : (Number.random()*3)->floor,
         INT : (Number.random()*3)->floor,
         DEF : (Number.random()*3)->floor,
@@ -84,7 +84,7 @@
     define :::(this) {
         @stats = StatSet.new(HP:1);
         @hp = stats.HP;
-        @mp = stats.MP;
+        @ap = stats.AP;
         @:flags = StateFlags.new();
         @isDead = false;
         @name = NameGen.person();
@@ -212,7 +212,7 @@
             state : {
                 set ::(value) {
                     hp = value.hp;
-                    mp = value.mp;
+                    ap = value.ap;
                     stats.state = value.stats;
                     name = value.name;
                     nickname = value.nickname;
@@ -252,7 +252,7 @@
                 get :: {
                     return {
                         hp : hp,
-                        mp : mp,
+                        ap : ap,
                         stats : stats.state,
                         name : name,
                         nickname : nickname,
@@ -505,9 +505,9 @@
                     if (hp < 0) hp = 0;
                     dialogue.message(text: '' + this.name + ' received ' + damage.amount + ' damage (HP:' + this.renderHP() + ')' );
                 } else ::<= {
-                    mp -= damage.amount;
-                    if (mp < 0) mp = 0;                
-                    dialogue.message(text: '' + this.name + ' received ' + damage.amount + ' MP damage (MP:' + mp + '/' + stats.MP + ')' );
+                    ap -= damage.amount;
+                    if (ap < 0) ap = 0;                
+                    dialogue.message(text: '' + this.name + ' received ' + damage.amount + ' AP damage (AP:' + ap + '/' + stats.AP + ')' );
 
                 };
                 @:world = import(module:'singleton.world.mt');
@@ -554,11 +554,11 @@
                 dialogue.message(text: '' + this.name + ' heals ' + amount + ' HP (HP:' + this.renderHP() + ')');
             },
             
-            healMP ::(amount => Number) {
+            healAP ::(amount => Number) {
                 amount = amount->ceil;
-                mp += amount;
-                if (mp > stats.MP) mp = stats.MP;
-                dialogue.message(text: '' + this.name + ' heals ' + amount + ' MP (MP:' + mp + '/' + stats.MP + ')');
+                ap += amount;
+                if (ap > stats.AP) ap = stats.AP;
+                dialogue.message(text: '' + this.name + ' heals ' + amount + ' AP (AP:' + ap + '/' + stats.AP + ')');
                 
                 
             },
@@ -594,7 +594,7 @@
                             @choice = random.integer(from:0, to:7);
                             stats.add(stats: StatSet.new(
                                 HP: if (choice == 0) statUp(level, growth:growth.HP) else 0,
-                                MP: if (choice == 1) statUp(level, growth:growth.MP) else 0,
+                                AP: if (choice == 1) statUp(level, growth:growth.AP) else 0,
                                 ATK: if (choice == 2) statUp(level, growth:growth.ATK) else 0,
                                 DEF: if (choice == 3) statUp(level, growth:growth.DEF) else 0,
                                 INT: if (choice == 4) statUp(level, growth:growth.INT) else 0,
@@ -606,7 +606,7 @@
                         
                         } else ::<= {
                             @hp = statUp(level, growth:growth.HP);                            
-                            @mp = statUp(level, growth:growth.MP);                            
+                            @ap = statUp(level, growth:growth.AP);                            
                             @atk = statUp(level, growth:growth.ATK);                            
                             @def = statUp(level, growth:growth.DEF);                            
                             @luk = statUp(level, growth:growth.LUK);                            
@@ -614,12 +614,12 @@
                             @dex = statUp(level, growth:growth.DEX);                            
                             @int = statUp(level, growth:growth.INT);                            
                             @choice = chooseStat(
-                                hp, mp, atk, def, int, spd, luk, dex
+                                hp, ap, atk, def, int, spd, luk, dex
                             );
                             
                             stats.add(stats: StatSet.new(
                                 HP: if (choice == 0) hp else 0,
-                                MP: if (choice == 1) mp else 0,
+                                AP: if (choice == 1) ap else 0,
                                 ATK: if (choice == 2) atk else 0,
                                 DEF: if (choice == 3) def else 0,
                                 INT: if (choice == 4) int else 0,
@@ -633,7 +633,7 @@
                         };
                         if (afterLevel != empty) afterLevel();
                         hp = stats.HP;
-                        mp = stats.MP;
+                        ap = stats.AP;
                         level += 1;
                     });
                 };
@@ -653,7 +653,7 @@
             dropExp :: {
                 return 
                     ((stats.HP +
-                    stats.MP +
+                    stats.AP +
                     stats.ATK +
                     stats.INT +
                     stats.DEF +
@@ -734,15 +734,15 @@
                 }
             },
             
-            mp : {
+            ap : {
                 get :: {
-                    return mp;
+                    return ap;
                 }
             },
             
             rest :: {
                 hp = stats.HP;
-                mp = stats.MP;
+                ap = stats.AP;
             },
             
             inventory : {
@@ -848,7 +848,7 @@
             },
             
             useAbility::(ability, targets, turnIndex, extraData) {
-                when(mp < ability.mpCost) dialogue.message(
+                when(ap < ability.apCost) dialogue.message(
                     text: this.name + " tried to use " + ability.name + ", but couldn\'t muster the mental strength!"
                 );
                 when(hp < ability.hpCost) dialogue.message(
@@ -860,7 +860,7 @@
                 );
                 if (abilitiesUsedBattle) abilitiesUsedBattle[ability.name] = true;
                 
-                mp -= ability.mpCost;
+                ap -= ability.apCost;
                 hp -= ability.hpCost;
                 ability.onAction(
                     user:this,
@@ -973,7 +973,7 @@
                     speaker: this.name,
                     text: '       Name: ' + name + '\n\n' +
                           '         HP: ' + this.hp + ' / ' + this.stats.HP + '\n' + 
-                          '         MP: ' + this.mp + ' / ' + this.stats.MP + '\n\n' + 
+                          '         AP: ' + this.ap + ' / ' + this.stats.AP + '\n\n' + 
                           '    species: ' + species.name + '\n' +
                           ' profession: ' + profession.base.name + '\n' +
                           'personality: ' + personality.name + '\n\n',

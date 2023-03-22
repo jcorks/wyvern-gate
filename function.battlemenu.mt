@@ -54,11 +54,11 @@ return ::(
                 @:abilities = [];
                 user.abilitiesAvailable->foreach(do:::(index, ability) {
                     abilities->push(value:
-                        if (ability.mpCost > 0 || ability.hpCost > 0)
-                            if (ability.mpCost > 0) 
-                                ability.name + '(' + ability.mpCost + ' MP)'
+                        if (ability.apCost > 0 || ability.hpCost > 0)
+                            if (ability.apCost > 0) 
+                                ability.name + '(' + ability.apCost + ' AP)'
                             else 
-                                ability.name + '(' + ability.mpCost + ' HP)'
+                                ability.name + '(' + ability.apCost + ' HP)'
                         else
                             ability.name
                     );

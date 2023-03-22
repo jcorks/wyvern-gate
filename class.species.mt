@@ -44,7 +44,7 @@ Species.database = Database.new(items: [
         description: 'A common canid race.',
         growth : StatSet.new(
             HP : 5,
-            MP : 2,
+            AP : 2,
             ATK: 3,
             DEF: 3,
             INT: 2,
@@ -63,7 +63,7 @@ Species.database = Database.new(items: [
         description: 'A felid race.',
         growth : StatSet.new(
             HP : 2,
-            MP : 6,
+            AP : 6,
             ATK: 2,
             DEF: 2,
             INT: 8,
@@ -82,7 +82,7 @@ Species.database = Database.new(items: [
         description: 'A canid race.',
         growth : StatSet.new(
             HP : 3,
-            MP : 6,
+            AP : 6,
             ATK: 4,
             DEF: 1,
             INT: 5,
@@ -101,7 +101,7 @@ Species.database = Database.new(items: [
         rarity : 45,
         growth : StatSet.new(
             HP : 3,
-            MP : 2,
+            AP : 2,
             ATK: 6,
             DEF: 2,
             INT: 4,
@@ -120,7 +120,7 @@ Species.database = Database.new(items: [
         rarity : 10,
         growth : StatSet.new(
             HP : 3,
-            MP : 4,
+            AP : 4,
             ATK: 3,
             DEF: 4,
             INT: 5,
@@ -139,7 +139,7 @@ Species.database = Database.new(items: [
         rarity : 40,
         growth : StatSet.new(
             HP : 3,
-            MP : 6,
+            AP : 6,
             ATK: 3,
             DEF: 3,
             INT: 7,
@@ -159,7 +159,7 @@ Species.database = Database.new(items: [
         rarity : 30,
         growth : StatSet.new(
             HP : 1,
-            MP : 10,
+            AP : 10,
             ATK: 2,
             DEF: 2,
             INT: 10,
@@ -178,7 +178,7 @@ Species.database = Database.new(items: [
         rarity : 30,
         growth : StatSet.new(
             HP : 3,
-            MP : 2,
+            AP : 2,
             ATK: 4,
             DEF: 2,
             INT: 4,
@@ -198,7 +198,7 @@ Species.database = Database.new(items: [
         description: 'A slender canid race.',
         growth : StatSet.new(
             HP : 5,
-            MP : 4,
+            AP : 4,
             ATK: 2,
             DEF: 1,
             INT: 3,
@@ -217,7 +217,7 @@ Species.database = Database.new(items: [
         description: 'A marsupial race of medium stature.',
         growth : StatSet.new(
             HP : 7,
-            MP : 3,
+            AP : 3,
             ATK: 3,
             DEF: 3,
             INT: 4,
@@ -236,7 +236,7 @@ Species.database = Database.new(items: [
         description: 'A large mammal race.',
         growth : StatSet.new(
             HP : 10,
-            MP : 1,
+            AP : 1,
             ATK: 7,
             DEF: 9,
             INT: 1,
@@ -255,7 +255,7 @@ Species.database = Database.new(items: [
         description: 'A large mammal race.',
         growth : StatSet.new(
             HP : 4,
-            MP : 3,
+            AP : 3,
             ATK: 8,
             DEF: 2,
             INT: 4,
@@ -274,7 +274,7 @@ Species.database = Database.new(items: [
         description: 'A bird race of medium stature',
         growth : StatSet.new(
             HP : 3,
-            MP : 8,
+            AP : 8,
             ATK: 3,
             DEF: 2,
             INT: 7,
@@ -293,7 +293,7 @@ Species.database = Database.new(items: [
         description: 'A mammal race of medium stature',
         growth : StatSet.new(
             HP : 4,
-            MP : 3,
+            AP : 3,
             ATK: 3,
             DEF: 3,
             INT: 4,
@@ -312,7 +312,7 @@ Species.database = Database.new(items: [
         description: 'A felid race of medium stature',
         growth : StatSet.new(
             HP : 3,
-            MP : 4,
+            AP : 4,
             ATK: 2,
             DEF: 3,
             INT: 5,
@@ -331,7 +331,7 @@ Species.database = Database.new(items: [
         description: 'Canid race thought to be blessed by the moon.',
         growth : StatSet.new(
             HP : 8,
-            MP : 2,
+            AP : 2,
             ATK: 10,
             DEF: 1,
             INT: 2,
@@ -351,7 +351,7 @@ Species.database = Database.new(items: [
         description: 'A mammal race of medium stature.',
         growth : StatSet.new(
             HP : 4,
-            MP : 2,
+            AP : 2,
             ATK: 4,
             DEF: 3,
             INT: 7,
@@ -371,7 +371,7 @@ Species.database = Database.new(items: [
         description: 'A mammal race of medium stature.',
         growth : StatSet.new(
             HP : 6,
-            MP : 1,
+            AP : 1,
             ATK: 8,
             DEF: 5,
             INT: 2,
@@ -391,7 +391,7 @@ Species.database = Database.new(items: [
         description: '',
         growth : StatSet.new(
             HP : 7,
-            MP : 1,
+            AP : 1,
             ATK: 6,
             DEF: 4,
             INT: 2,
@@ -410,7 +410,7 @@ Species.database = Database.new(items: [
         description: 'Keepers of the gates',
         growth : StatSet.new(
             HP : 60,
-            MP : 10,
+            AP : 10,
             ATK: 10,
             DEF: 10,
             INT: 10,

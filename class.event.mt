@@ -501,11 +501,11 @@ Event.Base.database = Database.new(
                         event.party.members->foreach(do:::(index, member) {
                             @oldStats = StatSet.new();
                             oldStats.state = member.stats.state;
-                            member.stats.add(stats:StatSet.new(HP:(oldStats.HP*0.1)->ceil, MP:(oldStats.MP*0.1)->ceil));
+                            member.stats.add(stats:StatSet.new(HP:(oldStats.HP*0.1)->ceil, AP:(oldStats.AP*0.1)->ceil));
                             oldStats.printDiff(other:member.stats, prompt:member.name + ': Mmmm...');
 
                             member.heal(amount:member.stats.HP * 0.1);
-                            member.healMP(amount:member.stats.MP * 0.1);
+                            member.healAP(amount:member.stats.AP * 0.1);
                         });
                         
                     } else ::<= {
@@ -514,16 +514,16 @@ Event.Base.database = Database.new(
                         event.party.members->foreach(do:::(index, member) {
                             @oldStats = StatSet.new();
                             oldStats.state = member.stats.state;
-                            member.stats.add(stats:StatSet.new(HP:-(oldStats.HP*0.1)->ceil, MP:-(oldStats.MP*0.1)->ceil));
+                            member.stats.add(stats:StatSet.new(HP:-(oldStats.HP*0.1)->ceil, AP:-(oldStats.AP*0.1)->ceil));
                             oldStats.printDiff(other:member.stats, prompt:member.name + ': Ugh...');
 
 
                             member.damage(
                                 from: member,
                                 damage: Damage.new(
-                                    amount:member.stats.MP * (0.1),
+                                    amount:member.stats.AP * (0.1),
                                     damageType : Damage.TYPE.PHYS,
-                                    damageClass: Damage.CLASS.MP
+                                    damageClass: Damage.CLASS.AP
                                 )
                             );
                         });
@@ -607,7 +607,7 @@ Event.Base.database = Database.new(
 
                     event.party.members->foreach(do:::(index, member) {
                         member.heal(amount:member.stats.HP * 0.3);
-                        member.healMP(amount:member.stats.MP * 0.3);
+                        member.healAP(amount:member.stats.AP * 0.3);
                     });
 
                     return 0; // number of timesteps active

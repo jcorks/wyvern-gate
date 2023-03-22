@@ -41,9 +41,9 @@ return class(
         @LUKmod = 0;
         @DEXmod = 0;
         
-        this.constructor = ::(HP, MP, ATK, INT, DEF, LUK, SPD, DEX) {
+        this.constructor = ::(HP, AP, ATK, INT, DEF, LUK, SPD, DEX) {
             if (HP != empty) HP_  = HP;
-            if (MP != empty) MP_  = MP;
+            if (AP != empty) MP_  = AP;
             if (ATK != empty)ATK_ = ATK;
             if (INT != empty) INT_ = INT;
             if (DEF != empty) DEF_ = DEF;
@@ -57,7 +57,7 @@ return class(
             state : {
                 set ::(value) {
                     HP_ = value.HP;
-                    MP_ = value.MP;
+                    MP_ = value.AP;
                     ATK_ = value.ATK;
                     INT_ = value.INT;
                     DEF_ = value.DEF;
@@ -80,7 +80,7 @@ return class(
                 get :: {
                     return {
                         HP: HP_,
-                        MP: MP_,
+                        AP: MP_,
                         ATK: ATK_,
                         INT: INT_,
                         DEF: DEF_,
@@ -102,7 +102,7 @@ return class(
         
             mod ::(stats) {
                 HPmod  += stats.HP;
-                MPmod  += stats.MP;
+                MPmod  += stats.AP;
                 ATKmod += stats.ATK;
                 INTmod += stats.INT;
                 DEFmod += stats.DEF;
@@ -113,7 +113,7 @@ return class(
             
             modRate ::(stats) {
                 HPmod  += (HP_*(stats.HP/100))->ceil;
-                MPmod  += (MP_*(stats.MP/100))->ceil;
+                MPmod  += (MP_*(stats.AP/100))->ceil;
                 ATKmod += (ATK_*(stats.ATK/100))->ceil;
                 INTmod += (INT_*(stats.INT/100))->ceil;
                 DEFmod += (DEF_*(stats.DEF/100))->ceil;
@@ -138,7 +138,7 @@ return class(
             
             add ::(stats) {
                 HP_  += stats.HP;
-                MP_  += stats.MP;
+                MP_  += stats.AP;
                 ATK_ += stats.ATK;
                 INT_ += stats.INT;
                 DEF_ += stats.DEF;
@@ -154,7 +154,7 @@ return class(
                     return (HP_ + HPmod)->floor;
                 }
             },
-            MP : {
+            AP : {
                 get ::{
                     return (MP_ + MPmod)->floor;
                 }
@@ -201,7 +201,7 @@ return class(
                     columns: [
                         [
                             'HP:',
-                            'MP:',
+                            'AP:',
                             'ATK:',
                             'DEF:',
                             'INT:',
@@ -212,7 +212,7 @@ return class(
                         
                         [
                             ''+this.HP,
-                            ''+this.MP,
+                            ''+this.AP,
                             ''+this.ATK,
                             ''+this.DEF,
                             ''+this.INT,
@@ -234,7 +234,7 @@ return class(
                         
                         [
                             ''+other.HP,
-                            ''+other.MP,
+                            ''+other.AP,
                             ''+other.ATK,
                             ''+other.DEF,
                             ''+other.INT,
@@ -245,7 +245,7 @@ return class(
                         
                         [
                             (if (other.HP - this.HP  != 0) (if (other.HP > this.HP) '(+' else '(') + (other.HP  - this.HP)  + ')' else ''),
-                            (if (other.MP - this.MP  != 0) (if (other.MP > this.MP) '(+' else '(') + (other.MP  - this.MP)  + ')' else ''),
+                            (if (other.AP - this.AP  != 0) (if (other.AP > this.AP) '(+' else '(') + (other.AP  - this.AP)  + ')' else ''),
                             (if (other.ATK - this.ATK  != 0) (if (other.ATK > this.ATK) '(+' else '(') + (other.ATK  - this.ATK)  + ')' else ''),
                             (if (other.DEF - this.DEF  != 0) (if (other.DEF > this.DEF)'(+' else '(') + (other.DEF  - this.DEF)  + ')' else ''),
                             (if (other.INT - this.INT  != 0) (if (other.INT > this.INT)'(+' else '(') + (other.INT  - this.INT)  + ')' else ''),
@@ -266,7 +266,7 @@ return class(
                     columns: [
                         [
                             'HP:',
-                            'MP:',
+                            'AP:',
                             'ATK:',
                             'DEF:',
                             'INT:',
@@ -277,7 +277,7 @@ return class(
                         
                         [
                             ''+this.HP+'%',
-                            ''+this.MP+'%',
+                            ''+this.AP+'%',
                             ''+this.ATK+'%',
                             ''+this.DEF+'%',
                             ''+this.INT+'%',
@@ -299,7 +299,7 @@ return class(
                         
                         [
                             ''+other.HP+'%',
-                            ''+other.MP+'%',
+                            ''+other.AP+'%',
                             ''+other.ATK+'%',
                             ''+other.DEF+'%',
                             ''+other.INT+'%',
@@ -310,7 +310,7 @@ return class(
                         
                         [
                             (if (other.HP - this.HP  != 0) (if (other.HP > this.HP) '(+' else '(') + (other.HP  - this.HP)  + ')' else ''),
-                            (if (other.MP - this.MP  != 0) (if (other.MP > this.MP) '(+' else '(') + (other.MP  - this.MP)  + ')' else ''),
+                            (if (other.AP - this.AP  != 0) (if (other.AP > this.AP) '(+' else '(') + (other.AP  - this.AP)  + ')' else ''),
                             (if (other.ATK - this.ATK  != 0) (if (other.ATK > this.ATK) '(+' else '(') + (other.ATK  - this.ATK)  + ')' else ''),
                             (if (other.DEF - this.DEF  != 0) (if (other.DEF > this.DEF)'(+' else '(') + (other.DEF  - this.DEF)  + ')' else ''),
                             (if (other.INT - this.INT  != 0) (if (other.INT > this.INT)'(+' else '(') + (other.INT  - this.INT)  + ')' else ''),
@@ -329,7 +329,7 @@ return class(
                 get :: {
                     return 
                         'HP:  ' + HP_ + '\n' +
-                        'MP:  ' + MP_ + '\n' +
+                        'AP:  ' + MP_ + '\n' +
                         'ATK: ' + ATK_ + '\n' +
                         'DEF: ' + DEF_ + '\n' +
                         'INT: ' + INT_ + '\n' +
@@ -343,7 +343,7 @@ return class(
             getRates :: {
                 return 
                     'HP:  ' + (if (HP_ > 0) '+' else '')  +HP_ + '%\n' +
-                    'MP:  ' + (if (MP_ > 0) '+' else '')  +MP_ + '%\n' +
+                    'AP:  ' + (if (MP_ > 0) '+' else '')  +MP_ + '%\n' +
                     'ATK: ' + (if (ATK_ > 0) '+' else '') +ATK_ + '%\n' +
                     'DEF: ' + (if (DEF_ > 0) '+' else '') +DEF_ + '%\n' +
                     'INT: ' + (if (INT_ > 0) '+' else '') +INT_ + '%\n' +

@@ -53,7 +53,7 @@
                 usageHintAI : Number,
                 oncePerBattle : Boolean,
                 durationTurns : Number, // multiduration turns supercede the choice of action
-                mpCost : Number,
+                apCost : Number,
                 hpCost : Number,
 
                 onAction : Function
@@ -79,7 +79,7 @@ Ability.database = Database.new(
                     description: "Damages a target based on the user's ATK.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -105,7 +105,7 @@ Ability.database = Database.new(
                     description: "Damages a target based on the user's ATK, doing 150% more damage if the target was hit since their last turn.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 10,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -140,7 +140,7 @@ Ability.database = Database.new(
                     description: "Damages a target based on the user's strength.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 5,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -173,7 +173,7 @@ Ability.database = Database.new(
                     description: "Damages three targets based on the user's strength.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 24,
+                    apCost : 2,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -210,7 +210,7 @@ Ability.database = Database.new(
                     description: "Takes 2 turns to run.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.DONTUSE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -226,7 +226,7 @@ Ability.database = Database.new(
                     description: "Causes the user to focus on their enemies, making attacks 25% more effective for 5 turns.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 8,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -243,7 +243,7 @@ Ability.database = Database.new(
                     description: "Cheers, granting a 30% damage bonus to allies for 5 turns.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 16,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -264,7 +264,7 @@ Ability.database = Database.new(
                     description: "Puts all of the combatants into stasis until it is night time.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 4, 
+                    apCost : 1, 
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -289,7 +289,7 @@ Ability.database = Database.new(
                     description: "Puts all of the combatants into stasis until it is morning.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 4, 
+                    apCost : 1, 
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -315,7 +315,7 @@ Ability.database = Database.new(
                     description: "Damages a target with Fire based on the user's INT. If night time, the damage is boosted.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 5,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -350,7 +350,7 @@ Ability.database = Database.new(
                     description: "Damages a target with Fire based on the user's INT. If day time, the damage is boosted.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 5,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -385,7 +385,7 @@ Ability.database = Database.new(
                     description: "Damages all enemies with Fire based on the user's INT. If day time, the damage is boosted.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 25,
+                    apCost : 2,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -422,7 +422,7 @@ Ability.database = Database.new(
                     description: "Increases DEF of target for 5 turns. If casted during night time, it's much more powerful.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 8,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -455,7 +455,7 @@ Ability.database = Database.new(
                     description: "Increases DEF of target for 5 turns. If casted during day time, it's much more powerful.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 8,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -487,7 +487,7 @@ Ability.database = Database.new(
                     description: "Increases ATK of target for 5 turns. If casted during night time, it's much more powerful.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 32,
+                    apCost : 2,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -521,7 +521,7 @@ Ability.database = Database.new(
                     description: "Causes the target to go berserk and attack random enemies for their turns. DEF,ATK +70%. Only can be casted at night.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 54,
+                    apCost : 2,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -553,7 +553,7 @@ Ability.database = Database.new(
                     description: "Heals over time. If casted during night time, it's much more powerful.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 26,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -585,7 +585,7 @@ Ability.database = Database.new(
                     description: "Heals over time. If casted during day time, it's much more powerful.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 26,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -617,7 +617,7 @@ Ability.database = Database.new(
                     description: "Swings, aiming for all enemies legs in hopes of stunning them.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 15,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -647,7 +647,7 @@ Ability.database = Database.new(
                     description: "Damages targets based on the user's strength.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 5,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -675,7 +675,7 @@ Ability.database = Database.new(
                     description: "Damages a target based on the user's strength.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 2,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -699,7 +699,7 @@ Ability.database = Database.new(
                     description: "Damages a target by throwing an item.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 2,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.DONTUSE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -732,7 +732,7 @@ Ability.database = Database.new(
                     description: "Damages a target based on the user's strength with a chance to stun.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 5,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -761,7 +761,7 @@ Ability.database = Database.new(
                     description: "Immobilizes both the user and the target for 3 turns. 70% success rate.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 20,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -786,7 +786,7 @@ Ability.database = Database.new(
                     description: "Damages a target based on the user's strength with a possibility to stun",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 5,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -814,7 +814,7 @@ Ability.database = Database.new(
                     description: "Damages a target based on the user's strength with a poisoned weapon.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 5,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -839,7 +839,7 @@ Ability.database = Database.new(
                     description: "Damages a target based on the user's strength with a special petrification poison.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 15,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -863,7 +863,7 @@ Ability.database = Database.new(
                     description: "Activates a tripwire set up prior to battle, causing the target to be stunned for 3 turns. Only works once per battle.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -883,7 +883,7 @@ Ability.database = Database.new(
                     description: "Activates a tripwire-activated explosive set up prior to battle, causing the target to be damaged. Only works once per battle.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -907,7 +907,7 @@ Ability.database = Database.new(
                     description: "Damages a target based on the user's strength and causes bleeding.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 20,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -932,7 +932,7 @@ Ability.database = Database.new(
                     description: "Heals a target by a small amount.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 3,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -947,12 +947,31 @@ Ability.database = Database.new(
 
             Ability.new(
                 data: {
+                    name: 'Mend',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Heals a target by a small amount.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 0,
+                    usageHintAI : USAGE_HINT.HEAL,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(
+                            text: user.name + ' mends ' + targets[0].name + '!'
+                        );
+                        targets[0].heal(amount:((targets[0].stats.HP*0.10)->ceil));
+                    }
+                }
+            ),
+
+            Ability.new(
+                data: {
                     name: 'Give Snack',
                     targetMode : TARGET_MODE.ONE,
                     description: "Heals a target by a small amount.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 5,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -964,7 +983,7 @@ Ability.database = Database.new(
                         match(true) {
                           (chance > 0.9) ::<= {        
                             dialogue.message(text: 'The snack tastes fruity!');
-                            targets[0].healMP(amount:((targets[0].stats.MP*0.15)->ceil));                          
+                            targets[0].healAP(amount:((targets[0].stats.AP*0.15)->ceil));                          
                           },
 
                           (chance > 0.8) ::<= {        
@@ -995,7 +1014,7 @@ Ability.database = Database.new(
                     description: 'Magick that damages a target with fire.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 4,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1019,7 +1038,7 @@ Ability.database = Database.new(
                     description: 'Magick that damages a target with fire.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 20,
+                    apCost : 2,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1045,7 +1064,7 @@ Ability.database = Database.new(
                     description: 'Magick that damages all enemies with Ice.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 8,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1071,7 +1090,7 @@ Ability.database = Database.new(
                     description: 'Magick that damages all enemies with Fire.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 38,
+                    apCost : 3,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1097,7 +1116,7 @@ Ability.database = Database.new(
                     description: 'Magick that blinds all enemies with a bright light.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 18,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1118,7 +1137,7 @@ Ability.database = Database.new(
                     description: 'Magick that deals 4 random strikes.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 16,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1146,7 +1165,7 @@ Ability.database = Database.new(
                     description: 'Attack that deals 4 random strikes.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 25,
+                    apCost : 2,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1174,17 +1193,19 @@ Ability.database = Database.new(
                     description: "Heals a target by a small amount.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 5,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Cure on ' + targets[0].name + '!'
                         );
-                        targets[0].heal(amount:((targets[0].stats.HP*0.15)->ceil));
+                        targets[0].heal(amount:((targets[0].stats.HP*0.3)->ceil));
                     }
                 }
             ),
+
+
             
             Ability.new(
                 data: {
@@ -1193,7 +1214,7 @@ Ability.database = Database.new(
                     description: "Removes the status effects: Paralyzed, Poisoned, Petrified, Burned, Frozen, and Blind.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 20,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1223,7 +1244,7 @@ Ability.database = Database.new(
                     description: "Cures the poison status effect.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 5,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1248,14 +1269,14 @@ Ability.database = Database.new(
                     description: "Heals a target by a moderate amount.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 15,
+                    apCost : 2,
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Greater Cure on ' + targets[0].name + '!'
                         );
-                        targets[0].heal(amount:((targets[0].stats.HP*0.25)->ceil));
+                        targets[0].heal(amount:((targets[0].stats.HP*0.4)->ceil));
                     }
                 }
             ),
@@ -1268,7 +1289,7 @@ Ability.database = Database.new(
                     description: "Increases DEF of target for 10 turns.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 10,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1288,7 +1309,7 @@ Ability.database = Database.new(
                     description: "Chooses a target to have a duel, causing them to take bonus damage by the user.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 10,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1308,7 +1329,7 @@ Ability.database = Database.new(
                     description: "Grants the target the ability to avoid death once.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 55,
+                    apCost : 3,
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1328,7 +1349,7 @@ Ability.database = Database.new(
                     description: "Grants the target the ability to avoid death once if casted during daytime.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 42,
+                    apCost : 3,
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1354,7 +1375,7 @@ Ability.database = Database.new(
                     description: "Increases DEF of allies for 5 turns.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 25,
+                    apCost : 2,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1367,40 +1388,22 @@ Ability.database = Database.new(
                     }
                 }
             ),
-            Ability.new(
-                data: {
-                    name: 'Soothe',
-                    targetMode : TARGET_MODE.ONE,
-                    description: "Recovers target\'s MP by a small amount.",
-                    durationTurns: 0,
-                    hpCost : 0,
-                    mpCost : 0,
-                    usageHintAI : USAGE_HINT.BUFF,
-                    oncePerBattle : false,
-                    onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
-                            text: user.name + ' uses Soothe on ' + targets[0].name +'!'
-                        );
-                        targets[0].healMP(amount:((targets[0].stats.MP*0.1)->ceil));
-                    }
-                }
-            ),
 
             Ability.new(
                 data: {
                     name: 'Meditate',
                     targetMode : TARGET_MODE.NONE,
-                    description: "Recovers users MP by a small amount.",
+                    description: "Recovers users AP by a small amount.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' meditates!'
                         );
-                        user.healMP(amount:((user.stats.MP*0.1)->ceil));
+                        user.healAP(amount:((user.stats.AP*0.1)->ceil));
                     }
                 }
             ),
@@ -1410,17 +1413,17 @@ Ability.database = Database.new(
                 data: {
                     name: 'Soothe',
                     targetMode : TARGET_MODE.ONE,
-                    description: "Relaxes a target, healing MP by a small amount.",
+                    description: "Relaxes a target, healing AP by a small amount.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 5,
+                    apCost : 5,
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         dialogue.message(
                             text: user.name + ' casts Soothe on ' + targets[0].name + '!'
                         );
-                        user.healMP(amount:((user.stats.MP*0.12)->ceil));
+                        user.healAP(amount:((user.stats.AP*0.12)->ceil));
                     }
                 }
             ),
@@ -1434,7 +1437,7 @@ Ability.database = Database.new(
                     description: 'Steals an item from a target',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 3,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1474,7 +1477,7 @@ Ability.database = Database.new(
                     description: 'Disarms a target',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 3,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1516,7 +1519,7 @@ Ability.database = Database.new(
                     description: 'Damages an enemy and attempts to steal gold',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 4,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1558,7 +1561,7 @@ Ability.database = Database.new(
                     description: 'Guarantees times 3 damage next time an offensive ability is used next turn',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 8,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1575,7 +1578,7 @@ Ability.database = Database.new(
                     description: 'Increases user\'s INT by 100% for 5 turns.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 8,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1591,11 +1594,60 @@ Ability.database = Database.new(
                     description: 'Reduced damage for one turn.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         user.addEffect(from:user, name: 'Defend', durationTurns:1);
+                    }
+                }
+            ),
+
+            Ability.new(
+                data: {
+                    name: 'Guard',
+                    targetMode : TARGET_MODE.NONE,
+                    description: 'Reduced damage for one turn.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 0,
+                    usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        user.addEffect(from:user, name: 'Guard', durationTurns:1);
+                    }
+                }
+            ),
+
+
+            Ability.new(
+                data: {
+                    name: 'Proceed with Caution',
+                    targetMode : TARGET_MODE.ALLALLY,
+                    description: 'Defense is heightened for the team for 10 turns.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 0,
+                    usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        user.addEffect(from:user, name: 'Proceed with Caution', durationTurns:10);
+                    }
+                }
+            ),
+
+            Ability.new(
+                data: {
+                    name: 'Retaliate',
+                    targetMode : TARGET_MODE.ALLALLY,
+                    description: 'The user retaliates to attacks.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        user.addEffect(from:user, name: 'Retaliate', durationTurns:10);
                     }
                 }
             ),
@@ -1607,7 +1659,7 @@ Ability.database = Database.new(
                     description: 'Stance that sacrifices offensive capabilities to boost defense.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1626,7 +1678,7 @@ Ability.database = Database.new(
                     description: 'Stance that sacrifices defensive capabilities to boost offense.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1645,7 +1697,7 @@ Ability.database = Database.new(
                     description: 'Stance that makes the user lighter on their feet at the cost of offense.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1664,7 +1716,7 @@ Ability.database = Database.new(
                     description: 'Stance that makes the user sturdier at the cost of speed.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1683,7 +1735,7 @@ Ability.database = Database.new(
                     description: 'Stance that makes the user more mentally focused.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1702,7 +1754,7 @@ Ability.database = Database.new(
                     description: 'Stance that focuses offense above all.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1722,7 +1774,7 @@ Ability.database = Database.new(
                     description: 'Stance that allows the user to reflect damage.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1741,7 +1793,7 @@ Ability.database = Database.new(
                     description: 'Stance that allows the user to dodge incoming attacks.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1760,7 +1812,7 @@ Ability.database = Database.new(
                     description: 'Does nothing.',
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1777,7 +1829,7 @@ Ability.database = Database.new(
                     description: "Uses an item from the user's inventory.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI: USAGE_HINT.DONTUSE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1798,7 +1850,7 @@ Ability.database = Database.new(
                     description: "Uses 2 items from the user's inventory.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI: USAGE_HINT.DONTUSE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1827,7 +1879,7 @@ Ability.database = Database.new(
                     description: "Equips an item from the user's inventory.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI: USAGE_HINT.DONTUSE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1848,7 +1900,7 @@ Ability.database = Database.new(
                     description: "Defends another from getting attacked",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI: USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1866,7 +1918,7 @@ Ability.database = Database.new(
                     description: "Sharpens a weapon, increasing its damage for the battle.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI: USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1892,7 +1944,7 @@ Ability.database = Database.new(
                     description: "Weakens armor, decreasing its effectiveness for the battle.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI: USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1918,7 +1970,7 @@ Ability.database = Database.new(
                     description: "Dull a weapon, increasing its damage for next turn.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI: USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1944,7 +1996,7 @@ Ability.database = Database.new(
                     description: "Strengthens armor, increasing its effectiveness for the battle",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 0,
+                    apCost : 0,
                     usageHintAI: USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1970,7 +2022,7 @@ Ability.database = Database.new(
                     description: "Prevents a combatant from acting for a few turns if successful.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 5,
+                    apCost : 1,
                     usageHintAI: USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1996,7 +2048,7 @@ Ability.database = Database.new(
                     description: "Pays a combatant to not fight any more.",
                     durationTurns: 0,
                     hpCost : 0,
-                    mpCost : 5,
+                    apCost : 1,
                     usageHintAI: USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
