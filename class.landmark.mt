@@ -57,7 +57,20 @@
         
         
         
-        
+        @:getLocationXY ::{
+            when(landmark.dungeonMap) ::<= {
+                @ar = map.getRandomArea();
+                return {
+                    x: (ar.x + ar.width/2)->floor,
+                    y: (ar.y + ar.height/2)->floor
+                };
+            };
+            
+            return {
+                x: (sizeW * Number.random())->floor,
+                y: (sizeH * Number.random())->floor
+            };
+        };  
         
         
         
@@ -163,9 +176,9 @@
 
 
 
-
             base.requiredLocations->foreach(do:::(i, loc) {
-                @loc = Location.Base.database.find(name:loc).new(landmark:this);
+                @xy = getLocationXY();
+                @loc = Location.Base.database.find(name:loc).new(landmark:this, xHint:xy.x, yHint:xy.y);
                 map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
                 mapIndex += 1;
                 locations->push(value:loc);
@@ -174,7 +187,8 @@
             [0, random.integer(from:base.minLocations, to:base.maxLocations)]->for(do:::(i) {
                 when(base.possibleLocations->keycount == 0) empty;
                 @:which = random.pickArrayItemWeighted(list:base.possibleLocations);
-                @:loc = Location.Base.database.find(name:which.name).new(landmark:this);
+                @xy = getLocationXY();
+                @:loc = Location.Base.database.find(name:which.name).new(landmark:this, xHint:xy.x, yHint:xy.y);
                 map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
                 mapIndex += 1;
 
@@ -289,7 +303,11 @@
 
             floor : {
                 get :: <- floor,
-                set ::(value) <- floor = value
+                set ::(value) { 
+                    floor = value;
+                    if (landmark.dungeonMap)
+                        dungeonLogic.floorHint = value;
+                }
             },
 
             step :: {
@@ -517,8 +535,8 @@ Landmark.Base.database = Database.new(
                 symbol : 'O',
                 rarity : 100000,      
                 isUnique : true,
-                minLocations : 1,
-                maxLocations : 3,
+                minLocations : 2,
+                maxLocations : 5,
                 peaceful: false,
                 dungeonMap : true,
                 possibleLocations : [
@@ -527,7 +545,8 @@ Landmark.Base.database = Database.new(
                     {name: '?????',       rarity:6},                    
                 ],
                 requiredLocations : [
-                    'Stairs Down'
+                    'Stairs Down',
+                    'Small Chest'
                 ]
             }
         ),

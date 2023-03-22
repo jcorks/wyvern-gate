@@ -359,7 +359,7 @@ return class(
                     ];
 
                     renderMain();
-                    @visitable = island.map.getNamedItemsUnderPointer();
+                    @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
 
                     if (visitable != empty) ::<= {
                         visitable->foreach(do:::(i, vis) {
@@ -422,10 +422,10 @@ return class(
                                             text:"The party has arrived at the " + if (arr.data.name == '') arr.data.base.name else arr.data.base.name + ' of ' + arr.data.name
                                         );
                                         arr.data.discover();
-                                        island.map.setPointer(
-                                            x: arr.x,
-                                            y: arr.y
-                                        );
+                                        //island.map.setPointer(
+                                        //    x: arr.x,
+                                        //    y: arr.y
+                                        //);
                                     
                                     });
                                     

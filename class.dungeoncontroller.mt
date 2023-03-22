@@ -14,6 +14,7 @@ return class(
         @map_;
         @island_;
         @landmark_;
+        @floorHint = 0;;
 
         @:Entity = import(module:'class.entity.mt');
         @:Location = import(module:'class.location.mt');
@@ -27,13 +28,15 @@ return class(
         };
     
         @:addEntity ::{
+            @:dialogue = import(module:'singleton.dialogue.mt');
+
             @area = map_.getRandomArea();;
             @:tileX = area.x + (area.width /2)->floor;
             @:tileY = area.y + (area.height/2)->floor;
             
             // only add an entity when not visible. Makes it 
             // feel more alive and unknown
-            //when (map.isTileVisible(x:tileX, y:tileY)) empty;
+            when (map_.isLocationVisible(x:tileX, y:tileY)) empty;
             
             
             // who knows whos down here. Can be anything and anyone, regardless of 
@@ -42,16 +45,25 @@ return class(
             @ent = {
                 targetX:(ar.x + ar.width/2)->floor, 
                 targetY:(ar.y + ar.height/2)->floor, 
-                ref:Entity.new(
-                    levelHint: random.integer(from:island_.levelMin, to:island_.levelMax)
-                )
+                ref:landmark_.island.newInhabitant()
             };
             ent.ref.anonymize();
             entities->push(value:ent);
-            map_.setItem(data:ent, x:tileX, y:tileY, discovered:false, symbol:'*');
+            map_.setItem(data:ent, x:tileX, y:tileY, discovered:true, symbol:'*');
+            dialogue.message(
+                text:random.pickArrayItem(list:[
+                    'Are those foosteps? Be careful.',
+                    'Hmm. Footsteps nearby.',
+                    'It\'s not safe here.',
+                    'What? Footsteps?'
+                ])
+            );
         };
     
         this.interface = {
+            floorHint : {
+                set ::(value) <- floorHint = value
+            },
             step::{
                 // update movement of entity
                 @toRemove = [];
@@ -81,7 +93,7 @@ return class(
                           (Battle.RESULTS.ALLIES_WIN):::<= {
                             toRemove->push(value:ent);
                             @loc = Location.Base.database.find(name:'Body').new(landmark:landmark_, ownedByHint: ent.ref, xHint:item.x, yHint:item.y);
-                            map_.setItem(data:loc, x:item.x, y:item.y, symbol: loc.base.symbol, discovered: false, name:loc.name);
+                            map_.setItem(data:loc, x:item.x, y:item.y, symbol: loc.base.symbol, discovered: true, name:loc.name);
                             landmark_.addLocation(location:loc);
                           },
                           
@@ -91,7 +103,7 @@ return class(
                         Object.freezeGC();
                     };
 
-                    when (map_.getDistanceFromItem(data:ent) < AGGRESSIVE_DISTANCE) ::<= {
+                    when (map_.getDistanceFromItem(data:ent) < AGGRESSIVE_DISTANCE + floorHint/2) ::<= {
                         map_.moveTowardPointer(data:ent);                    
                     };
 
@@ -113,7 +125,7 @@ return class(
                 });
                 
                 // add additional entities out of spawn points (stairs)
-                if (entities->keycount < ROOM_MAX_ENTITY) ::<= {
+                if (entities->keycount < floorHint && Number.random() > 0.8) ::<= {
                     addEntity();
                 };
             

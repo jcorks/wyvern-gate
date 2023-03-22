@@ -843,6 +843,22 @@ return class(
                 return out->filter(by:::(value) <- value.name != empty);
             },
 
+            isLocationVisible ::(x, y) {
+                return if (paged) ::<= {
+                    @:regionX = ((pointer.x+0) / mapSizeW)->floor;
+                    @:regionY = ((pointer.y+0) / mapSizeH)->floor;
+                    @:itemX = (x) + regionX*mapSizeW;
+                    @:itemY = (y) + regionY*mapSizeH;
+                    return !(itemX < 0 || itemY < 0 || itemX >= width+0 || itemY >= height+0);
+
+                
+                } else ::<= {
+                    @itemX = ((x + pointer.x - mapSizeW/2))->floor;
+                    @itemY = ((y + pointer.y - mapSizeH/2))->floor;
+                    return !((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY));
+                };
+
+            },
             
             MAP_CHARS_WIDTH: {
                 get::<- mapSizeW
