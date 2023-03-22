@@ -203,7 +203,7 @@ return class(
             pq->remove(key:in);            
         };
 
-        @:Timer = import(module:'class.logtimer.mt').new();
+        
         
         // A* finds a path from start to goal.
         // h is the heuristic function. h(n) estimates the cost to reach goal from node n.
@@ -268,7 +268,7 @@ return class(
         @:bfsPathNext::(start, goal) {
             start = aStarNewNode(x:start.x, y:start.y);
             goal = aStarNewNode(x:goal.x, y:goal.y);
-            Timer.start();
+            
             when(start.id == goal.id) empty;
             @:q = [];
             @:visited = {};
@@ -291,8 +291,8 @@ return class(
                                 @last;
                                 forever(do:::{
                                     when(a.parent.id == start.id) ::<= {
-                                        Timer.end(note:'BFS');
-                                        canvas.debugLine = Timer.trials[Timer.trials->keycount-1];
+                                        
+                                        
                                         send(message:a);                
                                     };                
                                     a = a.parent; 
