@@ -65,7 +65,7 @@ instance.mainMenu(
         };
     },
 
-    useCursor : false,
+    useCursor : true,
     
     onInputNumber :::() {
         @out = 0;
@@ -89,17 +89,19 @@ instance.mainMenu(
             }
         };    
         
-        /*
-            @:CURSOR_ACTIONS : {
-                LEFT : 0,
-                UP : 1,
-                RIGHT : 2,
-                DOWN : 3,
-                CONFIRM : 4,
-                CANCEL : 5,
-            };        
-        */
-        return out;        
+    
+        
+        @:CURSOR_ACTIONS = {
+            1: 1, // up,
+            2: 3, // down
+            3: 0, // left,
+            4: 2, // right 
+            5: 4, // confirm,
+            6: 5, // cancel
+            
+        };
+    
+        return CURSOR_ACTIONS[out];        
     }
 );
 

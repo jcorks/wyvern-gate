@@ -227,31 +227,17 @@ return class(
                                         send();
                                     };
                                 } else ::<= {
-                                    dialogue.pushChoices(
+                                    dialogue.cursorMove(
                                         leftWeight: 1,
                                         topWeight: 1,
                                         prompt: 'Walk which way?',
-                                        choices : [
-                                            'North',
-                                            'East',
-                                            'West',
-                                            'South'
-                                        ],
-                                        canCancel: true,
-                                        defaultChoice:lastChoice,
-                                        jail: true,
-                                        onChoice ::(choice) {
-                                            
-                                            
-                                            when(choice == 0) dialogue.popChoice();
+                                        onMove ::(choice) {
                                             lastChoice = choice;
-                                            
-                                            
                                             // move by one unit in that direction
                                             // or ON it if its within one unit.
                                             landmark.map.movePointerAdjacent(
-                                                x: if (choice == 2) 1 else if (choice == 3) -1 else 0,
-                                                y: if (choice == 4) 1 else if (choice == 1) -1 else 0
+                                                x: if (choice == dialogue.CURSOR_ACTIONS.RIGHT) 1 else if (choice == dialogue.CURSOR_ACTIONS.LEFT) -1 else 0,
+                                                y: if (choice == dialogue.CURSOR_ACTIONS.DOWN)  1 else if (choice == dialogue.CURSOR_ACTIONS.UP)   -1 else 0
                                             );
                                             landmark.step();
                                             when(party.isIncapacitated()) dialogue.popChoice();
@@ -381,23 +367,12 @@ return class(
                       (0): ::<= {
 
                         @lastChoice = 0;
-                        dialogue.pushChoices(
+                        dialogue.cursorMove(
                             leftWeight: 1,
                             topWeight: 1,
-                            prompt: 'Travel which way?',
-                            choices : [
-                                'North',
-                                'East',
-                                'West',
-                                'South'
-                            ],
-                            canCancel: true,
-                            defaultChoice:lastChoice,
-                            jail: true,
-                            onChoice ::(choice) {
+                            prompt: 'Traveling...',
+                            onMove ::(choice) {
                                 
-                                
-                                when(choice == 0) dialogue.popChoice();
                                 lastChoice = choice;
                                 
                                 @:target = island.landmarks[choice-1];
@@ -407,8 +382,8 @@ return class(
                                 // move by one unit in that direction
                                 // or ON it if its within one unit.
                                 island.map.movePointerFree(
-                                    x: if (choice == 2) 4 else if (choice == 3) -4 else 0,
-                                    y: if (choice == 4) 4 else if (choice == 1) -4 else 0
+                                    x: if (choice == dialogue.CURSOR_ACTIONS.RIGHT) 4 else if (choice == dialogue.CURSOR_ACTIONS.LEFT) -4 else 0,
+                                    y: if (choice == dialogue.CURSOR_ACTIONS.DOWN)  4 else if (choice == dialogue.CURSOR_ACTIONS.UP)   -4 else 0
                                 );
                                 world.stepTime();                                    
                                 island.incrementTime();
@@ -422,6 +397,7 @@ return class(
                                             text:"The party has arrived at the " + if (arr.data.name == '') arr.data.base.name else arr.data.base.name + ' of ' + arr.data.name
                                         );
                                         arr.data.discover();
+                                        island.map.discover(data:arr.data);
                                         //island.map.setPointer(
                                         //    x: arr.x,
                                         //    y: arr.y

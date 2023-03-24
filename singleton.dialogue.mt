@@ -208,54 +208,116 @@ return class(
                 
                 return max;
             };
-            onChoice(choice:[::] {
-                @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
-                @cursorPageTop = 0;
-                forever(do:::{
-                    if (cursorPos < 0) cursorPos = 0;
-                    if (cursorPos >= choices->keycount) cursorPos = choices->keycount-1;
+            onChoice(choice: ::<={
+                @:outputChoice = [::] {
+                    @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
+                    @cursorPageTop = 0;
+                    forever(do:::{
+                        if (cursorPos < 0) cursorPos = 0;
+                        if (cursorPos >= choices->keycount) cursorPos = choices->keycount-1;
 
-                    if (cursorPos >= cursorPageTop+PAGE_SIZE) cursorPageTop+=1;
-                    if (cursorPos  < cursorPageTop) cursorPageTop -=1;
+                        if (cursorPos >= cursorPageTop+PAGE_SIZE) cursorPageTop+=1;
+                        if (cursorPos  < cursorPageTop) cursorPageTop -=1;
 
-                    if (cursorPageTop > choices->keycount - PAGE_SIZE) cursorPageTop = choices->keycount-PAGE_SIZE;
-                    if (cursorPageTop < 0) cursorPageTop = 0;
-                    
-                    @:choicesModified = [];
-                    
-                    
-                    if (choices->keycount > PAGE_SIZE) ::<= {
-                        @initialLine = if (cursorPageTop > 0) '▴' else ' ';
-                        [initialLine->length, WIDTH]->for(do:::(i) {
-                            initialLine = initialLine + ' ';
-                        });                   
-                        choicesModified->push(value:initialLine);
+                        if (cursorPageTop > choices->keycount - PAGE_SIZE) cursorPageTop = choices->keycount-PAGE_SIZE;
+                        if (cursorPageTop < 0) cursorPageTop = 0;
+                        
+                        @:choicesModified = [];
+                        
+                        
+                        if (choices->keycount > PAGE_SIZE) ::<= {
+                            @initialLine = if (cursorPageTop > 0) '▴' else ' ';
+                            [initialLine->length, WIDTH]->for(do:::(i) {
+                                initialLine = initialLine + ' ';
+                            });                   
+                            choicesModified->push(value:initialLine);
 
 
-                        [cursorPageTop, cursorPageTop+PAGE_SIZE]->for(do:::(index) {
+                            [cursorPageTop, cursorPageTop+PAGE_SIZE]->for(do:::(index) {
+                                
+                                choicesModified->push(value: (if (cursorPos == index) '▹  ' else '   ') + choices[index]);
+                            });
+
+
+                            if (cursorPageTop + PAGE_SIZE < (choices->keycount))                    
+                                choicesModified->push(value:'▾  ')
+                            else
+                                choicesModified->push(value:'       ');
+                        } else ::<= {
+                            [0, choices->keycount]->for(do:::(index) {
+                                choicesModified->push(value: (if (cursorPos == index) '▹  ' else '   ') + choices[index]);
+                            });
+                        
+                        };
+                        
+                        //if (canCancel) ::<= {
+                        //    choicesModified->push(value:'(Cancel)');
+                        //};
+                        canvas.pushState();
+                        renderText(
+                            lines: choicesModified,
+                            speaker: prompt,
+                            leftWeight,
+                            topWeight,
+                            limitLines:13
+                        ); 
+                        canvas.commit();    
+                        
+                        @choice;
+                        [::] {  
+                            forever(do:::{
+                                choice = onInput();
+                                match(choice) {
+                                  (CURSOR_ACTIONS.UP,
+                                   CURSOR_ACTIONS.DOWN,
+                                   CURSOR_ACTIONS.LEFT,
+                                   CURSOR_ACTIONS.RIGHT,
+                                   CURSOR_ACTIONS.CONFIRM,
+                                   CURSOR_ACTIONS.CANCEL): send()
+                                };
+                            });
+                        };                                              
+
+                        canvas.popState();
+                        canvas.commit();                            
+
+                        when (choice == CURSOR_ACTIONS.UP)
+                            cursorPos -= 1;
+                        when(choice == CURSOR_ACTIONS.DOWN)
+                            cursorPos += 1;
                             
-                            choicesModified->push(value: (if (cursorPos == index) '▹  ' else '   ') + choices[index]);
-                        });
+                        when(choice == CURSOR_ACTIONS.CANCEL && canCancel)
+                            send(message:0);
+                        
+                        when(choice == CURSOR_ACTIONS.CONFIRM)
+                            send(message:cursorPos + 1);
 
 
-                        if (cursorPageTop + PAGE_SIZE < (choices->keycount))                    
-                            choicesModified->push(value:'▾  ')
-                        else
-                            choicesModified->push(value:'       ');
-                    } else ::<= {
-                        [0, choices->keycount]->for(do:::(index) {
-                            choicesModified->push(value: (if (cursorPos == index) '▹  ' else '   ') + choices[index]);
-                        });
-                    
-                    };
-                    
+                        
+                    });
+                };
+                data.defaultChoice = outputChoice;
+                return outputChoice;
+            });        
+        };
+
+
+        @:choiceCursorMove ::(data => Object) {
+            @:prompt = data.prompt; 
+            @:leftWeight = data.leftWeight; 
+            @:topWeight = data.topWeight; 
+            @:defaultChoice = data.defaultChoice;
+            @:onChoice = data.onChoice;
+            
+            
+            [::] {
+                forever(do:::{
                     //if (canCancel) ::<= {
                     //    choicesModified->push(value:'(Cancel)');
                     //};
-                    breakpoint();
                     canvas.pushState();
                     renderText(
-                        lines: choicesModified,
+                        lines: ['[Cancel to return]'],
                         speaker: prompt,
                         leftWeight,
                         topWeight,
@@ -281,22 +343,18 @@ return class(
                     canvas.popState();
                     canvas.commit();                            
 
-                    when (choice == CURSOR_ACTIONS.UP)
-                        cursorPos -= 1;
-                    when(choice == CURSOR_ACTIONS.DOWN)
-                        cursorPos += 1;
-                        
-                    when(choice == CURSOR_ACTIONS.CANCEL && canCancel)
+                    when(choice == CURSOR_ACTIONS.CANCEL)
                         send(message:0);
-                    
-                    when(choice == CURSOR_ACTIONS.CONFIRM)
-                        send(message:cursorPos + 1);
 
-
+                    when (choice == CURSOR_ACTIONS.UP||
+                          choice == CURSOR_ACTIONS.DOWN ||
+                          choice == CURSOR_ACTIONS.LEFT ||
+                          choice == CURSOR_ACTIONS.RIGHT)
+                        onChoice(choice);
                     
                 });
-            });        
-        };
+            };
+        };        
     
     
         @:choiceColumnsNumber ::(data => Object) {
@@ -503,7 +561,8 @@ return class(
             CURSOR : 0,
             NUMBER : 1,
             COLUMN_CURSOR : 2,
-            COLUMN_NUMBER : 3
+            COLUMN_NUMBER : 3,
+            CURSOR_MOVE: 4
         };
         
         @:commitChoice ::{    
@@ -515,7 +574,8 @@ return class(
               (CHOICE_MODE.CURSOR): choicesCursor(data:val),
               (CHOICE_MODE.NUMBER): choicesNumber(data:val),
               (CHOICE_MODE.COLUMN_CURSOR): choiceColumnsCursor(data:val),
-              (CHOICE_MODE.COLUMN_NUMBER): choiceColumnsNumber(data:val)                  
+              (CHOICE_MODE.COLUMN_NUMBER): choiceColumnsNumber(data:val),
+              (CHOICE_MODE.CURSOR_MOVE): choiceCursorMove(data:val)            
             };        
         };
        
@@ -704,7 +764,18 @@ return class(
                 });
                 commitChoice();
                 return out;
-            },            
+            },        
+            
+            cursorMove ::(prompt, leftWeight, topWeight, onMove) {
+                choiceStack->push(value:{
+                    mode: CHOICE_MODE.CURSOR_MOVE,
+                    prompt: prompt,
+                    leftWeight: leftWeight,
+                    topWeight: topWeight,
+                    onChoice:onMove
+                });
+                commitChoice();
+            },    
             
             
             // like choices(), but instead displays it column-wise.
@@ -777,6 +848,10 @@ return class(
             
             startChoiceStack ::{
                 startChoices();
+            },
+            
+            CURSOR_ACTIONS : {
+                get::<- CURSOR_ACTIONS
             }
         };    
     }

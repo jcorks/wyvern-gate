@@ -376,7 +376,7 @@ return class(
                     
                     when(isWalled(x:itemX, y:itemY)) ::<= {
                         canvas.movePen(x:left + x, y:top + y);  
-                        canvas.drawChar(text:'░');
+                        canvas.drawChar(text:'▓');
                     };
                     
                     @:items = this.itemsAt(x:itemX, y:itemY);
@@ -507,7 +507,7 @@ return class(
 
                     when(isWalled(x:itemX, y:itemY)) ::<= {
                         canvas.movePen(x:left + x, y:top + y);  
-                        canvas.drawChar(text:'░');
+                        canvas.drawChar(text:'▓');
                     };
                     @:items = this.itemsAt(x:itemX, y:itemY);
                     when(items != empty && items->keycount > 0) ::<= {
@@ -695,6 +695,11 @@ return class(
             getDistanceFromItem ::(data) {
                 @:item = retrieveItem(data);
                 return distance(x0:pointer.x, y0:pointer.y, x1:item.x, y1:item.y);
+            },
+            
+            discover ::(data){
+                @:item = retrieveItem(data);
+                item.discovered = true;            
             },
             
             movePointerToward::(x, y) {
