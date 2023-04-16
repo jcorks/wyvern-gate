@@ -944,7 +944,6 @@ return class(
                 canvas.movePen(x:left -1, y: 0);
                 canvas.drawText(text:world.timeString + '                   ');
                 
-                canvas.commit();            
             
             }
         };    

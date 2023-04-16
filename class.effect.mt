@@ -1341,6 +1341,39 @@ Effect.database = Database.new(
                 }
             }
         ),
+
+
+        Effect.new(
+            data : {
+                name : 'Trained Hand',
+                description: 'ATK +30%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {                    
+                },                
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
         
         Effect.new(
             data : {
@@ -1448,7 +1481,40 @@ Effect.database = Database.new(
             }
         ),
 
+        Effect.new(
+            data : {
+                name : 'Perfect Guard',
+                description: 'All damage is nullified.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                    dialogue.message(text:holder.name + ' is strongly guarding themself');
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
 
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                    if (from != holder) ::<= {
+                        dialogue.message(text:holder.name + ' is protected from the damage!');
+                        damage.amount = 0;                        
+                    };
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
 
         Effect.new(
             data : {
@@ -1804,7 +1870,38 @@ Effect.database = Database.new(
             }
         ),
 
+        Effect.new(
+            data : {
+                name : 'Coordinated',
+                description: 'SPD,DEF,ATK +35%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                    ATK:35,
+                    DEF:35,
+                    SPD:35
+                ),
+                onAffliction : ::(user, item, holder) {
+                    dialogue.message(text:holder.name +' is ready to coordinate!');                    
+                },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
 
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                }
+            }
+        ),
         Effect.new(
             data : {
                 name : 'Proceed with Caution',
@@ -2009,7 +2106,7 @@ Effect.database = Database.new(
                 onDamage : ::(user, item, holder, from, damage) {
                     if (user == from) ::<= {
                         dialogue.message(text: user.name + '\'s duel challenge focuses damage!');
-                        damage.amount *= 1.5;
+                        damage.amount *= 2.25;
                     };
                 },
                 

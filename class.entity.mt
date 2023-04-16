@@ -846,6 +846,12 @@
                 this.recalculateStats();
                 return current;
             },
+            unequipItem ::(item, silent) {
+                equips->foreach(do:::(slot, equip) {
+                    if (equip == item)
+                        this.unequip(slot, silent);
+                });
+            },
             
             useAbility::(ability, targets, turnIndex, extraData) {
                 when(ap < ability.apCost) dialogue.message(

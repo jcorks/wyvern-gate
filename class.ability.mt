@@ -100,6 +100,34 @@ Ability.database = Database.new(
             
             Ability.new(
                 data: {
+                    name: 'Coordination',
+                    targetMode : TARGET_MODE.ALLALLY,
+                    description: "ATK,DEF,SPD +35% for each party member who is also the same profession.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(
+                            text: user.name + ' coordinates with others!'
+                        );
+                        
+                        targets->foreach(do:::(i, ent) {
+                            when(ent == user) empty;
+                            if (ent.profession.name == user.profession.name) ::<= {
+                                // skip if already has Coordinated effect.
+                                when(ent.effects->any(condition::(value) <- value.name == user.profession.name)) empty;
+
+                                targets[0].addEffect(from:user, name: 'Coordinated', durationTurns: 1000000);
+                            };
+                        });
+                    }
+                }
+            ),            
+            
+            Ability.new(
+                data: {
                     name: 'Follow Up',
                     targetMode : TARGET_MODE.ONE,
                     description: "Damages a target based on the user's ATK, doing 150% more damage if the target was hit since their last turn.",
@@ -1056,6 +1084,40 @@ Ability.database = Database.new(
             ),
 
 
+            Ability.new(
+                data: {
+                    name: 'Dematerialize',
+                    targetMode : TARGET_MODE.ONE,
+                    description: 'Magick that unequips a target\'s equipment',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 3,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,	
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(
+                            text: user.name + ' casts Dematerialize on ' + targets[0].name + '!'
+                        );
+                        @:Entity = import(module:'class.entity.mt');
+                        @:Random = import(module:'singleton.random.mt');
+                        @:item = ::<= {
+                            @:list = [];
+                            Entity.EQUIP_SLOTS->foreach(do:::(i, slot) {
+                                @out = targets[0].getEquipped(slot);
+                                if (out)
+                                    list->push(value:out);
+                            });
+                            return Random.pickArrayItem(list);
+                        };
+                        targets[0].unequipItem(item);
+                        dialogue.message(
+                            text: targets[0].name + '\'s ' + item.name + ' gets unequipped!'
+                        );
+                    }
+                }
+            ),
+
+
             
             Ability.new(
                 data: {
@@ -1082,6 +1144,60 @@ Ability.database = Database.new(
                     }
                 }
             ),
+            
+            Ability.new(
+                data: {
+                    name: 'Frozen Flame',
+                    targetMode : TARGET_MODE.ALLENEMY,
+                    description: 'Magick that causes enemies to spontaneously combust in a cold, blue flame. Might freeze the targets.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(
+                            text: user.name + ' casts Frozen Flame!'
+                        );
+                        user.enemies->foreach(do:::(index, enemy) {
+                            user.attack(
+                                target:enemy,
+                                amount:user.stats.INT * (0.75),
+                                damageType : Damage.TYPE.ICE,
+                                damageClass: Damage.CLASS.HP
+                            );
+                            if (Number.random() < 0.2) ::<=	{
+                                enemy.addEffect(from:user, name: 'Frozen', durationTurns: 2);                            
+                            };
+                        });
+
+
+                    }
+                }
+            ),            
+
+
+            Ability.new(
+                data: {
+                    name: 'Telekinesis',
+                    targetMode : TARGET_MODE.ONE,
+                    description: 'Magick that moves a target around, stunning them',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(
+                            text: user.name + ' casts Telekinesis!'
+                        );
+                        targets[0].addEffect(from:user, name: 'Stunned', durationTurns: 2);                            
+
+
+                    }
+                }
+            ),          
+            
             
             Ability.new(
                 data: {
@@ -1913,6 +2029,24 @@ Ability.database = Database.new(
 
             Ability.new(
                 data: {
+                    name: 'Perfect Guard',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Nullifies damage for 3 turns",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 2,
+                    usageHintAI: USAGE_HINT.BUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        targets[0].addEffect(
+                            from:user, name: 'Perfect Guard', durationTurns: 3 
+                        );
+                    }
+                }
+           ),
+
+            Ability.new(
+                data: {
                     name: 'Sharpen',
                     targetMode : TARGET_MODE.ONE,
                     description: "Sharpens a weapon, increasing its damage for the battle.",
@@ -1967,7 +2101,7 @@ Ability.database = Database.new(
                 data: {
                     name: 'Dull Weapon',
                     targetMode : TARGET_MODE.ONE,
-                    description: "Dull a weapon, increasing its damage for next turn.",
+                    description: "Dull a weapon, decreasing its damage for next turn.",
                     durationTurns: 0,
                     hpCost : 0,
                     apCost : 0,

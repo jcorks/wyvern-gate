@@ -166,14 +166,14 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
                 learnable : true,
                 abilities : [
-                    'First Aid',
-                    'Swipe Kick',
-                    'Doublestrike',     // 2 hits RNG targets, 80% of attack
-                    'Focus Perception', // + 25% ATK for 5 turns 
-                    'Cheer',            // + 30% ATK for whole party 5 turns
-                    'Follow Up',        // if hurt this turn, does +150% damage, else is attack strength
-                    'Grapple',          // No action for user or target for 3 turns
-                    'Triplestrike',     // 3 hits RNG targets, 70% power
+                    'First Aid',        //X
+                    'Swipe Kick',       //X
+                    'Doublestrike',     //X2 hits RNG targets, 80% of attack
+                    'Focus Perception', //X + 25% ATK for 5 turns 
+                    'Cheer',            //X + 30% ATK for whole party 5 turns
+                    'Follow Up',        //X if hurt this turn, does +150% damage, else is attack strength
+                    'Grapple',          //X No action for user or target for 3 turns
+                    'Triplestrike',     //X 3 hits RNG targets, 70% power
                 ],
                 
                 passives : []
@@ -199,14 +199,14 @@ Profession.Base.database = Database.new(
                 learnable : true,
                 abilities : [
                     // only one stance at a time
-                    'Defensive Stance',  // +%75 Def -50% Atk
-                    'Offensive Stance',  // +%75 Atk -50% Def
-                    'Light Stance',      // +75% Speed -50% Atk
-                    'Heavy Stance',      // +75% Def -50% Spd 
-                    'Meditative Stance', // +75% INT -50% Spd
-                    'Striking Stance',   // +100% ATK, -30%Def,Spd
-                    'Reflective Stance', // if hit, retaliates
-                    'Evasive Stance',    // 50% chance evade
+                    'Defensive Stance',  //X +%75 Def -50% Atk
+                    'Offensive Stance',  //X +%75 Atk -50% Def
+                    'Light Stance',      //X +75% Speed -50% Atk
+                    'Heavy Stance',      //X +75% Def -50% Spd 
+                    'Meditative Stance', //X +75% INT -50% Spd
+                    'Striking Stance',   //X +100% ATK, -30%Def,Spd
+                    'Reflective Stance', //X if hit, retaliates
+                    'Evasive Stance',    //X 50% chance evade
                     
                 ],
                 
@@ -234,14 +234,14 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
                 
                 abilities : [
-                    'Fire',
-                    'Ice',      // all enemies
-                    'Meditate', // AP recover, self
-                    'Thunder',  // 4 random strikes
-                    'Mind Focus', // +100% INT for 10 turns
-                    'Flash',    // all enemies, 50% chance cant act for a turn
-                    'Flare',    // one enemy, big damage
-                    'Explosion', // all enemies, fire big damage
+                    'Fire',     //X
+                    'Ice',      //X all enemies
+                    'Meditate', //X AP recover, self
+                    'Thunder',  //X 4 random strikes
+                    'Mind Focus',//X +100% INT for 10 turns
+                    'Flash',    //X all enemies, 50% chance cant act for a turn
+                    'Flare',    //X one enemy, big damage
+                    'Explosion', //X all enemies, fire big damage
                 ],
                 
                 passives : []
@@ -268,14 +268,14 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
                 
                 abilities : [
-                    'Cure',
-                    'Antidote', // specifically cures poison
-                    'Protect',
-                    'Greater Cure',
-                    'Protect All',
-                    'Soothe', // ap recovery, any
-                    'Cleanse', // removal of standard status ailments
-                    'Grace', // save from death, once    
+                    'Cure',         //X
+                    'Antidote',     //X specifically cures poison
+                    'Protect',      //X
+                    'Greater Cure', //X
+                    'Protect All',  //X
+                    'Soothe',       //X ap recovery, any
+                    'Cleanse',      //X removal of standard status ailments
+                    'Grace',        //X save from death, once    
                 ],
                 
                 passives : []
@@ -302,12 +302,12 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
                 
                 abilities : [
-                    'Lunar Blessing',   // make it night time
-                    'Moonbeam',         // attack enhanced by night time
-                    'Night Veil',       // +100% Def if in night time
-                    'Moonsong',         // HoT if in night time
-                    'Call of the Night',// +60% ATK if in night time
-                    'Lunacy',           // Berserk: attacks random enemy instead of turn, +70% ATK and +70% DEF. only usable at night
+                    'Lunar Blessing',   //X make it night time
+                    'Moonbeam',         //X attack enhanced by night time
+                    'Night Veil',       //X +100% Def if in night time
+                    'Moonsong',         //X HoT if in night time
+                    'Call of the Night',//X +60% ATK if in night time
+                    'Lunacy',           //X Berserk: attacks random enemy instead of turn, +70% ATK and +70% DEF. only usable at night
                 ],
                 passives : [
                     'Lunar Affinity'
@@ -335,15 +335,15 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
                 
                 abilities : [
-                    'Solar Blessing', // make it day time
-                    'Sunbeam',        // attack enhanced by day 
-                    'Dayshroud',      // +100% Def if in day time     
-                    'Sol Attunement', // +5% health every turn
-                    'Sunburst',       // attack enhanced by day 
-                    'Phoenix Soul'    // autorevive once
+                    'Solar Blessing', //X make it day time
+                    'Sunbeam',        //X attack enhanced by day 
+                    'Dayshroud',      //X +100% Def if in day time     
+                    'Sol Attunement', //X +5% health every turn
+                    'Sunburst',       //X attack enhanced by day 
+                    'Phoenix Soul'    //X autorevive once
                 ],
                 passives : [
-                    'Solar Affinity'
+                    'Solar Affinity'  //X
                 ]
             }),
 
@@ -368,10 +368,10 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
                 
                 abilities : [
-                    'Sharpen',
-                    'Weaken Armor',
-                    'Strengthen Armor',
-                    'Dull Weapon'
+                    'Sharpen',          //X
+                    'Weaken Armor',     //X
+                    'Strengthen Armor', //X
+                    'Dull Weapon'       //X
                 ],
                 passives : [
                 ]
@@ -397,12 +397,12 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
 
                 abilities : [
-                    'Convince',
-                    'Bribe',
-                    'Quickhand', // do 2 item actions, same target
+                    'Convince',     //X convinces target to not do anything for 1 to 3 turns 
+                    'Bribe',        //X pay to leave battle
+                    'Quickhand',    //X do 2 item actions, same target
                 ],
                 passives : [
-                    'Penny Picker' // after battle may notice dropped G
+                    'Penny Picker'  //X after battle may notice dropped G
                 ]
             }),
 
@@ -426,13 +426,13 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
                 
                 abilities : [
-                    'Tackle',
-                    'Stun',
-                    'Big Swing',
-                    'Leg Sweep',
-                    'Stab', // bleeding effect
-                    'Wild Swing',
-                    'Duel', // pick enemy. if attacking, +150% damage
+                    'Tackle',           //X Damage, better than attack
+                    'Stun',             //X Normal attack with 50% chance to stun
+                    'Big Swing',        //X damage all enemies
+                    'Leg Sweep',        //X damage all and 50% chance to stun
+                    'Stab',             //X bleeding effect
+                    'Wild Swing',       //X 4 strong attacks to random targets
+                    'Duel',             // pick enemy. if attacking, +225% damage
                 ],
                 passives : [
                 ]
@@ -458,16 +458,16 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
 
                 abilities : [
-                    'Guard',   // defend 2.0
-                    'Proceed with Caution', // defense buff for team
-                    'Mend',    // heal other, no AP cost!!!! but weak
-                    'Defend Other',
-                    'Retaliate',    // auto-attack if hit
-                    'Tandem', // stat boost for every other in party with same profession 
-                    'Avenge', // after use, if any teammates are hit, K'Od, or killed, boost to ATK and DEF
+                    'Guard',                //X defend 2.0
+                    'Proceed with Caution', //X defense buff for team (10 turns)
+                    'Mend',                 //X heal other, no AP cost!!!! but weak
+                    'Defend Other',         //X Defends another for 4 turns
+                    'Retaliate',            //X auto-attack if hit (10 turns)
+                    'Coordination',         //X stat boost for every other in party with same profession 
+                    'Perfect Guard',        //X Nullifies all damage for 3 turns
                 ],
                 passives : [
-                    'Trained Hand', // +30% attack
+                    'Trained Hand',         //X +30% attack
                 ]
             }), 
 
@@ -493,11 +493,11 @@ Profession.Base.database = Database.new(
                 learnable : true,
                 
                 abilities : [
-                    'Telekinesis',  // stun for a turn
-                    'Materialize',  // summon temporary equipment
-                    'Dematerialize',
-                    'Mind read', // use random ability of target
-                    'Flight', // make target fly?
+                    'Telekinesis',   //X stun for a turn
+                    'Frozen Flame',  //X damage all, chance for freeze
+                    'Dematerialize', //X removes equip
+                    'Mind Read',     // use random ability of target
+                    'Flight',        // make target fly?
                     
                 ],
                 passives : [

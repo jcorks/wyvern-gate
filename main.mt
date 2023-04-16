@@ -21,7 +21,7 @@
 
 @:canvas = import(module:'singleton.canvas.mt');
 @:instance = import(module:'singleton.instance.mt');
-
+@:Time = import(module:'Matte.System.Time');
 
 
 
@@ -80,28 +80,31 @@ instance.mainMenu(
     },
     
     onInputCursor :::() {
-        @out = 0;
-        [::] {
-            out = Number.parse(string:console.getln());
-        } : {
-            onError:::(message) {
-                //nothing
-            }
-        };    
         
-    
+        @command = '';
+        @:getPiece = ::{
+            @:ch = console.getch(unbuffered:true);
+            when (ch == empty) '';
+            return ch->charCodeAt(index:0);
+        };
+        
+        command = '' + getPiece() + getPiece() + getPiece();
+ 
         
         @:CURSOR_ACTIONS = {
-            1: 1, // up,
-            2: 3, // down
-            3: 0, // left,
-            4: 2, // right 
-            5: 4, // confirm,
-            6: 5, // cancel
+            '279165': 1, // up,
+            '279166': 3, // down
+            '279168': 0, // left,
+            '279167': 2, // right
+             
+            '122': 4, // confirm,
+            '120': 5, // cancel
             
         };
-    
-        return CURSOR_ACTIONS[out];        
+        @val = CURSOR_ACTIONS[command];
+        if (val == empty)
+            Time.sleep(milliseconds:30);
+        return val;        
     }
 );
 

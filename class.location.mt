@@ -497,7 +497,7 @@ Location.Base.database = Database.new(
 
                 @:nameGen = import(module:'singleton.namegen.mt');
 
-                [0, 4 + (location.ownedBy.level / 4)->ceil]->for(do:::(i) {
+                [0, 30 + (location.ownedBy.level / 4)->ceil]->for(do:::(i) {
                     // no weight, as the value scales
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false &&
@@ -507,6 +507,18 @@ Location.Base.database = Database.new(
 
 
 
+                location.inventory.add(item:Item.Base.database.find(
+                    name: 'Skill Crystal'
+                ).new(from:location.ownedBy));                
+                location.inventory.add(item:Item.Base.database.find(
+                    name: 'Skill Crystal'
+                ).new(from:location.ownedBy));                
+                location.inventory.add(item:Item.Base.database.find(
+                    name: 'Skill Crystal'
+                ).new(from:location.ownedBy));                
+                location.inventory.add(item:Item.Base.database.find(
+                    name: 'Skill Crystal'
+                ).new(from:location.ownedBy));                
                 location.inventory.add(item:Item.Base.database.find(
                     name: 'Skill Crystal'
                 ).new(from:location.ownedBy));                
