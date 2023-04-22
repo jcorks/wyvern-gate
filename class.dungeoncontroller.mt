@@ -50,14 +50,15 @@ return class(
             ent.ref.anonymize();
             entities->push(value:ent);
             map_.setItem(data:ent, x:tileX, y:tileY, discovered:true, symbol:'*');
-            dialogue.message(
-                text:random.pickArrayItem(list:[
-                    'Are those foosteps? Be careful.',
-                    'Hmm. Footsteps nearby.',
-                    'It\'s not safe here.',
-                    'What? Footsteps?'
-                ])
-            );
+            if (entities->keycount == 1)
+                dialogue.message(
+                    text:random.pickArrayItem(list:[
+                        'Are those foosteps? Be careful.',
+                        'Hmm. Footsteps nearby.',
+                        'It\'s not safe here.',
+                        'What? Footsteps?'
+                    ])
+                );
         };
     
         this.interface = {

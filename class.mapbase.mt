@@ -462,7 +462,7 @@ return class(
                 };
             };
             
-            [0, 365]->for(do:::(i) {
+            [0, 360, 7.5]->for(do:::(i) {
                 sightRay(degrees:i);
             });
             

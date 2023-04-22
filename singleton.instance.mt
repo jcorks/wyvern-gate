@@ -152,6 +152,7 @@ return class(
             });
 
             canvas.pushState();
+            @stepCount = 0;
             @:early = [::]{
                 forever(do:::{
                     when(party.isIncapacitated()) send();
@@ -165,7 +166,7 @@ return class(
                     @locationAt = landmark.map.getNamedItemsUnderPointer();
                     if (locationAt != empty) ::<= {
                         locationAt->foreach(do:::(i, loc) {
-                            choices->push(value:'Visit ' + loc.name);
+                            choices->push(value:'Check ' + loc.name);
                         });
                     };
                     
@@ -191,7 +192,7 @@ return class(
                                     landmark.locations->foreach(do:::(index, location) {
                                         choices->push(value:location.name);
                                     });
-
+                                    
                                     @choice = dialogue.choicesNow(
                                         leftWeight: 1,
                                         topWeight: 1,
@@ -217,6 +218,8 @@ return class(
                                     };
                                     when(party.isIncapacitated()) send();
 
+
+
                                     @:arrival = landmark.map.getNamedItemsUnderPointer();
                                     if (arrival != empty) ::<= {
                                         arrival->foreach(do:::(index, arr) {
@@ -240,7 +243,13 @@ return class(
                                                 y: if (choice == dialogue.CURSOR_ACTIONS.DOWN)  1 else if (choice == dialogue.CURSOR_ACTIONS.UP)   -1 else 0
                                             );
                                             landmark.step();
+                                            stepCount += 1;
                                             when(party.isIncapacitated()) dialogue.popChoice();
+
+
+                                            // every 5 steps, heal 1% HP
+                                            if (stepCount % 15 == 0) 
+                                                party.members->foreach(do:::(i, member) <- member.heal(amount:(member.stats.HP * 0.01)->ceil));
                                             
                                             // cancel if we've arrived somewhere
                                             @:arrival = landmark.map.getNamedItemsUnderPointer();
@@ -517,6 +526,14 @@ return class(
                           },
                           
                           (1)::<= {
+                            canvas.clear();
+                            @:message = 'Loading...';
+                            canvas.movePen(
+                                x: canvas.width/2 - message->length/2,
+                                y: canvas.height/2
+                            );
+                            canvas.drawText(text:message);
+                            canvas.commit();
                             this.startNew();
                             this.startInstance();
                           },
@@ -631,11 +648,6 @@ return class(
                 @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
                 // debug
 
-                p1.inventory.clear();
-                p0.inventory.clear();
-
-                @:arm0 = Item.Base.database.find(name:'Tunic').new(from:p0);
-                @:arm1 = Item.Base.database.find(name:'Robe').new(from:p1);
 
 
                 [0, 3]->for(do:::(i) {
@@ -645,8 +657,6 @@ return class(
 
 
 
-                p0.equip(item:arm0, slot:Entity.EQUIP_SLOTS.ARMOR, silent:true, inventory:party.inventory);
-                p1.equip(item:arm1, slot:Entity.EQUIP_SLOTS.ARMOR, silent:true, inventory:party.inventory);
 
                 party.add(member:p0);
                 party.add(member:p1);

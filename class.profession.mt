@@ -799,30 +799,7 @@ Profession.Base.database = Database.new(
             }),  
 
 
-            Profession.Base.new(data:{
-                name: 'Outlaw',
-                weaponAffinity: 'Shortsword',                
-                description : "", 
-                growth: StatSet.new(
-                    HP:  5,
-                    AP:  3,
-                    ATK: 6,
-                    INT: 5,
-                    DEF: 2,
-                    SPD: 4,
-                    LUK: 8,
-                    DEX: 4
-                ),
-                levelMinimum : 1,
-                minKarma : 0,
-                learnable : false,
-                maxKarma : 50,
-                
-                abilities : [
-                ],
-                passives : [
-                ]
-            }), 
+
 
             Profession.Base.new(data:{
                 name: 'Mercenary',
@@ -954,34 +931,7 @@ Profession.Base.database = Database.new(
                 ]
             }),             
             
-            Profession.Base.new(data:{
-                name: 'Highwayman',
-                weaponAffinity: 'Shortsword',                
-                description : "Excelling in their forward manner, highwaymen are a feared profession", 
-                growth: StatSet.new(
-                    HP:  5,
-                    AP:  2,
-                    ATK: 5,
-                    INT: 5,
-                    DEF: 3,
-                    SPD: 6,
-                    LUK: 10,
-                    DEX: 3
-                ),
-                levelMinimum : 1,
-                learnable : false,
 
-                minKarma : 0,
-                maxKarma : 50,
-                
-                abilities : [
-                    'Mug',   // attack and steal gold 
-                    'Unarm', // attack + 50% chance to unarm
-                    //'Swipe', // trip enemy, skipping their turn
-                ],
-                passives : [
-                ]
-            }),
             
             Profession.Base.new(data:{
                 name: 'Disciple',

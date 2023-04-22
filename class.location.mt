@@ -961,7 +961,7 @@ Location.Base.database = Database.new(
             onCreate ::(location) {
                 location.inventory.add(item:Item.Base.database.getRandomFiltered(
                     filter:::(value) <- value.isUnique == false
-                ).new(from:location.landmark.island.newInhabitant()));
+                ).new(rngModHint:true, from:location.landmark.island.newInhabitant()));
             },
             
             onTimeChange::(location, time) {
@@ -1003,7 +1003,7 @@ Location.Base.database = Database.new(
                 [0, 3+(Number.random()*2)->ceil]->for(do:::(i) <-
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false
-                    ).new(from:location.landmark.island.newInhabitant()))
+                    ).new(from:location.landmark.island.newInhabitant(),rngModHint:true))
                 );
             },
             

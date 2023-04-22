@@ -91,6 +91,7 @@
         @island;
         @islandLevelHint;
         @islandNameHint;
+        @modCount = 0;
         @victoryCount = 0; // like exp, stat mods increase with victories
                            // conceptually: the user becomes more familiar
                            // with how to effectively use it in their hands
@@ -99,7 +100,7 @@
                            //
                            // Also the item can become enchanted through use 
         @:stats = StatSet.new();
-        this.constructor = ::(base, from, creationHint, modHint, materialHint, state) {
+        this.constructor = ::(base, from, creationHint, modHint, materialHint, rngModHint, state) {
             when(state != empty) ::<= {
                 this.state = state;
                 return this;
@@ -120,10 +121,11 @@
                 };
 
                 
-                if (Number.random() > 0.5) ::<= {
+                if (rngModHint != empty || Number.random() > 0.5) ::<= {
                     @:count = (Number.random()*3+1)->floor;
                     if(count > 1)
                         customName = base.name + ' (Custom)';
+                    modCount = count;
                     [0, count]->for(do:::(i) {
                         @:mod = ItemModifier.database.getRandom();
                         if (count == 1)
@@ -200,6 +202,10 @@
                 }
             },
             
+            modCount : {
+                get ::<- modCount
+            },
+            
             equipMod : {
                 get ::<- stats
             },
@@ -258,7 +264,7 @@
             
             addVictory ::(silent) {
                 victoryCount += 1;
-                if (victoryCount % 5 == 0) ::<= {
+                if (victoryCount % 3 == 0) ::<= {
                     @choice = random.integer(from:0, to:7);
                     @:oldStats = StatSet.new();
                     oldStats.add(stats);
@@ -274,7 +280,7 @@
                     ));
                     
                     if (silent == empty) ::<= {
-                        dialogue.message(text:'The ' + this.name + ' gets stronger from use.');
+                        dialogue.message(text:'The party get\'s more used to using the ' + this.name + '.');
                         oldStats.printDiffRate(other:stats, prompt:this.name);
                     };
                 
@@ -301,6 +307,7 @@
                         
                     description = value.description;
                     stats.state = value.stats;
+                    modCount = value.modCount;
                     value.modNames->foreach(do:::(index, modName) {
                         @:mod = ItemModifier.database.find(name:modName);
                         mods->push(value:mod);
@@ -318,6 +325,7 @@
                         island : if (island != empty && island.id != world.island.id) island.state else empty,
                         description : description,
                         stats : stats.state,
+                        modCount : modCount,
                         modNames : [...mods]->map(to:::(value) <- value.name)
                     };
                 }
@@ -364,8 +372,8 @@ Item.Base = class(
             }
         );
         this.interface = {
-            new ::(from, creationHint, modHint, materialHint, state) {
-                return Item.new(base:this, from, creationHint, modHint, materialHint, state);
+            new ::(from, creationHint, modHint, materialHint, rngModHint, state) {
+                return Item.new(base:this, from, creationHint, modHint, materialHint, rngModHint, state);
             },
             
 
@@ -530,7 +538,7 @@ Item.Base.database = Database.new(items: [
             DEX: -10   // its oddly shaped.
         ),
         useEffects : [
-            'HP Recovery: Minor',
+            'HP Recovery: All',
             'Consume Item'       
         ],
         equipEffects : [
@@ -599,7 +607,7 @@ Item.Base.database = Database.new(items: [
             DEX: -10   // its oddly shaped.
         ),
         useEffects : [
-            'AP Recovery: Minor',
+            'AP Recovery: All',
             'Consume Item'       
         ],
         equipEffects : [

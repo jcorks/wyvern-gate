@@ -389,17 +389,20 @@
                 if (alliesWin) ::<= {            
                     dialogue.message(text: 'The battle is won.');
 
-                    if (exp == true) ::<= {
-                        @exp = 0;
-                        enemies_->foreach(do:::(index, enemy) {
-                            exp += enemy.dropExp();
-                        });                
-                        exp /= allies_->keycount;
-                        exp = exp->ceil;
+                    @exp = 0;
+                    enemies_->foreach(do:::(index, enemy) {
+                        exp += enemy.dropExp();
+                    });                
+                    exp /= allies_->keycount;
+                    exp = exp->ceil;
+                    if (exp == true)
                         dialogue.message(text: 'Each party member gains ' + exp + ' EXP.');
-                        allies_->foreach(do:::(index, ally) {
-                            ally.stats.resetMod();
-                            
+                        
+                    allies_->foreach(do:::(index, ally) {
+                        ally.stats.resetMod();
+                        
+
+                        if (exp == true) ::<= {
                             @stats = StatSet.new();
                             @level = ally.level;
                             stats.add(stats:ally.stats);
@@ -433,16 +436,16 @@
                                 stats.printDiff(other:ally.stats, prompt:'(Level:  ' + level  + ' -> ' + (ally.level+1) + ': Focus)');                        
                             
                             });
-                            @:Entity = import(module:'class.entity.mt');
-                            @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
-                            if (wep != empty) ::<= {
-                                wep.addVictory();
-                            };
-                            ally.recalculateStats();
-                            
-         
-                        }); 
-                    };
+                        };
+                        @:Entity = import(module:'class.entity.mt');
+                        @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
+                        if (wep != empty) ::<= {
+                            wep.addVictory();
+                        };
+                        ally.recalculateStats();
+                        
+     
+                    }); 
                     if (noLoot == empty) ::<= {
                         @:loot = [];
                         enemies->foreach(do:::(index, enemy) {

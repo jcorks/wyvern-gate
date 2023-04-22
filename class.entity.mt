@@ -197,7 +197,8 @@
                     );
                     if (item.name != 'None') ::<={
                         @:itemInstance = item.new(from:this);
-                        inventory.add(item:itemInstance);
+                        if (itemInstance.modCount == 0) 
+                            inventory.add(item:itemInstance);
                     };
                     
                     
@@ -547,11 +548,13 @@
                 get ::<- favoritePlace
             },
             
-            heal ::(amount => Number) {
+            heal ::(amount => Number, silent) {
+                when(hp >= stats.HP) empty;
                 amount = amount->ceil;
                 hp += amount;
                 if (hp > stats.HP) hp = stats.HP;
-                dialogue.message(text: '' + this.name + ' heals ' + amount + ' HP (HP:' + this.renderHP() + ')');
+                if (silent == empty)
+                    dialogue.message(text: '' + this.name + ' heals ' + amount + ' HP (HP:' + this.renderHP() + ')');
             },
             
             healAP ::(amount => Number) {

@@ -1158,13 +1158,13 @@ Effect.database = Database.new(
 
         Effect.new(
             data : {
-                name : 'HP Recovery: Minor',
-                description: 'Heals 20% of HP.',
+                name : 'HP Recovery: All',
+                description: 'Heals 100% of HP.',
                 battleOnly : true,
                 skipTurn : false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    holder.heal(amount:holder.stats.HP*0.2);
+                    holder.heal(amount:holder.stats.HP);
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
@@ -1187,6 +1187,37 @@ Effect.database = Database.new(
             }
         ),
         
+        Effect.new(
+            data : {
+                name : 'AP Recovery: All',
+                description: 'Heals 100% of AP.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                    holder.healAP(amount:holder.stats.AP);
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
         Effect.new(
             data : {
                 name : 'Treasure I',
