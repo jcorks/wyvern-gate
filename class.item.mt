@@ -92,6 +92,7 @@
         @islandLevelHint;
         @islandNameHint;
         @modCount = 0;
+        @equipEffects = [];
         @victoryCount = 0; // like exp, stat mods increase with victories
                            // conceptually: the user becomes more familiar
                            // with how to effectively use it in their hands
@@ -110,6 +111,9 @@
             base_ = base;
             stats.add(stats:base.equipMod);
             description = base.description;
+            base.equipEffects->foreach(do:::(i, effect) {
+                equipEffects->push(value:effect);
+            });
             
             if (base.canHaveModifier) ::<= {
                 if (modHint != empty) ::<= {
@@ -117,14 +121,14 @@
                     mods->push(value:mod);
                     customName = base.name + ' (' + mod.name + ')';
                     stats.add(stats:mod.equipMod);
-                    description = description + mod.description;
+                    description = description + ' ' + mod.description;
                 };
 
                 
                 if (rngModHint != empty || Number.random() > 0.5) ::<= {
                     @:count = (Number.random()*3+1)->floor;
                     if(count > 1)
-                        customName = base.name + ' (Custom)';
+                        customName = base.name + ' (Rare)';
                     modCount = count;
                     [0, count]->for(do:::(i) {
                         @:mod = ItemModifier.database.getRandom();
@@ -132,8 +136,11 @@
                             customName = base.name + ' (' + mod.name + ')';
 
                         mods->push(value:mod);
+                        mod.equipEffects->foreach(do:::(i, effect) {
+                            equipEffects->push(value:effect);
+                        });
                         stats.add(stats:mod.equipMod);
-                        description = description + mod.description;
+                        description = description + ' ' + mod.description;
                     });
                 };
             };
@@ -218,6 +225,10 @@
                 set ::(value => Inventory.type) {
                     container = value;
                 }
+            },
+            
+            equipEffects : {
+                get ::<- equipEffects
             },
             
             islandEntry : {
@@ -308,6 +319,12 @@
                     description = value.description;
                     stats.state = value.stats;
                     modCount = value.modCount;
+                    equipEffects = [];
+                    value.equipEffects->foreach(do:::(index, effectName) {
+                        mods->push(value:effectName);
+                    });
+
+                    mods = [];
                     value.modNames->foreach(do:::(index, modName) {
                         @:mod = ItemModifier.database.find(name:modName);
                         mods->push(value:mod);
@@ -326,7 +343,8 @@
                         description : description,
                         stats : stats.state,
                         modCount : modCount,
-                        modNames : [...mods]->map(to:::(value) <- value.name)
+                        modNames : [...mods]->map(to:::(value) <- value.name),
+                        equipEffects : [...equipEffects]
                     };
                 }
             }

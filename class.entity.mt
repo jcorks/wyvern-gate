@@ -137,7 +137,7 @@
             
             [0, EQUIP_SLOTS.RING_R+1]->for(do:::(slot) {
                 when(slot == EQUIP_SLOTS.HAND_R) empty;
-                equips[slot].base.equipEffects->foreach(do:::(index, effect) {
+                equips[slot].equipEffects->foreach(do:::(index, effect) {
                     this.addEffect(
                         from:this, 
                         name:effect, 
@@ -500,11 +500,24 @@
                     flags.add(flag:StateFlags.IS_DEAD);
                     isDead = true;                    
                 };
+
+                @damageTypeName ::{
+                    return match(damage.damageType) {
+                      (Damage.TYPE.FIRE): 'fire ',
+                      (Damage.TYPE.ICE): 'ice ',
+                      (Damage.TYPE.THUNDER): 'thunder ',
+                      (Damage.TYPE.LIGHT): 'light ',
+                      (Damage.TYPE.DARK): 'dark ',
+                      (Damage.TYPE.PHYS): 'physical ',
+                      (Damage.TYPE.POISON): 'poison ',
+                      (Damage.TYPE.NEUTRAL): ''
+                    };
+                };
                 
                 if (damage.damageClass == Damage.CLASS.HP) ::<= {
                     hp -= damage.amount;
                     if (hp < 0) hp = 0;
-                    dialogue.message(text: '' + this.name + ' received ' + damage.amount + ' damage (HP:' + this.renderHP() + ')' );
+                    dialogue.message(text: '' + this.name + ' received ' + damage.amount + ' '+damageTypeName() + 'damage (HP:' + this.renderHP() + ')' );
                 } else ::<= {
                     ap -= damage.amount;
                     if (ap < 0) ap = 0;                
@@ -528,6 +541,14 @@
                     this.addEffect(from, name:'Frozen',durationTurns:5);
                 if (damage.damageType == Damage.TYPE.THUNDER && Number.random() > 0.9)
                     this.addEffect(from, name:'Paralyzed',durationTurns:5);
+                if (damage.damageType == Damage.TYPE.PHYS && Number.random() > 0.99) 
+                    this.addEffect(from, name:'Bleeding',durationTurns:5);
+                if (damage.damageType == Damage.TYPE.POISON && Number.random() > 0.9) 
+                    this.addEffect(from, name:'Poisoned',durationTurns:5);
+                if (damage.damageType == Damage.TYPE.DARK && Number.random() > 0.9)
+                    this.addEffect(from, name:'Blind',durationTurns:5);
+                if (damage.damageType == Damage.TYPE.LIGHT && Number.random() > 0.9)
+                    this.addEffect(from, name:'Petrified',durationTurns:5);
                 
                 
                 if (world.party.isMember(entity:this) && hp == 0 && Number.random() > 0.7) ::<= {
@@ -781,7 +802,8 @@
                 };
                 
                 
-                item.base.equipEffects->foreach(do:::(index, effect) {
+                item.equipEffects->foreach(do:::(index, effect) {
+                    breakpoint();
                     this.addEffect(
                         from:this, 
                         name:effect, 
@@ -835,7 +857,7 @@
                     equips[slot] = none;                
                 };
                 
-                current.base.equipEffects->foreach(do:::(i, effect) {
+                current.equipEffects->foreach(do:::(i, effect) {
                     @:effectObj = effects->filter(by:::(value) <- value.effect.name == effect)[0];
                     effectObj.effect.onRemoveEffect(
                         user:effectObj.from, 

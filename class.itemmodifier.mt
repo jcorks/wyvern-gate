@@ -56,7 +56,6 @@ ItemMod.database = Database.new(
                 pricePercentMod: -60,
                 levelMinimum : 1,
                 equipEffects : [
-                    'Brittle' // chance to break every turn
                 ],
                 
                 useEffects : []
@@ -80,7 +79,6 @@ ItemMod.database = Database.new(
                 pricePercentMod: -50,
                 
                 equipEffects : [
-                    'Brittle' // chance to break every turn
                 ],
                 
                 useEffects : []
@@ -171,7 +169,7 @@ ItemMod.database = Database.new(
         ItemMod.new(
             data : {
                 name : 'Decorative',
-                description : 'It appears a bit more ornate than the usual',
+                description : 'It appears a bit more ornate than the usual.',
                 equipMod : StatSet.new(
                     SPD: -5,
                     DEX: -5,
@@ -307,6 +305,108 @@ ItemMod.database = Database.new(
                 useEffects : []
             }
         ), 
+
+        ItemMod.new(
+            data : {
+                name : 'Burning',
+                description : 'The material its made of is warm to the touch. Gives it a fire aspect when used as a weapon, and gives ice resistance when used as armor.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                pricePercentMod: 20,
+                
+                equipEffects : [
+                    "Burning"
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemMod.new(
+            data : {
+                name : 'Icy',
+                description : 'The material its made of is cold to the touch. Gives it an ice aspect when used as a weapon, and gives fire resistance when used as armor.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                pricePercentMod: 20,
+                
+                equipEffects : [
+                    "Icy"
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemMod.new(
+            data : {
+                name : 'Shock',
+                description : 'The material its made of gently hums. Gives it an thunder aspect when used as a weapon, and gives thunder resistance when used as armor.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                pricePercentMod: 20,
+                
+                equipEffects : [
+                    "Shock"
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemMod.new(
+            data : {
+                name : 'Toxic',
+                description : 'The material its made of is poisonous. Gives it a poison aspect when used as a weapon, and gives poison resistance when used as armor.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                pricePercentMod: 20,
+                
+                equipEffects : [
+                    "Toxic"
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemMod.new(
+            data : {
+                name : 'Shimmering',
+                description : 'The material its made of glows softly. Gives it a light aspect when used as a weapon, and gives dark resistance when used as armor.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                pricePercentMod: 20,
+                
+                equipEffects : [
+                    "Shimmering"
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemMod.new(
+            data : {
+                name : 'Dark',
+                description : 'The material its made of is very dark. Gives it a dark aspect when used as a weapon, and gives light resistance when used as armor.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                pricePercentMod: 20,
+                
+                equipEffects : [
+                    "Dark"
+                ],
+                
+                useEffects : []
+            }
+        ),
 
     
     ]

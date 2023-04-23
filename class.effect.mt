@@ -1979,7 +1979,7 @@ Effect.database = Database.new(
                 onAffliction : ::(user, item, holder) {
                     @:world = import(module:'singleton.world.mt');
 
-                    if (world.time > world.TIME.EVENING) ::<= {
+                    if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
                         dialogue.message(text:'The sun intensifies... ' + holder.name +' softly glows');                    
                     };
                 },
@@ -2000,7 +2000,7 @@ Effect.database = Database.new(
                 onStatRecalculate : ::(user, item, holder, stats) {
                     @:world = import(module:'singleton.world.mt');
 
-                    if (world.time < world.TIME.EVENING) ::<= {
+                    if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
                         stats.modRate(stats:StatSet.new(INT:40, DEF:40, ATK:40));
                     };                    
                 }
@@ -2030,7 +2030,7 @@ Effect.database = Database.new(
                     if (Number.random() > 0.8 && damage.damageType == Damage.TYPE.PHYS) ::<= {
                         @:Entity = import(module:'class.entity.mt');
                     
-                        dialogue.message(text:holder.name + " parries the blow, but their weapon breaks in the process!");
+                        dialogue.message(text:holder.name + " parries the blow, but their non-combat weapon breaks in the process!");
                         damage.amount = 0;
                         @:item = holder.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
                         holder.unequip(slot:Entity.EQUIP_SLOTS.HAND_L, silent:true);
@@ -2044,7 +2044,42 @@ Effect.database = Database.new(
                 
                 }
             }
-        ),      
+        ),   
+        
+        Effect.new(
+            data : {
+                name : 'Flight',
+                description: '20% chance to deflect attack then break weapon.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                    if (from != holder) ::<= {
+                        @:Entity = import(module:'class.entity.mt');                    
+                        dialogue.message(text:holder.name + " dodges the damage from Flight!");
+                        damage.amount = 0;
+                    };
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),        
+           
         Effect.new(
             data : {
                 name : 'Assassin\'s Pride',
@@ -2223,7 +2258,7 @@ Effect.database = Database.new(
                     holder.damage(
                         from: holder,
                         damage: Damage.new(
-                            amount:holder.HP*0.05,
+                            amount:holder.stats.HP*0.05,
                             damageType : Damage.TYPE.NEUTRAL,
                             damageClass: Damage.CLASS.HP
                         )
@@ -2397,7 +2432,7 @@ Effect.database = Database.new(
                         damage : Damage.new(
                             amount: user.stats.HP / 16,
                             damageClass: Damage.CLASS.HP,
-                            damageType: Damage.TYPE.FIRE
+                            damageType: Damage.TYPE.NEUTRAL
                         )
                     );
                 },
@@ -2510,6 +2545,233 @@ Effect.database = Database.new(
             }
         ),
         
+        Effect.new(
+            data : {
+                name : 'Burning',
+                description: 'Gives fire damage and gives 50% ice resist',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                    to.damage(from:to, damage: Damage.new(
+                        amount: random.integer(from:1, to:4),
+                        damageType: Damage.TYPE.FIRE,
+                        damageClass: Damage.CLASS.HP
+                    ));
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    if (damage.damageType == Damage.TYPE.ICE) ::<= {
+                        damage.amount *= 0.5;
+                    };
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),         
+
+        Effect.new(
+            data : {
+                name : 'Icy',
+                description: 'Gives ice damage and gives 50% fire resist',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                    to.damage(from:to, damage: Damage.new(
+                        amount: random.integer(from:1, to:4),
+                        damageType: Damage.TYPE.ICE,
+                        damageClass: Damage.CLASS.HP
+                    ));
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    if (damage.damageType == Damage.TYPE.FIRE) ::<= {
+                        damage.amount *= 0.5;
+                    };
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
+        Effect.new(
+            data : {
+                name : 'Shock',
+                description: 'Gives thunder damage and gives 50% thunder resist',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                    to.damage(from:to, damage: Damage.new(
+                        amount: random.integer(from:1, to:4),
+                        damageType: Damage.TYPE.THUNDER,
+                        damageClass: Damage.CLASS.HP
+                    ));
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
+                        damage.amount *= 0.5;
+                    };
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
+        Effect.new(
+            data : {
+                name : 'Toxic',
+                description: 'Gives poison damage and gives 50% poison resist',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                    to.damage(from:to, damage: Damage.new(
+                        amount: random.integer(from:1, to:4),
+                        damageType: Damage.TYPE.POISON,
+                        damageClass: Damage.CLASS.HP
+                    ));
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    if (damage.damageType == Damage.TYPE.POISON) ::<= {
+                        damage.amount *= 0.5;
+                    };
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
+        Effect.new(
+            data : {
+                name : 'Shimmering',
+                description: 'Gives light damage and gives 50% dark resist',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                    to.damage(from:to, damage: Damage.new(
+                        amount: random.integer(from:1, to:4),
+                        damageType: Damage.TYPE.LIGHT,
+                        damageClass: Damage.CLASS.HP
+                    ));
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    if (damage.damageType == Damage.TYPE.DARK) ::<= {
+                        damage.amount *= 0.5;
+                    };
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),        
+        Effect.new(
+            data : {
+                name : 'Dark',
+                description: 'Gives dark damage and gives 50% light resist',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                    to.damage(from:to, damage: Damage.new(
+                        amount: random.integer(from:1, to:4),
+                        damageType: Damage.TYPE.DARK,
+                        damageClass: Damage.CLASS.HP
+                    ));
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    if (damage.damageType == Damage.TYPE.LIGHT) ::<= {
+                        damage.amount *= 0.5;
+                    };
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ), 
+
     ]
 );
 

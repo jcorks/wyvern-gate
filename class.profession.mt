@@ -496,8 +496,8 @@ Profession.Base.database = Database.new(
                     'Telekinesis',   //X stun for a turn
                     'Frozen Flame',  //X damage all, chance for freeze
                     'Dematerialize', //X removes equip
-                    'Mind Read',     // use random ability of target
-                    'Flight',        // make target fly?
+                    'Mind Read',     //X use random ability of target
+                    'Flight',        //X make target fly
                     
                 ],
                 passives : [
@@ -622,8 +622,8 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
 
                 abilities : [
-                    'Pink Brew',     // -1 ingredient pack, +1 pink potion 
-                    'Cyan Brew',     // -1 ingredient pack, +1 cyan ption 
+                    'Pink Brew',     // -3 ingredient pack, +1 pink potion 
+                    'Cyan Brew',     // -3 ingredient pack, +1 cyan ption 
                     'Green Brew',    // etc (poison)
                     'Orange Brew',   // etc (explosion)
                     'Purple Brew',   // etc (health + ap)

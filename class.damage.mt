@@ -24,7 +24,8 @@
      ICE        : 3,
     LIGHT      : 4,
     DARK       : 5,
-    PHYS       : 6
+    PHYS       : 6,
+    POISON     : 7
 
 };
 

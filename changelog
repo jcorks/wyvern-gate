@@ -1,4 +1,8 @@
 0.1.2b
+- Items can now have equip modifiers
+- Equipped items can now cause typed damage 
+- Added Poison damage type 
+- Changed dropped items from enemies to always be non-modified, while chests will contain modifier items 
 -  changed the map system on island view to be more exploration based
   . open-world exploration using cardinal directions
   . terrain scenery generated

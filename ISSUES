@@ -6,6 +6,9 @@ Known bugs / concerns:
 - Skills are not used by AI yet.
 - killed enamies do not yield exp.
 
+
+
+
 Coming changes:
 - Game restructure
   . Random encounters will be very rare
@@ -16,6 +19,11 @@ Coming changes:
   . One stair per level 
   . Chance for Treasure room is available after 6 floors, but still only a chance 
   . large chest ALWAYS contains a key to next stratum
+  . Stratum keys are pre-defined:
+    - FIRE key first 
+    - ICE key second 
+    - THUNDER key third
+    - LIGHT key last
   . shops no longer sell keys 
   . random event changes:
     - eating food with a stranger increases or decreases max HP / MP by 5%
