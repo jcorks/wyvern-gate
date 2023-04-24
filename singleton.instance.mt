@@ -468,22 +468,12 @@ return class(
         
         this.interface = {
             mainMenu ::(
-                onCommit => Function,    // canvas commit,
                 onSaveState => Function, // for saving,
                 onLoadState => Function,
-                useCursor => Boolean,
-                onInputNumber => Function,
-                onInputCursor => Function
             ) {
-                canvas.onCommit = onCommit;
                 this.onSaveState = onSaveState;
                 this.onLoadState = onLoadState;
-                
-                dialogue.setInput(
-                    function:if (useCursor) onInputCursor else onInputNumber,
-                    cursorMode : useCursor
-                );
-                
+                                
                 dialogue.message(
                     text: ' Wyvern Gate ' + VERSION + ' '
                 );
@@ -494,11 +484,9 @@ return class(
 
 
 
-                canvas.clear();
-                
                 
 
-                @:choice = dialogue.pushChoices(
+                dialogue.pushChoices(
                     choices : ['Load', 'New', 'Quit'],
                     topWeight: 0.75,
                     onChoice ::(choice) {

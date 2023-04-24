@@ -119,12 +119,30 @@ dialogue.message(
     text: 'Test2'
 );
 
+dialogue.pushChoices(
+    prompt: 'Which?',
+    choices : [
+        'apple',
+        'orng',
+        'pear',
+        'mango'
+    ],
+    
+    onChoice ::(choice) {
+        dialogue.message(
+            leftWeight: 0,
+            text: 'Picked ' + choice
+        );        
+    }
+);
+
+
 dialogue.message(
     leftWeight: 0,
     text: 'Test3'
 );
 
-
+// standard event loop
 forever(do::{
     @val = pollInput();
     dialogue.commitInput(input:val);

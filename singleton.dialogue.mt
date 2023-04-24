@@ -94,7 +94,7 @@ return class(
     
 
 
-        @:choicesCursor ::(data => Object) {
+        @:choicesCursor ::(data => Object, input) {
             @:choices = data.choices;
             @:prompt = data.prompt; 
             @:leftWeight = data.leftWeight; 
@@ -102,8 +102,25 @@ return class(
             @:canCancel = data.canCancel;
             @:defaultChoice = data.defaultChoice;
             @:onChoice = data.onChoice;
+            @choice = input;
             
-            
+            @continue = match(choice) {
+              (CURSOR_ACTIONS.UP,
+               CURSOR_ACTIONS.DOWN,
+               CURSOR_ACTIONS.LEFT,
+               CURSOR_ACTIONS.RIGHT,
+               CURSOR_ACTIONS.CONFIRM,
+               CURSOR_ACTIONS.CANCEL): true,
+               
+              default:false
+            };
+            // first render
+            if (data.rendered == empty) ::<= {
+                continue = true;
+                data.rendered = true; 
+            };  
+
+            when(!continue) false;            
             @:PAGE_SIZE = 7;        
             @:WIDTH = ::<= {
                 @max = 0;
@@ -114,95 +131,85 @@ return class(
                 
                 return max;
             };
-            onChoice(choice: ::<={
-                @:outputChoice = [::] {
-                    @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
-                    @cursorPageTop = 0;
-                    forever(do:::{
-                        if (cursorPos < 0) cursorPos = 0;
-                        if (cursorPos >= choices->keycount) cursorPos = choices->keycount-1;
+            @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
+            @cursorPageTop = 0;
 
-                        if (cursorPos >= cursorPageTop+PAGE_SIZE) cursorPageTop+=1;
-                        if (cursorPos  < cursorPageTop) cursorPageTop -=1;
+            if (choice == CURSOR_ACTIONS.UP) ::<= {
+                data.defaultChoice = (cursorPos+1) - 1;
+                cursorPos -= 1;
+            };
+            if(choice == CURSOR_ACTIONS.DOWN) ::<= {
+                data.defaultChoice = (cursorPos+1) + 1;
+                cursorPos += 1;
+            };
 
-                        if (cursorPageTop > choices->keycount - PAGE_SIZE) cursorPageTop = choices->keycount-PAGE_SIZE;
-                        if (cursorPageTop < 0) cursorPageTop = 0;
-                        
-                        @:choicesModified = [];
-                        
-                        
-                        if (choices->keycount > PAGE_SIZE) ::<= {
-                            @initialLine = if (cursorPageTop > 0) '▴' else ' ';
-                            [initialLine->length, WIDTH]->for(do:::(i) {
-                                initialLine = initialLine + ' ';
-                            });                   
-                            choicesModified->push(value:initialLine);
+            if (cursorPos < 0) cursorPos = 0;
+            if (cursorPos >= choices->keycount) cursorPos = choices->keycount-1;
 
+            if (cursorPos >= cursorPageTop+PAGE_SIZE) cursorPageTop+=1;
+            if (cursorPos  < cursorPageTop) cursorPageTop -=1;
 
-                            [cursorPageTop, cursorPageTop+PAGE_SIZE]->for(do:::(index) {
-                                
-                                choicesModified->push(value: (if (cursorPos == index) '▹  ' else '   ') + choices[index]);
-                            });
-
-
-                            if (cursorPageTop + PAGE_SIZE < (choices->keycount))                    
-                                choicesModified->push(value:'▾  ')
-                            else
-                                choicesModified->push(value:'       ');
-                        } else ::<= {
-                            [0, choices->keycount]->for(do:::(index) {
-                                choicesModified->push(value: (if (cursorPos == index) '▹  ' else '   ') + choices[index]);
-                            });
-                        
-                        };
-                        
-                        //if (canCancel) ::<= {
-                        //    choicesModified->push(value:'(Cancel)');
-                        //};
-                        renderText(
-                            lines: choicesModified,
-                            speaker: prompt,
-                            leftWeight,
-                            topWeight,
-                            limitLines:13
-                        ); 
-                        canvas.commit();    
-                        
-                        @choice;
-                        [::] {  
-                            forever(do:::{
-                                choice = onInput();
-                                match(choice) {
-                                  (CURSOR_ACTIONS.UP,
-                                   CURSOR_ACTIONS.DOWN,
-                                   CURSOR_ACTIONS.LEFT,
-                                   CURSOR_ACTIONS.RIGHT,
-                                   CURSOR_ACTIONS.CONFIRM,
-                                   CURSOR_ACTIONS.CANCEL): send()
-                                };
-                            });
-                        };                                              
-
-                        
-
-                        when (choice == CURSOR_ACTIONS.UP)
-                            cursorPos -= 1;
-                        when(choice == CURSOR_ACTIONS.DOWN)
-                            cursorPos += 1;
-                            
-                        when(choice == CURSOR_ACTIONS.CANCEL && canCancel)
-                            send(message:0);
-                        
-                        when(choice == CURSOR_ACTIONS.CONFIRM)
-                            send(message:cursorPos + 1);
+            if (cursorPageTop > choices->keycount - PAGE_SIZE) cursorPageTop = choices->keycount-PAGE_SIZE;
+            if (cursorPageTop < 0) cursorPageTop = 0;
+            
+            @:choicesModified = [];
+            
+            
+            if (choices->keycount > PAGE_SIZE) ::<= {
+                @initialLine = if (cursorPageTop > 0) '▴' else ' ';
+                [initialLine->length, WIDTH]->for(do:::(i) {
+                    initialLine = initialLine + ' ';
+                });                   
+                choicesModified->push(value:initialLine);
 
 
-                        
-                    });
-                };
-                data.defaultChoice = outputChoice;
-                return outputChoice;
-            });        
+                [cursorPageTop, cursorPageTop+PAGE_SIZE]->for(do:::(index) {
+                    
+                    choicesModified->push(value: (if (cursorPos == index) '▹  ' else '   ') + choices[index]);
+                });
+
+
+                if (cursorPageTop + PAGE_SIZE < (choices->keycount))                    
+                    choicesModified->push(value:'▾  ')
+                else
+                    choicesModified->push(value:'       ');
+            } else ::<= {
+                [0, choices->keycount]->for(do:::(index) {
+                    choicesModified->push(value: (if (cursorPos == index) '▹  ' else '   ') + choices[index]);
+                });
+            
+            };
+            
+
+
+            //if (canCancel) ::<= {
+            //    choicesModified->push(value:'(Cancel)');
+            //};
+            renderText(
+                lines: choicesModified,
+                speaker: prompt,
+                leftWeight,
+                topWeight,
+                limitLines:13
+            ); 
+            canvas.commit();    
+            breakpoint();
+
+                
+            when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
+                canvas.popState();
+                choiceStack->pop;
+                return true;
+            };
+            
+            when(choice == CURSOR_ACTIONS.CONFIRM) ::<= {
+                canvas.popState();
+                choiceStack->pop;
+                onChoice(choice:cursorPos + 1);
+                return true;
+            };
+                
+            return false;
         };
 
 
@@ -326,15 +333,18 @@ return class(
                         });
                         choicesModified->push(value:choice);
                     });
-                    
-                    renderText(
-                        lines: choicesModified,
-                        speaker: prompt,
-                        leftWeight,
-                        topWeight,
-                        limitLines:9
-                    ); 
-                    canvas.commit();                            
+                    // first render
+                    if (data.rendered == empty) ::<= {
+                        renderText(
+                            lines: choicesModified,
+                            speaker: prompt,
+                            leftWeight,
+                            topWeight,
+                            limitLines:9
+                        ); 
+                        canvas.commit();
+                        data.rendered = true; 
+                    };                                           
                     @choice;
                     [::] {  
                         forever(do:::{
@@ -349,7 +359,14 @@ return class(
                             };
                         });
                     };                                              
-                    
+                    renderText(
+                        lines: choicesModified,
+                        speaker: prompt,
+                        leftWeight,
+                        topWeight,
+                        limitLines:9
+                    ); 
+                    canvas.commit();                    
                     
                     if (choice == CURSOR_ACTIONS.CONFIRM)
                         send(message:which+1);        
@@ -396,8 +413,11 @@ return class(
         
             return match(input) {
               (CURSOR_ACTIONS.CONFIRM, 
-               CURSOR_ACTIONS.CANCEL): true,
-               
+               CURSOR_ACTIONS.CANCEL): ::<= {
+                canvas.popState();
+                choiceStack->pop;
+                return true;
+               },
               default: false
             };
         };
@@ -427,8 +447,8 @@ return class(
                 };        
                 // true means done
                 if (result == true) ::<= {
-                    canvas.popState();
-                    choiceStack->pop;
+                    if (choiceStack->keycount)
+                        this.commitInput();                    
                 };
             },
             
@@ -553,7 +573,7 @@ return class(
             //
             pushChoices ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function) {
                 choiceStack->push(value:{
-                    mode: if (isCursor) CHOICE_MODE.CURSOR else CHOICE_MODE.NUMBER,
+                    mode: CHOICE_MODE.CURSOR,
                     choices: choices,
                     prompt: prompt,
                     leftWeight: leftWeight,
