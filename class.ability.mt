@@ -329,7 +329,7 @@ Ability.database = Database.new(
                                     send();                        
                             });
                         };
-                        dialogue.message(text:user.name + '\'s Solar Blessing made it night time!');
+                        dialogue.message(text:user.name + '\'s Solar Blessing made it day time!');
                         
                     }
                 }
@@ -432,7 +432,7 @@ Ability.database = Database.new(
                         user.enemies->foreach(do:::(index, enemy) {
                             user.attack(
                                 target: enemy,
-                                amount:user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.7 else 0.9),
+                                amount:user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.7 else 0.4),
                                 damageType : Damage.TYPE.FIRE,
                                 damageClass: Damage.CLASS.HP
                             );
@@ -780,8 +780,63 @@ Ability.database = Database.new(
                     }
                 }
             ),
-            
-            
+
+            Ability.new(
+                data: {
+                    name: 'Mind Read',
+                    targetMode : TARGET_MODE.ONE,
+                    description: 'Uses a random offsensive ability of the target\'s',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(
+                            text: user.name + ' reads ' + targets[0].name + '\'s mind!'
+                        );
+                        
+                        @:choices = targets[0].abilitiesAvailable;
+                        
+                        // offensive moves only
+                        @:firstChoices = choices->filter(by:::(value) <- value.usageHintAI == USAGE_HINT.OFFENSIVE && value.name != 'Attack');
+                        when(firstChoices->keycount) ::<= {
+                            @:Random = import(module:'singleton.random.mt');
+                            @:which = Random.pickArrayItem(list:firstChoices);
+                            user.useAbility(
+                                ability:which,
+                                targets,
+                                turnIndex,
+                                extraData
+                            );
+                        };
+                        
+                        dialogue.message(
+                            text: user.name + ' couldn\'t find any offensive abilities to use!'
+                        );                        
+                        
+                    }
+                }
+            ),             
+            Ability.new(
+                data: {
+                    name: 'Flight',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Causes the target to fly, making all damage miss the target for 3 turns",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 3,
+                    usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(
+                            text: user.name + ' casts Flight on ' + targets[0].name + '!'
+                        );
+                        targets[0].addEffect(from:user, name: 'Flight', durationTurns: 3);
+                            
+                    }
+                }
+            ),         
             Ability.new(
                 data: {
                     name: 'Grapple',
@@ -1166,9 +1221,6 @@ Ability.database = Database.new(
                                 damageType : Damage.TYPE.ICE,
                                 damageClass: Damage.CLASS.HP
                             );
-                            if (Number.random() < 0.2) ::<=	{
-                                enemy.addEffect(from:user, name: 'Frozen', durationTurns: 2);                            
-                            };
                         });
 
 
@@ -1702,6 +1754,9 @@ Ability.database = Database.new(
                     }
                 }
             ), 
+
+ 
+
 
             Ability.new(
                 data: {
