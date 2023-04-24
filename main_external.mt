@@ -1,3 +1,5 @@
+
+
 /*
     Wyvern Gate, a procedural, console-based RPG
     Copyright (C) 2023, Johnathan Corkery (jcorkery@umich.edu)
@@ -15,6 +17,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
 @:Entity = import(module:'class.entity.mt');
 @:Random = import(module:'singleton.random.mt');
 
@@ -57,14 +60,14 @@
 // 
 // returns the appropriate cursor action number 
 //
-/*
-    LEFT : 0,
-    UP : 1,
-    RIGHT : 2,
-    DOWN : 3,
-    CONFIRM : 4,
-    CANCEL : 5,
-*/
+
+//    LEFT : 0,
+//    UP : 1,
+//    RIGHT : 2,
+//    DOWN : 3,
+//    CONFIRM : 4,
+//    CANCEL : 5,
+
 @:external_getInput      = getExternalFunction(name:'external_getInput');
 
 

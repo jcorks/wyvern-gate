@@ -379,49 +379,58 @@ return class(
         
         };
         
+        @:displayCursor ::(data, input) {
+            if (data.rendered == empty) ::<={
+                breakpoint();
+                renderText(
+                    leftWeight: data.leftWeight, 
+                    topWeight: data.topWeight, 
+                    lines: data.lines,
+                    speaker:data.prompt,
+                    limitLines : data.pageAfter,
+                    hasNotch: true
+                );
+                canvas.commit();
+                data.rendered = false;
+            };
+        
+            return match(input) {
+              (CURSOR_ACTIONS.CONFIRM, 
+               CURSOR_ACTIONS.CANCEL): true,
+               
+              default: false
+            };
+        };
+        
         
         @:CHOICE_MODE = {
             CURSOR : 0,
             NUMBER : 1,
             COLUMN_CURSOR : 2,
             COLUMN_NUMBER : 3,
-            CURSOR_MOVE: 4
+            CURSOR_MOVE: 4,
+            DISPLAY: 5
         };
         
-        @:commitChoice ::{    
-            @:val = choiceStack->pop;
-            if (val.jail == true) ::<= {
-                choiceStack->push(value:val);
-            };
-            
-            match(val.mode) {
-              (CHOICE_MODE.CURSOR): ::<= {
-                canvas.pushState();
-                choicesCursor(data:val);
-                canvas.popState();
-                canvas.commit();
-              },
-              (CHOICE_MODE.COLUMN_CURSOR): ::<= {
-                canvas.pushState();
-                choiceColumnsCursor(data:val);
-                canvas.popState();
-                canvas.commit();
-              },
-              (CHOICE_MODE.CURSOR_MOVE): choiceCursorMove(data:val)            
-            };        
-        };
        
-        
-        @:startChoices ::{
-            [::] {
-                forever(do:::{
-                    when(choiceStack->keycount == 0) send();
-                    commitChoice();
-                });
-            };
-        };
-        
         this.interface = {
+            commitInput ::(input){    
+                @:val = choiceStack[choiceStack->keycount-1];
+                //if (val.jail == true) ::<= {
+                //    choiceStack->push(value:val);
+                //};
+                @result = match(val.mode) {
+                  (CHOICE_MODE.CURSOR):         choicesCursor(data:val, input),
+                  (CHOICE_MODE.COLUMN_CURSOR):  choiceColumnsCursor(data:val, input),
+                  (CHOICE_MODE.DISPLAY):        displayCursor(data:val, input),
+                  (CHOICE_MODE.CURSOR_MOVE):    choiceCursorMove(data:val, input)
+                };        
+                // true means done
+                if (result == true) ::<= {
+                    canvas.popState();
+                    choiceStack->pop;
+                };
+            },
             
             // Posts a message to the screen. In the case that a 
             // message overflows, it will be split into multiple dialogs.
@@ -518,42 +527,31 @@ return class(
             //
             // lines should be an array of strings.
             display::(prompt, lines, pageAfter, leftWeight, topWeight) {
+                canvas.pushState();                    
                 if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
                 [0, lines->keycount, pageAfter]->for(do:::(i) {
-                    canvas.pushState();                    
-                    renderText(
-                        leftWeight, topWeight, 
-                        lines: lines->subset(from:i, to:min(a:i+pageAfter, b:lines->keycount)-1),
-                        speaker:prompt,
-                        limitLines : pageAfter,
-                        hasNotch: true
-                    );
-                    canvas.commit();
-                    if (isCursor) ::<={
-                        // stuck until press confirm or cancel
-                        [::] {
-                            forever(do:::{
-                                match(onInput()) {
-                                  (CURSOR_ACTIONS.CONFIRM, 
-                                   CURSOR_ACTIONS.CANCEL): send()
-                                };
-                            });
-                        };
-                    
-                    } else 
-                        onInput();                
-                    canvas.popState();
-
+                    choiceStack->push(value:{
+                        topWeight: topWeight,
+                        leftWeight : leftWeight,
+                        lines:lines->subset(from:i, to:min(a:i+pageAfter, b:lines->keycount)-1),
+                        pageAfter: pageAfter,
+                        prompt: prompt,
+                        mode: CHOICE_MODE.DISPLAY
+                    });
                 });                       
-                canvas.commit();      
+                canvas.pushState();      
             },
+
+
+
+
             
             
             // Allows for choosing from a list of options.
             // Like all UI choices, the weight can be chosen.
             // Prompt will be displayed, like speaker in the message callback
             //
-            pushChoices ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, jail, onChoice => Function) {
+            pushChoices ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function) {
                 choiceStack->push(value:{
                     mode: if (isCursor) CHOICE_MODE.CURSOR else CHOICE_MODE.NUMBER,
                     choices: choices,
@@ -563,9 +561,9 @@ return class(
                     canCancel: canCancel,
                     defaultChoice: defaultChoice,
                     onChoice: onChoice,
-                    jail: jail
                 });
                 
+                /*
                 if (jail == true) ::<= {
                     @count = choiceStack->keycount - 1;
                     [::] {
@@ -577,9 +575,10 @@ return class(
                         });                        
                     };
                 };
+                */
             },
             
-            
+            /*
             choicesNow ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice) {
                 @out;
                 choiceStack->push(value:{
@@ -596,8 +595,9 @@ return class(
                 });
                 commitChoice();
                 return out;
-            },        
-            
+            },  
+            */      
+            /*
             cursorMove ::(prompt, leftWeight, topWeight, onMove) {
                 choiceStack->push(value:{
                     mode: CHOICE_MODE.CURSOR_MOVE,
@@ -671,12 +671,7 @@ return class(
                     return choiceStack->keycount;
                 }
             },
-            
-            
-            setInput ::(function, cursorMode) {
-                isCursor = cursorMode;
-                onInput = function;
-            },
+
             
             startChoiceStack ::{
                 startChoices();
@@ -685,6 +680,7 @@ return class(
             CURSOR_ACTIONS : {
                 get::<- CURSOR_ACTIONS
             }
+            */
         };    
     }
 ).new();

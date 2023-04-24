@@ -15,17 +15,17 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-@:Entity = import(module:'class.entity.mt');
-@:Random = import(module:'singleton.random.mt');
+//@:Entity = import(module:'class.entity.mt');
+//@:Random = import(module:'singleton.random.mt');
 @:console = import(module:'Matte.System.ConsoleIO');
 
 @:canvas = import(module:'singleton.canvas.mt');
-@:instance = import(module:'singleton.instance.mt');
+//@:instance = import(module:'singleton.instance.mt');
 @:Time = import(module:'Matte.System.Time');
 
 
 
-
+/*
 instance.mainMenu(
     onCommit :::(lines) {
         console.clear();
@@ -64,49 +64,83 @@ instance.mainMenu(
             }
         };
     },
+    
 
-    useCursor : true,
-    
-    onInputNumber :::() {
-        @out = 0;
-        [::] {
-            out = Number.parse(string:console.getln());
-        } : {
-            onError:::(message) {
-                //nothing
-            }
-        };    
-        return out;
-    },
-    
-    onInputCursor :::() {
-        
-        @command = '';
-        @:getPiece = ::{
-            @:ch = console.getch(unbuffered:true);
-            when (ch == empty) '';
-            return ch->charCodeAt(index:0);
-        };
-        
-        command = '' + getPiece() + getPiece() + getPiece();
- 
-        
-        @:CURSOR_ACTIONS = {
-            '279165': 1, // up,
-            '279166': 3, // down
-            '279168': 0, // left,
-            '279167': 2, // right
-             
-            '122': 4, // confirm,
-            '120': 5, // cancel
-            
-        };
-        @val = CURSOR_ACTIONS[command];
-        if (val == empty)
-            Time.sleep(milliseconds:30);
-        return val;        
-    }
 );
+*/
+
+
+@:pollInput = ::{
+        
+    @command = '';
+    @:getPiece = ::{
+        @:ch = console.getch(unbuffered:true);
+        when (ch == empty) '';
+        return ch->charCodeAt(index:0);
+    };
+    
+    command = '' + getPiece() + getPiece() + getPiece();
+
+    
+    @:CURSOR_ACTIONS = {
+        '279165': 1, // up,
+        '279166': 3, // down
+        '279168': 0, // left,
+        '279167': 2, // right
+         
+        '122': 4, // confirm,
+        '120': 5, // cancel
+        
+    };
+    @val = CURSOR_ACTIONS[command];
+    if (val == empty)
+        Time.sleep(milliseconds:30);
+    return val;   
+};
+
+
+@currentCanvas;
+@canvasChanged = false;
+canvas.onCommit = ::(lines){
+    currentCanvas = lines;
+    canvasChanged = true;
+};
+
+
+@:dialogue = import(module:'singleton.dialogue.mt');
+
+dialogue.message(
+    leftWeight: 1,
+    text: 'Test1'
+);
+
+dialogue.message(
+    topWeight: 1,
+    text: 'Test2'
+);
+
+dialogue.message(
+    leftWeight: 0,
+    text: 'Test3'
+);
+
+
+forever(do::{
+    @val = pollInput();
+    dialogue.commitInput(input:val);
+    
+    if (canvasChanged) ::<= {
+        console.clear();
+        @:lines = currentCanvas;
+        lines->foreach(do:::(index, line) {
+            line->foreach(do:::(i, iter) {
+                console.println(message:iter.text);
+            });
+        }); 
+        canvasChanged = false;    
+    };
+});
+
 
 
 

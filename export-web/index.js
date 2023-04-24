@@ -1,101 +1,11 @@
-function() {
-    var LAST_INPUT = -1;
+var LAST_INPUT = -1;
+const matteWorker = new Worker('driver.js');
 
-    /*
-    @:CURSOR_ACTIONS = {
-        LEFT : 0,
-        UP : 1,
-        RIGHT : 2,
-        DOWN : 3,
-        CONFIRM : 4,
-        CANCEL : 5
-    };
+(function() {
 
-    */
-
-    // reads a binary file
-    const readBinary = function(name, onLoad) {
-        const req = new XMLHttpRequest();
-        req.open("GET", name, true);
-        req.responseType = "arraybuffer";
-
-        req.onload = (event) => {
-            const arrayBuffer = req.response; // Note: not req.responseText
-            if (arrayBuffer) {
-                onLoad(arrayBuffer);
-            };
-        }
-        req.send(null);
-    };
-
-    const matteList = [
-        'class.ability.mt'
-        'class.battleai.mt'
-        'class.battle.mt'
-        'class.damage.mt'
-        'class.database.mt'
-        'class.dungeoncontroller.mt'
-        'class.dungeonmap.mt'
-        'class.effect.mt'
-        'class.entity.mt'
-        'class.event.mt'
-        'class.interaction.mt'
-        'class.inventory.mt'
-        'class.island.mt'
-        'class.itemcolor.mt'
-        'class.itemmodifier.mt'
-        'class.item.mt'
-        'class.landmark.mt'
-        'class.largemap.mt'
-        'class.location.mt'
-        'class.logtimer.mt'
-        'class.mapbase.mt'
-        'class.map.mt'
-        'class.material.mt'
-        'class.party.mt'
-        'class.personality.mt'
-        'class.profession.mt'
-        'class.scene.mt'
-        'class.species.mt'
-        'class.stateflags.mt'
-        'class.statset.mt'
-        'function.battlemenu.mt'
-        'function.distance.mt'
-        'function.itemmenu.mt'
-        'function.partyoptions.mt'
-        'function.pickitem.mt'
-        'main_external.mt'
-        'singleton.canvas.mt'
-        'singleton.dialogue.mt'
-        'singleton.instance.mt'
-        'singleton.menustack.mt'
-        'singleton.namegen.mt'
-        'singleton.random.mt'
-        'singleton.story.mt'
-        'singleton.world.mt'
-        'struct.battleaction.mt'
-        'struct.mt'
-
-    ];
-
-    var matteListIndex = 0;
-
-    const mattePreloadedBytecode = {};
-
-    const matte = Matte.newVM(
-        function(name) {
-            return mattePreloadedBytecode[name];
-        },
-        function(value) {
-            var a = document.getElementById("canvas");
-            a.innerText = 
-                'Whoops. JC made a mistake and the game pooped. Again.\n' +
-                'There\'s a BIG chance it\'s just because of a missing\n' + 
-                'feature, but just in case, you can send \'em this thingy:\n\n' +    
-                '(commit: ' + version + ')\n' +
-                error;
-        },
-    );
+    matteWorker.onerror = function(e) {
+        throw new Error(e);
+    }
 
     const CANVAS = {
         _el: null,
@@ -230,96 +140,73 @@ function() {
             if (gamepadThisState[i] == true && gamepadLastState[i] == false) LAST_INPUT = i;    
         }
         
-        if (LAST_INPUT != -1)
+        if (LAST_INPUT != -1) {
             console.log(LAST_INPUT);
+            matteWorker.postMessage(LAST_INPUT);
+            LAST_INPUT = -1;
+        }        
     }
 
 
-
-    var onPageInput = function (event) {
-        switch(event.key) {
-          case 'ArrowLeft': 
-            LAST_INPUT = 0;
-            break;
-
-          case 'ArrowRight': 
-            LAST_INPUT = 2;
-            break;
-
-          case 'ArrowUp': 
-            LAST_INPUT = 1;
-            break;
-
-          case 'ArrowDown': 
-            LAST_INPUT = 3;
-            break;
-
-          case 'Z': 
-          case 'Space': 
-          case 'Enter': 
-            LAST_INPUT = 4;
-            break;
-
-          case 'Escape': 
-          case 'Backspace': 
-            LAST_INPUT = 5;
-            break;
-
-
-        }
-        console.log(event.key);
-    }
-
-
-    matte.setExternalFunction('external_onStartCommit', function(fn, args) {
-        CANVAS.reset();
-        return matte.heap.createEmpty();        
-    });
-
-    matte.setExternalFunction('external_onEndCommit', function(fn, args) {
-        return matte.heap.createEmpty();            
-    });
-
-
-    matte.setExternalFunction('external_onCommitText', function(fn, args) {
-        CANVAS.writeCommit(args[0].data);
-        return matte.heap.createEmpty();        
-    });
-
-    matte.setExternalFunction('external_onSaveState', function(fn, args) {
-        var storage = window['localStorage'];
-        storage['wyvernslot'+slot] = args[0].data;
-        return matte.heap.createEmpty();            
-    });
-      
-    matte.setExternalFunction('external_onLoadState', function(fn, args) {
-        var storage = window['localStorage'];
-        return matte.heap.createString(storage['wyvernslot'+slot]);    
-    });      
-
-
-    matte.setExternalFunction('external_getInput', function(fn, args) {
-        var out = LAST_INPUT;
-        LAST_INPUT = -1;
-        return matte.heap.createNumber(out);
-    });
-
-
-      
-
-
-    var task = setInterval(function() {
-        if (matteListIndex != matteList.length) {             
-            const mod = matteList[matteListIndex++]; 
-            readBinary(mod, function(data) {
-                console.log('Loading ' + mod);
-                mattePreloadedBytecode[mod] = data;
-            });
+    
+    matteWorker.onmessage = function(data) {
+        const canvasInput = data.data;
+        debugger;
+        if (typeof canvasInput == 'string') {
+            var a = document.getElementById("canvas");
+            a.innerText = 
+                'Whoops. JC made a mistake and the game pooped. Again.\n' +
+                'There\'s a BIG chance it\'s just because of a missing\n' + 
+                'feature, but just in case, you can send \'em this thingy:\n\n' +
+                canvasInput;           
         } else {
-            clearInterval(task);
-            matte.import('main_external');
+            for(var i = 0; i < canvasInput.length; ++i) {
+                CANVAS.writeRow(i, canvasInput[i]);
+            }    
         }
-    });
+    };
+    
 
-}();
+})();
+
+
+
+
+var onPageInput = function (event) {
+    switch(event.key) {
+      case 'ArrowLeft': 
+        LAST_INPUT = 0;
+        break;
+
+      case 'ArrowRight': 
+        LAST_INPUT = 2;
+        break;
+
+      case 'ArrowUp': 
+        LAST_INPUT = 1;
+        break;
+
+      case 'ArrowDown': 
+        LAST_INPUT = 3;
+        break;
+
+      case 'Z': 
+      case 'Space': 
+      case 'Enter': 
+        LAST_INPUT = 4;
+        break;
+
+      case 'Escape': 
+      case 'Backspace': 
+        LAST_INPUT = 5;
+        break;
+
+
+    }
+    if (LAST_INPUT != -1) {
+        matteWorker.postMessage(LAST_INPUT);
+        LAST_INPUT = -1;
+    }
+    console.log(event.key);
+};
 

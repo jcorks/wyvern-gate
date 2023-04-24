@@ -501,8 +501,6 @@ return class(
                 @:choice = dialogue.pushChoices(
                     choices : ['Load', 'New', 'Quit'],
                     topWeight: 0.75,
-                    jail: true,
-                    
                     onChoice ::(choice) {
                         match(choice-1) {
                           // Load 
@@ -547,6 +545,7 @@ return class(
                 
 
             },
+            
         
             startInstance ::{
                 @destination = empty;

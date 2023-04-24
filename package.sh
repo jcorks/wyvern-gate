@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 for f in `ls -1`; do 
 	if [[ $f == *"mt" ]]; then 
 		../matte/cli/matte compile "$f" "./export-web/$f"
@@ -9,9 +9,8 @@ done
 ../matte/cli/matte compile ../matte/src/rom/core/eventsystem.mt "./export-web/Matte.Core.EventSystem"
 ../matte/cli/matte compile ../matte/src/rom/core/introspect.mt "./export-web/Matte.Core.Introspect"
 ../matte/cli/matte compile ../matte/src/rom/core/json.mt "./export-web/Matte.Core.JSON"
-
+cp ../matte/js/matte.js ./export-web/
 cd ./export-web
 GITSHORT=`git rev-parse --short HEAD`
-make GIT_SHORT_HASH=\"$GITSHORT\"
 cd ..
 
