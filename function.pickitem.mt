@@ -33,6 +33,7 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function)
         prompt: 'Choose an item:',
         choices : names,
         canCancel: true,
+        keep:true,
         onChoice ::(choice) {
             when(choice == 0) onPick();
             onPick(item:inventory.items[choice-1]);

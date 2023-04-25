@@ -37,6 +37,7 @@ return ::(
             topWeight: 1,
             prompt: '[' + item.name + ']',
             canCancel : true,
+            keep:true,
             choices: [
                 'Use',
                 'Equip',
@@ -72,6 +73,7 @@ return ::(
                           prompt: 'On whom?',
                           choices: allNames,
                           canCancel: true,
+                          keep:true,
                           onChoice ::(choice) {
                             when(choice == 0) empty;                      
 
@@ -92,6 +94,7 @@ return ::(
                         choice = dialogue.choicesNow(
                           leftWeight: 1,
                           topWeight: 1,
+                          keep:true,
                           prompt: 'On whom?',
                           choices: [
                             'Allies',
@@ -137,7 +140,9 @@ return ::(
 
                   
                   (2): ::<={ // inventory
-                    dialogue.message(speaker:item.name, text:item.description, pageAfter:canvas.height-4);
+                    item.describe(
+                        onNext::{}
+                    );
                     
                   },
                   

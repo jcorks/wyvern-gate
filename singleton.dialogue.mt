@@ -121,7 +121,7 @@ return class(
             };  
 
             when(!continue) false;            
-            @:PAGE_SIZE = 7;        
+            @:PAGE_SIZE = 7;     
             @:WIDTH = ::<= {
                 @max = 0;
                 choices->foreach(do:::(i, text) {
@@ -131,6 +131,14 @@ return class(
                 
                 return max;
             };
+
+            @lineTop = '▴';
+            @lineBot = '▾';
+            [0, WIDTH+2]->for(do:::(i) {
+                lineTop = lineTop + ' ';            
+                lineBot = lineBot + ' ';            
+            });            
+            
             @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
             @cursorPageTop = 0;
 
@@ -144,8 +152,9 @@ return class(
             if (cursorPos < 0) cursorPos = 0;
             if (cursorPos >= choices->keycount) cursorPos = choices->keycount-1;
 
-            if (cursorPos >= cursorPageTop+PAGE_SIZE) cursorPageTop+=1;
-            if (cursorPos  < cursorPageTop) cursorPageTop -=1;
+            //if (cursorPos >= cursorPageTop+PAGE_SIZE) cursorPageTop+=1;
+            //if (cursorPos  < cursorPageTop) cursorPageTop -=1;
+            cursorPageTop = cursorPos - (PAGE_SIZE/2)->floor;
 
             if (cursorPageTop > choices->keycount - PAGE_SIZE) cursorPageTop = choices->keycount-PAGE_SIZE;
             if (cursorPageTop < 0) cursorPageTop = 0;
@@ -154,7 +163,7 @@ return class(
             
             
             if (choices->keycount > PAGE_SIZE) ::<= {
-                @initialLine = if (cursorPageTop > 0) '▴' else ' ';
+                @initialLine = if (cursorPageTop > 0) lineTop else ' ';
                 [initialLine->length, WIDTH]->for(do:::(i) {
                     initialLine = initialLine + ' ';
                 });                   
@@ -168,15 +177,19 @@ return class(
 
 
                 if (cursorPageTop + PAGE_SIZE < (choices->keycount))                    
-                    choicesModified->push(value:'▾  ')
+                    choicesModified->push(value:lineBot)
                 else
                     choicesModified->push(value:'       ');
+
             } else ::<= {
                 [0, choices->keycount]->for(do:::(index) {
                     choicesModified->push(value: (if (cursorPos == index) '▹  ' else '   ') + choices[index]);
                 });
-            
             };
+            
+            
+            
+            
             
             if (choice == CURSOR_ACTIONS.UP||
                 choice == CURSOR_ACTIONS.DOWN) ::<= {
@@ -193,7 +206,7 @@ return class(
                 speaker: prompt,
                 leftWeight,
                 topWeight,
-                limitLines:13
+                limitLines:14
             ); 
             canvas.commit();    
 

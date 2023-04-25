@@ -134,6 +134,7 @@ return ::{
                 dialogue.choices(
                     leftWeight: 1,
                     topWeight: 1,
+                    keep:true,
                     prompt: "Who's looking?",
                     choices: names,
                     canCancel : true,

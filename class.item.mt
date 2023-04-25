@@ -24,6 +24,7 @@
 @:Material = import(module:'class.material.mt');
 @:random = import(module:'singleton.random.mt');
 @:dialogue = import(module:'singleton.dialogue.mt');
+@:canvas = import(module:'singleton.canvas.mt');
 /*
     Items. 
     
@@ -271,6 +272,37 @@
                 
                     return description + '\nEquip effects: \n' + stats.getRates();
                 }
+            },
+            
+            describe ::(onNext) {
+                dialogue.message(
+                    speaker:this.name,
+                    text:description,
+                    pageAfter:canvas.height-4,
+                    onNext::{
+                        @:Effect = import(module:'class.effect.mt');
+                        dialogue.message(
+                            speaker:this.name + ' - Equip Stats',
+                            text:stats.description,
+                            pageAfter:canvas.height-4,
+                            onNext ::{
+                                dialogue.message(
+                                    speaker:this.name + ' - Equip Effects',
+                                    pageAfter:canvas.height-4,
+                                    text:::<={
+                                        @out = '';
+                                        when (equipEffects->keycount == 0) 'None.';
+                                        equipEffects->foreach(do:::(i, effect) {
+                                            out = out + '-' + Effect.database.find(name:effect).description + '\n';
+                                        });
+                                        return out;
+                                    },
+                                    onNext::{}
+                                );
+                            }
+                        );
+                    }
+                );
             },
             
             addVictory ::(silent) {
