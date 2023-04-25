@@ -20,23 +20,22 @@
 
 
 
-return ::(inventory => Inventory.type, canCancel => Boolean) {
+return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function) {
     @:names = [...inventory.items]->map(to:::(value) {return value.name;});
     when(names->keycount == 0) ::<={
         dialogue.message(text: "The inventory is empty.");
     };
-    breakpoint();
     
 
-    @:choice = dialogue.choicesNow(
+    dialogue.choices(
         leftWeight: 1,
         topWeight: 1,
         prompt: 'Choose an item:',
         choices : names,
-        canCancel
+        canCancel: true,
+        onChoice ::(choice) {
+            when(choice == 0) onPick();
+            onPick(item:inventory.items[choice-1]);
+        }
     );
-    
-    when(choice == 0) empty;
-
-    return inventory.items[choice-1];
 };

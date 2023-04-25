@@ -20,7 +20,7 @@
 @:console = import(module:'Matte.System.ConsoleIO');
 
 @:canvas = import(module:'singleton.canvas.mt');
-//@:instance = import(module:'singleton.instance.mt');
+@:instance = import(module:'singleton.instance.mt');
 @:Time = import(module:'Matte.System.Time');
 
 
@@ -108,7 +108,7 @@ canvas.onCommit = ::(lines){
 
 
 @:dialogue = import(module:'singleton.dialogue.mt');
-
+/*
 dialogue.message(
     leftWeight: 1,
     text: 'Test1'
@@ -141,6 +141,40 @@ dialogue.message(
     leftWeight: 0,
     text: 'Test3'
 );
+*/
+
+instance.mainMenu(
+    onSaveState :::(
+        slot,
+        data
+    ) {
+        @:Filesystem = import(module:'Matte.System.Filesystem');
+        Filesystem.cwd = '/usr/share/Wyvern_SAVES';
+        Filesystem.writeString(
+            path: 'saveslot' + slot,
+            string: data
+        );
+    },
+
+    onLoadState :::(
+        slot
+    ) {
+        @:Filesystem = import(module:'Matte.System.Filesystem');
+        Filesystem.cwd = '/usr/share/Wyvern_SAVES';
+        return [::] {
+            return Filesystem.readString(
+                path: 'saveslot' + slot
+            );
+            
+        } : {
+            onError:::(detail) {
+                return empty;
+            }
+        };
+    }
+
+);
+
 
 // standard event loop
 forever(do::{

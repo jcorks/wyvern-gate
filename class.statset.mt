@@ -194,10 +194,11 @@ return class(
                 get ::<- (HP_ + MP_ + ATK_ + INT_ + DEF_ + LUK_ + SPD_ + DEX_)
             },
             
-            printDiff ::(other, prompt) {
+            printDiff ::(other, prompt, onNext => Function) {
                 dialogue.displayColumns(
                     prompt,
                     pageAfter: 10,
+                    onNext,
                     columns: [
                         [
                             'HP:',
@@ -259,10 +260,11 @@ return class(
             
             },
             
-            printDiffRate ::(other, prompt) {
+            printDiffRate ::(other, prompt, onNext => Function) {
                 dialogue.displayColumns(
                     prompt,
                     pageAfter: 10,
+                    onNext,
                     columns: [
                         [
                             'HP:',

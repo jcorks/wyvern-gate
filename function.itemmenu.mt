@@ -25,15 +25,14 @@
 return ::(
     user,
     party,
-    enemies
-
+    enemies,
+    onAct => Function
 ) {
     @:Item = import(module:'class.item.mt');
 
-    return [::]{
-        @:item = pickItem(inventory:party.inventory, canCancel:true);
+    pickItem(inventory:party.inventory, canCancel:true, onPick::(item) {
         when(item == empty) empty;
-        @choice = dialogue.choicesNow(
+        dialogue.choices(
             leftWeight: 1,
             topWeight: 1,
             prompt: '[' + item.name + ']',
@@ -43,115 +42,122 @@ return ::(
                 'Equip',
                 'Check',
                 'Compare'
-            ]
+            ],
+            onChoice::(choice) {
+                when (choice == 0) empty;              
+                
+                match(choice-1) {
+                  // item: use
+                  (0): ::<={
+                    match(item.base.useTargetHint) {
+                      (Item.USE_TARGET_HINT.ONE): ::<={
+                        @:all = [];
+                        party.members->foreach(do:::(index, ally) {
+                            all->push(value:ally);
+                        });
+                        enemies->foreach(do:::(index, enemy) {
+                            all->push(value:enemy);
+                        });
+                        
+                        
+                        @:allNames = [];
+                        all->foreach(do:::(index, person) {
+                            allNames->push(value:person.name);
+                        });
+                      
+                      
+                        choice = dialogue.choices(
+                          leftWeight: 1,
+                          topWeight: 1,
+                          prompt: 'On whom?',
+                          choices: allNames,
+                          canCancel: true,
+                          onChoice ::(choice) {
+                            when(choice == 0) empty;                      
+
+                            onAct(
+                                action:BattleAction.new(state:{
+                                    ability: Ability.database.find(name:'Use Item'),
+                                    targets: [all[choice-1]],
+                                    extraData : [item]
+                                }) 
+                            );                            
+                          }
+                        );
+                        
+                
+                      },
+                      
+                      (Item.USE_TARGET_HINT.GROUP): ::<={
+                        choice = dialogue.choicesNow(
+                          leftWeight: 1,
+                          topWeight: 1,
+                          prompt: 'On whom?',
+                          choices: [
+                            'Allies',
+                            'Enemies'
+                          ],
+                          canCancel: true
+                        );
+                        
+                        when(choice == 0) empty;                      
+                        onAct(
+                            action:BattleAction.new(state:{
+                                ability: Ability.database.find(name:'Use Item'),
+                                targets: if (choice == 1) party.members else enemies,
+                                extraData : [item]
+                            }) 
+                        );                  
+                      },
+
+                      (Item.USE_TARGET_HINT.ALL): ::<= {
+                        onAct(action:
+                            BattleAction.new(state:{
+                                ability: Ability.database.find(name:'Use Item'),
+                                targets: [...party.members, ...enemies],
+                                extraData : [item]
+                            }) 
+                        );                  
+                      
+                      }
+
+
+
+                    };
+                  
+                  },
+                  // item equip
+                  (1): onAct(action:
+                    BattleAction.new(state:{
+                        ability: Ability.database.find(name:'Equip Item'),
+                        targets: [user],
+                        extraData : [item, party.inventory]
+                    })                   
+                  ),
+
+                  
+                  (2): ::<={ // inventory
+                    dialogue.message(speaker:item.name, text:item.description, pageAfter:canvas.height-4);
+                    
+                  },
+                  
+                  // compare
+                  (3)::<= {
+                    @slot = user.getSlotsForItem(item)[0];
+                    @currentEquip = user.getEquipped(slot);
+                    
+                    currentEquip.equipMod.printDiffRate(
+                        prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
+                        other:item.equipMod,
+                        onNext::{}
+                    ); 
+                    
+                    
+                    
+                  }
+                };              
+            
+            }
         );
-        when (choice == 0) empty;              
-        
-        match(choice-1) {
-          // item: use
-          (0): ::<={
-            match(item.base.useTargetHint) {
-              (Item.USE_TARGET_HINT.ONE): ::<={
-                @:all = [];
-                party.members->foreach(do:::(index, ally) {
-                    all->push(value:ally);
-                });
-                enemies->foreach(do:::(index, enemy) {
-                    all->push(value:enemy);
-                });
-                
-                
-                @:allNames = [];
-                all->foreach(do:::(index, person) {
-                    allNames->push(value:person.name);
-                });
-              
-              
-                choice = dialogue.choicesNow(
-                  leftWeight: 1,
-                  topWeight: 1,
-                  prompt: 'On whom?',
-                  choices: allNames,
-                  canCancel: true
-                );
-                
-                when(choice == 0) empty;                      
-
-                send(message:
-                    BattleAction.new(state:{
-                        ability: Ability.database.find(name:'Use Item'),
-                        targets: [all[choice-1]],
-                        extraData : [item]
-                    }) 
-                );                  
-              },
-              
-              (Item.USE_TARGET_HINT.GROUP): ::<={
-                choice = dialogue.choicesNow(
-                  leftWeight: 1,
-                  topWeight: 1,
-                  prompt: 'On whom?',
-                  choices: [
-                    'Allies',
-                    'Enemies'
-                  ],
-                  canCancel: true
-                );
-                
-                when(choice == 0) empty;                      
-                send(message:
-                    BattleAction.new(state:{
-                        ability: Ability.database.find(name:'Use Item'),
-                        targets: if (choice == 1) party.members else enemies,
-                        extraData : [item]
-                    }) 
-                );                  
-              },
-
-              (Item.USE_TARGET_HINT.ALL): ::<= {
-                send(message:
-                    BattleAction.new(state:{
-                        ability: Ability.database.find(name:'Use Item'),
-                        targets: [...party.members, ...enemies],
-                        extraData : [item]
-                    }) 
-                );                  
-              
-              }
-
-
-
-            };
-          
-          },
-          // item equip
-          (1): send(message:
-            BattleAction.new(state:{
-                ability: Ability.database.find(name:'Equip Item'),
-                targets: [user],
-                extraData : [item, party.inventory]
-            })                   
-          ),
-
-          
-          (2): ::<={ // inventory
-            dialogue.message(speaker:item.name, text:item.description);
-            
-          },
-          
-          // compare
-          (3)::<= {
-            @slot = user.getSlotsForItem(item)[0];
-            @currentEquip = user.getEquipped(slot);
-            
-            currentEquip.equipMod.printDiffRate(
-                prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
-                other:item.equipMod
-            ); 
-            
-            
-            
-          }
-        };
-    };
+    });    
 };

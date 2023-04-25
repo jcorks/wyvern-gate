@@ -135,11 +135,9 @@ return class(
             @cursorPageTop = 0;
 
             if (choice == CURSOR_ACTIONS.UP) ::<= {
-                data.defaultChoice = (cursorPos+1) - 1;
                 cursorPos -= 1;
             };
             if(choice == CURSOR_ACTIONS.DOWN) ::<= {
-                data.defaultChoice = (cursorPos+1) + 1;
                 cursorPos += 1;
             };
 
@@ -180,11 +178,16 @@ return class(
             
             };
             
-
+            if (choice == CURSOR_ACTIONS.UP||
+                choice == CURSOR_ACTIONS.DOWN) ::<= {
+                data.defaultChoice = (cursorPos+1);
+            };
 
             //if (canCancel) ::<= {
             //    choicesModified->push(value:'(Cancel)');
             //};
+            if (data.renderable) 
+                data.renderable.render();
             renderText(
                 lines: choicesModified,
                 speaker: prompt,
@@ -193,7 +196,6 @@ return class(
                 limitLines:13
             ); 
             canvas.commit();    
-            breakpoint();
 
                 
             when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
@@ -203,8 +205,11 @@ return class(
             };
             
             when(choice == CURSOR_ACTIONS.CONFIRM) ::<= {
-                canvas.popState();
-                choiceStack->pop;
+                if (data.keep == false || data.keep == empty) ::<= {
+                    canvas.popState();
+                    choiceStack->pop;
+                }; 
+                data.rendered = empty;
                 onChoice(choice:cursorPos + 1);
                 return true;
             };
@@ -213,56 +218,48 @@ return class(
         };
 
 
-        @:choiceCursorMove ::(data => Object) {
+        @:choiceCursorMove ::(data => Object, input) {
             @:prompt = data.prompt; 
             @:leftWeight = data.leftWeight; 
             @:topWeight = data.topWeight; 
             @:defaultChoice = data.defaultChoice;
             @:onChoice = data.onChoice;
+            @:choice = input;         
+            @:renderable = data.renderable;   
             
-            
-            [::] {
-                forever(do:::{
-                    //if (canCancel) ::<= {
-                    //    choicesModified->push(value:'(Cancel)');
-                    //};
-                    renderText(
-                        lines: ['[Cancel to return]'],
-                        speaker: prompt,
-                        leftWeight,
-                        topWeight,
-                        limitLines:13
-                    ); 
-                    canvas.commit();    
-                    
-                    @choice;
-                    [::] {  
-                        forever(do:::{
-                            choice = onInput();
-                            match(choice) {
-                              (CURSOR_ACTIONS.UP,
-                               CURSOR_ACTIONS.DOWN,
-                               CURSOR_ACTIONS.LEFT,
-                               CURSOR_ACTIONS.RIGHT,
-                               CURSOR_ACTIONS.CONFIRM,
-                               CURSOR_ACTIONS.CANCEL): send()
-                            };
-                        });
-                    };                                              
-
-
-                    when(choice == CURSOR_ACTIONS.CANCEL)
-                        send(message:0);
-
-                    when (choice == CURSOR_ACTIONS.UP||
-                          choice == CURSOR_ACTIONS.DOWN ||
-                          choice == CURSOR_ACTIONS.LEFT ||
-                          choice == CURSOR_ACTIONS.RIGHT)
-                        onChoice(choice);
-                    
-                });
+            //if (canCancel) ::<= {
+            //    choicesModified->push(value:'(Cancel)');
+            //};
+            if (data.rendered == empty) ::<= {
+                if (data.renderable) 
+                    data.renderable.render();
+                renderText(
+                    lines: ['[Cancel to return]'],
+                    speaker: prompt,
+                    leftWeight,
+                    topWeight,
+                    limitLines:13
+                ); 
+                canvas.commit();    
+                data.rendered = true;
             };
-            canvas.commit();                            
+
+
+            when(choice == CURSOR_ACTIONS.CANCEL) ::<= {
+                canvas.popState();
+                choiceStack->pop;
+                return true;
+            };           
+
+            if (choice == CURSOR_ACTIONS.UP||
+                  choice == CURSOR_ACTIONS.DOWN ||
+                  choice == CURSOR_ACTIONS.LEFT ||
+                  choice == CURSOR_ACTIONS.RIGHT) ::<= {
+                onChoice(choice);
+                data.rendered = empty;
+                this.commitInput();
+            };
+            return false;    
         };        
     
     
@@ -398,7 +395,6 @@ return class(
         
         @:displayCursor ::(data, input) {
             if (data.rendered == empty) ::<={
-                breakpoint();
                 renderText(
                     leftWeight: data.leftWeight, 
                     topWeight: data.topWeight, 
@@ -416,6 +412,7 @@ return class(
                CURSOR_ACTIONS.CANCEL): ::<= {
                 canvas.popState();
                 choiceStack->pop;
+                data.onNext();
                 return true;
                },
               default: false
@@ -452,12 +449,33 @@ return class(
                 };
             },
             
+            
+            // Similar to message, but accepts a set of 
+            // messages to display
+            messageSet::(speaker, set => Object, leftWeight, topWeight, pageAfter, onNext => Function) {
+                set = [...set];
+                @:post = ::{
+                    when(set->keycount == 0) onNext();
+                    @:text = set[0];
+                    set->remove(key:0);
+                    this.message(
+                        speaker,
+                        text,
+                        leftWeight,
+                        topWeight,
+                        pageAfter,
+                        onNext:post
+                    );   
+                };
+                post();
+            },
+            
             // Posts a message to the screen. In the case that a 
             // message overflows, it will be split into multiple dialogs.
             //
             // The function returns when the message is displayed in full
             // to the user.
-            message::(speaker, text, leftWeight, topWeight, pageAfter) {
+            message::(speaker, text, leftWeight, topWeight, pageAfter, onNext => Function) {
                 if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
                 // first: split the text.
                 //text = text->replace(keys:['\r'], with: '');
@@ -499,14 +517,15 @@ return class(
                     leftWeight, topWeight,
                     prompt:speaker,
                     lines,
-                    pageAfter
+                    pageAfter,
+                    onNext
                 );              
             },
             
             // Similar to display(), but takes in an array of string arrays and 
             // treats them as columns, appended left-to-right separated with a 
             // space.
-            displayColumns::(prompt, columns, leftWeight, topWeight, pageAfter) {
+            displayColumns::(prompt, columns, leftWeight, topWeight, pageAfter, onNext => Function) {
                 @:lines = [];
                 @:widths = [];
                 @rowcount = 0;
@@ -538,7 +557,7 @@ return class(
                 });                
            
                 this.display(
-                    prompt, lines, pageAfter, leftWeight, topWeight
+                    prompt, lines, pageAfter, leftWeight, topWeight, onNext
                 );
             },
             
@@ -546,8 +565,7 @@ return class(
             // If it doesnt fit, display will try and make it scrollable.
             //
             // lines should be an array of strings.
-            display::(prompt, lines, pageAfter, leftWeight, topWeight) {
-                canvas.pushState();                    
+            display::(prompt, lines, pageAfter, leftWeight, topWeight, onNext => Function) {
                 if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
                 [0, lines->keycount, pageAfter]->for(do:::(i) {
                     choiceStack->push(value:{
@@ -556,10 +574,11 @@ return class(
                         lines:lines->subset(from:i, to:min(a:i+pageAfter, b:lines->keycount)-1),
                         pageAfter: pageAfter,
                         prompt: prompt,
-                        mode: CHOICE_MODE.DISPLAY
+                        mode: CHOICE_MODE.DISPLAY,
+                        onNext: onNext
                     });
+                    canvas.pushState();      
                 });                       
-                canvas.pushState();      
             },
 
 
@@ -571,7 +590,7 @@ return class(
             // Like all UI choices, the weight can be chosen.
             // Prompt will be displayed, like speaker in the message callback
             //
-            pushChoices ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function) {
+            choices ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, renderable, keep) {
                 choiceStack->push(value:{
                     mode: CHOICE_MODE.CURSOR,
                     choices: choices,
@@ -581,23 +600,29 @@ return class(
                     canCancel: canCancel,
                     defaultChoice: defaultChoice,
                     onChoice: onChoice,
+                    keep: keep,
+                    renderable:renderable
                 });
-                
-                /*
-                if (jail == true) ::<= {
-                    @count = choiceStack->keycount - 1;
-                    [::] {
-                        forever(do:::{
-                            when(choiceStack->keycount <= count)
-                                send();
-                                
-                            commitChoice();
-                        });                        
-                    };
-                };
-                */
+                canvas.pushState();      
+   
             },
+            cursorMove ::(prompt, leftWeight, topWeight, onMove, renderable) {
+                choiceStack->push(value:{
+                    mode: CHOICE_MODE.CURSOR_MOVE,
+                    prompt: prompt,
+                    leftWeight: leftWeight,
+                    topWeight: topWeight,
+                    onChoice:onMove,
+                    renderable:renderable
+                });
+                canvas.clear();
+                canvas.pushState();      
+            },               
+
             
+            CURSOR_ACTIONS : {
+                get::<- CURSOR_ACTIONS
+            }
             /*
             choicesNow ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice) {
                 @out;
@@ -618,16 +643,7 @@ return class(
             },  
             */      
             /*
-            cursorMove ::(prompt, leftWeight, topWeight, onMove) {
-                choiceStack->push(value:{
-                    mode: CHOICE_MODE.CURSOR_MOVE,
-                    prompt: prompt,
-                    leftWeight: leftWeight,
-                    topWeight: topWeight,
-                    onChoice:onMove
-                });
-                commitChoice();
-            },    
+ 
             
             
             // like choices(), but instead displays it column-wise.
@@ -696,10 +712,7 @@ return class(
             startChoiceStack ::{
                 startChoices();
             },
-            
-            CURSOR_ACTIONS : {
-                get::<- CURSOR_ACTIONS
-            }
+
             */
         };    
     }

@@ -1000,42 +1000,7 @@
                 stats.resetMod();
                 plainStats.add(stats);
                 this.recalculateStats();
-                dialogue.message(
-                    speaker: this.name,
-                    text: '       Name: ' + name + '\n\n' +
-                          '         HP: ' + this.hp + ' / ' + this.stats.HP + '\n' + 
-                          '         AP: ' + this.ap + ' / ' + this.stats.AP + '\n\n' + 
-                          '    species: ' + species.name + '\n' +
-                          ' profession: ' + profession.base.name + '\n' +
-                          'personality: ' + personality.name + '\n\n',
-                        //        'Level: ' + level + ' (would drop ' + this.dropExp() + ' EXP) \n' +
-                        //  'Exp to next: ' + expNext + '\n',
 
-                    pageAfter:canvas.height-4
-                );
-                
-
-                
-                plainStats.printDiff(other:stats, 
-                    prompt:this.name + '(Base -> w/Mods.)'
-                );
-                    
-
-
-                dialogue.message(
-                    speaker: this.name,
-                    text: 
-                    ' -Equipment-  \n'                
-                        + 'hand(l): ' + equips[EQUIP_SLOTS.HAND_L].name + '\n'
-                        + 'hand(r): ' + equips[EQUIP_SLOTS.HAND_R].name + '\n'
-                        + 'armor  : ' + equips[EQUIP_SLOTS.ARMOR].name + '\n'
-                        + 'amulet : ' + equips[EQUIP_SLOTS.AMULET].name + '\n'
-                        + 'trinket: ' + equips[EQUIP_SLOTS.TRINKET].name + '\n'
-                        + 'ring(l): ' + equips[EQUIP_SLOTS.RING_L].name + '\n'
-                        + 'ring(r): ' + equips[EQUIP_SLOTS.RING_R].name + '\n',
-                    pageAfter:canvas.height-4
-                );
-                
                 @:modRate = StatSet.new();
                 effects->foreach(do:::(index, effect) {
                     effect.effect.onStatRecalculate(user:effect.from, stats, holder:this, item:effect.item);
@@ -1046,29 +1011,55 @@
                     when(index == EQUIP_SLOTS.HAND_R) empty;
                     modRate.add(stats:equip.equipMod);
                 });
+                
 
+                plainStats.printDiff(other:stats, 
+                    prompt:this.name + '(Base -> w/Mods.)',
+                    onNext::{
 
-                dialogue.message(
-                    speaker: this.name,
-                    text: 
-                    ' - Stat Modifiers - \n' +
-                    modRate.getRates(),
-                    pageAfter:canvas.height-4
+                        dialogue.messageSet(
+                            speaker: this.name,
+                            pageAfter:canvas.height-4,
+                            set: [ 
+                                  '       Name: ' + name + '\n\n' +
+                                  '         HP: ' + this.hp + ' / ' + this.stats.HP + '\n' + 
+                                  '         AP: ' + this.ap + ' / ' + this.stats.AP + '\n\n' + 
+                                  '    species: ' + species.name + '\n' +
+                                  ' profession: ' + profession.base.name + '\n' +
+                                  'personality: ' + personality.name + '\n\n'
+                                 ,
+                                 
+                                  ' -Equipment-  \n'                
+                                        + 'hand(l): ' + equips[EQUIP_SLOTS.HAND_L].name + '\n'
+                                        + 'hand(r): ' + equips[EQUIP_SLOTS.HAND_R].name + '\n'
+                                        + 'armor  : ' + equips[EQUIP_SLOTS.ARMOR].name + '\n'
+                                        + 'amulet : ' + equips[EQUIP_SLOTS.AMULET].name + '\n'
+                                        + 'trinket: ' + equips[EQUIP_SLOTS.TRINKET].name + '\n'
+                                        + 'ring(l): ' + equips[EQUIP_SLOTS.RING_L].name + '\n'
+                                        + 'ring(r): ' + equips[EQUIP_SLOTS.RING_R].name + '\n'
+                                 ,
+                                
+                                  
+                                    ' - Stat Modifiers - \n' +
+                                    modRate.getRates()
+                                 ,
+                                  ::<= {
+                                    @out = ' - Effects - \n\n';
+                                    effects->foreach(do:::(index, effect) {
+                                        out = out + effect.effect.name + ': ' + effect.effect.description + '\n';
+                                    });
+                                    return out;
+                                 }
+                             ],
+                             onNext ::{}                                   
+                        );                    
+                        
+                    }
                 );
                 
-                if (effects->keycount) ::<= {
-                    @out = ' - Effects - \n\n';
-                    effects->foreach(do:::(index, effect) {
-                        out = out + effect.effect.name + ': ' + effect.effect.description + '\n';
-                    });
-                    dialogue.message(
-                        speaker: this.name,
-                        text: out,
-                        pageAfter:canvas.height-4
-                    );
-                    
-                    
-                };
+                
+
+
             }
             
 

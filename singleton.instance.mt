@@ -48,12 +48,6 @@ return class(
         @stepsSinceLast = 0;
 
         
-        @:renderMain ::{
-            canvas.clear();
-            island.map.title = "(Map of " + island.name + ')';
-            island.map.render();
-        
-        };
         
         @:renderLandmark ::{
             landmark.map.render();
@@ -339,21 +333,25 @@ return class(
         
         @:visitIsland :: {
 
+            // check if we're AT a location.
+            @:choices = [
+                'Travel',
+                'Check',
+                'Party',
+                'Look around',
+                'System',
+            ];
+            island.map.title = "(Map of " + island.name + ')';
 
-            return [::] {
-                forever(do:::{
-                    when(party.isIncapacitated()) send();
-                
-                    // check if we're AT a location.
-                    @:choices = [
-                        'Travel',
-                        'Check',
-                        'Party',
-                        'Look around',
-                        'System',
-                    ];
+            dialogue.choices(
+                leftWeight: 1,
+                topWeight: 1,
+                prompt: 'What next?',
+                renderable: island.map,
+                keep: true,
+                choices,
+                onChoice::(choice) {
 
-                    renderMain();
                     @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
 
                     if (visitable != empty) ::<= {
@@ -361,13 +359,6 @@ return class(
                             choices->push(value:'Visit ' + vis.name);                
                         });
                     };
-                    @choice = dialogue.choicesNow(
-                        leftWeight: 1,
-                        topWeight: 1,
-                        prompt: 'What next?',
-                        choices
-                        
-                    );
 
 
                    
@@ -375,17 +366,14 @@ return class(
                       // travel
                       (0): ::<= {
 
-                        @lastChoice = 0;
                         dialogue.cursorMove(
                             leftWeight: 1,
                             topWeight: 1,
                             prompt: 'Traveling...',
+                            renderable:island.map,
                             onMove ::(choice) {
                                 
-                                lastChoice = choice;
-                                
                                 @:target = island.landmarks[choice-1];
-                                
                                 
                                 
                                 // move by one unit in that direction
@@ -396,17 +384,18 @@ return class(
                                 );
                                 world.stepTime();                                    
                                 island.incrementTime();
-                                when(party.isIncapacitated()) dialogue.popChoice();
                                 
                                 // cancel if we've arrived somewhere
                                 @:arrival = island.map.getNamedItemsUnderPointerRadius(radius:5);
                                 if (arrival != empty) ::<= {
                                     arrival->foreach(do:::(i, arr) {
                                         dialogue.message(
-                                            text:"The party has arrived at the " + if (arr.data.name == '') arr.data.base.name else arr.data.base.name + ' of ' + arr.data.name
+                                            text:"The party has arrived at the " + if (arr.data.name == '') arr.data.base.name else arr.data.base.name + ' of ' + arr.data.name,
+                                            onNext::{
+                                                arr.data.discover();
+                                                island.map.discover(data:arr.data);                                            
+                                            }
                                         );
-                                        arr.data.discover();
-                                        island.map.discover(data:arr.data);
                                         //island.map.setPointer(
                                         //    x: arr.x,
                                         //    y: arr.y
@@ -415,7 +404,6 @@ return class(
                                     });
                                     
                                 };                            
-                                renderMain();
 
                             }
                         
@@ -425,29 +413,27 @@ return class(
                     
                       // check
                       (1): ::<= {
-                        choice = dialogue.choicesNow(
+                        choice = dialogue.choices(
                             leftWeight: 1,
                             topWeight: 1,
                             prompt: 'Check which?',
                             choices: [
                                 'Island',
                             ],
-                            canCancel: true
+                            canCancel: true,
+                            onChoice::(choice){
+                                match(choice-1) {
+                                  (0): dialogue.message(speaker: 'About ' + island.name, text: island.description, onNext::{})
+                                };                                                        
+                            }
                         );
-
-                        when(choice == 0) empty;
-
-                        match(choice-1) {
-                          (0): dialogue.message(speaker: 'About ' + island.name, text: island.description)
-                        };                            
-                        
                       
                       },
                       
 
                       (3): ::<= {
                         island.incrementTime();
-                        dialogue.message(text:'Nothing to see but the peaceful scenery of ' + island.name + '.');                          
+                        dialogue.message(text:'Nothing to see but the peaceful scenery of ' + island.name + '.', onNext::{});                          
                       },
                       // party options
                       (2): partyOptions(),
@@ -458,12 +444,19 @@ return class(
                       
                       // visit landmark
                       default: ::<= {
-                        breakpoint();
-                        send(message:visitable[choice-6].data);
+                        //breakpoint();
+                        visitLandmark(landmark:visitable[choice-6].data);
                       }
                     };
-                });   
-            };
+
+
+                
+                
+                }
+            );
+
+
+
         };
         
         this.interface = {
@@ -475,129 +468,126 @@ return class(
                 this.onLoadState = onLoadState;
                                 
                 dialogue.message(
-                    text: ' Wyvern Gate ' + VERSION + ' '
-                );
+                    text: ' Wyvern Gate ' + VERSION + ' ',
+                    onNext ::{
+                        dialogue.message(
+                            text: 'Note: this game is under heavy development. Depending on your platform, use either Number keys + Enter, gamepad up/down/left/right / confirm / cancel, or arrow keys / enter / backspace to navigate.\nGoodluck!',
+                            onNext :: {
+                                dialogue.choices(
+                                    choices : ['Load', 'New', 'Quit'],
+                                    topWeight: 0.75,
+                                    onChoice ::(choice) {
+                                        match(choice-1) {
+                                          // Load 
+                                          (0)::<= {
+                                            @:choice = dialogue.choices(
+                                                choices: [
+                                                    'Slot 1',
+                                                    'Slot 2',
+                                                    'Slot 3',
+                                                ],
+                                                canCancel: true
+                                            );
+                                            when(choice == 0) empty;
+                                            @:data = onLoadState(slot:choice);
 
-                dialogue.message(
-                    text: 'Note: this game is under heavy development. Depending on your platform, use either Number keys + Enter, gamepad up/down/left/right / confirm / cancel, or arrow keys / enter / backspace to navigate.\nGoodluck!'
-                );
-
-
-
-                
-
-                dialogue.pushChoices(
-                    choices : ['Load', 'New', 'Quit'],
-                    topWeight: 0.75,
-                    onChoice ::(choice) {
-                        match(choice-1) {
-                          // Load 
-                          (0)::<= {
-                            @:choice = dialogue.choicesNow(
-                                choices: [
-                                    'Slot 1',
-                                    'Slot 2',
-                                    'Slot 3',
-                                ],
-                                canCancel: true
-                            );
-                            when(choice == 0) empty;
-                            @:data = onLoadState(slot:choice);
-
-                            when(data == empty)
-                                dialogue.message(text:'There is no data in this slot');
-                                
-                            this.state = JSON.decode(string:data);
-                            this.startInstance();
-                          },
-                          
-                          (1)::<= {
-                            canvas.clear();
-                            @:message = 'Loading...';
-                            canvas.movePen(
-                                x: canvas.width/2 - message->length/2,
-                                y: canvas.height/2
-                            );
-                            canvas.drawText(text:message);
-                            canvas.commit();
-                            this.startNew();
-                            this.startInstance();
-                          },
-                          
-                          (2)::<= {
-                            dialogue.popChoice();
-                          }
-                        };                            
+                                            when(data == empty)
+                                                dialogue.message(text:'There is no data in this slot');
+                                                
+                                            this.state = JSON.decode(string:data);
+                                            this.startInstance();
+                                          },
+                                          
+                                          (1)::<= {
+                                            canvas.clear();
+                                            @:message = 'Loading...';
+                                            canvas.movePen(
+                                                x: canvas.width/2 - message->length/2,
+                                                y: canvas.height/2
+                                            );
+                                            canvas.drawText(text:message);
+                                            canvas.commit();
+                                            this.startNew();
+                                            //this.startInstance();
+                                          },
+                                          
+                                          (2)::<= {
+                                            dialogue.popChoice();
+                                          }
+                                        };                            
+                                    }
+                                );                            
+                            }
+                        );
                     }
                 );
-                
 
             },
             
         
             startInstance ::{
+                /*
                 @destination = empty;
                 @landmarkChain = [];
-                [::] {
-                    forever(do:::{
-                        if (destination != empty) ::<= {
-                            // user initiated island travel
-                            match(destination->type) {
-                              (Island.type)::<={
-                                island = destination;
-                                landmark = empty;
-                                world.island = island;
-                                
-                                // place the player on a random location in the island
-                                island.map.setPointer(
-                                    x: Number.random()*island.map.size,
-                                    y: Number.random()*island.map.size
-                                );                                                
-
-                              },
-                              
-                              (Landmark.type):::<= {
-                                if (landmark != empty)
-                                    landmarkChain->push(value:landmark);
-                                island = destination.island;
-                                landmark = destination;
-                                world.island = island;
-                                landmark.map.setPointer(
-                                    x: landmark.gate.x,
-                                    y: landmark.gate.y
-                                );                                                
-
-                              }
-                              
-                              
-                            };
-
-                            destination = empty;
-                        } else ::<= {
-                            landmark = empty;
-                            // need to go back where we came before back to island                        
-                            if (landmarkChain->keycount > 0) ::<={
-                                landmark = landmarkChain->pop;
-                            };
-                        };
-                    
-                        when(landmark != empty) ::<= {
-                            destination = visitLandmark();
-                            breakpoint();
-                        };
 
 
-                        // fallback op                        
-                        destination = visitIsland();
-                        breakpoint();
-                        when(party.isIncapacitated()) ::<= {
-                            canvas.clear();
-                            dialogue.message(text: 'Perhaps fate has entrusted someone else with the future...');                            
-                            party.clear();
-                            send();
-                        };
-                    });                
-                }; 
+                if (destination != empty) ::<= {
+                    // user initiated island travel
+                    match(destination->type) {
+                      (Island.type)::<={
+                        island = destination;
+                        landmark = empty;
+                        world.island = island;
+                        
+                        // place the player on a random location in the island
+                        island.map.setPointer(
+                            x: Number.random()*island.map.size,
+                            y: Number.random()*island.map.size
+                        );                                                
+
+                      },
+                      
+                      (Landmark.type):::<= {
+                        if (landmark != empty)
+                            landmarkChain->push(value:landmark);
+                        island = destination.island;
+                        landmark = destination;
+                        world.island = island;
+                        landmark.map.setPointer(
+                            x: landmark.gate.x,
+                            y: landmark.gate.y
+                        );                                                
+
+                      }
+                      
+                      
+                    };
+
+                    destination = empty;
+                } else ::<= {
+                    landmark = empty;
+                    // need to go back where we came before back to island                        
+                    if (landmarkChain->keycount > 0) ::<={
+                        landmark = landmarkChain->pop;
+                    };
+                };
+            
+                when(landmark != empty) ::<= {
+                    destination = visitLandmark();
+                    breakpoint();
+                };
+
+
+                // fallback op                        
+                destination = visitIsland();
+                breakpoint();
+                when(party.isIncapacitated()) ::<= {
+                    canvas.clear();
+                    dialogue.message(text: 'Perhaps fate has entrusted someone else with the future...');                            
+                    party.clear();
+                    send();
+                };
+                */
             },
         
             startNew ::{
@@ -634,13 +624,13 @@ return class(
                 @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
                 @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
                 // debug
-                    /*
+                    
                     [0, 10]->for(do:::(i) {
                         party.inventory.add(item:Item.Base.database.getRandomFiltered(
                             filter:::(value) <- value.isUnique == false
                         ).new(from:island.newInhabitant(),rngModHint:true));
                     });
-                    */
+                    
 
                 [0, 3]->for(do:::(i) {
                     @:crystal = Item.Base.database.find(name:'Skill Crystal').new(from:p0);
@@ -674,16 +664,12 @@ return class(
                 */
                 
                 @:Scene = import(module:'class.scene.mt');
-                Scene.database.find(name:'scene_intro').act();
+                Scene.database.find(name:'scene_intro').act(onDone::{
+                    breakpoint();
+                    visitIsland();
+                });
                 
                 
-                [::] {
-                    forever(do:::{
-                        world.stepTime();
-                        if (world.time == world.TIME.LATE_MORNING)
-                            send();
-                    });
-                };
                 
             },
             onSaveState : {

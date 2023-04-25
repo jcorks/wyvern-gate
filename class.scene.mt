@@ -36,19 +36,27 @@
         );
         
         this.interface = {
-            act::(location, landmark) {
-                this.script->foreach(do:::(index, action) {
+        
+            act::(onDone => Function, location, landmark) {
+                @:left = [...this.script];
+                
+                @:doNext ::{
+                    when(left->keycount == 0) onDone();
+                    @:action = left[0];
+                    left->remove(key:0);
                     match(action->type) {
-                      (Function): 
-                        action(location, landmark),
+                      (Function):
+                        action(location, landmark, doNext),
                       
                       (Object): 
-                        dialogue.message(speaker: action[0], text: action[1]),
+                        dialogue.message(speaker: action[0], text: action[1], onNext:doNext),
                         
                       default:
                         error(detail:'Scene scripts only accept arrays or functions')
                     };
-                });            
+                };
+                
+                doNext();
             }
         };
     }
