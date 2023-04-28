@@ -764,7 +764,10 @@ Interaction.database = Database.new(
 
                     canvas.clear();
                     dialogue.message(text:'The party travels to the next floor.');
-                    send(message:location.targetLandmark);
+                    
+                    
+                    @:instance = import(module:'singleton.instance.mt');
+                    instance.visitLandmark(landmark:location.targetLandmark);
 
 
                 },

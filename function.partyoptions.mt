@@ -61,7 +61,7 @@ return ::{
             }
         },
         choices: [
-            'Manage',
+            //'Manage',
             'Members',
             'Inventory'
         ],
@@ -70,36 +70,10 @@ return ::{
         onChoice ::(choice) {
 
             match(choice-1) {
-              // status
-              (0)::<= {
-                @:lines = [];
-                @:party = world.party;
-                
-                party.members->foreach(do:::(i, member) {
-                    lines->push(value:member.renderHP() + ' ' + member.hp + ' / ' + member.stats.HP + ' HP ' + member.name); //'(Lv' + member.level + ')');
-                });
-                
-                lines->push(value:'');
-                lines->push(value:': ' + party.inventory.gold);
-                lines->push(value:'');
-                lines->push(value:'inventory (' + party.inventory.items->keycount + ' items)');
-                party.inventory.items->foreach(do:::(i, item) {
-                    lines->push(value:item.name);
-                });
-
-
-                dialogue.display(
-                    prompt:'Party status',
-                    lines,
-                    pageAfter: canvas.height-2,
-                    onNext::{}
-                );
-              
-              },
               
               
               // members
-              (1)::<= {
+              (0)::<= {
                 @:names = [];
                 @:party = world.party;
                 party.members->foreach(do:::(i, member) {
@@ -126,7 +100,7 @@ return ::{
               
               
               // Inventory
-              (2)::<= {
+              (1)::<= {
                 @:names = [];
                 world.party.members->foreach(do:::(index, member) {
                     names->push(value:member.name);

@@ -94,6 +94,7 @@
         @islandNameHint;
         @modCount = 0;
         @equipEffects = [];
+        @useEffects = [];
         @victoryCount = 0; // like exp, stat mods increase with victories
                            // conceptually: the user becomes more familiar
                            // with how to effectively use it in their hands
@@ -115,6 +116,11 @@
             base.equipEffects->foreach(do:::(i, effect) {
                 equipEffects->push(value:effect);
             });
+
+            base.useEffects->foreach(do:::(i, effect) {
+                useEffects->push(value:effect);
+            });
+
             
             if (base.canHaveModifier) ::<= {
                 if (modHint != empty) ::<= {
@@ -275,34 +281,42 @@
             },
             
             describe ::(onNext) {
+                @:Effect = import(module:'class.effect.mt');
                 dialogue.message(
                     speaker:this.name,
                     text:description,
-                    pageAfter:canvas.height-4,
-                    onNext::{
-                        @:Effect = import(module:'class.effect.mt');
-                        dialogue.message(
-                            speaker:this.name + ' - Equip Stats',
-                            text:stats.description,
-                            pageAfter:canvas.height-4,
-                            onNext ::{
-                                dialogue.message(
-                                    speaker:this.name + ' - Equip Effects',
-                                    pageAfter:canvas.height-4,
-                                    text:::<={
-                                        @out = '';
-                                        when (equipEffects->keycount == 0) 'None.';
-                                        equipEffects->foreach(do:::(i, effect) {
-                                            out = out + '-' + Effect.database.find(name:effect).description + '\n';
-                                        });
-                                        return out;
-                                    },
-                                    onNext::{}
-                                );
-                            }
-                        );
-                    }
+                    pageAfter:canvas.height-4
                 );
+                dialogue.message(
+                    speaker:this.name + ' - Equip Stats',
+                    text:stats.description,
+                    pageAfter:canvas.height-4
+                );
+
+                dialogue.message(
+                    speaker:this.name + ' - Equip Effects',
+                    pageAfter:canvas.height-4,
+                    text:::<={
+                        @out = '';
+                        when (equipEffects->keycount == 0) 'None.';
+                        equipEffects->foreach(do:::(i, effect) {
+                            out = out + '. ' + Effect.database.find(name:effect).description + '\n';
+                        });
+                        return out;
+                    }
+                );                
+                dialogue.message(
+                    speaker:this.name + ' - Use Effects',
+                    pageAfter:canvas.height-4,
+                    text:::<={
+                        @out = '';
+                        when (useEffects->keycount == 0) 'None.';
+                        useEffects->foreach(do:::(i, effect) {
+                            out = out + '. ' + Effect.database.find(name:effect).description + '\n';
+                        });
+                        return out;
+                    }
+                );  
             },
             
             addVictory ::(silent) {
@@ -1998,7 +2012,8 @@ Item.Base.database = Database.new(items: [
             DEX: -20
         ),
         useEffects : [
-            'Treasure I'
+            'Treasure I',
+            'Consume Item'       
         ],
         equipEffects : [],
         attributes : [

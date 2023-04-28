@@ -37,7 +37,6 @@ return ::(
             topWeight: 1,
             prompt: '[' + item.name + ']',
             canCancel : true,
-            keep:true,
             choices: [
                 'Use',
                 'Equip',
@@ -73,7 +72,6 @@ return ::(
                           prompt: 'On whom?',
                           choices: allNames,
                           canCancel: true,
-                          keep:true,
                           onChoice ::(choice) {
                             when(choice == 0) empty;                      
 
@@ -91,26 +89,28 @@ return ::(
                       },
                       
                       (Item.USE_TARGET_HINT.GROUP): ::<={
-                        choice = dialogue.choicesNow(
+                        choice = dialogue.choices(
                           leftWeight: 1,
                           topWeight: 1,
-                          keep:true,
                           prompt: 'On whom?',
                           choices: [
                             'Allies',
                             'Enemies'
                           ],
-                          canCancel: true
+                          canCancel: true,
+                          onChoice ::(choice) {
+                       
+                            when(choice == 0) empty;                      
+                            onAct(
+                                action:BattleAction.new(state:{
+                                    ability: Ability.database.find(name:'Use Item'),
+                                    targets: if (choice == 1) party.members else enemies,
+                                    extraData : [item]
+                                }) 
+                            );                  
+                          
+                          }
                         );
-                        
-                        when(choice == 0) empty;                      
-                        onAct(
-                            action:BattleAction.new(state:{
-                                ability: Ability.database.find(name:'Use Item'),
-                                targets: if (choice == 1) party.members else enemies,
-                                extraData : [item]
-                            }) 
-                        );                  
                       },
 
                       (Item.USE_TARGET_HINT.ALL): ::<= {

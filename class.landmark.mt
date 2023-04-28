@@ -196,6 +196,10 @@
             });
             
             
+            map.setPointer(
+                x:gate.x,
+                y:gate.y
+            );
             
             return this;
         };    

@@ -44,6 +44,7 @@
                     when(left->keycount == 0) onDone();
                     @:action = left[0];
                     left->remove(key:0);
+                    breakpoint();
                     match(action->type) {
                       (Function):
                         action(location, landmark, doNext),

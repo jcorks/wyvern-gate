@@ -1115,25 +1115,27 @@ Effect.database = Database.new(
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     dialogue.message(
-                        text: user.name + ' flung the ' + item.name + ' at ' + holder.name + '!'
+                        text: user.name + ' flung the ' + item.name + ' at ' + holder.name + '!',
+                        onNext ::{
+                            if (Number.random() > 0.8) ::<= {
+                                holder.inventory.add(item);
+                                dialogue.message(
+                                    text: holder.name + ' caught the flung ' + item.name + '!!', onNext::{}
+                                );
+                            } else ::<= {
+                                holder.damage(
+                                    from: user,
+                                    damage: Damage.new(
+                                        amount:user.stats.ATK*(item.base.weight * 0.1),
+                                        damageType : Damage.TYPE.NEUTRAL,
+                                        damageClass: Damage.CLASS.HP
+                                    )
+                                );
+                            };                        
+                        }
                     );
 
                     item.throwOut();
-                    if (Number.random() > 0.8) ::<= {
-                        holder.inventory.add(item);
-                        dialogue.message(
-                            text: holder.name + ' caught the flung ' + item.name + '!!'
-                        );
-                    } else ::<= {
-                        holder.damage(
-                            from: user,
-                            damage: Damage.new(
-                                amount:user.stats.ATK*(item.base.weight * 0.1),
-                                damageType : Damage.TYPE.NEUTRAL,
-                                damageClass: Damage.CLASS.HP
-                            )
-                        );
-                    };
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
@@ -1221,7 +1223,7 @@ Effect.database = Database.new(
         Effect.new(
             data : {
                 name : 'Treasure I',
-                description: 'Heals 20% of HP.',
+                description: 'Opening gives a fair number of G.',
                 battleOnly : true,
                 skipTurn : false,
                 stats: StatSet.new(),

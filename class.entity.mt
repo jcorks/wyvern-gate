@@ -1014,48 +1014,46 @@
                 
 
                 plainStats.printDiff(other:stats, 
-                    prompt:this.name + '(Base -> w/Mods.)',
-                    onNext::{
-
-                        dialogue.messageSet(
-                            speaker: this.name,
-                            pageAfter:canvas.height-4,
-                            set: [ 
-                                  '       Name: ' + name + '\n\n' +
-                                  '         HP: ' + this.hp + ' / ' + this.stats.HP + '\n' + 
-                                  '         AP: ' + this.ap + ' / ' + this.stats.AP + '\n\n' + 
-                                  '    species: ' + species.name + '\n' +
-                                  ' profession: ' + profession.base.name + '\n' +
-                                  'personality: ' + personality.name + '\n\n'
-                                 ,
-                                 
-                                  ' -Equipment-  \n'                
-                                        + 'hand(l): ' + equips[EQUIP_SLOTS.HAND_L].name + '\n'
-                                        + 'hand(r): ' + equips[EQUIP_SLOTS.HAND_R].name + '\n'
-                                        + 'armor  : ' + equips[EQUIP_SLOTS.ARMOR].name + '\n'
-                                        + 'amulet : ' + equips[EQUIP_SLOTS.AMULET].name + '\n'
-                                        + 'trinket: ' + equips[EQUIP_SLOTS.TRINKET].name + '\n'
-                                        + 'ring(l): ' + equips[EQUIP_SLOTS.RING_L].name + '\n'
-                                        + 'ring(r): ' + equips[EQUIP_SLOTS.RING_R].name + '\n'
-                                 ,
-                                
-                                  
-                                    ' - Stat Modifiers - \n' +
-                                    modRate.getRates()
-                                 ,
-                                  ::<= {
-                                    @out = ' - Effects - \n\n';
-                                    effects->foreach(do:::(index, effect) {
-                                        out = out + effect.effect.name + ': ' + effect.effect.description + '\n';
-                                    });
-                                    return out;
-                                 }
-                             ],
-                             onNext ::{}                                   
-                        );                    
-                        
-                    }
+                    prompt:this.name + '(Base -> w/Mods.)'
                 );
+                
+                dialogue.messageSet(
+                    speaker: this.name,
+                    pageAfter:canvas.height-4,
+                    set: [ 
+                          '       Name: ' + name + '\n\n' +
+                          '         HP: ' + this.hp + ' / ' + this.stats.HP + '\n' + 
+                          '         AP: ' + this.ap + ' / ' + this.stats.AP + '\n\n' + 
+                          '    species: ' + species.name + '\n' +
+                          ' profession: ' + profession.base.name + '\n' +
+                          'personality: ' + personality.name + '\n\n'
+                         ,
+                         
+                          ' -Equipment-  \n'                
+                                + 'hand(l): ' + equips[EQUIP_SLOTS.HAND_L].name + '\n'
+                                + 'hand(r): ' + equips[EQUIP_SLOTS.HAND_R].name + '\n'
+                                + 'armor  : ' + equips[EQUIP_SLOTS.ARMOR].name + '\n'
+                                + 'amulet : ' + equips[EQUIP_SLOTS.AMULET].name + '\n'
+                                + 'trinket: ' + equips[EQUIP_SLOTS.TRINKET].name + '\n'
+                                + 'ring(l): ' + equips[EQUIP_SLOTS.RING_L].name + '\n'
+                                + 'ring(r): ' + equips[EQUIP_SLOTS.RING_R].name + '\n'
+                         ,
+                        
+                          
+                            ' - Stat Modifiers - \n' +
+                            modRate.getRates()
+                         ,
+                          ::<= {
+                            @out = ' - Effects - \n\n';
+                            effects->foreach(do:::(index, effect) {
+                                out = out + effect.effect.name + ': ' + effect.effect.description + '\n';
+                            });
+                            return out;
+                         }
+                     ]                                   
+                );                     
+                           
+                
                 
                 
 

@@ -49,10 +49,6 @@ return class(
 
         
         
-        @:renderLandmark ::{
-            landmark.map.render();
-            
-        };
         
         
         @:aggress::(location, party) {
@@ -86,250 +82,61 @@ return class(
         };
         
         @:systemMenu :: {
-            @:choice = dialogue.choicesNow(
+            dialogue.choices(
                 choices: [
                     'Save',
                     'Quit'
                 ],
-                canCancel : true
-            );
-            when(choice == 0) empty;
-            
-            match(choice-1) {
-              // save 
-              (0)::<= {
-                @:choice = dialogue.choicesNow(
-                    prompt:'Save which slot?',
-                    choices: [
-                        'Slot 1',
-                        'Slot 2',
-                        'Slot 3',
-                    ],
-                    canCancel : true
-                );
-                
-                when(choice == 0) empty;
-                
-                
-                onSaveState(slot:choice, data:JSON.encode(object:this.state));        
-                dialogue.message(text:'Saved successfully to slot ' + choice);
-              },
-              // quit
-              (1)::<= {
-                @:choice = dialogue.choicesNow(
-                    prompt:'Quit?',
-                    choices: [
-                        'Yes',
-                        'No'
-                    ]
-                );
-                
-                when(choice == 2) empty;
-                send();                
-                                
-              }
-            };
-            
-
-
-            
-        };
-        @:visitLandmark ::{
-            // render pattern
-            canvas.clear();
-            [0, 100]->for(do:::(y) {
-                canvas.movePen(
-                    x:((canvas.width)*Number.random())->floor, 
-                    y:((canvas.height)*Number.random())->floor
-                );
-                canvas.drawChar(text:',');
-            });
-
-            canvas.pushState();
-            @stepCount = 0;
-            @:early = [::]{
-                forever(do:::{
-                    when(party.isIncapacitated()) send();
-                
-                    renderLandmark();
-                    @choices = [
-                        'Walk...',
-                        'Party'
-                    ];
+                canCancel : true,
+                onChoice::(choice) {
+                    when(choice == 0) empty;
                     
-                    @locationAt = landmark.map.getNamedItemsUnderPointer();
-                    if (locationAt != empty) ::<= {
-                        locationAt->foreach(do:::(i, loc) {
-                            choices->push(value:'Check ' + loc.name);
-                        });
-                    };
-                    
-                    @choice = dialogue.choicesNow(
-                        leftWeight: 1,
-                        topWeight: 1,
-                        prompt: 'What next?',
-                        choices
-                    );
-                    
-                    @:MAX_STATIC_CHOICES = 2;
                     match(choice-1) {
+                      // save 
                       (0)::<= {
-                        [::] {
-                            @lastChoice = 0;
-                            forever(do:::{
-                                when(party.isIncapacitated()) send();
-                                renderLandmark();
-
-                                if (!landmark.base.dungeonMap) ::<= {
-
-                                    choices = [];
-                                    landmark.locations->foreach(do:::(index, location) {
-                                        choices->push(value:location.name);
-                                    });
-                                    
-                                    @choice = dialogue.choicesNow(
-                                        leftWeight: 1,
-                                        topWeight: 1,
-                                        prompt: 'Walk where?',
-                                        choices,
-                                        defaultChoice: lastChoice,
-                                        canCancel : true
-                                    );                 
-                                    
-                                    when(choice == 0) send();
-                                    lastChoice = choice;
-                                    landmark.map.movePointerToward(x:landmark.locations[choice-1].x, y:landmark.locations[choice-1].y);
-                                    stepsSinceLast += 1;
-                                    if (landmark.peaceful == false) ::<= {
-                                        if (stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
-                                            island.addEvent(
-                                                event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
-                                                    island, party, landmark //, currentTime
-                                                )
-                                            );
-                                            stepsSinceLast = 0;
-                                        };
-                                    };
-                                    when(party.isIncapacitated()) send();
-
-
-
-                                    @:arrival = landmark.map.getNamedItemsUnderPointer();
-                                    if (arrival != empty) ::<= {
-                                        arrival->foreach(do:::(index, arr) {
-                                            dialogue.message(
-                                                text:"The party has arrived at " + arr.name
-                                            );
-                                        });
-                                        send();
-                                    };
-                                } else ::<= {
-                                    dialogue.cursorMove(
-                                        leftWeight: 1,
-                                        topWeight: 1,
-                                        prompt: 'Walk which way?',
-                                        onMove ::(choice) {
-                                            lastChoice = choice;
-                                            // move by one unit in that direction
-                                            // or ON it if its within one unit.
-                                            landmark.map.movePointerAdjacent(
-                                                x: if (choice == dialogue.CURSOR_ACTIONS.RIGHT) 1 else if (choice == dialogue.CURSOR_ACTIONS.LEFT) -1 else 0,
-                                                y: if (choice == dialogue.CURSOR_ACTIONS.DOWN)  1 else if (choice == dialogue.CURSOR_ACTIONS.UP)   -1 else 0
-                                            );
-                                            landmark.step();
-                                            stepCount += 1;
-                                            when(party.isIncapacitated()) dialogue.popChoice();
-
-
-                                            // every 5 steps, heal 1% HP
-                                            if (stepCount % 15 == 0) 
-                                                party.members->foreach(do:::(i, member) <- member.heal(amount:(member.stats.HP * 0.01)->ceil));
-                                            
-                                            // cancel if we've arrived somewhere
-                                            @:arrival = landmark.map.getNamedItemsUnderPointer();
-                                            if (arrival != empty && arrival->keycount > 0) ::<= {
-                                                arrival->foreach(do:::(index, arr) {
-                                                    dialogue.message(
-                                                        text:"The party has arrived at the " + arr.name
-                                                    );
-                                                });
-                                                landmark.map.setPointer(
-                                                    x: arrival[0].x,
-                                                    y: arrival[0].y
-                                                );
-                                                
-                                            };                            
-                                            //renderMain();
-                                            renderLandmark();
-
-                                        }
-                                    
-                                    );
-                                    send();
-                            
-                                };
-                            });
-                        };
-                      },
-                      (1): ::<={
-                        partyOptions();
-                        landmark.step();
-                      },
-                      default: ::<= {
-                        when(choice == empty) empty;
-                        choice -= MAX_STATIC_CHOICES + 1;
-                        when(choice >= locationAt->keycount) empty;
-                        locationAt = locationAt[choice].data;
-                        
-                        breakpoint();
-                        
-                        // initial interaction 
-                        // Initial interaction triggers an event.
-                        
-                        @canInteract = [::] {
-                            return locationAt.base.onInteract(location:locationAt);
-                        };
-                            
-                        when(canInteract == false) empty;
-                      
-                        @:interactionNames = [...locationAt.base.interactions]->map(to:::(value) {
-                            return Interaction.database.find(name:value).displayName;
-                        });
-                            
-                        @:choices = [...interactionNames];
-
-                        if (locationAt.base.aggressiveInteractions->keycount)
-                            choices->push(value: 'Aggress...');
-                            
-                        choice = dialogue.choicesNow(
-                            prompt: 'Interaction',
-                            choices:choices,
-                            canCancel : true
+                        dialogue.choicesNow(
+                            prompt:'Save which slot?',
+                            choices: [
+                                'Slot 1',
+                                'Slot 2',
+                                'Slot 3',
+                            ],
+                            canCancel : true,
+                            onChoice::(choice) {
+                                when(choice == 0) empty;
+                                
+                                
+                                onSaveState(slot:choice, data:JSON.encode(object:this.state));        
+                                dialogue.message(text:'Saved successfully to slot ' + choice);
+                            }
                         );
                         
-                        when(choice == 0) empty;
-
-                        // aggress
-                        when(locationAt.base.aggressiveInteractions->keycount > 0 && choice-1 == locationAt.base.interactions->keycount) ::<= {
-                            aggress(location:locationAt, party);
-                        };
-                        
-                        Interaction.database.find(name:locationAt.base.interactions[choice-1]).onInteract(
-                            location: locationAt,
-                            party
+                      },
+                      // quit
+                      (1)::<= {
+                        dialogue.choices(
+                            prompt:'Quit?',
+                            choices: [
+                                'Yes',
+                                'No'
+                            ],
+                            onChoice::(choice) {
+                                when(choice == 2) empty;
+                            
+                            }
                         );
-                        landmark.step();
-                      }
-                    
-                    };
-                    
                                         
-                    
-                });
-            };
-            canvas.popState();
-            return early;
+                      }
+                    };                
+                }
+            );
+
+            
+
+
+            
         };
+        
         
         @:visitIsland :: {
 
@@ -423,7 +230,7 @@ return class(
                             canCancel: true,
                             onChoice::(choice){
                                 match(choice-1) {
-                                  (0): dialogue.message(speaker: 'About ' + island.name, text: island.description, onNext::{})
+                                  (0): dialogue.message(speaker: 'About ' + island.name, text: island.description)
                                 };                                                        
                             }
                         );
@@ -433,7 +240,7 @@ return class(
 
                       (3): ::<= {
                         island.incrementTime();
-                        dialogue.message(text:'Nothing to see but the peaceful scenery of ' + island.name + '.', onNext::{});                          
+                        dialogue.message(text:'Nothing to see but the peaceful scenery of ' + island.name + '.');                          
                       },
                       // party options
                       (2): partyOptions(),
@@ -445,7 +252,7 @@ return class(
                       // visit landmark
                       default: ::<= {
                         //breakpoint();
-                        visitLandmark(landmark:visitable[choice-6].data);
+                        this.visitLandmark(landmark:visitable[choice-6].data);
                       }
                     };
 
@@ -460,6 +267,205 @@ return class(
         };
         
         this.interface = {
+            visitLandmark ::(landmark){
+                // render pattern
+                /*canvas.clear();
+                [0, 100]->for(do:::(y) {
+                    canvas.movePen(
+                        x:((canvas.width)*Number.random())->floor, 
+                        y:((canvas.height)*Number.random())->floor
+                    );
+                    canvas.drawChar(text:',');
+                });
+
+                canvas.pushState();
+                */
+                
+                @stepCount = 0;
+                dialogue.choices(
+                    leftWeight: 1,
+                    topWeight: 1,
+                    prompt: 'What next?',
+                    keep:true,
+                    onGetChoices ::{
+                        @choices = [                
+                            'Walk...',
+                            'Party'
+                        ];
+                        
+                        
+                        @locationAt = landmark.map.getNamedItemsUnderPointer();
+                        if (locationAt != empty) ::<= {
+                            locationAt->foreach(do:::(i, loc) {
+                                choices->push(value:'Check ' + loc.name);
+                            });
+                        };
+
+                        return choices;                
+                    },
+                    renderable:landmark.map,
+                    onChoice::(choice) {
+                        @locationAt = landmark.map.getNamedItemsUnderPointer();
+                            
+
+                            
+                        @:MAX_STATIC_CHOICES = 2;
+                        match(choice-1) {
+                          (0)::<= {
+                            
+                            @lastChoice = 0;
+
+                            if (!landmark.base.dungeonMap) ::<= {
+
+                                @choices = [];
+                                landmark.locations->foreach(do:::(index, location) {
+                                    choices->push(value:location.name);
+                                });
+                                
+                                dialogue.choices(
+                                    leftWeight: 1,
+                                    topWeight: 1,
+                                    prompt: 'Walk where?',
+                                    choices,
+                                    defaultChoice: lastChoice,
+                                    canCancel : true,
+                                    onChoice::(choice) {
+                                        when(choice == 0) send();
+                                        lastChoice = choice;
+                                        landmark.map.movePointerToward(x:landmark.locations[choice-1].x, y:landmark.locations[choice-1].y);
+                                        stepsSinceLast += 1;
+                                        if (landmark.peaceful == false) ::<= {
+                                            if (stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
+                                                island.addEvent(
+                                                    event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
+                                                        island, party, landmark //, currentTime
+                                                    )
+                                                );
+                                                stepsSinceLast = 0;
+                                            };
+                                        };
+                                        when(party.isIncapacitated()) send();
+
+
+
+                                        @:arrival = landmark.map.getNamedItemsUnderPointer();
+                                        if (arrival != empty) ::<= {
+                                            arrival->foreach(do:::(index, arr) {
+                                                dialogue.message(
+                                                    text:"The party has arrived at " + arr.name
+                                                );
+                                            });
+                                        };                                
+                                    }
+                                );                 
+                                
+                                
+                            } else ::<= {
+                                dialogue.cursorMove(
+                                    leftWeight: 1,
+                                    topWeight: 1,
+                                    prompt: 'Walk which way?',
+                                    renderable:landmark.map,
+                                    onMove ::(choice) {
+                                        lastChoice = choice;
+                                        // move by one unit in that direction
+                                        // or ON it if its within one unit.
+                                        landmark.map.movePointerAdjacent(
+                                            x: if (choice == dialogue.CURSOR_ACTIONS.RIGHT) 1 else if (choice == dialogue.CURSOR_ACTIONS.LEFT) -1 else 0,
+                                            y: if (choice == dialogue.CURSOR_ACTIONS.DOWN)  1 else if (choice == dialogue.CURSOR_ACTIONS.UP)   -1 else 0
+                                        );
+                                        landmark.step();
+                                        stepCount += 1;
+                                        when(party.isIncapacitated()) dialogue.popChoice();
+
+
+                                        // every 5 steps, heal 1% HP
+                                        if (stepCount % 15 == 0) 
+                                            party.members->foreach(do:::(i, member) <- member.heal(amount:(member.stats.HP * 0.01)->ceil));
+                                        
+                                        // cancel if we've arrived somewhere
+                                        @:arrival = landmark.map.getNamedItemsUnderPointer();
+                                        if (arrival != empty && arrival->keycount > 0) ::<= {
+                                            arrival->foreach(do:::(index, arr) {
+                                                dialogue.message(
+                                                    text:"The party has arrived at the " + arr.name
+                                                );
+                                            });
+                                            landmark.map.setPointer(
+                                                x: arrival[0].x,
+                                                y: arrival[0].y
+                                            );
+                                            
+                                        };                            
+
+                                    }
+                                
+                                );
+                        
+                            };
+                          },
+                          
+                          (1): ::<={
+                            partyOptions();
+                            landmark.step();
+                          },
+                          
+                          
+                          default: ::<= {
+                            when(choice == empty) empty;
+                            choice -= MAX_STATIC_CHOICES + 1;
+                            when(choice >= locationAt->keycount) empty;
+                            locationAt = locationAt[choice].data;
+                            
+                            breakpoint();
+                            
+                            // initial interaction 
+                            // Initial interaction triggers an event.
+                            
+                            @canInteract = [::] {
+                                return locationAt.base.onInteract(location:locationAt);
+                            };
+                                
+                            when(canInteract == false) empty;
+                          
+                            @:interactionNames = [...locationAt.base.interactions]->map(to:::(value) {
+                                return Interaction.database.find(name:value).displayName;
+                            });
+                                
+                            @:choices = [...interactionNames];
+
+                            if (locationAt.base.aggressiveInteractions->keycount)
+                                choices->push(value: 'Aggress...');
+                                
+                            dialogue.choices(
+                                prompt: 'Interaction',
+                                choices:choices,
+                                canCancel : true,
+                                onChoice::(choice) {
+                           
+                                    when(choice == 0) empty;
+
+                                    // aggress
+                                    when(locationAt.base.aggressiveInteractions->keycount > 0 && choice-1 == locationAt.base.interactions->keycount) ::<= {
+                                        aggress(location:locationAt, party);
+                                    };
+                                    
+                                    Interaction.database.find(name:locationAt.base.interactions[choice-1]).onInteract(
+                                        location: locationAt,
+                                        party
+                                    );
+                                    landmark.step();                            
+                                }
+                            );
+
+                          }
+                        
+                        };
+                    }
+                );
+            },
+
+
             mainMenu ::(
                 onSaveState => Function, // for saving,
                 onLoadState => Function,
@@ -468,60 +474,55 @@ return class(
                 this.onLoadState = onLoadState;
                                 
                 dialogue.message(
-                    text: ' Wyvern Gate ' + VERSION + ' ',
-                    onNext ::{
-                        dialogue.message(
-                            text: 'Note: this game is under heavy development. Depending on your platform, use either Number keys + Enter, gamepad up/down/left/right / confirm / cancel, or arrow keys / enter / backspace to navigate.\nGoodluck!',
-                            onNext :: {
-                                dialogue.choices(
-                                    choices : ['Load', 'New', 'Quit'],
-                                    topWeight: 0.75,
-                                    onChoice ::(choice) {
-                                        match(choice-1) {
-                                          // Load 
-                                          (0)::<= {
-                                            @:choice = dialogue.choices(
-                                                choices: [
-                                                    'Slot 1',
-                                                    'Slot 2',
-                                                    'Slot 3',
-                                                ],
-                                                canCancel: true
-                                            );
-                                            when(choice == 0) empty;
-                                            @:data = onLoadState(slot:choice);
+                    text: ' Wyvern Gate ' + VERSION + ' '
+                );
+                dialogue.message(
+                    text: 'Note: this game is under heavy development. Depending on your platform, use either Number keys + Enter, gamepad up/down/left/right / confirm / cancel, or arrow keys / enter / backspace to navigate.\nGoodluck!'
+                );                
+                dialogue.choices(
+                    choices : ['Load', 'New', 'Quit'],
+                    topWeight: 0.75,
+                    onChoice ::(choice) {
+                        match(choice-1) {
+                          // Load 
+                          (0)::<= {
+                            @:choice = dialogue.choices(
+                                choices: [
+                                    'Slot 1',
+                                    'Slot 2',
+                                    'Slot 3',
+                                ],
+                                canCancel: true
+                            );
+                            when(choice == 0) empty;
+                            @:data = onLoadState(slot:choice);
 
-                                            when(data == empty)
-                                                dialogue.message(text:'There is no data in this slot');
-                                                
-                                            this.state = JSON.decode(string:data);
-                                            this.startInstance();
-                                          },
-                                          
-                                          (1)::<= {
-                                            canvas.clear();
-                                            @:message = 'Loading...';
-                                            canvas.movePen(
-                                                x: canvas.width/2 - message->length/2,
-                                                y: canvas.height/2
-                                            );
-                                            canvas.drawText(text:message);
-                                            canvas.commit();
-                                            this.startNew();
-                                            //this.startInstance();
-                                          },
-                                          
-                                          (2)::<= {
-                                            dialogue.popChoice();
-                                          }
-                                        };                            
-                                    }
-                                );                            
-                            }
-                        );
+                            when(data == empty)
+                                dialogue.message(text:'There is no data in this slot');
+                                
+                            this.state = JSON.decode(string:data);
+                            this.startInstance();
+                          },
+                          
+                          (1)::<= {
+                            canvas.clear();
+                            @:message = 'Loading...';
+                            canvas.movePen(
+                                x: canvas.width/2 - message->length/2,
+                                y: canvas.height/2
+                            );
+                            canvas.drawText(text:message);
+                            canvas.commit();
+                            this.startNew();
+                            //this.startInstance();
+                          },
+                          
+                          (2)::<= {
+                            dialogue.popChoice();
+                          }
+                        };                            
                     }
                 );
-
             },
             
         
@@ -665,7 +666,6 @@ return class(
                 
                 @:Scene = import(module:'class.scene.mt');
                 Scene.database.find(name:'scene_intro').act(onDone::{
-                    breakpoint();
                     visitIsland();
                 });
                 
