@@ -54,17 +54,17 @@ return class(
                 
             },
             
-            takeTurn ::{
+            takeTurn ::(battle){
                 when(enemies_->keycount == 0)
-                    BattleAction.new(
+                    battle.entityCommitAction(action:BattleAction.new(
                         state : {
                             ability: Ability.database.find(name:'Wait'),
                             targets: [],
                             extraData: {}                        
                         }
-                    );
+                    ));
             
-                return BattleAction.new(
+                battle.entityCommitAction(action:BattleAction.new(
                     state : {
                         ability: 
                             user_.abilitiesAvailable[0],
@@ -75,7 +75,7 @@ return class(
                         ],
                         extraData: {}                        
                     }
-                );            
+                ));            
             }
         };   
     }  

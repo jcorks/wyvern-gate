@@ -282,6 +282,18 @@ return class(
             },
             
             clear :: {
+                when (savestates->keycount) ::<= {
+                    @prevCanvas = savestates[savestates->keycount-1].text;
+                    @prevColors = savestates[savestates->keycount-1].colors;
+                    canvas = [];
+                    canvasColors = [];
+                    prevCanvas->foreach(do:::(index, line) {
+                        canvas->push(value:[...line]);
+                    });
+                    prevColors->foreach(do:::(index, colors) {
+                        canvasColors->push(value:[...colors]);
+                    });
+                };
                 [0, CANVAS_HEIGHT]->for(do:::(i) {
                     @:line = canvas[i];
                     @:lineColor = canvasColors[i];

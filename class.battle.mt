@@ -43,6 +43,9 @@
         @onAllyTurn_;
         @landmark_;
         @active;
+        @alliesWin = false;
+        @entityTurn;
+        @onTurn_;
     
         // some actions last multiple turns.
         // indexed by Entity.
@@ -72,7 +75,6 @@
                 ];
                 
             });
-            redraw();        
         };
         
         @:doTurn ::{
@@ -94,75 +96,81 @@
             // then do turns.
             // Every turn returns a BattleAction:
             // includes an ability and targetset
-            turn->foreach(do:::(index, obj) {
-                @:ent = obj.entity;
-                turnIndex = index;
-                
-                // act turn can signal to not act
-                when(!ent.actTurn()) checkRemove();
-
-
-                // may have died this turn.
-                when (ent.isIncapacitated()) checkRemove();
-                this.prompt();
-                
-                // multi turn actions
-                if (actions[ent]) ::<= {
-                    @:action = actions[ent];
-                    action.turnIndex += 1;
-                    
-                    
-                    ent.useAbility(
-                        ability:action.ability,
-                        allies:  if(obj.isAlly) allies_  else enemies_,
-                        enemies: if(obj.isAlly) enemies_ else allies_,
-                        targets:action.targets,
-                        turnIndex : action.turnIndex,
-                        extraData : action.extraData
-                    );
-                    redraw();
-
-                    
-                    if (action.turnIndex >= action.ability.durationTurns) ::<= {
-                        actions[ent] = empty;
-                    };
-                } else ::<= {
-
-
-                    // normal turn: request action from the act function
-                    // given by the caller
-                    @:act = if (obj.isAlly) onAllyTurn_ else onEnemyTurn_;
-                    @:action = act(
-                        battle:this,
-                        user:ent,
-                        landmark:landmark_,
-                        allies:allies_,
-                        enemies:enemies_
-                    );
-                    ent.useAbility(
-                        ability:action.ability,
-                        targets:action.targets,
-                        turnIndex : action.turnIndex,
-                        extraData : action.extraData
-                    );
-            
-                    if (action.ability.durationTurns > 0) ::<= {
-                        action.turnIndex = 0;
-                        actions[ent] = action;
-                    };
-                };
-
-                checkRemove();
-                
-            });
-            
+            breakpoint();
             
             turn->foreach(do:::(index, obj) {
-                obj.entity.endTurn();
-            });
-
             
-        
+                dialogue.queueResolveAfter(callbacks:[::{
+                    @:ent = obj.entity;
+                    entityTurn = ent;
+                    turnIndex = index;
+                    
+                    // act turn can signal to not act
+                    when(!ent.actTurn()) checkRemove();
+
+
+                    // may have died this turn.
+                    when (ent.isIncapacitated()) checkRemove();
+                    
+                    // multi turn actions
+                    if (actions[ent]) ::<= {
+                        @:action = actions[ent];
+                        action.turnIndex += 1;
+                        
+                        
+                        ent.useAbility(
+                            ability:action.ability,
+                            allies:  if(obj.isAlly) allies_  else enemies_,
+                            enemies: if(obj.isAlly) enemies_ else allies_,
+                            targets:action.targets,
+                            turnIndex : action.turnIndex,
+                            extraData : action.extraData
+                        );
+                        redraw();
+
+                        
+                        if (action.turnIndex >= action.ability.durationTurns) ::<= {
+                            actions[ent] = empty;
+                        };
+                    } else ::<= {
+
+
+                        // normal turn: request action from the act function
+                        // given by the caller
+                        @:act = if (obj.isAlly) onAllyTurn_ else onEnemyTurn_;
+                        act(
+                            battle:this,
+                            user:ent,
+                            landmark:landmark_,
+                            allies:allies_,
+                            enemies:enemies_
+                        );
+                        
+                    };
+
+                    checkRemove();
+                }]);
+            });
+            
+            dialogue.queueResolveAfter(callbacks:[::{
+                turn->foreach(do:::(index, obj) {
+                    obj.entity.endTurn();
+                });
+
+                if (onTurn_ != empty)
+                    onTurn_();            
+                when(allies_->all(condition:::(value) {
+                    return value.isIncapacitated();
+                })) dialogue.forceExit();
+                
+                when(enemies_->all(condition:::(value) {
+                    return value.isIncapacitated();
+                })) dialogue.forceExit();
+                
+                doTurn();
+            }]);
+            
+                                
         };
     
 
@@ -239,13 +247,7 @@
         };
         
 
-        redraw = ::{
-            canvas.clear();
 
-            renderStatusBox();
-            renderTurnOrder();
-            canvas.commit();        
-        };
         
         
         this.interface = {
@@ -264,6 +266,7 @@
                 
                 onStart
             ) {
+                onTurn_ = onTurn;
                 allies = [...allies];
                 enemies = [...enemies];
                 canvas.pushState();
@@ -288,7 +291,7 @@
                 });
 
                 @:onAllyTurn = ::(battle, user, landmark, allies, enemies) {
-                    return if (party.isMember(entity:user))
+                    if (party.isMember(entity:user))
                         battlemenu(
                             party:party_,
                             battle,
@@ -298,13 +301,13 @@
                             enemies 
                         )
                     else 
-                        user.battleAI.takeTurn()
+                        user.battleAI.takeTurn(battle)
                     ;
                 };
                 
                 
                 @:onEnemyTurn = ::(battle, user, landmark, allies, enemies) {
-                    return user.battleAI.takeTurn();
+                    user.battleAI.takeTurn(battle);
                 };
 
                 if (npcBattle == empty) ::<= {
@@ -340,146 +343,140 @@
                         entity: v
                     });
                 });
-                redraw();
-                @alliesWin = [::] {
-                    if (onStart) onStart();
-                    forever(do:::{
-                        when(allies->all(condition:::(value) {
-                            return value.isIncapacitated();
-                        })) send(message:false);
-                        
-                        when(enemies->all(condition:::(value) {
-                            return value.isIncapacitated();
-                        })) send(message:true);
-                                    
-                        doTurn();
-                        if (onTurn != empty)
-                            onTurn();
-                    });
-                };
                 
-                result = match(true) {
-                  (alliesWin):      RESULTS.ALLIES_WIN,
-                  (!isPlayerParty): RESULTS.ENEMIES_WIN,
-                  default:          RESULTS.NOONE_WIN
-                };
-                
-                
-                allies->foreach(do:::(k, v) {
-                    v.battleEnd();
-                });
-
-                enemies->foreach(do:::(k, v) {
-                    v.battleEnd();
-                });
-                            
-                
-                when (npcBattle != empty) ::<= {
-                    active = false;
-                    dialogue.message(text: 'The battle is over.');
-                    canvas.popState();
-
-                    allies_ = [];
-                    enemies_ = [];
-                    
-                    return this;
-                };
 
 
-                if (alliesWin) ::<= {            
-                    dialogue.message(text: 'The battle is won.');
-
-                    @exp = 0;
-                    enemies_->foreach(do:::(index, enemy) {
-                        exp += enemy.dropExp();
-                    });                
-                    exp /= allies_->keycount;
-                    exp = exp->ceil;
-                    if (exp == true)
-                        dialogue.message(text: 'Each party member gains ' + exp + ' EXP.');
-                        
-                    allies_->foreach(do:::(index, ally) {
-                        ally.stats.resetMod();
-                        
-
-                        if (exp == true) ::<= {
-                            @stats = StatSet.new();
-                            @level = ally.level;
-                            stats.add(stats:ally.stats);
-                            ally.gainExp(amount:exp, chooseStat:::(
-                                hp, ap, atk, def, int, luk, dex, spd
-                            ) {
-                                dialogue.message(text: ally.name + ' has leveled up.');
-
-
-                                ally.stats.resetMod();
-                                stats.printDiff(other:ally.stats, prompt:ally.name + ' - (Level:  ' + level  + ' -> ' + (ally.level+1) + ': Base Stats)');                        
-                                stats = StatSet.new();
-                                stats.add(stats:ally.stats);                        
-                                return dialogue.choicesNow(
-                                    prompt: ally.name + ' - Focus which?',
-                                    choices: [
-                                        'HP  (+' + hp + ')',
-                                        'AP  (+' + ap + ')',
-                                        'ATK (+' + atk + ')',
-                                        'INT (+' + int + ')',
-                                        'DEF (+' + def + ')',
-                                        'SPD (+' + spd + ')',
-                                        'LUK (+' + luk + ')',
-                                        'DEX (+' + dex + ')'
-                                    ]
-                                )-1;
-                            },
-                            
-                            afterLevel :::{
-                                ally.stats.resetMod();
-                                stats.printDiff(other:ally.stats, prompt:'(Level:  ' + level  + ' -> ' + (ally.level+1) + ': Focus)');                        
-                            
-                            });
+                dialogue.noDisplay(
+                    renderable:this,
+                    onStart::{
+                        if (onStart) onStart();
+                        doTurn();                    
+                    },
+                    onNext::{
+                        result = match(true) {
+                          (alliesWin):      RESULTS.ALLIES_WIN,
+                          (!isPlayerParty): RESULTS.ENEMIES_WIN,
+                          default:          RESULTS.NOONE_WIN
                         };
-                        @:Entity = import(module:'class.entity.mt');
-                        @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
-                        if (wep != empty) ::<= {
-                            wep.addVictory();
-                        };
-                        ally.recalculateStats();
                         
-     
-                    }); 
-                    if (noLoot == empty) ::<= {
-                        @:loot = [];
-                        enemies->foreach(do:::(index, enemy) {
-                            enemy.inventory.items->foreach(do:::(index, item) {
-                                if (Number.random() > 0.7 && loot->keycount == 0) ::<= {
-                                    loot->push(value:enemy.inventory.remove(item));
-                                };
-                            });
+                        
+                        allies->foreach(do:::(k, v) {
+                            v.battleEnd();
                         });
-                        
-                        if (loot->keycount > 0) ::<= {
-                            dialogue.message(text: 'It looks like they dropped some items during the fight...');
-                            @message = 'The party found:\n\n';
-                            loot->foreach(do:::(index, item) {
-                                @message = 'The party found a(n) ';
-                                message = message + item.name;
-                                dialogue.message(text: message);
-                                party.inventory.add(item);
-                            });
-                        };
-                    };
-                                   
-                    canvas.popState();
 
-                } else ::<= {
-                    if (party.members->all(condition:::(value) <- value.isIncapacitated())) ::<= {
-                        dialogue.message(text: 'The battle is lost.');
-                    };
-                    canvas.popState();
-                };
-                allies_ = [];
-                enemies_ = [];
-                active = false;
-                
+                        enemies->foreach(do:::(k, v) {
+                            v.battleEnd();
+                        });
+                                    
+                        
+                        when (npcBattle != empty) ::<= {
+                            active = false;
+                            dialogue.message(text: 'The battle is over.');
+                            canvas.popState();
+
+                            allies_ = [];
+                            enemies_ = [];
+                            
+                            return this;
+                        };
+
+
+                        if (alliesWin) ::<= {            
+                            dialogue.message(text: 'The battle is won.');
+
+                            @exp = 0;
+                            enemies_->foreach(do:::(index, enemy) {
+                                exp += enemy.dropExp();
+                            });                
+                            exp /= allies_->keycount;
+                            exp = exp->ceil;
+                            if (exp == true)
+                                dialogue.message(text: 'Each party member gains ' + exp + ' EXP.');
+                                
+                            allies_->foreach(do:::(index, ally) {
+                                ally.stats.resetMod();
+                                
+
+                                if (exp == true) ::<= {
+                                    @stats = StatSet.new();
+                                    @level = ally.level;
+                                    stats.add(stats:ally.stats);
+                                    ally.gainExp(amount:exp, chooseStat:::(
+                                        hp, ap, atk, def, int, luk, dex, spd
+                                    ) {
+                                        dialogue.message(text: ally.name + ' has leveled up.');
+
+
+                                        ally.stats.resetMod();
+                                        stats.printDiff(other:ally.stats, prompt:ally.name + ' - (Level:  ' + level  + ' -> ' + (ally.level+1) + ': Base Stats)');                        
+                                        stats = StatSet.new();
+                                        stats.add(stats:ally.stats);                        
+                                        return dialogue.choicesNow(
+                                            prompt: ally.name + ' - Focus which?',
+                                            choices: [
+                                                'HP  (+' + hp + ')',
+                                                'AP  (+' + ap + ')',
+                                                'ATK (+' + atk + ')',
+                                                'INT (+' + int + ')',
+                                                'DEF (+' + def + ')',
+                                                'SPD (+' + spd + ')',
+                                                'LUK (+' + luk + ')',
+                                                'DEX (+' + dex + ')'
+                                            ]
+                                        )-1;
+                                    },
+                                    
+                                    afterLevel :::{
+                                        ally.stats.resetMod();
+                                        stats.printDiff(other:ally.stats, prompt:'(Level:  ' + level  + ' -> ' + (ally.level+1) + ': Focus)');                        
+                                    
+                                    });
+                                };
+                                @:Entity = import(module:'class.entity.mt');
+                                @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
+                                if (wep != empty) ::<= {
+                                    wep.addVictory();
+                                };
+                                ally.recalculateStats();
+                                
+             
+                            }); 
+                            if (noLoot == empty) ::<= {
+                                @:loot = [];
+                                enemies->foreach(do:::(index, enemy) {
+                                    enemy.inventory.items->foreach(do:::(index, item) {
+                                        if (Number.random() > 0.7 && loot->keycount == 0) ::<= {
+                                            loot->push(value:enemy.inventory.remove(item));
+                                        };
+                                    });
+                                });
+                                
+                                if (loot->keycount > 0) ::<= {
+                                    dialogue.message(text: 'It looks like they dropped some items during the fight...');
+                                    @message = 'The party found:\n\n';
+                                    loot->foreach(do:::(index, item) {
+                                        @message = 'The party found a(n) ';
+                                        message = message + item.name;
+                                        dialogue.message(text: message);
+                                        party.inventory.add(item);
+                                    });
+                                };
+                            };
+                                           
+                            canvas.popState();
+
+                        } else ::<= {
+                            if (party.members->all(condition:::(value) <- value.isIncapacitated())) ::<= {
+                                dialogue.message(text: 'The battle is lost.');
+                            };
+                            canvas.popState();
+                        };
+                        allies_ = [];
+                        enemies_ = [];
+                        active = false;                    
+                    }
+                );
+
                 return this;            
             },        
         
@@ -513,21 +510,27 @@
                     
             },
             
-            prompt :: (text, choices, canCancel){                                
-                canvas.clear();
-
+            render :: {
                 renderStatusBox();
                 renderTurnOrder();
-                when (choices == empty) -1;
-                return dialogue.choiceColumnsNow(
-                    leftWeight: 1,
-                    topWeight: 1,
-                    choices,
-                    itemsPerColumn: 3,
-                    prompt:text
+            },
+            
+            entityCommitAction::(action) {
+                breakpoint();
+                entityTurn.useAbility(
+                    ability:action.ability,
+                    targets:action.targets,
+                    turnIndex : action.turnIndex,
+                    extraData : action.extraData
                 );
+        
+                if (action.ability.durationTurns > 0) ::<= {
+                    action.turnIndex = 0;
+                    actions[entityTurn] = action;
+                };            
+            },
+            
 
-            }
         };
     }
 );

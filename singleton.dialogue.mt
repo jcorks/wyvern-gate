@@ -89,7 +89,8 @@ return class(
         @isCursor = true;
         @choiceStack = [];
         @:nextResolve = [];
-    
+        @:afterResolve = [];
+
     
     
     
@@ -289,9 +290,27 @@ return class(
             return false;    
         };        
     
+        @:nodisplayCursor ::(data => Object, input) {
+            @:renderable = data.renderable;   
+            
+            if (data.started == empty) ::<= {
+                data.onStart();
+                data.started = true;
+            };
+            
+            //if (canCancel) ::<= {
+            //    choicesModified->push(value:'(Cancel)');
+            //};
+            if (data.rendered == empty) ::<= {
+                if (data.renderable) 
+                    data.renderable.render();
+                canvas.commit();    
+            };
+
+            return true;    
+        };       
     
-    
-        @:choiceColumnsCursor ::(data => Object) {
+        @:choiceColumnsCursor ::(data => Object, input) {
         
             @:choices = if (data.onGetChoices) data.onGetChoices() else data.choices;
             // no choices
@@ -309,123 +328,125 @@ return class(
             @:canCancel = data.canCancel;
             @:onChoice = data.onChoice;
             
-            @x = 0;
-            @y = 0;
-            onChoice(choice:[::] {
-                forever(do:::{
+            @x = data.defaultX;
+            @y = data.defaultY;
+            
+            if (x == empty) x = 0;
+            if (y == empty) y = 0;
 
-                    @:choicesModified = [];
-                    @column = 0;
-                    
-                    @:columns = [[]];
-                    @:columnWidth = [0];
 
-                    @height;
-                    @width;
-                    @which;
-                    choices->foreach(do:::(index, choice) {
-                        @entry = (if (columns[column]->keycount == y && column == x)'▹ ' else '  ') + choice;
-                        if (columns[column]->keycount == y && column == x) which = index;
-                        
-                        columns[column]->push(value:entry);
+            @:choicesModified = [];
+            @column = 0;
+            
+            @:columns = [[]];
+            @:columnWidth = [0];
 
-                        if (entry->length > columnWidth[column])
-                            columnWidth[column] = entry->length;
-                        
-                        if (columns[column]->keycount >= itemsPerColumn) ::<= {
-                            column+=1;
-                            columns[column] = [];
-                            columnWidth->push(value:0);
-                        };
-                    });
-                    width = columnWidth->keycount;
-                    height = itemsPerColumn;
-                    
+            @height;
+            @width;
+            @which;
+            choices->foreach(do:::(index, choice) {
+                @entry = (if (columns[column]->keycount == y && column == x)'▹ ' else '  ') + choice;
+                if (columns[column]->keycount == y && column == x) which = index;
+                
+                columns[column]->push(value:entry);
 
-                    // its just a regular choice at that point. Most of the time
-                    // we can be a little sloppy here.
-                    when(columns->keycount == 1)
-                        choices(choices, prompt, leftWeight, topWeight, canCancel);
-                    
-                    
-                    // reformat with spacing
-                    @:choicesModified = [];
-                    [0, itemsPerColumn]->for(do:::(i) {
-                        @choice = '';
-                        columns->foreach(do:::(index, text) {
-                            if (text[i] != empty) ::<= {
-                                choice = choice + text[i];
-                                
-                                [choice->length, columnWidth[index]]->for(do:::(n) {
-                                    choice = choice + ' ';
-                                });
-                                choice = choice + '   ';
-                            };
-                            
-                        });
-                        choicesModified->push(value:choice);
-                    });
-                    // first render
-                    if (data.rendered == empty) ::<= {
-                        renderText(
-                            lines: choicesModified,
-                            speaker: prompt,
-                            leftWeight,
-                            topWeight,
-                            limitLines:9
-                        ); 
-                        canvas.commit();
-                        data.rendered = true; 
-                    };                                           
-                    @choice;
-                    [::] {  
-                        forever(do:::{
-                            choice = onInput();
-                            match(choice) {
-                              (CURSOR_ACTIONS.UP,
-                               CURSOR_ACTIONS.DOWN,
-                               CURSOR_ACTIONS.LEFT,
-                               CURSOR_ACTIONS.RIGHT,
-                               CURSOR_ACTIONS.CONFIRM,
-                               CURSOR_ACTIONS.CANCEL): send()
-                            };
-                        });
-                    };                                              
-                    renderText(
-                        lines: choicesModified,
-                        speaker: prompt,
-                        leftWeight,
-                        topWeight,
-                        limitLines:9
-                    ); 
-                    canvas.commit();                    
-                    
-                    if (choice == CURSOR_ACTIONS.CONFIRM)
-                        send(message:which+1);        
-                        
-                    if (canCancel && choice == CURSOR_ACTIONS.CANCEL)  
-                        send(message:0);  
-                    
-                    if (choice == CURSOR_ACTIONS.LEFT)
-                        x -= 1;
-                        
-                    if (choice == CURSOR_ACTIONS.RIGHT)
-                        x += 1;
-                        
-                    if (choice == CURSOR_ACTIONS.UP)
-                        y -= 1;
-
-                    if (choice == CURSOR_ACTIONS.DOWN)
-                        y += 1;
-
-                    if (x < 0) x = 0;
-                    if (x >= width) x = width-1;
-                    if (y < 0) y = 0;
-                    if (y >= height) y = height-1;
-                        
-                });
+                if (entry->length > columnWidth[column])
+                    columnWidth[column] = entry->length;
+                
+                if (columns[column]->keycount >= itemsPerColumn) ::<= {
+                    column+=1;
+                    columns[column] = [];
+                    columnWidth->push(value:0);
+                };
             });
-        
+            width = columnWidth->keycount;
+            height = itemsPerColumn;
+            
+
+            // its just a regular choice at that point. Most of the time
+            // we can be a little sloppy here.
+            when(columns->keycount == 1)
+                choices(choices, prompt, leftWeight, topWeight, canCancel);
+            
+            
+            // reformat with spacing
+            @:choicesModified = [];
+            [0, itemsPerColumn]->for(do:::(i) {
+                @choice = '';
+                columns->foreach(do:::(index, text) {
+                    if (text[i] != empty) ::<= {
+                        choice = choice + text[i];
+                        
+                        [choice->length, columnWidth[index]]->for(do:::(n) {
+                            choice = choice + ' ';
+                        });
+                        choice = choice + '   ';
+                    };
+                    
+                });
+                choicesModified->push(value:choice);
+            });
+            // first render
+            if (data.rendered == empty) ::<= {
+                if (data.renderable) 
+                    data.renderable.render();
+                renderText(
+                    lines: choicesModified,
+                    speaker: prompt,
+                    leftWeight,
+                    topWeight,
+                    limitLines:9
+                ); 
+                canvas.commit();
+                data.rendered = true; 
+            };                                           
+            @choice = input;                   
+            
+            when (choice == CURSOR_ACTIONS.CONFIRM) ::<= {
+                if (data.keep == false || data.keep == empty) ::<= {
+                    canvas.popState();
+                    canvas.commit();
+                    choiceStack->pop;
+                }; 
+                data.rendered = empty;
+                onChoice(choice:which + 1);
+                return true;
+            };
+                
+            if (canCancel && choice == CURSOR_ACTIONS.CANCEL) ::<= {
+                canvas.popState();
+                canvas.commit();
+                choiceStack->pop;
+                return true;
+            };
+            
+            when(choice == CURSOR_ACTIONS.LEFT||
+                 choice == CURSOR_ACTIONS.RIGHT||
+                 choice == CURSOR_ACTIONS.UP||
+                 choice == CURSOR_ACTIONS.DOWN) ::<= {
+                if (choice == CURSOR_ACTIONS.LEFT)
+                    x -= 1;
+                    
+                if (choice == CURSOR_ACTIONS.RIGHT)
+                    x += 1;
+                    
+                if (choice == CURSOR_ACTIONS.UP)
+                    y -= 1;
+
+                if (choice == CURSOR_ACTIONS.DOWN)
+                    y += 1;
+
+                if (x < 0) x = 0;
+                if (x >= width) x = width-1;
+                if (y < 0) y = 0;
+                if (y >= height) y = height-1;
+            
+                data.defaultX = x;
+                data.defaultY = y;
+                data.rendered = empty; 
+                return false;
+            };
+            return false;
         };
         
         @:displayCursor ::(data, input) {
@@ -463,7 +484,8 @@ return class(
             COLUMN_CURSOR : 2,
             COLUMN_NUMBER : 3,
             CURSOR_MOVE: 4,
-            DISPLAY: 5
+            DISPLAY: 5,
+            NODISPLAY: 6
         };
         
         this.interface = {
@@ -477,6 +499,9 @@ return class(
                     };
                     val = choiceStack[choiceStack->keycount-1];
                 };
+                
+
+                
                     
                 //if (val.jail == true) ::<= {
                 //    choiceStack->push(value:val);
@@ -485,7 +510,8 @@ return class(
                   (CHOICE_MODE.CURSOR):         choicesCursor(data:val, input),
                   (CHOICE_MODE.COLUMN_CURSOR):  choiceColumnsCursor(data:val, input),
                   (CHOICE_MODE.DISPLAY):        displayCursor(data:val, input),
-                  (CHOICE_MODE.CURSOR_MOVE):    choiceCursorMove(data:val, input)
+                  (CHOICE_MODE.CURSOR_MOVE):    choiceCursorMove(data:val, input),
+                  (CHOICE_MODE.NODISPLAY):      nodisplayCursor(data:val, input)
                 };        
                 // true means done
                 if (result == true) ::<= {
@@ -493,7 +519,13 @@ return class(
                         @:cbs = nextResolve[0];
                         nextResolve->remove(key:0);
                         cbs->foreach(do:::(i, cb) <- cb());
-                    };
+                    } else
+                        if (afterResolve->keycount) ::<= {
+                            @:cbs = afterResolve[0];
+                            afterResolve->remove(key:0);
+                            cbs->foreach(do:::(i, cb) <- cb());
+                        };
+
 
                     if (choiceStack->keycount)
                         this.commitInput();                    
@@ -629,6 +661,20 @@ return class(
                 }]);
             },
             
+            // a placeholder that only renders graphics
+            noDisplay::(onNext, renderable => Object, keep, onStart => Function) {
+                nextResolve->push(value:[::{
+                    choiceStack->push(value:{
+                        mode: CHOICE_MODE.NODISPLAY,
+                        keep: keep,
+                        renderable:renderable,
+                        onStart:onStart,
+                        onNext:onNext
+                    });
+                    canvas.pushState();      
+                }]);                
+            },
+            
             
             // Adds a callback to be fired on next continuation of the
             // dialogue. The callbacks are cleared once the continuation 
@@ -638,7 +684,10 @@ return class(
             },
 
 
-
+            // When this level is reached, this callback is called once
+            queueResolveAfter::(callbacks) {
+                afterResolve->push(value:callbacks);
+            },
 
             
             
@@ -665,6 +714,25 @@ return class(
                 }]);
    
             },
+            
+            choiceColumns ::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function, keep, renderable) {
+                nextResolve->push(value:[::{
+                    choiceStack->push(value:{
+                        mode:if (isCursor) CHOICE_MODE.COLUMN_CURSOR else CHOICE_MODE.COLUMN_NUMBER,
+                        choices: choices,
+                        prompt: prompt,
+                        itemsPerColumn: itemsPerColumn,
+                        leftWeight : leftWeight,
+                        topWeight : topWeight,
+                        canCancel : canCancel,
+                        onChoice : onChoice,
+                        keep : keep,
+                        renderable:renderable
+                    });
+                    canvas.pushState();      
+                }]);
+            
+            },            
             cursorMove ::(prompt, leftWeight, topWeight, onMove, renderable) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
@@ -678,11 +746,21 @@ return class(
                     canvas.clear();
                     canvas.pushState();      
                 }]);
-            },               
+            },  
+            
+                         
 
             
             CURSOR_ACTIONS : {
                 get::<- CURSOR_ACTIONS
+            },
+            
+            forceExit ::{
+                canvas.popState();
+                canvas.commit();
+                @:data = choiceStack->pop;
+                if (data.onNext)
+                    data.onNext();            
             }
             /*
             choicesNow ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice) {
@@ -709,19 +787,7 @@ return class(
             
             // like choices(), but instead displays it column-wise.
             // It's pretty limited, though.
-            pushChoiceColumns ::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function) {
-                choiceStack->push(value:{
-                    mode:if (isCursor) CHOICE_MODE.COLUMN_CURSOR else CHOICE_MODE.COLUMN_NUMBER,
-                    choices: choices,
-                    prompt: prompt,
-                    itemsPerColumn: itemsPerColumn,
-                    leftWeight : leftWeight,
-                    topWeight : topWeight,
-                    canCancel : canCancel,
-                    onChoice : onChoice
-                });
-            
-            },
+
 
             choiceColumnsNow ::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel) {
                 @out;

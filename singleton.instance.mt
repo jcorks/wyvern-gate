@@ -150,6 +150,9 @@ return class(
             ];
             island.map.title = "(Map of " + island.name + ')';
 
+
+
+
             dialogue.choices(
                 leftWeight: 1,
                 topWeight: 1,
@@ -158,6 +161,9 @@ return class(
                 keep: true,
                 choices,
                 onChoice::(choice) {
+
+
+
 
                     @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
 

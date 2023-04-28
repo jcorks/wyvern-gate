@@ -29,24 +29,22 @@ return ::(
     allies,
     enemies             
 ) {
-    return [::]{
-        @choice = -1;
 
-        forever(do:::{
-
-
-            
-            @choice = battle.prompt(
-                text: 'What will ' + user.name + ' do?',
-                choices : [
-                    'Act',
-                    'Check',
-                    'Run',
-                    'Wait',
-                    'Item'
-                ]
-            );
-            
+    dialogue.choiceColumns(
+        leftWeight: 1,
+        topWeight: 1,
+        choices : [
+            'Act',
+            'Check',
+            'Run',
+            'Wait',
+            'Item'
+        ],
+        
+        itemsPerColumn: 3,
+        prompt: 'What will ' + user.name + ' do?',
+        canCancel: false,
+        onChoice::(choice) {
             
             match(choice-1) {
               (0): ::<={ // fight
@@ -64,120 +62,123 @@ return ::(
                     );
                 });
                 
-                choice = dialogue.choicesNow(
+                dialogue.choices(
                     leftWeight: 1,
                     topWeight: 1,
                     prompt:'What ability should ' + user.name + ' use?',
                     choices: abilities,
-                    canCancel: true
+                    canCancel: true,
+                    onChoice::(choice) {
+                        when(choice == 0) empty;
+                        
+                        
+                        @:ability = user.abilitiesAvailable[choice-1];
+                        
+                        
+                        match(ability.targetMode) {
+                          (Ability.TARGET_MODE.ONE): ::<={
+                            @:all = [];
+                            allies->foreach(do:::(index, ally) {
+                                all->push(value:ally);
+                            });
+                            enemies->foreach(do:::(index, enemy) {
+                                all->push(value:enemy);
+                            });
+                            
+                            
+                            @:allNames = [];
+                            all->foreach(do:::(index, person) {
+                                allNames->push(value:person.name);
+                            });
+                          
+                          
+                            dialogue.choices(
+                              leftWeight: 1,
+                              topWeight: 1,
+                              prompt: 'Against whom?',
+                              choices: allNames,
+                              canCancel: true,
+                              onChoice::(choice) {
+                                when(choice == 0) empty;
+                                
+                                battle.entityCommitAction(action:
+                                    BattleAction.new(
+                                        state : {
+                                            ability: ability,
+                                            targets: [all[choice-1]],
+                                            extraData: {}
+                                        }
+                                    )
+                                );                    
+                              
+                              }
+                            );
+                            
+                          },
+                          (Ability.TARGET_MODE.ALLALLY): ::<={
+                            battle.entityCommitAction(action:
+                                BattleAction.new(
+                                    state : {
+                                        ability: ability,
+                                        targets: allies,
+                                        extraData: {}
+                                    }
+                                )
+                            );
+                          },
+                          (Ability.TARGET_MODE.ALLENEMY): ::<={
+                            battle.entityCommitAction(action:
+                                BattleAction.new(
+                                    state : {
+                                        ability: ability,
+                                        targets: enemies,
+                                        extraData: {}                                
+                                    }
+                                )
+                            );
+                          },
+
+                          (Ability.TARGET_MODE.NONE): ::<={
+                            battle.entityCommitAction(action:
+                                BattleAction.new(
+                                    state : {
+                                        ability: ability,
+                                        targets: [],
+                                        extraData: {}                                
+                                    }
+                                )
+                            );
+                          },
+
+                          (Ability.TARGET_MODE.RANDOM): ::<={
+                            @all = [];
+                            allies->foreach(do:::(index, ally) {
+                                all->push(value:ally);
+                            });
+                            enemies->foreach(do:::(index, enemy) {
+                                all->push(value:enemy);
+                            });
+                
+                            battle.entityCommitAction(action:
+                                BattleAction.new(
+                                    state : {
+                                        ability: ability,
+                                        targets: Random.pickArrayItem(list:all),
+                                        extraData: {}                                
+                                    }
+                                )
+                            );
+                          }
+                          
+                          
+
+                        };                    
+                    }
                 );
-                when(choice == 0) empty;
-                
-                
-                @:ability = user.abilitiesAvailable[choice-1];
-                
-                
-                match(ability.targetMode) {
-                  (Ability.TARGET_MODE.ONE): ::<={
-                    @:all = [];
-                    allies->foreach(do:::(index, ally) {
-                        all->push(value:ally);
-                    });
-                    enemies->foreach(do:::(index, enemy) {
-                        all->push(value:enemy);
-                    });
-                    
-                    
-                    @:allNames = [];
-                    all->foreach(do:::(index, person) {
-                        allNames->push(value:person.name);
-                    });
-                  
-                  
-                    choice = dialogue.choicesNow(
-                      leftWeight: 1,
-                      topWeight: 1,
-                      prompt: 'Against whom?',
-                      choices: allNames,
-                      canCancel: true
-                    );
-                    
-                    when(choice == 0) empty;
-                    
-                    send(message:
-                        BattleAction.new(
-                            state : {
-                                ability: ability,
-                                targets: [all[choice-1]],
-                                extraData: {}
-                            }
-                        )
-                    );                    
-                  },
-                  (Ability.TARGET_MODE.ALLALLY): ::<={
-                    send(message:
-                        BattleAction.new(
-                            state : {
-                                ability: ability,
-                                targets: allies,
-                                extraData: {}
-                            }
-                        )
-                    );
-                  },
-                  (Ability.TARGET_MODE.ALLENEMY): ::<={
-                    send(message:
-                        BattleAction.new(
-                            state : {
-                                ability: ability,
-                                targets: enemies,
-                                extraData: {}                                
-                            }
-                        )
-                    );
-                  },
-
-                  (Ability.TARGET_MODE.NONE): ::<={
-                    send(message:
-                        BattleAction.new(
-                            state : {
-                                ability: ability,
-                                targets: [],
-                                extraData: {}                                
-                            }
-                        )
-                    );
-                  },
-
-                  (Ability.TARGET_MODE.RANDOM): ::<={
-                    @all = [];
-                    allies->foreach(do:::(index, ally) {
-                        all->push(value:ally);
-                    });
-                    enemies->foreach(do:::(index, enemy) {
-                        all->push(value:enemy);
-                    });
-        
-                    send(message:
-                        BattleAction.new(
-                            state : {
-                                ability: ability,
-                                targets: Random.pickArrayItem(list:all),
-                                extraData: {}                                
-                            }
-                        )
-                    );
-                  }
-                  
-                  
-
-                };
-                
-                
               },
               
               (1): ::<={ // Info
-                choice = dialogue.choicesNow(
+                dialogue.choices(
                   topWeight: 1,
                   prompt: 'Check which?', 
                   leftWeight: 1,
@@ -187,55 +188,61 @@ return ::(
                     'Allies',
                     'Enemies'
                   ],
+                  onChoice::(choice) {
+                    when(choice == 0) empty;
 
+                    match(choice-1) {
+                      (0): ::<={ // abilities
+                        @:names = [...user.abilitiesAvailable]->map(to:::(value){return value.name;});
+                        
+                        dialogue.choices(
+                          leftWeight: 1,
+                          topWeight: 1,
+                          prompt: 'Check which ability?',
+                          choices: names,
+                          canCancel: true,
+                          onChoice::(choice) {
+                            when(choice == 0) empty;
+                                
+                            @:ability = user.abilitiesAvailable[choice-1];
+
+                            dialogue.message(
+                                speaker: 'Ability: ' + ability.name,
+                                text:ability.description
+                            );                          
+                          }
+                        );
+                      },
+                      
+                      (1): ::<={ // allies
+                        @:names = [...allies]->map(to:::(value){return value.name;});
+                        
+                        choice = dialogue.choices(
+                            topWeight: 1,
+                            leftWeight: 1,
+                            prompt:'Check which ally?',
+                            choices: names,
+                            canCancel: true,
+                            onChoice::(choice) {
+                                when (choice == 0) empty;
+
+                                @:ally = allies[choice-1];
+                                ally.describe();                            
+                            }
+                        );
+                      }
+                    
+                    };                  
+                  },
                   canCancel : true
                 );
                 
-                when(choice == 0) empty;
 
-                match(choice-1) {
-                  (0): ::<={ // abilities
-                    @:names = [...user.abilitiesAvailable]->map(to:::(value){return value.name;});
-                    
-                    choice = dialogue.choicesNow(
-                      leftWeight: 1,
-                      topWeight: 1,
-                      prompt: 'Check which ability?',
-                      choices: names,
-                      canCancel: true
-                    );
-                    when(choice == 0) empty;
-                        
-                    @:ability = user.abilitiesAvailable[choice-1];
-
-                    dialogue.message(
-                        speaker: 'Ability: ' + ability.name,
-                        text:ability.description
-                    );
-                  },
-                  
-                  (1): ::<={ // allies
-                    @:names = [...allies]->map(to:::(value){return value.name;});
-                    
-                    choice = dialogue.choicesNow(
-                        topWeight: 1,
-                        leftWeight: 1,
-                        prompt:'Check which ally?',
-                        choices: names,
-                        canCancel: true
-                    );
-                    when (choice == 0) empty;
-
-                    @:ally = allies[choice-1];
-                    ally.describe();
-                  }
-                
-                };
               },
               
               // run 
               (2): ::<= {
-                send(message:
+                battle.entityCommitAction(action:
                     BattleAction.new(
                         state : {
                             ability: Ability.database.find(name:'Run'),
@@ -249,7 +256,7 @@ return ::(
               
               // wait
               (3): ::<={
-                send(message:
+                battle.entityCommitAction(action:
                     BattleAction.new(
                         state : {
                             ability: Ability.database.find(name:'Wait'),
@@ -262,11 +269,9 @@ return ::(
               
               // Item
               (4): ::<= {
-                @:itemAction = itemmenu(user, party, enemies);
-                if (itemAction != empty) send(message:itemAction);
+                itemmenu(user, party, enemies, onAct::(action){battle.entityCommitAction(action);});
               }
-            };     
-        
-        });
-    };
+            };          
+        }
+    );    
 };

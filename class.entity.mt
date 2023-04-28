@@ -803,7 +803,6 @@
                 
                 
                 item.equipEffects->foreach(do:::(index, effect) {
-                    breakpoint();
                     this.addEffect(
                         from:this, 
                         name:effect, 
