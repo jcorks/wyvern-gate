@@ -68,6 +68,32 @@ var CANVAS;
 
     document.addEventListener('DOMContentLoaded', function () {
         CANVAS.init(document.getElementById('canvas'));
+
+        document.getElementById('arrow-left').addEventListener('click', function(e) {
+            LAST_INPUT = 0;
+        });
+
+        document.getElementById('arrow-up').addEventListener('click', function(e) {
+            LAST_INPUT = 1;
+        });
+
+        document.getElementById('arrow-right').addEventListener('click', function(e) {
+            LAST_INPUT = 2;
+        });
+
+        document.getElementById('arrow-down').addEventListener('click', function(e) {
+            LAST_INPUT = 3;
+        });
+
+
+        document.getElementById('a-button').addEventListener('click', function(e) {
+            LAST_INPUT = 4;
+        });
+
+        document.getElementById('b-button').addEventListener('click', function(e) {
+            LAST_INPUT = 5;
+        });
+
     });
 
 
