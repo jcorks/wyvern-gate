@@ -1,12 +1,5 @@
-importScripts("matte.js");
-const worker = self;
 (function() {
-    var LAST_INPUT = -1;
-    var CANVAS_OUTPUT = [];
 
-    worker.onmessage = function(e) {
-        LAST_INPUT = e.data;
-    };
 
     /*
     @:CURSOR_ACTIONS = {
@@ -105,25 +98,24 @@ const worker = self;
     );
 
     matte.unhandledError = function(file, line, value) {
-        worker.postMessage(matte.heap.valueObjectAccessString(value, 'summary').data);
+        console.log(matte.heap.valueObjectAccessString(value, 'summary').data);
     };  
     
 
 
 
     matte.setExternalFunction('external_onStartCommit', [], function(fn, args) {
-        CANVAS_OUTPUT = [];
+        CANVAS.reset();
         return matte.heap.createEmpty();        
     });
 
     matte.setExternalFunction('external_onEndCommit', [],function(fn, args) {
-        worker.postMessage(CANVAS_OUTPUT);
         return matte.heap.createEmpty();            
     });
 
 
     matte.setExternalFunction('external_onCommitText', ['a'],function(fn, args) {
-        CANVAS_OUTPUT.push(args[0].data);
+        CANVAS.writeCommit(args[0].data);
         return matte.heap.createEmpty();        
     });
 
@@ -148,7 +140,7 @@ const worker = self;
 
 
       
-
+    
     var loadedCount = 0;
     var task = setInterval(function() {
         if (matteListIndex != matteList.length) {             
@@ -162,7 +154,12 @@ const worker = self;
         
         if (loadedCount == matteList.length) {
             clearInterval(task);
-            matte.import('main_external.mt');
+            const update = matte.import('main_external.mt');
+            
+            
+            setInterval(function() {
+                matte.callFunction(update, [], []);
+            }, 30);
         }
     });
 

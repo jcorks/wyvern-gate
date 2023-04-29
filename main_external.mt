@@ -71,18 +71,19 @@
 @:external_getInput      = getExternalFunction(name:'external_getInput');
 
 
+@:dialogue = import(module:'singleton.dialogue.mt');
+
+
+
+@currentCanvas;
+@canvasChanged = false;
+canvas.onCommit = ::(lines){
+    currentCanvas = lines;
+    canvasChanged = true;
+};
 
 
 instance.mainMenu(
-    onCommit :::(lines) {
-        external_onStartCommit();
-        lines->foreach(do:::(index, line) {
-            line->foreach(do:::(i, iter) {
-                external_onCommitText(a:iter.text);
-            });
-        });    
-        external_onEndCommit();
-    },
     
     onSaveState :::(
         slot,
@@ -101,15 +102,6 @@ instance.mainMenu(
                 return empty;
             }
         };
-    },
-
-    useCursor : true,
-    
-    onInputNumber :::() {
-    },
-    
-    onInputCursor :::() {
-        return external_getInput();
     }
 );
 
@@ -117,6 +109,25 @@ instance.mainMenu(
 
 
 
+
+// user code calls the returned function every frame
+return ::{
+    @val = external_getInput();
+    dialogue.commitInput(input:val);
+    
+    if (canvasChanged) ::<= {
+        @:lines = currentCanvas;
+        external_onStartCommit();
+        lines->foreach(do:::(index, line) {
+            line->foreach(do:::(i, iter) {
+                external_onCommitText(a:iter.text);
+            });
+        });    
+        external_onEndCommit();
+        canvasChanged = false;    
+    };
+
+};
 
 
 

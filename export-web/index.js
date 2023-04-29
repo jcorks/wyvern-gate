@@ -1,13 +1,9 @@
 var LAST_INPUT = -1;
-const matteWorker = new Worker('driver.js');
-
+var CANVAS;
 (function() {
 
-    matteWorker.onerror = function(e) {
-        throw new Error(e);
-    }
 
-    const CANVAS = {
+    CANVAS = {
         _el: null,
         _commitRow: 0,
 
@@ -142,30 +138,29 @@ const matteWorker = new Worker('driver.js');
         
         if (LAST_INPUT != -1) {
             console.log(LAST_INPUT);
-            matteWorker.postMessage(LAST_INPUT);
             LAST_INPUT = -1;
         }        
     }
 
 
+
     
-    matteWorker.onmessage = function(data) {
-        const canvasInput = data.data;
-        debugger;
-        if (typeof canvasInput == 'string') {
-            var a = document.getElementById("canvas");
-            a.innerText = 
-                'Whoops. JC made a mistake and the game pooped. Again.\n' +
-                'There\'s a BIG chance it\'s just because of a missing\n' + 
-                'feature, but just in case, you can send \'em this thingy:\n\n' +
-                canvasInput;           
-        } else {
-            for(var i = 0; i < canvasInput.length; ++i) {
-                CANVAS.writeRow(i, canvasInput[i]);
-            }    
-        }
-    };
-    
+
+    /*
+    const canvasInput = data.data;
+    if (typeof canvasInput == 'string') {
+        var a = document.getElementById("canvas");
+        a.innerText = 
+            'Whoops. JC made a mistake and the game pooped. Again.\n' +
+            'There\'s a BIG chance it\'s just because of a missing\n' + 
+            'feature, but just in case, you can send \'em this thingy:\n\n' +
+            canvasInput;           
+    } else {
+        for(var i = 0; i < canvasInput.length; ++i) {
+            CANVAS.writeRow(i, canvasInput[i]);
+        }    
+    }
+    */
 
 })();
 
@@ -190,12 +185,13 @@ var onPageInput = function (event) {
         LAST_INPUT = 3;
         break;
 
-      case 'Z': 
+      case 'z': 
       case 'Space': 
       case 'Enter': 
         LAST_INPUT = 4;
         break;
 
+      case 'x': 
       case 'Escape': 
       case 'Backspace': 
         LAST_INPUT = 5;
@@ -204,9 +200,7 @@ var onPageInput = function (event) {
 
     }
     if (LAST_INPUT != -1) {
-        matteWorker.postMessage(LAST_INPUT);
-        LAST_INPUT = -1;
+        console.log(LAST_INPUT);
     }
-    console.log(event.key);
 };
 

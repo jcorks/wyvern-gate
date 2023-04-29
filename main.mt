@@ -25,50 +25,6 @@
 
 
 
-/*
-instance.mainMenu(
-    onCommit :::(lines) {
-        console.clear();
-        lines->foreach(do:::(index, line) {
-            line->foreach(do:::(i, iter) {
-                console.println(message:iter.text);
-            });
-        });    
-    },
-    
-    onSaveState :::(
-        slot,
-        data
-    ) {
-        @:Filesystem = import(module:'Matte.System.Filesystem');
-        Filesystem.cwd = '/usr/share/Wyvern_SAVES';
-        Filesystem.writeString(
-            path: 'saveslot' + slot,
-            string: data
-        );
-    },
-
-    onLoadState :::(
-        slot
-    ) {
-        @:Filesystem = import(module:'Matte.System.Filesystem');
-        Filesystem.cwd = '/usr/share/Wyvern_SAVES';
-        return [::] {
-            return Filesystem.readString(
-                path: 'saveslot' + slot
-            );
-            
-        } : {
-            onError:::(detail) {
-                return empty;
-            }
-        };
-    },
-    
-
-);
-*/
-
 
 @:pollInput = ::{
         
@@ -108,40 +64,7 @@ canvas.onCommit = ::(lines){
 
 
 @:dialogue = import(module:'singleton.dialogue.mt');
-/*
-dialogue.message(
-    leftWeight: 1,
-    text: 'Test1'
-);
 
-dialogue.message(
-    topWeight: 1,
-    text: 'Test2'
-);
-
-dialogue.pushChoices(
-    prompt: 'Which?',
-    choices : [
-        'apple',
-        'orng',
-        'pear',
-        'mango'
-    ],
-    
-    onChoice ::(choice) {
-        dialogue.message(
-            leftWeight: 0,
-            text: 'Picked ' + choice
-        );        
-    }
-);
-
-
-dialogue.message(
-    leftWeight: 0,
-    text: 'Test3'
-);
-*/
 
 instance.mainMenu(
     onSaveState :::(
