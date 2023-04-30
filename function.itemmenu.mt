@@ -22,6 +22,9 @@
 @:Ability = import(module:'class.ability.mt');
 @:pickItem = import(module:'function.pickitem.mt');
 
+
+@nextAction;
+
 return ::(
     user,
     party,
@@ -37,12 +40,16 @@ return ::(
             topWeight: 1,
             prompt: '[' + item.name + ']',
             canCancel : true,
+            keep:true,
             choices: [
                 'Use',
                 'Equip',
                 'Check',
                 'Compare'
             ],
+            onNext::{
+                onAct(action:nextAction);         
+            },
             onChoice::(choice) {
                 when (choice == 0) empty;              
                 
@@ -72,16 +79,20 @@ return ::(
                           prompt: 'On whom?',
                           choices: allNames,
                           canCancel: true,
+                          keep: true,
+                          onNext ::{
+                            dialogue.forceExit();
+                          },
                           onChoice ::(choice) {
                             when(choice == 0) empty;                      
 
-                            onAct(
-                                action:BattleAction.new(state:{
+                            nextAction = BattleAction.new(state:{
                                     ability: Ability.database.find(name:'Use Item'),
                                     targets: [all[choice-1]],
                                     extraData : [item]
                                 }) 
-                            );                            
+                            ;                            
+                            dialogue.forceExit();
                           }
                         );
                         
@@ -98,29 +109,34 @@ return ::(
                             'Enemies'
                           ],
                           canCancel: true,
+                          keep : true,
+                          onNext ::{
+                            dialogue.forceExit();                          
+                          },
                           onChoice ::(choice) {
                        
                             when(choice == 0) empty;                      
-                            onAct(
-                                action:BattleAction.new(state:{
+                            
+                            nextAction =BattleAction.new(state:{
                                     ability: Ability.database.find(name:'Use Item'),
                                     targets: if (choice == 1) party.members else enemies,
                                     extraData : [item]
                                 }) 
-                            );                  
+                            ;                  
+                            dialogue.forceExit();
                           
                           }
                         );
                       },
 
                       (Item.USE_TARGET_HINT.ALL): ::<= {
-                        onAct(action:
-                            BattleAction.new(state:{
+                        nextAction = BattleAction.new(state:{
                                 ability: Ability.database.find(name:'Use Item'),
                                 targets: [...party.members, ...enemies],
                                 extraData : [item]
                             }) 
-                        );                  
+                        ;                  
+                        dialogue.forceExit();
                       
                       }
 
@@ -130,13 +146,16 @@ return ::(
                   
                   },
                   // item equip
-                  (1): onAct(action:
-                    BattleAction.new(state:{
+                  (1)::<={
+                    nextAction = BattleAction.new(state:{
                         ability: Ability.database.find(name:'Equip Item'),
                         targets: [user],
                         extraData : [item, party.inventory]
-                    })                   
-                  ),
+                    });           
+                    dialogue.forceExit();
+
+
+                  },
 
                   
                   (2): ::<={ // inventory
@@ -153,8 +172,7 @@ return ::(
                     
                     currentEquip.equipMod.printDiffRate(
                         prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
-                        other:item.equipMod,
-                        onNext::{}
+                        other:item.equipMod
                     ); 
                     
                     

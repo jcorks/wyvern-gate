@@ -67,7 +67,6 @@ return class(
             },
             step::{
                 // update movement of entity
-                @toRemove = [];
                 Object.freezeGC();
 
                 entities->foreach(do:::(i, ent) {
@@ -81,7 +80,7 @@ return class(
                         };
                         Object.thawGC();
 
-                        match(world.battle.start(
+                        world.battle.start(
                             party:island_.world.party,                            
                             allies: island_.world.party.members,
                             enemies: [ent.ref],
@@ -89,18 +88,25 @@ return class(
                             noLoot: true,
                             onTurn ::{
                                 this.step();
+                            },
+                            
+                            onEnd::(result) {
+                                breakpoint();
+                                match(result) {
+                                  (Battle.RESULTS.ALLIES_WIN):::<= {
+                                    map_.removeItem(data:ent);
+                                    entities->remove(key:entities->findIndex(value:ent));
+                                    @loc = Location.Base.database.find(name:'Body').new(landmark:landmark_, ownedByHint: ent.ref, xHint:item.x, yHint:item.y);
+                                    map_.setItem(data:loc, x:item.x, y:item.y, symbol: loc.base.symbol, discovered: true, name:loc.name);
+                                    landmark_.addLocation(location:loc);
+
+                                  },
+                                  
+                                  (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                                  }
+                                };
                             }
-                        ).result) {
-                          (Battle.RESULTS.ALLIES_WIN):::<= {
-                            toRemove->push(value:ent);
-                            @loc = Location.Base.database.find(name:'Body').new(landmark:landmark_, ownedByHint: ent.ref, xHint:item.x, yHint:item.y);
-                            map_.setItem(data:loc, x:item.x, y:item.y, symbol: loc.base.symbol, discovered: true, name:loc.name);
-                            landmark_.addLocation(location:loc);
-                          },
-                          
-                          (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                          }
-                        };                     
+                        ); 
                         Object.freezeGC();
                     };
 
@@ -120,10 +126,6 @@ return class(
                 });
                 Object.thawGC();
                 
-                toRemove->foreach(do:::(i, ent) {
-                    map_.removeItem(data:ent);
-                    entities->remove(key:entities->findIndex(value:ent));
-                });
                 
                 // add additional entities out of spawn points (stairs)
                 if (entities->keycount < floorHint && Number.random() > 0.8) ::<= {

@@ -2351,7 +2351,7 @@ Effect.database = Database.new(
                     holder.damage(
                         from: holder,
                         damage: Damage.new(
-                            amount:holder.HP*0.05,
+                            amount:holder.stats.HP*0.05,
                             damageType : Damage.TYPE.NEUTRAL,
                             damageClass: Damage.CLASS.HP
                         )

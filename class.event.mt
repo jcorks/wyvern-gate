@@ -243,61 +243,63 @@ Event.Base.database = Database.new(
                     });
                     @:world = import(module:'singleton.world.mt');
                     
-                    [::] {
-                        forever(do:::{
-                            match(world.battle.start(
-                                party,
-                                
-                                allies: party.members,
-                                enemies,
-                                
-                                landmark: {},
-                                onStart :: {
+                    
+                    @:battleStart = ::{
+                        world.battle.start(
+                            party,
+                            
+                            allies: party.members,
+                            enemies,
+                            
+                            landmark: {},
+                            onStart :: {
 
-                                }
-                            ).result) {
-                              (Battle.RESULTS.ALLIES_WIN): ::<= {
-                                canvas.clear();
-                                dialogue.message(speaker: '???', text:'You are worthy of this key\'s use.');                              
-                                dialogue.message(text:'The world around you warps until you are brought to your feet on a new land.');                              
-                                dialogue.message(text:'Something falls to your feet.');                              
-                                
-                                /*
-                                @message = 'The party was given a Tablet.';
-                                @:item = Item.new(
-                                    base: Item.Base.database.find(name:'Tablet')
-                                );
-                                */
-                                @message = 'The party picks it up and puts it in their inventory.';
-                                @:item = Item.new(
-                                    base: Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique)
-                                );
-                                
-                                dialogue.message(text: message);
-                                when(world.party.inventory.isFull) ::<= {
-                                    dialogue.message(text: '...but the party\'s inventory was full.');
-                                    send();
-                                };
-                                
-                                party.inventory.add(item);
+                            },
+                            
+                            onEnd ::(result){
+                                match(result) {
+                                  (Battle.RESULTS.ALLIES_WIN): ::<= {
+                                    canvas.clear();
+                                    dialogue.message(speaker: '???', text:'You are worthy of this key\'s use.');                              
+                                    dialogue.message(text:'The world around you warps until you are brought to your feet on a new land.');                              
+                                    dialogue.message(text:'Something falls to your feet.');                              
+                                    
+                                    /*
+                                    @message = 'The party was given a Tablet.';
+                                    @:item = Item.new(
+                                        base: Item.Base.database.find(name:'Tablet')
+                                    );
+                                    */
+                                    @message = 'The party picks it up and puts it in their inventory.';
+                                    @:item = Item.new(
+                                        base: Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique)
+                                    );
+                                    
+                                    dialogue.message(text: message);
+                                    when(world.party.inventory.isFull) ::<= {
+                                        dialogue.message(text: '...but the party\'s inventory was full.');
+                                        send();
+                                    };
+                                    
+                                    party.inventory.add(item);
 
 
-                                send();
-                              },
-                              
-                              (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                                send();
-                              },
-                              
-                              
-                              (Battle.RESULTS.NOONE_WIN): ::<= {
-                                dialogue.message(speaker: '???', text:'Judgement shall be brought forth.');                              
-                              }
-                            };
-                        });
+                                  },
+                                  
+                                  (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                                  },
+                                  
+                                  
+                                  (Battle.RESULTS.NOONE_WIN): ::<= {
+                                    dialogue.message(speaker: '???', text:'Judgement shall be brought forth.');                              
+                                    battleStart();
+                                  }         
+                                };                      
+                            }
+                        );
                     };
                     
-                    
+                    battleStart();
                     
                     return 0;              
                     
@@ -331,68 +333,62 @@ Event.Base.database = Database.new(
                     @:boss = enemies[1];
 
                     
-                    [::] {
-                        forever(do:::{
                             boss.autoLevel();
-                            if (boss.level >= (1+(0.05*(event.landmark.floor/3))) * (island.levelMax))
-                                send();                                    
-                        });
-                    };
 
 
                     @:world = import(module:'singleton.world.mt');
                     
-                    [::] {
-                        forever(do:::{
-                            match(world.battle.start(
-                                party,
-                                
-                                allies: party.members,
-                                enemies,
-                                exp:true,
-                                landmark: {},
-                                onStart :: {
-                                }
-                            ).result) {
-                              (Battle.RESULTS.ALLIES_WIN): ::<= {
-                                @:loot = [];
-                                enemies->foreach(do:::(index, enemy) {
-                                    enemy.inventory.items->foreach(do:::(index, item) {
-                                        if (Number.random() > 0.7 && loot->keycount == 0) ::<= {
-                                            loot->push(value:enemy.inventory.remove(item));
-                                        };
-                                    });
-                                });
-                                
-                                if (loot->keycount > 0) ::<= {
-                                    dialogue.message(text: 'It looks like they dropped some items during the fight...');
-                                    @message = 'The party found:\n\n';
-                                    loot->foreach(do:::(index, item) {
-                                        message = message + item.name + '\n';
-                                        party.inventory.add(item);
+
+                    @:battleStart = ::{
+                        world.battle.start(
+                            party,
+
+                            allies: party.members,
+                            enemies,
+                            exp:true,
+                            landmark: {},
+                            onStart :: {
+                            },
+                            onEnd ::(result) {
+                                match(result) {
+                                  (Battle.RESULTS.ALLIES_WIN): ::<= {
+                                    @:loot = [];
+                                    enemies->foreach(do:::(index, enemy) {
+                                        enemy.inventory.items->foreach(do:::(index, item) {
+                                            if (Number.random() > 0.7 && loot->keycount == 0) ::<= {
+                                                loot->push(value:enemy.inventory.remove(item));
+                                            };
+                                        });
                                     });
                                     
-                                    
-                                    
-                                    dialogue.message(text: message);
+                                    if (loot->keycount > 0) ::<= {
+                                        dialogue.message(text: 'It looks like they dropped some items during the fight...');
+                                        @message = 'The party found:\n\n';
+                                        loot->foreach(do:::(index, item) {
+                                            message = message + item.name + '\n';
+                                            party.inventory.add(item);
+                                        });
+                                        
+                                        
+                                        
+                                        dialogue.message(text: message);
+                                    };
+                                  },
+                                  
+                                  (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                                  },
+                                  
+                                  
+                                  (Battle.RESULTS.NOONE_WIN): ::<= {
+                                    dialogue.message(text:'The ' + boss.name + ' corners you!');                              
+                                    battleStart();
+                                  }
                                 };
-                                send();
-                              },
-                              
-                              (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                                send();
-                              },
-                              
-                              
-                              (Battle.RESULTS.NOONE_WIN): ::<= {
-                                dialogue.message(text:'The ' + boss.name + ' corners you!');                              
-                              }
-                            };
-                        });
+                               }
+                          );
                     };
-                    
-                    return 0;              
-                    
+                    battleStart();
+                    return 0;  
                 },
                 
                 onEventUpdate ::(event) {
@@ -703,22 +699,14 @@ Event.Base.database = Database.new(
                         e.anonymize();
                     });
                     
-                    match(world.battle.start(
+                    world.battle.start(
                         party,
                         
                         allies: party.members,
                         enemies,
-                        landmark: {}
-                    ).result) {
-                      (Battle.RESULTS.ALLIES_WIN,
-                       Battle.RESULTS.NOONE_WIN): ::<= {
-
-                      },
-                      
-                      (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                      }
-                    
-                    };
+                        landmark: {},
+                        onEnd::{}
+                    );
                 
                     
                     
@@ -828,21 +816,14 @@ Event.Base.database = Database.new(
 
                     @:world = import(module:'singleton.world.mt');
                     
-                    match(world.battle.start(
+                    world.battle.start(
                         party,
                         
                         allies: party.members,
                         enemies,
-                        landmark: {}
-                    ).result) {
-                      (Battle.RESULTS.ALLIES_WIN,
-                       Battle.RESULTS.NOONE_WIN): ::<= {
-                      },
-                      
-                      (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                      }
-                    
-                    };
+                        landmark: {},
+                        onEnd::(result){}
+                    );
                 
                     
                     

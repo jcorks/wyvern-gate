@@ -2,6 +2,11 @@ var LAST_INPUT = -1;
 var CANVAS;
 (function() {
 
+    const isTouchScreen =
+      (  (('ontouchstart' in window) ||
+         (navigator.maxTouchPoints > 0) ||
+         (navigator.msMaxTouchPoints > 0)));
+    
 
     CANVAS = {
         _el: null,
@@ -48,7 +53,7 @@ var CANVAS;
                     cell.className = 'canvas__row__cell'
                 }
 
-                cell.innerHTML = character;
+                cell.innerText = character;
 
                 if (cell.parentElement === null) {
                     row.appendChild(cell)
@@ -69,30 +74,59 @@ var CANVAS;
     document.addEventListener('DOMContentLoaded', function () {
         CANVAS.init(document.getElementById('canvas'));
 
-        document.getElementById('arrow-left').addEventListener('click', function(e) {
+        if (!isTouchScreen) {
+            document.getElementById('arrow-left').addEventListener('mousedown', function(e) {
+                LAST_INPUT = 0;
+            });
+
+            document.getElementById('arrow-up').addEventListener('mousedown', function(e) {
+                LAST_INPUT = 1;
+            });
+
+            document.getElementById('arrow-right').addEventListener('mousedown', function(e) {
+                LAST_INPUT = 2;
+            });
+
+            document.getElementById('arrow-down').addEventListener('mousedown', function(e) {
+                LAST_INPUT = 3;
+            });
+
+
+            document.getElementById('a-button').addEventListener('mousedown', function(e) {
+                LAST_INPUT = 4;
+            });
+
+            document.getElementById('b-button').addEventListener('mousedown', function(e) {
+                LAST_INPUT = 5;
+            });
+        }
+        
+        
+        
+       document.getElementById('arrow-left').addEventListener('touchstart', function(e) {
             LAST_INPUT = 0;
         });
 
-        document.getElementById('arrow-up').addEventListener('click', function(e) {
+        document.getElementById('arrow-up').addEventListener('touchstart', function(e) {
             LAST_INPUT = 1;
         });
 
-        document.getElementById('arrow-right').addEventListener('click', function(e) {
+        document.getElementById('arrow-right').addEventListener('touchstart', function(e) {
             LAST_INPUT = 2;
         });
 
-        document.getElementById('arrow-down').addEventListener('click', function(e) {
+        document.getElementById('arrow-down').addEventListener('touchstart', function(e) {
             LAST_INPUT = 3;
         });
 
 
-        document.getElementById('a-button').addEventListener('click', function(e) {
+        document.getElementById('a-button').addEventListener('touchstart', function(e) {
             LAST_INPUT = 4;
         });
 
-        document.getElementById('b-button').addEventListener('click', function(e) {
+        document.getElementById('b-button').addEventListener('touchstart', function(e) {
             LAST_INPUT = 5;
-        });
+        });        
 
     });
 

@@ -286,6 +286,28 @@ Species.database = Database.new(items: [
         passives : [
         ]
     }),
+
+
+    Species.new(data:{
+        name : 'Pigeon',
+        rarity : 100,
+        description: 'A bird race of medium stature',
+        growth : StatSet.new(
+            HP : 4,
+            AP : 0,
+            ATK: 5,
+            DEF: 5,
+            INT: 0,
+            LUK: 10,
+            SPD: 10,
+            DEX: 0
+        ),
+        
+        passives : [
+        ]
+    }),
+
+
     
     Species.new(data:{
         name : 'Rat',

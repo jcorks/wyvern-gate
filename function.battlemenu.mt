@@ -21,6 +21,9 @@
 @:BattleAction = import(module:'struct.battleaction.mt');
 @:Ability = import(module:'class.ability.mt');
 @:itemmenu = import(module:'function.itemmenu.mt');
+
+@nextAction;
+
 return ::(
     party,
     battle,
@@ -40,10 +43,14 @@ return ::(
             'Wait',
             'Item'
         ],
-        
+        keep: true,
         itemsPerColumn: 3,
+        renderable: battle,
         prompt: 'What will ' + user.name + ' do?',
         canCancel: false,
+        onNext::{
+            dialogue.queueResolve(callbacks:[::{battle.entityCommitAction(action:nextAction);}]);
+        },
         onChoice::(choice) {
             
             match(choice-1) {
@@ -68,6 +75,10 @@ return ::(
                     prompt:'What ability should ' + user.name + ' use?',
                     choices: abilities,
                     canCancel: true,
+                    keep: true,
+                    onNext :: {
+                        dialogue.forceExit();
+                    },
                     onChoice::(choice) {
                         when(choice == 0) empty;
                         
@@ -98,10 +109,14 @@ return ::(
                               prompt: 'Against whom?',
                               choices: allNames,
                               canCancel: true,
+                              keep: true,
+                              onNext :: {
+                                  dialogue.forceExit();
+                              },
                               onChoice::(choice) {
                                 when(choice == 0) empty;
                                 
-                                battle.entityCommitAction(action:
+                                nextAction = 
                                     BattleAction.new(
                                         state : {
                                             ability: ability,
@@ -109,14 +124,15 @@ return ::(
                                             extraData: {}
                                         }
                                     )
-                                );                    
+                                ;
+                                dialogue.forceExit();                    
                               
                               }
                             );
                             
                           },
                           (Ability.TARGET_MODE.ALLALLY): ::<={
-                            battle.entityCommitAction(action:
+                            nextAction = 
                                 BattleAction.new(
                                     state : {
                                         ability: ability,
@@ -124,10 +140,11 @@ return ::(
                                         extraData: {}
                                     }
                                 )
-                            );
+                            ;
+                            dialogue.forceExit();                            
                           },
                           (Ability.TARGET_MODE.ALLENEMY): ::<={
-                            battle.entityCommitAction(action:
+                            nextAction =
                                 BattleAction.new(
                                     state : {
                                         ability: ability,
@@ -135,11 +152,12 @@ return ::(
                                         extraData: {}                                
                                     }
                                 )
-                            );
+                            ;
+                            dialogue.forceExit();                            
                           },
 
                           (Ability.TARGET_MODE.NONE): ::<={
-                            battle.entityCommitAction(action:
+                            nextAction =
                                 BattleAction.new(
                                     state : {
                                         ability: ability,
@@ -147,7 +165,8 @@ return ::(
                                         extraData: {}                                
                                     }
                                 )
-                            );
+                            ;
+                            dialogue.forceExit();                            
                           },
 
                           (Ability.TARGET_MODE.RANDOM): ::<={
@@ -159,7 +178,7 @@ return ::(
                                 all->push(value:enemy);
                             });
                 
-                            battle.entityCommitAction(action:
+                            nextAction = 
                                 BattleAction.new(
                                     state : {
                                         ability: ability,
@@ -167,7 +186,8 @@ return ::(
                                         extraData: {}                                
                                     }
                                 )
-                            );
+                            ;
+                            dialogue.forceExit();                            
                           }
                           
                           
@@ -188,6 +208,9 @@ return ::(
                     'Allies',
                     'Enemies'
                   ],
+                  onNext ::{                  
+                    dialogue.forceExit();                            
+                  },
                   onChoice::(choice) {
                     when(choice == 0) empty;
 
@@ -223,6 +246,9 @@ return ::(
                             prompt:'Check which ally?',
                             choices: names,
                             canCancel: true,
+                            onNext::{
+                                dialogue.forceExit();                                                        
+                            },
                             onChoice::(choice) {
                                 when (choice == 0) empty;
 
@@ -242,7 +268,7 @@ return ::(
               
               // run 
               (2): ::<= {
-                battle.entityCommitAction(action:
+                nextAction = 
                     BattleAction.new(
                         state : {
                             ability: Ability.database.find(name:'Run'),
@@ -250,13 +276,14 @@ return ::(
                             extraData: {}
                         }
                     )                
-                );
+                ;
+                dialogue.forceExit();                                                        
                 
               },
               
               // wait
               (3): ::<={
-                battle.entityCommitAction(action:
+                nextAction = 
                     BattleAction.new(
                         state : {
                             ability: Ability.database.find(name:'Wait'),
@@ -264,12 +291,17 @@ return ::(
                             extraData: {}
                         }
                     )                
-                );
+                ;
+                dialogue.forceExit();                                                        
               },
               
               // Item
               (4): ::<= {
-                itemmenu(user, party, enemies, onAct::(action){battle.entityCommitAction(action);});
+                itemmenu(user, party, enemies, onAct::(action){
+                    nextAction = action;
+                    dialogue.forceExit();                                                        
+                    dialogue.forceExit();                                                        
+                });
               }
             };          
         }

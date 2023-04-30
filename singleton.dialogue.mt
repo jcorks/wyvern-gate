@@ -90,7 +90,7 @@ return class(
         @choiceStack = [];
         @:nextResolve = [];
         @:afterResolve = [];
-
+        @bg;
     
     
     
@@ -209,6 +209,8 @@ return class(
             //if (canCancel) ::<= {
             //    choicesModified->push(value:'(Cancel)');
             //};
+            if (bg)
+                bg.render();
             if (data.renderable) 
                 data.renderable.render();
             renderText(
@@ -256,6 +258,8 @@ return class(
             //    choicesModified->push(value:'(Cancel)');
             //};
             if (data.rendered == empty) ::<= {
+                if (bg)
+                    bg.render();
                 if (data.renderable) 
                     data.renderable.render();
                 renderText(
@@ -293,18 +297,19 @@ return class(
         @:nodisplayCursor ::(data => Object, input) {
             @:renderable = data.renderable;   
             
-            if (data.started == empty) ::<= {
-                data.onStart();
-                data.started = true;
-            };
-            
             //if (canCancel) ::<= {
             //    choicesModified->push(value:'(Cancel)');
             //};
+            if (bg)
+                bg.render();
             if (data.rendered == empty) ::<= {
                 if (data.renderable) 
                     data.renderable.render();
                 canvas.commit();    
+            };
+            if (data.started == empty) ::<= {
+                data.onStart();
+                data.started = true;
             };
 
             return true;    
@@ -388,6 +393,8 @@ return class(
             });
             // first render
             if (data.rendered == empty) ::<= {
+                if (bg)
+                    bg.render();
                 if (data.renderable) 
                     data.renderable.render();
                 renderText(
@@ -451,6 +458,8 @@ return class(
         
         @:displayCursor ::(data, input) {
             if (data.rendered == empty) ::<={
+                if (bg)
+                    bg.render();
                 renderText(
                     leftWeight: data.leftWeight, 
                     topWeight: data.topWeight, 
@@ -488,6 +497,23 @@ return class(
             NODISPLAY: 6
         };
         
+        @:pushUpdates = ::{
+            if (nextResolve->keycount) ::<= {
+                @:cbs = nextResolve[0];
+                nextResolve->remove(key:0);
+                cbs->foreach(do:::(i, cb) <- cb());
+            } else
+                if (afterResolve->keycount) ::<= {
+                    @:cbs = afterResolve[0];
+                    afterResolve->remove(key:0);
+                    cbs->foreach(do:::(i, cb) <- cb());
+                };
+
+
+            if (choiceStack->keycount)
+                this.commitInput();           
+        };
+        
         this.interface = {
             commitInput ::(input){    
                 @val = choiceStack[choiceStack->keycount-1];
@@ -515,20 +541,7 @@ return class(
                 };        
                 // true means done
                 if (result == true) ::<= {
-                    if (nextResolve->keycount) ::<= {
-                        @:cbs = nextResolve[0];
-                        nextResolve->remove(key:0);
-                        cbs->foreach(do:::(i, cb) <- cb());
-                    } else
-                        if (afterResolve->keycount) ::<= {
-                            @:cbs = afterResolve[0];
-                            afterResolve->remove(key:0);
-                            cbs->foreach(do:::(i, cb) <- cb());
-                        };
-
-
-                    if (choiceStack->keycount)
-                        this.commitInput();                    
+                    pushUpdates();                 
                 };
             },
             
@@ -695,7 +708,7 @@ return class(
             // Like all UI choices, the weight can be chosen.
             // Prompt will be displayed, like speaker in the message callback
             //
-            choices ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, renderable, keep, onGetChoices) {
+            choices ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, renderable, keep, onGetChoices, onNext) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode: CHOICE_MODE.CURSOR,
@@ -709,13 +722,14 @@ return class(
                         keep: keep,
                         onGetChoices : onGetChoices,
                         renderable:renderable,
+                        onNext : onNext
                     });
                     canvas.pushState();      
                 }]);
    
             },
             
-            choiceColumns ::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function, keep, renderable) {
+            choiceColumns ::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function, keep, renderable, onNext) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode:if (isCursor) CHOICE_MODE.COLUMN_CURSOR else CHOICE_MODE.COLUMN_NUMBER,
@@ -727,7 +741,8 @@ return class(
                         canCancel : canCancel,
                         onChoice : onChoice,
                         keep : keep,
-                        renderable:renderable
+                        renderable:renderable,
+                        onNext : onNext
                     });
                     canvas.pushState();      
                 }]);
@@ -755,13 +770,31 @@ return class(
                 get::<- CURSOR_ACTIONS
             },
             
-            forceExit ::{
+            forceExit ::(soft){
                 canvas.popState();
                 canvas.commit();
                 @:data = choiceStack->pop;
                 if (data.onNext)
-                    data.onNext();            
+                    data.onNext();      
+
+            },
+
+            // ask yes or no immediately.
+            askBoolean::(prompt, onChoice => Function) {
+                this.choices(prompt, choices:['Yes', 'No'],
+                    onChoice::(choice){
+                        onChoice(which: choice == 1);
+                    }
+                );
+            },
+            
+            // sets an object to always draw behind 
+            // when committing a new visual. Set to 
+            // empty to stop.
+            backgroundRenderable :{
+                set ::(value) <- bg = value
             }
+
             /*
             choicesNow ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice) {
                 @out;
@@ -807,17 +840,7 @@ return class(
                 return out;
             },
             
-            // ask yes or no immediately.
-            askBoolean::(prompt) {
-                @out;
-                this.pushChoices(prompt, choices:['Yes', 'No'],
-                    onChoice::(choice) {
-                        out = choice;
-                    }
-                );
-                this.showChoices();
-                return if(out == 1) true else false;
-            },
+
             
             
             showChoices :: {

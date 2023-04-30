@@ -874,18 +874,7 @@ Location.Base.database = Database.new(
             maxOccupants : 0,
             
             onInteract ::(location) {
-                @:world = import(module:'singleton.world.mt');
-                @:Event = import(module:'class.event.mt');
 
-                if (location.contested == true) ::<= {
-                    @:event = Event.Base.database.find(name:'Encounter:TreasureBoss').new(
-                        island:location.landmark.island,
-                        party:world.party,
-                        currentTime:0, // TODO,
-                        landmark:location.landmark
-                    );  
-                    location.contested = false;
-                };
                 return true;
             },
             
@@ -960,7 +949,7 @@ Location.Base.database = Database.new(
             
             onCreate ::(location) {
                 location.inventory.add(item:Item.Base.database.getRandomFiltered(
-                    filter:::(value) <- value.isUnique == false
+                    filter:::(value) <- value.isUnique == false && value.canHaveModifier
                 ).new(rngModHint:true, from:location.landmark.island.newInhabitant()));
             },
             
@@ -995,6 +984,7 @@ Location.Base.database = Database.new(
             },
             
             onCreate ::(location) {
+                
                 @:nameGen = import(module:'singleton.namegen.mt');
                 location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key').new(from:location.ownedBy, creationHint:{
                     levelHint: ((location.landmark.island.levelMax * 1.1) + 5)->floor,

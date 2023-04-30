@@ -905,70 +905,74 @@
                     speaker: name,
                     text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.GREET])
                 );                
-                @:choice = dialogue.choicesNow(
+                dialogue.choices(
                     canCancel : true,
                     prompt: 'Talking to ' + name,
                     choices: [
                         'chat',
                         'hire',
                         'aggress...'
-                    ]
+                    ],
+                    
+                    onChoice::(choice) {
+                
+                        when(choice == 0) empty;
+                        
+                        match(choice-1) {
+                          // Chat
+                          (0): ::<= {
+                            dialogue.message(
+                                speaker: name,
+                                text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.CHAT])
+                            );                                                        
+                          },
+                          
+                          // hire 
+                          (1): ::<= {
+                            when(party.isMember(entity:this))
+                                dialogue.message(
+                                    text: name + ' is already a party member.'
+                                );                
+                          
+                            when (party.members->keycount >= 3 || !adventurous)
+                                dialogue.message(
+                                    speaker: name,
+                                    text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_DENY])
+                                );                
+                                
+                            dialogue.message(
+                                speaker: name,
+                                text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_ACCEPT])
+                            );                
+
+                            @:cost = 50+((stats.sum/3 + level)*2.5)->ceil;
+
+
+                            this.describe();
+
+                            when(dialogue.askBoolean(
+                                prompt: 'Hire for ' + cost + 'G?'
+                            ) == false) empty;
+                            
+                            when(party.inventory.gold < cost)
+                                dialogue.message(
+                                    text: 'The party cannot afford to hire ' + name
+                                );                
+                                
+                            party.inventory.subtractGold(amount:cost);
+                            party.add(member:this);
+                                dialogue.message(
+                                    text: name + ' joins the party!'
+                                );                
+                            
+
+                            
+                          }
+                        
+                        };                    
+                    }
                 );  
-                
-                when(choice == 0) empty;
-                
-                match(choice-1) {
-                  // Chat
-                  (0): ::<= {
-                    dialogue.message(
-                        speaker: name,
-                        text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.CHAT])
-                    );                                                        
-                  },
-                  
-                  // hire 
-                  (1): ::<= {
-                    when(party.isMember(entity:this))
-                        dialogue.message(
-                            text: name + ' is already a party member.'
-                        );                
-                  
-                    when (party.members->keycount >= 3 || !adventurous)
-                        dialogue.message(
-                            speaker: name,
-                            text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_DENY])
-                        );                
-                        
-                    dialogue.message(
-                        speaker: name,
-                        text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_ACCEPT])
-                    );                
 
-                    @:cost = 50+((stats.sum/3 + level)*2.5)->ceil;
-
-
-                    this.describe();
-
-                    when(dialogue.askBoolean(
-                        prompt: 'Hire for ' + cost + 'G?'
-                    ) == false) empty;
-                    
-                    when(party.inventory.gold < cost)
-                        dialogue.message(
-                            text: 'The party cannot afford to hire ' + name
-                        );                
-                        
-                    party.inventory.subtractGold(amount:cost);
-                    party.add(member:this);
-                        dialogue.message(
-                            text: name + ' joins the party!'
-                        );                
-                    
-
-                    
-                  }
-                
-                };
                 
                 // if aggress:
                 //

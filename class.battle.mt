@@ -54,6 +54,7 @@
         @turnIndex = 0;
         @redraw;
         @party_;
+        @turnPoppable;
         
         @result;
         
@@ -67,17 +68,104 @@
                 
                 @index = allies_->findIndex(value:obj.entity);
                 if (index != -1) allies_->remove(key:index);
-                @index = enemies_->findIndex(value:obj.entity);
+                index = enemies_->findIndex(value:obj.entity);
                 if (index != -1) enemies_->remove(key:index);
                 turn = [
                     ...([...allies_]->map(to:::(value) {return {isAlly:true, entity:value};})), 
                     ...([...enemies_]->map(to:::(value){return {isAlly:false, entity:value};}))
                 ];
                 
+                index = turnPoppable->findIndex(value:obj);
+                if (index != -1) turnPoppable->remove(key:index);
+
+                
             });
         };
         
-        @:doTurn ::{
+        @:endTurn ::{
+            checkRemove();  
+            turnIndex+=1;
+            if (turnPoppable->keycount == 0) ::<= {      
+                turn->foreach(do:::(index, obj) {
+                    obj.entity.endTurn();
+                });
+
+                if (onTurn_ != empty)
+                    onTurn_();            
+                when(allies_->all(condition:::(value) {
+                    return value.isIncapacitated();
+                })) dialogue.forceExit();
+                
+                when(enemies_->all(condition:::(value) {
+                    return value.isIncapacitated();
+                })) ::<={
+                    alliesWin = true;
+                    dialogue.forceExit();
+                };
+                initTurn();
+            };
+        };
+        
+        @:nextTurn ::{
+            when (turnPoppable->keycount == 0) empty;
+            @:obj = turnPoppable[0];
+            @:ent = obj.entity;
+            turnPoppable->remove(key:0);
+            entityTurn = ent;
+            
+            // act turn can signal to not act
+            when(!ent.actTurn()) ::<={
+                endTurn();
+                nextTurn();
+            };
+
+
+            // may have died this turn.
+            when (ent.isIncapacitated()) ::<={
+                endTurn();
+                nextTurn();
+            };
+            
+            // multi turn actions
+            if (actions[ent]) ::<= {
+                @:action = actions[ent];
+                action.turnIndex += 1;
+                
+                
+                ent.useAbility(
+                    ability:action.ability,
+                    allies:  if(obj.isAlly) allies_  else enemies_,
+                    enemies: if(obj.isAlly) enemies_ else allies_,
+                    targets:action.targets,
+                    turnIndex : action.turnIndex,
+                    extraData : action.extraData
+                );
+
+                
+                if (action.turnIndex >= action.ability.durationTurns) ::<= {
+                    actions[ent] = empty;
+                };
+                endTurn();
+                nextTurn();
+            } else ::<= {
+
+
+                // normal turn: request action from the act function
+                // given by the caller
+                @:act = if (obj.isAlly) onAllyTurn_ else onEnemyTurn_;
+                act(
+                    battle:this,
+                    user:ent,
+                    landmark:landmark_,
+                    allies:allies_,
+                    enemies:enemies_
+                );
+                
+            };
+
+        };
+        
+        @:initTurn ::{
             
             // first reset stats according to current effects 
             turn->foreach(do:::(index, obj) {
@@ -92,85 +180,12 @@
                 }
             );
             
+            turnPoppable = [...turn];
             
             // then do turns.
             // Every turn returns a BattleAction:
             // includes an ability and targetset
-            breakpoint();
-            
-            turn->foreach(do:::(index, obj) {
-            
-                dialogue.queueResolveAfter(callbacks:[::{
-                    @:ent = obj.entity;
-                    entityTurn = ent;
-                    turnIndex = index;
-                    
-                    // act turn can signal to not act
-                    when(!ent.actTurn()) checkRemove();
-
-
-                    // may have died this turn.
-                    when (ent.isIncapacitated()) checkRemove();
-                    
-                    // multi turn actions
-                    if (actions[ent]) ::<= {
-                        @:action = actions[ent];
-                        action.turnIndex += 1;
-                        
-                        
-                        ent.useAbility(
-                            ability:action.ability,
-                            allies:  if(obj.isAlly) allies_  else enemies_,
-                            enemies: if(obj.isAlly) enemies_ else allies_,
-                            targets:action.targets,
-                            turnIndex : action.turnIndex,
-                            extraData : action.extraData
-                        );
-                        redraw();
-
-                        
-                        if (action.turnIndex >= action.ability.durationTurns) ::<= {
-                            actions[ent] = empty;
-                        };
-                    } else ::<= {
-
-
-                        // normal turn: request action from the act function
-                        // given by the caller
-                        @:act = if (obj.isAlly) onAllyTurn_ else onEnemyTurn_;
-                        act(
-                            battle:this,
-                            user:ent,
-                            landmark:landmark_,
-                            allies:allies_,
-                            enemies:enemies_
-                        );
-                        
-                    };
-
-                    checkRemove();
-                }]);
-            });
-            
-            dialogue.queueResolveAfter(callbacks:[::{
-                turn->foreach(do:::(index, obj) {
-                    obj.entity.endTurn();
-                });
-
-                if (onTurn_ != empty)
-                    onTurn_();            
-                when(allies_->all(condition:::(value) {
-                    return value.isIncapacitated();
-                })) dialogue.forceExit();
-                
-                when(enemies_->all(condition:::(value) {
-                    return value.isIncapacitated();
-                })) dialogue.forceExit();
-                
-                doTurn();
-            }]);
-            
-                                
+            turnIndex = 0;
         };
     
 
@@ -264,7 +279,8 @@
                 noLoot,
                 exp,
                 
-                onStart
+                onStart,
+                onEnd => Function
             ) {
                 onTurn_ = onTurn;
                 allies = [...allies];
@@ -273,6 +289,7 @@
                 turn = [];
                 turnIndex = 0;
                 active = true;
+                
                 
                 @:isPlayerParty = party.isMember(entity:allies[0]);
             
@@ -350,7 +367,8 @@
                     renderable:this,
                     onStart::{
                         if (onStart) onStart();
-                        doTurn();                    
+                        initTurn();  
+                        nextTurn();
                     },
                     onNext::{
                         result = match(true) {
@@ -358,6 +376,7 @@
                           (!isPlayerParty): RESULTS.ENEMIES_WIN,
                           default:          RESULTS.NOONE_WIN
                         };
+                        breakpoint();
                         
                         
                         allies->foreach(do:::(k, v) {
@@ -372,13 +391,13 @@
                         when (npcBattle != empty) ::<= {
                             active = false;
                             dialogue.message(text: 'The battle is over.');
-                            canvas.popState();
 
                             allies_ = [];
                             enemies_ = [];
-                            
-                            return this;
-                        };
+                            active = false;
+                            dialogue.backgroundRenderable = empty;
+                            onEnd(result);                    
+                        }; 
 
 
                         if (alliesWin) ::<= {            
@@ -463,17 +482,17 @@
                                 };
                             };
                                            
-                            canvas.popState();
 
                         } else ::<= {
                             if (party.members->all(condition:::(value) <- value.isIncapacitated())) ::<= {
                                 dialogue.message(text: 'The battle is lost.');
                             };
-                            canvas.popState();
                         };
                         allies_ = [];
                         enemies_ = [];
-                        active = false;                    
+                        active = false;
+                        dialogue.backgroundRenderable = empty;
+                        onEnd(result);                    
                     }
                 );
 
@@ -511,12 +530,13 @@
             },
             
             render :: {
+                breakpoint();
+                canvas.clear();
                 renderStatusBox();
                 renderTurnOrder();
             },
             
             entityCommitAction::(action) {
-                breakpoint();
                 entityTurn.useAbility(
                     ability:action.ability,
                     targets:action.targets,
@@ -527,7 +547,13 @@
                 if (action.ability.durationTurns > 0) ::<= {
                     action.turnIndex = 0;
                     actions[entityTurn] = action;
-                };            
+                };  
+                dialogue.queueResolveAfter(callbacks:[
+                    ::{ 
+                        endTurn();
+                        nextTurn();
+                    }
+                ]);
             },
             
 

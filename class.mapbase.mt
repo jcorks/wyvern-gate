@@ -93,6 +93,7 @@ return class(
         };
         
         @renderOutOfBounds = true;
+        @isDark = false;
 
         @:aStarHeuristicH::(from, to) <-
             distance(x0:from.x, y0:from.y, x1:to.x, y1:to.y)

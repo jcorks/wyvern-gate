@@ -141,13 +141,6 @@ return class(
         @:visitIsland :: {
 
             // check if we're AT a location.
-            @:choices = [
-                'Travel',
-                'Check',
-                'Party',
-                'Look around',
-                'System',
-            ];
             island.map.title = "(Map of " + island.name + ')';
 
 
@@ -159,12 +152,14 @@ return class(
                 prompt: 'What next?',
                 renderable: island.map,
                 keep: true,
-                choices,
-                onChoice::(choice) {
-
-
-
-
+                onGetChoices ::{
+                    @:choices = [
+                        'Travel',
+                        'Check',
+                        'Party',
+                        'Look around',
+                        'System',
+                    ];
                     @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
 
                     if (visitable != empty) ::<= {
@@ -172,7 +167,10 @@ return class(
                             choices->push(value:'Visit ' + vis.name);                
                         });
                     };
-
+                    return choices;
+                },
+                onChoice::(choice) {
+                    @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
 
                    
                     match(choice-1) {
@@ -321,7 +319,7 @@ return class(
                             
                             @lastChoice = 0;
 
-                            if (!landmark.base.dungeonMap) ::<= {
+                            if (false) ::<= {
 
                                 @choices = [];
                                 landmark.locations->foreach(do:::(index, location) {
@@ -423,7 +421,6 @@ return class(
                             when(choice >= locationAt->keycount) empty;
                             locationAt = locationAt[choice].data;
                             
-                            breakpoint();
                             
                             // initial interaction 
                             // Initial interaction triggers an event.
@@ -447,6 +444,7 @@ return class(
                                 prompt: 'Interaction',
                                 choices:choices,
                                 canCancel : true,
+                                keep: true,
                                 onChoice::(choice) {
                            
                                     when(choice == 0) empty;
@@ -631,13 +629,13 @@ return class(
                 @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
                 @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
                 // debug
-                    
+                    /*
                     [0, 10]->for(do:::(i) {
                         party.inventory.add(item:Item.Base.database.getRandomFiltered(
                             filter:::(value) <- value.isUnique == false
                         ).new(from:island.newInhabitant(),rngModHint:true));
                     });
-                    
+                    */
 
                 [0, 3]->for(do:::(i) {
                     @:crystal = Item.Base.database.find(name:'Skill Crystal').new(from:p0);
@@ -673,9 +671,14 @@ return class(
                 @:Scene = import(module:'class.scene.mt');
                 Scene.database.find(name:'scene_intro').act(onDone::{
                     visitIsland();
+                    //island.addEvent(
+                    //    event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
+                    //        island, party, landmark //, currentTime
+                    //    )
+                    //);  
                 });
                 
-                
+          
                 
             },
             onSaveState : {

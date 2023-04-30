@@ -32,6 +32,7 @@ return ::{
         canCancel: true,
         renderable : {
             render ::{
+                canvas.clear();
                 // Name (species, class)
                 // HP, AP,
                 // Weapon

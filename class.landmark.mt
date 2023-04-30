@@ -58,18 +58,12 @@
         
         
         @:getLocationXY ::{
-            when(landmark.dungeonMap) ::<= {
-                @ar = map.getRandomArea();
-                return {
-                    x: (ar.x + ar.width/2)->floor,
-                    y: (ar.y + ar.height/2)->floor
-                };
-            };
-            
+            @ar = map.getRandomArea();
             return {
-                x: (sizeW * Number.random())->floor,
-                y: (sizeH * Number.random())->floor
+                x: (ar.x + ar.width/2)->floor,
+                y: (ar.y + ar.height/2)->floor
             };
+
         };  
         
         
@@ -89,56 +83,22 @@
             if (base.dungeonMap) ::<= {
                 map = DungeonMap.new();
                 dungeonLogic = DungeonController.new(map, island, landmark:this);
-                sizeW = map.width;
-                sizeH = map.height;
-
-
-                @area = map.getRandomArea();                
-
-                gate = Location.Base.database.find(name:'Entrance').new(
-                    landmark:this, 
-                    xHint:area.x + (area.width/2)->floor,
-                    yHint:area.y + (area.height/2)->floor
-                );                
-
-
             } else ::<= {
                 map = Map.new();
-                sizeW = random.integer(from:30, to:60)->ceil;
-                sizeH = random.integer(from:30, to:60)->ceil;
-
-                match ((Number.random()*4)->floor) {
-                  (0)::<= {
-                    gate = Location.Base.database.find(name:'Entrance').new(
-                        landmark:this, 
-                        xHint:1,
-                        yHint:Number.random()*sizeH
-                    );                
-                  },
-                  (1)::<= {
-                    gate = Location.Base.database.find(name:'Entrance').new(
-                        landmark:this, 
-                        xHint:sizeW - 1,
-                        yHint:Number.random()*sizeH
-                    );                
-                  },
-                  (2)::<= {
-                    gate = Location.Base.database.find(name:'Entrance').new(
-                        landmark:this, 
-                        xHint:Number.random()*sizeH,
-                        yHint:1
-                    );                
-                  },
-                  (3)::<= {
-                    gate = Location.Base.database.find(name:'Entrance').new(
-                        landmark:this, 
-                        xHint:Number.random()*sizeW,
-                        yHint:sizeH-1
-                    );                
-                  }
-              };           
-
             };
+
+            sizeW = map.width;
+            sizeH = map.height;
+
+
+            @area = map.getRandomArea();                
+
+            gate = Location.Base.database.find(name:'Entrance').new(
+                landmark:this, 
+                xHint:area.x + (area.width/2)->floor,
+                yHint:area.y + (area.height/2)->floor
+            );                
+
 
             if (base.isUnique)
                 name = ''

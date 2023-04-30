@@ -133,26 +133,26 @@ Interaction.database = Database.new(
                         dialogue.message(text:'No one is within the ' + location.base.name);             
 
                     @talkee;
-                    if (choices->keycount == 1) ::<= {
-                        talkee = choices[0];                    
-                    } else ::<= {
-                        @choice = dialogue.choicesNow(
-                            prompt: 'Talk to whom?',
-                            choices : [...choices]->map(to:::(value) <- value.name),
-                            canCancel : true
-                        );
-                        
-                        when(choice == 0) empty;
-                        talkee = choices[choice-1];
-                    };
                     
-                    // if cancelled
-                    when(talkee == empty) empty;
+                    dialogue.choices(
+                        prompt: 'Talk to whom?',
+                        choices : [...choices]->map(to:::(value) <- value.name),
+                        canCancel : true,
+                        onChoice::(choice) {
+                            when(choice == 0) empty;
+                            talkee = choices[choice-1];                            
 
-                    talkee.interactPerson(
-                        party,
-                        location
+                            // if cancelled
+                            when(talkee == empty) empty;
+
+                            talkee.interactPerson(
+                                party,
+                                location
+                            );
+
+                        }
                     );
+                    
                 }
             }
         ),
@@ -172,122 +172,114 @@ Interaction.database = Database.new(
                         );
                     };
                     
-                    when(dialogue.askBoolean(
-                        prompt: 'Buy a drink? (1G)'
-                    ) == false) empty;   
-                    
+                    dialogue.askBoolean(
+                        prompt: 'Buy a drink? (1G)',
+                        onChoice::(which) {
+                            when(which  == false) empty; 
                     when (party.inventory.gold < 5)
                         dialogue.message(text:'Not enough gold...');
                     
-                    party.inventory.subtractGold(amount:5);
-                    
-                    dialogue.message(
-                        text: random.pickArrayItem(list:
-                            [
-                                'The frothy drink calms your soul.',
-                                'Tastes a bit fruitier than you would have thought.',
-                                'The drink puts you at ease.',
-                            ]           
-                        )
-                    );   
-
-
-                    
-                    party.members->foreach(do:::(index, member) {
-                        if (member.ap < member.stats.AP)
-                            member.healAP(amount:member.stats.AP * 0.1);
-                    });
-
-
-
-                    
-                    @:chance = Number.random();
-                    match(true) {
-                      // normal
-                      (chance < 0.8)::<= {
-                        dialogue.message(
-                            text:'Someone sits next to you.'
-                        );   
+                        party.inventory.subtractGold(amount:5);
                         
-                        @:talkee = location.landmark.island.newInhabitant();
-                        talkee.interactPerson(
-                            party,
-                            location
-                        );
-                        
-                        dialogue.message(text:'You finish your drink.');
-                      },
-
-                      // drunkard
-                      (chance < 0.9)::<= {                            
-                        @:talkee = location.landmark.island.newInhabitant();
-
                         dialogue.message(
-                            text:'Someone stumbles toward you...'
-                        );
-
-                        dialogue.message(
-                            speaker: '???',
-                            text: random.pickArrayItem(
-                                list: [
-                                    '"Hhheeeyy whaddya ddoin heer"',
-                                    '"wwwhaaat? did youu sayy to mee.??"',
-                                    '"uugghht gett outtaa my waaayy"'
-                                ]
+                            text: random.pickArrayItem(list:
+                                [
+                                    'The frothy drink calms your soul.',
+                                    'Tastes a bit fruitier than you would have thought.',
+                                    'The drink puts you at ease.',
+                                ]           
                             )
-                        );
+                        );   
 
-                        @:world = import(module:'singleton.world.mt');
-                        match(world.battle.start(
-                            party,                            
-                            allies: party.members,
-                            enemies: [talkee],
-                            landmark: {}
-                        ).result) {
-                          (Battle.RESULTS.ALLIES_WIN,
-                           Battle.RESULTS.NOONE_WIN): ::<= {
+
+                        
+                        party.members->foreach(do:::(index, member) {
+                            if (member.ap < member.stats.AP)
+                                member.healAP(amount:member.stats.AP * 0.1);
+                        });
+
+
+
+                        
+                        @:chance = Number.random();
+                        match(true) {
+                          // normal
+                          (chance < 0.8)::<= {
+                            dialogue.message(
+                                text:'Someone sits next to you.'
+                            );   
+                            
+                            @:talkee = location.landmark.island.newInhabitant();
+                            talkee.interactPerson(
+                                party,
+                                location
+                            );
+                            
+                            dialogue.message(text:'You finish your drink.');
+                          },
+
+                          // drunkard
+                          (chance < 0.9)::<= {                            
+                            @:talkee = location.landmark.island.newInhabitant();
+
+                            dialogue.message(
+                                text:'Someone stumbles toward you...'
+                            );
+
+                            dialogue.message(
+                                speaker: '???',
+                                text: random.pickArrayItem(
+                                    list: [
+                                        '"Hhheeeyy whaddya ddoin heer"',
+                                        '"wwwhaaat? did youu sayy to mee.??"',
+                                        '"uugghht gett outtaa my waaayy"'
+                                    ]
+                                )
+                            );
+
+                            @:world = import(module:'singleton.world.mt');
+                            world.battle.start(
+                                party,                            
+                                allies: party.members,
+                                enemies: [talkee],
+                                landmark: {},
+                                onEnd::(result) {
+                                    if (talkee.isDead) ::<= {
+                                        dialogue.message(
+                                            speaker: 'Bartender',
+                                            text:"You killed 'em...?"
+                                        );                            
+                                        dialogue.message(
+                                            speaker: 'Bartender',
+                                            text:"*sigh*"
+                                        );                            
+                                        dialogue.message(
+                                            text:'The guards are alerted of the death.'
+                                        );                            
+                                        location.landmark.peaceful = false;
+                                    } else ::<= {
+                                        dialogue.message(
+                                            speaker: 'Bartender',
+                                            text:'Gah, what a drunk. Sorry \'bout that.'
+                                        );                            
+                                    };
+                                                                
+                                }
+                            );                            
+                            
+
                           },
                           
-                          (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                          }
-                        
-                        }; 
-                        
-                        if (talkee.isDead) ::<= {
+                          default: 
                             dialogue.message(
-                                speaker: 'Bartender',
-                                text:"You killed 'em...?"
-                            );                            
-                            dialogue.message(
-                                speaker: 'Bartender',
-                                text:"*sigh*"
-                            );                            
-                            dialogue.message(
-                                text:'The guards are alerted of the death.'
-                            );                            
-                            location.landmark.peaceful = false;
-                        } else ::<= {
-                            dialogue.message(
-                                speaker: 'Bartender',
-                                text:'Gah, what a drunk. Sorry \'bout that.'
-                            );                            
+                                text:'The drink is enjoyed in solitude.'
+                            )
+                          
                         };
-                        
-
-                      },
-                      
-                      default: 
-                        dialogue.message(
-                            text:'The drink is enjoyed in solitude.'
-                        )
-                      
-                    };
-                                                                          
-
-
-                        
-                    
-
+                                                                              
+                                                    
+                        }
+                    );
                 }
             }
         ),
@@ -396,21 +388,23 @@ Interaction.database = Database.new(
                             speaker: location.ownedBy.name,
                             text: "You're not welcome here!!"
                         );
-                        match(world.battle.start(
+                        world.battle.start(
                             party,                            
                             allies: party.members,
                             enemies: [location.ownedBy],
-                            landmark: {}
-                        ).result) {
-                          (Battle.RESULTS.ALLIES_WIN,
-                           Battle.RESULTS.NOONE_WIN): ::<= {
-                            location.ownedBy = empty;                          
-                          },
-                          
-                          (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                          }
-                        
-                        }; 
+                            landmark: {},
+                            onEnd::(result) {
+                                match(result) {
+                                  (Battle.RESULTS.ALLIES_WIN,
+                                   Battle.RESULTS.NOONE_WIN): ::<= {
+                                    location.ownedBy = empty;                          
+                                  },
+                                  
+                                  (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                                  }
+                                };
+                            }
+                        );
                     };
 
                     @:world = import(module:'singleton.world.mt');
@@ -418,46 +412,48 @@ Interaction.database = Database.new(
                         dialogue.message(text: 'The shop appears to be closed at this hour..');                            
 
 
-                    [::]{
-                        forever(do:::{                    
-                            @items = party.inventory.items;
-                            
-                            when(items->keycount == 0) ::<= {
-                                dialogue.message(text: "The inventory is empty.");
-                                send();
-                            };                                
-                            
-                            //@basePrices = [...items]->map(to:::(value) <- (((value.price * 0.4)/5)->ceil)*5); // compiler bug here if uncomment
-                            @basePrices = [];
-                            items->foreach(do:::(index, item) {
-                                @sellPrice = (((item.price * 0.5)/5)*0.5)->ceil;
-                                if (sellPrice < 0) sellPrice = 0;
-                                basePrices[index] = sellPrice;
-                            });
-                            @choices = [];
-                            items->foreach(do:::(index, item) {
-                                choices->push(value: item.name + '(' + basePrices[index] + 'G)');
-                            });
-                            
-                            @choice = dialogue.choicesNow(
-                                choices,
-                                prompt: 'Sell which? (current: ' + party.inventory.gold + 'G)',
-                                canCancel : true
-                            );
-                            
-                            when(choice == 0) send();
-                            
-                            @item = items[choice-1];
-                            @price = basePrices[choice-1];
-                            
-                            dialogue.message(text: 'Sold the ' + item.name + ' for ' + price + 'G');
-
-                            party.inventory.addGold(amount:price);
-                            party.inventory.remove(item);
-                            
-                            location.inventory.add(item);
+                    @:doAct ::{
+                        @items = party.inventory.items;
+                        
+                        when(items->keycount == 0) ::<= {
+                            dialogue.message(text: "The inventory is empty.");
+                        };                                
+                        
+                        //@basePrices = [...items]->map(to:::(value) <- (((value.price * 0.4)/5)->ceil)*5); // compiler bug here if uncomment
+                        @basePrices = [];
+                        items->foreach(do:::(index, item) {
+                            @sellPrice = (((item.price * 0.5)/5)*0.5)->ceil;
+                            if (sellPrice < 0) sellPrice = 0;
+                            basePrices[index] = sellPrice;
                         });
+                        @choices = [];
+                        items->foreach(do:::(index, item) {
+                            choices->push(value: item.name + '(' + basePrices[index] + 'G)');
+                        });
+                        
+                        dialogue.choices(
+                            choices,
+                            prompt: 'Sell which? (current: ' + party.inventory.gold + 'G)',
+                            canCancel : true,
+                            onChoice ::(choice){                    
+                                when(choice == 0) empty;
+
+                                @item = items[choice-1];
+                                @price = basePrices[choice-1];
+                                
+                                dialogue.message(text: 'Sold the ' + item.name + ' for ' + price + 'G');
+
+                                party.inventory.addGold(amount:price);
+                                party.inventory.remove(item);
+                                
+                                location.inventory.add(item);
+                                doAct();
+                            }
+                        );
+                        
+                        
                     };
+                    doAct();
                 },
                 
 
@@ -476,20 +472,23 @@ Interaction.database = Database.new(
                             speaker: location.ownedBy.name,
                             text: "You're not welcome here!!"
                         );
-                        match(world.battle.start(
+                        world.battle.start(
                             party,                            
                             allies: party.members,
                             enemies: [location.ownedBy],
-                            landmark: {}
-                        ).result) {
-                          (true): ::<= {
-                            location.ownedBy = empty;                          
-                          },
-                          
-                          (false): ::<= {
-                          }
-                        
-                        }; 
+                            landmark: {},
+                            onEnd::(result) {
+                                match(result) {
+                                  (Battle.RESULTS.ALLIES_WIN,
+                                   Battle.RESULTS.NOONE_WIN): ::<= {
+                                    location.ownedBy = empty;                          
+                                  },
+                                  
+                                  (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                                  }
+                                };
+                            }
+                        );
                     };
                     @:world = import(module:'singleton.world.mt');
                     
@@ -499,86 +498,94 @@ Interaction.database = Database.new(
                     
                     
                     
-                    [::]{
-                        forever(do:::{                    
-                            @items = location.inventory.items;
-                            //@basePrices = [...items]->map(to:::(value) <- (((value.price * 0.4)/5)->ceil)*5); // compiler bug here if uncomment
-                            @basePrices = [];
-                            items->foreach(do:::(index, item) {
-                                basePrices[index] = ((item.price * 0.5)/5)->ceil;
-                            });
-                            @choices = [];
-                            items->foreach(do:::(index, item) {
-                                choices->push(value: item.name + '(' + basePrices[index] + 'G)');
-                            });
-                            
-                            @choice = dialogue.choicesNow(
-                                choices,
-                                prompt: 'Buy which? (current: ' + party.inventory.gold + 'G)',
-                                canCancel : true
-                            );
-                            
-                            when(choice == 0) send();
-                            @item = items[choice-1];
-                            @price = basePrices[choice-1];
-                            
-                            choice = dialogue.choicesNow(
-                                prompt: item.name,
-                                choices: ['Buy', 'Compare Equipment'],
-                                canCancel: true
-                            );
-                            when(choice == 0) send();
-                            
-                            match(choice-1) {
-                              // buy
-                              (0)::<= {
-                                when(world.party.inventory.isFull) ::<= {
-                                    dialogue.message(text: 'The party\'s inventory is full.');
-                                    send();
-                                };
-                                    
-                                
-                                when(!party.inventory.subtractGold(amount:price)) dialogue.message(text:'The party cannot afford this.');
-                                location.inventory.remove(item);
-                                
-                                if (item.base.name == 'Wyvern Key' && world.storyFlags.foundFirstKey == false) ::<= {
-                                    location.landmark.island.world.storyFlags.foundFirstKey = true;
-                                    dialogue.message(
-                                        speaker:location.ownedBy.name,
-                                        text: 'Going up the strata, eh? Best of luck to ye. Those wyverns are pretty ruthless.'
-                                    );
-                                    dialogue.message(
-                                        speaker:location.ownedBy.name,
-                                        text: 'Though, can\'t say I\'m not curious what lies at the top...'
-                                    );
-
-                                };
-                                
-                                
-                                dialogue.message(text: 'Bought a(n) ' + item.name);
-                                party.inventory.add(item);                              
-                              },
-                              
-                              // compare 
-                              (1)::<= {
-                                @:memberNames = [...party.members]->map(to:::(value) <- value.name);
-                                @:choice = dialogue.choicesNow(
-                                    prompt: 'Compare equipment for whom?',
-                                    choices: memberNames
-                                );
-                                @:user = party.members[choice-1];
-                                @slot = user.getSlotsForItem(item)[0];
-                                @currentEquip = user.getEquipped(slot);
-                                
-                                currentEquip.equipMod.printDiffRate(
-                                    prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
-                                    other:item.equipMod
-                                );                               
-                              }
-                            };
-                            
+                    @:doAct = ::{
+                        @items = location.inventory.items;
+                        //@basePrices = [...items]->map(to:::(value) <- (((value.price * 0.4)/5)->ceil)*5); // compiler bug here if uncomment
+                        @basePrices = [];
+                        items->foreach(do:::(index, item) {
+                            basePrices[index] = ((item.price * 0.5)/5)->ceil;
                         });
+                        @choices = [];
+                        items->foreach(do:::(index, item) {
+                            choices->push(value: item.name + '(' + basePrices[index] + 'G)');
+                        });
+                        
+                        dialogue.choices(
+                            choices,
+                            prompt: 'Buy which? (current: ' + party.inventory.gold + 'G)',
+                            canCancel : true,
+                            onChoice::(choice) {
+
+                                when(choice == 0) empty;
+                                @item = items[choice-1];
+                                @price = basePrices[choice-1];
+                                
+                                dialogue.choices(
+                                    prompt: item.name,
+                                    choices: ['Buy', 'Compare Equipment'],
+                                    canCancel: true,
+                                    onChoice::(choice) {
+                                        when(choice == 0) empty;
+                                        
+                                        match(choice-1) {
+                                          // buy
+                                          (0)::<= {
+                                            when(world.party.inventory.isFull) ::<= {
+                                                dialogue.message(text: 'The party\'s inventory is full.');
+                                                send();
+                                            };
+                                                
+                                            
+                                            when(!party.inventory.subtractGold(amount:price)) dialogue.message(text:'The party cannot afford this.');
+                                            location.inventory.remove(item);
+                                            
+                                            if (item.base.name == 'Wyvern Key' && world.storyFlags.foundFirstKey == false) ::<= {
+                                                location.landmark.island.world.storyFlags.foundFirstKey = true;
+                                                dialogue.message(
+                                                    speaker:location.ownedBy.name,
+                                                    text: 'Going up the strata, eh? Best of luck to ye. Those wyverns are pretty ruthless.'
+                                                );
+                                                dialogue.message(
+                                                    speaker:location.ownedBy.name,
+                                                    text: 'Though, can\'t say I\'m not curious what lies at the top...'
+                                                );
+
+                                            };
+                                            
+                                            
+                                            dialogue.message(text: 'Bought a(n) ' + item.name);
+                                            party.inventory.add(item);                              
+                                          },
+                                          
+                                          // compare 
+                                          (1)::<= {
+                                            @:memberNames = [...party.members]->map(to:::(value) <- value.name);
+                                            @:choice = dialogue.choices(
+                                                prompt: 'Compare equipment for whom?',
+                                                choices: memberNames,
+                                                onChoice::(choice) {
+                                                    @:user = party.members[choice-1];
+                                                    @slot = user.getSlotsForItem(item)[0];
+                                                    @currentEquip = user.getEquipped(slot);
+                                                    
+                                                    currentEquip.equipMod.printDiffRate(
+                                                        prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
+                                                        other:item.equipMod
+                                                    );                                                                               
+                                                }
+                                            );
+                                          }  
+                                        };                                 
+                                        doAct();
+                                    }
+                                );
+
+                                
+                            
+                            }
+                        );
                     };
+                    doAct();
                 },
                 
 
@@ -779,28 +786,40 @@ Interaction.database = Database.new(
                 displayName : 'Explore Pit',
                 name : 'explore pit',
                 onInteract ::(location, party) {
+                    @:world = import(module:'singleton.world.mt');
+                    @:Event = import(module:'class.event.mt');
 
-                    if (location.targetLandmark == empty) ::<={
-                        @:Landmark = import(module:'class.landmark.mt');
-                        
+                    if (location.contested == true) ::<= {
+                        @:event = Event.Base.database.find(name:'Encounter:TreasureBoss').new(
+                            island:location.landmark.island,
+                            party:world.party,
+                            currentTime:0, // TODO,
+                            landmark:location.landmark
+                        );  
+                        location.contested = false;
+                    } else ::<= {
+                        if (location.targetLandmark == empty) ::<={
+                            @:Landmark = import(module:'class.landmark.mt');
+                            
 
-                        location.targetLandmark = 
-                            Landmark.Base.database.find(name:'Treasure Room').new(
-                                island:location.landmark.island,
-                                x:-1,
-                                y:-1
-                            )
-                        ;
-                        
-                        
-                        location.targetLandmark.floor = location.landmark.floor+1;
+                            location.targetLandmark = 
+                                Landmark.Base.database.find(name:'Treasure Room').new(
+                                    island:location.landmark.island,
+                                    x:-1,
+                                    y:-1
+                                )
+                            ;
+                            
+                            
+                            location.targetLandmark.floor = location.landmark.floor+1;
+                        };
+                        @:instance = import(module:'singleton.instance.mt');
+                        instance.visitLandmark(landmark:location.targetLandmark);
+
+
+                        canvas.clear();
+                        dialogue.message(text:'The party enters the pit full of treasure.');
                     };
-
-                    canvas.clear();
-                    dialogue.message(text:'The party enters the pit full of treasure.');
-                    send(message:location.targetLandmark);
-
-
                 },
             }
         ),          
