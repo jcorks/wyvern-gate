@@ -106,6 +106,7 @@ return class(
         @penColor = hints.NEUTRAL;
         @onCommit;
         @debugLines = [];
+        @:lines_output = [];
         
         @savestates = [];
         
@@ -313,9 +314,10 @@ return class(
                     this.drawText(text: debugLines[0]);
                 };
                 
-                @:lines = [];
 
                 [0, CANVAS_HEIGHT]->for(do:::(row) {
+                    lines_output[row] = String.combine(strings:canvas[row]);
+                    /*
                     @:line = canvas[row];
                     @:lineColors = canvasColors[row];
 
@@ -345,11 +347,12 @@ return class(
                     iter.text = String.combine(strings:line->subset(from:last, to:CANVAS_WIDTH-1));
                     iters->push(value:iter);                    
                     lines->push(value:iters);
+                    */
                 });
                 
                 
                 onCommit(
-                    lines                
+                    lines:lines_output               
                 );                
             }
         };    

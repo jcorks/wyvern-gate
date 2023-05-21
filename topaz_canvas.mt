@@ -83,4 +83,6 @@ Topaz.FontManager.registerFont(asset:font);
 
 
 
+
+
 return TextCanvas;

@@ -46,15 +46,44 @@ canvas.onCommit = ::(lines){
     };
     Topaz.defaultDisplay.root = canvas;
 
+    Topaz.Input.addKeyboardListener(
+        onPress :::(input, value) {
+            match(input) {
+              (Topaz.Input.KEY.Z,
+               Topaz.Input.KEY.ENTER):::<= {
+                dialogue.commitInput(input:4);
+              },
+
+              (Topaz.Input.KEY.X,
+               Topaz.Input.KEY.BACKSPACE):::<= {
+                dialogue.commitInput(input:5);
+              },
+
+              (Topaz.Input.KEY.LEFT):::<= {
+                dialogue.commitInput(input:0);
+              },
+              (Topaz.Input.KEY.UP):::<= {
+                dialogue.commitInput(input:1);
+              },
+              (Topaz.Input.KEY.RIGHT):::<= {
+                dialogue.commitInput(input:2);
+              },
+              (Topaz.Input.KEY.DOWN):::<= {
+                dialogue.commitInput(input:3);
+              }
+
+            };
+        }
+    );
+
+
     @lastInput;
     canvas.onStep = ::{
         dialogue.commitInput(input:lastInput);
         if (canvasChanged) ::<= {
             @:lines = currentCanvas;
             lines->foreach(do:::(index, line) {
-                line->foreach(do:::(i, iter) {
-                    canvas.updateLine(index, text:iter.text);
-                });
+                canvas.updateLine(index, text:line);
             }); 
             canvasChanged = false;    
         };        
@@ -81,6 +110,7 @@ canvas.onCommit = ::(lines){
             command = '' + getPiece() + getPiece() + getPiece();
 
             
+            // ansi terminal actions
             @:CURSOR_ACTIONS = {
                 '279165': 1, // up,
                 '279166': 3, // down
@@ -107,9 +137,7 @@ canvas.onCommit = ::(lines){
                     console.clear();
                     @:lines = currentCanvas;
                     lines->foreach(do:::(index, line) {
-                        line->foreach(do:::(i, iter) {
-                            console.println(message:iter.text);
-                        });
+                        console.println(message:line);
                     }); 
                     canvasChanged = false;    
                 };
