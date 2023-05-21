@@ -17,42 +17,13 @@
 */
 //@:Entity = import(module:'class.entity.mt');
 //@:Random = import(module:'singleton.random.mt');
-@:console = import(module:'Matte.System.ConsoleIO');
 
 @:canvas = import(module:'singleton.canvas.mt');
 @:instance = import(module:'singleton.instance.mt');
-@:Time = import(module:'Matte.System.Time');
+@:dialogue = import(module:'singleton.dialogue.mt');
 
+@mainLoop;
 
-
-
-@:pollInput = ::{
-        
-    @command = '';
-    @:getPiece = ::{
-        @:ch = console.getch(unbuffered:true);
-        when (ch == empty) '';
-        return ch->charCodeAt(index:0);
-    };
-    
-    command = '' + getPiece() + getPiece() + getPiece();
-
-    
-    @:CURSOR_ACTIONS = {
-        '279165': 1, // up,
-        '279166': 3, // down
-        '279168': 0, // left,
-        '279167': 2, // right
-         
-        '122': 4, // confirm,
-        '120': 5, // cancel
-        
-    };
-    @val = CURSOR_ACTIONS[command];
-    if (val == empty)
-        Time.sleep(milliseconds:30);
-    return val;   
-};
 
 
 @currentCanvas;
@@ -63,7 +34,91 @@ canvas.onCommit = ::(lines){
 };
 
 
-@:dialogue = import(module:'singleton.dialogue.mt');
+[::] {
+    @:Topaz = import(module:'Topaz');
+    @:TextCanvas = import(module:'topaz_canvas.mt');
+    // if topaz is detected, setup its canvas and main loop
+
+    @:canvas = TextCanvas.new();
+    canvas.position = {
+        x: -Topaz.defaultDisplay.width/2,
+        y:  Topaz.defaultDisplay.height/2 - canvas.LINE_SPACING*2
+    };
+    Topaz.defaultDisplay.root = canvas;
+
+    @lastInput;
+    canvas.onStep = ::{
+        dialogue.commitInput(input:lastInput);
+        if (canvasChanged) ::<= {
+            @:lines = currentCanvas;
+            lines->foreach(do:::(index, line) {
+                line->foreach(do:::(i, iter) {
+                    canvas.updateLine(index, text:iter.text);
+                });
+            }); 
+            canvasChanged = false;    
+        };        
+    };
+
+
+
+} : {
+    // NO TOPAZ, just regular console IO
+    onError ::(message){
+        @:console = import(module:'Matte.System.ConsoleIO');
+        @:Time = import(module:'Matte.System.Time');
+        print(message:'Topaz not detected, continuing to terminal output');
+
+        @:pollInput = ::{
+                
+            @command = '';
+            @:getPiece = ::{
+                @:ch = console.getch(unbuffered:true);
+                when (ch == empty || ch == '') '';
+                return ch->charCodeAt(index:0);
+            };
+            
+            command = '' + getPiece() + getPiece() + getPiece();
+
+            
+            @:CURSOR_ACTIONS = {
+                '279165': 1, // up,
+                '279166': 3, // down
+                '279168': 0, // left,
+                '279167': 2, // right
+                
+                '122': 4, // confirm,
+                '120': 5, // cancel
+                
+            };
+            @val = CURSOR_ACTIONS[command];
+            if (val == empty)
+                Time.sleep(milliseconds:30);
+            return val;   
+        };
+
+        mainLoop = ::{
+            // standard event loop
+            forever(do::{
+                @val = pollInput();
+                dialogue.commitInput(input:val);
+                
+                if (canvasChanged) ::<= {
+                    console.clear();
+                    @:lines = currentCanvas;
+                    lines->foreach(do:::(index, line) {
+                        line->foreach(do:::(i, iter) {
+                            console.println(message:iter.text);
+                        });
+                    }); 
+                    canvasChanged = false;    
+                };
+            });            
+        };
+    }
+};
+
+
 
 
 instance.mainMenu(
@@ -99,24 +154,4 @@ instance.mainMenu(
 );
 
 
-// standard event loop
-forever(do::{
-    @val = pollInput();
-    dialogue.commitInput(input:val);
-    
-    if (canvasChanged) ::<= {
-        console.clear();
-        @:lines = currentCanvas;
-        lines->foreach(do:::(index, line) {
-            line->foreach(do:::(i, iter) {
-                console.println(message:iter.text);
-            });
-        }); 
-        canvasChanged = false;    
-    };
-});
-
-
-
-
-
+if (mainLoop != empty) mainLoop();
