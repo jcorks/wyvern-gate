@@ -23,10 +23,30 @@
 
 // create font asset
 @:font = Topaz.Resources.createAsset(
-    path:'monof55.ttf',
+    path:'FSEX300.ttf',
     name:'Monospace'
 );
 Topaz.FontManager.registerFont(asset:font);
+
+
+@:shader = Topaz.Resources.createAsset(
+    path:'topaz.crt.glsl',
+    name:'topaz.crt.glsl'
+);
+
+@:ret = Topaz.defaultDisplay.setPostProcessShader(
+    vertexShader   : shader.string,
+    fragmentShader : shader.string
+);
+
+if (ret != empty) ::<= {
+    error(detail:ret);
+};
+
+
+
+
+
 
 
 @:RENDERER_WIDTH = 80;
@@ -34,10 +54,10 @@ Topaz.FontManager.registerFont(asset:font);
 @:LINE_SPACING = 15;
 @:FONT_SIZE = 15;
 
-@:TextCanvas = class(
+@:Terminal = class(
     inherits: [Topaz.Entity],
     define:::(this) {
-
+        @cursor = 0;
         // renders a single line.
         // It makes no restrictions on size and assumes that the setter 
         // maintains a proper width
@@ -55,11 +75,17 @@ Topaz.FontManager.registerFont(asset:font);
                     line : {
                         set ::(value) {
                             textRenderer.text = value;
-                        } 
+                        },
+                        get ::<- textRenderer.text
                     }
                 };
             }
         );
+        @:bg = Topaz.Shape2D.new();
+        bg.formRectangle(width:640, height:480);
+        bg.color = '#242424';
+        this.components = [bg];
+        bg.position = {x:0, y:-480 + LINE_SPACING*2};
 
         @:lines = [];
         [0, RENDERER_HEIGHT]->for(do:::(i) {
@@ -67,14 +93,38 @@ Topaz.FontManager.registerFont(asset:font);
             lines[i].position = {x:0, y:-LINE_SPACING*i};
             this.attach(entity:lines[i]);
         });
+
         
 
         this.interface = {
             updateLine::(index => Number, text => String) {
                 lines[index].line = text;
+                cursor = index;
             },
             LINE_SPACING : {
                 get ::<- LINE_SPACING
+            },
+
+            clear ::{
+                cursor = 0;
+                [0, RENDERER_HEIGHT]->for(do:::(i) {
+                    lines[i].line = '';
+                });
+            },
+
+            printch::(value => String) {
+                lines[cursor].line = lines[cursor].line + value;
+            },
+
+            'print'::(line => String) {
+                // delete last line in queue.
+                if (cursor >= RENDERER_HEIGHT) ::<= {
+                    [1, RENDERER_HEIGHT]->for(do:::(i) {
+                        lines[i-1].line = lines[i].line;
+                    });
+                };
+                lines[cursor].line = line;
+                cursor+=1;
             }
         };
 
@@ -85,4 +135,4 @@ Topaz.FontManager.registerFont(asset:font);
 
 
 
-return TextCanvas;
+return Terminal;
