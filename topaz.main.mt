@@ -1,6 +1,5 @@
 
 
-
 @:Topaz = import(module:'Topaz');
 @:Terminal = import(module:'topaz.terminal.mt');
 // if topaz is detected, setup its canvas and main loop
@@ -14,18 +13,18 @@ Topaz.defaultDisplay.root = term;
 @:shell = import(module:'topaz.shell.mt');
 import(module:'topaz.bootseq.mt')(
     terminal:term,
-    onBoot ::{
+    onBoot ::(arg){
         term.clear();
         shell.start(terminal:term);
-        shell.commands = {
-            'start' : start
-        };
+        shell.commands.start = start;
 
     }
 );
 
 
-@:start = ::{
+@:start = ::(arg){
+    term.clear();
+    term.print(line:'Starting program...');
     shell.disabled = true;
     @:canvas = import(module:'singleton.canvas.mt');
     @:instance = import(module:'singleton.instance.mt');
@@ -70,12 +69,12 @@ import(module:'topaz.bootseq.mt')(
 
 
     @lastInput;
-    canvas.onStep = ::{
+    term.onStep = ::{
         dialogue.commitInput(input:lastInput);
         if (canvasChanged) ::<= {
             @:lines = currentCanvas;
             lines->foreach(do:::(index, line) {
-                canvas.updateLine(index, text:line);
+                term.updateLine(index, text:line);
             }); 
             canvasChanged = false;    
         };        

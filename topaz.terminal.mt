@@ -20,6 +20,10 @@
 @:Topaz   = import(module:'Topaz');
 @:class   = import(module:'Matte.Core.Class');
 
+Topaz.defaultDisplay.setParameter(
+    parameter:Topaz.Display.PARAMETER.VIEW_POLICY,
+    value:Topaz.Display.VIEW_POLICY.NONE
+);
 
 // create font asset
 @:font = Topaz.Resources.createAsset(
@@ -67,7 +71,7 @@ if (ret != empty) ::<= {
                 @:textRenderer = Topaz.Text2D.new();
                 textRenderer.font = font;
                 textRenderer.size = FONT_SIZE; 
-                //textRenderer.color = Topaz.Color.parse(string:'white');
+                textRenderer.color = '#f19823';
 
                 this.components = [textRenderer];
                 this.interface = {
@@ -114,6 +118,21 @@ if (ret != empty) ::<= {
 
             printch::(value => String) {
                 lines[cursor].line = lines[cursor].line + value;
+            },
+
+            backspace::{
+                when (lines[cursor].line == '') empty;
+                when (lines[cursor].line->length == 1) lines[cursor].line = '';
+                lines[cursor].line = lines[cursor].line->substr(from:0, to:lines[cursor].line->length-2);
+            },
+
+            backline ::{
+                cursor -=1;
+                lines[cursor].line = '';
+            },
+
+            reprint ::(line) {
+                lines[cursor].line = line;
             },
 
             'print'::(line => String) {

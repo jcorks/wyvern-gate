@@ -23,11 +23,11 @@
     import(module:'topaz.main.mt');
 
 } : {
-    onError ::(message){
+    //onError ::(message){
          //continue on to terminal implementation
-    }
+    //}
 };
-//return empty;
+return empty;
 
 @:canvas = import(module:'singleton.canvas.mt');
 @:instance = import(module:'singleton.instance.mt');

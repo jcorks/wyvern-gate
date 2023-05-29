@@ -142,8 +142,8 @@ return class(
                 return max;
             };
 
-            @lineTop = '▴';
-            @lineBot = '▾';
+            @lineTop = '^';
+            @lineBot = 'v';
             [0, WIDTH+2]->for(do:::(i) {
                 lineTop = lineTop + ' ';            
                 lineBot = lineBot + ' ';            
@@ -182,7 +182,7 @@ return class(
 
                 [cursorPageTop, cursorPageTop+PAGE_SIZE]->for(do:::(index) {
                     
-                    choicesModified->push(value: (if (cursorPos == index) '▹  ' else '   ') + choices[index]);
+                    choicesModified->push(value: (if (cursorPos == index) '>  ' else '   ') + choices[index]);
                 });
 
 
@@ -193,7 +193,7 @@ return class(
 
             } else ::<= {
                 [0, choices->keycount]->for(do:::(index) {
-                    choicesModified->push(value: (if (cursorPos == index) '▹  ' else '   ') + choices[index]);
+                    choicesModified->push(value: (if (cursorPos == index) '>  ' else '   ') + choices[index]);
                 });
             };
             
@@ -350,7 +350,7 @@ return class(
             @width;
             @which;
             choices->foreach(do:::(index, choice) {
-                @entry = (if (columns[column]->keycount == y && column == x)'▹ ' else '  ') + choice;
+                @entry = (if (columns[column]->keycount == y && column == x)'> ' else '  ') + choice;
                 if (columns[column]->keycount == y && column == x) which = index;
                 
                 columns[column]->push(value:entry);
