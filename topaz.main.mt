@@ -16,16 +16,24 @@ import(module:'topaz.bootseq.mt')(
     onBoot ::(arg){
         term.clear();
         shell.start(terminal:term);
-        shell.commands.start = start;
-
+        shell.commands.start = ::(arg) {
+            shell.disabled = true;
+            term.clear();
+            term.print(line:'Starting program...');
+            @delayed = Topaz.Entity.new();
+            @counter = 10;
+            delayed.onStep = ::{
+                when(counter > 0) counter-=1;
+                start();
+                delayed.remove();
+            };
+            term.attach(entity:delayed);
+        };
     }
 );
 
 
-@:start = ::(arg){
-    term.clear();
-    term.print(line:'Starting program...');
-    shell.disabled = true;
+@:start = :: {
     @:canvas = import(module:'singleton.canvas.mt');
     @:instance = import(module:'singleton.instance.mt');
     @:dialogue = import(module:'singleton.dialogue.mt');

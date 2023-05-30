@@ -34,12 +34,13 @@ return ::(terminal, name, onQuit) {
             terminal.print(line:'Viewing "' + name + '"');
             terminal.print(line:'____________________________________________________________________');
 
-            [0, 21]->for(do:::(i) {
+            [0, terminal.HEIGHT - 5]->for(do:::(i) {
                 terminal.print(line:
                     ''+(viewLine+i+1) + 
                         (if (viewLine+i < 9) '  | ' else ' | ') + 
                     (if (i+viewLine >= lines->keycount) '' else ::<={
                             @line = lines[i+viewLine];
+                            when(line == empty) '';
                             when(viewPos >= line->length) '';
                             return line->substr(from:viewPos, to:line->length-1);
                     })
@@ -102,8 +103,7 @@ return ::(terminal, name, onQuit) {
         onError::(message) {
             if (listener != empty)
                 Topaz.Input.removeListener(id:listener);
-            terminal.print(line:'An error occurred: ' + message.summary);
-            onQuit();
+            onQuit(message:'An error occurred: ' + message.summary);
         }
     };
 

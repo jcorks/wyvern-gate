@@ -8,7 +8,7 @@
 
 @:printPrompt ::{
     @:path = location->reduce(to:::(value, previous) <- if (previous == empty) '/'+value else previous+value);
-    @:line = '['+path+'] > ' + currentCommand + '▓';
+    @:line = ':: > ' + currentCommand + '▓';
     term.reprint(line);
 };
 
@@ -17,18 +17,54 @@
         help ::(arg){
             term.print(line:'tOS shell commands:');
             term.print(line:' start       runs the preset default program');
+            term.print(line:' clear       clears all terminal lines');
             term.print(line:' help        brings you here');
-            term.print(line:' ls          lists files in the current directory');
+            term.print(line:' ls [filter] lists files in the current directory');
             term.print(line:' view [file] opens a file for viewing');
             term.print(line:' edit [file] opens a file for editing');
             term.print(line:' shutdown    powers off the machine');
         },
 
+        clear ::(arg) {
+            term.clear();
+            printPrompt();
+        },
+
         view ::(arg) {
             @:view = import(module:'topaz.view.mt');
             Shell.disabled = true;
-            view(terminal:term, name:arg, onQuit::{
+            view(terminal:term, name:arg, onQuit::(message){
                 term.clear();
+                if (message != empty) ::<={
+                    message->split(token:'\n')->foreach(do:::(i, line) {
+                        term.print(line);
+                    });
+                };
+                printPrompt();
+                Shell.disabled = false;
+            });
+        },
+
+        edit ::(arg) {
+            @:edit = import(module:'topaz.edit.mt');
+            Shell.disabled = true;
+            edit(terminal:term, name:arg, onQuit::(message){
+                term.clear();
+                if (message != empty) ::<={
+                    message->split(token:'\n')->foreach(do:::(i, line) {
+                        term.print(line);
+                    });
+                };
+                printPrompt();
+                Shell.disabled = false;
+            });
+        },
+
+
+        ls ::(arg) {
+            @:ls = import(module:'topaz.ls.mt');
+            Shell.disabled = true;
+            ls(terminal:term, filter:arg, onDone ::{
                 printPrompt();
                 Shell.disabled = false;
             });

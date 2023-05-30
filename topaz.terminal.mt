@@ -54,7 +54,7 @@ if (ret != empty) ::<= {
 
 
 @:RENDERER_WIDTH = 80;
-@:RENDERER_HEIGHT = 25;
+@:RENDERER_HEIGHT = 32;
 @:LINE_SPACING = 15;
 @:FONT_SIZE = 15;
 
@@ -71,7 +71,6 @@ if (ret != empty) ::<= {
                 @:textRenderer = Topaz.Text2D.new();
                 textRenderer.font = font;
                 textRenderer.size = FONT_SIZE; 
-                textRenderer.color = '#f19823';
 
                 this.components = [textRenderer];
                 this.interface = {
@@ -117,10 +116,12 @@ if (ret != empty) ::<= {
             },
 
             printch::(value => String) {
+                if (cursor == RENDERER_HEIGHT) cursor -=1;
                 lines[cursor].line = lines[cursor].line + value;
             },
 
             backspace::{
+                if (cursor == RENDERER_HEIGHT) cursor -=1;
                 when (lines[cursor].line == '') empty;
                 when (lines[cursor].line->length == 1) lines[cursor].line = '';
                 lines[cursor].line = lines[cursor].line->substr(from:0, to:lines[cursor].line->length-2);
@@ -128,11 +129,21 @@ if (ret != empty) ::<= {
 
             backline ::{
                 cursor -=1;
+                if (cursor < 0) cursor = 0;
                 lines[cursor].line = '';
             },
 
             reprint ::(line) {
+                if (cursor == RENDERER_HEIGHT) cursor -=1;
                 lines[cursor].line = line;
+            },
+
+            HEIGHT : {
+                get ::<- RENDERER_HEIGHT
+            },
+
+            WIDTH : {
+                get ::<- RENDERER_WIDTH
             },
 
             'print'::(line => String) {
@@ -141,6 +152,7 @@ if (ret != empty) ::<= {
                     [1, RENDERER_HEIGHT]->for(do:::(i) {
                         lines[i-1].line = lines[i].line;
                     });
+                    cursor = RENDERER_HEIGHT-1;
                 };
                 lines[cursor].line = line;
                 cursor+=1;

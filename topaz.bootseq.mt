@@ -10,7 +10,7 @@ return ::(terminal, onBoot => Function) {
     @:messages = [
         'Checking storage media...',
         '  - /dev/flbmp01...OK (boot? yes)',
-        '  - /dev/flbmp02...OK (bbot? no)',
+        '  - /dev/flbmp02...OK (boot? no)',
         'Checking HIDs',
         '  - /dev/sound01...' + if (Number.random() < 0.5) 'Failed to load driver, ignoring.' else 'Hardware error.',
         '  - /dev/kbd01...OK',
