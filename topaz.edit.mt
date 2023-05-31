@@ -18,8 +18,9 @@ return ::(terminal, name, onQuit) {
         if (item == empty)
             item = Topaz.Resources.fetchAsset(name:name);
 
-        when(item == empty)
-            error(detail:'No such item to view.');
+        if (item == empty) ::<= {
+            item = Topaz.Resources.createAsset(name);
+        };
 
 
         @:data = item.string;
@@ -31,11 +32,21 @@ return ::(terminal, name, onQuit) {
         @viewLine = 0;
         @viewPos = 0;
 
+        @lastStatus = empty;
+        @lastStatusCounter = 0;
         @:renderTerminal = ::{
             terminal.clear();
-            terminal.print(line:'Editing "' + name + '"');
+            if (lastStatus == empty)
+                terminal.print(line:'Editing "' + name + '"')
+            else ::<= {
+                terminal.print(line:'[Update] ' + lastStatus);
+                lastStatusCounter -= 1;
+                if (lastStatusCounter == 0) ::<= {
+                    lastStatus = empty;
+                };
+            };
             terminal.print(line:'____________________________________________________________________');
-
+            
             [0, VIEWSPACE_HEIGHT]->for(do:::(i) {
                 @lineNumber = ''+(if (i+viewLine == cursorLine) '   ->' else (viewLine+i+1));
                 lineNumber = lineNumber + (
@@ -69,7 +80,7 @@ return ::(terminal, name, onQuit) {
             });
 
             terminal.print(line:'____________________________________________________________________');
-            terminal.print(line:'Ctrl+x to quit');
+            terminal.print(line:'Ctrl+x to quit, Ctrl+s to save');
 
         };
 
@@ -146,13 +157,13 @@ return ::(terminal, name, onQuit) {
             onNewUnicode::(unicode) {
                 @:ch = ' '->setCharCodeAt(index:0, value:unicode);
                 when(cursorPos == 0) ::<= {
-                    lines[cursorLine] = ch + getCurrentLine();
+                    lines[cursorLine] = getCurrentLine() + ch;
                     moveCursorRight();
                     renderTerminal();
                 };
 
                 when(cursorPos == getCurrentLine()->length) ::<= {
-                    lines[cursorLine] = ch + getCurrentLine();
+                    lines[cursorLine] = getCurrentLine() + ch;
                     moveCursorRight();
                     renderTerminal();
                 };
@@ -182,49 +193,48 @@ return ::(terminal, name, onQuit) {
                         if (controlHeld > 0) ::<= {
                             Topaz.Input.removeListener(id:listener);
                             Topaz.Input.removeUnicodeListener(id:typing);
+
                             onQuit();            
                         };
                     },
+
+                    (Topaz.Input.KEY.S):::<= {
+                        if (controlHeld > 0) ::<= {
+                            lastStatus = "Saved " + name;
+                            lastStatusCounter = 10;
+                            Topaz.Resources.writeAsset(asset:item, extension:'', path:name);
+                            renderTerminal();
+                        };
+                    },
+
+
 
                     (Topaz.Input.KEY.ENTER):::<= {
                         when (value < 1) empty;
                         // line merges into previous
                         when(cursorPos == 0) ::<= {
-                            lines->insert(index:cursorPos, value:'');
-                            when(cursorLine == 0) empty;
-                            @:oldPos = lines[cursorLine-1]->length;
-                            lines[cursorLine-1] = lines[cursorLine-1] + getCurrentLine();
-                            lines->remove(key:cursorLine);
-                            moveCursorLeft(); // prev line;
+                            lines->insert(at:cursorLine, value:'');
+                            cursorLine += 1;
                             cursorPos = 0;
+                            checkCursorInBounds();
                             renderTerminal();
                         };
 
-                        // trim end
                         when(cursorPos == getCurrentLine()->length) ::<= {
-                            when(getCurrentLine()->length == 1) ::<= {
-                                lines[cursorLine] = '';
-                                moveCursorLeft();
-                                renderTerminal();
-                            };
-                            lines[cursorLine] = getCurrentLine()->substr(from:0, to:getCurrentLine()->length-2);
-                            moveCursorLeft();
+                            lines->insert(at:cursorLine+1, value:'');
+                            cursorLine += 1;
+                            cursorPos = 0;
+                            checkCursorInBounds();
                             renderTerminal();
-                        };
-
-
-                        when(cursorPos == 1) ::<= {
-                            lines[cursorLine] = getCurrentLine()->substr(from:1, to:getCurrentLine()->length-1);
-                            moveCursorLeft();
-                            renderTerminal();  
                         };
 
                         // normal case
-                        lines[cursorLine] = 
-                            getCurrentLine()->substr(from:0, to:cursorPos-2) +
-                            getCurrentLine()->substr(from:cursorPos, to:getCurrentLine()->length-1); 
-                        ;
-                        moveCursorLeft();
+                        @:str = getCurrentLine();
+                        lines[cursorLine] = str->substr(from:cursorPos, to:str->length-1);
+                        lines->insert(at:cursorLine, value:str->substr(from:0, to:cursorPos-1));
+                        cursorLine += 1;
+                        cursorPos = 0;
+                        checkCursorInBounds();
                         renderTerminal();                          
                     },
 
