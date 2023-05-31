@@ -72,6 +72,7 @@ return class(
         @drawLegend = false;
         @paged = true;
         @outOfBoundsCharacter = '▓';
+        @wallCharacter = '▓';
         
         @:aStarIndex = [];
         @obscured = []; 
@@ -377,7 +378,7 @@ return class(
                     
                     when(isWalled(x:itemX, y:itemY)) ::<= {
                         canvas.movePen(x:left + x, y:top + y);  
-                        canvas.drawChar(text:'▓');
+                        canvas.drawChar(text:wallCharacter);
                     };
                     
                     @:items = this.itemsAt(x:itemX, y:itemY);
@@ -508,7 +509,7 @@ return class(
 
                     when(isWalled(x:itemX, y:itemY)) ::<= {
                         canvas.movePen(x:left + x, y:top + y);  
-                        canvas.drawChar(text:'▓');
+                        canvas.drawChar(text:wallCharacter);
                     };
                     @:items = this.itemsAt(x:itemX, y:itemY);
                     when(items != empty && items->keycount > 0) ::<= {
@@ -637,6 +638,12 @@ return class(
                     });
                 });
                             
+            },
+            
+            clearItems::(x, y) {
+                @itemY = itemIndex[x];
+                when(itemY == empty) empty;
+                itemY[y] = empty;
             },
                 
             removeItem::(
@@ -773,6 +780,11 @@ return class(
             outOfBoundsCharacter : {
                 get::<- outOfBoundsCharacter,
                 set::(value) <- outOfBoundsCharacter = value
+            },
+
+            wallCharacter : {
+                get::<- wallCharacter,
+                set::(value) <- wallCharacter = value
             },
             
             movePointerAdjacent::(

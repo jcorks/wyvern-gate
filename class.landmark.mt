@@ -57,15 +57,57 @@
         
         
         
-        @:getLocationXY ::{
-            @ar = map.getRandomArea();
-            return {
-                x: (ar.x + ar.width/2)->floor,
-                y: (ar.y + ar.height/2)->floor
+        @:getLocationXY ::<= {
+            @:tryMap = [
+                [0, 0],
+                [-1, 0],
+                [-1, -1],
+                [0, -1],
+                [1, -1],
+                [1, 0],
+                [1, 1],
+                [0, 1],
+                [-1, 1],
+                [-2, 1],
+                [-2, 0],
+                [-2, -1],
+                [-2, -2],
+                [-1, -2],
+                [0, -2],
+                [1, -2],
+                [2, -2],
+                [2, -1],
+                [2, 0],
+                [2, 1],
+                [2, 2]
+            ];
+            
+            
+            @:tryArea = ::(ar, offset) {
+                @area = {
+                    x: (ar.x + ar.width/2 + offset[0]*2)->floor,
+                    y: (ar.y + ar.height/2 + offset[1]*2)->floor
+                };                
+                
+                @:already = map.itemsAt(x:area.x, y:area.y);
+                when(already != empty && already->keycount) empty;
+                return area;
             };
-
-        };  
         
+        
+            return ::{
+                @ar = map.getRandomArea();
+                
+                return [::] {
+                    @iter = 0;
+                    forever(do::{
+                        @:try = tryArea(ar, offset:tryMap[iter]);
+                        when(try != empty) send(message:try);
+                        iter += 1;
+                    });
+                };
+            }; 
+        };
         
         
         
@@ -81,10 +123,10 @@
             };
 
             if (base.dungeonMap) ::<= {
-                map = DungeonMap.new();
+                map = DungeonMap.new(mapHint: base.mapHint);
                 dungeonLogic = DungeonController.new(map, island, landmark:this);
             } else ::<= {
-                map = Map.new();
+                map = Map.new(mapHint: base.mapHint);
             };
 
             sizeW = map.width;
@@ -356,7 +398,8 @@ Landmark.Base = class(
                 possibleLocations : Object,
                 requiredLocations : Object,
                 peaceful: Boolean,
-                dungeonMap: Boolean
+                dungeonMap: Boolean,
+                mapHint : Object
 
             }
         );
@@ -396,7 +439,15 @@ Landmark.Base.database = Database.new(
                     'shop',
                     'School',
                     'Inn',
-                ]
+                ],
+                mapHint : {
+                    roomSize: 30,
+                    roomAreaSize: 7,
+                    roomAreaSizeLarge: 9,
+                    emptyAreaCount: 6,
+                    scatterChar: 'Y',
+                    scatterRate: 0.3
+                }
             }
         ),
 
@@ -424,7 +475,14 @@ Landmark.Base.database = Database.new(
                     'Inn',
                     'School',
                     'Blacksmith'            
-                ]
+                ],
+                mapHint : {
+                    roomSize: 30,
+                    roomAreaSize: 5,
+                    roomAreaSizeLarge: 7,
+                    emptyAreaCount: 18
+                }
+                
             }
         ),
 
@@ -449,7 +507,14 @@ Landmark.Base.database = Database.new(
                 requiredLocations : [
                     'ore vein',
                     'smelter',
-                ]
+                ],
+                mapHint : {
+                    roomSize: 15,
+                    roomAreaSize: 5,
+                    roomAreaSizeLarge: 10,
+                    emptyAreaCount: 5
+                }
+                
             }
         ),
 
@@ -469,7 +534,16 @@ Landmark.Base.database = Database.new(
                 ],
                 requiredLocations : [
                     'Gate'
-                ]
+                ],
+                
+                mapHint : {
+                    roomSize: 25,
+                    wallCharacter: 'Y',
+                    roomAreaSize: 5,
+                    roomAreaSizeLarge: 7,
+                    emptyAreaCount: 30
+                }
+                
             }
         ),
 
@@ -487,7 +561,8 @@ Landmark.Base.database = Database.new(
                 ],
                 requiredLocations : [
                     'Stairs Up',
-                ]
+                ],
+                mapHint: {}
             }
         ),
 
@@ -511,7 +586,8 @@ Landmark.Base.database = Database.new(
                 requiredLocations : [
                     'Stairs Down',
                     'Small Chest'
-                ]
+                ],
+                mapHint:{}
             }
         ),
 
@@ -530,7 +606,15 @@ Landmark.Base.database = Database.new(
                 ],
                 requiredLocations : [
                     'Large Chest',
-                ]
+                ],
+                
+                mapHint : {
+                    roomSize: 10,
+                    roomAreaSize: 5,
+                    roomAreaSizeLarge: 7,
+                    emptyAreaCount: 2
+                }
+                
             }
         ),
 
@@ -553,7 +637,14 @@ Landmark.Base.database = Database.new(
                 requiredLocations : [
                     'Tavern'
                     //'shipyard'
-                ]
+                ],
+                mapHint : {
+                    roomSize: 25,
+                    roomAreaSize: 5,
+                    roomAreaSizeLarge: 14,
+                    emptyAreaCount: 7
+                }
+                
             }
         ),
 
@@ -573,7 +664,13 @@ Landmark.Base.database = Database.new(
                     {name:'shop', rarity:7},
                     {name:'farm', rarity:4}
                 ],
-                requiredLocations : []
+                requiredLocations : [],
+                mapHint : {
+                    roomSize: 25,
+                    roomAreaSize: 7,
+                    roomAreaSizeLarge: 14,
+                    emptyAreaCount: 4
+                }            
             }
         ),
 
@@ -592,7 +689,14 @@ Landmark.Base.database = Database.new(
                     {name:'Tavern', rarity:7},
                     {name:'farm', rarity:4}
                 ],
-                requiredLocations : []
+                requiredLocations : [],
+                mapHint : {
+                    roomSize: 25,
+                    wallCharacter: ',',
+                    roomAreaSize: 7,
+                    roomAreaSizeLarge: 14,
+                    emptyAreaCount: 4
+                }
             }
         ),
 
@@ -621,7 +725,9 @@ Landmark.Base.database = Database.new(
                 minLocations : 0,
                 maxLocations : 0,
                 possibleLocations : [],
-                requiredLocations : []
+                requiredLocations : [],
+                mapHint: {}
+                
             }
         ),
 
@@ -636,7 +742,9 @@ Landmark.Base.database = Database.new(
                 minLocations : 0,
                 maxLocations : 0,
                 possibleLocations : [],
-                requiredLocations : []
+                requiredLocations : [],
+                mapHint: {}
+                
             }
         ),
 
@@ -652,7 +760,9 @@ Landmark.Base.database = Database.new(
                 minLocations : 0,
                 maxLocations : 0,
                 possibleLocations : [],
-                requiredLocations : []
+                requiredLocations : [],
+                mapHint: {}
+                
             }
         ),
         Landmark.Base.new(
@@ -666,7 +776,8 @@ Landmark.Base.database = Database.new(
                 minLocations : 0,
                 maxLocations : 0,
                 possibleLocations : [],
-                requiredLocations : []
+                requiredLocations : [],
+                mapHint: {}                
             }
         ),
 

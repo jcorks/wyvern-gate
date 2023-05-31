@@ -7,7 +7,7 @@ return ::(terminal, name, onQuit) {
         @cursorCharacter = '▓';
         @:VIEWSPACE_HEIGHT = terminal.HEIGHT - 5;
         @:VIEWSPACE_WIDTH  = terminal.WIDTH - 8; // 8 is for the header
-        @lines = [];
+        @lines = [''];
 
         @:nameFiltered = name->replace(keys:['/', '\\', '..'], with: '');
         @item = Topaz.Resources.createAsset(
@@ -20,11 +20,12 @@ return ::(terminal, name, onQuit) {
 
         if (item == empty) ::<= {
             item = Topaz.Resources.createAsset(name);
+        } else ::<= {
+            @:data = item.string;
+            lines = data->split(token:'\n');        
         };
 
 
-        @:data = item.string;
-        lines = data->split(token:'\n');
 
         @cursorLine = 0;
         @cursorPos = 0;
@@ -202,6 +203,7 @@ return ::(terminal, name, onQuit) {
                         if (controlHeld > 0) ::<= {
                             lastStatus = "Saved " + name;
                             lastStatusCounter = 10;
+                            item.string = lines->reduce(to:::(previous, value) <- if (previous == empty) value else (previous + '\n' + value)); 
                             Topaz.Resources.writeAsset(asset:item, extension:'', path:name);
                             renderTerminal();
                         };

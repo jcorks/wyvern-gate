@@ -78,7 +78,8 @@ Interaction.database = Database.new(
                     };
 
                     // jumps to the prev menu lock
-                    send();                
+                    dialogue.forceExit();
+                    dialogue.forceExit();
                 }
             }
         ),

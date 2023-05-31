@@ -69,12 +69,14 @@ return class(
         @:areas = [];
         @cavities = [];
         
-        @:ROOM_AREA_SIZE = 5;
-        @:ROOM_AREA_SIZE_LARGE = 6;
-        @:ROOM_AREA_VARIANCE = 0.2;
-        @:ROOM_SIZE = 30;
-        @:ROOM_EMPTY_AREA_COUNT = 35;
-
+        // defaults. They can be overridden by the constructor
+        @ROOM_AREA_SIZE = 5;
+        @ROOM_AREA_SIZE_LARGE = 6;
+        @ROOM_AREA_VARIANCE = 0.2;
+        @ROOM_SIZE = 30;
+        @ROOM_EMPTY_AREA_COUNT = 35;
+        @ROOM_SCATTER_CHAR = ',';
+        @ROOM_SCATTER_RATE = 0.3;
         
         
 
@@ -174,12 +176,14 @@ return class(
                 [area.x+1, area.x + area.width]->for(do:::(x) {
                     [area.y+1, area.y + area.height]->for(do:::(y) {
                         this.removeWall(x, y);
+                        this.clearItems(x, y);
                     });
                 });
             });
             
             cavities->foreach(do:::(i, cav) {
                 this.removeWall(x:cav.x, y:cav.y);
+                this.clearItems(x:cav.x, y:cav.y);
             });            
             cavities = [];
         };
@@ -238,12 +242,14 @@ return class(
         };
     
         @:generateLayout :: {
-            /*[0, 200]->for(do:::(i) {
-                addWall(
-                    x: (ROOM_SIZE * Number.random())->floor,
-                    y: (ROOM_SIZE * Number.random())->floor
-                );
-            });*/
+            [0, ROOM_SIZE]->for(do:::(y) {
+                [0, ROOM_SIZE]->for(do:::(x) {
+                    if (Number.random() < ROOM_SCATTER_RATE)
+                        this.setItem(
+                            x, y, symbol: ROOM_SCATTER_CHAR, discovered:true
+                        );
+                });
+            });
                     
         
             
@@ -263,13 +269,23 @@ return class(
 
 
 
-        this.constructor = :: {
+        this.constructor = ::(mapHint => Object) {
             
             this.paged = false;
-            this.width = ROOM_SIZE;
-            this.height = ROOM_SIZE;
-            this.renderOutOfBounds = true;
-            this.outOfBoundsCharacter = ' ';
+            this.width = if (mapHint.roomSize == empty) ROOM_SIZE else mapHint.roomSize;
+            this.height = if (mapHint.roomSize == empty) ROOM_SIZE else mapHint.roomSize;
+            this.renderOutOfBounds = if (mapHint.renderOutOfBounds == empty) true else mapHint.renderOutOfBounds;
+            this.outOfBoundsCharacter = if (mapHint.outOfBoundsCharacter == empty) ' ' else mapHint.outOfBoundsCharacter;
+            this.wallCharacter = if (mapHint.wallCharacter == empty) '▓' else mapHint.wallCharacter;
+            
+            if (mapHint.roomAreaSize != empty) ROOM_AREA_SIZE = mapHint.roomAreaSize;
+            if (mapHint.roomAreaSizeLarge != empty) ROOM_AREA_SIZE_LARGE = mapHint.roomAreaSizeLarge;
+            if (mapHint.roomAreaVariance != empty) ROOM_AREA_VARIANCE = mapHint.roomAreaVariance;
+            if (mapHint.roomSize != empty) ROOM_SIZE = mapHint.roomSize;
+            if (mapHint.emptyAreaCount != empty) ROOM_EMPTY_AREA_COUNT = mapHint.emptyAreaCount;
+            if (mapHint.scatterChar != empty) ROOM_SCATTER_CHAR = mapHint.scatterChar;
+            if (mapHint.scatterRate != empty) ROOM_SCATTER_RATE = mapHint.scatterRate;
+            
             generateLayout();
             return this;
         };   

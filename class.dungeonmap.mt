@@ -263,7 +263,7 @@ return class(
 
 
 
-        this.constructor = :: {
+        this.constructor = ::(mapHint => Object) {
             
             this.paged = false;
             this.width = ROOM_SIZE;
