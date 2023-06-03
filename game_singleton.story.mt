@@ -15,6 +15,26 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-//@:Entity = import(module:'class.entity.mt');
-//@:Random = import(module:'singleton.random.mt');
-import(module:'sys_main.mt');
+@:struct = import(module:'game_struct.mt');
+
+
+return struct(
+    name: 'Wyvern.StoryFlags',
+    
+    items : {
+        // whether the shopkeep will give you the comment about strata
+        foundFirstKey : Boolean,
+        
+        
+        
+        // Number of discovered locations
+        data_locationsDiscovered : Number,
+        
+        data_locationsNeeded : Number
+    }
+).new(state: {
+    foundFirstKey : false,
+    
+    data_locationsDiscovered : 0,
+    data_locationsNeeded : 25
+});

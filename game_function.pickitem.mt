@@ -15,6 +15,28 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-//@:Entity = import(module:'class.entity.mt');
-//@:Random = import(module:'singleton.random.mt');
-import(module:'sys_main.mt');
+@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:Inventory = import(module:'game_class.inventory.mt');
+
+
+
+return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function) {
+    dialogue.choices(
+        leftWeight: 1,
+        topWeight: 1,
+        prompt: 'Choose an item:',
+        canCancel: true,
+        onGetChoices ::{
+            @:names = [...inventory.items]->map(to:::(value) {return value.name;});
+            when(names->keycount == 0) ::<={
+                dialogue.message(text: "The inventory is empty.");
+            };
+            return names;
+        },
+        keep:true,
+        onChoice ::(choice) {
+            when(choice == 0) onPick();
+            onPick(item:inventory.items[choice-1]);
+        }
+    );
+};

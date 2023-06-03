@@ -15,6 +15,17 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-//@:Entity = import(module:'class.entity.mt');
-//@:Random = import(module:'singleton.random.mt');
-import(module:'sys_main.mt');
+@:struct = import(module:'game_struct.mt');
+@:Ability = import(module:'game_class.ability.mt');
+
+
+return struct(
+    name: 'Wyvern.Battle.Action',
+    
+    items : {
+        ability: Ability.type,
+        targets: Object,
+        turnIndex: Number,
+        extraData: Object
+    }
+);  
