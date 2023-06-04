@@ -47,7 +47,7 @@
         out->push(value:{
             x: 0,
             y: Number.random() * height,
-            symbol: '▓'
+            symbol: ' '
         });
     });
 
@@ -55,7 +55,7 @@
         out->push(value:{
             x: width,
             y: Number.random() * height,
-            symbol: '▓'
+            symbol: ' '
         });
     });
 
@@ -63,7 +63,7 @@
         out->push(value:{
             x: Number.random()*width,
             y: 0,
-            symbol: '▓'
+            symbol: ' '
         });
     });
 
@@ -71,7 +71,7 @@
         out->push(value:{
             x: Number.random()*width,
             y: height,
-            symbol: '▓'
+            symbol: ' '
         });
     });
 
@@ -115,14 +115,14 @@ return class(
             
             this.width = sizeW;
             this.height = sizeH;
-            this.offsetX = 20;
-            this.offsetY = 20;
+            this.offsetX = 100;
+            this.offsetY = 100;
             this.paged = true;
             this.drawLegend = true;
             
             generateTerrain(width:this.width, height:this.height)->foreach(do::(index, value) {
-                when(value.x < 0 || value.x > this.width || value.y < 0 || value.y > this.height)
-                    empty;
+                //when(value.x < 0 || value.x > this.width || value.y < 0 || value.y > this.height)
+                    //empty;
                 this.setItem(
                     x:value.x,
                     y:value.y,

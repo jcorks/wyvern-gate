@@ -34,7 +34,7 @@
     return (xd**2 + yd**2)**0.5;
 };
 @:JSON = import(module:'Matte.Core.JSON');
-@:VERSION = '0.1.2a';
+@:VERSION = '0.1.3a';
 @world = import(module:'game_singleton.world.mt');
 
 return class(
@@ -705,4 +705,4 @@ return class(
             }
         };
     }
-).new();
+).new(); 

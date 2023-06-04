@@ -900,7 +900,7 @@
             },
             
             // interacts with this entity
-            interactPerson ::(party, location) {
+            interactPerson ::(party, location, onNext) {
                 dialogue.message(
                     speaker: name,
                     text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.GREET])
@@ -908,6 +908,7 @@
                 dialogue.choices(
                     canCancel : true,
                     prompt: 'Talking to ' + name,
+                    onNext: onNext,
                     choices: [
                         'chat',
                         'hire',
@@ -950,23 +951,23 @@
 
                             this.describe();
 
-                            when(dialogue.askBoolean(
-                                prompt: 'Hire for ' + cost + 'G?'
-                            ) == false) empty;
-                            
-                            when(party.inventory.gold < cost)
-                                dialogue.message(
-                                    text: 'The party cannot afford to hire ' + name
-                                );                
-                                
-                            party.inventory.subtractGold(amount:cost);
-                            party.add(member:this);
-                                dialogue.message(
-                                    text: name + ' joins the party!'
-                                );                
-                            
+                            dialogue.askBoolean(
+                                prompt: 'Hire for ' + cost + 'G?',
+                                onChoice::(which) {
+                                    when(which == false) empty;
+                                    when(party.inventory.gold < cost)
+                                        dialogue.message(
+                                            text: 'The party cannot afford to hire ' + name
+                                        );                
+                                        
+                                    party.inventory.subtractGold(amount:cost);
+                                    party.add(member:this);
+                                        dialogue.message(
+                                            text: name + ' joins the party!'
+                                        );                
 
-                            
+                                }
+                            );
                           }
                         
                         };                    

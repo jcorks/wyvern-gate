@@ -405,59 +405,69 @@ Event.Base.database = Database.new(
                 name : 'Chest:Normal',
                 rarity: 1, //5        
                 onEventStart ::(event) {
+                    @:openChest = ::(opener){
+
+                        dialogue.message(text:'The party opens the chest...'); 
+                        @:Damage = import(module:'game_class.damage.mt');
+                        
+                        when(Number.random() < 0.5) ::<= {
+                            dialogue.message(text:'A trap is triggered, and a volley of arrows springs form the chest!'); 
+                            if (Number.random() < 0.5) ::<= {
+                                dialogue.message(text:opener.name + ' narrowly dodges the trap.');                         
+                            } else ::<= {
+                                opener.damage(
+                                    from: opener,
+                                    damage: Damage.new(
+                                        amount:opener.stats.HP * (0.7),
+                                        damageType : Damage.TYPE.PHYS,
+                                        damageClass: Damage.CLASS.HP
+                                    )
+                                );
+                            };
+                        }; 
+                        
+                        
+                        @:itemCount = (2+Number.random()*3)->floor;
+                        
+                        dialogue.message(text:'The chest contained ' + itemCount + ' items!'); 
+                        [0, itemCount]->for(do:::(index) {
+                            @:item = Item.Base.database.getRandom().new(from:opener);
+                            @message = 'The party found a(n) ';
+                            message = message + item.name;
+                            dialogue.message(text: message);
+
+                            when(party.inventory.isFull) ::<= {
+                                dialogue.message(text: '...but the party\'s inventory was full.');
+                            };
+
+                            party.inventory.add(item);
+                            
+                        });    
+
+                    };
+
+
+                    
                     @:party = event.party;
                     dialogue.message(text:'What\'s this?');
                     dialogue.message(text:'The party trips over a hidden chest!');
-                    when(dialogue.askBoolean(
-                        prompt: 'Open the chest?'
-                    ) == false) 0;
-                    
-                    
-                    @:opener = party.members[dialogue.choicesNow(
-                        prompt: 'Who opens up the chest?',
-                        choices : [...party.members]->map(to:::(value) <- value.name)
-                    )-1];
-                    
-                    
-                    dialogue.message(text:'The party opens the chest...'); 
-                    @:Damage = import(module:'game_class.damage.mt');
-                    
-                    when(Number.random() < 0.5) ::<= {
-                        dialogue.message(text:'A trap is triggered, and a volley of arrows springs form the chest!'); 
-                        if (Number.random() < 0.5) ::<= {
-                            dialogue.message(text:opener.name + ' narrowly dodges the trap.');                         
-                        } else ::<= {
-                            opener.damage(
-                                from: opener,
-                                damage: Damage.new(
-                                    amount:opener.stats.HP * (0.7),
-                                    damageType : Damage.TYPE.PHYS,
-                                    damageClass: Damage.CLASS.HP
-                                )
+                    dialogue.askBoolean(
+                        prompt: 'Open the chest?',
+                        onChoice ::(which) {
+                            when(which == false) empty;
+                                                
+                            dialogue.choices(
+                                prompt: 'Who opens up the chest?',
+                                choices : [...party.members]->map(to:::(value) <- value.name),
+                                canCancel: false,
+                                onChoice::(choice) {
+                                    openChest(opener:party.members[choice-1]);
+                                }
                             );
-                        };
-                        return 0;
-                    }; 
-                    
-                    
-                    @:itemCount = (2+Number.random()*3)->floor;
-                    
-                    dialogue.message(text:'The chest contained ' + itemCount + ' items!'); 
-                    [0, itemCount]->for(do:::(index) {
-                        @:item = Item.Base.database.getRandom().new(from:opener);
-                        @message = 'The party found a(n) ';
-                        message = message + item.name;
-                        dialogue.message(text: message);
+                        }
+                    );
+                    return 0;
 
-                        when(party.inventory.isFull) ::<= {
-                            dialogue.message(text: '...but the party\'s inventory was full.');
-                        };
-
-                        party.inventory.add(item);
-                        
-                    });    
-                
-                    return 0; // number of timesteps active
                 },
                 
                 onEventUpdate ::(event) {
@@ -482,59 +492,61 @@ Event.Base.database = Database.new(
                     dialogue.message(text:'They are by a fire enjoying a meal.');
                     dialogue.message(speaker: '???', text:'"Care to join me? There\'s plenty to share!"');
 
-                    when(dialogue.askBoolean(
-                        prompt:'Sit by the fire?'
-                    ) == false) ::<= {
-                        dialogue.message(speaker:'???', text:'"Ah, I understand. Stay safe out there!"');
-                        return 0;
-                    };
+                    dialogue.askBoolean(
+                        prompt:'Sit by the fire?',
+                        onChoice::(which) {
+                            when(which == false)
+                                dialogue.message(speaker:'???', text:'"Ah, I understand. Stay safe out there!"');
 
-                    dialogue.message(text:'The party is given some food.');
+                            dialogue.message(text:'The party is given some food.');
 
-                    @StatSet = import(module:'game_class.statset.mt');
-                    if (Number.random() < 0.8) ::<= {
-                        dialogue.message(text:'The food is delicious.');
-                        event.party.members->foreach(do:::(index, member) {
-                            @oldStats = StatSet.new();
-                            oldStats.state = member.stats.state;
-                            member.stats.add(stats:StatSet.new(HP:(oldStats.HP*0.1)->ceil, AP:(oldStats.AP*0.1)->ceil));
-                            oldStats.printDiff(other:member.stats, prompt:member.name + ': Mmmm...');
+                            @StatSet = import(module:'game_class.statset.mt');
+                            if (Number.random() < 0.8) ::<= {
+                                dialogue.message(text:'The food is delicious.');
+                                event.party.members->foreach(do:::(index, member) {
+                                    @oldStats = StatSet.new();
+                                    oldStats.state = member.stats.state;
+                                    member.stats.add(stats:StatSet.new(HP:(oldStats.HP*0.1)->ceil, AP:(oldStats.AP*0.1)->ceil));
+                                    oldStats.printDiff(other:member.stats, prompt:member.name + ': Mmmm...');
 
-                            member.heal(amount:member.stats.HP * 0.1);
-                            member.healAP(amount:member.stats.AP * 0.1);
-                        });
-                        
-                    } else ::<= {
-                        dialogue.message(text:'The food tastes terrible. The party feels ill.');
-                        @:Damage = import(module:'game_class.damage.mt');
-                        event.party.members->foreach(do:::(index, member) {
-                            @oldStats = StatSet.new();
-                            oldStats.state = member.stats.state;
-                            member.stats.add(stats:StatSet.new(HP:-(oldStats.HP*0.1)->ceil, AP:-(oldStats.AP*0.1)->ceil));
-                            oldStats.printDiff(other:member.stats, prompt:member.name + ': Ugh...');
+                                    member.heal(amount:member.stats.HP * 0.1);
+                                    member.healAP(amount:member.stats.AP * 0.1);
+                                });
+                                
+                            } else ::<= {
+                                dialogue.message(text:'The food tastes terrible. The party feels ill.');
+                                @:Damage = import(module:'game_class.damage.mt');
+                                event.party.members->foreach(do:::(index, member) {
+                                    @oldStats = StatSet.new();
+                                    oldStats.state = member.stats.state;
+                                    member.stats.add(stats:StatSet.new(HP:-(oldStats.HP*0.1)->ceil, AP:-(oldStats.AP*0.1)->ceil));
+                                    oldStats.printDiff(other:member.stats, prompt:member.name + ': Ugh...');
 
 
-                            member.damage(
-                                from: member,
-                                damage: Damage.new(
-                                    amount:member.stats.AP * (0.1),
-                                    damageType : Damage.TYPE.PHYS,
-                                    damageClass: Damage.CLASS.AP
-                                )
+                                    member.damage(
+                                        from: member,
+                                        damage: Damage.new(
+                                            amount:member.stats.AP * (0.1),
+                                            damageType : Damage.TYPE.PHYS,
+                                            damageClass: Damage.CLASS.AP
+                                        )
+                                    );
+                                });
+                            
+                            };
+
+                            @:nicePerson = event.island.newInhabitant();
+                            nicePerson.interactPerson(
+                                party:event.party,
+                                onNext ::{
+                                    if (!party.isMember(entity:nicePerson)) ::<= {
+                                        dialogue.message(text:'You thank the person and continue on your way.');  
+                                    };
+                                }
                             );
-                        });
-                    
-                    };
 
-                    @:nicePerson = event.island.newInhabitant();
-                    nicePerson.interactPerson(
-                        party:event.party
+                        }
                     );
-
-                    if (!party.isMember(entity:nicePerson)) ::<= {
-                        dialogue.message(text:'You thank the person and continue on your way.');  
-                    };
-                    
                     return 0; // number of timesteps active
                 },
                 
@@ -567,46 +579,49 @@ Event.Base.database = Database.new(
                         );
                     };
 
-                    when(dialogue.askBoolean(
-                        prompt:'Rest?'
-                    ) == false) ::<= {
-                        dialogue.message(speaker:'???', text:'The party continues on their way.');
-                        return 0;
-                    };
+                    dialogue.askBoolean(
+                        prompt:'Rest?',
+                        onChoice::(which) {
+                            when(which == false)
+                                dialogue.message(speaker:'???', text:'The party continues on their way.');
 
 
-                    canvas.pushState();
-                    canvas.clear();
+                            dialogue.message(text:
+                                random.pickArrayItem(
+                                    list:
+                                    
+                                    if (party.members->keycount == 1)
+                                        [
+                                            party.members[0].name + ' sits next to the campfire in a peaceful silence.'
+                                        ]                                
+                                    else
+                                        [
+                                            'The party starts a fire and huddles up close to it, resting in silence.',
+                                            'The party makes a fire and sits, excitedly talking about the most recent endaevors.',
+                                            'The party sets up camp, and sleeps for a brief time.'   
+                                        ]
+                                        
+                                ),
 
-                    dialogue.message(text:
-                        random.pickArrayItem(
-                            list:
-                            
-                            if (party.members->keycount == 1)
-                                [
-                                    party.members[0].name + ' sits next to the campfire in a peaceful silence.'
-                                ]                                
-                            else
-                                [
-                                    'The party starts a fire and huddles up close to it, resting in silence.',
-                                    'The party makes a fire and sits, excitedly talking about the most recent endaevors.',
-                                    'The party sets up camp, and sleeps for a brief time.'   
-                                ]
-                                
-                        )
+                                onNext ::{
+                                    @:world = import(module:'game_singleton.world.mt');
+                                    [0, 5*3]->for(do:::(i) {
+                                        world.stepTime();
+                                    });
+
+                                    event.party.members->foreach(do:::(index, member) {
+                                        member.heal(amount:member.stats.HP * 0.3);
+                                        member.healAP(amount:member.stats.AP * 0.3);
+                                    });
+                                }
+                            );
+
+
+                        }
                     );
-                    canvas.popState();
-                    @:world = import(module:'game_singleton.world.mt');
-                    [0, 5*3]->for(do:::(i) {
-                        world.stepTime();
-                    });
 
-                    event.party.members->foreach(do:::(index, member) {
-                        member.heal(amount:member.stats.HP * 0.3);
-                        member.healAP(amount:member.stats.AP * 0.3);
-                    });
 
-                    return 0; // number of timesteps active
+                    return 0;
                 },
                 
                 onEventUpdate ::(event) {

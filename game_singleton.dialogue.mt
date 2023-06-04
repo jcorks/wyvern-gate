@@ -708,7 +708,7 @@ return class(
             // Like all UI choices, the weight can be chosen.
             // Prompt will be displayed, like speaker in the message callback
             //
-            choices ::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, renderable, keep, onGetChoices, onNext) {
+            choices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, renderable, keep, onGetChoices, onNext) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode: CHOICE_MODE.CURSOR,
@@ -728,8 +728,10 @@ return class(
                 }]);
    
             },
+
+
             
-            choiceColumns ::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function, keep, renderable, onNext) {
+            choiceColumns::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function, keep, renderable, onNext) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode:if (isCursor) CHOICE_MODE.COLUMN_CURSOR else CHOICE_MODE.COLUMN_NUMBER,
@@ -781,7 +783,7 @@ return class(
 
             // ask yes or no immediately.
             askBoolean::(prompt, onChoice => Function) {
-                this.choices(prompt, choices:['Yes', 'No'],
+                this.choices(prompt, choices:['Yes', 'No'], canCancel:false,
                     onChoice::(choice){
                         onChoice(which: choice == 1);
                     }

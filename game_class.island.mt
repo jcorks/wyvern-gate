@@ -378,7 +378,6 @@
                 //if (stepsSinceLastEvent > 200000) ::<= {
                 if (stepsSinceLastEvent > 13) ::<= {
                     if (Number.random() > 13 - (stepsSinceLastEvent-5) / 5) ::<={
-
                         // mostly its encounters. 0.1% chance of encounter 
                         if (Number.random() < 0.001) ::<= {
                             this.addEvent(

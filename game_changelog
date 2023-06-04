@@ -23,3 +23,14 @@
 - fixed a bug where loading saves would make items unconsumable
 - inventory is now limited. The party can hold 20 items.
 - Fixed a bug where if an inventory is empty and an item needs to be selected, a full inventory of "empty" is displayed when selling
+
+0.1.3a
+- Many things broke with the update to an iterative design to support non-terminal setups, like 
+  the topaz canvas for windows users.
+- Added fake BIOS / PC setup for topaz with basic OS-like capabilities
+- Fixed bugs with events being broken
+- Made it so the overworld map wont let you walk on sky. also changed the layout to be a little more appealing, allowing viewing of the sky from all sides
+- Added dungeon-aligned layouts for landmarks
+- Added "foliage" for landmarks that extend outside of the map
+- Changed locations to be spaced out when generating landmarks to prevent overlap
+

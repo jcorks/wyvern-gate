@@ -39,6 +39,8 @@
 @:UNPAGED_ROOM_SIZE_LIMIT = 70;
 @:SIGHT_RAY_LIMIT = 6;
 @:SIGHT_RAY_EPSILON = 0.2;
+@:OOB_RANGE = 96;
+
 
 
 @:distance = import(module:'game_function.distance.mt');
@@ -332,8 +334,8 @@ return class(
             
 
 
-            @:regionX = ((pointer.x+0) / mapSizeW)->floor;
-            @:regionY = ((pointer.y+0) / mapSizeH)->floor;
+            @:regionX = ((pointer.x + mapSizeW*0.5) / mapSizeW)->floor;
+            @:regionY = ((pointer.y + mapSizeH*0.5) / mapSizeH)->floor;
 
 
             @:centerX = (mapSizeW / 2)->floor;
@@ -372,8 +374,8 @@ return class(
             
             [0, mapSizeH+1]->for(do:::(y) {
                 [0, mapSizeW+1]->for(do:::(x) {
-                    @itemX = (x) + regionX*mapSizeW;
-                    @itemY = (y) + regionY*mapSizeH;
+                    @itemX = (x) + regionX*mapSizeW - mapSizeW*0.5;
+                    @itemY = (y) + regionY*mapSizeH - mapSizeH*0.5;
                     
                     
                     when(isWalled(x:itemX, y:itemY)) ::<= {
@@ -384,7 +386,7 @@ return class(
                     @:items = this.itemsAt(x:itemX, y:itemY);
                     when(items != empty) ::<= {
                         canvas.movePen(x:left + x, y:top + y);
-                        canvas.drawChar(text:if (items[0].discovered) items[0].symbol else '?');
+                        canvas.drawChar(text:if (items[items->keycount-1].discovered) items[items->keycount-1].symbol else '?');
                     };
                     
                     when(itemX < 0 || itemY < 0 || itemX >= width+0 || itemY >= height+0) ::<= {
@@ -401,8 +403,8 @@ return class(
             
   
             canvas.movePen(
-                x:left + ((pointer.x - regionX*mapSizeW))->floor,
-                y:top  + ((pointer.y - regionY*mapSizeH))->floor         
+                x:left + ((pointer.x - regionX*mapSizeW  + mapSizeW*0.5))->floor,
+                y:top  + ((pointer.y - regionY*mapSizeH  + mapSizeH*0.5))->floor         
             );
             
             canvas.drawText(text:'P');
@@ -489,7 +491,17 @@ return class(
                     @itemX = ((x + pointer.x - mapSizeW/2))->floor;
                     @itemY = ((y + pointer.y - mapSizeH/2))->floor;
 
+
+                    @:items = this.itemsAt(x:itemX, y:itemY);
+
+
+
+
                     when((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY)) ::<= {
+                        when(items != empty && items->keycount > 0) ::<= {
+                            canvas.movePen(x:left + x, y:top + y);
+                            canvas.drawChar(text:if (items[0].discovered) items[0].symbol else '?');
+                        };
                         when(renderOutOfBounds) ::<= {
                             canvas.movePen(x:left + x, y:top + y);  
                             canvas.drawChar(text:outOfBoundsCharacter);
@@ -507,15 +519,17 @@ return class(
                         canvas.drawChar(text:'`');                        
                     };
 
+
                     when(isWalled(x:itemX, y:itemY)) ::<= {
                         canvas.movePen(x:left + x, y:top + y);  
                         canvas.drawChar(text:wallCharacter);
                     };
-                    @:items = this.itemsAt(x:itemX, y:itemY);
+
                     when(items != empty && items->keycount > 0) ::<= {
                         canvas.movePen(x:left + x, y:top + y);
                         canvas.drawChar(text:if (items[0].discovered) items[0].symbol else '?');
-                    };
+                    };                    
+
                 });                
             });               
             
@@ -593,18 +607,18 @@ return class(
                 x = x->floor;
                 y = y->floor;
                 
-                when(x < 0 || x > width || y < 0 || y > height)
+                when(x < -OOB_RANGE || y < -OOB_RANGE || x >= width + OOB_RANGE || y >= height + OOB_RANGE)
                     error(detail:'Bad\n');
                 
-                @itemIndexY = itemIndex[x];
+                @itemIndexY = itemIndex[x+OOB_RANGE];
                 if (itemIndexY == empty) ::<= {
                     itemIndexY = [];
-                    itemIndex[x] = itemIndexY;
+                    itemIndex[x+OOB_RANGE] = itemIndexY;
                 };
                 @loc = itemIndexY[y];
                 if (loc == empty) ::<= {
                     loc = [];
-                    itemIndexY[y] = loc;
+                    itemIndexY[y+OOB_RANGE] = loc;
                 };
                 @:val = {
                     x: x,
@@ -625,9 +639,9 @@ return class(
             },
             
             itemsAt::(x, y) {
-                @itemY = itemIndex[x];
+                @itemY = itemIndex[x+OOB_RANGE];
                 when(itemY == empty) empty;
-                return itemY[y];
+                return itemY[y+OOB_RANGE];
             },
             
             obscure::{
@@ -641,9 +655,9 @@ return class(
             },
             
             clearItems::(x, y) {
-                @itemY = itemIndex[x];
+                @itemY = itemIndex[x+OOB_RANGE];
                 when(itemY == empty) empty;
-                itemY[y] = empty;
+                itemY[y+OOB_RANGE] = empty;
             },
                 
             removeItem::(
@@ -651,9 +665,9 @@ return class(
             ) {
                 @item = retrieveItem(data);
             
-                @itemY = itemIndex[item.x];
+                @itemY = itemIndex[item.x+OOB_RANGE];
                 when(itemY == empty) empty;
-                @items = itemY[item.y];
+                @items = itemY[item.y+OOB_RANGE];
                 [::] {
                     items->foreach(do:::(key, v) {
                         when(v.data == data) ::<= {
@@ -753,15 +767,15 @@ return class(
                 ent.y = path.y;
 
 
-                @itemIndexY = itemIndex[ent.x];
+                @itemIndexY = itemIndex[ent.x+OOB_RANGE];
                 if (itemIndexY == empty) ::<= {
                     itemIndexY = [];
-                    itemIndex[ent.x] = itemIndexY;
+                    itemIndex[ent.x+OOB_RANGE] = itemIndexY;
                 };
-                @loc = itemIndexY[ent.y];
+                @loc = itemIndexY[ent.y+OOB_RANGE];
                 if (loc == empty) ::<= {
                     loc = [];
-                    itemIndexY[ent.y] = loc;
+                    itemIndexY[ent.y+OOB_RANGE] = loc;
                 };
                 loc->push(value:ent);
 

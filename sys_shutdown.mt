@@ -1,4 +1,5 @@
 @:Topaz = import(module:'Topaz');
+@:Shell = import(module:'sys_shell.mt');
 return ::(terminal, arg, onDone) {
     terminal.clear();
     terminal.print(line:'Shutting down...');

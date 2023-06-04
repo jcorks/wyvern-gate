@@ -242,9 +242,9 @@ return class(
         };
     
         @:generateLayout :: {
-            [0, ROOM_SIZE]->for(do:::(y) {
-                [0, ROOM_SIZE]->for(do:::(x) {
-                    if (Number.random() < ROOM_SCATTER_RATE)
+            [-90, ROOM_SIZE+90]->for(do:::(y) {
+                [-90, ROOM_SIZE+90]->for(do:::(x) {
+                    if (Number.random() < ROOM_SCATTER_RATE / 4)
                         this.setItem(
                             x, y, symbol: ROOM_SCATTER_CHAR, discovered:true
                         );
