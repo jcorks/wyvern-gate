@@ -143,9 +143,9 @@
 
 
             if (base.isUnique)
-                name = ''
+                name = base.name
             else
-                name = NameGen.place();
+                name = base.name + ' of ' + NameGen.place();
             landmark = base;
             x_ = x;
             y_ = y;
@@ -570,12 +570,12 @@ Landmark.Base.database = Database.new(
 
         Landmark.Base.new(
             data: {
-                name : 'Grotto',
+                name : 'Shrine',
                 symbol : 'O',
                 rarity : 100000,      
                 isUnique : true,
                 minLocations : 2,
-                maxLocations : 5,
+                maxLocations : 2,
                 peaceful: false,
                 dungeonMap : true,
                 possibleLocations : [

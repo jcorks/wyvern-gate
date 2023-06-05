@@ -69,7 +69,8 @@ return class(
                     'cd',
                     'ls',
                     'edit',
-                    'shutdown'
+                    'shutdown',
+                    'fullscreen'
                 ]
             },
 

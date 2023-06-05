@@ -133,9 +133,9 @@
 
                 
                 if (rngModHint != empty || Number.random() > 0.5) ::<= {
-                    @:count = (Number.random()*3+1)->floor;
+                    @:count = random.pickArrayItem(list:[1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 4, 5]);
                     if(count > 1)
-                        customName = base.name + ' (Rare)';
+                        customName = base.name + ' (Unique)';
                     modCount = count;
                     [0, count]->for(do:::(i) {
                         @:mod = ItemModifier.database.getRandom();

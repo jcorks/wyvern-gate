@@ -237,7 +237,7 @@
 
 
             // guaranteed town
-            @:gate = Landmark.Base.database.find(name:'Grotto').new(
+            @:gate = Landmark.Base.database.find(name:'Shrine').new(
                 island:this,
                 x: 30, //Number.random()*(sizeW - 0.2) + 0.2,
                 y: 30  //Number.random()*(sizeH - 0.2) + 0.2

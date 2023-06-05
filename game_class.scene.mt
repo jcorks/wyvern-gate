@@ -68,10 +68,14 @@ Scene.database = Database.new(
             data : {
                 name : 'scene_intro',
                 script: [
-                    ['', '...Hey...you up?'],
-                    ['', 'Guess we slept longer than we were hoping...'],
-                    ['', 'Its morning now though, so we should get going and find that grotto.'],
-                    ['', 'They say it\'s the only place to get Gate Keys.'],
+                    ['???', '...'],
+                    ['???', '...You.. you have been chosen...'],
+                    ['???', 'Among those of the world, the Chosen are selected...'],
+                    ['???', '...Selected to seek me, the Wyvern of Light...'],
+                    ['???', 'If you seek me, I will grant you and anyone with you a wish...'],
+                    ['???', 'But be warned: others will seek their own wish and will accept no others...'],
+                    ['???', 'Come, chosen: seek me and the Gate Keys among the Shrines...'],
+                    ['???', '...I will await you, Chosen...'],
                 ]
             }
         ),     

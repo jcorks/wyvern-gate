@@ -1,38 +1,41 @@
 Known bugs / concerns:
-- Menus often exit down too far. Ideally they should menu down one level at a time and allow cancelling.
 - Missing skills in professions
   . Assassin
   . Farmer
 - Skills are not used by AI yet.
-- killed enamies do not yield exp.
-
+- Defeating a person in battle can cause them to rejoin the battle sometimes 
+- bribing or otherwise dismissing an enemy from battle will not 
+  remove them from the dungeon map, making them still chase you afterwards 
+- Time of day is still listed in dungeons when time of day doesnt change. Need to display 
+  level and other useful information instead
+- When Entering a landmark, the previous menu from the overworld pokes through
+- When using items, the inventory screen persists, causing a layering effect (purely visual)
 
 
 
 Coming changes:
-- Game restructure
-  . Random encounters will be very rare
   . Dungeon crawl-style maps for:
-    - grottos 
     - abandoned castles
-  . Dungeon crawls will have physical spawns of enemies (*), chests
-  . One stair per level 
   . Chance for Treasure room is available after 6 floors, but still only a chance 
+    . guaranteed after 12
+  . enemy spawns are ALWAYS offscreen areas
+   
   . large chest ALWAYS contains a key to next stratum
   . Stratum keys are pre-defined:
-    - FIRE key first 
-    - ICE key second 
-    - THUNDER key third
-    - LIGHT key last
-  . shops no longer sell keys 
-  . random event changes:
-    - eating food with a stranger increases or decreases max HP / MP by 5%
-    - failing a chest trap check will decrease HP 5% and hurt
-    
+    - First dunegon yields the FIRE key. Enemies here do not use skills and do not have equips
+    - ICE key second. Enemies here do not use skills but have weapon equips
+    - THUNDER key third. Enemies here use skills (1-2) and have weapons 
+    - LIGHT key last. Enemies here have all skills learned and have equips
+    - Using each key on a gate triggers a special element-themed "boss dragon" 
+      that must be fought to progress to the next island.
+      . Each boss victory yields a legendary item
+    - After the last dragon, credits and post game.
+
+- Post Game
+
 - additional weapons:
   . rapier
   . lance
-- Endgame
 - Research Hall
     . Tablet exchange
 - area plots for towns and cities to give it a better sense of order
@@ -40,5 +43,38 @@ Coming changes:
 - Gambling Tent
   . Dice poker
   . others?
-- inventory limit
 
+
+
+SPOILERS BELOW
+---------------------------------------------------
+- Story
+  . You and another are both among the Chosen by the Light Wyvern. The Wyvern beckons for you to reach them.
+    If you reach them, a wish will  be granted. People are selected among the entire population as Chosen, 
+    but only one team may be selected by the Light Wyvern. The challenge is to reach them, hunting the Gate Keys to reach their
+    domain. Beware: other Chosen will attempt to get in your path for their own wish 
+
+  . Each Wyvern are siblings and know each other, but all have the utmost respect for the Light Wyvern
+    each will monologue a bit before the fight talking about themselves and their siblings, Each Wyvern 
+    basically judges your worthiness to see the next. It's all a trial.
+      - In combat with the Wyverns, you never knock them out or kill them, but rather they halt the 
+        fight after being weakened enough.
+
+  . Once you reach, challenge, and defeat the light wyvern, they explain to you their real reason to 
+    summon you, why they pit all these Chosen among each other: they need a Champion to fight on their 
+    behalf to fight the Dark Wyvern, a sibling who threatens all the others and the entire world. 
+    
+  . The Light Wyvern gives you a choice: have your wish granted now, or continue on as their Champion 
+    to fight the Dark Wyvern. If you choose the wish, the Light Wyvern understands and the credits roll.
+    Otherwise, the Light Wyvern gives you a key to the Dark domain, where one file temple awaits.
+
+    Before entering the final gate with the final key, a prompt appears asking if you are truly ready 
+    and warning you that, if you dont succeed, you might not be able to come back.
+
+    Instead of randos fighting you, now the Dark Wyverns own disciples fight you, fully clad in armor, 
+    weapons, and skills. Once the dungeon is complete and you reach the end of the dungeon, you actually
+    dont get another key, but reach the Dark Wyvern. 
+
+    Meta: when you fight the Dark Wyvern, it's all or nothing. If you lose to the Dark Wyvern, an in-game
+    Error is thrown with the message "Your soul is mine, Champion of Light.", corrupting your save file 
+    for that game.

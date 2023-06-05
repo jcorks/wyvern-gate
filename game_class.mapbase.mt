@@ -38,7 +38,7 @@
 @:mapSizeH  = 16;
 @:UNPAGED_ROOM_SIZE_LIMIT = 70;
 @:SIGHT_RAY_LIMIT = 6;
-@:SIGHT_RAY_EPSILON = 0.2;
+@:SIGHT_RAY_EPSILON = 0.4;
 @:OOB_RANGE = 96;
 
 
@@ -80,19 +80,13 @@ return class(
         @obscured = []; 
         [0, UNPAGED_ROOM_SIZE_LIMIT]->for(do:::(x) {
             aStarIndex[x] = [];
-            obscured[x] = [];
             [0, UNPAGED_ROOM_SIZE_LIMIT]->for(do:::(y) {
                 aStarIndex[x][y] = ''+x+'-'+y;
-                obscured[x][y] = false;
             });
         });
         
         @:isWalled ::(x, y) {
-        
-            when(wallIndex->keycount == 0) false;
-            @wallY = wallIndex[x];
-            when(wallY == empty) false;
-            return wallY[y] == true;
+            return wallIndex[x + y*UNPAGED_ROOM_SIZE_LIMIT] == true;
         };
         
         @renderOutOfBounds = true;
@@ -412,6 +406,8 @@ return class(
         };
         
         @:renderUnpaged ::{
+            //@:Time = import(module:'Matte.System.Time');
+            //@:ticks = Time.getTicks();
             @:left = canvas.width/2 - mapSizeW/2;
             @:top = canvas.height/2 - mapSizeH/2;
             canvas.renderFrame(
@@ -424,49 +420,31 @@ return class(
             @:centerX = (mapSizeW / 2)->floor;
             @:centerY = (mapSizeH / 2)->floor;
             
-            //@:map = [...scenery, ...items->values, ...walls];
-            /*
-            scenery->foreach(do:::(item, data) {
-                @itemX = ((data.x - regionX) * mapSizeW)->floor;
-                @itemY = ((data.y - regionY) * mapSizeH)->floor;
-            
-                when(itemX < 1 || itemY < 1 || itemX >= mapSizeW || itemY >= mapSizeH) empty;
-                canvas.movePen(x:left-1 + itemX, y:top-1 + itemY);  
-                canvas.drawText(text:data.symbol);
-            });*/
-            /*
-            map->foreach(do:::(item, data) {
-                @itemX = ((data.x - pointer.x + mapSizeW/2))->floor;
-                @itemY = ((data.y - pointer.y + mapSizeH/2))->floor;
-            
-                when(itemX < 1 || itemY < 1 || itemX >= mapSizeW || itemY > mapSizeH) empty;
-                canvas.movePen(x:left-1 + itemX, y:top + itemY);  
-                canvas.drawText(text:data.symbol);
-            });*/
             
             
             
             @:sightRay ::(degrees) {
                 @x = pointer.x + 0.5;
                 @y = pointer.y + 0.5;
+                @:rads = (Number.PI() / 180)*degrees;
                 [::] {
                     forever(do:::{
-                        @:rads = (Number.PI() / 180)*degrees;
                         x += rads->cos * SIGHT_RAY_EPSILON;
                         y += rads->sin * SIGHT_RAY_EPSILON;
                         
-                        when(distance(x0:pointer.x, y0:pointer.y, x1:x, y1:y) > SIGHT_RAY_LIMIT) send();
 
                         when((x < offsetX || y < offsetY || x >= width+offsetX || y >= height+offsetY)) send();
 
-                        obscured[x->floor][y->floor] = false;                        
+                        when(distance(x0:pointer.x, y0:pointer.y, x1:x, y1:y) > SIGHT_RAY_LIMIT) send();
+                        obscured[x->floor+y->floor*UNPAGED_ROOM_SIZE_LIMIT] = empty;                        
                         if (isWalled(x:x->floor, y:y->floor))
                             send();
                     });
                 };
             };
             
-            [0, 360, 7.5]->for(do:::(i) {
+            
+            [0, 360, 10]->for(do:::(i) {
                 sightRay(degrees:i);
             });
             
@@ -514,7 +492,7 @@ return class(
                     //    if (distance(x0:pointer.x, y0:pointer.y, x1:itemX, y1:itemY) < 5)
                     //        obscured[itemX][itemY] = false;
                     
-                    when(obscured[itemX][itemY]) ::<= {
+                    when(obscured[itemX+itemY*UNPAGED_ROOM_SIZE_LIMIT] == true) ::<= {
                         canvas.movePen(x:left + x, y:top + y);  
                         canvas.drawChar(text:'`');                        
                     };
@@ -554,6 +532,7 @@ return class(
             );
             
             canvas.drawText(text:'P');
+            //canvas.debugLine = 'Frame took ' + (Time.getTicks() - ticks) + 'ms';
                     
         };
 
@@ -581,18 +560,11 @@ return class(
 
             addWall ::(x, y) {
                 when(x < 0 || y < 0) empty;
-                @v = wallIndex[x];
-                if (v == empty) ::<={
-                    v = [];
-                    wallIndex[x] = v;
-                };
-                v[y] = true;                
+                wallIndex[x + y*UNPAGED_ROOM_SIZE_LIMIT] = true;
             },
             
             removeWall ::(x, y) {        
-                @xval = wallIndex[x];
-                when(xval == empty) empty;
-                xval[y] = false;
+                wallIndex[x+y*UNPAGED_ROOM_SIZE_LIMIT] = empty;
             },
             
         
@@ -610,15 +582,10 @@ return class(
                 when(x < -OOB_RANGE || y < -OOB_RANGE || x >= width + OOB_RANGE || y >= height + OOB_RANGE)
                     error(detail:'Bad\n');
                 
-                @itemIndexY = itemIndex[x+OOB_RANGE];
-                if (itemIndexY == empty) ::<= {
-                    itemIndexY = [];
-                    itemIndex[x+OOB_RANGE] = itemIndexY;
-                };
-                @loc = itemIndexY[y];
+                @loc = itemIndex[x+OOB_RANGE + (y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)];
                 if (loc == empty) ::<= {
                     loc = [];
-                    itemIndexY[y+OOB_RANGE] = loc;
+                    itemIndex[x+OOB_RANGE + (y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)] = loc;
                 };
                 @:val = {
                     x: x,
@@ -639,25 +606,20 @@ return class(
             },
             
             itemsAt::(x, y) {
-                @itemY = itemIndex[x+OOB_RANGE];
-                when(itemY == empty) empty;
-                return itemY[y+OOB_RANGE];
+                return itemIndex[x+OOB_RANGE + (y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)];
             },
             
             obscure::{
                 [0, UNPAGED_ROOM_SIZE_LIMIT]->for(do:::(x) {
-                    obscured[x] = [];
                     [0, UNPAGED_ROOM_SIZE_LIMIT]->for(do:::(y) {
-                        obscured[x][y] = true;
+                        obscured[x+y*UNPAGED_ROOM_SIZE_LIMIT] = true;
                     });
                 });
                             
             },
             
             clearItems::(x, y) {
-                @itemY = itemIndex[x+OOB_RANGE];
-                when(itemY == empty) empty;
-                itemY[y+OOB_RANGE] = empty;
+                itemIndex[x+OOB_RANGE + (y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)] = empty;
             },
                 
             removeItem::(
@@ -665,9 +627,8 @@ return class(
             ) {
                 @item = retrieveItem(data);
             
-                @itemY = itemIndex[item.x+OOB_RANGE];
-                when(itemY == empty) empty;
-                @items = itemY[item.y+OOB_RANGE];
+                @items = itemIndex[item.x+OOB_RANGE + (item.y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)];
+                when(items == empty) empty;
                 [::] {
                     items->foreach(do:::(key, v) {
                         when(v.data == data) ::<= {
@@ -689,7 +650,7 @@ return class(
 
 
                 if(items->keycount == 0)
-                    itemY[item.y] = empty;    
+                    itemIndex[item.x+OOB_RANGE + (item.y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)] = empty;    
                     
                 items = items->filter(by::(value) <- value.data != data);
             },
@@ -758,7 +719,7 @@ return class(
                     ent.y += ydiff;
                 };  
             
-                @items = itemIndex[ent.x][ent.y];
+                @items =  itemIndex[ent.x+OOB_RANGE + (ent.y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)];
                 items->remove(key:items->findIndex(value:ent));
             
                 @:path = aStarPathNext(start:ent, goal:{x:x, y:y});
@@ -767,15 +728,11 @@ return class(
                 ent.y = path.y;
 
 
-                @itemIndexY = itemIndex[ent.x+OOB_RANGE];
-                if (itemIndexY == empty) ::<= {
-                    itemIndexY = [];
-                    itemIndex[ent.x+OOB_RANGE] = itemIndexY;
-                };
-                @loc = itemIndexY[ent.y+OOB_RANGE];
+                @loc = itemIndex[ent.x+OOB_RANGE + (ent.y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)];
+
                 if (loc == empty) ::<= {
                     loc = [];
-                    itemIndexY[ent.y+OOB_RANGE] = loc;
+                    itemIndex[ent.x+OOB_RANGE + (ent.y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)] = loc;
                 };
                 loc->push(value:ent);
 
@@ -969,7 +926,7 @@ return class(
                 @:world = import(module:'game_singleton.world.mt');
                 // render the time under the map.
                 canvas.movePen(x:left -1, y: 0);
-                canvas.drawText(text:world.timeString + '                   ');
+                canvas.drawText(text:title);
                 
             
             }

@@ -758,7 +758,7 @@ Interaction.database = Database.new(
                         
 
                         location.targetLandmark = 
-                            Landmark.Base.database.find(name:'Grotto').new(
+                            Landmark.Base.database.find(name:'Shrine').new(
                                 island:location.landmark.island,
                                 x:-1,
                                 y:-1
@@ -767,7 +767,7 @@ Interaction.database = Database.new(
                         
                         
                         location.targetLandmark.floor = location.landmark.floor+1;
-                        location.targetLandmark.name = 'Grotto ('+location.targetLandmark.floor+'F)';
+                        location.targetLandmark.name = 'Shrine ('+location.targetLandmark.floor+'F)';
                     };
 
                     canvas.clear();

@@ -193,7 +193,8 @@ return class(
                                     x: if (choice == dialogue.CURSOR_ACTIONS.RIGHT) 4 else if (choice == dialogue.CURSOR_ACTIONS.LEFT) -4 else 0,
                                     y: if (choice == dialogue.CURSOR_ACTIONS.DOWN)  4 else if (choice == dialogue.CURSOR_ACTIONS.UP)   -4 else 0
                                 );
-                                world.stepTime();                                    
+                                world.stepTime(); 
+                                island.map.title = world.timeString + '                   ';
                                 island.incrementTime();
                                 
                                 // cancel if we've arrived somewhere
@@ -201,7 +202,7 @@ return class(
                                 if (arrival != empty) ::<= {
                                     arrival->foreach(do:::(i, arr) {
                                         dialogue.message(
-                                            text:"The party has arrived at the " + if (arr.data.name == '') arr.data.base.name else arr.data.base.name + ' of ' + arr.data.name,
+                                            text:"The party has arrived at the " + arr.data.name,
                                             onNext::{
                                                 arr.data.discover();
                                                 island.map.discover(data:arr.data);                                            
@@ -272,6 +273,7 @@ return class(
         
         this.interface = {
             visitLandmark ::(landmark){
+                landmark.map.title = landmark.name + ' - ' + world.timeString + '          ';
                 // render pattern
                 /*canvas.clear();
                 [0, 100]->for(do:::(y) {

@@ -236,7 +236,7 @@ Location.Base.database = Database.new(
             descriptions: [
                 "A sturdy gate surrounded by a well-maintained fence around the area.",
                 "A decrepit gate surrounded by a feeble attempt at fencing.",
-                "A protective gate surrounded by a proepr stone wall. Likely for safety."
+                "A protective gate surrounded by a proper stone wall. Likely for safety."
             ],
             symbol: '#',
             

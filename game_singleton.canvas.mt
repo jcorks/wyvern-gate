@@ -100,7 +100,6 @@ return class(
     name: 'Wyvern.Canvas',
     define:::(this) {
         @canvas = [];
-        @canvasColors = [];
         @penx = 0;
         @peny = 0;
         @penColor = hints.NEUTRAL;
@@ -110,19 +109,15 @@ return class(
         
         @savestates = [];
         
-        [0, CANVAS_HEIGHT]->for(do:::(index) {
-            @:line = [];
-            @:lineColor = [];
-            
-            [0, CANVAS_WIDTH]->for(do:::(ch) {
-                line->push(value:' ');
-                lineColor->push(value:hints.NEUTRAL);
+        ::<= {
+            @iter = 0;
+            [0, CANVAS_HEIGHT]->for(do:::(index) {
+                [0, CANVAS_WIDTH]->for(do:::(ch) {
+                    canvas[iter] = ' ';
+                    iter += 1;
+                });
             });
-            
-            canvas->push(value:line);
-            canvasColors->push(value:lineColor);
-        });
-        
+        };
         
         this.interface = {
             movePen ::(x => Number, y => Number) {
@@ -219,18 +214,10 @@ return class(
             },  
             
             pushState ::{
-                @:canvasCopy = [];
-                @:canvasColorsCopy = [];
-                canvas->foreach(do:::(index, line) {
-                    canvasCopy->push(value:[...line]);
-                });
-                canvasColors->foreach(do:::(index, colors) {
-                    canvasColorsCopy->push(value:[...colors]);
-                });
+                @:canvasCopy = [...canvas];
                 
                 savestates->push(value:{
-                    text : canvasCopy,
-                    colors : canvasColorsCopy
+                    text : canvasCopy
                 });
             },
             
@@ -240,25 +227,21 @@ return class(
 
                 @top = savestates->pop;
                 canvas = top.text;
-                canvasColors = top.colors;
             },
                         
             drawText ::(text => String) {
                 when (penx < 0 || penx >= CANVAS_WIDTH || peny < 0 || peny >= CANVAS_HEIGHT) empty;              
-                @:line = canvas[peny];
-                @:lineColor = canvasColors[peny];
                 [penx, penx+min(a:text->length, b:CANVAS_WIDTH-penx)]->for(do:::(i) {
-                    line[i] = text->charAt(index:i-penx);
-                    if (line[i] == '\n') line[i] = ' ';
-                    lineColor[i] = penColor;
+                    @ch = text->charAt(index:i-penx);
+                    if (ch == '\n') ch = ' ';
+                    canvas[i+peny*CANVAS_WIDTH] = ch;
                 });
             },
             
             drawChar ::(text => String) {  
                 when (penx < 0 || penx >= CANVAS_WIDTH || peny < 0 || peny >= CANVAS_HEIGHT) empty;              
                 if (text == '\n') text = ' ';
-                canvas      [peny][penx] = text->charAt(index:0);               
-                canvasColors[peny][penx] = penColor;
+                canvas[penx+peny*CANVAS_WIDTH] = text->charAt(index:0);               
             },
             
             erase :: {
@@ -285,23 +268,13 @@ return class(
             clear :: {
                 when (savestates->keycount) ::<= {
                     @prevCanvas = savestates[savestates->keycount-1].text;
-                    @prevColors = savestates[savestates->keycount-1].colors;
-                    canvas = [];
-                    canvasColors = [];
-                    prevCanvas->foreach(do:::(index, line) {
-                        canvas->push(value:[...line]);
-                    });
-                    prevColors->foreach(do:::(index, colors) {
-                        canvasColors->push(value:[...colors]);
-                    });
+                    canvas = [...prevCanvas];
                 };
+                @iter = 0;
                 [0, CANVAS_HEIGHT]->for(do:::(i) {
-                    @:line = canvas[i];
-                    @:lineColor = canvasColors[i];
-                    
                     [0, CANVAS_WIDTH]->for(do:::(ch) {
-                        line[ch] = ' ';
-                        lineColor[ch] = hints.NEUTRAL;
+                        canvas[iter] = ' ';
+                        iter += 1;
                     });
                 });
             },
@@ -316,7 +289,7 @@ return class(
                 
 
                 [0, CANVAS_HEIGHT]->for(do:::(row) {
-                    lines_output[row] = String.combine(strings:canvas[row]);
+                    lines_output[row] = String.combine(strings:canvas->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1));
                     /*
                     @:line = canvas[row];
                     @:lineColors = canvasColors[row];
