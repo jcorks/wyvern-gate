@@ -754,14 +754,25 @@ Landmark.Base.database = Database.new(
                 name : 'forest',
                 symbol : 'T',
                 rarity : 40,                
-                peaceful: true,
+                peaceful: false,
                 isUnique : false,
-                dungeonMap : false,
-                minLocations : 0,
-                maxLocations : 0,
-                possibleLocations : [],
-                requiredLocations : [],
-                mapHint: {}
+                dungeonMap : true,
+                minLocations : 3,
+                maxLocations : 5,
+                possibleLocations : [
+                    {name: 'Small Chest', rarity:1},
+                ],
+                requiredLocations : [
+                    'Small Chest'
+                ],
+                mapHint: {
+                    roomSize: 60,
+                    wallCharacter: 'Y',
+                    roomAreaSize: 7,
+                    roomAreaSizeLarge: 14,
+                    emptyAreaCount: 25,
+                    outOfBoundsCharacter: 'y'
+                }
                 
             }
         ),

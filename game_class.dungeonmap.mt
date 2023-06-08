@@ -69,11 +69,11 @@ return class(
         @:areas = [];
         @cavities = [];
         
-        @:ROOM_AREA_SIZE = 5;
-        @:ROOM_AREA_SIZE_LARGE = 9;
-        @:ROOM_AREA_VARIANCE = 0.2;
-        @:ROOM_SIZE = 50;
-        @:ROOM_EMPTY_AREA_COUNT = 13;
+        @ROOM_AREA_SIZE = 5;
+        @ROOM_AREA_SIZE_LARGE = 9;
+        @ROOM_AREA_VARIANCE = 0.2;
+        @ROOM_SIZE = 50;
+        @ROOM_EMPTY_AREA_COUNT = 13;
 
         
         
@@ -264,12 +264,24 @@ return class(
 
 
         this.constructor = ::(mapHint => Object) {
-            
+
+
+            if (mapHint.roomAreaSize != empty) ROOM_AREA_SIZE = mapHint.roomAreaSize;
+            if (mapHint.roomAreaSizeLarge != empty) ROOM_AREA_SIZE_LARGE = mapHint.roomAreaSize;
+            if (mapHint.emptyAreaCount != empty) ROOM_EMPTY_AREA_COUNT = mapHint.emptyAreaCount;
+            if (mapHint.roomSize != empty) ROOM_SIZE = mapHint.roomSize;
+
+
             this.paged = false;
             this.width = ROOM_SIZE;
             this.height = ROOM_SIZE;
             this.renderOutOfBounds = true;
             this.outOfBoundsCharacter = '`';
+
+            if (mapHint.wallCharacter != empty) this.wallCharacter = mapHint.wallCharacter;
+            if (mapHint.outOfBoundsCharacter != empty) this.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
+
+
             this.obscure();
             generateLayout();
             return this;

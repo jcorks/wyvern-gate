@@ -494,7 +494,7 @@ return class(
                     
                     when(obscured[itemX+itemY*UNPAGED_ROOM_SIZE_LIMIT] == true) ::<= {
                         canvas.movePen(x:left + x, y:top + y);  
-                        canvas.drawChar(text:'`');                        
+                        canvas.drawChar(text:outOfBoundsCharacter);                        
                     };
 
 
