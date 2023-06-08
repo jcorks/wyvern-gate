@@ -92,6 +92,7 @@
         @island;
         @islandLevelHint;
         @islandNameHint;
+        @islandTierHint;
         @modCount = 0;
         @equipEffects = [];
         @useEffects = [];
@@ -242,9 +243,10 @@
                 get ::<- island
             },
             
-            setIslandGenAttributes ::(levelHint => Number, nameHint => String, islandHint) {
+            setIslandGenAttributes ::(levelHint => Number, nameHint => String, tierHint => Number, islandHint) {
                 islandLevelHint = levelHint;
                 islandNameHint = nameHint;
+                islandTierHint = tierHint;
                 island = islandHint;
             },
             
@@ -253,7 +255,8 @@
 
                 island = world.discoverIsland(
                     levelHint: (islandLevelHint)=>Number,
-                    nameHint: (islandNameHint)=>String
+                    nameHint: (islandNameHint)=>String,
+                    tierHint: (islandTierHint)=>Number
                 );                
             },
             
@@ -2130,6 +2133,206 @@ Item.Base.database = Database.new(items: [
     }), 
 
     Item.Base.new(data : {
+        name : "Wyvern Key of Fire",
+        description: 'A key to another island. Its quite big and warm to the touch.',
+        examine : '',
+        equipType: TYPE.TWOHANDED,
+        rarity : 100,
+        weight : 10,
+        canBeColored : false,
+        basePrice: 1,
+        keyItem : false,
+        levelMinimum : 1000000000,
+        canHaveModifier : false,
+        hasMaterial : false,
+        isUnique : true,
+        useTargetHint : USE_TARGET_HINT.ONE,
+
+        // fatigued
+        equipMod : StatSet.new(
+            ATK: 25,
+            SPD: -5,
+            DEX: -5
+        ),
+        useEffects : [
+        ],
+        equipEffects : [
+            "Burning"
+        ],
+        attributes : [
+            ATTRIBUTE.SHARP,
+            ATTRIBUTE.METAL
+        ],
+        onCreate ::(item, user, creationHint) {     
+        
+            @:world = import(module:'game_singleton.world.mt');        
+            @:nameGen = import(module:'game_singleton.namegen.mt');
+            @:island = {
+                island : empty
+            };
+
+            item.setIslandGenAttributes(
+                levelHint:  user.level => Number,
+                nameHint:   nameGen.island(),
+                tierHint : 1
+            );
+            
+            item.price = 1;
+        }
+        
+    }),
+    
+    Item.Base.new(data : {
+        name : "Wyvern Key of Ice",
+        description: 'A key to another island. Its quite big and cold to the touch.',
+        examine : '',
+        equipType: TYPE.TWOHANDED,
+        rarity : 100,
+        weight : 10,
+        canBeColored : false,
+        basePrice: 1,
+        keyItem : false,
+        levelMinimum : 1000000000,
+        canHaveModifier : false,
+        hasMaterial : false,
+        isUnique : true,
+        useTargetHint : USE_TARGET_HINT.ONE,
+
+        // fatigued
+        equipMod : StatSet.new(
+            ATK: 25,
+            SPD: -5,
+            DEX: -5
+        ),
+        useEffects : [
+        ],
+        equipEffects : [
+            "Icy"
+        ],
+        attributes : [
+            ATTRIBUTE.SHARP,
+            ATTRIBUTE.METAL
+        ],
+        onCreate ::(item, user, creationHint) {     
+        
+            @:world = import(module:'game_singleton.world.mt');        
+            @:nameGen = import(module:'game_singleton.namegen.mt');
+            @:island = {
+                island : empty
+            };
+
+            item.setIslandGenAttributes(
+                levelHint:  user.level => Number,
+                nameHint:   nameGen.island(),
+                tierHint : 2
+            );
+            
+            item.price = 1;
+        }
+        
+    }),    
+    
+    Item.Base.new(data : {
+        name : "Wyvern Key of Thunder",
+        description: 'A key to another island. Its quite big and softly hums.',
+        examine : '',
+        equipType: TYPE.TWOHANDED,
+        rarity : 100,
+        weight : 10,
+        canBeColored : false,
+        basePrice: 1,
+        keyItem : false,
+        levelMinimum : 1000000000,
+        canHaveModifier : false,
+        hasMaterial : false,
+        isUnique : true,
+        useTargetHint : USE_TARGET_HINT.ONE,
+
+        // fatigued
+        equipMod : StatSet.new(
+            ATK: 25,
+            SPD: -5,
+            DEX: -5
+        ),
+        useEffects : [
+        ],
+        equipEffects : [
+            "Shock"
+        ],
+        attributes : [
+            ATTRIBUTE.SHARP,
+            ATTRIBUTE.METAL
+        ],
+        onCreate ::(item, user, creationHint) {     
+        
+            @:world = import(module:'game_singleton.world.mt');        
+            @:nameGen = import(module:'game_singleton.namegen.mt');
+            @:island = {
+                island : empty
+            };
+
+            item.setIslandGenAttributes(
+                levelHint:  user.level => Number,
+                nameHint:   nameGen.island(),
+                tierHint : 3
+            );
+            
+            item.price = 1;
+        }
+        
+    }),    
+
+    Item.Base.new(data : {
+        name : "Wyvern Key of Light",
+        description: 'A key to another island. Its quite big and faintly glows.',
+        examine : '',
+        equipType: TYPE.TWOHANDED,
+        rarity : 100,
+        weight : 10,
+        canBeColored : false,
+        basePrice: 1,
+        keyItem : false,
+        levelMinimum : 1000000000,
+        canHaveModifier : false,
+        hasMaterial : false,
+        isUnique : true,
+        useTargetHint : USE_TARGET_HINT.ONE,
+
+        // fatigued
+        equipMod : StatSet.new(
+            ATK: 25,
+            SPD: -5,
+            DEX: -5
+        ),
+        useEffects : [
+        ],
+        equipEffects : [
+            "Shimmering"
+        ],
+        attributes : [
+            ATTRIBUTE.SHARP,
+            ATTRIBUTE.METAL
+        ],
+        onCreate ::(item, user, creationHint) {     
+        
+            @:world = import(module:'game_singleton.world.mt');        
+            @:nameGen = import(module:'game_singleton.namegen.mt');
+            @:island = {
+                island : empty
+            };
+
+            item.setIslandGenAttributes(
+                levelHint:  user.level => Number,
+                nameHint:   nameGen.island(),
+                tierHint : 3
+            );
+            
+            item.price = 1;
+        }
+        
+    }),       
+    
+    Item.Base.new(data : {
         name : "Wyvern Key",
         description: 'A key to another island.',
         examine : '',
@@ -2189,16 +2392,16 @@ Item.Base.database = Database.new(items: [
             
             item.setIslandGenAttributes(
                 levelHint: island.levelHint,
-                nameHint : island.nameHint
+                nameHint : island.nameHint,
+                tierHint : 0
             );
             
             item.price *= 1 + ((island.levelHint) / (5 + 5*Number.random()));
             item.price = item.price->ceil;
             item.name = 'Key to ' + island.nameHint + ' - Stratum ' + levelToStratum(level:island.levelHint);
-            return island;
         }
         
-    })
+    })    
 
     
 ]);

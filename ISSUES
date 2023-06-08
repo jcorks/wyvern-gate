@@ -23,7 +23,7 @@ Coming changes:
   . large chest ALWAYS contains a key to next stratum
   . Stratum keys are pre-defined:
     - First dunegon yields the FIRE key. Enemies here do not use skills and do not have equips
-    - ICE key second. Enemies here do not use skills but have weapon equips
+    - ICE key second. Enemies here use skills (1-2) but have no weapon equips
     - THUNDER key third. Enemies here use skills (1-2) and have weapons 
     - LIGHT key last. Enemies here have all skills learned and have equips
     - Using each key on a gate triggers a special element-themed "boss dragon" 

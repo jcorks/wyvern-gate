@@ -64,6 +64,8 @@ return class(
                         }
                     ));
             
+            
+            
                 battle.entityCommitAction(action:BattleAction.new(
                     state : {
                         ability: 

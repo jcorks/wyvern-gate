@@ -80,6 +80,57 @@ Scene.database = Database.new(
             }
         ),     
  
+
+
+        Scene.new(
+            data : {
+                name : 'scene_wyvernfire0',
+                script: [
+                    //           "Another who comes"
+                    ['???',      'Nohdjaezo kaaj juhrruhnkii...'],
+                    ['???',      'Welcome... to my domain, Chosen. You have done well to get here.'],
+                    ['???',      'You have been summoned, but not by me. My sibling is the one who calls for you.'],
+                    ['???',      'But to get to them, I must evaluate you to see if you are truly worthy of seeing the Wyvern of Light.'],
+                    ['Kaedjaal', 'My name is Kaedjaal, and my domain is that of flame. I enjoy a summer\'s day as much as the next, but I\'ll be honest with you; I take it a step further.'],
+                    ['Kaedjaal', 'Chosen, can you stand my flames? Can you triumph over uncertain and, at times, unfair odds? Show me your power.'],
+                    ['Kaedjaal', 'Come forth.'],
+                    ::(location, landmark, doNext) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @:end = ::(result){
+                            when (!location.ownedBy.isIncapacitated()) ::<= {
+                                world.battle.start(
+                                    party: world.party,                            
+                                    allies: world.party.members,
+                                    enemies: [location.ownedBy],
+                                    landmark: landmark,
+                                    onEnd::(result) {
+                                        end(result);
+                                    }
+                                );                                
+                            }; 
+                            
+                            doNext();
+                        };
+                        world.battle.start(
+                            party:world.party,                            
+                            allies: world.party.members,
+                            enemies: [location.ownedBy],
+                            landmark: landmark,
+                            onEnd::(result) {
+                                end(result);
+                            }
+                        );                         
+                    },
+                    ['Kaedjaal', 'Ha ha ha, splendid! Chosen, that was excellent. You have shown how well you can handle yourself.'],
+                    ['Kaedjaal', 'However, be cautious: you are not the first to have triumphed over me.'],
+                    ['Kaedjaal', 'There are many with their own goals and ambitions, and some will be more skilled that you currently are.'],
+                    ['Kaedjaal', 'Well, I hope you enjoyed this little visit. Come and see me any time.'],
+                    ['Kaedjaal', 'I will send you on your way. Seek the shine to find the Key.'],
+                    ['Kaedjaal', 'May you find peace and prosperity in your heart. ']
+                ]
+            }
+        ),     
+
         
         
     ]

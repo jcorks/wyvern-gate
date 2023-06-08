@@ -105,8 +105,8 @@ return class(
             
             
             
-            discoverIsland ::(levelHint => Number, nameHint) {
-                @:out = Island.new(world:this, levelHint, party, nameHint);
+            discoverIsland ::(levelHint => Number, tierHint => Number, nameHint) {
+                @:out = Island.new(world:this, levelHint, party, nameHint, tierHint);
                 return out;
             },
             

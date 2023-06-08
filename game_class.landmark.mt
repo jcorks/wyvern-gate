@@ -584,6 +584,13 @@ Landmark.Base.database = Database.new(
                     {name: '?????',       rarity:6},                    
                 ],
                 requiredLocations : [
+                    '?????',
+                    '?????',
+                    '?????',
+                    '?????',
+                    '?????',
+
+
                     'Stairs Down',
                     'Small Chest'
                 ],
@@ -598,9 +605,9 @@ Landmark.Base.database = Database.new(
                 rarity : 5,      
                 isUnique : true,
                 minLocations : 1,
-                maxLocations : 4,
+                maxLocations : 5,
                 peaceful: true,
-                dungeonMap : true,
+                dungeonMap : false,
                 possibleLocations : [
                     {name: 'Small Chest', rarity:5},
                 ],
@@ -609,7 +616,7 @@ Landmark.Base.database = Database.new(
                 ],
                 
                 mapHint : {
-                    roomSize: 10,
+                    roomSize: 15,
                     roomAreaSize: 5,
                     roomAreaSizeLarge: 7,
                     emptyAreaCount: 2
@@ -617,6 +624,34 @@ Landmark.Base.database = Database.new(
                 
             }
         ),
+        
+        Landmark.Base.new(
+            data: {
+                name : 'Wyvern Dimension',
+                symbol : 'M',
+                rarity : 1,      
+                isUnique : true,
+                minLocations : 2,
+                maxLocations : 2,
+                peaceful: true,
+                dungeonMap : false,
+                possibleLocations : [
+                ],
+                requiredLocations : [
+                    'Wyvern Throne',
+                ],
+                
+                mapHint : {
+                    roomSize: 20,
+                    roomAreaSize: 15,
+                    roomAreaSizeLarge: 15,
+                    emptyAreaCount: 1
+                    
+                }
+                
+            }
+        ),        
+        
 
         Landmark.Base.new(
             data: {

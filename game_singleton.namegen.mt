@@ -115,7 +115,8 @@
     @:list = [
         'k',
         'gg',
-        'dj'
+        'dj',
+        'pp'
     ];
     return :: {
         return Random.pickArrayItem(list);
@@ -127,7 +128,10 @@
     @:list = [
         'rr',
         'z',
-        'j'
+        'j',
+        'l',
+        'n',
+        'x'
     ];
     return :: {
         return Random.pickArrayItem(list);
@@ -139,7 +143,9 @@
         'ae',
         'aa',
         'oh',
-        'o'
+        'o',
+        'uh',
+        'ii'
     ];
     
     return ::{

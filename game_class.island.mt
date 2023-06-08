@@ -139,6 +139,14 @@
         @events = []; //array of Events
         
         @party_;
+        
+        // the tier of the island. This determines the difficulty
+        // tier 0-> enemies have no skills or equips. Large chests drop Fire keys 
+        // tier 1-> enemies have 1 to 2 skills, but have no equips. Large chests drop Ice keys 
+        // tier 2-> enemies have 1 to 2 skills and have weapons. Large chests drop Thunder keys 
+        // tier 3-> enemies have all skills and have equips. Large chests drop Light keys
+        // tier 4-> enemies have a random set of all skills and have full equip sets.
+        @tier_ = 0;
 
 
         // every island has hostile creatures.
@@ -175,10 +183,120 @@
 
         @significantLandmarks = {};
 
+        // augments an entity based on the current tier
+        @augmentTiered = ::(entity) {
+            match(tier_) {
+              (0): empty, // tier zero has no mods 
 
-        this.constructor = ::(world => Object, levelHint => Number, party => Party.type, nameHint, state) {
+              // tier 1: learn 1 to 2 skills
+              (1):::<= {
+                entity.profession.gainSP(amount:1);
+                if (Number.random() > 0.5)
+                    entity.profession.gainSP(amount:1);
+                          
+              },
+              
+
+              // tier 2: learn 1 to 2 skills and get equips
+              (2):::<= {
+                entity.profession.gainSP(amount:1);
+                if (Number.random() > 0.5)
+                    entity.profession.gainSP(amount:1);
+              
+                @:Item = import(module:'game_class.item.mt');
+                // add a weapon
+                @:wep = Item.Base.database.getRandomFiltered(
+                    filter:::(value) <-
+                        value.isUnique == false &&
+                        value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
+                );
+                    
+                entity.equip(
+                    slot:Entity.EQUIP_SLOTS.HAND_L, 
+                    item:wep.new(
+                        from: entity
+                    ), 
+                    inventory:entity.inventory, 
+                    silent:true
+                );
+              },
+              
+
+
+              // tier 2: learn 1 to 2 skills and get equips
+              (2):::<= {
+                entity.profession.gainSP(amount:10);
+
+              
+                @:Item = import(module:'game_class.item.mt');
+                // add a weapon
+                @:wep = Item.Base.database.getRandomFiltered(
+                    filter:::(value) <-
+                        value.isUnique == false &&
+                        value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
+                );
+                    
+                entity.equip(
+                    slot:Entity.EQUIP_SLOTS.HAND_L, 
+                    item:wep.new(
+                        from: entity
+                    ), 
+                    inventory:entity.inventory, 
+                    silent:true
+                );
+              },
+              
+              
+              // tier 2: learn 1 to 2 skills and get equips
+              (3):::<= {
+                entity.profession.gainSP(amount:10);
+
+              
+                @:Item = import(module:'game_class.item.mt');
+                // add a weapon
+                @:wep = Item.Base.database.getRandomFiltered(
+                    filter:::(value) <-
+                        value.isUnique == false &&
+                        value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
+                );
+                    
+                entity.equip(
+                    slot:Entity.EQUIP_SLOTS.HAND_L, 
+                    item:wep.new(
+                        from: entity
+                    ), 
+                    inventory:entity.inventory, 
+                    silent:true
+                );
+
+
+                // add some armor!
+                @:wep = Item.Base.database.getRandomFiltered(
+                    filter:::(value) <-
+                        value.isUnique == false &&
+                        value.type == Item.TYPE.ARMOR
+                );;
+                    
+                entity.equip(
+                    slot:Entity.EQUIP_SLOTS.ARMOR, 
+                    item:wep.new(
+                        from: entity
+                    ), 
+                    inventory:entity.inventory, 
+                    silent:true
+                );
+
+              }             
+              
+              
+            };        
+        };
+
+
+        this.constructor = ::(world => Object, levelHint => Number, party => Party.type, nameHint, state, tierHint => Number) {
             world_ = world;            
             party_ = party;
+            tier_ = tierHint;
 
             when (state != empty) ::<= {
                 this.state = state;
@@ -369,6 +487,10 @@
                 get ::<- sizeH
             },
             
+            tier : {
+                get ::<- tier_
+            },
+            
             map : {
                 get:: <- map
             },
@@ -427,6 +549,8 @@
                     //professionHint: if (professionHint == empty) this.getProfession().name  else professionHint
                 );
                 
+                augmentTiered(entity:out);
+                
                 return out;
             },
             
@@ -450,28 +574,7 @@
                     ).name
                 );       
                 
-                @:Item = import(module:'game_class.item.mt');
-                // add a weapon
-                if (angy.level >= 3) ::<= {
-                    @:wep = Item.Base.database.getRandomFiltered(
-                        filter:::(value) <-
-                            value.isUnique == false &&
-                            angy.level >= value.levelMinimum &&
-                                (value.equipType == Item.TYPE.HAND ||
-                                 value.equipType == Item.TYPE.TWOHANDED) &&
-                             value.equipMod.ATK >= 5
-                    );
-                    
-                    angy.equip(
-                        slot:Entity.EQUIP_SLOTS.HAND_L, 
-                        item:wep.new(
-                            from: angy
-                        ), 
-                        inventory:angy.inventory, 
-                        silent:true
-                    );
-                };
-                       
+                augmentTiered(entity:angy);                       
                 return angy;  
             },
 

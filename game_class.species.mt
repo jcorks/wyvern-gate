@@ -445,6 +445,25 @@ Species.database = Database.new(items: [
         ]
     }),
 
+    Species.new(data:{
+        name : 'Wyvern of Fire',
+        rarity : 2000000000000,
+        description: 'Keepers of the gates',
+        growth : StatSet.new(
+            HP : 60,
+            AP : 10,
+            ATK: 10,
+            DEF: 10,
+            INT: 10,
+            LUK: 10,
+            SPD: 10,
+            DEX: 10
+        ),
+        
+        passives : [
+        ]
+    }),
+
     
 ]);
 

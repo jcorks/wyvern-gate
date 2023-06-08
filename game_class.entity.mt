@@ -130,6 +130,7 @@
         
         @expNext = 10;
         @level = 0;
+        @onInteract = empty;
 
 
         @:resetEffects :: {
@@ -363,13 +364,21 @@
                 get :: {
                     when (nickname != empty) nickname;
                     return name;
+                },
+                
+                set ::(value => String) {
+                    name = value;
                 }
             },
             
             species : {
                 get :: {
                     return species;
-                } 
+                }, 
+                
+                set ::(value) {
+                    species = value;
+                }
             },
 
             requestsRemove : {
@@ -901,6 +910,7 @@
             
             // interacts with this entity
             interactPerson ::(party, location, onNext) {
+                when(onInteract) onInteract(party, location, onNext);
                 dialogue.message(
                     speaker: name,
                     text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.GREET])
@@ -997,6 +1007,13 @@
 
             enemies : {
                 get ::<- enemies_
+            },
+            
+            // when set, this overrides the default interaction menu
+            onInteract : {
+                set ::(value) {
+                    onInteract = value;
+                }
             },
             
             describe:: {

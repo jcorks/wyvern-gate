@@ -696,7 +696,7 @@ Interaction.database = Database.new(
                     @:keys = [];
                     @:keynames = [];
                     party.inventory.items->foreach(do:::(index, item) {
-                        if (item.base.name == 'Wyvern Key') ::<= {
+                        if (item.base.name->contains(key:'Wyvern Key')) ::<= {
                             keys->push(value: item);
                             keynames->push(value: item.name);
                         };
@@ -707,36 +707,32 @@ Interaction.database = Database.new(
                         
                     
                         
-                    @choice = dialogue.choicesNow(
+                    dialogue.choices(
                         prompt: 'Enter with which?',
                         choices: keynames,
-                        canCancel: true                        
+                        canCancel: true,
+                        onChoice:::(choice) {
+                            when(choice == 0) empty;
+                            canvas.clear();
+                            dialogue.message(text:'As the key is pushed in, the gate gently whirrs and glows with a blinding light...');
+                            dialogue.message(text:'As you enter, you feel the world around you fade.');
+                            dialogue.message(text:'...', onNext::{
+                                @:Event = import(module:'game_class.event.mt');
+                                @:Landmark = import(module:'game_class.landmark.mt');
+                                @:world = import(module:'game_singleton.world.mt');
+                                @:instance = import(module:'game_singleton.instance.mt');
+
+                                @:d = Landmark.Base.database.find(name:'Wyvern Dimension').new(
+                                    island:location.landmark.island,
+                                    x: 0,
+                                    y: 0
+                                );
+                                instance.visitLandmark(landmark:d);                        
+                            
+                            });
+                        }
                     );
-                    when(choice == 0) empty;
 
-                    canvas.clear();
-                    dialogue.message(text:'As the key is pushed in, the gate gently whirrs and glows with a blinding light...');
-                    dialogue.message(text:'As you enter, you feel the world around you fade.');
-                    dialogue.message(text:'...');
-
-                    @:Event = import(module:'game_class.event.mt');
-                    @:world = import(module:'game_singleton.world.mt');
-
-
-                    @:event = Event.Base.database.find(name:'Encounter:GateBoss').new(
-                        island:location.landmark.island,
-                        party:world.party,
-                        currentTime:0, // TODO,
-                        landmark:location.landmark
-                    );  
-
-
-
-                    @:world = import(module:'game_singleton.world.mt');
-
-                    @:key = keys[choice-1];
-                    key.addIslandEntry(world);    
-                    send(message:key.islandEntry);
 
 
                 },

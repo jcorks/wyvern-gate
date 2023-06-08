@@ -376,7 +376,6 @@
                           (!isPlayerParty): RESULTS.ENEMIES_WIN,
                           default:          RESULTS.NOONE_WIN
                         };
-                        breakpoint();
                         
                         
                         allies->foreach(do:::(k, v) {
@@ -530,7 +529,6 @@
             },
             
             render :: {
-                breakpoint();
                 canvas.clear();
                 renderStatusBox();
                 renderTurnOrder();

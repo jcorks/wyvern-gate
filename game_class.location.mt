@@ -457,6 +457,84 @@ Location.Base.database = Database.new(
         
         }),
 
+
+        Location.Base.new(data:{
+            name: 'Wyvern Throne',
+            rarity: 1,
+            ownVerb : 'owned',
+            symbol: 'W',
+            owned : true,
+
+            descriptions: [
+                "What seems to be a stone throne",
+            ],
+            interactions : [
+                'talk',
+                'examine'
+            ],
+            
+            aggressiveInteractions : [
+                'vandalize',            
+            ],
+
+
+            
+            minOccupants : 0,
+            maxOccupants : 0,
+            
+            onInteract ::(location) {
+                return true;
+
+            },            
+            
+            onCreate ::(location) {
+                location.name = 'Wyvern Throne';
+                match(location.landmark.island.tier) {
+                  (0): ::<= {
+                    @:Profession = import(module:'game_class.profession.mt');
+                    @:Species = import(module:'game_class.species.mt');
+                    @:Story = import(module:'game_singleton.story.mt');
+                    @:Scene = import(module:'game_class.scene.mt');
+                    @:StatSet = import(module:'game_class.statset.mt');
+                
+                    location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
+                    location.ownedBy.species = Species.database.find(name:'Wyvern of Fire');
+                    location.ownedBy.profession = Profession.Base.database.find(name:'Wyvern of Fire').new();               
+                    location.ownedBy.onInteract = ::(party, location, onNext) {
+                        if (!Story.defeatedWyvernFire) ::<= {
+                            Scene.database.find(name:'scene_wyvernfire0').act(onDone::{}, location, landmark:location.landmark);
+                        } else ::<= {
+                            // just visiting!
+                            Scene.database.find(name:'scene_wyvernfire1').act(onDone::{}, location, landmark:location.landmark);                        
+                        };
+                    };
+                    location.ownedBy.stats.state = StatSet.new(
+                        HP:   120,
+                        AP:   999,
+                        ATK:  25,
+                        INT:  50,
+                        DEF:  20,
+                        LUK:  20,
+                        SPD:  20,
+                        DEX:  20
+                    ).state;
+                  },
+                  default: ::<= {
+                    error(detail:'This wyvern is currently out!');
+                  }
+
+                };
+                
+
+
+
+            },
+            
+            onTimeChange::(location, time) {
+            
+            }
+        }),
+
         Location.Base.new(data:{
             name: 'shop',
             rarity: 100,
@@ -984,17 +1062,19 @@ Location.Base.database = Database.new(
             },
             
             onCreate ::(location) {
-                
                 @:nameGen = import(module:'game_singleton.namegen.mt');
-                location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key').new(from:location.ownedBy, creationHint:{
-                    levelHint: ((location.landmark.island.levelMax * 1.1) + 5)->floor,
-                    nameHint: nameGen.island()
-                }));
-                [0, 3+(Number.random()*2)->ceil]->for(do:::(i) <-
+                
+                match(location.landmark.island.tier) {
+                    (0): location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire').new(from:location.ownedBy)),
+                    (1): location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Ice').new(from:location.ownedBy)),
+                    (2): location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Thunder').new(from:location.ownedBy)),
+                    (3): location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Light').new(from:location.ownedBy))
+                };
+                [0, 3+(Number.random()*2)->ceil]->for(do:::(i) {
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false
-                    ).new(from:location.landmark.island.newInhabitant(),rngModHint:true))
-                );
+                    ).new(from:location.landmark.island.newInhabitant(),rngModHint:true));
+                });
             },
             
             onTimeChange::(location, time) {

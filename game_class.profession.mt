@@ -1017,7 +1017,41 @@ Profession.Base.database = Database.new(
                 ],
                 passives : [
                 ]
+            }),
+
+            Profession.Base.new(data:{
+                name: 'Wyvern of Fire',
+                weaponAffinity: 'None',
+                description : "", 
+                levelMinimum : 100,
+
+                growth: StatSet.new(
+                    HP:  20,
+                    AP:  20,
+                    ATK: 20,
+                    INT: 20,
+                    DEF: 20,
+                    SPD: 20,
+                    LUK: 20,
+                    DEX: 20
+                ),
+                minKarma : 0,
+                maxKarma : 50,
+                learnable : false,
+                
+                abilities : [
+                    'Triplestrike',
+                    'Sunbeam',
+                    'Sunburst',
+                    'Big Swing',
+                    'Stun',
+                    'Fire',
+                    'Wild Swing'
+                ],
+                passives : [
+                ]
             })
+            
             
             
         ]

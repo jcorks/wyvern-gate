@@ -22,8 +22,33 @@ return struct(
     name: 'Wyvern.StoryFlags',
     
     items : {
-        // whether the shopkeep will give you the comment about strata
-        foundFirstKey : Boolean,
+        // whether the Fire Key is has been given to the party
+        foundFireKey : Boolean,
+
+        // whether the Ice Key has been given to the party
+        foundIceKey : Boolean,
+
+        // whether the thunder key has been given to the party
+        foundThunderKey : Boolean,
+
+        // whether the light key has been given to the party        
+        foundLightKey : Boolean,
+        
+        // whether the dark key has been given to the party
+        hasDarkKey : Boolean,
+        
+        
+        
+        
+        
+        // whether the wyvern of fire has been defeated
+        defeatedWyvernFire : Boolean,
+        
+        defeatedWyvernIce : Boolean,
+        
+        defeatedWyvernThunder : Boolean,
+        
+        defeatedWyvernLight : Boolean,
         
         
         
@@ -33,7 +58,18 @@ return struct(
         data_locationsNeeded : Number
     }
 ).new(state: {
-    foundFirstKey : false,
+    foundFireKey : false,
+    foundIceKey : false,
+    foundThunderKey : false,
+    foundLightKey : false,
+    
+    
+    defeatedWyvernFire : false,
+    defeatedWyvernIce : false,
+    defeatedWyvernThunder : false,
+    defeatedWyvernLight : false,
+    
+    hasDarkKey : false,
     
     data_locationsDiscovered : 0,
     data_locationsNeeded : 25

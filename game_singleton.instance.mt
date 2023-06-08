@@ -604,7 +604,8 @@ return class(
                         nameHint:namegen.island(), levelHint:5
                     }
                 );
-                    
+                
+                
                     
                 keyhome.addIslandEntry(world);
                 island = keyhome.islandEntry;
@@ -628,9 +629,13 @@ return class(
                 
                 
                 
-                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
+                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:500);
                 @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
                 // debug
+                    party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
+                    ).new(from:island.newInhabitant(),rngModHint:true));
+
+
                     /*
                     [0, 10]->for(do:::(i) {
                         party.inventory.add(item:Item.Base.database.getRandomFiltered(
@@ -707,4 +712,4 @@ return class(
             }
         };
     }
-).new(); 
+).new();
