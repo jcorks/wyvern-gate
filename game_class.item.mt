@@ -148,7 +148,8 @@
                             equipEffects->push(value:effect);
                         });
                         stats.add(stats:mod.equipMod);
-                        description = description + ' ' + mod.description;
+                        if (description->contains(key:mod.description) == false)
+                            description = description + ' ' + mod.description;
                     });
                 };
             };
@@ -2172,7 +2173,7 @@ Item.Base.database = Database.new(items: [
             };
 
             item.setIslandGenAttributes(
-                levelHint:  user.level => Number,
+                levelHint:  5,//user.level => Number,
                 nameHint:   nameGen.island(),
                 tierHint : 1
             );

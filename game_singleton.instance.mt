@@ -629,20 +629,22 @@ return class(
                 
                 
                 
-                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:500);
+                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
                 @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
                 // debug
+                    /*
                     party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
                     ).new(from:island.newInhabitant(),rngModHint:true));
-
+                    */
 
                     /*
-                    [0, 10]->for(do:::(i) {
+                    [0, 20]->for(do:::(i) {
                         party.inventory.add(item:Item.Base.database.getRandomFiltered(
                             filter:::(value) <- value.isUnique == false
                         ).new(from:island.newInhabitant(),rngModHint:true));
                     });
                     */
+                    
 
                 [0, 3]->for(do:::(i) {
                     @:crystal = Item.Base.database.find(name:'Skill Crystal').new(from:p0);

@@ -92,6 +92,7 @@ Scene.database = Database.new(
                     ['???',      'You have been summoned, but not by me. My sibling is the one who calls for you.'],
                     ['???',      'But to get to them, I must evaluate you to see if you are truly worthy of seeing the Wyvern of Light.'],
                     ['Kaedjaal', 'My name is Kaedjaal, and my domain is that of flame. I enjoy a summer\'s day as much as the next, but I\'ll be honest with you; I take it a step further.'],
+                    ['Kaedjaal', 'Dancing in the fire, my test looks inward: your will, your determination, what moves you.'],
                     ['Kaedjaal', 'Chosen, can you stand my flames? Can you triumph over uncertain and, at times, unfair odds? Show me your power.'],
                     ['Kaedjaal', 'Come forth.'],
                     ::(location, landmark, doNext) {
@@ -125,7 +126,7 @@ Scene.database = Database.new(
                     ['Kaedjaal', 'However, be cautious: you are not the first to have triumphed over me.'],
                     ['Kaedjaal', 'There are many with their own goals and ambitions, and some will be more skilled that you currently are.'],
                     ['Kaedjaal', 'Well, I hope you enjoyed this little visit. Come and see me any time.'],
-                    ['Kaedjaal', 'I will send you on your way. Seek the shine to find the Key.'],
+                    ['Kaedjaal', 'I will send you on your way. Remember: seek the shrine to find the Key.'],
                     ['Kaedjaal', 'May you find peace and prosperity in your heart. ']
                 ]
             }

@@ -55,6 +55,21 @@ return class(
             },
             
             takeTurn ::(battle){
+                @:defaultAttack = ::{
+                    battle.entityCommitAction(action:BattleAction.new(
+                        state : {
+                            ability: 
+                                user_.abilitiesAvailable[0],
+                                //Ability.database.find(name:'Bribe'),
+
+                            targets: [
+                                Random.pickArrayItem(list:enemies_)
+                            ],
+                            extraData: {}                        
+                        }
+                    ));                  
+                };
+            
                 when(enemies_->keycount == 0)
                     battle.entityCommitAction(action:BattleAction.new(
                         state : {
@@ -65,19 +80,64 @@ return class(
                     ));
             
             
-            
+                // default: just attack if all you have is defend and attack
+                when(user_.abilitiesAvailable->keycount <= 2 || Number.random() < 0.4)
+                    defaultAttack();          
+
+                // else pick a non-defend ability
+                @:list = user_.abilitiesAvailable->filter(by:::(value) <- value.name != 'Attack' && value.name != 'Defend' && value.usageHintAI != Ability.USAGE_HINT.DONTUSE);
+
+                // fallback if only ability known is "dont use"
+                if (list->keycount == 0)
+                    defaultAttack();
+                    
+                @:ability = Random.pickArrayItem(list);
+                
+                
+                @atEnemy = ability.usageHintAI == Ability.USAGE_HINT.OFFSENSIVE ||
+                           ability.usageHintAI == Ability.USAGE_HINT.DEBUFF;
+                breakpoint();
+                
+                @targets = [];
+                match(ability.targetMode) {
+                  (Ability.TARGET_MODE.ONE) :::<= {
+                    if (atEnemy) 
+                        targets->push(value:Random.pickArrayItem(list:enemies_))
+                    else 
+                        targets->push(value:Random.pickArrayItem(list:allies_))
+                    ;
+                  },
+                  
+                  (Ability.TARGET_MODE.ALLALLY) :::<= {
+                    targets = [...allies_];
+                  },                  
+
+                  (Ability.TARGET_MODE.ALLENEMY) :::<= {
+                    targets = [...enemies_];
+                  },                  
+
+                  (Ability.TARGET_MODE.NONE) :::<= {
+                  },
+
+
+                  (Ability.TARGET_MODE.RANDOM) :::<= {
+                    if (Number.random() < 0.5) 
+                        targets->push(value:Random.pickArrayItem(list:enemies_))
+                    else 
+                        targets->push(value:Random.pickArrayItem(list:allies_))
+                    ;                    
+                  }
+
+                };
+                
+                
                 battle.entityCommitAction(action:BattleAction.new(
                     state : {
-                        ability: 
-                            user_.abilitiesAvailable[0],
-                            //Ability.database.find(name:'Bribe'),
-
-                        targets: [
-                            Random.pickArrayItem(list:enemies_)
-                        ],
+                        ability: ability,
+                        targets: targets,
                         extraData: {}                        
                     }
-                ));            
+                ));
             }
         };   
     }  

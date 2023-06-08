@@ -601,9 +601,69 @@ Interaction.database = Database.new(
                 onInteract ::(location, party) {
                 
                     @:Entity = import(module:'game_class.entity.mt');
+
+                    @:items = party.inventory.items->filter(by:::(value) <- value.base.hasAttribute(attribute:Item.ATTRIBUTE.RAW_METAL));
+                    when(items->keycount == 0)
+                        dialogue.message(text:'No suitable ingots or materials were found in the party inventory.');
+
+
+                    @charge = false;
+                    @smith = empty;
+
+                    @:smithingInAction = :: {
+                       
+                        @:itemNames = [...items]->map(to:::(value) <- value.name);
+        
+                        dialogue.choices(
+                            prompt: 'Which material?',
+                            choices: itemNames,
+                            canCancel: true,
+                            onChoice::(choice) {
+                                @:ore = items[choice-1];
+                                @:toMake = Item.Base.database.getAll()->filter(
+                                    by:::(value) <- (
+                                        value.isUnique == false &&
+                                        smith.level >= value.levelMinimum &&
+                                        value.hasAttribute(attribute:Item.ATTRIBUTE.METAL)
+                                    )
+                                );
+
+                                @:outputBase = random.pickArrayItem(list:toMake);
+                                when(dialogue.askBoolean(
+                                    prompt:'Smith with ' + ore.base.name + '?',
+                                    onChoice::(which) {
+                                    
+                                    }
+                                )) empty;
+                                
+                                if (charge)
+                                    party.inventory.subtractGold(amount:300);                            
+                                
+                
+                                @:output = outputBase.new(
+                                    materialHint: ore.base.name->split(token:' ')[0],
+                                    from: smith
+                                );
+                                
+                                dialogue.message(
+                                    speaker: smith.name,
+                                    text: 'No problem!'
+                                );
+                                
+                                dialogue.message(
+                                    text:smith.name + ' forged a ' + output.name,
+                                    onNext ::{
+                                        party.inventory.remove(item:ore);
+                                        party.inventory.add(item:output);                                                                    
+                                    }
+                                );
+                            }
+                        );         
+                    };
+
                 
                     @:smiths = party.members->filter(by:::(value) <- value.profession.base.name == 'Blacksmith');
-                    @:smith = if (smiths->keycount == 0) ::<= {
+                    if (smiths->keycount == 0) ::<= {
                         dialogue.message(text:'No one in your party can work the forge (no one is a Blacksmith)');
 
                         @:world = import(module:'game_singleton.world.mt');
@@ -611,74 +671,41 @@ Interaction.database = Database.new(
                             dialogue.message(text:'The blacksmith here would normally be able to forge for you, but the blacksmith is gone for the night.');
 
                         dialogue.message(text:'The blacksmith offers to work the forge for you.');
-                        when(dialogue.askBoolean(
-                            prompt: 'Hire to forge for 100G?'
-                        ) == false) empty;
-                        
-                        when(party.inventory.gold < 100)
-                            dialogue.message(text:'The party cannot afford to pay the blacksmith.');
 
-                        party.inventory.subtractGold(amount:100);                            
-                        return location.ownedBy;
+
+                        dialogue.askBoolean(
+                            prompt: 'Hire to forge for 300G?',
+                            onChoice::(which) {
+                                when(which == false) empty;
+                                when(party.inventory.gold < 300)
+                                    dialogue.message(text:'The party cannot afford to pay the blacksmith.');
+                                
+                                smith = location.ownedBy;
+                                charge = true;
+                                smithingInAction();
+                            }
+                        );
                     } else ::<= {                            
                         @:names = [...smiths]->map(to:::(value) <- value.name);
                         
-                        @choice = dialogue.choicesNow(
+                        dialogue.choices(
                             prompt: 'Who should work the forge?',
                             choices: names,
-                            canCancel: true
+                            canCancel: true,
+                            onChoice::(choice) {
+                                when(choice == 0) empty;
+                                @:hammer = smiths[choice-1].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
+                                when (hammer == empty || hammer.base.name != 'Hammer')
+                                    dialogue.message(text:'Smithing requires a Hammer to be equipped.');
+
+
+                                smith = smiths[choice-1];
+                                smithingInAction();
+                            
+                            }
                         );         
-                        when(choice == 0) empty;
-                        @:hammer = smiths[choice-1].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
-                        when (hammer == empty || hammer.base.name != 'Hammer')
-                            dialogue.message(text:'Smithing requires a Hammer to be equipped.');
-
-
-                        return smiths[choice-1];
                     };
-                    when(smith == empty) empty;
-                        
-                    @:items = party.inventory.items->filter(by:::(value) <- value.base.hasAttribute(attribute:Item.ATTRIBUTE.RAW_METAL));
-                    when(items->keycount == 0)
-                        dialogue.message(text:'No suitable ingots or materials were found in the party inventory.');
 
-                    @:itemNames = [...items]->map(to:::(value) <- value.name);
-    
-                    @choice = dialogue.choicesNow(
-                        prompt: 'Which material?',
-                        choices: itemNames,
-                        canCancel: true
-                    );         
-                    when(choice == 0) empty;
-                    @:ore = items[choice-1];
-                    @:toMake = Item.Base.database.getAll()->filter(
-                        by:::(value) <- (
-                            value.isUnique == false &&
-                            smith.level >= value.levelMinimum &&
-                            value.hasAttribute(attribute:Item.ATTRIBUTE.METAL)
-                        )
-                    );
-
-                    @:outputBase = random.pickArrayItem(list:toMake);
-                    when(dialogue.askBoolean(
-                        prompt:'Smith with ' + ore.base.name + '?'
-                    ) == false) empty;
-    
-                    @:output = outputBase.new(
-                        materialHint: ore.base.name->split(token:' ')[0],
-                        from: smith
-                    );
-                    
-                    dialogue.message(
-                        speaker: smith.name,
-                        text: 'No problem!'
-                    );
-                    
-                    dialogue.message(
-                        text:smith.name + ' forged a ' + output.name
-                    );
-                    party.inventory.remove(item:ore);
-                    party.inventory.add(item:output);
                     
                 },
                 

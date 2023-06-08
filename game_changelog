@@ -33,4 +33,9 @@
 - Added dungeon-aligned layouts for landmarks
 - Added "foliage" for landmarks that extend outside of the map
 - Changed locations to be spaced out when generating landmarks to prevent overlap
+- Fixed blacksmith forging options
+- Added battle AI for ability use
+- Added required city on islands
+- Increased shop count in cities
+- Added abilities for first wyvern
 

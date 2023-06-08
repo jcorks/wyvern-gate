@@ -587,11 +587,12 @@
                     dialogue.message(text: '' + this.name + ' heals ' + amount + ' HP (HP:' + this.renderHP() + ')');
             },
             
-            healAP ::(amount => Number) {
+            healAP ::(amount => Number, silent) {
                 amount = amount->ceil;
                 ap += amount;
                 if (ap > stats.AP) ap = stats.AP;
-                dialogue.message(text: '' + this.name + ' heals ' + amount + ' AP (AP:' + ap + '/' + stats.AP + ')');
+                if (silent == empty)
+                    dialogue.message(text: '' + this.name + ' heals ' + amount + ' AP (AP:' + ap + '/' + stats.AP + ')');
                 
                 
             },
@@ -759,6 +760,14 @@
                     abilitiesAvailable->push(value:ability);
                     
                 abilitiesLearned->push(value:ability);
+            },
+            
+            clearAbilities::{
+                @abilitiesAvailable = [
+                    Ability.database.find(name:'Attack'),
+                    Ability.database.find(name:'Defend'),
+                ];
+                abilitiesLearned = [];
             },
             
             hp : {

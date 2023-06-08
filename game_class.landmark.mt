@@ -458,7 +458,7 @@ Landmark.Base.database = Database.new(
                 rarity : 5,
                 minLocations : 3,
                 isUnique : false,
-                maxLocations : 5,
+                maxLocations : 12,
                 peaceful : true,
                 dungeonMap : false,
                 possibleLocations : [
@@ -469,6 +469,8 @@ Landmark.Base.database = Database.new(
                     //{name:'school', rarity: 7}
                 ],
                 requiredLocations : [
+                    'shop',
+                    'shop',
                     'shop',
                     'Tavern',
                     'Arena',
@@ -584,11 +586,6 @@ Landmark.Base.database = Database.new(
                     {name: '?????',       rarity:6},                    
                 ],
                 requiredLocations : [
-                    '?????',
-                    '?????',
-                    '?????',
-                    '?????',
-                    '?????',
 
 
                     'Stairs Down',

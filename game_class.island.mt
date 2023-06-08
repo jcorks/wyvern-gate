@@ -383,6 +383,15 @@
             map.setItem(data:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol, name:gate.base.name);
             significantLandmarks->push(value:gate);
 
+
+            @:gate = Landmark.Base.database.find(name:'city').new(
+                island:this,
+                x: Number.random()*(sizeW - 0.2) + 0.2,
+                y: Number.random()*(sizeH - 0.2) + 0.2
+            );
+            map.setItem(data:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol, name:gate.base.name);
+            significantLandmarks->push(value:gate);
+
             
 
             return this;

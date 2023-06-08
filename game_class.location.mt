@@ -500,6 +500,12 @@ Location.Base.database = Database.new(
                     location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
                     location.ownedBy.species = Species.database.find(name:'Wyvern of Fire');
                     location.ownedBy.profession = Profession.Base.database.find(name:'Wyvern of Fire').new();               
+                    location.ownedBy.clearAbilities();
+                    location.ownedBy.profession.gainSP(amount:10)->foreach(do:::(i, ability) {
+                        location.ownedBy.learnAbility(name:ability);
+                    });
+
+                    
                     location.ownedBy.onInteract = ::(party, location, onNext) {
                         if (!Story.defeatedWyvernFire) ::<= {
                             Scene.database.find(name:'scene_wyvernfire0').act(onDone::{}, location, landmark:location.landmark);
@@ -509,15 +515,17 @@ Location.Base.database = Database.new(
                         };
                     };
                     location.ownedBy.stats.state = StatSet.new(
-                        HP:   120,
+                        HP:   140,
                         AP:   999,
-                        ATK:  25,
-                        INT:  50,
-                        DEF:  20,
-                        LUK:  20,
-                        SPD:  20,
-                        DEX:  20
+                        ATK:  7,
+                        INT:  16,
+                        DEF:  14,
+                        LUK:  8,
+                        SPD:  16,
+                        DEX:  16
                     ).state;
+                    location.ownedBy.heal(amount:9999, silent:true); 
+                    location.ownedBy.healAP(amount:9999, silent:true); 
                   },
                   default: ::<= {
                     error(detail:'This wyvern is currently out!');
@@ -1063,12 +1071,29 @@ Location.Base.database = Database.new(
             
             onCreate ::(location) {
                 @:nameGen = import(module:'game_singleton.namegen.mt');
+                @:Story = import(module:'game_singleton.story.mt');
                 
                 match(location.landmark.island.tier) {
-                    (0): location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire').new(from:location.ownedBy)),
-                    (1): location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Ice').new(from:location.ownedBy)),
-                    (2): location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Thunder').new(from:location.ownedBy)),
-                    (3): location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Light').new(from:location.ownedBy))
+                    (0):::<= { 
+                        if (Story.foundFireKey == false)
+                            location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire').new(from:location.ownedBy));
+                        Story.foundFireKey = true;
+                    },
+                    (1):::<= {
+                        if (Story.foundIceKey == false) 
+                            location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Ice').new(from:location.ownedBy));                                            
+                        Story.foundIceKey = true;
+                    },
+                    (2):::<= {
+                        if (Story.foundThunderKey == false)                     
+                            location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Thunder').new(from:location.ownedBy));
+                        Story.foundThunderKey = true;
+                    },
+                    (3):::<= {
+                        if (Story.foundLightKey == false) 
+                            location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Light').new(from:location.ownedBy));
+                        Story.foundLightKey = true;
+                    }
                 };
                 [0, 3+(Number.random()*2)->ceil]->for(do:::(i) {
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(
