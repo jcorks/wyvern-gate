@@ -2228,6 +2228,244 @@ Ability.database = Database.new(
                     }
                 }
             ),
+
+            Ability.new(
+                data: {
+                    name: 'Pink Brew',
+                    targetMode : TARGET_MODE.NONE,
+                    description: 'Uses 3 Ingredients to make a pink potion.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.DONTUSE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @inventory;
+                        if (world.party.isMember(entity:user)) ::<= {
+                            inventory = world.party.inventory;
+                        } else ::<= {
+                            inventory = user.inventory;
+                        };
+                        
+                        @count = 0;
+                        inventory.items->foreach(do:::(i, item) {
+                            if (item.name == 'Ingredient') ::<= {
+                                count += 1;
+                            };
+                        });
+                        
+                        dialogue.message(text: user.name + ' tried to make a Pink Brew...');
+                        when(count < 3)
+                            dialogue.message(text: '... but didn\'t have enough ingredients!');
+
+                        dialogue.message(text: '... and made a Pink Potion!');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.add(item:Item.Base.database.find(name:'Pink Potion').new(from:user));                            
+                    }
+                }
+            ),
+
+            Ability.new(
+                data: {
+                    name: 'Cyan Brew',
+                    targetMode : TARGET_MODE.NONE,
+                    description: 'Uses 3 Ingredients to make a cyan potion.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.DONTUSE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @inventory;
+                        if (world.party.isMember(entity:user)) ::<= {
+                            inventory = world.party.inventory;
+                        } else ::<= {
+                            inventory = user.inventory;
+                        };
+                        
+                        @count = 0;
+                        inventory.items->foreach(do:::(i, item) {
+                            if (item.name == 'Ingredient') ::<= {
+                                count += 1;
+                            };
+                        });
+                        
+                        dialogue.message(text: user.name + ' tried to make a Cyan Brew...');
+                        when(count < 3)
+                            dialogue.message(text: '... but didn\'t have enough ingredients!');
+
+                        dialogue.message(text: '... and made a Pink Potion!');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.add(item:Item.Base.database.find(name:'Cyan Potion').new(from:user));                            
+                    }
+                }
+            ),
+
+
+            Ability.new(
+                data: {
+                    name: 'Green Brew',
+                    targetMode : TARGET_MODE.NONE,
+                    description: 'Uses 3 Ingredients to make a cyan potion.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.DONTUSE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @inventory;
+                        if (world.party.isMember(entity:user)) ::<= {
+                            inventory = world.party.inventory;
+                        } else ::<= {
+                            inventory = user.inventory;
+                        };
+                        
+                        @count = 0;
+                        inventory.items->foreach(do:::(i, item) {
+                            if (item.name == 'Ingredient') ::<= {
+                                count += 1;
+                            };
+                        });
+                        
+                        dialogue.message(text: user.name + ' tried to make a Green Brew...');
+                        when(count < 3)
+                            dialogue.message(text: '... but didn\'t have enough ingredients!');
+
+                        dialogue.message(text: '... and made a Green Potion!');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.add(item:Item.Base.database.find(name:'Green Potion').new(from:user));                            
+                    }
+                }
+            ),
+
+
+
+            Ability.new(
+                data: {
+                    name: 'Orange Brew',
+                    targetMode : TARGET_MODE.NONE,
+                    description: 'Uses 3 Ingredients to make an orange potion.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.DONTUSE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @inventory;
+                        if (world.party.isMember(entity:user)) ::<= {
+                            inventory = world.party.inventory;
+                        } else ::<= {
+                            inventory = user.inventory;
+                        };
+                        
+                        @count = 0;
+                        inventory.items->foreach(do:::(i, item) {
+                            if (item.name == 'Ingredient') ::<= {
+                                count += 1;
+                            };
+                        });
+                        
+                        dialogue.message(text: user.name + ' tried to make an Orange Brew...');
+                        when(count < 3)
+                            dialogue.message(text: '... but didn\'t have enough ingredients!');
+
+                        dialogue.message(text: '... and made a Orange Potion!');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.add(item:Item.Base.database.find(name:'Orange Potion').new(from:user));                            
+                    }
+                }
+            ),
+
+            Ability.new(
+                data: {
+                    name: 'Purple Brew',
+                    targetMode : TARGET_MODE.NONE,
+                    description: 'Uses 3 Ingredients to make a purple potion.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.DONTUSE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @inventory;
+                        if (world.party.isMember(entity:user)) ::<= {
+                            inventory = world.party.inventory;
+                        } else ::<= {
+                            inventory = user.inventory;
+                        };
+                        
+                        @count = 0;
+                        inventory.items->foreach(do:::(i, item) {
+                            if (item.name == 'Ingredient') ::<= {
+                                count += 1;
+                            };
+                        });
+                        
+                        dialogue.message(text: user.name + ' tried to make a Purple Brew...');
+                        when(count < 3)
+                            dialogue.message(text: '... but didn\'t have enough ingredients!');
+
+                        dialogue.message(text: '... and made a Purple Potion!');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.add(item:Item.Base.database.find(name:'Purple Potion').new(from:user));                            
+                    }
+                }
+            ),
+
+
+            Ability.new(
+                data: {
+                    name: 'Black Brew',
+                    targetMode : TARGET_MODE.NONE,
+                    description: 'Uses 3 Ingredients to make a black potion.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.DONTUSE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @inventory;
+                        if (world.party.isMember(entity:user)) ::<= {
+                            inventory = world.party.inventory;
+                        } else ::<= {
+                            inventory = user.inventory;
+                        };
+                        
+                        @count = 0;
+                        inventory.items->foreach(do:::(i, item) {
+                            if (item.name == 'Ingredient') ::<= {
+                                count += 1;
+                            };
+                        });
+                        
+                        dialogue.message(text: user.name + ' tried to make a Black Brew...');
+                        when(count < 3)
+                            dialogue.message(text: '... but didn\'t have enough ingredients!');
+
+                        dialogue.message(text: '... and made a Black Potion!');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.removeByName(name:'Ingredient');
+                        inventory.add(item:Item.Base.database.find(name:'Black Potion').new(from:user));                            
+                    }
+                }
+            ),
             
             
            Ability.new(

@@ -609,9 +609,9 @@ Profession.Base.database = Database.new(
                     HP:  3,
                     AP:  5,
                     ATK: 2,
-                    INT: 4,
+                    INT: 6,
                     DEF: 3,
-                    SPD: 3,
+                    SPD: 5,
                     LUK: 2,
                     DEX: 2
                 ),
@@ -626,8 +626,7 @@ Profession.Base.database = Database.new(
                     'Green Brew',    // etc (poison)
                     'Orange Brew',   // etc (explosion)
                     'Purple Brew',   // etc (health + ap)
-                    'Grey Brew',     // petrify
-                    'Purple Elixir', // heal + ap for party 
+                    'Black Brew',     // petrify
                 ],
                 passives : [
                     'Alchemist\'s Scavenging' // find 2-5 Ingredient Packs

@@ -48,6 +48,17 @@ return class(
                 return item;
             },
             
+            removeByName::(name) {
+                [::] {
+                    items->foreach(do:::(i, item) {
+                        if (item.base.name == name) ::<= {
+                            items->remove(key:i);
+                            send();
+                        };
+                    });
+                };
+            },
+            
             gold : {
                 get ::<- gold,
             },

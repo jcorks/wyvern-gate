@@ -589,14 +589,14 @@ Effect.database = Database.new(
         Effect.new(
             data : {
                 name : 'Weapon Affinity',
-                description: 'User has their profession\'s ideal weapon. ATK,DEF,SPD,INT +20%',
+                description: 'User has their profession\'s ideal weapon. ATK,DEF,SPD,INT +60%',
                 battleOnly : true,
                 skipTurn : false,
                 stats: StatSet.new(
-                    ATK: 20,
-                    DEF: 20,
-                    SPD: 20,
-                    INT: 20
+                    ATK: 60,
+                    DEF: 60,
+                    SPD: 60,
+                    INT: 60
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -1324,6 +1324,56 @@ Effect.database = Database.new(
                         text: 'After the battle, ' + holder.name + ' found ' + amt + 'G on the ground dropped from the battling party.'
                     );
                     world.party.inventory.addGold(amount:amt);
+                    
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
+
+        Effect.new(
+            data : {
+                name : 'Alchemist\'s Scavenging',
+                description: 'Scavenges for alchemist ingredients.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                    @:world = import(module:'game_singleton.world.mt');
+                    @:Item  = import(module:'game_class.item.mt');
+                    
+                    when(user.isIncapacitated()) empty;
+                    when(!world.party.isMember(entity:holder)) empty;
+                    
+
+                    @:amt = 2 + (Number.random() * 4)->floor;
+                    dialogue.message(
+                        text: holder.name + ' scavenged for ingredients...'
+                    );
+                    dialogue.message(
+                        text: holder.name + ' found ' + amt + ' ingredient(s).'
+                    );
+
+                    [0, amt]->for(do:::(i) {                    
+                        world.party.inventory.add(item:Item.Base.database.find(name:'Ingredient').new(from:holder));
+                    });
                     
                 },                
                 onGivenDamage : ::(user, item, holder, to) {
@@ -2311,7 +2361,46 @@ Effect.database = Database.new(
                 }
             }
         ), 
-        
+        Effect.new(
+            data : {
+                name : 'Explode',
+                description: 'Damage to holder.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                    dialogue.message(text:"The " + item.name + " explodes on " + user.name + "!");
+                    
+                    holder.damage(
+                        from: holder,
+                        damage: Damage.new(
+                            amount:random.integer(from:10, 20),
+                            damageType : Damage.TYPE.FIRE,
+                            damageClass: Damage.CLASS.HP
+                        )
+                    );
+                
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),        
 
 
         

@@ -284,7 +284,7 @@
                 }
             },
             
-            describe ::(onNext) {
+            describe ::(by, onNext) {
                 @:Effect = import(module:'game_class.effect.mt');
                 dialogue.message(
                     speaker:this.name,
@@ -321,6 +321,17 @@
                         return out;
                     }
                 );  
+
+
+                if (by != empty) ::<= {
+                    when(by.profession.base.weaponAffinity != base_.name) empty;
+                    dialogue.message(
+                        speaker:by.name,
+                        pageAfter:canvas.height-4,
+                        text:'Oh! This weapon type really works for me as a(n) ' + by.profession.base.name + '.'
+                    );  
+                };
+
             },
             
             addVictory ::(silent) {
@@ -340,7 +351,7 @@
                         SPD: if (choice == 7) 1 else 0
                     ));
                     
-                    if (silent == empty) ::<= {
+                    if (silent == empty && base_.name != 'None') ::<= {
                         dialogue.message(text:'The party get\'s more used to using the ' + this.name + '.');
                         oldStats.printDiffRate(other:stats, prompt:this.name);
                     };
@@ -618,6 +629,140 @@ Item.Base.database = Database.new(items: [
 
 
     }),
+    
+    
+    Item.Base.new(data : {
+        name : "Purple Potion",
+        description: 'Purple-colored potions are known to combine the effects of pink and cyan potions',
+        examine : 'These potions are handy, as the effects of ',
+        equipType: TYPE.HAND,
+        weight : 0.5,
+        rarity : 100,
+        canBeColored : false,
+        keyItem : false,
+        basePrice: 100,
+        levelMinimum : 1,
+        canHaveModifier : false,
+        hasMaterial : false,
+        isUnique : false,        
+        useTargetHint : USE_TARGET_HINT.ONE,
+        equipMod : StatSet.new(
+            SPD: -2, // itll slow you down
+            DEX: -10   // its oddly shaped.
+        ),
+        useEffects : [
+            'HP Recovery: All',
+            'AP Recovery: All',
+            'Consume Item'       
+        ],
+        equipEffects : [
+        ],
+        attributes : [
+            ATTRIBUTE.FRAGILE
+        ],
+        onCreate ::(item, user, creationHint) {}
+
+
+    }),    
+    
+    Item.Base.new(data : {
+        name : "Green Potion",
+        description: 'Green-colored potions are known to be toxic.',
+        examine : 'Often used offensively, these potions are known to be used as poison once used and doused on a target.',
+        equipType: TYPE.HAND,
+        weight : 0.5,
+        rarity : 100,
+        canBeColored : false,
+        keyItem : false,
+        basePrice: 20,
+        levelMinimum : 1,
+        canHaveModifier : false,
+        hasMaterial : false,
+        isUnique : false,        
+        useTargetHint : USE_TARGET_HINT.ONE,
+        equipMod : StatSet.new(
+            SPD: -2, // itll slow you down
+            DEX: -10   // its oddly shaped.
+        ),
+        useEffects : [
+            'Poisoned',
+            'Consume Item'       
+        ],
+        equipEffects : [
+        ],
+        attributes : [
+            ATTRIBUTE.FRAGILE
+        ],
+        onCreate ::(item, user, creationHint) {}
+
+
+    }),    
+
+    Item.Base.new(data : {
+        name : "Orange Potion",
+        description: 'Orange-colored potions are known to be volatile.',
+        examine : 'Often used offensively, these potions are known to explode on contact.',
+        equipType: TYPE.HAND,
+        weight : 0.5,
+        rarity : 100,
+        canBeColored : false,
+        keyItem : false,
+        basePrice: 20,
+        levelMinimum : 1,
+        canHaveModifier : false,
+        hasMaterial : false,
+        isUnique : false,        
+        useTargetHint : USE_TARGET_HINT.ONE,
+        equipMod : StatSet.new(
+            SPD: -2, // itll slow you down
+            DEX: -10   // its oddly shaped.
+        ),
+        useEffects : [
+            'Explode',
+            'Consume Item'       
+        ],
+        equipEffects : [
+        ],
+        attributes : [
+            ATTRIBUTE.FRAGILE
+        ],
+        onCreate ::(item, user, creationHint) {}
+    }),    
+
+
+    Item.Base.new(data : {
+        name : "Black Potion",
+        description: 'Black-colored potions are known to be toxic to all organic life.',
+        examine : 'Often used offensively, these potions are known to cause instant petrification.',
+        equipType: TYPE.HAND,
+        weight : 0.5,
+        rarity : 100,
+        canBeColored : false,
+        keyItem : false,
+        basePrice: 20,
+        levelMinimum : 1,
+        canHaveModifier : false,
+        hasMaterial : false,
+        isUnique : false,        
+        useTargetHint : USE_TARGET_HINT.ONE,
+        equipMod : StatSet.new(
+            SPD: -2, // itll slow you down
+            DEX: -10   // its oddly shaped.
+        ),
+        useEffects : [
+            'Petrified',
+            'Consume Item'       
+        ],
+        equipEffects : [
+        ],
+        attributes : [
+            ATTRIBUTE.FRAGILE
+        ],
+        onCreate ::(item, user, creationHint) {}
+
+
+    }),    
+
 
 
     Item.Base.new(data : {
@@ -2132,6 +2277,41 @@ Item.Base.database = Database.new(items: [
         onCreate ::(item, user, creationHint) {}
 
     }), 
+
+
+    Item.Base.new(data : {
+        name : "Ingredient",
+        description: "A pack of ingredients used for potions and brews.",
+        examine : 'Common ingredients used by alchemists.',
+        equipType: TYPE.TWOHANDED,
+        rarity : 300000000,
+        weight : 1,
+        keyItem : false,
+        canBeColored : false,
+        canHaveModifier : false,
+        hasMaterial : false,
+        isUnique : false,
+        levelMinimum : 10000000,
+        useTargetHint : USE_TARGET_HINT.ONE,
+        basePrice: 5,
+
+        equipMod : StatSet.new(
+            ATK: 0,
+            DEF: 2, 
+            SPD: -1,
+            DEX: -2
+        ),
+        useEffects : [
+            'Fling',
+            'Break Item'
+        ],
+        equipEffects : [],
+        attributes : [
+        ],
+        onCreate ::(item, user, creationHint) {}
+
+    }), 
+
 
     Item.Base.new(data : {
         name : "Wyvern Key of Fire",

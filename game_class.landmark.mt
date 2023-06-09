@@ -115,7 +115,7 @@
         @:Entity = import(module:'game_class.entity.mt');
 
 
-        this.constructor = ::(base, island, x, y, state){
+        this.constructor = ::(base, island, x, y, state, floorHint){
             island_ = island;
             when(state != empty) ::<= {
                 this.state = state;
@@ -163,7 +163,6 @@
 
 
 
-
             
             
             locations->push(value:gate);
@@ -179,22 +178,20 @@
 
 
             base.requiredLocations->foreach(do:::(i, loc) {
-                @xy = getLocationXY();
-                @loc = Location.Base.database.find(name:loc).new(landmark:this, xHint:xy.x, yHint:xy.y);
-                map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
+                this.addLocation(
+                    name:loc
+                );
+            
                 mapIndex += 1;
-                locations->push(value:loc);
             });
             
             [0, random.integer(from:base.minLocations, to:base.maxLocations)]->for(do:::(i) {
                 when(base.possibleLocations->keycount == 0) empty;
                 @:which = random.pickArrayItemWeighted(list:base.possibleLocations);
-                @xy = getLocationXY();
-                @:loc = Location.Base.database.find(name:which.name).new(landmark:this, xHint:xy.x, yHint:xy.y);
-                map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
+                this.addLocation(
+                    name:which.name
+                );
                 mapIndex += 1;
-
-                locations->push(value:loc);
             });
             
             
@@ -202,6 +199,16 @@
                 x:gate.x,
                 y:gate.y
             );
+
+            if (floorHint != empty) ::<= {
+                floor = floorHint;
+                floor => Number;
+                if (landmark.dungeonMap)
+                    dungeonLogic.floorHint = floor;
+            };
+
+            
+            this.base.onCreate(landmark:this, island);
             
             return this;
         };    
@@ -308,12 +315,7 @@
             },
 
             floor : {
-                get :: <- floor,
-                set ::(value) { 
-                    floor = value;
-                    if (landmark.dungeonMap)
-                        dungeonLogic.floorHint = value;
-                }
+                get :: <- floor
             },
 
             step :: {
@@ -350,8 +352,15 @@
                 get :: <- locations 
             },
 
-            addLocation ::(location) {
-                locations->push(value:location);                
+            addLocation ::(name, ownedByHint, x, y) {
+                if (x == empty || y == empty) ::<= {
+                    @xy = getLocationXY();
+                    x = xy.x;
+                    y = xy.y;
+                };
+                @loc = Location.Base.database.find(name:name).new(landmark:this, ownedByHint, xHint:x, yHint:y);
+                map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
+                locations->push(value:loc);                
             },
 
             removeLocation ::(location) {
@@ -399,7 +408,8 @@ Landmark.Base = class(
                 requiredLocations : Object,
                 peaceful: Boolean,
                 dungeonMap: Boolean,
-                mapHint : Object
+                mapHint : Object,
+                onCreate : Function
 
             }
         );
@@ -407,8 +417,8 @@ Landmark.Base = class(
         
         
         this.interface = {
-            new :: (island => Object, x => Number, y => Number, state) {
-                return Landmark.new(base:this, island, x, y, state);
+            new :: (island => Object, x => Number, y => Number, floorHint, state) {
+                return Landmark.new(base:this, island, x, y, floorHint, state);
             }
         };
     }
@@ -447,7 +457,8 @@ Landmark.Base.database = Database.new(
                     emptyAreaCount: 6,
                     scatterChar: 'Y',
                     scatterRate: 0.3
-                }
+                },
+                onCreate ::(landmark, island){}
             }
         ),
 
@@ -483,7 +494,8 @@ Landmark.Base.database = Database.new(
                     roomAreaSize: 5,
                     roomAreaSizeLarge: 7,
                     emptyAreaCount: 18
-                }
+                },
+                onCreate ::(landmark, island){}
                 
             }
         ),
@@ -515,7 +527,8 @@ Landmark.Base.database = Database.new(
                     roomAreaSize: 5,
                     roomAreaSizeLarge: 10,
                     emptyAreaCount: 5
-                }
+                },
+                onCreate ::(landmark, island){}
                 
             }
         ),
@@ -544,7 +557,8 @@ Landmark.Base.database = Database.new(
                     roomAreaSize: 5,
                     roomAreaSizeLarge: 7,
                     emptyAreaCount: 30
-                }
+                },
+                onCreate ::(landmark, island){}
                 
             }
         ),
@@ -564,7 +578,9 @@ Landmark.Base.database = Database.new(
                 requiredLocations : [
                     'Stairs Up',
                 ],
-                mapHint: {}
+                mapHint: {},
+                onCreate ::(landmark, island){}
+                
             }
         ),
 
@@ -583,7 +599,6 @@ Landmark.Base.database = Database.new(
                 possibleLocations : [
                     {name: 'Stairs Down', rarity:1},
                     {name: 'Small Chest', rarity:3},
-                    {name: '?????',       rarity:6},                    
                 ],
                 requiredLocations : [
 
@@ -591,7 +606,14 @@ Landmark.Base.database = Database.new(
                     'Stairs Down',
                     'Small Chest'
                 ],
-                mapHint:{}
+                mapHint:{},
+                onCreate ::(landmark, island){
+                    if (landmark.floor > 6) ::<= {
+                        landmark.addLocation(name:'?????');
+                        landmark.addLocation(name:'?????');
+                    };
+                }
+                
             }
         ),
 
@@ -617,7 +639,9 @@ Landmark.Base.database = Database.new(
                     roomAreaSize: 5,
                     roomAreaSizeLarge: 7,
                     emptyAreaCount: 2
-                }
+                },
+                onCreate ::(landmark, island){}
+                
                 
             }
         ),
@@ -644,7 +668,8 @@ Landmark.Base.database = Database.new(
                     roomAreaSizeLarge: 15,
                     emptyAreaCount: 1
                     
-                }
+                },
+                onCreate ::(landmark, island){}
                 
             }
         ),        
@@ -675,7 +700,8 @@ Landmark.Base.database = Database.new(
                     roomAreaSize: 5,
                     roomAreaSizeLarge: 14,
                     emptyAreaCount: 7
-                }
+                },
+                onCreate ::(landmark, island){}
                 
             }
         ),
@@ -702,7 +728,8 @@ Landmark.Base.database = Database.new(
                     roomAreaSize: 7,
                     roomAreaSizeLarge: 14,
                     emptyAreaCount: 4
-                }            
+                },        
+                onCreate ::(landmark, island){}
             }
         ),
 
@@ -728,7 +755,8 @@ Landmark.Base.database = Database.new(
                     roomAreaSize: 7,
                     roomAreaSizeLarge: 14,
                     emptyAreaCount: 4
-                }
+                },
+                onCreate ::(landmark, island){}
             }
         ),
 
@@ -769,7 +797,8 @@ Landmark.Base.database = Database.new(
                     roomAreaSizeLarge: 14,
                     emptyAreaCount: 25,
                     outOfBoundsCharacter: 'y'
-                }
+                },
+                onCreate ::(landmark, island){}
                 
             }
         ),
@@ -786,7 +815,8 @@ Landmark.Base.database = Database.new(
                 maxLocations : 0,
                 possibleLocations : [],
                 requiredLocations : [],
-                mapHint: {}
+                mapHint: {},
+                onCreate ::(landmark, island){}
                 
             }
         ),
@@ -804,7 +834,8 @@ Landmark.Base.database = Database.new(
                 maxLocations : 0,
                 possibleLocations : [],
                 requiredLocations : [],
-                mapHint: {}
+                mapHint: {},
+                onCreate ::(landmark, island){}
                 
             }
         ),
@@ -820,7 +851,8 @@ Landmark.Base.database = Database.new(
                 maxLocations : 0,
                 possibleLocations : [],
                 requiredLocations : [],
-                mapHint: {}                
+                mapHint: {},              
+                onCreate ::(landmark, island){}
             }
         ),
 

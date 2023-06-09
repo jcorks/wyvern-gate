@@ -96,10 +96,8 @@ return class(
                                   (Battle.RESULTS.ALLIES_WIN):::<= {
                                     map_.removeItem(data:ent);
                                     entities->remove(key:entities->findIndex(value:ent));
-                                    @loc = Location.Base.database.find(name:'Body').new(landmark:landmark_, ownedByHint: ent.ref, xHint:item.x, yHint:item.y);
-                                    map_.setItem(data:loc, x:item.x, y:item.y, symbol: loc.base.symbol, discovered: true, name:loc.name);
-                                    landmark_.addLocation(location:loc);
 
+                                    landmark_.addLocation(name:'Body', x:item.x, y:item.y, ownedByHint: ent.ref);
                                   },
                                   
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
@@ -128,7 +126,7 @@ return class(
                 
                 
                 // add additional entities out of spawn points (stairs)
-                if (entities->keycount < floorHint && Number.random() > 0.8) ::<= {
+                if (entities->keycount < (floorHint/3)->ceil && Number.random() > 0.1) ::<= {
                     addEntity();
                 };
             

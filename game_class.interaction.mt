@@ -784,12 +784,11 @@ Interaction.database = Database.new(
                             Landmark.Base.database.find(name:'Shrine').new(
                                 island:location.landmark.island,
                                 x:-1,
-                                y:-1
+                                y:-1,
+                                floorHint:location.landmark.floor+1
                             )
                         ;
                         
-                        
-                        location.targetLandmark.floor = location.landmark.floor+1;
                         location.targetLandmark.name = 'Shrine ('+location.targetLandmark.floor+'F)';
                     };
 

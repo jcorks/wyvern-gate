@@ -160,6 +160,7 @@ return ::(
                   
                   (2): ::<={ // inventory
                     item.describe(
+                        by:user,
                         onNext::{}
                     );
                     

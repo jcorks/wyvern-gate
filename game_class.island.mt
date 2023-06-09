@@ -119,8 +119,9 @@
         @encounterRate = Number.random();        
         
         // Size of the island... Islands are always square-ish
-        @sizeW  = Number.random()*40 + 50;
-        @sizeH  = Number.random()*40 + 50;
+        @factor = Number.random()*50 + 70;
+        @sizeW  = (factor)->floor;
+        @sizeH  = (factor*0.5)->floor;
         
         // steps since the last event
         @stepsSinceLastEvent = 0;
@@ -561,8 +562,8 @@
             newInhabitant ::(professionHint, levelHint, speciesHint) {
                 @:out = Entity.new(
                     speciesHint:    if (speciesHint == empty) random.pickArrayItemWeighted(list:species).species else speciesHint,
-                    levelHint:      if (levelHint == empty) random.integer(from:levelMin, to:levelMax) else levelHint
-                    //professionHint: if (professionHint == empty) this.getProfession().name  else professionHint
+                    levelHint:      if (levelHint == empty) random.integer(from:levelMin, to:levelMax) else levelHint,
+                    professionHint: if (professionHint == empty) this.getProfession().name  else professionHint
                 );
                 
                 augmentTiered(entity:out);
