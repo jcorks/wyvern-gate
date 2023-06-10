@@ -30,9 +30,9 @@ return class(
         @:addEntity ::{
             @:dialogue = import(module:'game_singleton.dialogue.mt');
 
-            @area = map_.getRandomArea();;
-            @:tileX = area.x + (area.width /2)->floor;
-            @:tileY = area.y + (area.height/2)->floor;
+            @ar = map_.getRandomArea();;
+            @:tileX = ar.x + (ar.width /2)->floor;
+            @:tileY = ar.y + (ar.height/2)->floor;
             
             // only add an entity when not visible. Makes it 
             // feel more alive and unknown
@@ -41,10 +41,9 @@ return class(
             
             // who knows whos down here. Can be anything and anyone, regardless of 
             // the inhabitants of the island.
-            @:ar = map_.getRandomArea();
             @ent = {
-                targetX:(ar.x + ar.width/2)->floor, 
-                targetY:(ar.y + ar.height/2)->floor, 
+                targetX:tileX, 
+                targetY:tileY, 
                 ref:landmark_.island.newInhabitant()
             };
             ent.ref.anonymize();
@@ -101,6 +100,19 @@ return class(
                                   },
                                   
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                                    @:dialogue = import(module:'game_singleton.dialogue.mt');
+                                    dialogue.message(text:'Perhaps these Chosen were not ready...',
+                                        renderable : {
+                                            render :: {
+                                                @:canvas = import(module:'game_singleton.canvas');
+                                                canvas.blackout();
+                                                canvas.commit();
+                                            }
+                                        },
+                                        onNext ::{
+                                            dialogue.jumpToTag(name:'MainMenu');                                        
+                                        }
+                                    );
                                   }
                                 };
                             }
@@ -126,7 +138,7 @@ return class(
                 
                 
                 // add additional entities out of spawn points (stairs)
-                if (entities->keycount < (floorHint/3)->ceil && Number.random() > 0.1) ::<= {
+                if (entities->keycount < (floorHint/3)->ceil && Number.random() < 0.1) ::<= {
                     addEntity();
                 };
             

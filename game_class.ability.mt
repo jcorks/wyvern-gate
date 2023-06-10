@@ -1992,6 +1992,114 @@ Ability.database = Database.new(
                 }
             ),
 
+            Ability.new(
+                data: {
+                    name: 'Fire Shift',
+                    targetMode : TARGET_MODE.NONE,
+                    description: "Adds the Burning effect.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI: USAGE_HINT.BUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(text:user.name + ' becomes shrouded in flame!');
+                        user.addEffect(from:user, name:'Burning', durationTurns:20);                            
+                    }
+                }
+            ),
+
+
+            Ability.new(
+                data: {
+                    name: 'Elemental Tag',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Adds weakness to elemental damage +100%.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 2,
+                    usageHintAI: USAGE_HINT.DEBUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(text:targets[0].name + ' becomes weak to elemental damage!');
+                        user.addEffect(from:user, name:'Elemental Tag', durationTurns:20);                            
+                    }
+                }
+            ),
+
+
+            Ability.new(
+                data: {
+                    name: 'Elemental Shield',
+                    targetMode : TARGET_MODE.NONE,
+                    description: "Nullifies most Thunder, Fire, and Ice damage.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 2,
+                    usageHintAI: USAGE_HINT.BUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(text:targets[0].name + ' becomes shielded to elemental damage!');
+                        user.addEffect(from:user, name:'Elemental Shield', durationTurns:20);                            
+                    }
+                }
+            ),
+
+
+
+            Ability.new(
+                data: {
+                    name: 'Ice Shift',
+                    targetMode : TARGET_MODE.NONE,
+                    description: "Adds the Icy effect.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI: USAGE_HINT.BUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(text:user.name + ' becomes shrouded in an icy wind!');
+                        user.addEffect(from:user, name:'Icy', durationTurns:20);                            
+                    }
+                }
+            ),
+
+            Ability.new(
+                data: {
+                    name: 'Thunder Shift',
+                    targetMode : TARGET_MODE.NONE,
+                    description: "Adds the Shock effect.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI: USAGE_HINT.BUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(text:user.name + ' becomes shrouded in electric arcs!');
+                        user.addEffect(from:user, name:'Shock', durationTurns:20);                            
+                    }
+                }
+            ),
+
+            Ability.new(
+                data: {
+                    name: 'Tri Shift',
+                    targetMode : TARGET_MODE.NONE,
+                    description: "Adds the Shock, Burning, and Icy effects.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 3,
+                    usageHintAI: USAGE_HINT.BUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(text:user.name + ' becomes shrouded in light');
+                        user.addEffect(from:user, name:'Burning', durationTurns:20);                            
+                        user.addEffect(from:user, name:'Icy',     durationTurns:20);                            
+                        user.addEffect(from:user, name:'Shock',   durationTurns:20);                            
+                    }
+                }
+            ),
+
             
             Ability.new(
                 data: {

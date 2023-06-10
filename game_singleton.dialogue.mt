@@ -566,7 +566,7 @@ return class(
             //
             // The function returns when the message is displayed in full
             // to the user.
-            message::(speaker, text, leftWeight, topWeight, pageAfter, onNext) {
+            message::(speaker, text, leftWeight, topWeight, pageAfter, renderable, onNext) {
                 if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
                 // first: split the text.
                 //text = text->replace(keys:['\r'], with: '');
@@ -607,6 +607,7 @@ return class(
                 this.display(
                     leftWeight, topWeight,
                     prompt:speaker,
+                    renderable,
                     lines,
                     pageAfter,
                     onNext
@@ -656,7 +657,7 @@ return class(
             // If it doesnt fit, display will try and make it scrollable.
             //
             // lines should be an array of strings.
-            display::(prompt, lines, pageAfter, leftWeight, topWeight, onNext) {
+            display::(prompt, lines, pageAfter, leftWeight, topWeight, onNext, renderable) {
                 nextResolve->push(value:[::{
                     if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
                     [0, lines->keycount, pageAfter]->for(do:::(i) {
@@ -667,7 +668,8 @@ return class(
                             pageAfter: pageAfter,
                             prompt: prompt,
                             mode: CHOICE_MODE.DISPLAY,
-                            onNext: onNext
+                            onNext: onNext,
+                            renderable: renderable
                         });
                         canvas.pushState();      
                     });                       
@@ -708,7 +710,7 @@ return class(
             // Like all UI choices, the weight can be chosen.
             // Prompt will be displayed, like speaker in the message callback
             //
-            choices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, renderable, keep, onGetChoices, onNext) {
+            choices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, renderable, keep, onGetChoices, onNext, jumpTag) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode: CHOICE_MODE.CURSOR,
@@ -722,14 +724,32 @@ return class(
                         keep: keep,
                         onGetChoices : onGetChoices,
                         renderable:renderable,
-                        onNext : onNext
+                        onNext : onNext,
+                        jumpTag : jumpTag
                     });
                     canvas.pushState();      
                 }]);
-   
             },
 
-
+            // pops all choices in the stack until the tag is hit.
+            jumpToTag::(name => String) {
+                breakpoint();
+                [::] {
+                    forever(do::{
+                        if (choiceStack->keycount == 0)
+                            error(detail:'jumpToTag() could not find a dialogue tag with name ' + name);
+                            
+                        @:data = choiceStack[choiceStack->keycount-1];
+                        if (data.jumpTag != name) ::<= {
+                            canvas.popState();
+                            choiceStack->pop;
+                        } else 
+                            send();
+                    });
+                };
+                canvas.commit();                
+            },
+            
             
             choiceColumns::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function, keep, renderable, onNext) {
                 nextResolve->push(value:[::{
@@ -748,7 +768,6 @@ return class(
                     });
                     canvas.pushState();      
                 }]);
-            
             },            
             cursorMove ::(prompt, leftWeight, topWeight, onMove, renderable) {
                 nextResolve->push(value:[::{

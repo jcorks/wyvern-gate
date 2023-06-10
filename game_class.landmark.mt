@@ -409,7 +409,8 @@ Landmark.Base = class(
                 peaceful: Boolean,
                 dungeonMap: Boolean,
                 mapHint : Object,
-                onCreate : Function
+                onCreate : Function,
+                onVisit : Function
 
             }
         );
@@ -458,7 +459,8 @@ Landmark.Base.database = Database.new(
                     scatterChar: 'Y',
                     scatterRate: 0.3
                 },
-                onCreate ::(landmark, island){}
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
             }
         ),
 
@@ -495,7 +497,8 @@ Landmark.Base.database = Database.new(
                     roomAreaSizeLarge: 7,
                     emptyAreaCount: 18
                 },
-                onCreate ::(landmark, island){}
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
                 
             }
         ),
@@ -528,7 +531,8 @@ Landmark.Base.database = Database.new(
                     roomAreaSizeLarge: 10,
                     emptyAreaCount: 5
                 },
-                onCreate ::(landmark, island){}
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
                 
             }
         ),
@@ -558,7 +562,8 @@ Landmark.Base.database = Database.new(
                     roomAreaSizeLarge: 7,
                     emptyAreaCount: 30
                 },
-                onCreate ::(landmark, island){}
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
                 
             }
         ),
@@ -579,7 +584,8 @@ Landmark.Base.database = Database.new(
                     'Stairs Up',
                 ],
                 mapHint: {},
-                onCreate ::(landmark, island){}
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
                 
             }
         ),
@@ -608,14 +614,41 @@ Landmark.Base.database = Database.new(
                 ],
                 mapHint:{},
                 onCreate ::(landmark, island){
-                    if (landmark.floor > 6) ::<= {
-                        landmark.addLocation(name:'?????');
-                        landmark.addLocation(name:'?????');
-                    };
+                },
+                onVisit ::(landmark, island) {}
+                
+            }
+        ),
+
+        Landmark.Base.new(
+            data: {
+                name : 'Shrine: Lost Floor',
+                symbol : 'O',
+                rarity : 100000,      
+                isUnique : true,
+                minLocations : 2,
+                maxLocations : 2,
+                peaceful: true,
+                dungeonMap : true,
+                possibleLocations : [
+                    {name: 'Small Chest', rarity:3},
+                ],
+                requiredLocations : [
+                    '?????',
+                    'Small Chest'
+                ],
+                mapHint:{},
+                onCreate ::(landmark, island){
+                },
+                
+                onVisit ::(landmark, island) {
+                    @:dialogue = import(module:'game_singleton.dialogue.mt');
+                    dialogue.message(text:'It seems this area has been long forgotten...');
                 }
                 
             }
         ),
+
 
         Landmark.Base.new(
             data: {
@@ -636,11 +669,16 @@ Landmark.Base.database = Database.new(
                 
                 mapHint : {
                     roomSize: 15,
-                    roomAreaSize: 5,
-                    roomAreaSizeLarge: 7,
+                    roomAreaSize: 7,
+                    roomAreaSizeLarge: 9,
                     emptyAreaCount: 2
                 },
-                onCreate ::(landmark, island){}
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {
+                    @:dialogue = import(module:'game_singleton.dialogue.mt');
+                    dialogue.message(text:'The party enters the pit full of treasure.');
+               
+                }
                 
                 
             }
@@ -669,7 +707,8 @@ Landmark.Base.database = Database.new(
                     emptyAreaCount: 1
                     
                 },
-                onCreate ::(landmark, island){}
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
                 
             }
         ),        
@@ -701,7 +740,8 @@ Landmark.Base.database = Database.new(
                     roomAreaSizeLarge: 14,
                     emptyAreaCount: 7
                 },
-                onCreate ::(landmark, island){}
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
                 
             }
         ),
@@ -729,7 +769,8 @@ Landmark.Base.database = Database.new(
                     roomAreaSizeLarge: 14,
                     emptyAreaCount: 4
                 },        
-                onCreate ::(landmark, island){}
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
             }
         ),
 
@@ -756,7 +797,8 @@ Landmark.Base.database = Database.new(
                     roomAreaSizeLarge: 14,
                     emptyAreaCount: 4
                 },
-                onCreate ::(landmark, island){}
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
             }
         ),
 
@@ -796,9 +838,10 @@ Landmark.Base.database = Database.new(
                     roomAreaSize: 7,
                     roomAreaSizeLarge: 14,
                     emptyAreaCount: 25,
-                    outOfBoundsCharacter: 'y'
+                    outOfBoundsCharacter: '~'
                 },
-                onCreate ::(landmark, island){}
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
                 
             }
         ),
@@ -816,7 +859,8 @@ Landmark.Base.database = Database.new(
                 possibleLocations : [],
                 requiredLocations : [],
                 mapHint: {},
-                onCreate ::(landmark, island){}
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
                 
             }
         ),
@@ -835,7 +879,8 @@ Landmark.Base.database = Database.new(
                 possibleLocations : [],
                 requiredLocations : [],
                 mapHint: {},
-                onCreate ::(landmark, island){}
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
                 
             }
         ),
@@ -852,7 +897,8 @@ Landmark.Base.database = Database.new(
                 possibleLocations : [],
                 requiredLocations : [],
                 mapHint: {},              
-                onCreate ::(landmark, island){}
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
             }
         ),
 

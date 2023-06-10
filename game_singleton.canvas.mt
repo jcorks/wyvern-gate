@@ -270,13 +270,17 @@ return class(
                     @prevCanvas = savestates[savestates->keycount-1].text;
                     canvas = [...prevCanvas];
                 };
+                this.blackout();
+            },
+            
+            blackout ::{
                 @iter = 0;
                 [0, CANVAS_HEIGHT]->for(do:::(i) {
                     [0, CANVAS_WIDTH]->for(do:::(ch) {
                         canvas[iter] = ' ';
                         iter += 1;
                     });
-                });
+                });            
             },
             
             commit :: {

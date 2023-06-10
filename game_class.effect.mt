@@ -2374,7 +2374,7 @@ Effect.database = Database.new(
                     holder.damage(
                         from: holder,
                         damage: Damage.new(
-                            amount:random.integer(from:10, 20),
+                            amount:random.integer(from:10, to:20),
                             damageType : Damage.TYPE.FIRE,
                             damageClass: Damage.CLASS.HP
                         )
@@ -2635,6 +2635,92 @@ Effect.database = Database.new(
                 }
             }
         ),
+
+        Effect.new(
+            data : {
+                name : 'Elemental Tag',
+                description: 'Weakness to Fire, Ice, and Thunder damage by 100%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    if (damage.damageType == Damage.TYPE.FIRE) ::<= {
+                        damage.amount *= 2;
+                    };
+                    if (damage.damageType == Damage.TYPE.ICE) ::<= {
+                        damage.amount *= 2;
+                    };
+                    if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
+                        damage.amount *= 2;
+                    };
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
+
+        Effect.new(
+            data : {
+                name : 'Elemental Shield',
+                description: 'Nullify ',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    @:effects = holder.effects;
+                    
+                    @fire    = effects->filter(by:::(value) <- value.name == 'Burning')->keycount != 0;
+                    @ice     = effects->filter(by:::(value) <- value.name == 'Icy')->keycount != 0;
+                    @thunder = effects->filter(by:::(value) <- value.name == 'Shock')->keycount != 0;
+                    
+                    if (fire && holder.damage.damageType == Damage.TYPE.FIRE) ::<= {
+                        damage.amount *= 0;
+                    };
+                    if (ice && damage.damageType == Damage.TYPE.ICE) ::<= {
+                        damage.amount *= 0;
+                    };
+                    if (thunder && damage.damageType == Damage.TYPE.THUNDER) ::<= {
+                        damage.amount *= 0;
+                    };
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
         
         Effect.new(
             data : {

@@ -97,7 +97,21 @@ Scene.database = Database.new(
                     ['Kaedjaal', 'Come forth.'],
                     ::(location, landmark, doNext) {
                         @:world = import(module:'game_singleton.world.mt');
+                        @:Battle = import(module:'game_class.battle.mt');
+
                         @:end = ::(result){
+
+                            when(result == Battle.RESULTS.ENEMIES_WIN) ::<= {
+                                dialogue.message(
+                                    speaker:'Kaedjaal',
+                                    text:'Perhaps it was not meant to be...',
+                                    onNext ::{                                    
+                                        dialogue.jumpToTag(name:'MainMenu');
+                                    }
+                                );
+                            };
+                            
+                        
                             when (!location.ownedBy.isIncapacitated()) ::<= {
                                 world.battle.start(
                                     party: world.party,                            

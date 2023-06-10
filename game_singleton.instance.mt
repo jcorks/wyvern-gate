@@ -274,6 +274,7 @@ return class(
         this.interface = {
             visitLandmark ::(landmark){
                 landmark.map.title = landmark.name + ' - ' + world.timeString + '          ';
+                landmark.base.onVisit(landmark, island:landmark.island);
                 // render pattern
                 /*canvas.clear();
                 [0, 100]->for(do:::(y) {
@@ -288,6 +289,7 @@ return class(
                 */
                 
                 @stepCount = 0;
+              
                 dialogue.choices(
                     leftWeight: 1,
                     topWeight: 1,
@@ -382,7 +384,6 @@ return class(
                                         );
                                         landmark.step();
                                         stepCount += 1;
-                                        when(party.isIncapacitated()) dialogue.popChoice();
 
 
                                         // every 5 steps, heal 1% HP
@@ -488,6 +489,13 @@ return class(
                 dialogue.choices(
                     choices : ['Load', 'New', 'Quit'],
                     topWeight: 0.75,
+                    keep : true,
+                    jumpTag : 'MainMenu',
+                    renderable : {
+                        render ::{
+                            canvas.blackout();
+                        }
+                    },
                     onChoice ::(choice) {
                         match(choice-1) {
                           // Load 
@@ -598,7 +606,6 @@ return class(
             },
         
             startNew ::{
-            
                 @:keyhome = Item.Base.database.find(name:'Wyvern Key').new(
                     creationHint: {
                         nameHint:namegen.island(), levelHint:5
@@ -611,6 +618,7 @@ return class(
                 island = keyhome.islandEntry;
                 world.island = island;
                 party = world.party;
+                party.reset();
                 party.inventory.addGold(amount:100);
                 // debug
                 //party.inventory.addGold(amount:100000);
@@ -629,13 +637,13 @@ return class(
                 
                 
                 
-                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
+                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5, professionHint:'Elementalist');
                 @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
                 // debug
-                    /*
+                    
                     party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
                     ).new(from:island.newInhabitant(),rngModHint:true));
-                    */
+                    
 
                     /*
                     [0, 20]->for(do:::(i) {

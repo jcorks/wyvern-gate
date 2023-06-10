@@ -72,6 +72,7 @@ Interaction.database = Database.new(
                           },
                           
                           (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                            dialogue.jumpToTag(name:'MainMenu');
                           }
                         
                         }; 
@@ -245,6 +246,9 @@ Interaction.database = Database.new(
                                 enemies: [talkee],
                                 landmark: {},
                                 onEnd::(result) {
+                                    when(result == Battle.RESULTS.ENEMIES_WIN)
+                                        dialogue.jumpToTag(name:'MainMenu');
+                                
                                     if (talkee.isDead) ::<= {
                                         dialogue.message(
                                             speaker: 'Bartender',
@@ -402,6 +406,7 @@ Interaction.database = Database.new(
                                   },
                                   
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                                    dialogue.jumpToTag(name:'MainMenu');
                                   }
                                 };
                             }
@@ -486,6 +491,7 @@ Interaction.database = Database.new(
                                   },
                                   
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                                    dialogue.jumpToTag(name:'MainMenu');
                                   }
                                 };
                             }
@@ -777,19 +783,32 @@ Interaction.database = Database.new(
                 onInteract ::(location, party) {
 
                     if (location.targetLandmark == empty) ::<={
-                        @:Landmark = import(module:'game_class.landmark.mt');
-                        
-
-                        location.targetLandmark = 
-                            Landmark.Base.database.find(name:'Shrine').new(
-                                island:location.landmark.island,
-                                x:-1,
-                                y:-1,
-                                floorHint:location.landmark.floor+1
-                            )
-                        ;
-                        
-                        location.targetLandmark.name = 'Shrine ('+location.targetLandmark.floor+'F)';
+                    
+                        if (location.landmark.floor > 5 && Number.random() > 0.5 - (0.2*(location.landmark.floor - 5))) ::<= {
+                            @:Landmark = import(module:'game_class.landmark.mt');
+                            
+                            location.targetLandmark = 
+                                Landmark.Base.database.find(name:'Shrine: Lost Floor').new(
+                                    island:location.landmark.island,
+                                    x:-1,
+                                    y:-1
+                                )
+                            ;
+                                                    
+                        } else ::<= {
+                            @:Landmark = import(module:'game_class.landmark.mt');
+                            
+                            location.targetLandmark = 
+                                Landmark.Base.database.find(name:'Shrine').new(
+                                    island:location.landmark.island,
+                                    x:-1,
+                                    y:-1,
+                                    floorHint:location.landmark.floor+1
+                                )
+                            ;
+                            
+                            location.targetLandmark.name = 'Shrine ('+location.targetLandmark.floor+'F)';
+                        };
                     };
 
                     canvas.clear();
@@ -833,15 +852,12 @@ Interaction.database = Database.new(
                                 )
                             ;
                             
-                            
-                            location.targetLandmark.floor = location.landmark.floor+1;
                         };
                         @:instance = import(module:'game_singleton.instance.mt');
                         instance.visitLandmark(landmark:location.targetLandmark);
 
 
                         canvas.clear();
-                        dialogue.message(text:'The party enters the pit full of treasure.');
                     };
                 },
             }
@@ -874,6 +890,7 @@ Interaction.database = Database.new(
                           },
                           
                           (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                            dialogue.jumpToTag(name:'MainMenu');
                           }
                         
                         };                        

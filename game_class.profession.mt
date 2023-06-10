@@ -544,12 +544,12 @@ Profession.Base.database = Database.new(
                 description : "Capable of infusing magicks into normal objects for combat.", 
                 growth: StatSet.new(
                     HP:  5,
-                    AP:  6,
-                    ATK: 6,
+                    AP:  7,
+                    ATK: 7,
                     INT: 6,
                     DEF: 4,
                     SPD: 5,
-                    LUK: 3,
+                    LUK: 5,
                     DEX: 4
                 ),
                 levelMinimum : 1,
@@ -559,13 +559,12 @@ Profession.Base.database = Database.new(
                 learnable : true,
                 
                 abilities : [
-                    'Fire Shift', // shifts current ele,emt
-                    'Elemental Attack', // 50% better than normal attack, elemental damage
-                    'Ice Shift', // shifts current ele,emt
-                    'Elemental Shield', // no damage if taking hit from current element.
-                    'Thunder Shift', // shifts current ele,emt
-                    'Elemental Tag', // Take +100% damage from element type
-                    'Tri Attack' // 3 hits, one of each type of damage
+                    'Fire Shift',       //X adds fire aspect
+                    'Elemental Tag',    //X Take +100% damage from elemental damage type
+                    'Ice Shift',        //X adds ice aspect
+                    'Elemental Shield', //X Blocks most damage for current elemental aspects.
+                    'Thunder Shift',    //X adds thunder aspect
+                    'Tri Shift'         //X Stacks all 3
                 ],
                 passives : [
                 ]
@@ -621,12 +620,12 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
 
                 abilities : [
-                    'Pink Brew',     // -3 ingredient pack, +1 pink potion 
-                    'Cyan Brew',     // -3 ingredient pack, +1 cyan ption 
-                    'Green Brew',    // etc (poison)
-                    'Orange Brew',   // etc (explosion)
-                    'Purple Brew',   // etc (health + ap)
-                    'Black Brew',     // petrify
+                    'Pink Brew',     //X -3 ingredient pack, +1 pink potion 
+                    'Cyan Brew',     //X -3 ingredient pack, +1 cyan ption 
+                    'Green Brew',    //X etc (poison)
+                    'Orange Brew',   //X etc (explosion)
+                    'Purple Brew',   //X etc (health + ap)
+                    'Black Brew',    //X petrify
                 ],
                 passives : [
                     'Alchemist\'s Scavenging' // find 2-5 Ingredient Packs
@@ -992,14 +991,14 @@ Profession.Base.database = Database.new(
             
             Profession.Base.new(data:{
                 name: 'Creature',
-                weaponAffinity: 'None',
+                weaponAffinity: 'Shortsword',
                 description : "", 
                 levelMinimum : 100,
 
                 growth: StatSet.new(
                     HP:  7,
                     AP:  7,
-                    ATK: 7,
+                    ATK: 2,
                     INT: 7,
                     DEF: 7,
                     SPD: 7,

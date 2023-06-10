@@ -31,7 +31,8 @@
                 rarity: Number,
                 description : String,
                 growth : StatSet.type,
-                passives : Object
+                passives : Object,
+                special : Boolean
             }
         );
     }
@@ -51,8 +52,8 @@ Species.database = Database.new(items: [
             LUK: 1,
             SPD: 2,
             DEX: 3
-        ),
-        
+        ),        
+        special : false,
         passives : [
         ]
     }),
@@ -72,6 +73,7 @@ Species.database = Database.new(items: [
             DEX: 4
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -91,6 +93,7 @@ Species.database = Database.new(items: [
             DEX: 4
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -110,6 +113,7 @@ Species.database = Database.new(items: [
             DEX: 3
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -129,6 +133,7 @@ Species.database = Database.new(items: [
             DEX: 6
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -148,6 +153,7 @@ Species.database = Database.new(items: [
             DEX: 3
         ),
         
+        special : false,
         passives : [
         ]
     }),    
@@ -168,6 +174,7 @@ Species.database = Database.new(items: [
             DEX: 8
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -187,6 +194,7 @@ Species.database = Database.new(items: [
             DEX: 8
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -207,6 +215,7 @@ Species.database = Database.new(items: [
             DEX: 5
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -226,6 +235,7 @@ Species.database = Database.new(items: [
             DEX: 2
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -245,6 +255,7 @@ Species.database = Database.new(items: [
             DEX: 1
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -264,6 +275,7 @@ Species.database = Database.new(items: [
             DEX: 0
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -283,6 +295,7 @@ Species.database = Database.new(items: [
             DEX: 4
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -303,6 +316,7 @@ Species.database = Database.new(items: [
             DEX: 0
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -324,6 +338,7 @@ Species.database = Database.new(items: [
             DEX: 3
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -343,6 +358,7 @@ Species.database = Database.new(items: [
             DEX: 2
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -362,6 +378,7 @@ Species.database = Database.new(items: [
             DEX: 1
         ),
         
+        special : false,
         passives : [
             "Moon's Blessing"
         ]
@@ -381,6 +398,7 @@ Species.database = Database.new(items: [
             SPD: 6,
             DEX: 7
         ),
+        special : false,
         
         passives : [
         ]
@@ -402,6 +420,7 @@ Species.database = Database.new(items: [
             DEX: 3
         ),
         
+        special : false,
         passives : [
         ]
     }),
@@ -414,7 +433,7 @@ Species.database = Database.new(items: [
         growth : StatSet.new(
             HP : 7,
             AP : 1,
-            ATK: 6,
+            ATK: 4,
             DEF: 4,
             INT: 2,
             LUK: 1,
@@ -422,6 +441,7 @@ Species.database = Database.new(items: [
             DEX: 4
         ),
         
+        special : true,
         passives : [
         ]
     }),
@@ -441,6 +461,7 @@ Species.database = Database.new(items: [
             DEX: 10
         ),
         
+        special : true,
         passives : [
         ]
     }),
@@ -460,6 +481,7 @@ Species.database = Database.new(items: [
             DEX: 10
         ),
         
+        special : true,
         passives : [
         ]
     }),

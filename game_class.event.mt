@@ -287,6 +287,7 @@ Event.Base.database = Database.new(
                                   },
                                   
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                                    dialogue.jumpToTag(name:'MainMenu');
                                   },
                                   
                                   
@@ -333,8 +334,6 @@ Event.Base.database = Database.new(
                     @:boss = enemies[1];
 
                     
-                            boss.autoLevel();
-
 
                     @:world = import(module:'game_singleton.world.mt');
                     
@@ -352,30 +351,15 @@ Event.Base.database = Database.new(
                             onEnd ::(result) {
                                 match(result) {
                                   (Battle.RESULTS.ALLIES_WIN): ::<= {
-                                    @:loot = [];
-                                    enemies->foreach(do:::(index, enemy) {
-                                        enemy.inventory.items->foreach(do:::(index, item) {
-                                            if (Number.random() > 0.7 && loot->keycount == 0) ::<= {
-                                                loot->push(value:enemy.inventory.remove(item));
-                                            };
-                                        });
-                                    });
-                                    
-                                    if (loot->keycount > 0) ::<= {
-                                        dialogue.message(text: 'It looks like they dropped some items during the fight...');
-                                        @message = 'The party found:\n\n';
-                                        loot->foreach(do:::(index, item) {
-                                            message = message + item.name + '\n';
-                                            party.inventory.add(item);
-                                        });
-                                        
-                                        
-                                        
-                                        dialogue.message(text: message);
-                                    };
+                                    dialogue.message(text: 'It looks like they dropped some items during the fight...');
+                                    @:item = Item.Base.database.find(name:'Skill Crystal').new(from:boss);
+                                    @message = 'The party found a Skill Crystal!';
+                                    party.inventory.add(item);
+                                    dialogue.message(text: message);
                                   },
                                   
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                                    dialogue.jumpToTag(name:'MainMenu');
                                   },
                                   
                                   
@@ -722,7 +706,9 @@ Event.Base.database = Database.new(
                         allies: party.members,
                         enemies,
                         landmark: {},
-                        onEnd::{}
+                        onEnd::(result){
+                        
+                        }
                     );
                 
                     

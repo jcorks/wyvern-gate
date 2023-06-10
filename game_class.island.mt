@@ -163,21 +163,18 @@
             @rarity = 1;
             return [
                 ... Species.database.getRandomSet(
-                        count : (4+Number.random()*3)->ceil,
-                        filter:::(value) <- value
+                        count : (5+Number.random()*5)->ceil,
+                        filter:::(value) <- value.special == false
                     )
             ]->map(
                 to:::(value) <- {
                     species: value, 
-                    rarity: rarity *= 2
+                    rarity: rarity *= 1.4
                 }
             );
         };
 
 
-        // Similarly, only a handful of professions of each are found on
-        // any given island.
-        @professions;
 
         // Islands have a set number of landmarks.
 
@@ -191,18 +188,18 @@
 
               // tier 1: learn 1 to 2 skills
               (1):::<= {
-                entity.profession.gainSP(amount:1);
+                entity.learnNextAbility();
                 if (Number.random() > 0.5)
-                    entity.profession.gainSP(amount:1);
+                    entity.learnNextAbility();
                           
               },
               
 
               // tier 2: learn 1 to 2 skills and get equips
               (2):::<= {
-                entity.profession.gainSP(amount:1);
+                entity.learnNextAbility();
                 if (Number.random() > 0.5)
-                    entity.profession.gainSP(amount:1);
+                    entity.learnNextAbility();
               
                 @:Item = import(module:'game_class.item.mt');
                 // add a weapon
@@ -224,33 +221,37 @@
               
 
 
-              // tier 2: learn 1 to 2 skills and get equips
-              (2):::<= {
-                entity.profession.gainSP(amount:10);
-
-              
-                @:Item = import(module:'game_class.item.mt');
-                // add a weapon
-                @:wep = Item.Base.database.getRandomFiltered(
-                    filter:::(value) <-
-                        value.isUnique == false &&
-                        value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
-                );
-                    
-                entity.equip(
-                    slot:Entity.EQUIP_SLOTS.HAND_L, 
-                    item:wep.new(
-                        from: entity
-                    ), 
-                    inventory:entity.inventory, 
-                    silent:true
-                );
-              },
-              
-              
-              // tier 2: learn 1 to 2 skills and get equips
+              // tier 3: learn 1 to 2 skills and get equips
               (3):::<= {
-                entity.profession.gainSP(amount:10);
+                [0, 10]->for(do:::(i) {
+                    entity.learnNextAbility();                
+                });
+
+              
+                @:Item = import(module:'game_class.item.mt');
+                // add a weapon
+                @:wep = Item.Base.database.getRandomFiltered(
+                    filter:::(value) <-
+                        value.isUnique == false &&
+                        value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
+                );
+                    
+                entity.equip(
+                    slot:Entity.EQUIP_SLOTS.HAND_L, 
+                    item:wep.new(
+                        from: entity
+                    ), 
+                    inventory:entity.inventory, 
+                    silent:true
+                );
+              },
+              
+              
+              // tier 2: learn 1 to 2 skills and get equips
+              (4):::<= {
+                [0, 10]->for(do:::(i) {
+                    entity.learnNextAbility();                
+                });
 
               
                 @:Item = import(module:'game_class.item.mt');
@@ -310,19 +311,7 @@
                 name = (nameHint) => String;
 
             @rarity = 1;
-            professions = [
-                ... Profession.Base.database.getRandomSet(
-                        count : (2+Number.random()*3)->ceil,
-                        filter:::(value) <- 
-                            levelMin >= value.levelMinimum &&
-                            value.learnable
-                    )
-            ]->map(
-                to:::(value) <- {
-                    profession: value, 
-                    rarity: rarity *= 2
-                }
-            );
+
             
   
 
@@ -435,12 +424,6 @@
                         events->push(value:event);
                     });
 
-                    professions = [];
-                    value.professions->foreach(do:::(index, professionData) {
-                        @:prof = professionData;
-                        prof.profession = Profession.Base.database.find(name:prof.profession);                       
-                        professions->push(value:prof);
-                    });
 
 
                 },
@@ -462,7 +445,6 @@
                         species : [...species]->map(to:::(value) <- {rarity:value.rarity, name:value.species.name}),
                         significantLandmarks : [...significantLandmarks]->map(to:::(value) <- value.state),
                         events : [...events]->map(to:::(value) <- value.state),
-                        professions : [...professions]->map(to:::(value) <- {rarity:value.rarity, profession:value.profession.name})
                     
                     };
                 }
@@ -563,7 +545,7 @@
                 @:out = Entity.new(
                     speciesHint:    if (speciesHint == empty) random.pickArrayItemWeighted(list:species).species else speciesHint,
                     levelHint:      if (levelHint == empty) random.integer(from:levelMin, to:levelMax) else levelHint,
-                    professionHint: if (professionHint == empty) this.getProfession().name  else professionHint
+                    professionHint: if (professionHint == empty) Profession.Base.database.getRandomFiltered(filter::(value)<-value.learnable).name else professionHint
                 );
                 
                 augmentTiered(entity:out);
@@ -571,9 +553,6 @@
                 return out;
             },
             
-            getProfession ::{
-                return random.pickArrayItemWeighted(list:professions).profession;
-            },
             
             species : {
                 get :: <- [...species]->map(to:::(value) <- value.species)
@@ -584,11 +563,7 @@
                 @:angy =  Entity.new(
                     speciesHint: random.pickArrayItemWeighted(list:species).species,
                     levelHint,
-                    professionHint: Profession.Base.database.getRandomFiltered(
-                        filter:::(value) <- 
-                            value.maxKarma < 1000 &&
-                            levelHint >= value.levelMinimum
-                    ).name
+                    professionHint: Profession.Base.database.getRandomFiltered(filter::(value)<-value.learnable).name
                 );       
                 
                 augmentTiered(entity:angy);                       

@@ -842,9 +842,10 @@ return class(
 
                 
                 } else ::<= {
-                    @itemX = ((x + pointer.x - mapSizeW/2))->floor;
-                    @itemY = ((y + pointer.y - mapSizeH/2))->floor;
-                    return !((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY));
+                    @itemX = (x - pointer.x);
+                    @itemY = (y - pointer.y);
+                    
+                    return (x >= -mapSizeW/2 && y >= -mapSizeH/2 && x <= mapSizeW/2 && y <= mapSizeH/2);
                 };
 
             },

@@ -43,3 +43,7 @@
 - prevented chest event from giving weird items
 - nerfed spawn rate for dungeons
 - added appearance of treasure room in shrines after a preset floor amount
+- Fixed issue with battle endings being disjoint from the actual battle 
+- Fixed issue with game overs not resulting in going back to main menu 
+- implemented Elementalist
+- Possibly fixed issue with enemy spawns in dungeons being on-screen (they should always spawn offscreen)

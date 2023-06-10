@@ -94,8 +94,8 @@ return class(
                 @:ability = Random.pickArrayItem(list);
                 
                 
-                @atEnemy = ability.usageHintAI == Ability.USAGE_HINT.OFFSENSIVE ||
-                           ability.usageHintAI == Ability.USAGE_HINT.DEBUFF;
+                @atEnemy = (ability.usageHintAI == Ability.USAGE_HINT.OFFENSIVE) ||
+                           (ability.usageHintAI == Ability.USAGE_HINT.DEBUFF);
                 breakpoint();
                 
                 @targets = [];

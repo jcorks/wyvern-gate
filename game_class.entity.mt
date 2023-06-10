@@ -762,6 +762,14 @@
                 abilitiesLearned->push(value:ability);
             },
             
+            learnNextAbility::{
+                @:skills = this.profession.gainSP(amount:1);
+                when(skills == empty) empty;
+                skills->foreach(do:::(i, skill) {
+                    this.learnAbility(name:skill);
+                });
+            },
+            
             clearAbilities::{
                 @abilitiesAvailable = [
                     Ability.database.find(name:'Attack'),

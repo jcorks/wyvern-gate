@@ -24,9 +24,14 @@ return class(
     name: 'Wyvern.Party',
     
     define:::(this) {
-        @:inventory = Inventory.new(size:20);
+        @inventory;
         @members = [];
         this.interface = {    
+            reset ::{
+                members = [];
+                inventory = Inventory.new(size:20);
+            },
+        
             add::(member => Entity.type) {
                 // no repeats, please
                 when(members->any(condition::(value) <- value == member)) empty;                
