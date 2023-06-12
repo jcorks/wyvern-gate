@@ -47,3 +47,5 @@
 - Fixed issue with game overs not resulting in going back to main menu 
 - implemented Elementalist
 - Possibly fixed issue with enemy spawns in dungeons being on-screen (they should always spawn offscreen)
+- Implemented farmer
+- expanded use of Wyvern language and formalized its grammar

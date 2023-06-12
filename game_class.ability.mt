@@ -1407,6 +1407,26 @@ Ability.database = Database.new(
 
             Ability.new(
                 data: {
+                    name: 'Magic Mist',
+                    targetMode : TARGET_MODE.NONE,
+                    description: "Removes ALL effects.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.BUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(
+                            text: user.name + ' casts Magic Mist on ' + targets[0].name + '!'
+                        );
+                        user.resetEffects();
+                    }
+                }
+            ),
+
+
+            Ability.new(
+                data: {
                     name: 'Antidote',
                     targetMode : TARGET_MODE.ONE,
                     description: "Cures the poison status effect.",
@@ -1991,6 +2011,88 @@ Ability.database = Database.new(
                     }
                 }
             ),
+
+
+            Ability.new(
+                data: {
+                    name: 'Plant Poisonroot',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Plants a poisonroot seed on the target. Grows in 4 turns and causes poison damage every turn when grown.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI: USAGE_HINT.DEBUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(text:targets[0].name + ' was covered in poisonroot seeds!');
+                        user.addEffect(from:targets[0], name:'Poisonroot Growing', durationTurns:4);                            
+                    }
+                }
+            ),
+
+            Ability.new(
+                data: {
+                    name: 'Plant Triproot',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Plants a triproot seed on the target. Grows in 4 turns and causes 40% chance to trip every turn when grown.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI: USAGE_HINT.DEBUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(text:targets[0].name + ' was covered in triproot seeds!');
+                        user.addEffect(from:targets[0], name:'Triproot Growing', durationTurns:4);                            
+                    }
+                }
+            ),
+
+            Ability.new(
+                data: {
+                    name: 'Plant Healroot',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Plants a healroot seed on the target. Grows in 4 turns and heals 5% HP turn.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI: USAGE_HINT.HEAL,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        dialogue.message(text:targets[0].name + ' was covered in triproot seeds!');
+                        user.addEffect(from:targets[0], name:'Healroot Growing', durationTurns:4);                            
+                    }
+                }
+            ),
+
+
+            Ability.new(
+                data: {
+                    name: 'Green Thumb',
+                    targetMode : TARGET_MODE.NONE,
+                    description: "Any growing roots grow instantly on the target.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 3,
+                    usageHintAI: USAGE_HINT.BUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        @:effects = targets[0].effects;
+                        @:toRemove = [];
+                        effects->foreach(do:::(i, effect) {
+                            if (effect.name == 'Healroot Growing' ||
+                                effect.name == 'Triproot Growing' ||
+                                effect.name == 'Poisonroot Growing')
+                                toRemove->push(value:effect.base);
+                        });
+                        
+                        when(toRemove->keycount == 0)
+                            dialogue.message(text:'Nothing happened!');
+                        targets[0].removeEffects(effectBases:toRemove);
+                        dialogue.message(text:user.name + ' accelerated the growth of the seeds on ' + targets[0].name + '!');
+                    }
+                }
+            ),
+
 
             Ability.new(
                 data: {

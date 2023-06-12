@@ -1517,6 +1517,206 @@ Effect.database = Database.new(
                 }
             }
         ),           
+
+        Effect.new(
+            data : {
+                name : 'Poisonroot Growing',
+                description: 'Vines grow on target. SPD -10%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(SPD:-10),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {                    
+                    holder.addEffect(from:holder, name:'Poisonroot', durationTurns:30);                            
+                },                
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
+
+        Effect.new(
+            data : {
+                name : 'Poisonroot',
+                description: 'Every turn takes poison damage. SPD -10%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(SPD:-10),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {     
+                    dialogue.message(text:'The poisonroot vines dissipate from ' + holder.name + '.'); 
+                },                
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                    dialogue.message(text:user.name + ' is strangled by the poisonroot!');                    
+                    holder.damage(from:user, damage: Damage.new(
+                        amount: random.integer(from:1, to:4),
+                        damageType: Damage.TYPE.POISON,
+                        damageClass: Damage.CLASS.HP
+                    ));                
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
+        Effect.new(
+            data : {
+                name : 'Triproot Growing',
+                description: 'Vines grow on target. SPD -10%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(SPD:-10),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {                    
+                    holder.addEffect(from:holder, name:'Triproot', durationTurns:30);                            
+                },                
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
+
+        Effect.new(
+            data : {
+                name : 'Triproot',
+                description: 'Every turn 40% chance to trip. SPD -10%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(SPD:-10),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {                    
+                    dialogue.message(text:'The triproot vines dissipate from ' + holder.name + '.'); 
+                },                
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                    if (Number.random() < 0.4) ::<= {
+                        dialogue.message(text:'The triproot trips ' + holder.name + '!');
+                        holder.addEffect(from:holder, name:'Stunned', durationTurns:1);                                                
+                    };
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
+
+        Effect.new(
+            data : {
+                name : 'Healroot Growing',
+                description: 'Vines grow on target. SPD -10%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(SPD:-10),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {                    
+                    holder.addEffect(from:holder, name:'Healroot', durationTurns:30);                            
+                },                
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
+
+        Effect.new(
+            data : {
+                name : 'Healroot',
+                description: 'Every turn heal 5% HP. SPD -10%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(SPD:-10),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {                    
+                    dialogue.message(text:'The healroot vines dissipate from ' + holder.name + '.'); 
+                },                
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                    dialogue.message(text:'The healroot soothe\'s ' + holder.name + '.');
+                    holder.heal(amount:holder.stats.HP * 0.05);
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
              
 
         Effect.new(

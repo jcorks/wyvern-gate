@@ -2353,10 +2353,11 @@ Item.Base.database = Database.new(items: [
             };
 
             item.setIslandGenAttributes(
-                levelHint:  5,//user.level => Number,
+                levelHint:  6,//user.level => Number,
                 nameHint:   nameGen.island(),
                 tierHint : 1
             );
+            item.addIslandEntry(world);
             
             item.price = 1;
         }
@@ -2403,7 +2404,7 @@ Item.Base.database = Database.new(items: [
             };
 
             item.setIslandGenAttributes(
-                levelHint:  user.level => Number,
+                levelHint:  7,
                 nameHint:   nameGen.island(),
                 tierHint : 2
             );
@@ -2453,7 +2454,7 @@ Item.Base.database = Database.new(items: [
             };
 
             item.setIslandGenAttributes(
-                levelHint:  user.level => Number,
+                levelHint:  8,
                 nameHint:   nameGen.island(),
                 tierHint : 3
             );
@@ -2503,7 +2504,7 @@ Item.Base.database = Database.new(items: [
             };
 
             item.setIslandGenAttributes(
-                levelHint:  user.level => Number,
+                levelHint:  9,
                 nameHint:   nameGen.island(),
                 tierHint : 3
             );

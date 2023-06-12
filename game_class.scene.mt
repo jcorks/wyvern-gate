@@ -86,9 +86,9 @@ Scene.database = Database.new(
             data : {
                 name : 'scene_wyvernfire0',
                 script: [
-                    //           "Another who comes"
-                    ['???',      'Nohdjaezo kaaj juhrruhnkii...'],
-                    ['???',      'Welcome... to my domain, Chosen. You have done well to get here.'],
+                    //          "(comes     again      one  new)    Another new one comes..."
+                    ['???',      'Juhrruhlo-rrohsharr  naan djaashaarr ...'],
+                    ['???',      'Zaaluh-shol, welcome... to my domain. You have done well to get here.'],
                     ['???',      'You have been summoned, but not by me. My sibling is the one who calls for you.'],
                     ['???',      'But to get to them, I must evaluate you to see if you are truly worthy of seeing the Wyvern of Light.'],
                     ['Kaedjaal', 'My name is Kaedjaal, and my domain is that of flame. I enjoy a summer\'s day as much as the next, but I\'ll be honest with you; I take it a step further.'],
@@ -140,11 +140,87 @@ Scene.database = Database.new(
                     ['Kaedjaal', 'However, be cautious: you are not the first to have triumphed over me.'],
                     ['Kaedjaal', 'There are many with their own goals and ambitions, and some will be more skilled that you currently are.'],
                     ['Kaedjaal', 'Well, I hope you enjoyed this little visit. Come and see me any time.'],
-                    ['Kaedjaal', 'I will send you on your way. Remember: seek the shrine to find the Key.'],
-                    ['Kaedjaal', 'May you find peace and prosperity in your heart. ']
+                    ['Kaedjaal', 'Please hand me the key and I will send you on your way.'],
+                    ['', 'The party hands over the Wyvern Key of Fire.'],
+                    ['Kaedjaal', 'May you find peace and prosperity in your heart. Remember: seek the shrine to find the Key.'],
+                    ::(location, landmark, doNext) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Fire');
+                        if (key != empty) key = key[0];
+                        // could be equipped by hooligans and jokesters
+                        if (key == empty) ::<= {
+                            key = [::] {
+                                world.party.members->foreach(do:::(i, member) {
+                                    @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_L);
+                                    if (wep.name == 'Wyvern Key of Fire') ::<= {
+                                        send(message:key);
+                                    };
+                                });
+                            };
+                        };
+                        // you can technically throw it out or Literally Throw It.
+                        when(key == empty) ::<= {
+                            dialogue.message(
+                                speaker: 'Kaedjaal',
+                                                //(Friend   of   Me)  My friend...
+                                text: '... Oh. Uh. Rrohziil shaa jiin, I do not know how you have done this, but you seem to have misplaced your key to my domain.'
+                            );
+                            dialogue.message(
+                                speaker: 'Kaedjaal',
+                                text: 'Well, here: I have a spare.'
+                            );
+                            
+                            @:item = Item.Base.database.find(name:'Wyvern Key of Fire'
+                                        ).new(from:location.ownedBy);
+                            dialogue.message(text:'The party was given a ' + item.name + '.');
+                            world.party.inventory.add(item);
+                            key = item;
+
+                            dialogue.message(
+                                speaker: 'Kaedjaal',
+                                text: 'Rrohziil, Please keep it safe. It breaks my heart to give these away to Chosen who already should have one...'
+                            );
+                        };
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        instance.visitIsland(where:key.islandEntry);
+                        breakpoint();
+                        doNext();
+                    }
+                    
+                    
+                    
                 ]
             }
-        ),     
+        ), 
+        
+        Scene.new(
+            data : {
+                name : 'scene_wyvernfire0',
+                script: [
+                    ['Kaedjaal', 'Rrohziil shaa jiin, you have come to check on me, eh?'],
+                    ['Kaedjaal', 'Welcome back to my domain, Chosen. I am happy that you have returned.'],
+                    ['Kaedjaal', 'Perhaps you are interested in a trade? I have a habit of collecting trinkets.'],
+                    ['Kaedjaal', 'If you give me 3 items, I will give you 1 item from my hoard.'],
+                    ::(location, landmark, doNext) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        dialogue.askBoolean(
+                            prompt:'Trade?',
+                            onChoice::(which) {
+                                when(which == false) ::<= {
+                                    dialogue.message(speaker:'Kaedjaal', text:'Ah I see. That is understandable. I will still be here if you change your mind.');
+                                                                         //    (world    wish[verb] travel[noun, pl] swift prosperous)   -> The World wishes travels swift and prosperous -> May your travels be swift and properous
+                                    dialogue.message(speaker:'Kaedjaal', text: 'Zaashael kaaluh-lo zohppuh-zodjii shiirr kohggaelaarr...');
+                                };
+                                
+                                
+                                
+                            }
+                        );
+                    }                    
+                ]
+            }
+        );        
+            
 
         
         

@@ -138,138 +138,7 @@ return class(
         };
         
         
-        @:visitIsland :: {
-
-            // check if we're AT a location.
-            island.map.title = "(Map of " + island.name + ')';
-
-
-
-
-            dialogue.choices(
-                leftWeight: 1,
-                topWeight: 1,
-                prompt: 'What next?',
-                renderable: island.map,
-                keep: true,
-                onGetChoices ::{
-                    @:choices = [
-                        'Travel',
-                        'Check',
-                        'Party',
-                        'Look around',
-                        'System',
-                    ];
-                    @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
-
-                    if (visitable != empty) ::<= {
-                        visitable->foreach(do:::(i, vis) {
-                            choices->push(value:'Visit ' + vis.name);                
-                        });
-                    };
-                    return choices;
-                },
-                onChoice::(choice) {
-                    @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
-
-                   
-                    match(choice-1) {
-                      // travel
-                      (0): ::<= {
-
-                        dialogue.cursorMove(
-                            leftWeight: 1,
-                            topWeight: 1,
-                            prompt: 'Traveling...',
-                            renderable:island.map,
-                            onMove ::(choice) {
-                                
-                                @:target = island.landmarks[choice-1];
-                                
-                                
-                                // move by one unit in that direction
-                                // or ON it if its within one unit.
-                                island.map.movePointerFree(
-                                    x: if (choice == dialogue.CURSOR_ACTIONS.RIGHT) 4 else if (choice == dialogue.CURSOR_ACTIONS.LEFT) -4 else 0,
-                                    y: if (choice == dialogue.CURSOR_ACTIONS.DOWN)  4 else if (choice == dialogue.CURSOR_ACTIONS.UP)   -4 else 0
-                                );
-                                world.stepTime(); 
-                                island.map.title = world.timeString + '                   ';
-                                island.incrementTime();
-                                
-                                // cancel if we've arrived somewhere
-                                @:arrival = island.map.getNamedItemsUnderPointerRadius(radius:5);
-                                if (arrival != empty) ::<= {
-                                    arrival->foreach(do:::(i, arr) {
-                                        dialogue.message(
-                                            text:"The party has arrived at the " + arr.data.name,
-                                            onNext::{
-                                                arr.data.discover();
-                                                island.map.discover(data:arr.data);                                            
-                                            }
-                                        );
-                                        //island.map.setPointer(
-                                        //    x: arr.x,
-                                        //    y: arr.y
-                                        //);
-                                    
-                                    });
-                                    
-                                };                            
-
-                            }
-                        
-                        );
-                            
-                      },
-                    
-                      // check
-                      (1): ::<= {
-                        choice = dialogue.choices(
-                            leftWeight: 1,
-                            topWeight: 1,
-                            prompt: 'Check which?',
-                            choices: [
-                                'Island',
-                            ],
-                            canCancel: true,
-                            onChoice::(choice){
-                                match(choice-1) {
-                                  (0): dialogue.message(speaker: 'About ' + island.name, text: island.description)
-                                };                                                        
-                            }
-                        );
-                      
-                      },
-                      
-
-                      (3): ::<= {
-                        island.incrementTime();
-                        dialogue.message(text:'Nothing to see but the peaceful scenery of ' + island.name + '.');                          
-                      },
-                      // party options
-                      (2): partyOptions(),
-
-                      (4): ::<= {
-                        systemMenu();                          
-                      },                          
-                      
-                      // visit landmark
-                      default: ::<= {
-                        //breakpoint();
-                        this.visitLandmark(landmark:visitable[choice-6].data);
-                      }
-                    };
-
-
-                
-                
-                }
-            );
-
-
-
-        };
+        
         
         this.interface = {
             visitLandmark ::(landmark){
@@ -637,7 +506,7 @@ return class(
                 
                 
                 
-                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5, professionHint:'Elementalist');
+                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:1000);
                 @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
                 // debug
                     
@@ -687,7 +556,7 @@ return class(
                 
                 @:Scene = import(module:'game_class.scene.mt');
                 Scene.database.find(name:'scene_intro').act(onDone::{
-                    visitIsland();
+                    this.visitIsland();
                     //island.addEvent(
                     //    event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
                     //        island, party, landmark //, currentTime
@@ -698,6 +567,150 @@ return class(
           
                 
             },
+            visitIsland ::(where) {
+                breakpoint();
+                if (where != empty) ::<= {
+                    island = where;
+                    world.island = island;
+                };
+                
+                // cancel and flush current VisitIsland session
+                if (dialogue.canJumpToTag(name:'VisitIsland')) ::<= {
+                    dialogue.jumpToTag(name:'VisitIsland');
+                    dialogue.forceExit();
+                };
+                // check if we're AT a location.
+                island.map.title = "(Map of " + island.name + ')';
+
+
+
+
+                dialogue.choices(
+                    leftWeight: 1,
+                    topWeight: 1,
+                    prompt: 'What next?',
+                    renderable: island.map,
+                    keep: true,
+                    jumpTag: 'VisitIsland',
+                    onGetChoices ::{
+                        @:choices = [
+                            'Travel',
+                            'Check',
+                            'Party',
+                            'Look around',
+                            'System',
+                        ];
+                        @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
+
+                        if (visitable != empty) ::<= {
+                            visitable->foreach(do:::(i, vis) {
+                                choices->push(value:'Visit ' + vis.name);                
+                            });
+                        };
+                        return choices;
+                    },
+                    onChoice::(choice) {
+                        @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
+
+                       
+                        match(choice-1) {
+                          // travel
+                          (0): ::<= {
+
+                            dialogue.cursorMove(
+                                leftWeight: 1,
+                                topWeight: 1,
+                                prompt: 'Traveling...',
+                                renderable:island.map,
+                                onMove ::(choice) {
+                                    
+                                    @:target = island.landmarks[choice-1];
+                                    
+                                    
+                                    // move by one unit in that direction
+                                    // or ON it if its within one unit.
+                                    island.map.movePointerFree(
+                                        x: if (choice == dialogue.CURSOR_ACTIONS.RIGHT) 4 else if (choice == dialogue.CURSOR_ACTIONS.LEFT) -4 else 0,
+                                        y: if (choice == dialogue.CURSOR_ACTIONS.DOWN)  4 else if (choice == dialogue.CURSOR_ACTIONS.UP)   -4 else 0
+                                    );
+                                    world.stepTime(); 
+                                    island.map.title = world.timeString + '                   ';
+                                    island.incrementTime();
+                                    
+                                    // cancel if we've arrived somewhere
+                                    @:arrival = island.map.getNamedItemsUnderPointerRadius(radius:5);
+                                    if (arrival != empty) ::<= {
+                                        arrival->foreach(do:::(i, arr) {
+                                            dialogue.message(
+                                                text:"The party has arrived at the " + arr.data.name,
+                                                onNext::{
+                                                    arr.data.discover();
+                                                    island.map.discover(data:arr.data);                                            
+                                                }
+                                            );
+                                            //island.map.setPointer(
+                                            //    x: arr.x,
+                                            //    y: arr.y
+                                            //);
+                                        
+                                        });
+                                        
+                                    };                            
+
+                                }
+                            
+                            );
+                                
+                          },
+                        
+                          // check
+                          (1): ::<= {
+                            choice = dialogue.choices(
+                                leftWeight: 1,
+                                topWeight: 1,
+                                prompt: 'Check which?',
+                                choices: [
+                                    'Island',
+                                ],
+                                canCancel: true,
+                                onChoice::(choice){
+                                    match(choice-1) {
+                                      (0): dialogue.message(speaker: 'About ' + island.name, text: island.description)
+                                    };                                                        
+                                }
+                            );
+                          
+                          },
+                          
+
+                          (3): ::<= {
+                            island.incrementTime();
+                            dialogue.message(text:'Nothing to see but the peaceful scenery of ' + island.name + '.');                          
+                          },
+                          // party options
+                          (2): partyOptions(),
+
+                          (4): ::<= {
+                            systemMenu();                          
+                          },                          
+                          
+                          // visit landmark
+                          default: ::<= {
+                            //breakpoint();
+                            this.visitLandmark(landmark:visitable[choice-6].data);
+                          }
+                        };
+
+
+                    
+                    
+                    }
+                );
+
+
+
+            },      
+            
             onSaveState : {
                 set ::(value) <- onSaveState = value
             },

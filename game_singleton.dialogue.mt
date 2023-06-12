@@ -731,6 +731,21 @@ return class(
                 }]);
             },
 
+            canJumpToTag::(name => String) {
+                return [::] {
+                    forever(do::{
+                        if (choiceStack->keycount == 0)
+                            send(message:false);
+                        @:data = choiceStack[choiceStack->keycount-1];
+                        if (data.jumpTag != name) ::<= {
+                            canvas.popState();
+                            choiceStack->pop;
+                        } else 
+                            send(message:true);
+                    });
+                };            
+            },
+
             // pops all choices in the stack until the tag is hit.
             jumpToTag::(name => String) {
                 breakpoint();

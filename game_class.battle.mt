@@ -95,14 +95,12 @@
                 when((allies_->keycount == 0) || allies_->all(condition:::(value) {
                     return value.isIncapacitated();
                 })) ::<= {
-                    breakpoint();
                     battleEnd();
                 };
                 when((enemies_->keycount == 0) || enemies_->all(condition:::(value) {
                     return value.isIncapacitated();
                 })) ::<={
                     alliesWin = true;
-                    breakpoint();
                     battleEnd();
                 };
                 initTurn();

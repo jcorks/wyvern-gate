@@ -106,9 +106,77 @@
 
 
 /*
+    Wyvern's language.
+    Some notes on the language
+    
+    - Adjectives / modifiers are always after the noun they modify. Series of adjectives / modifiers can be strung to further describe the noun
+    - Verbs come before the subject and object. Subject comes before the object. (VSO)
+    - Endings of words act as explicit particles for types and functions of words
+    - adverbs always come after verbs and are dashed. they follow the conjugation suffix
+    
+    
+    Current word list:
+        // pronouns. Always end in n
+        jiin            me / I
+        kaajiin         you
+        naan            one / someone
+        laen            they / he / she 
+        
+        // prepositions. always end in aa
+        // propositions link with dashes their subject and object
+        // prepositions come after the subject and behave as adjectives in placement
+        // Example: "warrior" -> (one of war) -> naan-shaa-zohkiizaal
+        shaa            of / from
+
+        // nouns end in l. end in ii for multiple
+        zaashael        world / earth (assumed if contextless) / planet
+        rrohziil        friend
+        zohkaal         enemy
+        zohkiizaal      war
+        kael            wing
+        djaal           fire / flame
+        
+        // verbs. infinitive always ends in uh 
+        zohppuh         to travel
+        juhrruh         to come 
+        ppuh            to be
+        kaaluh          to wish
+        zaaluh          to choose
+        zohkuh          to fight
+        
+        // adjectives / adverbs, always end in rr
+        shiirr          swift
+        kohggaelaarr    prosperous
+        djaashaarr      new
+        rrohsharr       again / repeatedly
+        
+        
+        // conjunctions always end in z
+        jaan            but
 
 
 
+    Conjugation. separated by a dash
+    Add an l to make it a noun
+        -lo             present tense
+        -sho            past tense 
+        -zo             affirmative / command
+
+
+    grammatical caveats
+        - the verb "to be" is special in that it can form modifiers to nouns by linking with other words. Those 
+          attached to "to be" are also dashed together.
+          For example, the word "Chosen" / "Chosen one" (as in somebody who is chosen) is literally the verb 'to be' conjugated in the past tense linked with the infinitive of "to choose" with the subject "one"
+          in other words: ppuh-sho-zaaluh naan
+          which is distinctly different from "zaaluh-zol" which is the word for "choice" 
+          (it is more common to just informally say "zaaluh-shol" (chosen (noun form))
+    
+
+        
+    Cultural bits 
+        - The World (zaashael) is a way to refer to the world but also the creator of things. Not in an explicit sense 
+          but a incorporeal spiritual sense, whatever that may be to the individual.
+          A common way to do well wishings upon another is to tell them "The world wishes xxx", i.e. "the world wishes you swift and prosperous travels" is a common phrase to wish one on a journey
 */
 
 @:dragonish_hardConsonant = ::<= {
@@ -116,7 +184,8 @@
         'k',
         'gg',
         'dj',
-        'pp'
+        'pp',
+        'tt',
     ];
     return :: {
         return Random.pickArrayItem(list);
@@ -131,7 +200,7 @@
         'j',
         'l',
         'n',
-        'x'
+        'sh'
     ];
     return :: {
         return Random.pickArrayItem(list);

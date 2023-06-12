@@ -525,6 +525,7 @@ Profession.Base.database = Database.new(
                 
                 // runes fade after 5 turns
                 abilities : [
+                    /*
                     'Poison Rune', // weak DoT until released
                     'Rune Release', // releases all runes on target
                     'Destruction Rune', // damage when released.
@@ -532,6 +533,7 @@ Profession.Base.database = Database.new(
                     'Cure Rune', // heal when released
                     'Shield Rune', // DEF + 100% until released
                     'Multiply Rune' // ddoubles targets Rune charges
+                    */
                 ],
                 passives : [
                 ]
@@ -591,10 +593,10 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
 
                 abilities : [
-                    'Poisonroot', // grows at targets feet quickly. after 4 turns, 50% poison damage
-                    'Triproot',   // grows at targets feet quickly. after 4 turns, 50% chance trip
-                    'Healroot',   // grows at targets feet quickly. after 4 turns, 5% heal per turn
-                    'Green Thumb',  // farmer roots grow instantly
+                    'Plant Poisonroot', //X grows at targets feet quickly. after 4 turns, continuous poison damage every turn
+                    'Plant Triproot',   //X grows at targets feet quickly. after 4 turns, 50% chance trip every turn
+                    'Plant Healroot',   //X grows at targets feet quickly. after 4 turns, 5% heal per turn
+                    'Green Thumb',      //X farmer roots grow instantly
                 ],
                 passives : [
                 ]
@@ -652,9 +654,9 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
 
                 abilities : [
-                    'Give Snack',
-                    'Rotten Food', // minor damage, poison chance 75%
-                    'Flambe', // fire damage, all enemies weak damage
+                    'Give Snack',  // X
+                    //'Rotten Food', // minor damage, poison chance 75%
+                    //'Flambe',      // fire damage, all enemies weak damage
                 ],
                 passives : [
                     'Field Cook'
@@ -682,12 +684,14 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
 
                 abilities : [
-                    'Sharpshoot', // dex-based attack 
+                    /*
+                    'Sharpshoot',   // dex-based attack 
                     'Tranquilizer', // Paralysis + DEX attack,
-                    'Hunter', // +100% damage to Creatures
-                    'Ensnare', // both user and target cannot use an action for one turn
-                    'Call', // calls a creature to help (join team for single battle)
-                    'Tame', // chance to convince creature to join party.
+                    'Hunter',       // +100% damage to Creatures
+                    'Ensnare',      // both user and target cannot use an action for one turn
+                    'Call',         // calls a creature to help (join team for single battle)
+                    'Tame',         // chance to convince creature to join party.
+                    */
                 ],
                 passives : [
                 ]
@@ -714,6 +718,7 @@ Profession.Base.database = Database.new(
                 maxKarma : 50,
                 
                 abilities : [
+                    /*
                     'Curse',       // - 50% HP, -ATK 100% one enemy 10 turns
                     'Blood Rite',  // - 50% HP, HoT (+5% each turn)
                     'Blind Faith', // - 50% HP, ATK + 100%
@@ -721,6 +726,7 @@ Profession.Base.database = Database.new(
                     'Wither',      // - 50% HP, DEF - 100%, SPD - 100%
                     'Divine Gift', // - 50% HP, +25% AP target
                     'Sacrifice',   // - 99% HP, heal party + 75% hp
+                    */
                 ],
                 passives : [
                 ]
@@ -747,6 +753,7 @@ Profession.Base.database = Database.new(
                 learnable : true,
 
                 abilities : [
+                    /*
                     'Steal',       // steal 
                     'Lightfooted', // +50% speed for 5 turns  
                     'Backstab',    // hi damage attack
@@ -754,7 +761,7 @@ Profession.Base.database = Database.new(
                     'Conceal',   // dodge next attack
                     'Reflexes', // %25 chance to avoid damage for 4 turns
                     'Multistrike' // 2-5 hits single target
-
+                    */
                 ],
                 passives : [
                 ]
@@ -783,12 +790,12 @@ Profession.Base.database = Database.new(
                 maxKarma : 50,
                 
                 abilities : [
-                    'Poison Attack',  //atk + poison
-                    'Tripwire',       //ONCE PER BATTLE: attack that pushes ppl into a tripwire you set up before battle (cant act for a turn)
-                    'Trip Explosive', //ONCE PER BATTLE: attach that push ppl into a trip explosive u set up before battle (enemy party damage)
-                    'Petrify',        //atk + petrify
-                    'Dire Precision', // if damage from this user were to knock out a character, it kills them instead
-                    'Spike Pit'       //Once per battle: all enemy fall in pit dmg + disable
+                    'Poison Attack',  //X atk + poison
+                    'Tripwire',       //X ONCE PER BATTLE: attack that pushes ppl into a tripwire you set up before battle (cant act for a turn)
+                    'Trip Explosive', //X ONCE PER BATTLE: attach that push ppl into a trip explosive u set up before battle (enemy party damage)
+                    'Petrify',        //X atk + petrify
+                    //'Dire Precision', // if damage from this user were to knock out a character, it kills them instead
+                    //'Spike Pit'       //Once per battle: all enemy fall in pit dmg + disable
                 ],
                 passives : [
                     'Assassin\'s Pride', // Each kill in battle gives a 25% buff to attack and speed
@@ -1047,7 +1054,37 @@ Profession.Base.database = Database.new(
                 ],
                 passives : [
                 ]
-            })
+            }),
+            
+        Profession.Base.new(data:{
+                name: 'Wyvern of Ice',
+                weaponAffinity: 'None',
+                description : "", 
+                levelMinimum : 100,
+
+                growth: StatSet.new(
+                    HP:  20,
+                    AP:  20,
+                    ATK: 20,
+                    INT: 20,
+                    DEF: 20,
+                    SPD: 20,
+                    LUK: 20,
+                    DEX: 20
+                ),
+                minKarma : 0,
+                maxKarma : 50,
+                learnable : false,
+                
+                abilities : [
+                    'Frozen Flame',
+                    'Ice',
+                    'Magic Mist', // remove all effects
+                    'Wild Swing'
+                ],
+                passives : [
+                ]
+            })            
             
             
             
