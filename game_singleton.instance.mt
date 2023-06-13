@@ -34,7 +34,7 @@
     return (xd**2 + yd**2)**0.5;
 };
 @:JSON = import(module:'Matte.Core.JSON');
-@:VERSION = '0.1.3a';
+@:VERSION = '0.1.4a';
 @world = import(module:'game_singleton.world.mt');
 
 return class(
@@ -389,13 +389,14 @@ return class(
                           
                           (1)::<= {
                             canvas.clear();
+                            canvas.blackout();
                             @:message = 'Loading...';
                             canvas.movePen(
                                 x: canvas.width/2 - message->length/2,
                                 y: canvas.height/2
                             );
                             canvas.drawText(text:message);
-                            canvas.commit();
+                            canvas.commit(renderNow:true);
                             this.startNew();
                             //this.startInstance();
                           },
@@ -511,16 +512,16 @@ return class(
                 // debug
                     
                     party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
-                    ).new(from:island.newInhabitant(),rngModHint:true));
+                    ).new(from:island.newInhabitant()));
                     
 
-                    /*
+                    
                     [0, 20]->for(do:::(i) {
                         party.inventory.add(item:Item.Base.database.getRandomFiltered(
                             filter:::(value) <- value.isUnique == false
-                        ).new(from:island.newInhabitant(),rngModHint:true));
+                        ).new(from:island.newInhabitant(),rngEnchantHint:true));
                     });
-                    */
+                    
                     
 
                 [0, 3]->for(do:::(i) {

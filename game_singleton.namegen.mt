@@ -135,14 +135,18 @@
         zohkiizaal      war
         kael            wing
         djaal           fire / flame
+        luhl            reality
+        
         
         // verbs. infinitive always ends in uh 
+        // prefix with kaa- to negate a verb
         zohppuh         to travel
         juhrruh         to come 
         ppuh            to be
         kaaluh          to wish
         zaaluh          to choose
         zohkuh          to fight
+        djiirohshuh     to apologize
         
         // adjectives / adverbs, always end in rr
         shiirr          swift

@@ -198,7 +198,7 @@
                     );
                     if (item.name != 'None') ::<={
                         @:itemInstance = item.new(from:this);
-                        if (itemInstance.modCount == 0) 
+                        if (itemInstance.enchantsCount == 0) 
                             inventory.add(item:itemInstance);
                     };
                     

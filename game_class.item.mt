@@ -19,7 +19,8 @@
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
-@:ItemModifier = import(module:'game_class.itemmodifier.mt');
+@:ItemEnchant = import(module:'game_class.itemenchant.mt');
+@:ItemQuality = import(module:'game_class.itemquality.mt');
 @:ItemColor = import(module:'game_class.itemcolor.mt');
 @:Material = import(module:'game_class.material.mt');
 @:random = import(module:'game_singleton.random.mt');
@@ -82,7 +83,8 @@
     },
     define:::(this) {
         @base_;
-        @mods = []; // ItemMod
+        @enchants = []; // ItemMod
+        @quality;
         @material;
         @customName = empty;
         @description;
@@ -93,7 +95,6 @@
         @islandLevelHint;
         @islandNameHint;
         @islandTierHint;
-        @modCount = 0;
         @equipEffects = [];
         @useEffects = [];
         @victoryCount = 0; // like exp, stat mods increase with victories
@@ -104,7 +105,34 @@
                            //
                            // Also the item can become enchanted through use 
         @:stats = StatSet.new();
-        this.constructor = ::(base, from, creationHint, modHint, materialHint, rngModHint, state) {
+        
+        @:recalculateName = ::{
+
+            @baseName =
+            if (base_.hasMaterial)
+                customName = material.name + ' ' + base_.name
+            else 
+                customName = base_.name
+            ;
+                
+            @enchantName = '';
+            
+            if (enchants->keycount == 1)
+                enchantName = ' (' + enchants[0].name + ')'
+            else if(enchants->keycount > 1)
+                enchantName = ' (Unique)'
+            ;
+            
+            customName = if (base_.hasQuality && quality != empty)
+                quality.name + ' ' + baseName + enchantName 
+            else
+                baseName + enchantName;
+
+
+        };
+        
+        
+        this.constructor = ::(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint) {
             when(state != empty) ::<= {
                 this.state = state;
                 return this;
@@ -113,7 +141,9 @@
             
             base_ = base;
             stats.add(stats:base.equipMod);
-            description = base.description;
+            price = base.basePrice;
+            price *= 1.05 * base_.weight;
+            description = base.description + ' ';
             base.equipEffects->foreach(do:::(i, effect) {
                 equipEffects->push(value:effect);
             });
@@ -121,48 +151,36 @@
             base.useEffects->foreach(do:::(i, effect) {
                 useEffects->push(value:effect);
             });
-
             
-            if (base.canHaveModifier) ::<= {
-                if (modHint != empty) ::<= {
-                    @:mod = ItemModifier.database.find(name:modHint);
-                    mods->push(value:mod);
-                    customName = base.name + ' (' + mod.name + ')';
-                    stats.add(stats:mod.equipMod);
-                    description = description + ' ' + mod.description;
+            if (base.hasQuality) ::<= {
+                // random chance to have a maker's emblem on it, indicating 
+                // made with love and care
+                if (Number.random() < 0.3) ::<= {
+                    description = description + 'The maker\'s emblem is engraved on it. ';
+                    stats.add(stats:StatSet.new(
+                        ATK:10,
+                        DEF:10,
+                        SPD:10,
+                        INT:10,
+                        DEX:10                    
+                    ));
+                    price *= 1.05;
                 };
-
                 
-                if (rngModHint != empty || Number.random() > 0.5) ::<= {
-                    @:count = random.pickArrayItem(list:[1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 4, 5]);
-                    if(count > 1)
-                        customName = base.name + ' (Unique)';
-                    modCount = count;
-                    [0, count]->for(do:::(i) {
-                        @:mod = ItemModifier.database.getRandom();
-                        if (count == 1)
-                            customName = base.name + ' (' + mod.name + ')';
-
-                        mods->push(value:mod);
-                        mod.equipEffects->foreach(do:::(i, effect) {
-                            equipEffects->push(value:effect);
-                        });
-                        stats.add(stats:mod.equipMod);
-                        if (description->contains(key:mod.description) == false)
-                            description = description + ' ' + mod.description;
-                    });
+                
+                if (Number.random() < 0.3) ::<= {
+                    quality = if (qualityHint == empty)
+                        ItemQuality.database.getRandom()
+                    else 
+                        ItemQuality.database.find(name:qualityHint);
+                    stats.add(stats:quality.equipMod);
+                    price += (price * (quality.pricePercentMod/100));
+                    description = description + quality.description + ' ';
+                    
                 };
             };
             
 
-            if (base.canBeColored) ::<= {
-                color = ItemColor.database.getRandom();
-                stats.add(stats:color.equipMod);
-                customName = if (customName) color.name + ' ' + customName else color.name + ' ' + base_.name;
-            };
-                        
-            
-            
             if (base.hasMaterial) ::<= {
                 if (materialHint == empty) ::<= {
                     material = Material.database.getRandomWeightedFiltered(
@@ -171,20 +189,38 @@
                 } else ::<= {
                     material = Material.database.find(name:materialHint);                
                 };
-
+                description = description + material.description + ' ';
                 stats.add(stats:material.statMod);
-                if (mods->keycount)
-                    customName = material.name + ' ' + customName
-                else 
-                    customName = material.name + ' ' + base.name;
-
+                recalculateName();
             };
             
-            price = base.basePrice;
-            price *= 1.05 * base_.weight;
-            mods->foreach(do:::(index, mod) {
-                price += (price * (mod.pricePercentMod/100));
-            });
+
+            
+            if (base.canHaveEnchants) ::<= {
+                if (enchantHint != empty) ::<= {
+                    this.addEnchant(name:enchantHint);
+                };
+
+                
+                if (rngEnchantHint != empty || Number.random() > 0.5) ::<= {
+                    @:count = random.pickArrayItem(list:[1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 4]);
+                    [0, count]->for(do:::(i) {
+                        @:mod = ItemEnchant.database.getRandom();
+                        this.addEnchant(name:mod.name);
+                    });
+                };
+            };
+            
+
+            if (base.canBeColored) ::<= {
+                color = if (colorHint) ItemColor.database.find(name:colorHint) else ItemColor.database.getRandom();
+                stats.add(stats:color.equipMod);
+                description = description->replace(key:'$color$', with:color.name);
+            };
+                        
+            
+            
+
             if (material != empty) 
                 price += price * (material.pricePercentMod / 100);
                 
@@ -218,8 +254,8 @@
                 }
             },
             
-            modCount : {
-                get ::<- modCount
+            enchantsCount : {
+                get ::<- enchants->keycount
             },
             
             equipMod : {
@@ -274,6 +310,22 @@
             price : {
                 get ::<-price,
                 set ::(value) <- price = value
+            },
+            
+            addEnchant::(name) {
+                @:mod = ItemEnchant.database.find(name);
+
+
+                enchants->push(value:mod);
+                mod.equipEffects->foreach(do:::(i, effect) {
+                    equipEffects->push(value:effect);
+                });
+                stats.add(stats:mod.equipMod);
+                if (description->contains(key:mod.description) == false)
+                    description = description + mod.description + ' ';
+                recalculateName();
+                price += (price * (mod.pricePercentMod/100));
+                price = price->ceil;
             },
             
             description : {
@@ -379,17 +431,18 @@
                         
                     description = value.description;
                     stats.state = value.stats;
-                    modCount = value.modCount;
                     equipEffects = [];
                     value.equipEffects->foreach(do:::(index, effectName) {
-                        mods->push(value:effectName);
+                        equipEffects->push(value:effectName);
                     });
 
-                    mods = [];
-                    value.modNames->foreach(do:::(index, modName) {
-                        @:mod = ItemModifier.database.find(name:modName);
-                        mods->push(value:mod);
+                    enchants = [];
+                    value.enchantNames->foreach(do:::(index, modName) {
+                        @:mod = ItemEnchant.database.find(name:modName);
+                        enchants->push(value:mod);
                     });
+                    
+                    quality = ItemQuality.database.find(name:value.quality);
                 },
                 get :: {
                     return {
@@ -403,9 +456,9 @@
                         island : if (island != empty && island.id != world.island.id) island.state else empty,
                         description : description,
                         stats : stats.state,
-                        modCount : modCount,
-                        modNames : [...mods]->map(to:::(value) <- value.name),
-                        equipEffects : [...equipEffects]
+                        enchantNames : [...enchants]->map(to:::(value) <- value.name),
+                        equipEffects : [...equipEffects],
+                        quality : quality.name
                     };
                 }
             }
@@ -436,7 +489,8 @@ Item.Base = class(
                 weight : Number,
                 levelMinimum : Number,
                 equipMod : StatSet.type,
-                canHaveModifier : Boolean,
+                canHaveEnchants: Boolean,
+                hasQuality : Boolean,
                 hasMaterial : Boolean,
                 isUnique : Boolean,
                 keyItem : Boolean,
@@ -451,8 +505,8 @@ Item.Base = class(
             }
         );
         this.interface = {
-            new ::(from, creationHint, modHint, materialHint, rngModHint, state) {
-                return Item.new(base:this, from, creationHint, modHint, materialHint, rngModHint, state);
+            new ::(from, creationHint, enchantHint, materialHint, rngEnchantHint, qualityHint, state, colorHint) {
+                return Item.new(base:this, from, creationHint, enchantHint, materialHint, rngEnchantHint, qualityHint, state, colorHint);
             },
             
 
@@ -481,7 +535,8 @@ Item.Base.database = Database.new(items: [
             levelMinimum : 1,
             keyItem : false,
             basePrice: 0,
-            canHaveModifier : false,
+            canHaveEnchants : false,
+            hasQuality : false,
             hasMaterial : false,
             useTargetHint : USE_TARGET_HINT.ONE,
             useEffects : [],
@@ -501,7 +556,8 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         weight : 0.1,
         levelMinimum : 1,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : true,
         canBeColored : false,
@@ -538,7 +594,8 @@ Item.Base.database = Database.new(items: [
         basePrice : 30000,
         keyItem : false,
         weight : 0.3,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : true,
         canBeColored : false,
@@ -570,7 +627,8 @@ Item.Base.database = Database.new(items: [
         basePrice : 30000,
         keyItem : false,
         hasMaterial : false,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         canBeColored : false,
         isUnique : true,
         weight : 0.1,
@@ -608,7 +666,8 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         basePrice: 20,
         levelMinimum : 1,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,        
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -642,7 +701,8 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         basePrice: 100,
         levelMinimum : 1,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,        
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -676,7 +736,8 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         basePrice: 20,
         levelMinimum : 1,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,        
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -709,7 +770,8 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         basePrice: 20,
         levelMinimum : 1,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,        
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -741,7 +803,8 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         basePrice: 20,
         levelMinimum : 1,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,        
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -778,7 +841,8 @@ Item.Base.database = Database.new(items: [
         levelMinimum : 1,
         keyItem : false,
         isUnique : false,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         equipMod : StatSet.new(
             SPD: -2, // itll slow you down
@@ -813,7 +877,8 @@ Item.Base.database = Database.new(items: [
         levelMinimum : 1,
         hasMaterial : false,
         isUnique : false,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         equipMod : StatSet.new(
             SPD: -2, // itll slow you down
@@ -844,7 +909,8 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         weight : 4,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : false,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -881,7 +947,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : false,
         weight : 4,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : false,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -920,7 +987,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : false,
         basePrice: 20,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : false,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -960,7 +1028,8 @@ Item.Base.database = Database.new(items: [
         weight : 4,
         basePrice: 17,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : false,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -990,16 +1059,17 @@ Item.Base.database = Database.new(items: [
     
     Item.Base.new(data : {
         name : "Shortsword",
-        description: 'A basic sword.',
+        description: 'A basic sword. The hilt has a $color$ trim.',
         examine : 'Swords like these are quite common and are of adequate quality even if simple.',
         equipType: TYPE.HAND,
         rarity : 300,
-        canBeColored : false,
+        canBeColored : true,
         keyItem : false,
         weight : 4,
         basePrice: 50,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1026,16 +1096,17 @@ Item.Base.database = Database.new(items: [
     
     Item.Base.new(data : {
         name : "Bow & Quiver",
-        description: 'A basic bow and quiver full of arrows.',
+        description: 'A basic bow and quiver full of arrows. The bow has a streak of $color$ across it.',
         examine : '',
         equipType: TYPE.TWOHANDED,
         rarity : 300,
         keyItem : false,
         weight : 2,
-        canBeColored : false,
+        canBeColored : true,
         basePrice: 76,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1062,15 +1133,16 @@ Item.Base.database = Database.new(items: [
     
     Item.Base.new(data : {
         name : "Greatsword",
-        description: 'A basic, large sword.',
+        description: 'A basic, large sword. The hilt has a $color$ trim.',
         examine : 'Not as common as shortswords, but rather easy to find. Favored by larger warriors.',
         equipType: TYPE.TWOHANDED,
         rarity : 300,
         weight : 12,
         keyItem : false,
-        canBeColored : false,
+        canBeColored : true,
         basePrice: 87,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         levelMinimum : 1,
@@ -1097,15 +1169,16 @@ Item.Base.database = Database.new(items: [
     
     Item.Base.new(data : {
         name : "Dagger",
-        description: 'A basic knife.',
+        description: 'A basic knife. The handle has an intricate $color$ trim.',
         examine : 'Commonly favored by both swift warriors and common folk for their easy handling and easiness to produce.',
         equipType: TYPE.HAND,
         rarity : 300,
         weight : 1,
-        canBeColored : false,
+        canBeColored : true,
         keyItem : false,
         basePrice: 35,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         levelMinimum : 1,
@@ -1141,7 +1214,8 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         basePrice: 30,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1167,17 +1241,18 @@ Item.Base.database = Database.new(items: [
     
     
     Item.Base.new(data : {
-        name : "Polearm",
-        description: 'A weapon with long reach and deadly power.',
+        name : "Halberd",
+        description: 'A weapon with long reach and deadly power. The handle has a $color$ trim.',
         examine : '',
         equipType: TYPE.TWOHANDED,
         rarity : 100,
         weight : 8,
-        canBeColored : false,
+        canBeColored : true,
         keyItem : false,
         basePrice: 105,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1204,16 +1279,17 @@ Item.Base.database = Database.new(items: [
     
     Item.Base.new(data : {
         name : "Glaive",
-        description: 'A weapon with long reach and deadly power.',
+        description: 'A weapon with long reach and deadly power. The handle has a $color$ trim.',
         examine : '',
         equipType: TYPE.TWOHANDED,
         rarity : 100,
         weight : 8,
-        canBeColored : false,
+        canBeColored : true,
         keyItem : false,
         basePrice: 105,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1241,16 +1317,17 @@ Item.Base.database = Database.new(items: [
     
     Item.Base.new(data : {
         name : "Staff",
-        description: 'A combat staff. Promotes fluid movement when used well.',
+        description: 'A combat staff. Promotes fluid movement when used well.The ends are tied with a $color$ fabric.',
         examine : '',
         equipType: TYPE.TWOHANDED,
         rarity : 100,
         weight : 8,
-        canBeColored : false,
+        canBeColored : true,
         keyItem : false,
         basePrice: 40,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1277,16 +1354,17 @@ Item.Base.database = Database.new(items: [
 
     Item.Base.new(data : {
         name : "Mage-rod",
-        description: 'Similar to a wand, promotes mental accuity.',
+        description: 'Similar to a wand, promotes mental accuity. The handle has a $color$ trim.',
         examine : '',
         equipType: TYPE.TWOHANDED,
         rarity : 100,
         weight : 9,
-        canBeColored : false,
+        canBeColored : true,
         keyItem : false,
         basePrice: 100,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1312,22 +1390,24 @@ Item.Base.database = Database.new(items: [
     
     Item.Base.new(data : {
         name : "Wand",
-        description: '',
+        description: 'The handle has a $color$ trim.',
         examine : '',
         equipType: TYPE.TWOHANDED,
         rarity : 100,
-        canBeColored : false,
+        canBeColored : true,
         weight : 8,
         keyItem : false,
         basePrice: 100,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
 
         // fatigued
         equipMod : StatSet.new(
+            ATK:  5,
             INT:  25,
             SPD:  45,
             DEX:  20
@@ -1349,15 +1429,16 @@ Item.Base.database = Database.new(items: [
 
     Item.Base.new(data : {
         name : "Warhammer",
-        description: 'A hammer meant for combat.',
+        description: 'A hammer meant for combat. The end is tied with a $color$ fabric.',
         examine : 'A common choice for those who wish to cause harm and have the arm to back it up.',
         equipType: TYPE.TWOHANDED,
         rarity : 350,
         weight : 10,
         keyItem : false,
-        canBeColored : false,
+        canBeColored : true,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         basePrice: 200,
         isUnique : false,
@@ -1385,15 +1466,16 @@ Item.Base.database = Database.new(items: [
     
     Item.Base.new(data : {
         name : "Tome",
-        description: 'A plated book for magick-users in the heat of battle.',
+        description: 'A plated book for magick-users in the heat of battle. The cover is imprinted with a $color$ fabric.',
         examine : 'A lightly enchanted book meant to both be used as reference on-the-fly and meant to increase the mental acquity of the holder.',
         equipType: TYPE.HAND,
         rarity : 350,
         weight : 1,
-        canBeColored : false,
+        canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1419,7 +1501,7 @@ Item.Base.database = Database.new(items: [
 
     Item.Base.new(data : {
         name : "Tunic",
-        description: 'Simple cloth for the body.',
+        description: 'Simple cloth for the body. It is predominantly $color$.',
         examine : 'Common type of light armor',
         equipType: TYPE.ARMOR,
         rarity : 100,
@@ -1427,7 +1509,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : false,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1450,7 +1533,7 @@ Item.Base.database = Database.new(items: [
 
     Item.Base.new(data : {
         name : "Robe",
-        description: 'Simple cloth favored by scholars.',
+        description: 'Simple cloth favored by scholars. It features a $color$ design.',
         examine : 'Common type of light armor',
         equipType: TYPE.ARMOR,
         rarity : 100,
@@ -1458,7 +1541,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : false,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1480,7 +1564,7 @@ Item.Base.database = Database.new(items: [
     
     Item.Base.new(data : {
         name : "Scarf",
-        description: 'Simple cloth accessory.',
+        description: 'Simple cloth accessory. It is $color$.',
         examine : 'Common type of light armor',
         equipType: TYPE.TRINKET,
         rarity : 100,
@@ -1488,7 +1572,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : false,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1510,7 +1595,7 @@ Item.Base.database = Database.new(items: [
 
     Item.Base.new(data : {
         name : "Bandana",
-        description: 'Simple cloth accessory.',
+        description: 'Simple cloth accessory. It is $color$.',
         examine : 'Common type of light armor',
         equipType: TYPE.TRINKET,
         rarity : 100,
@@ -1518,7 +1603,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : false,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1540,7 +1626,7 @@ Item.Base.database = Database.new(items: [
 
     Item.Base.new(data : {
         name : "Cape",
-        description: 'Simple cloth accessory.',
+        description: 'Simple cloth accessory. It features a $color$-based design.',
         examine : 'Common type of light armor',
         equipType: TYPE.TRINKET,
         rarity : 100,
@@ -1548,7 +1634,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : false,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1569,7 +1656,7 @@ Item.Base.database = Database.new(items: [
     
     Item.Base.new(data : {
         name : "Hat",
-        description: 'Simple cloth accessory.',
+        description: 'Simple cloth accessory. It is predominantly $color$.',
         examine : 'Common type of light armor',
         equipType: TYPE.TRINKET,
         rarity : 100,
@@ -1577,7 +1664,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : false,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1598,7 +1686,7 @@ Item.Base.database = Database.new(items: [
 
     Item.Base.new(data : {
         name : "Fortified Cape",
-        description: 'A cape fortified with metal. It is a bit heavy.',
+        description: 'A cape fortified with metal. It is a bit heavy. It features a $color$ trim.',
         examine : 'Common type of light armor',
         equipType: TYPE.TRINKET,
         rarity : 350,
@@ -1606,7 +1694,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1630,7 +1719,7 @@ Item.Base.database = Database.new(items: [
     
     Item.Base.new(data : {
         name : "Light Robe",
-        description: 'Enchanted light wear favored by mages.',
+        description: 'Enchanted light wear favored by mages. It features a $color$ design.',
         examine : 'Common type of light armor',
         equipType: TYPE.ARMOR,
         rarity : 350,
@@ -1638,7 +1727,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : false,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1661,15 +1751,16 @@ Item.Base.database = Database.new(items: [
     
     Item.Base.new(data : {
         name : "Chainmail",
-        description: 'Mail made of linked chains.',
+        description: 'Mail made of linked chains. It bears a(n) $color$ emblem.',
         examine : 'Common type of light armor',
         equipType: TYPE.ARMOR,
         rarity : 350,
         weight : 1,
-        canBeColored : false,
+        canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1693,15 +1784,16 @@ Item.Base.database = Database.new(items: [
 
     Item.Base.new(data : {
         name : "Filigree Armor",
-        description: 'Hardened material with a fancy trim.',
+        description: 'Hardened material with a fancy $color$ trim.',
         examine : 'Common type of light armor',
         equipType: TYPE.ARMOR,
         rarity : 500,
         weight : 1,
-        canBeColored : false,
+        canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1726,15 +1818,16 @@ Item.Base.database = Database.new(items: [
         
     Item.Base.new(data : {
         name : "Plate Armor",
-        description: 'Extremely protective armor of a high-grade.',
+        description: 'Extremely protective armor of a high-grade. It has a $color$ trim.',
         examine : 'Highly skilled craftspeople are required to make this work.',
         equipType: TYPE.ARMOR,
         rarity : 500,
         weight : 1,
-        canBeColored : false,
+        canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1768,7 +1861,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : false,
         weight : 10,
         levelMinimum : 1,
-        canHaveModifier : true,
+        canHaveEnchants : true,
+        hasQuality : true,
         hasMaterial : false,
         isUnique : true,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1805,7 +1899,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : false,
         keyItem : false,
         basePrice: 10,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         levelMinimum : 1,
@@ -1841,7 +1936,8 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         canBeColored : false,
         basePrice: 20,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         levelMinimum : 1,
@@ -1875,7 +1971,8 @@ Item.Base.database = Database.new(items: [
         weight : 5,
         keyItem : false,
         basePrice: 30,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         levelMinimum : 1,
@@ -1911,7 +2008,8 @@ Item.Base.database = Database.new(items: [
         weight : 5,
         keyItem : false,
         basePrice: 150,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         levelMinimum : 1,
@@ -1945,7 +2043,8 @@ Item.Base.database = Database.new(items: [
         weight : 5,
         keyItem : false,
         basePrice: 175,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         levelMinimum : 1,
@@ -1979,7 +2078,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : false,
         keyItem : false,
         basePrice: 300,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         levelMinimum : 1,
@@ -2014,7 +2114,8 @@ Item.Base.database = Database.new(items: [
         basePrice: 115,
         keyItem : false,
         weight : 5,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         levelMinimum : 1,
@@ -2048,7 +2149,8 @@ Item.Base.database = Database.new(items: [
         canBeColored : false,
         keyItem : false,
         basePrice: 115,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         levelMinimum : 1,
@@ -2081,7 +2183,8 @@ Item.Base.database = Database.new(items: [
         weight : 5,
         canBeColored : false,
         keyItem : false,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         basePrice: 250,
@@ -2114,7 +2217,8 @@ Item.Base.database = Database.new(items: [
         weight : 5,
         canBeColored : false,
         keyItem : false,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         levelMinimum : 100000,
@@ -2147,7 +2251,8 @@ Item.Base.database = Database.new(items: [
         weight : 5,
         canBeColored : false,
         keyItem : false,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         levelMinimum : 1,
@@ -2181,7 +2286,8 @@ Item.Base.database = Database.new(items: [
         weight : 3,
         canBeColored : false,
         keyItem : false,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         levelMinimum : 1,
@@ -2219,7 +2325,8 @@ Item.Base.database = Database.new(items: [
         weight : 10,
         canBeColored : false,
         keyItem : true,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         levelMinimum : 1000000,
@@ -2253,7 +2360,8 @@ Item.Base.database = Database.new(items: [
         weight : 10,
         keyItem : false,
         canBeColored : false,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         levelMinimum : 10000000,
@@ -2288,7 +2396,8 @@ Item.Base.database = Database.new(items: [
         weight : 1,
         keyItem : false,
         canBeColored : false,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : false,
         levelMinimum : 10000000,
@@ -2324,7 +2433,8 @@ Item.Base.database = Database.new(items: [
         basePrice: 1,
         keyItem : false,
         levelMinimum : 1000000000,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : true,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -2375,7 +2485,8 @@ Item.Base.database = Database.new(items: [
         basePrice: 1,
         keyItem : false,
         levelMinimum : 1000000000,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : true,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -2425,7 +2536,8 @@ Item.Base.database = Database.new(items: [
         basePrice: 1,
         keyItem : false,
         levelMinimum : 1000000000,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : true,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -2475,7 +2587,8 @@ Item.Base.database = Database.new(items: [
         basePrice: 1,
         keyItem : false,
         levelMinimum : 1000000000,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : true,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -2525,7 +2638,8 @@ Item.Base.database = Database.new(items: [
         basePrice: 100,
         keyItem : false,
         levelMinimum : 1000000000,
-        canHaveModifier : false,
+        canHaveEnchants : false,
+        hasQuality : false,
         hasMaterial : false,
         isUnique : true,
         useTargetHint : USE_TARGET_HINT.ONE,

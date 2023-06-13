@@ -20,12 +20,12 @@
 
 
 
-return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function) {
+return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt) {
     dialogue.choices(
-        leftWeight: 1,
-        topWeight: 1,
-        prompt: 'Choose an item:',
-        canCancel: true,
+        leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
+        topWeight:  if (topWeight == empty)  1 else topWeight => Number,
+        prompt: if (prompt == empty) 'Choose an item:' else prompt => String,
+        canCancel: canCancel,
         onGetChoices ::{
             @:names = [...inventory.items]->map(to:::(value) {return value.name;});
             when(names->keycount == 0) ::<={

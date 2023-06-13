@@ -1035,8 +1035,8 @@ Location.Base.database = Database.new(
             
             onCreate ::(location) {
                 location.inventory.add(item:Item.Base.database.getRandomFiltered(
-                    filter:::(value) <- value.isUnique == false && value.canHaveModifier
-                ).new(rngModHint:true, from:location.landmark.island.newInhabitant()));
+                    filter:::(value) <- value.isUnique == false && value.canHaveEnchants
+                ).new(rngEnchantHint:true, from:location.landmark.island.newInhabitant()));
             },
             
             onTimeChange::(location, time) {

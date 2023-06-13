@@ -64,7 +64,7 @@ return struct(
     foundLightKey : false,
     
     
-    defeatedWyvernFire : false,
+    defeatedWyvernFire : true,//false,
     defeatedWyvernIce : false,
     defeatedWyvernThunder : false,
     defeatedWyvernLight : false,

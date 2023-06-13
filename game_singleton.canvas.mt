@@ -283,7 +283,7 @@ return class(
                 });            
             },
             
-            commit :: {
+            commit ::(renderNow) {
                 // debug lines happen as the LAST possible thing 
                 // the canvas does to ensure that its always on top.
                 if (debugLines[0] != empty) ::<= {
@@ -329,7 +329,8 @@ return class(
                 
                 
                 onCommit(
-                    lines:lines_output               
+                    lines:lines_output,
+                    renderNow              
                 );                
             }
         };    

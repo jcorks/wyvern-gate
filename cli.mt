@@ -27,9 +27,20 @@
 
 @currentCanvas;
 @canvasChanged = false;
-canvas.onCommit = ::(lines){
+
+@:rerender = ::{
+    console.clear();
+    @:lines = currentCanvas;
+    lines->foreach(do:::(index, line) {
+        console.println(message:line);
+    }); 
+    canvasChanged = false;   
+};
+canvas.onCommit = ::(lines, renderNow){
     currentCanvas = lines;
     canvasChanged = true;
+    if (renderNow != empty)
+        rerender();
 };
 
 
@@ -78,12 +89,7 @@ canvas.onCommit = ::(lines){
         dialogue.commitInput(input:val);
         
         if (canvasChanged) ::<= {
-            console.clear();
-            @:lines = currentCanvas;
-            lines->foreach(do:::(index, line) {
-                console.println(message:line);
-            }); 
-            canvasChanged = false;    
+            rerender();  
         };
     });            
 };

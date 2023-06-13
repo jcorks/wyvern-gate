@@ -49,3 +49,11 @@
 - Possibly fixed issue with enemy spawns in dungeons being on-screen (they should always spawn offscreen)
 - Implemented farmer
 - expanded use of Wyvern language and formalized its grammar
+- Items have been tweaked
+    . Instead of general modifiers, they specifically have quality and enchants, kept separate.
+    . redid color usage on items. Now they are no longer part of the name, but will be included in descriptions. Most items can have colors, which slightly affect stats
+- Kaedjaal will now trade with you, exchanging 3 items for a single item. The item will always be red (their favorite color) and will have burning.
+- fixed loading screen to actually display
+
+0.1.4a
+

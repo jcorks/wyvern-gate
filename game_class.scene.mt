@@ -195,7 +195,7 @@ Scene.database = Database.new(
         
         Scene.new(
             data : {
-                name : 'scene_wyvernfire0',
+                name : 'scene_wyvernfire1',
                 script: [
                     ['Kaedjaal', 'Rrohziil shaa jiin, you have come to check on me, eh?'],
                     ['Kaedjaal', 'Welcome back to my domain, Chosen. I am happy that you have returned.'],
@@ -208,18 +208,113 @@ Scene.database = Database.new(
                             onChoice::(which) {
                                 when(which == false) ::<= {
                                     dialogue.message(speaker:'Kaedjaal', text:'Ah I see. That is understandable. I will still be here if you change your mind.');
-                                                                         //    (world    wish[verb] travel[noun, pl] swift prosperous)   -> The World wishes travels swift and prosperous -> May your travels be swift and properous
-                                    dialogue.message(speaker:'Kaedjaal', text: 'Zaashael kaaluh-lo zohppuh-zodjii shiirr kohggaelaarr...');
                                 };
+
+
+                                when(world.party.inventory.items->keycount < 3) ::<= {
+                                    dialogue.message(speaker:'Kaedjaal', text:'Djiiroshuhzolii, Chosen. You have not enough items to complete a trade.', onNext:doNext);
+                                };
+
                                 
                                 
-                                
+                                @items = [];
+                                @runOnce = false;
+                                @chooseItem = ::(item) {
+                                    when (item == empty && runOnce) ::<= {
+                                        // re-add the items
+                                        items->foreach(do:::(i, item) {
+                                            world.party.inventory.add(item);
+                                        });
+                                        // cancelled by user
+                                        dialogue.message(speaker:'Kaedjaal', text:'Having second thoughts? No matter. I will still be here if you change your mind.', onNext:doNext);    
+                                                        
+                                    };
+                                    if (item != empty) ::<= {
+                                        if (item.name == 'Wyvern Key of Fire') ::<= {
+                                            dialogue.message(speaker:'Kaedjaal', text:'Rrohziil, you... cannot trade me with the Key of Fire. You need that to leave here.');
+                                        } else ::<= {
+                                            items->push(value:item);
+                                            world.party.inventory.remove(item);                                    
+                                        };
+                                    };
+                                    
+                                    when(items->keycount == 3) ::<= {
+                                        dialogue.message(speaker:'Kaedjaal', text:'Excellent. Let me, in exchange, give you this.');   
+                                        @:item = Item.Base.database.getRandomFiltered(
+                                            filter:::(value) <- value.isUnique == false && value.canHaveEnchants
+                                        ).new(rngModHint:true, from:location.landmark.island.newInhabitant(), colorHint:'Red');
+                                        item.addModifier(name:'Burning');
+                                        item.addModifier(name:'Burning');
+
+
+                                        dialogue.message(text:'In exchange, the party was given a(n) ' + item.name + '.');
+                                        world.party.inventory.add(item);
+                                        
+                                        dialogue.message(speaker:'Kaedjaal', text:'Would you like to trade once more?');
+                                        dialogue.askBoolean(
+                                            prompt:'Trade again?',
+                                            onChoice::(which) {
+                                                when(which) ::<= {
+                                                    runOnce = false;
+                                                    items = [];
+                                                    chooseItem();
+                                                };
+                                                doNext();
+                                            }
+                                        );
+                                    };
+                                    
+                                    
+                                    
+                                    @:pickitem = import(module:'game_function.pickitem.mt');
+                                    runOnce = true;
+                                    pickitem(
+                                        inventory: world.party.inventory,
+                                        leftWeight: 0.5,
+                                        topWeight: 0.5,
+                                        canCancel:true,
+                                        prompt: 'Pick the ' + (match(items->keycount) {
+                                                    (0): 'first',
+                                                    (1): 'second',
+                                                    (2): 'third'
+                                                }) + ' item.',
+                                        onPick:::(item){
+                                            dialogue.forceExit();
+                                            chooseItem(item);
+                                        }
+                                    );
+                                };
+                                chooseItem();
                             }
                         );
-                    }                    
+                        
+                    },
+                    ['Kaedjaal', 'Allow me to return you to the land that the Key of Fire leads to.'],                     
+                           //    (world    wish[verb] travel[noun, pl] swift prosperous)   -> The World wishes travels swift and prosperous -> May your travels be swift and properous
+                    ['Kaedjaal', 'Zaashael kaaluh-lo zohppuh-zodjii shiirr kohggaelaarr...'], 
+                    ::(location, landmark, doNext) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Fire');
+                        if (key != empty) key = key[0];
+                        // could be equipped by hooligans and jokesters
+                        if (key == empty) ::<= {
+                            key = [::] {
+                                world.party.members->foreach(do:::(i, member) {
+                                    @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_L);
+                                    if (wep.name == 'Wyvern Key of Fire') ::<= {
+                                        send(message:key);
+                                    };
+                                });
+                            };
+                        };
+
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        instance.visitIsland(where:key.islandEntry);
+                        doNext();                    
+                    }
                 ]
             }
-        );        
+        )      
             
 
         

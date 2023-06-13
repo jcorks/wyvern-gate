@@ -61,7 +61,7 @@ Material.database = Database.new(
         Material.new(
             data : {
                 name : 'Steel',
-                description : '',
+                description : 'The steel used gives a persistent shine.',
                 rarity : 5,
                 levelMinimum : 1,
                 statMod : StatSet.new(
@@ -75,7 +75,7 @@ Material.database = Database.new(
         Material.new(
             data : {
                 name : 'Iron',
-                description : '',
+                description : 'The iron used gives it a solid grey color.',
                 rarity : 2,
                 levelMinimum : 1,
                 statMod : StatSet.new(
@@ -93,7 +93,7 @@ Material.database = Database.new(
         Material.new(
             data : {
                 name : 'Mythril',
-                description : '',
+                description : 'The mythril used makes it radiantly green',
                 rarity : 300,
                 levelMinimum : 30,
                 statMod : StatSet.new(
@@ -108,7 +108,7 @@ Material.database = Database.new(
         Material.new(
             data : {
                 name : 'Adamantine',
-                description : '',
+                description : 'The adamantine used makes it earthly',
                 rarity : 500,
                 levelMinimum : 45,
                 statMod : StatSet.new(
@@ -122,7 +122,7 @@ Material.database = Database.new(
         Material.new(
             data : {
                 name : 'Quicksilver',
-                description : '',
+                description : 'The quicksilver used makes it remarkably shiny.',
                 rarity : 500,
                 levelMinimum : 35,
                 statMod : StatSet.new(
@@ -137,7 +137,7 @@ Material.database = Database.new(
         Material.new(
             data : {
                 name : 'Dragonglass',
-                description : '',
+                description : 'The dragonglass used gives it a deep black color.',
                 rarity : 500,
                 levelMinimum : 55,
                 statMod : StatSet.new(
@@ -153,7 +153,7 @@ Material.database = Database.new(
             data : {
                 name : 'Composite',
                 rarity : 20,
-                description : '',
+                description : 'The composite material used is sturdy.',
                 levelMinimum : 20,
                 statMod : StatSet.new(
                     DEF: 45,
@@ -169,7 +169,7 @@ Material.database = Database.new(
             data : {
                 name : 'Sunstone',
                 rarity : 300,
-                description : '',
+                description : 'The sunstone used gives it a warm touch.',
                 levelMinimum : 15,
                 statMod : StatSet.new(
                     DEF: 35,
@@ -184,7 +184,7 @@ Material.database = Database.new(
             data : {
                 name : 'Moonstone',
                 rarity : 300,
-                description : '',
+                description : 'The moonstone used gives it a cold touch.',
                 levelMinimum : 15,
                 statMod : StatSet.new(
                     DEF: 15,
