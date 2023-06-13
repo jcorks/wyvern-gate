@@ -14,13 +14,21 @@ Known bugs / concerns:
 
 
 Coming changes:
+  . Item descriptions can have a colored tag to them. For example, the description of a short 
+    sword could have added 'The hilt of the shortsword has a green trim'. If an item has 
+    a color, it counts as a color attribute and gets those stat changes
+  . Enchanter stall
+    . disenchant (remove effects) from equip for a flat rate 
+    . enchant from a list of per-enchanter mods
+        . base cost + rate if already enchanted scaling with number of effects 
+    . transfer enchants 
+        . scales with individual mod costs 
+        . takes all mods and moves them on a non-enchanted item
+    
   . Dungeon crawl-style maps for:
     - abandoned castles
-  . Chance for Treasure room is available after 6 floors, but still only a chance 
-    . guaranteed after 12
   . enemy spawns are ALWAYS offscreen areas
    
-  . large chest ALWAYS contains a key to next stratum
   . Stratum keys are pre-defined:
     - First dunegon yields the FIRE key. Enemies here do not use skills and do not have equips
     - ICE key second. Enemies here use skills (1-2) but have no weapon equips
@@ -30,6 +38,11 @@ Coming changes:
       that must be fought to progress to the next island.
       . Each boss victory yields a legendary item
     - After the last dragon, credits and post game.
+
+  . Each wyvern has a service they provide if you ever revisit them 
+    . Fire wyvern allows trading of 3 items for a new item with enchants + fire enchant 
+    . Ice wyvern challenges the party (for 1000G) a game of Generala. If the party wins 
+      the Ice wyvern gives the party a Masterwork item with an Icy enchant.
 
 - Post Game
 
