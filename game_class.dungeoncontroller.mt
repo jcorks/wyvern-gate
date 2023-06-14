@@ -46,6 +46,20 @@ return class(
                 targetY:tileY, 
                 ref:landmark_.island.newInhabitant()
             };
+
+            ::<={
+                @:Item = import(module:'game_class.item.mt');
+                [0, 1+(Number.random()*3)->floor]->for(do:::(i) {
+                    @:item = Item.Base.database.getRandomWeightedFiltered(
+                        filter:::(value) <- value.isUnique == false
+                        
+                    );
+                    if (item.name != 'None') ::<={
+                        @:itemInstance = item.new(from:ent.ref);
+                        ent.ref.inventory.add(item:itemInstance);
+                    };
+                });
+            };
             ent.ref.anonymize();
             entities->push(value:ent);
             map_.setItem(data:ent, x:tileX, y:tileY, discovered:true, symbol:'*');

@@ -580,6 +580,7 @@ Location.Base.database = Database.new(
                 @:Profession = import(module:'game_class.profession.mt');
             
                 location.ownedBy.profession = Profession.Base.database.find(name:'Trader').new();
+                location.inventory.maxItems = 50;
 
                 @:nameGen = import(module:'game_singleton.namegen.mt');
 
@@ -623,6 +624,68 @@ Location.Base.database = Database.new(
             }
         }),
         
+
+        Location.Base.new(data:{
+            name: 'Enchant Stand',
+            rarity: 100,
+            ownVerb : 'run',
+            symbol: '$',
+            owned : true,
+
+            descriptions: [
+                'An enchanter\'s stand.'
+            ],
+            interactions : [
+                'enchant',
+                'disenchant',
+                'transfer-enchant',
+                'talk',
+                'examine'
+            ],
+            
+            aggressiveInteractions : [
+                'vandalize',            
+            ],
+
+
+            
+            minOccupants : 0,
+            maxOccupants : 0,
+            
+            onInteract ::(location) {
+                return true;
+
+            },            
+            
+            onCreate ::(location) {
+                @:ItemEnchant = import(module:'game_class.itemenchant.mt');
+            
+                location.data.enchants = [
+                    ItemEnchant.database.getRandom().name,
+                    ItemEnchant.database.getRandom().name,
+                    ItemEnchant.database.getRandom().name,
+                    ItemEnchant.database.getRandom().name
+                ];
+
+                [0, location.data.enchants->keycount]->for(do:::(i) {
+                    when (i > location.data.enchants->keycount) empty;
+                    [0, location.data.enchants->keycount]->for(do:::(n) {
+                        when (i == n) empty;
+                        when (n > location.data.enchants->keycount) empty;
+                    
+                        if (location.data.enchants[i] ==
+                            location.data.enchants[n])
+                            location.data.enchants->remove(key:n);
+                    });
+                });
+
+            },
+            
+            onTimeChange::(location, time) {
+            
+            }
+        }),
+
         Location.Base.new(data:{
             name: 'Blacksmith',
             rarity: 100,

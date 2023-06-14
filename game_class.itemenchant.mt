@@ -68,6 +68,48 @@ ItemEnchant.database = Database.new(
         ),
 
 
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Bloodstone',
+                description : 'Set with a large bloodstone, shining sinisterly',
+                equipMod : StatSet.new(
+                    SPD: 20,
+                    DEX: 20,
+                    ATK: 20,
+                    DEF: 20,
+                    INT: 20,
+                    HP: -40
+                ),
+                priceMod: 2000,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Soulstone',
+                description : 'Set with a large soulstone, shining sinisterly',
+                equipMod : StatSet.new(
+                    SPD: 20,
+                    DEX: 20,
+                    ATK: 20,
+                    DEF: 20,
+                    INT: 20,
+                    AP: -40
+                ),
+                priceMod: 2000,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
 
 
         ItemEnchant.new(
@@ -75,11 +117,11 @@ ItemEnchant.database = Database.new(
                 name : 'Inlet: Morion',
                 description : 'Set with an enchanted morion stone.',
                 equipMod : StatSet.new(
-                    SPD: 100,
-                    DEX: 100,
-                    ATK: -50,
-                    DEF: -50,
-                    INT: -50
+                    SPD: 50,
+                    DEX: 50,
+                    ATK: -25,
+                    DEF: -25,
+                    INT: -25
                 ),
                 priceMod: 1200,
                 levelMinimum : 1,
@@ -95,11 +137,11 @@ ItemEnchant.database = Database.new(
                 name : 'Inlet: Amethyst',
                 description : 'Set with an enchanted amethyst.',
                 equipMod : StatSet.new(
-                    SPD: -50,
-                    DEX: 100,
-                    ATK: 100,
-                    DEF: -50,
-                    INT: -50
+                    SPD: -25,
+                    DEX: 50,
+                    ATK: 50,
+                    DEF: -25,
+                    INT: -25
                 ),
                 priceMod: 1200,
                 levelMinimum : 1,
@@ -115,11 +157,11 @@ ItemEnchant.database = Database.new(
                 name : 'Inlet: Citrine',
                 description : 'Set with an enchanted citrine stone.',
                 equipMod : StatSet.new(
-                    SPD: -50,
-                    DEX: -50,
-                    ATK: 100,
-                    DEF: 100,
-                    INT: -50
+                    SPD: -25,
+                    DEX: -25,
+                    ATK: 50,
+                    DEF: 50,
+                    INT: -25
                 ),
                 priceMod: 1200,
                 levelMinimum : 1,
@@ -135,11 +177,11 @@ ItemEnchant.database = Database.new(
                 name : 'Inlet: Garnet',
                 description : 'Set with an enchanted garnet stone.',
                 equipMod : StatSet.new(
-                    SPD: -50,
-                    DEX: -50,
-                    ATK: -50,
-                    DEF: 100,
-                    INT: 100
+                    SPD: -25,
+                    DEX: -25,
+                    ATK: -25,
+                    DEF: 50,
+                    INT: 50
                 ),
                 priceMod: 1200,
                 levelMinimum : 1,
@@ -156,11 +198,11 @@ ItemEnchant.database = Database.new(
                 name : 'Inlet: Praesolite',
                 description : 'Set with an enchanted praesolite stone.',
                 equipMod : StatSet.new(
-                    SPD: 100,
-                    DEX: -50,
-                    ATK: -50,
-                    DEF: -50,
-                    INT: 100
+                    SPD: 50,
+                    DEX: -25,
+                    ATK: -25,
+                    DEF: -25,
+                    INT: 50
                 ),
                 priceMod: 1200,
                 levelMinimum : 1,
@@ -176,11 +218,11 @@ ItemEnchant.database = Database.new(
                 name : 'Inlet: Aquamarine',
                 description : 'Set with an enchanted aquamarine stone.',
                 equipMod : StatSet.new(
-                    SPD: 100,
-                    DEX: -50,
-                    ATK: 100,
-                    DEF: -50,
-                    INT: -50
+                    SPD: 50,
+                    DEX: -25,
+                    ATK: 50,
+                    DEF: -25,
+                    INT: -25
                 ),
                 priceMod: 1200,
                 levelMinimum : 1,
@@ -196,11 +238,11 @@ ItemEnchant.database = Database.new(
                 name : 'Inlet: Diamond',
                 description : 'Set with an enchanted diamond stone.',
                 equipMod : StatSet.new(
-                    SPD: 100,
-                    DEX: -50,
-                    ATK: -50,
-                    DEF: 100,
-                    INT: -50
+                    SPD: 50,
+                    DEX: -25,
+                    ATK: -25,
+                    DEF: 50,
+                    INT: -25
                 ),
                 priceMod: 1200,
                 levelMinimum : 1,
@@ -216,11 +258,11 @@ ItemEnchant.database = Database.new(
                 name : 'Inlet: Pearl',
                 description : 'Set with an enchanted pearl.',
                 equipMod : StatSet.new(
-                    SPD: -50,
-                    DEX: 100,
-                    ATK: -50,
-                    DEF: 100,
-                    INT: -50
+                    SPD: -25,
+                    DEX: 50,
+                    ATK: -25,
+                    DEF: 50,
+                    INT: -25
                 ),
                 priceMod: 1200,
                 levelMinimum : 1,
@@ -236,11 +278,11 @@ ItemEnchant.database = Database.new(
                 name : 'Inlet: Ruby',
                 description : 'Set with an enchanted ruby.',
                 equipMod : StatSet.new(
-                    SPD: -50,
-                    DEX: 100,
-                    ATK: -50,
-                    DEF: -50,
-                    INT: 100
+                    SPD: -25,
+                    DEX: 50,
+                    ATK: -25,
+                    DEF: -25,
+                    INT: 50
                 ),
                 priceMod: 1200,
                 levelMinimum : 1,
@@ -256,11 +298,11 @@ ItemEnchant.database = Database.new(
                 name : 'Inlet: Sapphire',
                 description : 'Set with an enchanted sapphire.',
                 equipMod : StatSet.new(
-                    SPD: 100,
-                    DEX: -50,
-                    ATK: 100,
-                    DEF: -50,
-                    INT: -50
+                    SPD: 50,
+                    DEX: -25,
+                    ATK: 50,
+                    DEF: -25,
+                    INT: -25
                 ),
                 priceMod: 1200,
                 levelMinimum : 1,
@@ -276,11 +318,11 @@ ItemEnchant.database = Database.new(
                 name : 'Inlet: Opal',
                 description : 'Set with an enchanted opal stone.',
                 equipMod : StatSet.new(
-                    SPD: -50,
-                    DEX: -50,
-                    ATK: 100,
-                    DEF: -50,
-                    INT: 100
+                    SPD: -25,
+                    DEX: -25,
+                    ATK: 50,
+                    DEF: -25,
+                    INT: 50
                 ),
                 priceMod: 1200,
                 levelMinimum : 1,

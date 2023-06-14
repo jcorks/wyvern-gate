@@ -422,7 +422,7 @@ Effect.database = Database.new(
                         amount,
                         damageType:Damage.TYPE.PHYS,
                         damageClass:Damage.CLASS.HP
-                    ));
+                    ),dodgeable: true);
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -1129,7 +1129,8 @@ Effect.database = Database.new(
                                         amount:user.stats.ATK*(item.base.weight * 0.1),
                                         damageType : Damage.TYPE.NEUTRAL,
                                         damageClass: Damage.CLASS.HP
-                                    )
+                                    ),
+                                    dodgeable: true                                    
                                 );
                             };                        
                         }
@@ -1578,7 +1579,7 @@ Effect.database = Database.new(
                         amount: random.integer(from:1, to:4),
                         damageType: Damage.TYPE.POISON,
                         damageClass: Damage.CLASS.HP
-                    ));                
+                    ),dodgeable: false);                
                 },
                 onStatRecalculate : ::(user, item, holder, stats) {
                 
@@ -1749,7 +1750,7 @@ Effect.database = Database.new(
                             amount,
                             damageType : Damage.TYPE.NEUTRAL,
                             damageClass: Damage.CLASS.HP
-                        )
+                        ),dodgeable: false
                     );                    
                     
 
@@ -2513,7 +2514,7 @@ Effect.database = Database.new(
                             amount:holder.stats.HP*0.05,
                             damageType : Damage.TYPE.NEUTRAL,
                             damageClass: Damage.CLASS.HP
-                        )
+                        ),dodgeable: false
                     );
                 },
                 onStatRecalculate : ::(user, item, holder, stats) {
@@ -2576,8 +2577,8 @@ Effect.database = Database.new(
                         damage: Damage.new(
                             amount:random.integer(from:10, to:20),
                             damageType : Damage.TYPE.FIRE,
-                            damageClass: Damage.CLASS.HP
-                        )
+                            damageClass: Damage.CLASS.HP                                                       
+                        ),dodgeable: false 
                     );
                 
                 },
@@ -2643,7 +2644,7 @@ Effect.database = Database.new(
                             amount:holder.stats.HP*0.05,
                             damageType : Damage.TYPE.NEUTRAL,
                             damageClass: Damage.CLASS.HP
-                        )
+                        ),dodgeable: false 
                     );
                 },
                 onStatRecalculate : ::(user, item, holder, stats) {
@@ -2723,8 +2724,8 @@ Effect.database = Database.new(
                         damage : Damage.new(
                             amount: user.stats.HP / 16,
                             damageClass: Damage.CLASS.HP,
-                            damageType: Damage.TYPE.NEUTRAL
-                        )
+                            damageType: Damage.TYPE.NEUTRAL                                                   
+                        ),dodgeable: false 
                     );
                 },
                 onStatRecalculate : ::(user, item, holder, stats) {
@@ -2939,7 +2940,7 @@ Effect.database = Database.new(
                         amount: random.integer(from:1, to:4),
                         damageType: Damage.TYPE.FIRE,
                         damageClass: Damage.CLASS.HP
-                    ));
+                    ),dodgeable: false);
                 },
 
                 onGiveDamage : ::(user, item, holder, to, damage) {
@@ -2977,7 +2978,7 @@ Effect.database = Database.new(
                         amount: random.integer(from:1, to:4),
                         damageType: Damage.TYPE.ICE,
                         damageClass: Damage.CLASS.HP
-                    ));
+                    ),dodgeable: false);
                 },
 
                 onGiveDamage : ::(user, item, holder, to, damage) {
@@ -3015,7 +3016,7 @@ Effect.database = Database.new(
                         amount: random.integer(from:1, to:4),
                         damageType: Damage.TYPE.THUNDER,
                         damageClass: Damage.CLASS.HP
-                    ));
+                    ),dodgeable: false);
                 },
 
                 onGiveDamage : ::(user, item, holder, to, damage) {
@@ -3053,7 +3054,9 @@ Effect.database = Database.new(
                         amount: random.integer(from:1, to:4),
                         damageType: Damage.TYPE.POISON,
                         damageClass: Damage.CLASS.HP
-                    ));
+                    ),
+                    dodgeable: false
+                    );
                 },
 
                 onGiveDamage : ::(user, item, holder, to, damage) {
@@ -3091,7 +3094,7 @@ Effect.database = Database.new(
                         amount: random.integer(from:1, to:4),
                         damageType: Damage.TYPE.LIGHT,
                         damageClass: Damage.CLASS.HP
-                    ));
+                    ),dodgeable: false);
                 },
 
                 onGiveDamage : ::(user, item, holder, to, damage) {
@@ -3128,7 +3131,7 @@ Effect.database = Database.new(
                         amount: random.integer(from:1, to:4),
                         damageType: Damage.TYPE.DARK,
                         damageClass: Damage.CLASS.HP
-                    ));
+                    ),dodgeable: false);
                 },
 
                 onGiveDamage : ::(user, item, holder, to, damage) {

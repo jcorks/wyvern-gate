@@ -56,4 +56,10 @@
 - fixed loading screen to actually display
 
 0.1.4a
-
+- Dungeon crawl enemies now drop any items 
+- negative dex or speed will make a character skip a turn
+- dex is now used for a "chance for miss" calculation. More dex than your opponent guarantees a hit. Less dex means a chance to miss, up to 50% if way out of proportion.
+- shops now have a max inventory space of 50 items.
+- Added bloodstone and soulstone enchants
+- nerfed stone enchants to be half as chaotic
+- changed default gold amount to 250

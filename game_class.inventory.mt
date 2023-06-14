@@ -59,6 +59,14 @@ return class(
                 };
             },
             
+            maxItems : {
+                set ::(value) {
+                    maxItems = value;
+                },
+                
+                get ::<- maxItems
+            },
+            
             gold : {
                 get ::<- gold,
             },

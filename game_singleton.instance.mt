@@ -489,7 +489,7 @@ return class(
                 world.island = island;
                 party = world.party;
                 party.reset();
-                party.inventory.addGold(amount:100);
+                party.inventory.addGold(amount:250);
                 // debug
                 //party.inventory.addGold(amount:100000);
                 
@@ -507,10 +507,10 @@ return class(
                 
                 
                 
-                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:1000);
+                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
                 @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
                 // debug
-                    
+                    /*
                     party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
                     ).new(from:island.newInhabitant()));
                     
@@ -521,6 +521,7 @@ return class(
                             filter:::(value) <- value.isUnique == false
                         ).new(from:island.newInhabitant(),rngEnchantHint:true));
                     });
+                    */
                     
                     
 

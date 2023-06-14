@@ -189,6 +189,7 @@
                 this.autoLevel();                
             });
 
+            /*
             ::<={
                 [0, 1+(Number.random()*3)->floor]->for(do:::(i) {
                     @:item = Item.Base.database.getRandomWeightedFiltered(
@@ -206,6 +207,7 @@
                 });
                 
             };
+            */
 
             return this;
         };
@@ -350,6 +352,18 @@
                         effect.turnIndex += 1;
                     };
                 });
+                
+                if (this.stats.SPD < 0) ::<= {
+                    dialogue.message(text:this.name + ' cannot move due to negative speed!');
+                    act = false;
+                };
+
+                if (this.stats.DEX < 0) ::<= {
+                    dialogue.message(text:this.name + ' fumbles about due to negative dexterity!');
+                    act = false;
+                };
+
+                
                 return act;
             },
 
@@ -465,7 +479,7 @@
                     effect.effect.onGiveDamage(user:effect.from, item:effect.item, holder:this, to:target, damage:dmg);
                 });
                 when(dmg.amount <= 0) empty;
-                target.damage(from:this, damage:dmg);
+                when(!target.damage(from:this, damage:dmg, dodgeable:true)) empty;
 
 
                 
@@ -475,8 +489,32 @@
 
             },
             
-            damage ::(from => this.type, damage => Damage.type) {
+            damage ::(from => this.type, damage => Damage.type, dodgeable => Boolean) {
                 when(isDead) empty;
+
+                @whiff = false;
+                if (dodgeable) ::<= {
+                    @diffpercent = (from.stats.DEX - this.stats.DEX) / this.stats.DEX;
+                    // if attacker dex is above target dex, hit always connects
+                    when(diffpercent > 0) empty;
+                    
+                    // if less dex, then a percent to miss, up to 50%
+                    diffpercent = diffpercent + (1 - diffpercent) / 3.0;
+                    if (diffpercent < 0.5) diffpercent = 0.5;
+                    if (Number.random() > diffpercent)
+                        whiff = true;
+                };
+                
+                when(whiff) ::<= {
+                    dialogue.message(text:random.pickArrayItem(list:[
+                        this.name + ' lithely dodges ' + from.name + '\'s attack!',                 
+                        this.name + ' narrowly dodges ' + from.name + '\'s attack!',                 
+                        this.name + ' dances around ' + from.name + '\'s attack!',                 
+                        from.name + '\'s attack completely misses ' + this.name + '!'
+                    ]));
+                    return false;
+                };
+
 
                 if (from.stats.DEX > this.stats.DEX)               
                     // as DEX increases: randomness decreases 
@@ -486,6 +524,7 @@
                 else
                     damage.amount = damage.amount + damage.amount * (Number.random() - 0.5)
                 ; 
+                
                 
                 @critChance = 0.999 - (this.stats.LUK - level) / 100;
                 if (critChance < 0.90) critChance = 0.9;
@@ -570,7 +609,7 @@
                 if (hp == 0)
                     dialogue.message(text: '' + this.name + ' has been knocked out.');                                
                                 
-                
+                return true;
             },
             
             // where they roam to in their freetime. if places doesnt have one they stay home
