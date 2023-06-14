@@ -539,7 +539,6 @@ Interaction.database = Database.new(
                                           (0)::<= {
                                             when(world.party.inventory.isFull) ::<= {
                                                 dialogue.message(text: 'The party\'s inventory is full.');
-                                                send();
                                             };
                                                 
                                             

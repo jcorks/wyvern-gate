@@ -417,7 +417,7 @@ Event.Base.database = Database.new(
                         [0, itemCount]->for(do:::(index) {
                             @:item = Item.Base.database.getRandomFiltered(
                                 filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                            ).new(rngModHint:true, from:opener);
+                            ).new(rngEnchantHint:true, from:opener);
                             @message = 'The party found a(n) ';
                             message = message + item.name;
                             dialogue.message(text: message);

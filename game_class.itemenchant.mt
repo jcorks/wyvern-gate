@@ -35,7 +35,7 @@
                 equipMod : StatSet.type, // percentages
                 useEffects : Object,
                 equipEffects : Object,
-                pricePercentMod : Number
+                priceMod : Number
             }
         );
     }
@@ -58,7 +58,7 @@ ItemEnchant.database = Database.new(
                     SPD: 20
                 ),
                 levelMinimum : 5,
-                pricePercentMod: 300,
+                priceMod: 300,
                 
                 equipEffects : [
                 ],
@@ -81,7 +81,7 @@ ItemEnchant.database = Database.new(
                     DEF: -50,
                     INT: -50
                 ),
-                pricePercentMod: 1200,
+                priceMod: 1200,
                 levelMinimum : 1,
                 equipEffects : [
                 ],
@@ -101,7 +101,7 @@ ItemEnchant.database = Database.new(
                     DEF: -50,
                     INT: -50
                 ),
-                pricePercentMod: 1200,
+                priceMod: 1200,
                 levelMinimum : 1,
                 equipEffects : [
                 ],
@@ -121,7 +121,7 @@ ItemEnchant.database = Database.new(
                     DEF: 100,
                     INT: -50
                 ),
-                pricePercentMod: 1200,
+                priceMod: 1200,
                 levelMinimum : 1,
                 equipEffects : [
                 ],
@@ -129,6 +129,27 @@ ItemEnchant.database = Database.new(
                 useEffects : []
             }
         ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Garnet',
+                description : 'Set with an enchanted garnet stone.',
+                equipMod : StatSet.new(
+                    SPD: -50,
+                    DEX: -50,
+                    ATK: -50,
+                    DEF: 100,
+                    INT: 100
+                ),
+                priceMod: 1200,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
 
         ItemEnchant.new(
             data : {
@@ -141,7 +162,7 @@ ItemEnchant.database = Database.new(
                     DEF: -50,
                     INT: 100
                 ),
-                pricePercentMod: 1200,
+                priceMod: 1200,
                 levelMinimum : 1,
                 equipEffects : [
                 ],
@@ -150,7 +171,125 @@ ItemEnchant.database = Database.new(
             }
         ),
 
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Aquamarine',
+                description : 'Set with an enchanted aquamarine stone.',
+                equipMod : StatSet.new(
+                    SPD: 100,
+                    DEX: -50,
+                    ATK: 100,
+                    DEF: -50,
+                    INT: -50
+                ),
+                priceMod: 1200,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Diamond',
+                description : 'Set with an enchanted diamond stone.',
+                equipMod : StatSet.new(
+                    SPD: 100,
+                    DEX: -50,
+                    ATK: -50,
+                    DEF: 100,
+                    INT: -50
+                ),
+                priceMod: 1200,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
         
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Pearl',
+                description : 'Set with an enchanted pearl.',
+                equipMod : StatSet.new(
+                    SPD: -50,
+                    DEX: 100,
+                    ATK: -50,
+                    DEF: 100,
+                    INT: -50
+                ),
+                priceMod: 1200,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Ruby',
+                description : 'Set with an enchanted ruby.',
+                equipMod : StatSet.new(
+                    SPD: -50,
+                    DEX: 100,
+                    ATK: -50,
+                    DEF: -50,
+                    INT: 100
+                ),
+                priceMod: 1200,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Sapphire',
+                description : 'Set with an enchanted sapphire.',
+                equipMod : StatSet.new(
+                    SPD: 100,
+                    DEX: -50,
+                    ATK: 100,
+                    DEF: -50,
+                    INT: -50
+                ),
+                priceMod: 1200,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Opal',
+                description : 'Set with an enchanted opal stone.',
+                equipMod : StatSet.new(
+                    SPD: -50,
+                    DEX: -50,
+                    ATK: 100,
+                    DEF: -50,
+                    INT: 100
+                ),
+                priceMod: 1200,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
 
 
         ItemEnchant.new(
@@ -160,7 +299,7 @@ ItemEnchant.database = Database.new(
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
-                pricePercentMod: 20,
+                priceMod: 200,
                 
                 equipEffects : [
                     "Burning"
@@ -177,7 +316,7 @@ ItemEnchant.database = Database.new(
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
-                pricePercentMod: 20,
+                priceMod: 200,
                 
                 equipEffects : [
                     "Icy"
@@ -194,7 +333,7 @@ ItemEnchant.database = Database.new(
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
-                pricePercentMod: 20,
+                priceMod: 200,
                 
                 equipEffects : [
                     "Shock"
@@ -211,7 +350,7 @@ ItemEnchant.database = Database.new(
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
-                pricePercentMod: 20,
+                priceMod: 200,
                 
                 equipEffects : [
                     "Toxic"
@@ -228,7 +367,7 @@ ItemEnchant.database = Database.new(
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
-                pricePercentMod: 20,
+                priceMod: 200,
                 
                 equipEffects : [
                     "Shimmering"
@@ -245,7 +384,7 @@ ItemEnchant.database = Database.new(
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
-                pricePercentMod: 20,
+                priceMod: 200,
                 
                 equipEffects : [
                     "Dark"

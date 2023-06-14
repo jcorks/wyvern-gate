@@ -324,7 +324,7 @@
                 if (description->contains(key:mod.description) == false)
                     description = description + mod.description + ' ';
                 recalculateName();
-                price += (price * (mod.pricePercentMod/100));
+                price += mod.priceMod;
                 price = price->ceil;
             },
             

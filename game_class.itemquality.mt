@@ -97,7 +97,7 @@ ItemQuality.database = Database.new(
                     SPD: 10,
                     DEX: 10
                 ),
-                pricePercentMod: 30,
+                pricePercentMod: 15,
                 levelMinimum : 1,
                 equipEffects : [
                 ],
@@ -117,7 +117,7 @@ ItemQuality.database = Database.new(
                     SPD: 20,
                     DEX: 10
                 ),
-                pricePercentMod: 10,
+                pricePercentMod: 15,
                 levelMinimum : 1,
                 equipEffects : [
                 ],

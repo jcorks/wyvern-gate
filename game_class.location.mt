@@ -1098,7 +1098,7 @@ Location.Base.database = Database.new(
                 [0, 3+(Number.random()*2)->ceil]->for(do:::(i) {
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false
-                    ).new(from:location.landmark.island.newInhabitant(),rngModHint:true));
+                    ).new(from:location.landmark.island.newInhabitant(),rngEnchantHint:true));
                 });
             },
             
