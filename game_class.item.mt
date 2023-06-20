@@ -1092,6 +1092,43 @@ Item.Base.database = Database.new(items: [
         onCreate ::(item, user, creationHint) {}
 
     }),
+    
+    
+    Item.Base.new(data : {
+        name : "Rapier",
+        description: 'A slender sword excellent for thrusting. The hilt has a $color$ trim.',
+        examine : 'Swords like these are quite common and are of adequate quality even if simple.',
+        equipType: TYPE.HAND,
+        rarity : 300,
+        canBeColored : true,
+        keyItem : false,
+        weight : 4,
+        basePrice: 100,
+        levelMinimum : 1,
+        canHaveEnchants : true,
+        hasQuality : true,
+        hasMaterial : true,
+        isUnique : false,
+        useTargetHint : USE_TARGET_HINT.ONE,
+
+        // fatigued
+        equipMod : StatSet.new(
+            ATK: 40,
+            SPD: 10,
+            DEF:-10
+        ),
+        useEffects : [
+            'Fling',
+        ],
+        equipEffects : [],
+        attributes : [
+            ATTRIBUTE.SHARP,
+            ATTRIBUTE.METAL,
+            ATTRIBUTE.WEAPON
+        ],
+        onCreate ::(item, user, creationHint) {}
+
+    }),    
 
     
     Item.Base.new(data : {
@@ -1276,6 +1313,43 @@ Item.Base.database = Database.new(items: [
         onCreate ::(item, user, creationHint) {}
 
     }),
+    
+    Item.Base.new(data : {
+        name : "Lance",
+        description: 'A weapon with long reach and deadly power. The handle has a $color$ trim.',
+        examine : '',
+        equipType: TYPE.TWOHANDED,
+        rarity : 100,
+        weight : 8,
+        canBeColored : true,
+        keyItem : false,
+        basePrice: 105,
+        levelMinimum : 1,
+        canHaveEnchants : true,
+        hasQuality : true,
+        hasMaterial : true,
+        isUnique : false,
+        useTargetHint : USE_TARGET_HINT.ONE,
+
+        // fatigued
+        equipMod : StatSet.new(
+            ATK:  35,
+            SPD:  20,
+            DEX:  15
+        ),
+        useEffects : [
+            'Fling'
+        ],
+        equipEffects : [],
+        attributes : [
+            ATTRIBUTE.BLUNT,
+            ATTRIBUTE.METAL,
+            ATTRIBUTE.WEAPON
+
+        ],
+        onCreate ::(item, user, creationHint) {}
+
+    }),    
     
     Item.Base.new(data : {
         name : "Glaive",

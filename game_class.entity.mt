@@ -99,7 +99,7 @@
         @growth = StatSet.new();
         @enemies_ = [];
         @allies_ = [];
-        @qualities = [];
+        @qualityDescription = empty;
         @abilitiesUsedBattle = empty;
         @adventurous = Number.random() <= 0.5;
         @battleAI = BattleAI.new(
@@ -184,9 +184,6 @@
                 species = speciesHint;
             };
             
-            species.qualities->foreach(do:::(i, qual) {
-                qualities->push(value:EntityQuality.Base.database.find(name:qual).new());
-            });
             
             growth.mod(stats:species.growth);
             growth.mod(stats:personality.growth);
@@ -487,6 +484,11 @@
                 when(dmg.amount <= 0) empty;
                 when(!target.damage(from:this, damage:dmg, dodgeable:true)) empty;
 
+                when(hp == 0) ::<= {
+                    dialogue.message(text: '' + this.name + ' has died!');                
+                    flags.add(flag:StateFlags.IS_DEAD);
+                    isDead = true;                    
+                };
 
                 
                 effects->foreach(do:::(index, effect) {
@@ -549,11 +551,7 @@
 
 
                 when (damage.amount == 0) empty;
-                when(hp == 0) ::<= {
-                    dialogue.message(text: '' + this.name + ' has died!');                
-                    flags.add(flag:StateFlags.IS_DEAD);
-                    isDead = true;                    
-                };
+                when(hp == 0) true;
 
                 @damageTypeName ::{
                     return match(damage.damageType) {
@@ -1079,58 +1077,102 @@
             },
             
             describeQualities ::{
+                when (qualityDescription) qualityDescription;
+                
+                @qualities = [];
+                species.qualities->foreach(do:::(i, qual) {
+                    qualities->push(value:EntityQuality.Base.database.find(name:qual).new());
+                });
+
+            
                 @out = this.name + ' is a(n) ' + species.name + '. ';
                 @:quals = [...qualities];
+
+                // inefficient, but idc                
+                @:describeDual::(qual0, qual1, index) {
+                    return ([
+                        'They have ' + qual0.name + 
+                                (if (qual0.plural) ' that are ' else ' that is ') 
+                            + qual0.description + ', and their '
+                            + qual1.name + 
+                                (if (qual1.plural) ' are ' else ' is ') 
+                            + qual1.description + '. ',
+                            
+                        this.name + '\'s ' + qual0.name + 
+                                (if (qual0.plural) ' are ' else ' is ') 
+                            + qual0.description + ', and they have '
+                            + qual1.name + 
+                                (if (qual1.plural) ' which are ' else ' which is ') 
+                            + qual1.description + '. ',
+                    ])[index];
+                };
+
+                @:describeSingle::(qual, index) {
+                    return ([
+                        this.name + '\'s ' + qual.name + 
+                                (if (qual.plural) ' are ' else ' is ') 
+                            + qual.description + '. ',
+
+                        'Their ' + qual.name + 
+                                (if (qual.plural) ' are very clearly ' else ' is very clearly ') 
+                            + qual.description + '. ',
+                            
+
+                        'Their ' + qual.name + 
+                                (if (qual.plural) ' are ' else ' is ') 
+                            + qual.description + '. ',
+
+                        'Their ' + qual.name + 
+                                (if (qual.plural) ' are evidently ' else ' is evidently ') 
+                            + qual.description + '. ',
+
+                        'Their ' + qual.name + 
+                                (if (qual.plural) ' are fairly ' else ' is fairly ') 
+                            + qual.description + '. '
+                    ])[index];
+                };
+                
+                @:singleChoices = [0, 1, 2, 3, 4];
+                @:dualChoices = [0, 1];
+                
+                @:pickDescriptionChoice::(list) {
+                    @:index = random.integer(from:0, to:list->keycount-1);
+                    @:out = list[index];
+                    list->remove(key:index);
+                    return out;
+                };
+                
+                // when we pick descriptive sentences, we dont want to 
+                // reuse structures more than once except for the unflourished 
+                // one.
                 [::] {
                     forever(do::{
-                        when(quals->keycount == empty) send();
+                        when(quals->keycount == 0) send();
                         
-                        @single = if (quals->keycount > 2) Number.random() < 0.5 else false;
+                        @single = if (quals->keycount >= 2) (Number.random() < 0.5) else true;
                         
                         if (!single) ::<= {
                             @qual0 = quals->pop;
                             @qual1 = quals->pop;
-                            out = out + random.pickArrayItem(list:[
-                                'They have ' + qual0.name + 
-                                        (if (qual0.plural) ' that are ' else ' that is ') 
-                                    + qual0.description + ' and their '
-                                    + qual1.name + 
-                                        (if (qual1.plural) ' are ' else ' is ') 
-                                    + qual1.description + '. ',
-                                    
-                                this.name + '\'s ' + qual0.name + 
-                                        (if (qual0.plural) ' are ' else ' is ') 
-                                    + qual1.description + ', and they have '
-                                    + qual1.name + 
-                                        (if (qual1.plural) ' which is ' else ' which are ') 
-                                    + qual1.description + '. ',
-                            ]);                                
+                            
+                            @index = if(dualChoices->keycount == 0)
+                                0
+                            else                                
+                                pickDescriptionChoice(list:dualChoices);                                
+                            out = out + describeDual(qual0, qual1, index);
                         } else ::<= {
                             @qual = quals->pop;
-                            out = out + random.pickArrayItem(list:[
-                                this.name + '\'s ' + qual.name + 
-                                        (if (qual.plural) ' are ' else ' is ') 
-                                    + qual.description + '. ',
-
-                                'Their ' + qual.name + 
-                                        (if (qual.plural) ' are very clearly ' else ' is very clearly ') 
-                                    + qual.description + '. ',
-                                    
-
-                                'Their ' + qual.name + 
-                                        (if (qual.plural) ' are ' else ' is  ') 
-                                    + qual.description + '. ',
-
-                                'Their ' + qual.name + 
-                                        (if (qual.plural) ' are evidently ' else ' is evidently ') 
-                                    + qual.description + '. ',
-                                    
                             
-                            ]);
+                            @index = if(singleChoices->keycount == 0)
+                                2
+                            else                                
+                                pickDescriptionChoice(list:singleChoices);                                
+                            out = out + describeSingle(qual, index);                        
                         };
                     });
                     
                 };
+                qualityDescription = out;
                 return out;
             },
             
@@ -1167,7 +1209,6 @@
                           ' profession: ' + profession.base.name + '\n' +
                           'personality: ' + personality.name + '\n\n'
                          ,
-                         ' -About-  \n' +
                          this.describeQualities()
                          ,
                          
