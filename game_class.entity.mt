@@ -32,6 +32,7 @@
 @:Location = import(module:'game_class.location.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
+@:EntityQuality = import(module:'game_class.entityquality.mt');
 
 // returns EXP recommended for next level
 @:levelUp ::(level, stats => StatSet.type, growthPotential => StatSet.type, whichStat) {
@@ -98,6 +99,7 @@
         @growth = StatSet.new();
         @enemies_ = [];
         @allies_ = [];
+        @qualities = [];
         @abilitiesUsedBattle = empty;
         @adventurous = Number.random() <= 0.5;
         @battleAI = BattleAI.new(
@@ -181,6 +183,10 @@
             if (speciesHint != empty) ::<= {
                 species = speciesHint;
             };
+            
+            species.qualities->foreach(do:::(i, qual) {
+                qualities->push(value:EntityQuality.Base.database.find(name:qual).new());
+            });
             
             growth.mod(stats:species.growth);
             growth.mod(stats:personality.growth);
@@ -1072,6 +1078,62 @@
                 }
             },
             
+            describeQualities ::{
+                @out = this.name + ' is a(n) ' + species.name + '. ';
+                @:quals = [...qualities];
+                [::] {
+                    forever(do::{
+                        when(quals->keycount == empty) send();
+                        
+                        @single = if (quals->keycount > 2) Number.random() < 0.5 else false;
+                        
+                        if (!single) ::<= {
+                            @qual0 = quals->pop;
+                            @qual1 = quals->pop;
+                            out = out + random.pickArrayItem(list:[
+                                'They have ' + qual0.name + 
+                                        (if (qual0.plural) ' that are ' else ' that is ') 
+                                    + qual0.description + ' and their '
+                                    + qual1.name + 
+                                        (if (qual1.plural) ' are ' else ' is ') 
+                                    + qual1.description + '. ',
+                                    
+                                this.name + '\'s ' + qual0.name + 
+                                        (if (qual0.plural) ' are ' else ' is ') 
+                                    + qual1.description + ', and they have '
+                                    + qual1.name + 
+                                        (if (qual1.plural) ' which is ' else ' which are ') 
+                                    + qual1.description + '. ',
+                            ]);                                
+                        } else ::<= {
+                            @qual = quals->pop;
+                            out = out + random.pickArrayItem(list:[
+                                this.name + '\'s ' + qual.name + 
+                                        (if (qual.plural) ' are ' else ' is ') 
+                                    + qual.description + '. ',
+
+                                'Their ' + qual.name + 
+                                        (if (qual.plural) ' are very clearly ' else ' is very clearly ') 
+                                    + qual.description + '. ',
+                                    
+
+                                'Their ' + qual.name + 
+                                        (if (qual.plural) ' are ' else ' is  ') 
+                                    + qual.description + '. ',
+
+                                'Their ' + qual.name + 
+                                        (if (qual.plural) ' are evidently ' else ' is evidently ') 
+                                    + qual.description + '. ',
+                                    
+                            
+                            ]);
+                        };
+                    });
+                    
+                };
+                return out;
+            },
+            
             describe:: {
                 @:plainStats = StatSet.new();
                 stats.resetMod();
@@ -1104,6 +1166,9 @@
                           '    species: ' + species.name + '\n' +
                           ' profession: ' + profession.base.name + '\n' +
                           'personality: ' + personality.name + '\n\n'
+                         ,
+                         ' -About-  \n' +
+                         this.describeQualities()
                          ,
                          
                           ' -Equipment-  \n'                

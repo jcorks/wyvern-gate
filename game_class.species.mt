@@ -29,6 +29,7 @@
             attributes : {
                 name : String,
                 rarity: Number,
+                qualities : Object,
                 description : String,
                 growth : StatSet.type,
                 passives : Object,
@@ -53,6 +54,13 @@ Species.database = Database.new(items: [
             SPD: 2,
             DEX: 3
         ),        
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         special : false,
         passives : [
         ]
@@ -72,6 +80,13 @@ Species.database = Database.new(items: [
             SPD: 6,
             DEX: 4
         ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -92,6 +107,13 @@ Species.database = Database.new(items: [
             SPD: 6,
             DEX: 4
         ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -112,6 +134,13 @@ Species.database = Database.new(items: [
             SPD: 5,
             DEX: 3
         ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -132,6 +161,13 @@ Species.database = Database.new(items: [
             SPD: 6,
             DEX: 6
         ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -152,6 +188,13 @@ Species.database = Database.new(items: [
             SPD: 8,
             DEX: 3
         ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -173,6 +216,13 @@ Species.database = Database.new(items: [
             SPD: 10,
             DEX: 8
         ),
+        qualities : [
+            'snout',
+            'scales',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -193,6 +243,13 @@ Species.database = Database.new(items: [
             SPD: 10,
             DEX: 8
         ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -214,6 +271,13 @@ Species.database = Database.new(items: [
             SPD: 4,
             DEX: 5
         ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -234,6 +298,13 @@ Species.database = Database.new(items: [
             SPD: 3,
             DEX: 2
         ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -254,6 +325,13 @@ Species.database = Database.new(items: [
             SPD: -3,
             DEX: 1
         ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -274,6 +352,13 @@ Species.database = Database.new(items: [
             SPD: 5,
             DEX: 0
         ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -294,7 +379,11 @@ Species.database = Database.new(items: [
             SPD: 5,
             DEX: 4
         ),
-        
+        qualities : [
+            'feathers',
+            'eyes',
+            'body'
+        ],        
         special : false,
         passives : [
         ]
@@ -315,6 +404,11 @@ Species.database = Database.new(items: [
             SPD: 10,
             DEX: 0
         ),
+        qualities : [
+            'feathers',
+            'eyes',
+            'body'
+        ],        
         
         special : false,
         passives : [
@@ -337,6 +431,13 @@ Species.database = Database.new(items: [
             SPD: 3,
             DEX: 3
         ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -357,6 +458,13 @@ Species.database = Database.new(items: [
             SPD: 6,
             DEX: 2
         ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -377,6 +485,13 @@ Species.database = Database.new(items: [
             SPD: 10,
             DEX: 1
         ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -399,6 +514,13 @@ Species.database = Database.new(items: [
             DEX: 7
         ),
         special : false,
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         passives : [
         ]
@@ -419,6 +541,13 @@ Species.database = Database.new(items: [
             SPD: 6,
             DEX: 3
         ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'body'
+        ],
         
         special : false,
         passives : [
@@ -440,6 +569,8 @@ Species.database = Database.new(items: [
             SPD: 7,
             DEX: 4
         ),
+        qualities : [
+        ],
         
         special : true,
         passives : [
@@ -460,6 +591,8 @@ Species.database = Database.new(items: [
             SPD: 10,
             DEX: 10
         ),
+        qualities : [
+        ],
         
         special : true,
         passives : [
@@ -480,6 +613,8 @@ Species.database = Database.new(items: [
             SPD: 10,
             DEX: 10
         ),
+        qualities : [
+        ],
         
         special : true,
         passives : [
