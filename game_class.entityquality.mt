@@ -89,6 +89,10 @@
                 },
             },
             
+            appearanceChance : {
+                get ::<- base_.appearanceChance
+            },
+            
             description : {
                 get ::{
                     @:base = base_.descriptions[descIndex];
@@ -136,6 +140,7 @@ EntityQuality.Base = class(
             attributes : {
                 name : String,
                 plural : Boolean,
+                appearanceChance : Number,
                 descriptions : Object,
                 trait0 : Object,
                 trait1 : Object,
@@ -157,6 +162,7 @@ EntityQuality.Base.database = Database.new(
         EntityQuality.Base.new(
             data : {
                 name : 'fur',
+                appearanceChance : 1,
                 plural : false,
                 descriptions : [
                     ['$0'],
@@ -186,11 +192,42 @@ EntityQuality.Base.database = Database.new(
                 
                 trait2 : [
                     'brown',
-                    'white',
                     'light brown',
                     'black',
                     'grey',
                     'soft grey'
+                ]             
+            }
+        ),
+
+        EntityQuality.Base.new(
+            data : {
+                name : 'face',
+                appearanceChance : 0.3,
+                plural : false,
+                descriptions : [
+                    ['$0'],
+                    ['$0'],
+                    ['$0'],
+                    ['$0'],
+                    ['$0 with $1'],
+                ],
+                
+                trait0 : [
+                    'soft',
+                    'hard',
+                    'trusting',
+                    'gentle',
+                    'stern',
+                    'neutral',
+                ],
+                
+                trait1 : [
+                    'freckles',
+                    'markings'
+                ],
+                
+                trait2 : [
                 ]             
             }
         ),
@@ -199,6 +236,7 @@ EntityQuality.Base.database = Database.new(
         EntityQuality.Base.new(
             data : {
                 name : 'scales',
+                appearanceChance : 1,
                 plural : true,
                 descriptions : [
                     ['$0'],
@@ -237,6 +275,7 @@ EntityQuality.Base.database = Database.new(
         EntityQuality.Base.new(
             data : {
                 name : 'feathers',
+                appearanceChance : 1,
                 plural : true,
                 descriptions : [
                     ['$0'],
@@ -273,6 +312,7 @@ EntityQuality.Base.database = Database.new(
         EntityQuality.Base.new(
             data : {
                 name : 'eyes',
+                appearanceChance : 1,
                 plural : true,
                 descriptions : [
                     ['$2 with $1.'],
@@ -337,6 +377,7 @@ EntityQuality.Base.database = Database.new(
         EntityQuality.Base.new(
             data : {
                 name : 'snout',
+                appearanceChance : 1,
                 plural : false,
                 descriptions : [
                     ['$0'],
@@ -361,6 +402,7 @@ EntityQuality.Base.database = Database.new(
         EntityQuality.Base.new(
             data : {
                 name : 'body',
+                appearanceChance : 1,
                 plural : false,
                 descriptions : [
                     ['$0'],
