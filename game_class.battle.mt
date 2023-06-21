@@ -386,7 +386,7 @@
                         allies_ = [];
                         enemies_ = [];
                         active = false;
-                        dialogue.backgroundRenderable = empty;
+                        dialogue.forceExit();
                         onEnd(result);                    
                     }; 
 

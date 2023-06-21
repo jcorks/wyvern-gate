@@ -1418,7 +1418,8 @@ Item.Base.database = Database.new(items: [
         equipEffects : [],
         attributes : [
             ATTRIBUTE.BLUNT,
-            ATTRIBUTE.METAL
+            ATTRIBUTE.METAL,
+            ATTRIBUTE.WEAPON
 
         ],
         onCreate ::(item, user, creationHint) {}
@@ -1455,7 +1456,8 @@ Item.Base.database = Database.new(items: [
         equipEffects : [],
         attributes : [
             ATTRIBUTE.BLUNT,
-            ATTRIBUTE.METAL
+            ATTRIBUTE.METAL,
+            ATTRIBUTE.WEAPON
 
         ],
         onCreate ::(item, user, creationHint) {}
@@ -1492,7 +1494,8 @@ Item.Base.database = Database.new(items: [
         equipEffects : [],
         attributes : [
             ATTRIBUTE.BLUNT,
-            ATTRIBUTE.METAL
+            ATTRIBUTE.METAL,
+            ATTRIBUTE.WEAPON
 
         ],
         onCreate ::(item, user, creationHint) {}
@@ -1531,7 +1534,8 @@ Item.Base.database = Database.new(items: [
         equipEffects : [],
         attributes : [
             ATTRIBUTE.BLUNT,
-            ATTRIBUTE.METAL
+            ATTRIBUTE.METAL,
+            ATTRIBUTE.WEAPON
         ],
         onCreate ::(item, user, creationHint) {}
 
@@ -1567,7 +1571,8 @@ Item.Base.database = Database.new(items: [
         equipEffects : [],
         attributes : [
             ATTRIBUTE.BLUNT,
-            ATTRIBUTE.METAL
+            ATTRIBUTE.METAL,
+            ATTRIBUTE.WEAPON
         ],
         onCreate ::(item, user, creationHint) {}
         

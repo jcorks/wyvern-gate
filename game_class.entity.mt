@@ -482,13 +482,14 @@
                     effect.effect.onGiveDamage(user:effect.from, item:effect.item, holder:this, to:target, damage:dmg);
                 });
                 when(dmg.amount <= 0) empty;
-                when(!target.damage(from:this, damage:dmg, dodgeable:true)) empty;
-
                 when(hp == 0) ::<= {
                     dialogue.message(text: '' + this.name + ' has died!');                
                     flags.add(flag:StateFlags.IS_DEAD);
                     isDead = true;                    
                 };
+
+                when(!target.damage(from:this, damage:dmg, dodgeable:true)) empty;
+
 
                 
                 effects->foreach(do:::(index, effect) {
@@ -550,8 +551,8 @@
                 });
 
 
-                when (damage.amount == 0) empty;
-                when(hp == 0) true;
+                when (damage.amount == 0) false;
+                when(hp == 0) false;
 
                 @damageTypeName ::{
                     return match(damage.damageType) {
