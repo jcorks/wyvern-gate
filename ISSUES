@@ -36,7 +36,6 @@ Coming changes:
     - LIGHT key last. Enemies here have all skills learned and have equips
     - Using each key on a gate triggers a special element-themed "boss dragon" 
       that must be fought to progress to the next island.
-      . Each boss victory yields a legendary item
     - After the last dragon, credits and post game.
 
   . Each wyvern has a service they provide if you ever revisit them 
@@ -45,9 +44,6 @@ Coming changes:
 
 - Post Game
 
-- additional weapons:
-  . rapier
-  . lance
 - Research Hall
     . Tablet exchange
 - area plots for towns and cities to give it a better sense of order

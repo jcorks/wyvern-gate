@@ -47,23 +47,23 @@
             if (trait0Hint != empty) 
                 trait0 = trait0Hint
             else 
-                trait0 = random.integer(from:0, to:base_.trait0->keycount);
+                trait0 = random.integer(from:0, to:base_.trait0->keycount-1);
 
 
             if (trait1Hint != empty) 
                 trait1 = trait1Hint
             else 
-                trait1 = random.integer(from:0, to:base_.trait1->keycount);
+                trait1 = random.integer(from:0, to:base_.trait1->keycount-1);
 
             if (trait2Hint != empty) 
                 trait2 = trait2Hint
             else 
-                trait2 = random.integer(from:0, to:base_.trait2->keycount);
+                trait2 = random.integer(from:0, to:base_.trait2->keycount-1);
             
             if (descriptionHint != empty) 
                 descIndex = descriptionHint
             else 
-                descIndex = random.integer(from:0, to:base_.descriptions->keycount);
+                descIndex = random.integer(from:0, to:base_.descriptions->keycount-1);
             
             return this;
             
@@ -95,10 +95,11 @@
             
             description : {
                 get ::{
-                    @:base = base_.descriptions[descIndex];
-                    return base->replace(key:'$0', with:base_.trait0[trait0])
-                               ->replace(key:'$1', with:base_.trait1[trait1])
-                               ->replace(key:'$2', with:base_.trait2[trait2]);
+                    @base = base_.descriptions[descIndex];
+                    if (base->contains(key:'$0')) base = base->replace(key:'$0', with:base_.trait0[trait0]);
+                    if (base->contains(key:'$1')) base = base->replace(key:'$1', with:base_.trait1[trait1]);
+                    if (base->contains(key:'$2')) base = base->replace(key:'$2', with:base_.trait2[trait2]);
+                    return base;
                 }
             },
             
@@ -165,12 +166,12 @@ EntityQuality.Base.database = Database.new(
                 appearanceChance : 1,
                 plural : false,
                 descriptions : [
-                    ['$0'],
-                    ['$0 with $1'],
-                    ['slightly irridescent $0 with $1'],
-                    ['$0 with stripes of $2'],
-                    ['thick and $1'],
-                    ['$0 with $2 spots'],
+                    '$0',
+                    '$0 with $1',
+                    'slightly irridescent $0 with $1',
+                    '$0 with stripes of $2',
+                    'thick and has $1',
+                    '$0 with $2 spots',
                 ],
                 
                 trait0 : [
@@ -191,11 +192,12 @@ EntityQuality.Base.database = Database.new(
                 ],
                 
                 trait2 : [
-                    'brown',
                     'light brown',
-                    'black',
-                    'grey',
-                    'soft grey'
+                    'bright white',
+                    'hazelnut',
+                    'deep black',
+                    'light grey',
+                    'shiny grey'
                 ]             
             }
         ),
@@ -239,11 +241,11 @@ EntityQuality.Base.database = Database.new(
                 appearanceChance : 1,
                 plural : true,
                 descriptions : [
-                    ['$0'],
-                    ['$0 with $1'],
-                    ['slightly irridescent $0 with $1'],
-                    ['$0 with a checkered pattern of $2'],
-                    ['shiny and $1'],
+                    '$0',
+                    '$0 with $1',
+                    'slightly irridescent $0 with $1',
+                    '$0 with a checkered pattern of $2',
+                    'shiny and $1',
                 ],
                 
                 trait0 : [
@@ -278,10 +280,10 @@ EntityQuality.Base.database = Database.new(
                 appearanceChance : 1,
                 plural : true,
                 descriptions : [
-                    ['$0'],
-                    ['$0 with $1'],
-                    ['slightly irridescent $0 with $1'],
-                    ['shiny and $1'],
+                    '$0',
+                    '$0 with $1',
+                    'slightly irridescent $0 with $1',
+                    'shiny and $1',
                 ],
                 
                 trait0 : [
@@ -315,11 +317,12 @@ EntityQuality.Base.database = Database.new(
                 appearanceChance : 1,
                 plural : true,
                 descriptions : [
-                    ['$2 with $1.'],
-                    ['particularly $0 and $2.'],
-                    ['$0 and $2 eyes with $1.'],
-                    ['mesmerizingly $2.'],
-                    ['covered with a fabric of some kind.'],
+                    '$2 with $1',
+                    'particularly $0 and $2',
+                    '$0 and $2',
+                    '$2 and have $1',
+                    'mesmerizingly $2',
+                    'covered with a fabric of some kind',
                 ],
                 trait0 : [
                     'rather thin',
@@ -330,9 +333,7 @@ EntityQuality.Base.database = Database.new(
                 trait1 : [
                     'a gentle affect',
                     'a piercing stare',
-                    'a blinded left eye',
-                    'a blinded right eye',
-                    'a constant look for boredom',
+                    'a constant look of boredom',
                     'a look of hopeful glee',
                     'a look of constant worry'
                 ],
@@ -355,9 +356,9 @@ EntityQuality.Base.database = Database.new(
                 name : 'ears',
                 plural : true,
                 descriptions : [
-                    ['$0'],
-                    ['$0 and emotive'],
-                    ['pierced and $0'],
+                    '$0',
+                    '$0 and emotive',
+                    'pierced and $0',
                 ],
                 
                 trait0 : [
@@ -380,8 +381,7 @@ EntityQuality.Base.database = Database.new(
                 appearanceChance : 1,
                 plural : false,
                 descriptions : [
-                    ['$0'],
-                    ['$0 and spotted'],
+                    '$0',
                 ],
                 
                 trait0 : [
@@ -405,8 +405,8 @@ EntityQuality.Base.database = Database.new(
                 appearanceChance : 1,
                 plural : false,
                 descriptions : [
-                    ['$0'],
-                    ['$0 and $1'],
+                    '$0',
+                    '$0 and $1',
                 ],
                 
                 trait0 : [

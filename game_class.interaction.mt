@@ -1031,21 +1031,25 @@ Interaction.database = Database.new(
                 displayName : 'Bet',
                 name : 'bet',
                 onInteract ::(location, party) {
+                    @:getAWeapon = ::<-
+                        Item.Base.database.getRandomFiltered(
+                            filter:::(value) <- (
+                                value.isUnique == false &&
+                                value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
+                            )
+                        )                    
+                    ;
+                
                     @:Entity = import(module:'game_class.entity.mt');
                     @:count = 3;
-                    @:teamAname = 'The ' + Material.database.getRandom().name + ' ' + Item.Base.database.getRandomFiltered(filter:::(value) <- !value.isUnique).name + 's';
+                    @:teamAname = 'The ' + Material.database.getRandom().name + ' ' + getAWeapon().name + 's';
                     @:teamA = [];
-                    @:teamBname = 'The ' + Material.database.getRandom().name + ' ' + Item.Base.database.getRandomFiltered(filter:::(value) <- !value.isUnique).name + 's';
+                    @:teamBname = 'The ' + Material.database.getRandom().name + ' ' + getAWeapon().name + 's';
                     @:teamB = [];
 
                     [0, count]->for(do:::(i) {
                         @:combatant = location.landmark.island.newInhabitant();
-                        @:weapon = Item.Base.database.getRandomFiltered(
-                            filter:::(value) <- (
-                                value.isUnique == false &&
-                                value.equipType == Item.TYPE.HAND                 
-                            )
-                        ).new(from:combatant);
+                        @:weapon = getAWeapon().new(from:combatant);
                         combatant.equip(item:weapon, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true, inventory: combatant.inventory);
 
                         teamA->push(value:combatant);
@@ -1053,18 +1057,16 @@ Interaction.database = Database.new(
 
                     [0, count]->for(do:::(i) {
                         @:combatant = location.landmark.island.newInhabitant();
-                        @:weapon = Item.Base.database.getRandomFiltered(
-                            filter:::(value) <- (
-                                value.isUnique == false &&
-                                value.equipType == Item.TYPE.HAND                 
-                            )
-                        ).new(from:combatant);                        
+                        @:weapon = getAWeapon().new(from:combatant);                        
                         combatant.equip(item:weapon, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true, inventory: combatant.inventory);
 
                         teamB->push(value:combatant);
                     });
 
 
+                    dialogue.message(
+                        text:'The croud cheers furiously as the teams get ready.'
+                    );
                     
                     dialogue.message(
                         speaker:'Announcer',
@@ -1073,18 +1075,16 @@ Interaction.database = Database.new(
                     
                     
 
-                    [::]{
-                        forever(do:::{
-                            @:choice = dialogue.choicesNow(
-                                choices: [
-                                    teamAname + ' stats',
-                                    teamBname + ' stats',
-                                    'place bet'
-                                ],
-                                canCancel: true
-                            );
-                            
-                            when(choice == 0) send();
+                    dialogue.choices(
+                        choices: [
+                            teamAname + ' stats',
+                            teamBname + ' stats',
+                            'place bet'
+                        ],
+                        canCancel: true,
+                        keep: true,
+                        onChoice::(choice) {                    
+                            when(choice == 0) empty;
                             
                             match(choice-1) {
                               // team A examine
@@ -1109,6 +1109,8 @@ Interaction.database = Database.new(
                                 @bet = 0;
                                 
                                 @:bets = [
+                                    50,
+                                    100,
                                     200,
                                     500,
                                     2000,
@@ -1118,72 +1120,85 @@ Interaction.database = Database.new(
                                     100000,
                                     1000000
                                 ];
-                                @choice = dialogue.choicesNow(
+                                @choice = dialogue.choices(
                                     prompt: 'Bet how much? (payout - 2:1)',
                                     choices: [...bets]->map(to:::(value) <- String(from:value)),
-                                    canCancel: true
+                                    canCancel: true,
+                                    onChoice::(choice) {
+                                        when(choice == 0) empty;
+                                        bet = bets[choice-1];
+                                        
+                                        when(party.inventory.gold < bet)
+                                            dialogue.message(text:'The party cannot afford this bet.');
+                                            
+                                        choice = dialogue.choices(
+                                            prompt: 'Bet on which team?',
+                                            choices: [
+                                                teamAname,
+                                                teamBname
+                                            ],
+                                            canCancel: true,
+                                            onChoice::(choice) {
+                                                when(choice == 0) empty;                                                        
+                                                @betOnA = choice == 1;
+                                              
+                                                @:world = import(module:'game_singleton.world.mt');
+                                              
+                                                world.battle.start(
+                                                    party,                            
+                                                    allies: teamA,
+                                                    enemies: teamB,
+                                                    landmark: {},
+                                                    onTurn ::{
+                                                        if (Number.random() < 0.7) ::<= {
+                                                            dialogue.message(text:random.pickArrayItem(list:[
+                                                                '"YEAH, tear them limb from limb!"',
+                                                                'The croud jeers at team ' + (if (Number.random() < 0.5) teamAname else teamBname) + '.',  
+                                                                'The croud goes silent.',
+                                                                'The croud goes wild in an uproar.',
+                                                                'The crowd murmurs restlessly.',
+                                                                'The crowd gasps.'
+                                                            ]));
+                                                        };
+                                                    },
+                                                    npcBattle: true,
+                                                    onEnd::(result) {
+                                                        @aWon = result == Battle.RESULTS.ALLIES_WIN;
+                                                        if (aWon) ::<= {
+                                                            dialogue.message(
+                                                                text: teamAname + ' wins!'
+                                                            );                                    
+                                                        
+                                                        } else ::<= {
+                                                            dialogue.message(
+                                                                text: teamBname + ' wins!'
+                                                            );                                    
+                                                        };
+                                                        
+                                                        
+                                                        // payout
+                                                        if ((betOnA && aWon) || (!betOnA && !aWon)) ::<= {
+                                                            dialogue.message(
+                                                                text:'The party won ' + (bet)->floor + 'G.'
+                                                            );                                    
+                                                            party.inventory.addGold(amount:(bet)->floor);
+                                                        } else ::<= {
+                                                            dialogue.message(
+                                                                text:'The party lost ' + bet + 'G.'
+                                                            );                                    
+                                                            party.inventory.subtractGold(amount:bet);
+                                                        };  
+                                                    }  
+                                                );                                           
+                                            }
+                                        );
+                                    }
                                 );
-                                when(choice == 0) empty;
-                                bet = bets[choice-1];
-                                
-                                when(party.inventory.gold < bet)
-                                    dialogue.message(text:'The party cannot afford this bet.');
-                                    
-                                choice = dialogue.choicesNow(
-                                    prompt: 'Bet on which team?',
-                                    choices: [
-                                        teamAname,
-                                        teamBname
-                                    ],
-                                    canCancel: true
-                                );
-                                breakpoint();
-                                when(choice == 0) empty;                                                        
-                                @betOnA = choice == 1;
-                              
-                                @:world = import(module:'game_singleton.world.mt');
-                              
-                                @aWon = world.battle.start(
-                                    party,                            
-                                    allies: teamA,
-                                    enemies: teamB,
-                                    landmark: {},
-                                    npcBattle: true
-                                ).result;
-                                
-                                // annouce winner
-                                if (aWon) ::<= {
-                                    dialogue.message(
-                                        text: teamAname + ' wins!'
-                                    );                                    
-                                
-                                } else ::<= {
-                                    dialogue.message(
-                                        text: teamBname + ' wins!'
-                                    );                                    
-                                };
-                                
-                                
-                                // payout
-                                if ((betOnA && aWon) || (!betOnA && !aWon)) ::<= {
-                                    dialogue.message(
-                                        text:'The party won ' + (bet)->floor + 'G.'
-                                    );                                    
-                                    party.inventory.addGold(amount:(bet)->floor);
-                                } else ::<= {
-                                    dialogue.message(
-                                        text:'The party lost ' + bet + 'G.'
-                                    );                                    
-                                    party.inventory.subtractGold(amount:bet);
-                                };  
-                                send();                               
                               }
+                            };                        
+                        }
+                    );
 
-                                
-                            };
-                            
-                        });
-                    };
                     
                     
                     

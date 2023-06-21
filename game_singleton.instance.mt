@@ -122,7 +122,7 @@ return class(
                             ],
                             onChoice::(choice) {
                                 when(choice == 2) empty;
-                            
+                                dialogue.jumpToTag(name:'MainMenu');
                             }
                         );
                                         
@@ -510,10 +510,10 @@ return class(
                 @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
                 @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
                 // debug
-                    /*
-                    party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
-                    ).new(from:island.newInhabitant()));
                     
+                    //party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
+                    //).new(from:island.newInhabitant()));
+                    /*
 
                     
                     [0, 20]->for(do:::(i) {

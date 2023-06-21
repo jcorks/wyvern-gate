@@ -68,7 +68,6 @@ Scene.database = Database.new(
             data : {
                 name : 'scene_intro',
                 script: [
-                    ['???', '...'],
                     ['???', '...You.. you have been chosen...'],
                     ['???', 'Among those of the world, the Chosen are selected...'],
                     ['???', '...Selected to seek me, the Wyvern of Light...'],

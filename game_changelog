@@ -63,3 +63,6 @@
 - Added bloodstone and soulstone enchants
 - nerfed stone enchants to be half as chaotic
 - changed default gold amount to 250
+- added Rapier and Lance weapons.
+- added descriptions to entities with unique qualities and traits.
+- changed death to only occur on explicit attacking of a knocked out individual rather than any damage, preventing a lot of accidental deaths
