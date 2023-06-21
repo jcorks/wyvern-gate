@@ -368,7 +368,7 @@
                       (alliesWin):      RESULTS.ALLIES_WIN,
                       default:          RESULTS.ENEMIES_WIN
                     };
-                    
+                    dialogue.jumpToTag(name:'Battle', goBeforeTag:true);
                     
                     allies->foreach(do:::(k, v) {
                         v.battleEnd();
@@ -386,7 +386,6 @@
                         allies_ = [];
                         enemies_ = [];
                         active = false;
-                        dialogue.forceExit();
                         onEnd(result);                    
                     }; 
 
@@ -474,7 +473,6 @@
                         
                         dialogue.message(text: 'The battle is won.',
                             onNext ::{
-                                dialogue.forceExit();
                                 onEnd(result);                                             
                             }
                         );
@@ -485,7 +483,6 @@
                         if (party.members->all(condition:::(value) <- value.isIncapacitated())) ::<= {
                             dialogue.message(text: 'The battle is lost.',
                                 onNext ::{
-                                    dialogue.forceExit();
                                     onEnd(result);                                             
                                 }
                             );
@@ -501,6 +498,7 @@
 
                 dialogue.noDisplay(
                     renderable:this,
+                    jumpTag: 'Battle',
                     onStart::{
                         if (onStart) onStart();
                         initTurn();  

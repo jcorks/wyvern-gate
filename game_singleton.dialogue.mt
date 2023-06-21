@@ -677,14 +677,15 @@ return class(
             },
             
             // a placeholder that only renders graphics
-            noDisplay::(onNext, renderable => Object, keep, onStart => Function) {
+            noDisplay::(onNext, renderable => Object, keep, onStart => Function, jumpTag) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode: CHOICE_MODE.NODISPLAY,
                         keep: keep,
                         renderable:renderable,
                         onStart:onStart,
-                        onNext:onNext
+                        onNext:onNext,
+                        jumpTag: jumpTag
                     });
                     canvas.pushState();      
                 }]);                
@@ -747,7 +748,7 @@ return class(
             },
 
             // pops all choices in the stack until the tag is hit.
-            jumpToTag::(name => String) {
+            jumpToTag::(name => String, goBeforeTag) {
                 breakpoint();
                 [::] {
                     forever(do::{
@@ -758,13 +759,18 @@ return class(
                         if (data.jumpTag != name) ::<= {
                             canvas.popState();
                             choiceStack->pop;
+                            if (goBeforeTag != empty) ::<= {
+                                canvas.popState();
+                                choiceStack->pop;                            
+                            };
+                                
                         } else 
                             send();
                     });
                 };
                 canvas.commit();                
             },
-            
+       
             
             choiceColumns::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function, keep, renderable, onNext) {
                 nextResolve->push(value:[::{
@@ -811,7 +817,8 @@ return class(
                 canvas.commit();
                 @:data = choiceStack->pop;
                 if (data.onNext)
-                    data.onNext();      
+                    data.onNext();  
+                this.commitInput();    
 
             },
 

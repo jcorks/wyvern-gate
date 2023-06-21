@@ -482,10 +482,8 @@
                     effect.effect.onGiveDamage(user:effect.from, item:effect.item, holder:this, to:target, damage:dmg);
                 });
                 when(dmg.amount <= 0) empty;
-                when(hp == 0) ::<= {
-                    dialogue.message(text: '' + this.name + ' has died!');                
-                    flags.add(flag:StateFlags.IS_DEAD);
-                    isDead = true;                    
+                when(target.hp == 0) ::<= {
+                    target.kill();                
                 };
 
                 when(!target.damage(from:this, damage:dmg, dodgeable:true)) empty;
@@ -746,6 +744,13 @@
                 get :: {
                     return adventurous;
                 }
+            },
+            
+            kill :: {
+                hp = 0;
+                dialogue.message(text: '' + this.name + ' has died!');                
+                flags.add(flag:StateFlags.IS_DEAD);
+                isDead = true;                
             },
             
             addEffect::(from => Entity.type, name => String, durationTurns => Number, item) {
@@ -1082,7 +1087,9 @@
                 
                 @qualities = [];
                 species.qualities->foreach(do:::(i, qual) {
-                    qualities->push(value:EntityQuality.Base.database.find(name:qual).new());
+                    @:q = EntityQuality.Base.database.find(name:qual);
+                    if (q.appearanceChance == 1 || Number.random() < q.appearanceChance)
+                        qualities->push(value:q.new());
                 });
 
             

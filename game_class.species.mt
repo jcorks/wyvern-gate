@@ -59,6 +59,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         special : false,
@@ -85,6 +86,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -112,6 +114,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -139,6 +142,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -166,6 +170,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -193,6 +198,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -221,6 +227,7 @@ Species.database = Database.new(items: [
             'scales',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -248,6 +255,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -276,6 +284,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -303,6 +312,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -330,6 +340,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -357,6 +368,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -382,6 +394,7 @@ Species.database = Database.new(items: [
         qualities : [
             'feathers',
             'eyes',
+            'face',
             'body'
         ],        
         special : false,
@@ -407,6 +420,7 @@ Species.database = Database.new(items: [
         qualities : [
             'feathers',
             'eyes',
+            'face',
             'body'
         ],        
         
@@ -436,6 +450,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -463,6 +478,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -490,6 +506,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -519,6 +536,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         
@@ -546,6 +564,7 @@ Species.database = Database.new(items: [
             'fur',
             'eyes',
             'ears',
+            'face',
             'body'
         ],
         

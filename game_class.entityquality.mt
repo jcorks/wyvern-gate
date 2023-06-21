@@ -208,11 +208,11 @@ EntityQuality.Base.database = Database.new(
                 appearanceChance : 0.3,
                 plural : false,
                 descriptions : [
-                    ['$0'],
-                    ['$0'],
-                    ['$0'],
-                    ['$0'],
-                    ['$0 with $1'],
+                    '$0',
+                    '$0',
+                    '$0',
+                    '$0',
+                    '$0 with $1',
                 ],
                 
                 trait0 : [
@@ -355,6 +355,7 @@ EntityQuality.Base.database = Database.new(
             data : {
                 name : 'ears',
                 plural : true,
+                appearanceChance : 1,
                 descriptions : [
                     '$0',
                     '$0 and emotive',
@@ -417,6 +418,7 @@ EntityQuality.Base.database = Database.new(
                 
                 trait1 : [
                     'stocky',
+                    'stout',
                     'slender',
                     'lithe',
                     'well-toned',
