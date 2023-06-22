@@ -282,8 +282,10 @@ EntityQuality.Base.database = Database.new(
                 descriptions : [
                     '$0',
                     '$0 with $1',
+                    '$0',
+                    '$0 with $1',
                     'slightly irridescent $0 with $1',
-                    'shiny and $1',
+                    'shiny with $1',
                 ],
                 
                 trait0 : [
@@ -363,9 +365,9 @@ EntityQuality.Base.database = Database.new(
                 ],
                 
                 trait0 : [
-                    'short',
-                    'long',
-                    'medium-length',
+                    'small',
+                    'large',
+                    'medium-size',
                 ],
                 
                 trait1 : [

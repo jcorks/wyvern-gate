@@ -387,6 +387,7 @@
                         enemies_ = [];
                         active = false;
                         onEnd(result);                    
+                        dialogue.resolveNext();                                            
                     }; 
 
 
@@ -474,6 +475,7 @@
                         dialogue.message(text: 'The battle is won.',
                             onNext ::{
                                 onEnd(result);                                             
+                                dialogue.resolveNext();                                            
                             }
                         );
 
@@ -483,7 +485,8 @@
                         if (party.members->all(condition:::(value) <- value.isIncapacitated())) ::<= {
                             dialogue.message(text: 'The battle is lost.',
                                 onNext ::{
-                                    onEnd(result);                                             
+                                    onEnd(result); 
+                                    dialogue.resolveNext();                                            
                                 }
                             );
                         };

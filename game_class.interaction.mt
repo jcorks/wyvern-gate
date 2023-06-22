@@ -1083,6 +1083,7 @@ Interaction.database = Database.new(
                         ],
                         canCancel: true,
                         keep: true,
+                        jumpTag: 'Bet',
                         onChoice::(choice) {                    
                             when(choice == 0) empty;
                             
@@ -1143,12 +1144,18 @@ Interaction.database = Database.new(
                                                 @betOnA = choice == 1;
                                               
                                                 @:world = import(module:'game_singleton.world.mt');
+                                                dialogue.resolveNext();
                                               
                                                 world.battle.start(
                                                     party,                            
                                                     allies: teamA,
                                                     enemies: teamB,
                                                     landmark: {},
+                                                    renderable : {
+                                                        render:: {
+                                                            canvas.blackout();                                                    
+                                                        }
+                                                    },
                                                     onTurn ::{
                                                         if (Number.random() < 0.7) ::<= {
                                                             dialogue.message(text:random.pickArrayItem(list:[
@@ -1164,6 +1171,7 @@ Interaction.database = Database.new(
                                                     npcBattle: true,
                                                     onEnd::(result) {
                                                         @aWon = result == Battle.RESULTS.ALLIES_WIN;
+                                                        dialogue.jumpToTag(name:'Bet', goBeforeTag:true);
                                                         if (aWon) ::<= {
                                                             dialogue.message(
                                                                 text: teamAname + ' wins!'
@@ -1188,6 +1196,8 @@ Interaction.database = Database.new(
                                                             );                                    
                                                             party.inventory.subtractGold(amount:bet);
                                                         };  
+                                                        dialogue.resolveNext();
+                                                        
                                                     }  
                                                 );                                           
                                             }

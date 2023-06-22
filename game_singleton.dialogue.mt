@@ -93,15 +93,36 @@ return class(
         @bg;
     
     
-    
+        @:renderThis ::(data => Object, selfRender) {
+            if (data.pushedCanvasState == empty) ::<= {
+                canvas.pushState();      
+                data.pushedCanvasState = true;
+            };
+
+            if (bg)
+                bg.render();
+            if (data.renderable) 
+                data.renderable.render();        
+            if (selfRender)
+                selfRender();
+            canvas.commit();
+            data.rendered = true;
+        };
+        
+        @next ::{
+            canvas.popState();
+            choiceStack->pop;
+            if (choiceStack->keycount > 0)
+                choiceStack[choiceStack->keycount-1].rendered = empty;
+            this.commitInput();        
+        };
 
 
         @:choicesCursor ::(data => Object, input) {
             @:choices = if (data.onGetChoices) data.onGetChoices() else data.choices;
             // no choices
             when(choices == empty || choices->keycount == 0) ::<= {
-                canvas.popState();
-                choiceStack->pop;
+                next();
                 canvas.commit();
                 if (data.onNext)
                     data.onNext();            
@@ -124,11 +145,8 @@ return class(
                
               default:false
             };
-            // first render
-            if (data.rendered == empty) ::<= {
-                continue = true;
-                data.rendered = true; 
-            };  
+
+
 
             when(!continue) false;            
             @:PAGE_SIZE = 7;     
@@ -209,32 +227,29 @@ return class(
             //if (canCancel) ::<= {
             //    choicesModified->push(value:'(Cancel)');
             //};
-            if (bg)
-                bg.render();
-            if (data.renderable) 
-                data.renderable.render();
-            renderText(
-                lines: choicesModified,
-                speaker: prompt,
-                leftWeight,
-                topWeight,
-                limitLines:14
-            ); 
-            canvas.commit();    
+            if (data.rendered == empty || choice != empty)
+                renderThis(
+                    data,
+                    selfRender::{
+                        renderText(
+                            lines: choicesModified,
+                            speaker: prompt,
+                            leftWeight,
+                            topWeight,
+                            limitLines:14
+                        ); 
+                    }
+                );
 
                 
             when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
-                canvas.popState();
-                canvas.commit();
-                choiceStack->pop;
+                next();
                 return true;
             };
             
             when(choice == CURSOR_ACTIONS.CONFIRM) ::<= {
                 if (data.keep == false || data.keep == empty) ::<= {
-                    canvas.popState();
-                    canvas.commit();
-                    choiceStack->pop;
+                    next();
                 }; 
                 data.rendered = empty;
                 onChoice(choice:cursorPos + 1);
@@ -254,30 +269,9 @@ return class(
             @:choice = input;         
             @:renderable = data.renderable;   
             
-            //if (canCancel) ::<= {
-            //    choicesModified->push(value:'(Cancel)');
-            //};
-            if (data.rendered == empty) ::<= {
-                if (bg)
-                    bg.render();
-                if (data.renderable) 
-                    data.renderable.render();
-                renderText(
-                    lines: ['[Cancel to return]'],
-                    speaker: prompt,
-                    leftWeight,
-                    topWeight,
-                    limitLines:13
-                ); 
-                canvas.commit();    
-                data.rendered = true;
-            };
-
 
             when(choice == CURSOR_ACTIONS.CANCEL) ::<= {
-                canvas.popState();
-                canvas.commit();
-                choiceStack->pop;
+                next();
                 return true;
             };           
 
@@ -286,9 +280,15 @@ return class(
                   choice == CURSOR_ACTIONS.LEFT ||
                   choice == CURSOR_ACTIONS.RIGHT) ::<= {
                 onChoice(choice);
-                data.rendered = empty;
-                this.commitInput();
-                data.rendered = empty;
+                renderThis(data, selfRender::{
+                    renderText(
+                        lines: ['[Cancel to return]'],
+                        speaker: prompt,
+                        leftWeight,
+                        topWeight,
+                        limitLines:13
+                    );             
+                });
                 return true;
             };
             return false;    
@@ -300,13 +300,10 @@ return class(
             //if (canCancel) ::<= {
             //    choicesModified->push(value:'(Cancel)');
             //};
-            if (bg)
-                bg.render();
-            if (data.rendered == empty) ::<= {
-                if (data.renderable) 
-                    data.renderable.render();
-                canvas.commit();    
-            };
+            
+            if (data.rendered == empty || input != empty)
+                renderThis(data);
+
             if (data.started == empty) ::<= {
                 data.onStart();
                 data.started = true;
@@ -320,9 +317,7 @@ return class(
             @:choices = if (data.onGetChoices) data.onGetChoices() else data.choices;
             // no choices
             when(choices == empty || choices->keycount == 0) ::<= {
-                canvas.popState();
-                canvas.commit();
-                choiceStack->pop;
+                next();
                 if (data.onNext)
                     data.onNext();            
             };
@@ -391,39 +386,30 @@ return class(
                 });
                 choicesModified->push(value:choice);
             });
-            // first render
-            if (data.rendered == empty) ::<= {
-                if (bg)
-                    bg.render();
-                if (data.renderable) 
-                    data.renderable.render();
-                renderText(
-                    lines: choicesModified,
-                    speaker: prompt,
-                    leftWeight,
-                    topWeight,
-                    limitLines:9
-                ); 
-                canvas.commit();
-                data.rendered = true; 
-            };                                           
+
             @choice = input;                   
-            
+            if (choice == empty || data.rendered  == empty)
+                renderThis(data, selfRender::{
+                    renderText(
+                        lines: choicesModified,
+                        speaker: prompt,
+                        leftWeight,
+                        topWeight,
+                        limitLines:9
+                    ); 
+                });            
+                
+                
             when (choice == CURSOR_ACTIONS.CONFIRM) ::<= {
                 if (data.keep == false || data.keep == empty) ::<= {
-                    canvas.popState();
-                    canvas.commit();
-                    choiceStack->pop;
+                    next();
                 }; 
-                data.rendered = empty;
                 onChoice(choice:which + 1);
                 return true;
             };
                 
             if (canCancel && choice == CURSOR_ACTIONS.CANCEL) ::<= {
-                canvas.popState();
-                canvas.commit();
-                choiceStack->pop;
+                next();
                 return true;
             };
             
@@ -457,27 +443,23 @@ return class(
         };
         
         @:displayCursor ::(data, input) {
-            if (data.rendered == empty) ::<={
-                if (bg)
-                    bg.render();
-                renderText(
-                    leftWeight: data.leftWeight, 
-                    topWeight: data.topWeight, 
-                    lines: data.lines,
-                    speaker:data.prompt,
-                    limitLines : data.pageAfter,
-                    hasNotch: true
-                );
-                canvas.commit();
-                data.rendered = false;
+            if (data.rendered == empty) ::<= {
+                renderThis(data, selfRender::{
+                    renderText(
+                        leftWeight: data.leftWeight, 
+                        topWeight: data.topWeight, 
+                        lines: data.lines,
+                        speaker:data.prompt,
+                        limitLines : data.pageAfter,
+                        hasNotch: true
+                    );
+                });
             };
         
             return match(input) {
               (CURSOR_ACTIONS.CONFIRM, 
                CURSOR_ACTIONS.CANCEL): ::<= {
-                canvas.popState();
-                canvas.commit();
-                choiceStack->pop;
+                next();
                 if (data.onNext)
                     data.onNext();
                 return true;
@@ -671,7 +653,6 @@ return class(
                             onNext: onNext,
                             renderable: renderable
                         });
-                        canvas.pushState();      
                     });                       
                 }]);
             },
@@ -687,7 +668,6 @@ return class(
                         onNext:onNext,
                         jumpTag: jumpTag
                     });
-                    canvas.pushState();      
                 }]);                
             },
             
@@ -703,6 +683,18 @@ return class(
             // When this level is reached, this callback is called once
             queueResolveAfter::(callbacks) {
                 afterResolve->push(value:callbacks);
+            },
+            
+            
+            // resolves the next action 
+            // this is normally done for you, but
+            // when jumping, sometimes it is required.
+            resolveNext::{
+                if (nextResolve->keycount) ::<= {
+                    @:cbs = nextResolve[0];
+                    nextResolve->remove(key:0);
+                    cbs->foreach(do:::(i, cb) <- cb());
+                };            
             },
 
             
@@ -728,19 +720,18 @@ return class(
                         onNext : onNext,
                         jumpTag : jumpTag
                     });
-                    canvas.pushState();      
                 }]);
             },
 
             canJumpToTag::(name => String) {
+                @:cs = [...choiceStack];
                 return [::] {
                     forever(do::{
-                        if (choiceStack->keycount == 0)
+                        if (cs->keycount == 0)
                             send(message:false);
-                        @:data = choiceStack[choiceStack->keycount-1];
+                        @:data = cs[cs->keycount-1];
                         if (data.jumpTag != name) ::<= {
-                            canvas.popState();
-                            choiceStack->pop;
+                            cs->pop;
                         } else 
                             send(message:true);
                     });
@@ -749,7 +740,6 @@ return class(
 
             // pops all choices in the stack until the tag is hit.
             jumpToTag::(name => String, goBeforeTag) {
-                breakpoint();
                 [::] {
                     forever(do::{
                         if (choiceStack->keycount == 0)
@@ -757,18 +747,18 @@ return class(
                             
                         @:data = choiceStack[choiceStack->keycount-1];
                         if (data.jumpTag != name) ::<= {
-                            canvas.popState();
-                            choiceStack->pop;
-                            if (goBeforeTag != empty) ::<= {
-                                canvas.popState();
-                                choiceStack->pop;                            
-                            };
-                                
+                            next();
                         } else 
                             send();
                     });
                 };
+                if (goBeforeTag != empty) ::<= {
+                    canvas.popState();
+                    choiceStack->pop;                            
+                };
                 canvas.commit();                
+                choiceStack[choiceStack->keycount-1].rendered = empty;
+                this.commitInput();
             },
        
             
@@ -787,7 +777,6 @@ return class(
                         renderable:renderable,
                         onNext : onNext
                     });
-                    canvas.pushState();      
                 }]);
             },            
             cursorMove ::(prompt, leftWeight, topWeight, onMove, renderable) {
@@ -801,7 +790,6 @@ return class(
                         renderable:renderable,
                     });
                     canvas.clear();
-                    canvas.pushState();      
                 }]);
             },  
             
@@ -813,9 +801,8 @@ return class(
             },
             
             forceExit ::(soft){
-                canvas.popState();
-                canvas.commit();
-                @:data = choiceStack->pop;
+                next();
+                @:data = choiceStack[choiceStack->keycount - 1];
                 if (data.onNext)
                     data.onNext();  
                 this.commitInput();    

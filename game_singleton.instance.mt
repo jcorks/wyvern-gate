@@ -158,7 +158,7 @@ return class(
                 */
                 
                 @stepCount = 0;
-              
+
                 dialogue.choices(
                     leftWeight: 1,
                     topWeight: 1,
