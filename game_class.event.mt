@@ -24,6 +24,7 @@
 @:Item = import(module:'game_class.item.mt');
 @:Entity = import(module:'game_class.entity.mt');
 @:Scene = import(module:'game_class.scene.mt');
+@:correctA = import(module:'game_function.correcta.mt');
 @:Event = class(
     statics : {
         Base : empty
@@ -418,8 +419,7 @@ Event.Base.database = Database.new(
                             @:item = Item.Base.database.getRandomFiltered(
                                 filter:::(value) <- value.isUnique == false && value.canHaveEnchants
                             ).new(rngEnchantHint:true, from:opener);
-                            @message = 'The party found a(n) ';
-                            message = message + item.name;
+                            @message = 'The party found ' + correctA(word:item.nam);
                             dialogue.message(text: message);
 
                             when(party.inventory.isFull) ::<= {

@@ -25,6 +25,7 @@
 @:Material = import(module:'game_class.material.mt');
 @:Profession = import(module:'game_class.profession.mt');
 @:Item = import(module:'game_class.item.mt');
+@:correctA = import(module:'game_function.correcta.mt');
 @:Interaction = class(
     name : 'Wyvern.Interaction',
     statics : {
@@ -374,7 +375,7 @@ Interaction.database = Database.new(
                     party.inventory.remove(item:ores[1]);
                     
                     @:metal = Item.Base.database.getRandomWeightedFiltered(filter:::(value) <- value.hasAttribute(attribute:Item.ATTRIBUTE.RAW_METAL)).new();                        
-                    dialogue.message(text: 'Smelted 2 ore chunks into a(n) ' + metal.name + '!');
+                    dialogue.message(text: 'Smelted 2 ore chunks into ' + correctA(word:metal.name) + '!');
                     party.inventory.add(item:metal);                    
                         
                 }
@@ -559,7 +560,7 @@ Interaction.database = Database.new(
                                             };
                                             
                                             
-                                            dialogue.message(text: 'Bought a(n) ' + item.name);
+                                            dialogue.message(text: 'Bought ' + correctA(word:item.name));
                                             party.inventory.add(item);                              
                                           },
                                           
@@ -987,7 +988,7 @@ Interaction.database = Database.new(
 
                     when(whom.profession.base.name == location.ownedBy.profession.base.name)
                         dialogue.message(
-                            text: whom.name + ' is already a(n) ' + location.ownedBy.profession.base.name + '.'
+                            text: whom.name + ' is already ' + correctA(word:location.ownedBy.profession.base.name) + '.'
                         );
                     
                     dialogue.message(
@@ -1017,7 +1018,7 @@ Interaction.database = Database.new(
                     whom.profession = Profession.Base.database.find(name: location.ownedBy.profession.base.name).new();
 
                     dialogue.message(
-                        text: '' + whom.name + " is now a(n) " + whom.profession.base.name + '.'
+                        text: '' + whom.name + " is now " + correctA(word:whom.profession.base.name) + '.'
 
                     );
                                                   
@@ -1240,7 +1241,7 @@ Interaction.database = Database.new(
                     };
                     
                     location.inventory.items->foreach(do:::(i, item) {
-                        dialogue.message(text:'The party found a(n) ' + item.name + '.');
+                        dialogue.message(text:'The party found ' + correctA(word:item.name) + '.');
                     });
                     
                     location.inventory.items->foreach(do:::(i, item) {
@@ -1273,7 +1274,7 @@ Interaction.database = Database.new(
                     };
                     
                     location.inventory.items->foreach(do:::(i, item) {
-                        dialogue.message(text:'The party found a(n) ' + item.name + '.');
+                        dialogue.message(text:'The party found ' + correctA(word:item.name) + '.');
                     });
                     
                     location.inventory.items->foreach(do:::(i, item) {
@@ -1396,7 +1397,7 @@ Interaction.database = Database.new(
 
                     item = item.new(from:location.ownedBy);                    
                     world.party.inventory.add(item);
-                    dialogue.message(speaker:'', text:'The party received a(n) ' + item.name + '!');
+                    dialogue.message(speaker:'', text:'The party received ' + correctA(word:item.name) + '!');
                     
                     
                     

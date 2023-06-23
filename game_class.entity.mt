@@ -33,6 +33,7 @@
 @:random = import(module:'game_singleton.random.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:EntityQuality = import(module:'game_class.entityquality.mt');
+@:correctA = import(module:'game_function.correcta.mt');
 
 // returns EXP recommended for next level
 @:levelUp ::(level, stats => StatSet.type, growthPotential => StatSet.type, whichStat) {
@@ -1093,7 +1094,7 @@
                 });
 
             
-                @out = this.name + ' is a(n) ' + species.name + '. ';
+                @out = this.name + ' is ' + correctA(word:species.name) + '. ';
                 @:quals = [...qualities];
 
                 // inefficient, but idc                

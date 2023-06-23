@@ -257,6 +257,7 @@ return class(
             };
                 
             when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
+                data.keep = empty;
                 return true;
             };
             
@@ -286,8 +287,13 @@ return class(
             if (  choice == CURSOR_ACTIONS.UP||
                   choice == CURSOR_ACTIONS.DOWN ||
                   choice == CURSOR_ACTIONS.LEFT ||
-                  choice == CURSOR_ACTIONS.RIGHT) ::<= {
-                onChoice(choice);
+                  choice == CURSOR_ACTIONS.RIGHT ||
+                  data.rendered == empty) ::<= {
+                if (choice != empty) ::<= {
+                    onChoice(choice);
+                    this.resolveNext();
+                };
+                    
                 renderThis(data, selfRender::{
                     renderText(
                         lines: ['[Cancel to return]'],
@@ -323,9 +329,12 @@ return class(
         
             @:choices = if (data.onGetChoices) data.onGetChoices() else data.choices;
             // no choices
-            when(choices == empty || choices->keycount == 0) ::<= {
-                next();
-            };
+            when(choices == empty || choices->keycount == 0) true;
+            
+            
+            
+            
+            
             @:prompt = data.prompt;
             @:itemsPerColumn = data.itemsPerColumn;
             @:leftWeight = data.leftWeight;

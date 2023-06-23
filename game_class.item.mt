@@ -26,6 +26,7 @@
 @:random = import(module:'game_singleton.random.mt');
 @:dialogue = import(module:'game_singleton.dialogue.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
+@:correctA = import(module:'game_function.correcta.mt');
 /*
     Items. 
     
@@ -380,7 +381,7 @@
                     dialogue.message(
                         speaker:by.name,
                         pageAfter:canvas.height-4,
-                        text:'Oh! This weapon type really works for me as a(n) ' + by.profession.base.name + '.'
+                        text:'Oh! This weapon type really works for me as ' + correctA(word:by.profession.base.name) + '.'
                     );  
                 };
 
@@ -1830,7 +1831,7 @@ Item.Base.database = Database.new(items: [
     
     Item.Base.new(data : {
         name : "Chainmail",
-        description: 'Mail made of linked chains. It bears a(n) $color$ emblem.',
+        description: 'Mail made of linked chains. It bears an emblem colored $color$.',
         examine : 'Common type of light armor',
         equipType: TYPE.ARMOR,
         rarity : 350,

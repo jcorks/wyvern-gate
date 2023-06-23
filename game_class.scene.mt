@@ -21,6 +21,7 @@
 @:dialogue = import(module:'game_singleton.dialogue.mt');
 @:Damage = import(module:'game_class.damage.mt');
 @:Item = import(module:'game_class.item.mt');
+@:correctA = import(module:'game_function.correcta.mt');
 @:Scene = class(
     name : 'Wyvern.Scene',
     statics : {
@@ -246,7 +247,7 @@ Scene.database = Database.new(
                                         item.addModifier(name:'Burning');
 
 
-                                        dialogue.message(text:'In exchange, the party was given a(n) ' + item.name + '.');
+                                        dialogue.message(text:'In exchange, the party was given ' + correctA(word:item.name) + '.');
                                         world.party.inventory.add(item);
                                         
                                         dialogue.message(speaker:'Kaedjaal', text:'Would you like to trade once more?');

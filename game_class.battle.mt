@@ -22,7 +22,7 @@
 @:battlemenu = import(module:'game_function.battlemenu.mt');
 @:Random = import(module:'game_singleton.random.mt');
 @:Party = import(module:'game_class.party.mt');
-
+@:correctA = import(module:'game_function.correcta.mt');
 
 @: RESULTS = {
     ALLIES_WIN: 0,
@@ -464,8 +464,7 @@
                                 dialogue.message(text: 'It looks like they dropped some items during the fight...');
                                 @message = 'The party found:\n\n';
                                 loot->foreach(do:::(index, item) {
-                                    @message = 'The party found a(n) ';
-                                    message = message + item.name;
+                                    @message = 'The party found ' + correctA(word:item.name);
                                     dialogue.message(text: message);
                                     party.inventory.add(item);
                                 });
