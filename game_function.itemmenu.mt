@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:Random = import(module:'game_singleton.random.mt');
 @:BattleAction = import(module:'game_struct.battleaction.mt');
@@ -23,7 +23,6 @@
 @:pickItem = import(module:'game_function.pickitem.mt');
 
 
-@nextAction;
 
 return ::(
     user,
@@ -32,10 +31,16 @@ return ::(
     onAct => Function
 ) {
     @:Item = import(module:'game_class.item.mt');
+    
+    @:commitAction ::(action) {
+        onAct(action);    
+        windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
+    };
+    
 
     pickItem(inventory:party.inventory, canCancel:true, onPick::(item) {
         when(item == empty) empty;
-        dialogue.choices(
+        windowEvent.choices(
             leftWeight: 1,
             topWeight: 1,
             prompt: '[' + item.name + ']',
@@ -47,9 +52,6 @@ return ::(
                 'Check',
                 'Compare'
             ],
-            onNext::{
-                onAct(action:nextAction);         
-            },
             onChoice::(choice) {
                 when (choice == 0) empty;              
                 
@@ -73,26 +75,22 @@ return ::(
                         });
                       
                       
-                        choice = dialogue.choices(
+                        choice = windowEvent.choices(
                           leftWeight: 1,
                           topWeight: 1,
                           prompt: 'On whom?',
                           choices: allNames,
                           canCancel: true,
                           keep: true,
-                          onNext ::{
-                            dialogue.forceExit();
-                          },
                           onChoice ::(choice) {
                             when(choice == 0) empty;                      
 
-                            nextAction = BattleAction.new(state:{
+                            commitAction(action:BattleAction.new(state:{
                                     ability: Ability.database.find(name:'Use Item'),
                                     targets: [all[choice-1]],
                                     extraData : [item]
                                 }) 
-                            ;                            
-                            dialogue.forceExit();
+                            );                            
                           }
                         );
                         
@@ -100,7 +98,7 @@ return ::(
                       },
                       
                       (Item.USE_TARGET_HINT.GROUP): ::<={
-                        choice = dialogue.choices(
+                        choice = windowEvent.choices(
                           leftWeight: 1,
                           topWeight: 1,
                           prompt: 'On whom?',
@@ -110,33 +108,28 @@ return ::(
                           ],
                           canCancel: true,
                           keep : true,
-                          onNext ::{
-                            dialogue.forceExit();                          
-                          },
                           onChoice ::(choice) {
                        
                             when(choice == 0) empty;                      
                             
-                            nextAction =BattleAction.new(state:{
+                            commitAction(action:BattleAction.new(state:{
                                     ability: Ability.database.find(name:'Use Item'),
                                     targets: if (choice == 1) party.members else enemies,
                                     extraData : [item]
                                 }) 
-                            ;                  
-                            dialogue.forceExit();
+                            );                  
                           
                           }
                         );
                       },
 
                       (Item.USE_TARGET_HINT.ALL): ::<= {
-                        nextAction = BattleAction.new(state:{
+                        commitAction(action:BattleAction.new(state:{
                                 ability: Ability.database.find(name:'Use Item'),
                                 targets: [...party.members, ...enemies],
                                 extraData : [item]
                             }) 
-                        ;                  
-                        dialogue.forceExit();
+                        );                  
                       
                       }
 
@@ -147,12 +140,11 @@ return ::(
                   },
                   // item equip
                   (1)::<={
-                    nextAction = BattleAction.new(state:{
+                    commitAction(action:BattleAction.new(state:{
                         ability: Ability.database.find(name:'Equip Item'),
                         targets: [user],
                         extraData : [item, party.inventory]
-                    });           
-                    dialogue.forceExit();
+                    }));           
 
 
                   },

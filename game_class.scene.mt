@@ -18,7 +18,7 @@
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Damage = import(module:'game_class.damage.mt');
 @:Item = import(module:'game_class.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
@@ -49,9 +49,10 @@
                       (Function):
                         action(location, landmark, doNext),
                       
-                      (Object): 
-                        dialogue.message(speaker: action[0], text: action[1], onNext:doNext),
-                        
+                      (Object): ::<= {
+                        windowEvent.message(speaker: action[0], text: action[1]);
+                        windowEvent.noDisplay(onStart:doNext);
+                      },
                       default:
                         error(detail:'Scene scripts only accept arrays or functions')
                     };
@@ -102,11 +103,11 @@ Scene.database = Database.new(
                         @:end = ::(result){
 
                             when(result == Battle.RESULTS.ENEMIES_WIN) ::<= {
-                                dialogue.message(
+                                windowEvent.message(
                                     speaker:'Kaedjaal',
                                     text:'Perhaps it was not meant to be...',
                                     onNext ::{                                    
-                                        dialogue.jumpToTag(name:'MainMenu');
+                                        windowEvent.jumpToTag(name:'MainMenu');
                                     }
                                 );
                             };
@@ -160,23 +161,23 @@ Scene.database = Database.new(
                         };
                         // you can technically throw it out or Literally Throw It.
                         when(key == empty) ::<= {
-                            dialogue.message(
+                            windowEvent.message(
                                 speaker: 'Kaedjaal',
                                                 //(Friend   of   Me)  My friend...
                                 text: '... Oh. Uh. Rrohziil shaa jiin, I do not know how you have done this, but you seem to have misplaced your key to my domain.'
                             );
-                            dialogue.message(
+                            windowEvent.message(
                                 speaker: 'Kaedjaal',
                                 text: 'Well, here: I have a spare.'
                             );
                             
                             @:item = Item.Base.database.find(name:'Wyvern Key of Fire'
                                         ).new(from:location.ownedBy);
-                            dialogue.message(text:'The party was given a ' + item.name + '.');
+                            windowEvent.message(text:'The party was given a ' + item.name + '.');
                             world.party.inventory.add(item);
                             key = item;
 
-                            dialogue.message(
+                            windowEvent.message(
                                 speaker: 'Kaedjaal',
                                 text: 'Rrohziil, Please keep it safe. It breaks my heart to give these away to Chosen who already should have one...'
                             );
@@ -203,16 +204,16 @@ Scene.database = Database.new(
                     ['Kaedjaal', 'If you give me 3 items, I will give you 1 item from my hoard.'],
                     ::(location, landmark, doNext) {
                         @:world = import(module:'game_singleton.world.mt');
-                        dialogue.askBoolean(
+                        windowEvent.askBoolean(
                             prompt:'Trade?',
                             onChoice::(which) {
                                 when(which == false) ::<= {
-                                    dialogue.message(speaker:'Kaedjaal', text:'Ah I see. That is understandable. I will still be here if you change your mind.');
+                                    windowEvent.message(speaker:'Kaedjaal', text:'Ah I see. That is understandable. I will still be here if you change your mind.');
                                 };
 
 
                                 when(world.party.inventory.items->keycount < 3) ::<= {
-                                    dialogue.message(speaker:'Kaedjaal', text:'Djiiroshuhzolii, Chosen. You have not enough items to complete a trade.', onNext:doNext);
+                                    windowEvent.message(speaker:'Kaedjaal', text:'Djiiroshuhzolii, Chosen. You have not enough items to complete a trade.', onNext:doNext);
                                 };
 
                                 
@@ -226,12 +227,12 @@ Scene.database = Database.new(
                                             world.party.inventory.add(item);
                                         });
                                         // cancelled by user
-                                        dialogue.message(speaker:'Kaedjaal', text:'Having second thoughts? No matter. I will still be here if you change your mind.', onNext:doNext);    
+                                        windowEvent.message(speaker:'Kaedjaal', text:'Having second thoughts? No matter. I will still be here if you change your mind.', onNext:doNext);    
                                                         
                                     };
                                     if (item != empty) ::<= {
                                         if (item.name == 'Wyvern Key of Fire') ::<= {
-                                            dialogue.message(speaker:'Kaedjaal', text:'Rrohziil, you... cannot trade me with the Key of Fire. You need that to leave here.');
+                                            windowEvent.message(speaker:'Kaedjaal', text:'Rrohziil, you... cannot trade me with the Key of Fire. You need that to leave here.');
                                         } else ::<= {
                                             items->push(value:item);
                                             world.party.inventory.remove(item);                                    
@@ -239,7 +240,7 @@ Scene.database = Database.new(
                                     };
                                     
                                     when(items->keycount == 3) ::<= {
-                                        dialogue.message(speaker:'Kaedjaal', text:'Excellent. Let me, in exchange, give you this.');   
+                                        windowEvent.message(speaker:'Kaedjaal', text:'Excellent. Let me, in exchange, give you this.');   
                                         @:item = Item.Base.database.getRandomFiltered(
                                             filter:::(value) <- value.isUnique == false && value.canHaveEnchants
                                         ).new(rngModHint:true, from:location.landmark.island.newInhabitant(), colorHint:'Red');
@@ -247,11 +248,11 @@ Scene.database = Database.new(
                                         item.addModifier(name:'Burning');
 
 
-                                        dialogue.message(text:'In exchange, the party was given ' + correctA(word:item.name) + '.');
+                                        windowEvent.message(text:'In exchange, the party was given ' + correctA(word:item.name) + '.');
                                         world.party.inventory.add(item);
                                         
-                                        dialogue.message(speaker:'Kaedjaal', text:'Would you like to trade once more?');
-                                        dialogue.askBoolean(
+                                        windowEvent.message(speaker:'Kaedjaal', text:'Would you like to trade once more?');
+                                        windowEvent.askBoolean(
                                             prompt:'Trade again?',
                                             onChoice::(which) {
                                                 when(which) ::<= {
@@ -279,7 +280,7 @@ Scene.database = Database.new(
                                                     (2): 'third'
                                                 }) + ' item.',
                                         onPick:::(item){
-                                            dialogue.forceExit();
+                                            windowEvent.forceExit();
                                             chooseItem(item);
                                         }
                                     );

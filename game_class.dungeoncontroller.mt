@@ -28,7 +28,7 @@ return class(
         };
     
         @:addEntity ::{
-            @:dialogue = import(module:'game_singleton.dialogue.mt');
+            @:windowEvent = import(module:'game_singleton.windowevent.mt');
 
             @ar = map_.getRandomArea();;
             @:tileX = ar.x + (ar.width /2)->floor;
@@ -64,7 +64,7 @@ return class(
             entities->push(value:ent);
             map_.setItem(data:ent, x:tileX, y:tileY, discovered:true, symbol:'*');
             if (entities->keycount == 1)
-                dialogue.message(
+                windowEvent.message(
                     text:random.pickArrayItem(list:[
                         'Are those foosteps? Be careful.',
                         'Hmm. Footsteps nearby.',
@@ -114,8 +114,8 @@ return class(
                                   },
                                   
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                                    @:dialogue = import(module:'game_singleton.dialogue.mt');
-                                    dialogue.message(text:'Perhaps these Chosen were not ready...',
+                                    @:windowEvent = import(module:'game_singleton.windowevent.mt');
+                                    windowEvent.message(text:'Perhaps these Chosen were not ready...',
                                         renderable : {
                                             render :: {
                                                 @:canvas = import(module:'game_singleton.canvas');
@@ -124,7 +124,7 @@ return class(
                                             }
                                         },
                                         onNext ::{
-                                            dialogue.jumpToTag(name:'MainMenu');                                        
+                                            windowEvent.jumpToTag(name:'MainMenu');                                        
                                         }
                                     );
                                   }

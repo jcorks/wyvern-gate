@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:class = import(module:'Matte.Core.Class');
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 
 
 
@@ -195,7 +195,7 @@ return class(
             },
             
             printDiff ::(other, prompt) {
-                dialogue.displayColumns(
+                windowEvent.displayColumns(
                     prompt,
                     pageAfter: 10,
                     columns: [
@@ -260,7 +260,7 @@ return class(
             },
             
             printDiffRate ::(other, prompt) {
-                dialogue.displayColumns(
+                windowEvent.displayColumns(
                     prompt,
                     pageAfter: 10,
                     columns: [

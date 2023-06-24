@@ -22,7 +22,7 @@
 @:Item = import(module:'game_class.item.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
 @:Scene = import(module:'game_class.scene.mt');
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 
 @:Location = class(
     statics : {

@@ -17,7 +17,7 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Entity = import(module:'game_class.entity.mt');
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
 
 return class(
@@ -58,7 +58,7 @@ return class(
                     members->foreach(do:::(index, m) {
                         if (m == member)::<={
                             members->remove(key:index);
-                            dialogue.message(text:m.name + ' has been removed from the party.');
+                            windowEvent.message(text:m.name + ' has been removed from the party.');
                             send();
                         };                        
                     });

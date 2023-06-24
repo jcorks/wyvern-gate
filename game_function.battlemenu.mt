@@ -15,14 +15,13 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:Random = import(module:'game_singleton.random.mt');
 @:BattleAction = import(module:'game_struct.battleaction.mt');
 @:Ability = import(module:'game_class.ability.mt');
 @:itemmenu = import(module:'game_function.itemmenu.mt');
 
-@nextAction;
 
 return ::(
     party,
@@ -32,8 +31,13 @@ return ::(
     allies,
     enemies             
 ) {
+    @:commitAction ::(action) {
+        battle.entityCommitAction(action:action);    
+        windowEvent.jumpToTag(name:'BattleMenu', goBeforeTag:true, doResolveNext:true);
+    };
 
-    dialogue.choiceColumns(
+
+    windowEvent.choiceColumns(
         leftWeight: 1,
         topWeight: 1,
         choices : [
@@ -43,14 +47,12 @@ return ::(
             'Wait',
             'Item'
         ],
+        jumpTag: 'BattleMenu',
         keep: true,
         itemsPerColumn: 3,
         renderable: battle,
         prompt: 'What will ' + user.name + ' do?',
         canCancel: false,
-        onNext::{
-            dialogue.queueResolve(callbacks:[::{battle.entityCommitAction(action:nextAction);}]);
-        },
         onChoice::(choice) {
             
             match(choice-1) {
@@ -69,16 +71,13 @@ return ::(
                     );
                 });
                 
-                dialogue.choices(
+                windowEvent.choices(
                     leftWeight: 1,
                     topWeight: 1,
                     prompt:'What ability should ' + user.name + ' use?',
                     choices: abilities,
                     canCancel: true,
                     keep: true,
-                    onNext :: {
-                        dialogue.forceExit();
-                    },
                     onChoice::(choice) {
                         when(choice == 0) empty;
                         
@@ -103,20 +102,17 @@ return ::(
                             });
                           
                           
-                            dialogue.choices(
+                            windowEvent.choices(
                               leftWeight: 1,
                               topWeight: 1,
                               prompt: 'Against whom?',
                               choices: allNames,
                               canCancel: true,
                               keep: true,
-                              onNext :: {
-                                  dialogue.forceExit();
-                              },
                               onChoice::(choice) {
                                 when(choice == 0) empty;
                                 
-                                nextAction = 
+                                commitAction(action:
                                     BattleAction.new(
                                         state : {
                                             ability: ability,
@@ -124,15 +120,14 @@ return ::(
                                             extraData: {}
                                         }
                                     )
-                                ;
-                                dialogue.forceExit();                    
+                                );
                               
                               }
                             );
                             
                           },
                           (Ability.TARGET_MODE.ALLALLY): ::<={
-                            nextAction = 
+                            commitAction(action:
                                 BattleAction.new(
                                     state : {
                                         ability: ability,
@@ -140,11 +135,10 @@ return ::(
                                         extraData: {}
                                     }
                                 )
-                            ;
-                            dialogue.forceExit();                            
+                            );                          
                           },
                           (Ability.TARGET_MODE.ALLENEMY): ::<={
-                            nextAction =
+                            commitAction(action:
                                 BattleAction.new(
                                     state : {
                                         ability: ability,
@@ -152,12 +146,11 @@ return ::(
                                         extraData: {}                                
                                     }
                                 )
-                            ;
-                            dialogue.forceExit();                            
+                            );
                           },
 
                           (Ability.TARGET_MODE.NONE): ::<={
-                            nextAction =
+                            commitAction(action:
                                 BattleAction.new(
                                     state : {
                                         ability: ability,
@@ -165,8 +158,7 @@ return ::(
                                         extraData: {}                                
                                     }
                                 )
-                            ;
-                            dialogue.forceExit();                            
+                            );
                           },
 
                           (Ability.TARGET_MODE.RANDOM): ::<={
@@ -178,7 +170,7 @@ return ::(
                                 all->push(value:enemy);
                             });
                 
-                            nextAction = 
+                            commitAction(action:
                                 BattleAction.new(
                                     state : {
                                         ability: ability,
@@ -186,8 +178,7 @@ return ::(
                                         extraData: {}                                
                                     }
                                 )
-                            ;
-                            dialogue.forceExit();                            
+                            );
                           }
                           
                           
@@ -198,19 +189,17 @@ return ::(
               },
               
               (1): ::<={ // Info
-                dialogue.choices(
+                windowEvent.choices(
                   topWeight: 1,
                   prompt: 'Check which?', 
                   leftWeight: 1,
-
+                  keep: true,
+                  canCancel: true,
                   choices : [
                     'Abilities',
                     'Allies',
                     'Enemies'
                   ],
-                  onNext ::{                  
-                    dialogue.forceExit();                            
-                  },
                   onChoice::(choice) {
                     when(choice == 0) empty;
 
@@ -218,18 +207,19 @@ return ::(
                       (0): ::<={ // abilities
                         @:names = [...user.abilitiesAvailable]->map(to:::(value){return value.name;});
                         
-                        dialogue.choices(
+                        windowEvent.choices(
                           leftWeight: 1,
                           topWeight: 1,
                           prompt: 'Check which ability?',
                           choices: names,
+                          keep: true,
                           canCancel: true,
                           onChoice::(choice) {
                             when(choice == 0) empty;
                                 
                             @:ability = user.abilitiesAvailable[choice-1];
 
-                            dialogue.message(
+                            windowEvent.message(
                                 speaker: 'Ability: ' + ability.name,
                                 text:ability.description
                             );                          
@@ -240,15 +230,13 @@ return ::(
                       (1): ::<={ // allies
                         @:names = [...allies]->map(to:::(value){return value.name;});
                         
-                        choice = dialogue.choices(
+                        choice = windowEvent.choices(
                             topWeight: 1,
                             leftWeight: 1,
                             prompt:'Check which ally?',
                             choices: names,
+                            keep: true,
                             canCancel: true,
-                            onNext::{
-                                dialogue.forceExit();                                                        
-                            },
                             onChoice::(choice) {
                                 when (choice == 0) empty;
 
@@ -259,8 +247,7 @@ return ::(
                       }
                     
                     };                  
-                  },
-                  canCancel : true
+                  }
                 );
                 
 
@@ -268,7 +255,7 @@ return ::(
               
               // run 
               (2): ::<= {
-                nextAction = 
+                commitAction(action:
                     BattleAction.new(
                         state : {
                             ability: Ability.database.find(name:'Run'),
@@ -276,14 +263,13 @@ return ::(
                             extraData: {}
                         }
                     )                
-                ;
-                dialogue.forceExit();                                                        
+                );
                 
               },
               
               // wait
               (3): ::<={
-                nextAction = 
+                commitAction(action:
                     BattleAction.new(
                         state : {
                             ability: Ability.database.find(name:'Wait'),
@@ -291,16 +277,13 @@ return ::(
                             extraData: {}
                         }
                     )                
-                ;
-                dialogue.forceExit();                                                        
+                );
               },
               
               // Item
               (4): ::<= {
                 itemmenu(user, party, enemies, onAct::(action){
-                    nextAction = action;
-                    dialogue.forceExit();                                                        
-                    dialogue.forceExit();                                                        
+                    commitAction(action);
                 });
               }
             };          

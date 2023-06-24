@@ -21,7 +21,7 @@
 @:Species = import(module:'game_class.species.mt');
 @:Entity = import(module:'game_class.entity.mt');
 @:Landmark = import(module:'game_class.landmark.mt');
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:LargeMap = import(module:'game_class.largemap.mt');
 @:Party = import(module:'game_class.party.mt');

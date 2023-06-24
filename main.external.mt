@@ -71,7 +71,7 @@
 @:external_getInput      = getExternalFunction(name:'external_getInput');
 
 
-@:dialogue = import(module:'singleton.dialogue.mt');
+@:windowEvent = import(module:'singleton.windowevent.mt');
 
 
 
@@ -113,7 +113,7 @@ instance.mainMenu(
 // user code calls the returned function every frame
 return ::{
     @val = external_getInput();
-    dialogue.commitInput(input:val);
+    windowEvent.commitInput(input:val);
     
     if (canvasChanged) ::<= {
         @:lines = currentCanvas;

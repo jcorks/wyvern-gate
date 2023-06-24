@@ -15,13 +15,13 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
 
 
 
 return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt) {
-    dialogue.choices(
+    windowEvent.choices(
         leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
         topWeight:  if (topWeight == empty)  1 else topWeight => Number,
         prompt: if (prompt == empty) 'Choose an item:' else prompt => String,
@@ -29,7 +29,7 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
         onGetChoices ::{
             @:names = [...inventory.items]->map(to:::(value) {return value.name;});
             when(names->keycount == 0) ::<={
-                dialogue.message(text: "The inventory is empty.");
+                windowEvent.message(text: "The inventory is empty.");
             };
             return names;
         },

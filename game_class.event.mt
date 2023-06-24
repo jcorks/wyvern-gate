@@ -17,7 +17,7 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:Battle = import(module:'game_class.battle.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
@@ -151,7 +151,7 @@ Event.Base.database = Database.new(
                     @:world = import(module:'game_singleton.world.mt');
                     match(world.season) {
 
-                        (world.SEASON.WINTER): dialogue.message(
+                        (world.SEASON.WINTER): windowEvent.message(
                             text: random.pickArrayItem(list:[
                                 'It starts to snow softly.',
                                 'A thick snow obscures your vision.',
@@ -159,7 +159,7 @@ Event.Base.database = Database.new(
                             ])
                         ),
 
-                        default: dialogue.message(
+                        default: windowEvent.message(
                             text: random.pickArrayItem(list:[
                                 'It starts to rain gently.',
                                 'It starts to storm intensely.',
@@ -180,7 +180,7 @@ Event.Base.database = Database.new(
                 
                 onEventEnd ::(event) {
                     when(event.duration == 0) empty;
-                    dialogue.message(
+                    windowEvent.message(
                         text: random.pickArrayItem(list:[
                             'The weather subsides.',
                         ])
@@ -198,8 +198,8 @@ Event.Base.database = Database.new(
                     @:Species = import(module:'game_class.species.mt');
                     @:Profession = import(module:'game_class.profession.mt');
 
-                    dialogue.message(speaker: '???', text:'The gates of wyverns are only for use by the chosen.');
-                    dialogue.message(speaker: '???', text:'You shall be judged.');
+                    windowEvent.message(speaker: '???', text:'The gates of wyverns are only for use by the chosen.');
+                    windowEvent.message(speaker: '???', text:'You shall be judged.');
                     
                     @chance = Number.random(); 
                     @:island = event.island;   
@@ -261,9 +261,9 @@ Event.Base.database = Database.new(
                                 match(result) {
                                   (Battle.RESULTS.ALLIES_WIN): ::<= {
                                     canvas.clear();
-                                    dialogue.message(speaker: '???', text:'You are worthy of this key\'s use.');                              
-                                    dialogue.message(text:'The world around you warps until you are brought to your feet on a new land.');                              
-                                    dialogue.message(text:'Something falls to your feet.');                              
+                                    windowEvent.message(speaker: '???', text:'You are worthy of this key\'s use.');                              
+                                    windowEvent.message(text:'The world around you warps until you are brought to your feet on a new land.');                              
+                                    windowEvent.message(text:'Something falls to your feet.');                              
                                     
                                     /*
                                     @message = 'The party was given a Tablet.';
@@ -276,9 +276,9 @@ Event.Base.database = Database.new(
                                         base: Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique)
                                     );
                                     
-                                    dialogue.message(text: message);
+                                    windowEvent.message(text: message);
                                     when(world.party.inventory.isFull) ::<= {
-                                        dialogue.message(text: '...but the party\'s inventory was full.');
+                                        windowEvent.message(text: '...but the party\'s inventory was full.');
                                         send();
                                     };
                                     
@@ -288,12 +288,12 @@ Event.Base.database = Database.new(
                                   },
                                   
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                                    dialogue.jumpToTag(name:'MainMenu');
+                                    windowEvent.jumpToTag(name:'MainMenu');
                                   },
                                   
                                   
                                   (Battle.RESULTS.NOONE_WIN): ::<= {
-                                    dialogue.message(speaker: '???', text:'Judgement shall be brought forth.');                              
+                                    windowEvent.message(speaker: '???', text:'Judgement shall be brought forth.');                              
                                     battleStart();
                                   }         
                                 };                      
@@ -352,20 +352,20 @@ Event.Base.database = Database.new(
                             onEnd ::(result) {
                                 match(result) {
                                   (Battle.RESULTS.ALLIES_WIN): ::<= {
-                                    dialogue.message(text: 'It looks like they dropped some items during the fight...');
+                                    windowEvent.message(text: 'It looks like they dropped some items during the fight...');
                                     @:item = Item.Base.database.find(name:'Skill Crystal').new(from:boss);
                                     @message = 'The party found a Skill Crystal!';
                                     party.inventory.add(item);
-                                    dialogue.message(text: message);
+                                    windowEvent.message(text: message);
                                   },
                                   
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                                    dialogue.jumpToTag(name:'MainMenu');
+                                    windowEvent.jumpToTag(name:'MainMenu');
                                   },
                                   
                                   
                                   (Battle.RESULTS.NOONE_WIN): ::<= {
-                                    dialogue.message(text:'The ' + boss.name + ' corners you!');                              
+                                    windowEvent.message(text:'The ' + boss.name + ' corners you!');                              
                                     battleStart();
                                   }
                                 };
@@ -392,13 +392,13 @@ Event.Base.database = Database.new(
                 onEventStart ::(event) {
                     @:openChest = ::(opener){
 
-                        dialogue.message(text:'The party opens the chest...'); 
+                        windowEvent.message(text:'The party opens the chest...'); 
                         @:Damage = import(module:'game_class.damage.mt');
                         
                         when(Number.random() < 0.5) ::<= {
-                            dialogue.message(text:'A trap is triggered, and a volley of arrows springs form the chest!'); 
+                            windowEvent.message(text:'A trap is triggered, and a volley of arrows springs form the chest!'); 
                             if (Number.random() < 0.5) ::<= {
-                                dialogue.message(text:opener.name + ' narrowly dodges the trap.');                         
+                                windowEvent.message(text:opener.name + ' narrowly dodges the trap.');                         
                             } else ::<= {
                                 opener.damage(
                                     from: opener,
@@ -414,16 +414,16 @@ Event.Base.database = Database.new(
                         
                         @:itemCount = (2+Number.random()*3)->floor;
                         
-                        dialogue.message(text:'The chest contained ' + itemCount + ' items!'); 
+                        windowEvent.message(text:'The chest contained ' + itemCount + ' items!'); 
                         [0, itemCount]->for(do:::(index) {
                             @:item = Item.Base.database.getRandomFiltered(
                                 filter:::(value) <- value.isUnique == false && value.canHaveEnchants
                             ).new(rngEnchantHint:true, from:opener);
                             @message = 'The party found ' + correctA(word:item.nam);
-                            dialogue.message(text: message);
+                            windowEvent.message(text: message);
 
                             when(party.inventory.isFull) ::<= {
-                                dialogue.message(text: '...but the party\'s inventory was full.');
+                                windowEvent.message(text: '...but the party\'s inventory was full.');
                             };
 
                             party.inventory.add(item);
@@ -435,14 +435,14 @@ Event.Base.database = Database.new(
 
                     
                     @:party = event.party;
-                    dialogue.message(text:'What\'s this?');
-                    dialogue.message(text:'The party trips over a hidden chest!');
-                    dialogue.askBoolean(
+                    windowEvent.message(text:'What\'s this?');
+                    windowEvent.message(text:'The party trips over a hidden chest!');
+                    windowEvent.askBoolean(
                         prompt: 'Open the chest?',
                         onChoice ::(which) {
                             when(which == false) empty;
                                                 
-                            dialogue.choices(
+                            windowEvent.choices(
                                 prompt: 'Who opens up the chest?',
                                 choices : [...party.members]->map(to:::(value) <- value.name),
                                 canCancel: false,
@@ -473,22 +473,22 @@ Event.Base.database = Database.new(
                 rarity: 1, //5        
                 onEventStart ::(event) {
                     @:party = event.party;
-                    dialogue.message(speaker: '???', text:'"Hey!"');
-                    dialogue.message(text:'Someone calls out to the party.');
-                    dialogue.message(text:'They are by a fire enjoying a meal.');
-                    dialogue.message(speaker: '???', text:'"Care to join me? There\'s plenty to share!"');
+                    windowEvent.message(speaker: '???', text:'"Hey!"');
+                    windowEvent.message(text:'Someone calls out to the party.');
+                    windowEvent.message(text:'They are by a fire enjoying a meal.');
+                    windowEvent.message(speaker: '???', text:'"Care to join me? There\'s plenty to share!"');
 
-                    dialogue.askBoolean(
+                    windowEvent.askBoolean(
                         prompt:'Sit by the fire?',
                         onChoice::(which) {
                             when(which == false)
-                                dialogue.message(speaker:'???', text:'"Ah, I understand. Stay safe out there!"');
+                                windowEvent.message(speaker:'???', text:'"Ah, I understand. Stay safe out there!"');
 
-                            dialogue.message(text:'The party is given some food.');
+                            windowEvent.message(text:'The party is given some food.');
 
                             @StatSet = import(module:'game_class.statset.mt');
                             if (Number.random() < 0.8) ::<= {
-                                dialogue.message(text:'The food is delicious.');
+                                windowEvent.message(text:'The food is delicious.');
                                 event.party.members->foreach(do:::(index, member) {
                                     @oldStats = StatSet.new();
                                     oldStats.state = member.stats.state;
@@ -500,7 +500,7 @@ Event.Base.database = Database.new(
                                 });
                                 
                             } else ::<= {
-                                dialogue.message(text:'The food tastes terrible. The party feels ill.');
+                                windowEvent.message(text:'The food tastes terrible. The party feels ill.');
                                 @:Damage = import(module:'game_class.damage.mt');
                                 event.party.members->foreach(do:::(index, member) {
                                     @oldStats = StatSet.new();
@@ -526,7 +526,7 @@ Event.Base.database = Database.new(
                                 party:event.party,
                                 onNext ::{
                                     if (!party.isMember(entity:nicePerson)) ::<= {
-                                        dialogue.message(text:'You thank the person and continue on your way.');  
+                                        windowEvent.message(text:'You thank the person and continue on your way.');  
                                     };
                                 }
                             );
@@ -554,25 +554,25 @@ Event.Base.database = Database.new(
                     @:party = event.party;
                     
                     if (party.members->keycount == 1) ::<= {
-                        dialogue.message(
+                        windowEvent.message(
                             speaker:party.members[0].name,
                             text:'This looks like a good place to rest...'
                         );
                     } else ::<= {
-                        dialogue.message(
+                        windowEvent.message(
                             speaker:party.members[1].name,
                             text:'"Can we take a break for a bit?"'
                         );
                     };
 
-                    dialogue.askBoolean(
+                    windowEvent.askBoolean(
                         prompt:'Rest?',
                         onChoice::(which) {
                             when(which == false)
-                                dialogue.message(speaker:'???', text:'The party continues on their way.');
+                                windowEvent.message(speaker:'???', text:'The party continues on their way.');
 
 
-                            dialogue.message(text:
+                            windowEvent.message(text:
                                 random.pickArrayItem(
                                     list:
                                     
@@ -632,7 +632,7 @@ Event.Base.database = Database.new(
                     @:party = event.party;
                     
                     @:world = import(module:'game_singleton.world.mt');
-                    dialogue.message(
+                    windowEvent.message(
                         text: 'A shadow emerges; the party is caught off-guard!'
                     );                    
                     @enemies = 

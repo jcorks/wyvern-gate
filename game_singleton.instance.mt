@@ -18,7 +18,7 @@
 @:class = import(module:'Matte.Core.Class');
 @:Entity = import(module:'game_class.entity.mt');
 @:Party = import(module:'game_class.party.mt');
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Battle = import(module:'game_class.battle.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:Landmark = import(module:'game_class.landmark.mt');
@@ -52,7 +52,7 @@ return class(
         
         
         @:aggress::(location, party) {
-            @choice = dialogue.choicesNow(
+            @choice = windowEvent.choicesNow(
                 prompt: 'Aggress how?',
                 choices: location.base.aggressiveInteractions,
                 canCancel : true
@@ -60,7 +60,7 @@ return class(
             
             when(choice == 0) empty;
             
-            when (location.landmark.peaceful && (dialogue.choicesNow(
+            when (location.landmark.peaceful && (windowEvent.choicesNow(
                 prompt: 'Are you sure?',
                 choices: ['Yes', 'No']
             ) == 2)) empty;
@@ -75,14 +75,14 @@ return class(
 
             if (location.landmark.peaceful) ::<= {
                 location.landmark.peaceful = false;
-                dialogue.message(text:'The people here are now aware of your aggression.');
+                windowEvent.message(text:'The people here are now aware of your aggression.');
             };
 
             
         };
         
         @:systemMenu :: {
-            dialogue.choices(
+            windowEvent.choices(
                 choices: [
                     'Save',
                     'Quit'
@@ -94,7 +94,7 @@ return class(
                     match(choice-1) {
                       // save 
                       (0)::<= {
-                        dialogue.choicesNow(
+                        windowEvent.choicesNow(
                             prompt:'Save which slot?',
                             choices: [
                                 'Slot 1',
@@ -107,14 +107,14 @@ return class(
                                 
                                 
                                 onSaveState(slot:choice, data:JSON.encode(object:this.state));        
-                                dialogue.message(text:'Saved successfully to slot ' + choice);
+                                windowEvent.message(text:'Saved successfully to slot ' + choice);
                             }
                         );
                         
                       },
                       // quit
                       (1)::<= {
-                        dialogue.choices(
+                        windowEvent.choices(
                             prompt:'Quit?',
                             choices: [
                                 'Yes',
@@ -122,7 +122,7 @@ return class(
                             ],
                             onChoice::(choice) {
                                 when(choice == 2) empty;
-                                dialogue.jumpToTag(name:'MainMenu');
+                                windowEvent.jumpToTag(name:'MainMenu');
                             }
                         );
                                         
@@ -159,7 +159,7 @@ return class(
                 
                 @stepCount = 0;
 
-                dialogue.choices(
+                windowEvent.choices(
                     leftWeight: 1,
                     topWeight: 1,
                     prompt: 'What next?',
@@ -199,7 +199,7 @@ return class(
                                     choices->push(value:location.name);
                                 });
                                 
-                                dialogue.choices(
+                                windowEvent.choices(
                                     leftWeight: 1,
                                     topWeight: 1,
                                     prompt: 'Walk where?',
@@ -228,7 +228,7 @@ return class(
                                         @:arrival = landmark.map.getNamedItemsUnderPointer();
                                         if (arrival != empty) ::<= {
                                             arrival->foreach(do:::(index, arr) {
-                                                dialogue.message(
+                                                windowEvent.message(
                                                     text:"The party has arrived at " + arr.name
                                                 );
                                             });
@@ -238,7 +238,7 @@ return class(
                                 
                                 
                             } else ::<= {
-                                dialogue.cursorMove(
+                                windowEvent.cursorMove(
                                     leftWeight: 1,
                                     topWeight: 1,
                                     prompt: 'Walk which way?',
@@ -248,8 +248,8 @@ return class(
                                         // move by one unit in that direction
                                         // or ON it if its within one unit.
                                         landmark.map.movePointerAdjacent(
-                                            x: if (choice == dialogue.CURSOR_ACTIONS.RIGHT) 1 else if (choice == dialogue.CURSOR_ACTIONS.LEFT) -1 else 0,
-                                            y: if (choice == dialogue.CURSOR_ACTIONS.DOWN)  1 else if (choice == dialogue.CURSOR_ACTIONS.UP)   -1 else 0
+                                            x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
+                                            y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
                                         );
                                         landmark.step();
                                         stepCount += 1;
@@ -263,7 +263,7 @@ return class(
                                         @:arrival = landmark.map.getNamedItemsUnderPointer();
                                         if (arrival != empty && arrival->keycount > 0) ::<= {
                                             arrival->foreach(do:::(index, arr) {
-                                                dialogue.message(
+                                                windowEvent.message(
                                                     text:"The party has arrived at the " + arr.name
                                                 );
                                             });
@@ -312,7 +312,7 @@ return class(
                             if (locationAt.base.aggressiveInteractions->keycount)
                                 choices->push(value: 'Aggress...');
                                 
-                            dialogue.choices(
+                            windowEvent.choices(
                                 prompt: 'Interaction',
                                 choices:choices,
                                 canCancel : true,
@@ -349,13 +349,13 @@ return class(
                 this.onSaveState = onSaveState;
                 this.onLoadState = onLoadState;
                                 
-                dialogue.message(
+                windowEvent.message(
                     text: ' Wyvern Gate ' + VERSION + ' '
                 );
-                dialogue.message(
+                windowEvent.message(
                     text: 'Note: this game is under heavy development. Depending on your platform, use either Number keys + Enter, gamepad up/down/left/right / confirm / cancel, or arrow keys / enter / backspace to navigate.\nGoodluck!'
                 );                
-                dialogue.choices(
+                windowEvent.choices(
                     choices : ['Load', 'New', 'Quit'],
                     topWeight: 0.75,
                     keep : true,
@@ -369,7 +369,7 @@ return class(
                         match(choice-1) {
                           // Load 
                           (0)::<= {
-                            @:choice = dialogue.choices(
+                            @:choice = windowEvent.choices(
                                 choices: [
                                     'Slot 1',
                                     'Slot 2',
@@ -381,7 +381,7 @@ return class(
                             @:data = onLoadState(slot:choice);
 
                             when(data == empty)
-                                dialogue.message(text:'There is no data in this slot');
+                                windowEvent.message(text:'There is no data in this slot');
                                 
                             this.state = JSON.decode(string:data);
                             this.startInstance();
@@ -402,7 +402,7 @@ return class(
                           },
                           
                           (2)::<= {
-                            dialogue.popChoice();
+                            windowEvent.popChoice();
                           }
                         };                            
                     }
@@ -468,7 +468,7 @@ return class(
                 breakpoint();
                 when(party.isIncapacitated()) ::<= {
                     canvas.clear();
-                    dialogue.message(text: 'Perhaps fate has entrusted someone else with the future...');                            
+                    windowEvent.message(text: 'Perhaps fate has entrusted someone else with the future...');                            
                     party.clear();
                     send();
                 };
@@ -509,8 +509,9 @@ return class(
                 
                 @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
                 @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
-                p0.name = 'Nido';
                 // debug
+                    party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
+                    ).new(from:island.newInhabitant(),rngEnchantHint:true));
                     
                     //party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
                     //).new(from:island.newInhabitant()));
@@ -539,20 +540,20 @@ return class(
                 
                 
                 /*
-                dialogue.message(
+                windowEvent.message(
                     text: '... As it were, today is the beginning of a new adventure.'
                 );
 
 
-                dialogue.message(
+                windowEvent.message(
                     text: '' + party.members[0].name + ' and their faithful companion ' + party.members[1].name + ' have decided to leave their long-time home of ' + island.name + '. Emboldened by countless tales of long lost eras, these 2 set out to discover the vast, mysterious, and treacherous world before them.'
                 );
 
-                dialogue.message(
+                windowEvent.message(
                     text: 'Their first task is to find a way off their island.\nDue to their distances and dangerous winds, travel between sky islands is only done via the Wyvern Gates, ancient portals of seemingly-eternal magick that connect these islands.'
                 );
                 
-                dialogue.message(
+                windowEvent.message(
                     text: party.members[0].name + ' has done the hard part and acquired a key to the Gate.\nAll thats left is to go to it and find where it leads.'
                 );
                 */
@@ -560,27 +561,28 @@ return class(
                 @:Scene = import(module:'game_class.scene.mt');
                 Scene.database.find(name:'scene_intro').act(onDone::{
                     this.visitIsland();
-                    //island.addEvent(
-                    //    event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
-                    //        island, party, landmark //, currentTime
-                    //    )
-                    //);  
+                    
+                    
+                    island.addEvent(
+                        event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
+                            island, party, landmark //, currentTime
+                        )
+                    );  
                 });
                 
           
                 
             },
             visitIsland ::(where) {
-                breakpoint();
                 if (where != empty) ::<= {
                     island = where;
                     world.island = island;
                 };
                 
                 // cancel and flush current VisitIsland session
-                if (dialogue.canJumpToTag(name:'VisitIsland')) ::<= {
-                    dialogue.jumpToTag(name:'VisitIsland');
-                    dialogue.forceExit();
+                if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
+                    windowEvent.jumpToTag(name:'VisitIsland');
+                    windowEvent.forceExit();
                 };
                 // check if we're AT a location.
                 island.map.title = "(Map of " + island.name + ')';
@@ -588,7 +590,7 @@ return class(
 
 
 
-                dialogue.choices(
+                windowEvent.choices(
                     leftWeight: 1,
                     topWeight: 1,
                     prompt: 'What next?',
@@ -620,7 +622,7 @@ return class(
                           // travel
                           (0): ::<= {
 
-                            dialogue.cursorMove(
+                            windowEvent.cursorMove(
                                 leftWeight: 1,
                                 topWeight: 1,
                                 prompt: 'Traveling...',
@@ -633,8 +635,8 @@ return class(
                                     // move by one unit in that direction
                                     // or ON it if its within one unit.
                                     island.map.movePointerFree(
-                                        x: if (choice == dialogue.CURSOR_ACTIONS.RIGHT) 4 else if (choice == dialogue.CURSOR_ACTIONS.LEFT) -4 else 0,
-                                        y: if (choice == dialogue.CURSOR_ACTIONS.DOWN)  4 else if (choice == dialogue.CURSOR_ACTIONS.UP)   -4 else 0
+                                        x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 4 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -4 else 0,
+                                        y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  4 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -4 else 0
                                     );
                                     world.stepTime(); 
                                     island.map.title = world.timeString + '                   ';
@@ -644,7 +646,7 @@ return class(
                                     @:arrival = island.map.getNamedItemsUnderPointerRadius(radius:5);
                                     if (arrival != empty) ::<= {
                                         arrival->foreach(do:::(i, arr) {
-                                            dialogue.message(
+                                            windowEvent.message(
                                                 text:"The party has arrived at the " + arr.data.name,
                                                 onNext::{
                                                     arr.data.discover();
@@ -668,7 +670,7 @@ return class(
                         
                           // check
                           (1): ::<= {
-                            choice = dialogue.choices(
+                            choice = windowEvent.choices(
                                 leftWeight: 1,
                                 topWeight: 1,
                                 prompt: 'Check which?',
@@ -678,7 +680,7 @@ return class(
                                 canCancel: true,
                                 onChoice::(choice){
                                     match(choice-1) {
-                                      (0): dialogue.message(speaker: 'About ' + island.name, text: island.description)
+                                      (0): windowEvent.message(speaker: 'About ' + island.name, text: island.description)
                                     };                                                        
                                 }
                             );
@@ -688,7 +690,7 @@ return class(
 
                           (3): ::<= {
                             island.incrementTime();
-                            dialogue.message(text:'Nothing to see but the peaceful scenery of ' + island.name + '.');                          
+                            windowEvent.message(text:'Nothing to see but the peaceful scenery of ' + island.name + '.');                          
                           },
                           // party options
                           (2): partyOptions(),

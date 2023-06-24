@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:class = import(module:'Matte.Core.Class');
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:battlemenu = import(module:'game_function.battlemenu.mt');
@@ -57,7 +57,7 @@
         @turnPoppable;
         
         @result;
-        
+        @externalRenderable;
         @battleEnd;
         
         @:checkRemove :: {
@@ -280,6 +280,8 @@
                 noLoot,
                 exp,
                 
+                renderable,
+                
                 onStart,
                 onEnd => Function
             ) {
@@ -290,7 +292,7 @@
                 turn = [];
                 turnIndex = 0;
                 active = true;
-                
+                externalRenderable = renderable;
                 
                 @:isPlayerParty = party.isMember(entity:allies[0]);
             
@@ -329,7 +331,7 @@
                 };
 
                 if (npcBattle == empty) ::<= {
-                    dialogue.message(
+                    windowEvent.message(
                         text: if (enemies->keycount == 1) 
                             "You're confronted by someone!"
                         else 
@@ -337,7 +339,7 @@
                     );    
                     
                     enemies->foreach(do:::(index, enemy) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: enemy.name + '(' + enemy.stats.HP + ' HP) blocks your path!'
                         );                    
                     });
@@ -368,7 +370,7 @@
                       (alliesWin):      RESULTS.ALLIES_WIN,
                       default:          RESULTS.ENEMIES_WIN
                     };
-                    dialogue.jumpToTag(name:'Battle', goBeforeTag:true);
+                    windowEvent.jumpToTag(name:'Battle', goBeforeTag:true);
                     
                     allies->foreach(do:::(k, v) {
                         v.battleEnd();
@@ -381,13 +383,13 @@
                     
                     when (npcBattle != empty) ::<= {
                         active = false;
-                        dialogue.message(text: 'The battle is over.');
+                        windowEvent.message(text: 'The battle is over.');
 
                         allies_ = [];
                         enemies_ = [];
                         active = false;
                         onEnd(result);                    
-                        dialogue.resolveNext();                                            
+                        windowEvent.resolveNext();                                            
                     }; 
 
 
@@ -400,7 +402,7 @@
                         exp /= allies_->keycount;
                         exp = exp->ceil;
                         if (exp == true)
-                            dialogue.message(text: 'Each party member gains ' + exp + ' EXP.');
+                            windowEvent.message(text: 'Each party member gains ' + exp + ' EXP.');
                             
                         allies_->foreach(do:::(index, ally) {
                             ally.stats.resetMod();
@@ -413,14 +415,14 @@
                                 ally.gainExp(amount:exp, chooseStat:::(
                                     hp, ap, atk, def, int, luk, dex, spd
                                 ) {
-                                    dialogue.message(text: ally.name + ' has leveled up.');
+                                    windowEvent.message(text: ally.name + ' has leveled up.');
 
 
                                     ally.stats.resetMod();
                                     stats.printDiff(other:ally.stats, prompt:ally.name + ' - (Level:  ' + level  + ' -> ' + (ally.level+1) + ': Base Stats)');                        
                                     stats = StatSet.new();
                                     stats.add(stats:ally.stats);                        
-                                    return dialogue.choicesNow(
+                                    return windowEvent.choicesNow(
                                         prompt: ally.name + ' - Focus which?',
                                         choices: [
                                             'HP  (+' + hp + ')',
@@ -461,52 +463,56 @@
                             });
                             
                             if (loot->keycount > 0) ::<= {
-                                dialogue.message(text: 'It looks like they dropped some items during the fight...');
+                                windowEvent.message(text: 'It looks like they dropped some items during the fight...');
                                 @message = 'The party found:\n\n';
                                 loot->foreach(do:::(index, item) {
                                     @message = 'The party found ' + correctA(word:item.name);
-                                    dialogue.message(text: message);
+                                    windowEvent.message(text: message);
                                     party.inventory.add(item);
                                 });
                             };
                         };
                         
-                        dialogue.message(text: 'The battle is won.',
-                            onNext ::{
-                                onEnd(result);                                             
-                                dialogue.resolveNext();                                            
-                            }
-                        );
+                        windowEvent.message(text: 'The battle is won.');
+                        windowEvent.noDisplay(onStart::{
+                            onEnd(result);                                             
+                            windowEvent.resolveNext();                                                                    
+                        });
 
                                        
 
                     } else ::<= {
                         if (party.members->all(condition:::(value) <- value.isIncapacitated())) ::<= {
-                            dialogue.message(text: 'The battle is lost.',
-                                onNext ::{
-                                    onEnd(result); 
-                                    dialogue.resolveNext();                                            
-                                }
-                            );
+                            windowEvent.message(text: 'The battle is lost.');
+                            windowEvent.noDisplay(onStart::{
+                                onEnd(result); 
+                                windowEvent.resolveNext();                                            
+                            });                       
+                            
                         };
                     };
                     allies_ = [];
                     enemies_ = [];
                     active = false;
-                    dialogue.backgroundRenderable = empty;
+                    windowEvent.backgroundRenderable = empty;
                 };
 
 
 
-                dialogue.noDisplay(
-                    renderable:this,
+                windowEvent.noDisplay(
+                    renderable :{
+                        render::{
+                            if (externalRenderable)
+                                externalRenderable.render();
+                            this.render();
+                        }
+                    },
+                    keep: true,
                     jumpTag: 'Battle',
                     onStart::{
                         if (onStart) onStart();
                         initTurn();  
                         nextTurn();
-                    },
-                    onNext::{               
                     }
                 );
 
@@ -532,19 +538,18 @@
             join ::(enemy, ally) {
                 if (enemy != empty) ::<= {
                     when (enemies_->findIndex(value:enemy) != -1) empty;
-                    dialogue.message(text:enemy.name + ' joins the fray!');
+                    windowEvent.message(text:enemy.name + ' joins the fray!');
                     enemies_->push(value:enemy);
                 };
                 if (ally != empty) ::<= {
                     when (allies_->findIndex(value:ally) != -1) empty;
-                    dialogue.message(text:ally.name + ' joins the fray!');
+                    windowEvent.message(text:ally.name + ' joins the fray!');
                     allies_->push(value:ally);
                 };
                     
             },
             
             render :: {
-                canvas.clear();
                 renderStatusBox();
                 renderTurnOrder();
             },
@@ -561,12 +566,13 @@
                     action.turnIndex = 0;
                     actions[entityTurn] = action;
                 };  
-                dialogue.queueResolveAfter(callbacks:[
-                    ::{ 
+                
+                windowEvent.noDisplay(
+                    onStart ::{
                         endTurn();
-                        nextTurn();
+                        nextTurn();                    
                     }
-                ]);
+                );
             },
             
 

@@ -20,7 +20,7 @@
 
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:instance = import(module:'game_singleton.instance.mt');
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 
 
 
@@ -86,7 +86,7 @@ canvas.onCommit = ::(lines, renderNow){
     // standard event loop
     forever(do::{
         @val = pollInput();
-        dialogue.commitInput(input:val);
+        windowEvent.commitInput(input:val);
         
         if (canvasChanged) ::<= {
             rerender();  

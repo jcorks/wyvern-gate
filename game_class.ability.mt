@@ -17,7 +17,7 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Item = import(module:'game_class.item.mt');
 @:Damage = import(module:'game_class.damage.mt');
 @:random = import(module:'game_singleton.random.mt');
@@ -83,7 +83,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' attacks ' + targets[0].name + '!'
                         );
                         
@@ -109,7 +109,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' coordinates with others!'
                         );
                         
@@ -137,7 +137,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' attacks ' + targets[0].name + ' as a follow-up!'
                         );
                         
@@ -172,7 +172,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' attacks twice!'
                         );
                         user.attack(
@@ -205,7 +205,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' attacks three times!'
                         );
                         user.attack(
@@ -258,7 +258,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(text:user.name + ' focuses their perception, increasing their ATK temporarily!');
+                        windowEvent.message(text:user.name + ' focuses their perception, increasing their ATK temporarily!');
                         user.addEffect(from:user, name: 'Focus Perception', durationTurns: 5);                        
                     }
                 }
@@ -275,7 +275,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(text:user.name + ' cheers for the party!');
+                        windowEvent.message(text:user.name + ' cheers for the party!');
                         user.allies->foreach(do:::(index, ally) {
                             ally.addEffect(from:user, name: 'Cheered', durationTurns: 5);                        
                         
@@ -304,7 +304,7 @@ Ability.database = Database.new(
                                     send();                        
                             });
                         };
-                        dialogue.message(text:user.name + '\'s Lunar Blessing made it night time!');
+                        windowEvent.message(text:user.name + '\'s Lunar Blessing made it night time!');
                         
                     }
                 }
@@ -329,7 +329,7 @@ Ability.database = Database.new(
                                     send();                        
                             });
                         };
-                        dialogue.message(text:user.name + '\'s Solar Blessing made it day time!');
+                        windowEvent.message(text:user.name + '\'s Solar Blessing made it day time!');
                         
                     }
                 }
@@ -347,12 +347,12 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' fires a glowing beam of moonlight!'
                         );      
                         @:world = import(module:'game_singleton.world.mt');
                         if (world.time >= world.TIME.EVENING) ::<= {
-                            dialogue.message(
+                            windowEvent.message(
                                 text: 'The beam shines brightly!'
                             );                                  
                         };
@@ -382,12 +382,12 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' fires a glowing beam of sunlight!'
                         );      
                         @:world = import(module:'game_singleton.world.mt');
                         if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
-                            dialogue.message(
+                            windowEvent.message(
                                 text: 'The beam shines brightly!'
                             );                                  
                         };
@@ -417,12 +417,12 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' lets loose a burst of sunlight!'
                         );      
                         @:world = import(module:'game_singleton.world.mt');
                         if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
-                            dialogue.message(
+                            windowEvent.message(
                                 text: 'The blast shines brightly!'
                             );                                  
                         };
@@ -454,13 +454,13 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Night Veil on ' + targets[0].name + '!'
                         );
                         
                         @:world = import(module:'game_singleton.world.mt');
                         if (world.time >= world.TIME.EVENING) ::<= {
-                            dialogue.message(
+                            windowEvent.message(
                                 text: targets[0].name + ' shimmers brightly!'
                             );                                  
                             targets[0].addEffect(from:user, name: 'Greater Night Veil', durationTurns: 5);
@@ -487,13 +487,13 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Dayshroud on ' + targets[0].name + '!'
                         );
                         
                         @:world = import(module:'game_singleton.world.mt');
                         if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
-                            dialogue.message(
+                            windowEvent.message(
                                 text: targets[0].name + ' shines brightly!'
                             );                                  
                             targets[0].addEffect(from:user, name: 'Greater Dayshroud', durationTurns: 5);
@@ -519,13 +519,13 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Call of the Night on ' + targets[0].name + '!'
                         );
                         
                         @:world = import(module:'game_singleton.world.mt');
                         if (world.time >= world.TIME.EVENING) ::<= {
-                            dialogue.message(
+                            windowEvent.message(
                                 text: targets[0].name + ' shimmers brightly!'
                             );                                  
                             targets[0].addEffect(from:user, name: 'Greater Call of the Night', durationTurns: 5);
@@ -553,19 +553,19 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Lunacy on ' + targets[0].name + '!'
                         );
                         
                         @:world = import(module:'game_singleton.world.mt');
                         if (world.time >= world.TIME.EVENING) ::<= {
-                            dialogue.message(
+                            windowEvent.message(
                                 text: targets[0].name + ' shimmers brightly!'
                             );                                  
                             targets[0].addEffect(from:user, name: 'Lunacy', durationTurns: 7);
 
                         } else 
-                            dialogue.message(text:'....But nothing happens!');
+                            windowEvent.message(text:'....But nothing happens!');
                         ;
                         
                         
@@ -585,13 +585,13 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Moonsong on ' + targets[0].name + '!'
                         );
                         
                         @:world = import(module:'game_singleton.world.mt');
                         if (world.time >= world.TIME.EVENING) ::<= {
-                            dialogue.message(
+                            windowEvent.message(
                                 text: targets[0].name + ' shimmers brightly!'
                             );                                  
                             targets[0].addEffect(from:user, name: 'Greater Moonsong', durationTurns: 8);
@@ -617,13 +617,13 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Sol Attunement on ' + targets[0].name + '!'
                         );
                         
                         @:world = import(module:'game_singleton.world.mt');
                         if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
-                            dialogue.message(
+                            windowEvent.message(
                                 text: targets[0].name + ' shines brightly!'
                             );                                  
                             targets[0].addEffect(from:user, name: 'Greater Sol Attunement', durationTurns: 8);
@@ -649,7 +649,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' tries to sweep everyone\'s legs!'
                         );
                         user.enemies->foreach(do:::(i, enemy) {
@@ -679,7 +679,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' does a big swing!'
                         );      
                         targets->foreach(do:::(index, target) {
@@ -707,7 +707,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' bashes ' + targets[0].name + '!'
                         );
                         user.attack(
@@ -736,7 +736,7 @@ Ability.database = Database.new(
                         
                         @:item = pickItem(inventory:world.party.inventory, canCancel:false);
                     
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' throws a ' + item.name + ' at ' + targets[0].name + '!'
                         );
                         
@@ -764,7 +764,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' tries to stun ' + targets[0].name + '!'
                         );
                         user.attack(
@@ -792,7 +792,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' reads ' + targets[0].name + '\'s mind!'
                         );
                         
@@ -811,7 +811,7 @@ Ability.database = Database.new(
                             );
                         };
                         
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' couldn\'t find any offensive abilities to use!'
                         );                        
                         
@@ -829,7 +829,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Flight on ' + targets[0].name + '!'
                         );
                         targets[0].addEffect(from:user, name: 'Flight', durationTurns: 3);
@@ -848,7 +848,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' tries to grapple ' + targets[0].name + '!'
                         );
                         
@@ -873,7 +873,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' does a swipe kick on ' + targets[0].name + '!'
                         );
                         user.attack(
@@ -901,7 +901,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' attacks ' + targets[0].name + ' with a poisoned weapon!'
                         );
                         user.attack(
@@ -926,7 +926,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' attacks ' + targets[0].name + ' with a poisoned weapon!'
                         );
                         user.attack(
@@ -950,7 +950,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' activates the tripwire right under ' + targets[0].name + '!'
                         );
                         targets[0].addEffect(from:user, name: 'Stunned', durationTurns: 2);                        
@@ -970,7 +970,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' activates the tripwire explosive right under ' + targets[0].name + '!'
                         );
                         user.attack(
@@ -994,7 +994,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' attacks ' + targets[0].name + '!'
                         );
                         user.attack(
@@ -1019,7 +1019,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' does first aid on ' + targets[0].name + '!'
                         );
                         targets[0].heal(amount:((targets[0].stats.HP*0.15)->ceil));
@@ -1039,7 +1039,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' mends ' + targets[0].name + '!'
                         );
                         targets[0].heal(amount:((targets[0].stats.HP*0.10)->ceil));
@@ -1058,26 +1058,26 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' gives a snack to ' + targets[0].name + '!'
                         );
                             
                         @:chance = Number.random();
                         match(true) {
                           (chance > 0.9) ::<= {        
-                            dialogue.message(text: 'The snack tastes fruity!');
+                            windowEvent.message(text: 'The snack tastes fruity!');
                             targets[0].healAP(amount:((targets[0].stats.AP*0.15)->ceil));                          
                           },
 
                           (chance > 0.8) ::<= {        
-                            dialogue.message(text: 'The snack tastes questionable...');
+                            windowEvent.message(text: 'The snack tastes questionable...');
                             targets[0].heal(
                                 amount:(1)
                             );                          
                           },
 
                           default: ::<= {
-                            dialogue.message(text: 'The snack tastes great!');
+                            windowEvent.message(text: 'The snack tastes great!');
                             targets[0].heal(
                                 amount:((targets[0].stats.HP*0.15)->ceil) 
                             );                          
@@ -1101,7 +1101,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Fire on ' + targets[0].name + '!'
                         );
                         user.attack(
@@ -1125,7 +1125,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Flare on ' + targets[0].name + '!'
                         );
                         user.attack(
@@ -1150,7 +1150,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,	
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Dematerialize on ' + targets[0].name + '!'
                         );
                         @:Entity = import(module:'game_class.entity.mt');
@@ -1165,7 +1165,7 @@ Ability.database = Database.new(
                             return Random.pickArrayItem(list);
                         };
                         targets[0].unequipItem(item);
-                        dialogue.message(
+                        windowEvent.message(
                             text: targets[0].name + '\'s ' + item.name + ' gets unequipped!'
                         );
                     }
@@ -1185,7 +1185,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Ice!'
                         );
                         user.enemies->foreach(do:::(index, enemy) {
@@ -1211,7 +1211,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Frozen Flame!'
                         );
                         user.enemies->foreach(do:::(index, enemy) {
@@ -1240,7 +1240,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Telekinesis!'
                         );
                         targets[0].addEffect(from:user, name: 'Stunned', durationTurns: 2);                            
@@ -1262,7 +1262,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Explosion!'
                         );
                         user.enemies->foreach(do:::(index, enemy) {
@@ -1288,7 +1288,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Flash!'
                         );
                         user.enemies->foreach(do:::(index, enemy) {
@@ -1309,7 +1309,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Thunder!'
                         );
                         [0, 4]->for(do:::(index) {
@@ -1337,7 +1337,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' wildly swings!'
                         );
                         [0, 4]->for(do:::(index) {
@@ -1365,7 +1365,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Cure on ' + targets[0].name + '!'
                         );
                         targets[0].heal(amount:((targets[0].stats.HP*0.3)->ceil));
@@ -1386,7 +1386,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Cleanse on ' + targets[0].name + '!'
                         );
                         @:Effect = import(module:'game_class.effect.mt');
@@ -1416,7 +1416,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Magic Mist on ' + targets[0].name + '!'
                         );
                         user.resetEffects();
@@ -1437,7 +1437,7 @@ Ability.database = Database.new(
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Effect = import(module:'game_class.effect.mt');
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Antidote on ' + targets[0].name + '!'
                         );
                         targets[0].removeEffects(
@@ -1461,7 +1461,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Greater Cure on ' + targets[0].name + '!'
                         );
                         targets[0].heal(amount:((targets[0].stats.HP*0.4)->ceil));
@@ -1481,7 +1481,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Protect on ' + targets[0].name + '!'
                         );
                         targets[0].addEffect(from:user, name: 'Protect', durationTurns: 10);
@@ -1501,7 +1501,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' challenges ' + targets[0].name + ' to a duel!'
                         );
                         targets[0].addEffect(from:user, name: 'Dueled', durationTurns: 1000000);
@@ -1521,7 +1521,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Grace on ' + targets[0].name + '!'
                         );
                         targets[0].addEffect(from:user, name: 'Grace', durationTurns: 1000);
@@ -1541,7 +1541,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Pheonix Soul on ' + targets[0].name + '!'
                         );
                         @:world = import(module:'game_singleton.world.mt');
@@ -1550,7 +1550,7 @@ Ability.database = Database.new(
                         if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING)
                             targets[0].addEffect(from:user, name: 'Grace', durationTurns: 1000)
                         else 
-                            dialogue.message(text:'... but nothing happened!');
+                            windowEvent.message(text:'... but nothing happened!');
 
                     }
                 }
@@ -1567,7 +1567,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Protect All!'
                         );
                         user.allies->foreach(do:::(index, ally) {
@@ -1588,7 +1588,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' meditates!'
                         );
                         user.healAP(amount:((user.stats.AP*0.1)->ceil));
@@ -1608,7 +1608,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' casts Soothe on ' + targets[0].name + '!'
                         );
                         user.healAP(amount:((user.stats.AP*0.12)->ceil));
@@ -1631,12 +1631,12 @@ Ability.database = Database.new(
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:world = import(module:'game_singleton.world.mt');
 
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' attempted to steal from ' + targets[0].name + '!'
                         );
                         
                         when(targets[0].inventory.items->keycount == 0) 
-                            dialogue.message(text:targets[0].name + ' has no items!');
+                            windowEvent.message(text:targets[0].name + ' has no items!');
                             
                         // NICE
                         if (Number.random() > 0.31) ::<= {
@@ -1649,9 +1649,9 @@ Ability.database = Database.new(
                                 targets[0].inventory.add(item);
                             };
                             
-                            dialogue.message(text:user.name + ' stole a ' + item.name + '!');
+                            windowEvent.message(text:user.name + ' stole a ' + item.name + '!');
                         } else ::<= {
-                            dialogue.message(text:user.name + " couldn't steal!");                        
+                            windowEvent.message(text:user.name + " couldn't steal!");                        
                         };
 
                     }
@@ -1671,21 +1671,21 @@ Ability.database = Database.new(
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:world = import(module:'game_singleton.world.mt');
                         @:Entity = import(module:'game_class.entity.mt');
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' attempted to disarm ' + targets[0].name + '!'
                         );
                         
                         @:equipped = targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L); 
                         when(equipped.name == 'None') 
-                            dialogue.message(text:targets[0].name + ' has nothing in-hand!');
+                            windowEvent.message(text:targets[0].name + ' has nothing in-hand!');
                             
                         // NICE
                         if (Number.random() > 0.31) ::<= {
                             targets[0].unequip(slot:Entity.EQUIP_SLOTS.HAND_L, silent:true);
                             
-                            dialogue.message(text:targets[0].name + ' lost grip of their ' + equipped.name + '!');
+                            windowEvent.message(text:targets[0].name + ' lost grip of their ' + equipped.name + '!');
                         } else ::<= {
-                            dialogue.message(text:targets[0].name + " swiftly dodged and retaliated!");                        
+                            windowEvent.message(text:targets[0].name + " swiftly dodged and retaliated!");                        
                             targets[0].attack(
                                 target:user,
                                 amount:targets[0].stats.ATK * (0.2),
@@ -1711,7 +1711,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(
+                        windowEvent.message(
                             text: user.name + ' mugs ' + targets[0].name + '!'
                         );
                         user.attack(
@@ -1735,7 +1735,7 @@ Ability.database = Database.new(
                                 targets[0].inventory.addGold(amount);
                             };
                             
-                            dialogue.message(text:user.name + ' stole ' + amount + 'G!');
+                            windowEvent.message(text:user.name + ' stole ' + amount + 'G!');
                         };
 
                     }
@@ -2007,7 +2007,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(text:'' + user.name + ' waits.');
+                        windowEvent.message(text:'' + user.name + ' waits.');
                     }
                 }
             ),
@@ -2024,7 +2024,7 @@ Ability.database = Database.new(
                     usageHintAI: USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(text:targets[0].name + ' was covered in poisonroot seeds!');
+                        windowEvent.message(text:targets[0].name + ' was covered in poisonroot seeds!');
                         user.addEffect(from:targets[0], name:'Poisonroot Growing', durationTurns:4);                            
                     }
                 }
@@ -2041,7 +2041,7 @@ Ability.database = Database.new(
                     usageHintAI: USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(text:targets[0].name + ' was covered in triproot seeds!');
+                        windowEvent.message(text:targets[0].name + ' was covered in triproot seeds!');
                         user.addEffect(from:targets[0], name:'Triproot Growing', durationTurns:4);                            
                     }
                 }
@@ -2058,7 +2058,7 @@ Ability.database = Database.new(
                     usageHintAI: USAGE_HINT.HEAL,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(text:targets[0].name + ' was covered in triproot seeds!');
+                        windowEvent.message(text:targets[0].name + ' was covered in triproot seeds!');
                         user.addEffect(from:targets[0], name:'Healroot Growing', durationTurns:4);                            
                     }
                 }
@@ -2086,9 +2086,9 @@ Ability.database = Database.new(
                         });
                         
                         when(toRemove->keycount == 0)
-                            dialogue.message(text:'Nothing happened!');
+                            windowEvent.message(text:'Nothing happened!');
                         targets[0].removeEffects(effectBases:toRemove);
-                        dialogue.message(text:user.name + ' accelerated the growth of the seeds on ' + targets[0].name + '!');
+                        windowEvent.message(text:user.name + ' accelerated the growth of the seeds on ' + targets[0].name + '!');
                     }
                 }
             ),
@@ -2105,7 +2105,7 @@ Ability.database = Database.new(
                     usageHintAI: USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(text:user.name + ' becomes shrouded in flame!');
+                        windowEvent.message(text:user.name + ' becomes shrouded in flame!');
                         user.addEffect(from:user, name:'Burning', durationTurns:20);                            
                     }
                 }
@@ -2123,7 +2123,7 @@ Ability.database = Database.new(
                     usageHintAI: USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(text:targets[0].name + ' becomes weak to elemental damage!');
+                        windowEvent.message(text:targets[0].name + ' becomes weak to elemental damage!');
                         user.addEffect(from:user, name:'Elemental Tag', durationTurns:20);                            
                     }
                 }
@@ -2141,7 +2141,7 @@ Ability.database = Database.new(
                     usageHintAI: USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(text:targets[0].name + ' becomes shielded to elemental damage!');
+                        windowEvent.message(text:targets[0].name + ' becomes shielded to elemental damage!');
                         user.addEffect(from:user, name:'Elemental Shield', durationTurns:20);                            
                     }
                 }
@@ -2160,7 +2160,7 @@ Ability.database = Database.new(
                     usageHintAI: USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(text:user.name + ' becomes shrouded in an icy wind!');
+                        windowEvent.message(text:user.name + ' becomes shrouded in an icy wind!');
                         user.addEffect(from:user, name:'Icy', durationTurns:20);                            
                     }
                 }
@@ -2177,7 +2177,7 @@ Ability.database = Database.new(
                     usageHintAI: USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(text:user.name + ' becomes shrouded in electric arcs!');
+                        windowEvent.message(text:user.name + ' becomes shrouded in electric arcs!');
                         user.addEffect(from:user, name:'Shock', durationTurns:20);                            
                     }
                 }
@@ -2194,7 +2194,7 @@ Ability.database = Database.new(
                     usageHintAI: USAGE_HINT.BUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(text:user.name + ' becomes shrouded in light');
+                        windowEvent.message(text:user.name + ' becomes shrouded in light');
                         user.addEffect(from:user, name:'Burning', durationTurns:20);                            
                         user.addEffect(from:user, name:'Icy',     durationTurns:20);                            
                         user.addEffect(from:user, name:'Shock',   durationTurns:20);                            
@@ -2323,10 +2323,10 @@ Ability.database = Database.new(
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Entity = import(module:'game_class.entity.mt');
                         when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L).base.name == 'None')
-                            dialogue.message(text:targets[0] + ' has no weapon to sharpen!');                    
+                            windowEvent.message(text:targets[0] + ' has no weapon to sharpen!');                    
 
 
-                        dialogue.message(text:user.name + ' sharpens ' + targets[0].name + '\'s weapon!');
+                        windowEvent.message(text:user.name + ' sharpens ' + targets[0].name + '\'s weapon!');
 
                         targets[0].addEffect(
                             from:user, name: 'Sharpen', durationTurns: 1000000 
@@ -2349,10 +2349,10 @@ Ability.database = Database.new(
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Entity = import(module:'game_class.entity.mt');
                         when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.ARMOR).base.name == 'None')
-                            dialogue.message(text:targets[0] + ' has no armor to weaken!');                    
+                            windowEvent.message(text:targets[0] + ' has no armor to weaken!');                    
 
 
-                        dialogue.message(text:user.name + ' weakens ' + targets[0].name + '\'s armor!');
+                        windowEvent.message(text:user.name + ' weakens ' + targets[0].name + '\'s armor!');
 
                         targets[0].addEffect(
                             from:user, name: 'Weaken Armor', durationTurns: 1000000 
@@ -2375,10 +2375,10 @@ Ability.database = Database.new(
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Entity = import(module:'game_class.entity.mt');
                         when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L).base.name == 'None')
-                            dialogue.message(text:targets[0] + ' has no weapon to dull!');                    
+                            windowEvent.message(text:targets[0] + ' has no weapon to dull!');                    
 
 
-                        dialogue.message(text:user.name + ' dulls ' + targets[0].name + '\'s weapon!');
+                        windowEvent.message(text:user.name + ' dulls ' + targets[0].name + '\'s weapon!');
 
                         targets[0].addEffect(
                             from:user, name: 'Dull Weapon', durationTurns: 1000000 
@@ -2401,10 +2401,10 @@ Ability.database = Database.new(
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:Entity = import(module:'game_class.entity.mt');
                         when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.ARMOR).base.name == 'None')
-                            dialogue.message(text:targets[0] + ' has no armor to strengthen!');                    
+                            windowEvent.message(text:targets[0] + ' has no armor to strengthen!');                    
 
 
-                        dialogue.message(text:user.name + ' strengthens ' + targets[0].name + '\'s armor!');
+                        windowEvent.message(text:user.name + ' strengthens ' + targets[0].name + '\'s armor!');
 
                         targets[0].addEffect(
                             from:user, name: 'Strengthen Armor', durationTurns: 1000000 
@@ -2425,13 +2425,13 @@ Ability.database = Database.new(
                     usageHintAI: USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        dialogue.message(text:user.name + ' tries to convince ' + targets[0].name + ' to wait!');
+                        windowEvent.message(text:user.name + ' tries to convince ' + targets[0].name + ' to wait!');
                         
                         when(Number.random() < 0.5)
-                            dialogue.message(text: targets[0].name + ' ignored ' + user.name + '!');
+                            windowEvent.message(text: targets[0].name + ' ignored ' + user.name + '!');
 
 
-                        dialogue.message(text:targets[0].name + ' listens intently!');
+                        windowEvent.message(text:targets[0].name + ' listens intently!');
                         targets[0].addEffect(
                             from:user, name: 'Convinced', durationTurns: 1+(Number.random()*3)->floor 
                         );
@@ -2465,11 +2465,11 @@ Ability.database = Database.new(
                             };
                         });
                         
-                        dialogue.message(text: user.name + ' tried to make a Pink Brew...');
+                        windowEvent.message(text: user.name + ' tried to make a Pink Brew...');
                         when(count < 3)
-                            dialogue.message(text: '... but didn\'t have enough ingredients!');
+                            windowEvent.message(text: '... but didn\'t have enough ingredients!');
 
-                        dialogue.message(text: '... and made a Pink Potion!');
+                        windowEvent.message(text: '... and made a Pink Potion!');
                         inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
@@ -2504,11 +2504,11 @@ Ability.database = Database.new(
                             };
                         });
                         
-                        dialogue.message(text: user.name + ' tried to make a Cyan Brew...');
+                        windowEvent.message(text: user.name + ' tried to make a Cyan Brew...');
                         when(count < 3)
-                            dialogue.message(text: '... but didn\'t have enough ingredients!');
+                            windowEvent.message(text: '... but didn\'t have enough ingredients!');
 
-                        dialogue.message(text: '... and made a Pink Potion!');
+                        windowEvent.message(text: '... and made a Pink Potion!');
                         inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
@@ -2544,11 +2544,11 @@ Ability.database = Database.new(
                             };
                         });
                         
-                        dialogue.message(text: user.name + ' tried to make a Green Brew...');
+                        windowEvent.message(text: user.name + ' tried to make a Green Brew...');
                         when(count < 3)
-                            dialogue.message(text: '... but didn\'t have enough ingredients!');
+                            windowEvent.message(text: '... but didn\'t have enough ingredients!');
 
-                        dialogue.message(text: '... and made a Green Potion!');
+                        windowEvent.message(text: '... and made a Green Potion!');
                         inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
@@ -2585,11 +2585,11 @@ Ability.database = Database.new(
                             };
                         });
                         
-                        dialogue.message(text: user.name + ' tried to make an Orange Brew...');
+                        windowEvent.message(text: user.name + ' tried to make an Orange Brew...');
                         when(count < 3)
-                            dialogue.message(text: '... but didn\'t have enough ingredients!');
+                            windowEvent.message(text: '... but didn\'t have enough ingredients!');
 
-                        dialogue.message(text: '... and made a Orange Potion!');
+                        windowEvent.message(text: '... and made a Orange Potion!');
                         inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
@@ -2624,11 +2624,11 @@ Ability.database = Database.new(
                             };
                         });
                         
-                        dialogue.message(text: user.name + ' tried to make a Purple Brew...');
+                        windowEvent.message(text: user.name + ' tried to make a Purple Brew...');
                         when(count < 3)
-                            dialogue.message(text: '... but didn\'t have enough ingredients!');
+                            windowEvent.message(text: '... but didn\'t have enough ingredients!');
 
-                        dialogue.message(text: '... and made a Purple Potion!');
+                        windowEvent.message(text: '... and made a Purple Potion!');
                         inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
@@ -2664,11 +2664,11 @@ Ability.database = Database.new(
                             };
                         });
                         
-                        dialogue.message(text: user.name + ' tried to make a Black Brew...');
+                        windowEvent.message(text: user.name + ' tried to make a Black Brew...');
                         when(count < 3)
-                            dialogue.message(text: '... but didn\'t have enough ingredients!');
+                            windowEvent.message(text: '... but didn\'t have enough ingredients!');
 
-                        dialogue.message(text: '... and made a Black Potion!');
+                        windowEvent.message(text: '... and made a Black Potion!');
                         inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
@@ -2690,39 +2690,39 @@ Ability.database = Database.new(
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         when (user.allies->any(condition:::(value) <- value == targets[0]))
-                            dialogue.message(text: "Are you... trying to bribe me? we're... we're on the same team..");
+                            windowEvent.message(text: "Are you... trying to bribe me? we're... we're on the same team..");
                             
                         @:cost = targets[0].level*100 + targets[0].stats.sum * 4;
     
                         @:world = import(module:'game_singleton.world.mt');
     
-                        dialogue.message(text: user.name + ' tries to bribe ' + targets[0].name + '!');
+                        windowEvent.message(text: user.name + ' tries to bribe ' + targets[0].name + '!');
                         
                         match(true) {
                             // party -> NPC
                             (world.party.isMember(entity:user)) ::<= {
 
                                 when (world.party.inventory.gold < cost)
-                                    dialogue.message(text: "The party couldn't afford the " + cost + "G bribe!");
+                                    windowEvent.message(text: "The party couldn't afford the " + cost + "G bribe!");
         
                                 world.party.inventory.subtractGold(amount:cost);
                                 targets[0].addEffect(
                                     from:user, name: 'Bribed', durationTurns: -1
                                 );             
-                                dialogue.message(text: user.name + ' bribes ' + targets[0].name + '!');
+                                windowEvent.message(text: user.name + ' bribes ' + targets[0].name + '!');
                             
                             },
                             
                             // NPC -> party
                             (world.party.isMember(entity:targets[0])) ::<= {
-                                dialogue.message(text: user.name + ' has offered ' + cost + 'G for ' + targets[0].name + ' to stop acting for the rest of the battle.');
+                                windowEvent.message(text: user.name + ' has offered ' + cost + 'G for ' + targets[0].name + ' to stop acting for the rest of the battle.');
                                 when(
-                                    dialogue.askBoolean(
+                                    windowEvent.askBoolean(
                                         prompt: 'Accept offer for ' + cost + 'G?'
                                     ) == false
                                 ) empty;              
                                               
-                                dialogue.message(text: user.name + ' bribes ' + targets[0].name + '!');
+                                windowEvent.message(text: user.name + ' bribes ' + targets[0].name + '!');
                                 targets[0].addEffect(
                                     from:user, name: 'Bribed', durationTurns: -1
                                 );    

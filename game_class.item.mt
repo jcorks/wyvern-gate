@@ -24,7 +24,7 @@
 @:ItemColor = import(module:'game_class.itemcolor.mt');
 @:Material = import(module:'game_class.material.mt');
 @:random = import(module:'game_singleton.random.mt');
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 /*
@@ -339,18 +339,18 @@
             
             describe ::(by, onNext) {
                 @:Effect = import(module:'game_class.effect.mt');
-                dialogue.message(
+                windowEvent.message(
                     speaker:this.name,
                     text:description,
                     pageAfter:canvas.height-4
                 );
-                dialogue.message(
+                windowEvent.message(
                     speaker:this.name + ' - Equip Stats',
                     text:stats.description,
                     pageAfter:canvas.height-4
                 );
 
-                dialogue.message(
+                windowEvent.message(
                     speaker:this.name + ' - Equip Effects',
                     pageAfter:canvas.height-4,
                     text:::<={
@@ -362,7 +362,7 @@
                         return out;
                     }
                 );                
-                dialogue.message(
+                windowEvent.message(
                     speaker:this.name + ' - Use Effects',
                     pageAfter:canvas.height-4,
                     text:::<={
@@ -378,7 +378,7 @@
 
                 if (by != empty) ::<= {
                     when(by.profession.base.weaponAffinity != base_.name) empty;
-                    dialogue.message(
+                    windowEvent.message(
                         speaker:by.name,
                         pageAfter:canvas.height-4,
                         text:'Oh! This weapon type really works for me as ' + correctA(word:by.profession.base.name) + '.'
@@ -405,7 +405,7 @@
                     ));
                     
                     if (silent == empty && base_.name != 'None') ::<= {
-                        dialogue.message(text:'The party get\'s more used to using the ' + this.name + '.');
+                        windowEvent.message(text:'The party get\'s more used to using the ' + this.name + '.');
                         oldStats.printDiffRate(other:stats, prompt:this.name);
                     };
                 

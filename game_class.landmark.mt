@@ -334,11 +334,11 @@
             },
             discover :: {
                 @:world = import(module:'game_singleton.world.mt');
-                @:dialogue = import(module:'game_singleton.dialogue.mt');
+                @:windowEvent = import(module:'game_singleton.windowevent.mt');
                 if (!discovered)
                     if (world.party.inventory.items->filter(by:::(value) <- value.base.name == 'Runestone')->keycount != 0) ::<= {
                         world.storyFlags.data_locationsDiscovered += 1;
-                        dialogue.message(text:'Location found! ' + world.storyFlags.data_locationsDiscovered + ' / ' 
+                        windowEvent.message(text:'Location found! ' + world.storyFlags.data_locationsDiscovered + ' / ' 
                                                                  + world.storyFlags.data_locationsNeeded + ' locations.');               
                     };
                 discovered = true;
@@ -642,8 +642,8 @@ Landmark.Base.database = Database.new(
                 },
                 
                 onVisit ::(landmark, island) {
-                    @:dialogue = import(module:'game_singleton.dialogue.mt');
-                    dialogue.message(text:'It seems this area has been long forgotten...');
+                    @:windowEvent = import(module:'game_singleton.windowevent.mt');
+                    windowEvent.message(text:'It seems this area has been long forgotten...');
                 }
                 
             }
@@ -675,8 +675,8 @@ Landmark.Base.database = Database.new(
                 },
                 onCreate ::(landmark, island){},
                 onVisit ::(landmark, island) {
-                    @:dialogue = import(module:'game_singleton.dialogue.mt');
-                    dialogue.message(text:'The party enters the pit full of treasure.');
+                    @:windowEvent = import(module:'game_singleton.windowevent.mt');
+                    windowEvent.message(text:'The party enters the pit full of treasure.');
                
                 }
                 

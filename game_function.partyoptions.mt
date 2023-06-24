@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:itemmenu = import(module:'game_function.itemmenu.mt');
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:world = import(module:'game_singleton.world.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 
@@ -24,7 +24,7 @@
 
 
 return ::{
-    dialogue.choices(
+    windowEvent.choices(
         leftWeight: 1,
         topWeight: 1,
         prompt: 'Party Options',
@@ -81,7 +81,7 @@ return ::{
                     names->push(value:member.name);
                 });
                 
-                @:choice = dialogue.choices(
+                @:choice = windowEvent.choices(
                     leftWeight: 1,
                     topWeight: 1,
                     choices: names,
@@ -106,7 +106,7 @@ return ::{
                 world.party.members->foreach(do:::(index, member) {
                     names->push(value:member.name);
                 });
-                dialogue.choices(
+                windowEvent.choices(
                     leftWeight: 1,
                     topWeight: 1,
                     keep:true,

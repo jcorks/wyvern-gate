@@ -18,7 +18,7 @@
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
-@:dialogue = import(module:'game_singleton.dialogue.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Damage = import(module:'game_class.damage.mt');
 @:Scene = import(module:'game_class.scene.mt');
 @:random = import(module:'game_singleton.random.mt');
@@ -105,7 +105,7 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' takes a defensive stance!'
                     );
                 
@@ -121,7 +121,7 @@ Effect.database = Database.new(
 
 
                 onDamage : ::(user, item, holder, from, damage) {
-                    dialogue.message(text:holder.name + "'s defending stance reduces damage!");
+                    windowEvent.message(text:holder.name + "'s defending stance reduces damage!");
                     damage.amount *= 0.6;
                 },
                 
@@ -142,7 +142,7 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' takes a guarding stance!'
                     );
                 
@@ -158,7 +158,7 @@ Effect.database = Database.new(
 
 
                 onDamage : ::(user, item, holder, from, damage) {
-                    dialogue.message(text:holder.name + "'s defending stance reduces damage significantly!");
+                    windowEvent.message(text:holder.name + "'s defending stance reduces damage significantly!");
                     damage.amount *= 0.9;
                 },
                 
@@ -179,7 +179,7 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(ATK:-50, DEF:75),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' changes their stance to be defensive!'
                     );
                 },
@@ -215,7 +215,7 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(DEF:-50, ATK:75),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' changes their stance to be offensive!'
                     );
                 },
@@ -250,7 +250,7 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(ATK:-50, SPD:75),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' changes their stance to be light on their feet!'
                     );
                 },
@@ -285,7 +285,7 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(SPD:-50, DEF:75),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' changes their stance to be heavy and sturdy!'
                     );
                 },
@@ -321,7 +321,7 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(SPD:-50, INT:75),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' changes their stance for mental focus!'
                     );
                 },
@@ -357,7 +357,7 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(SPD:-30, DEF:-30, ATK:100),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' changes their stance for maximum attack!'
                     );
                 },
@@ -392,7 +392,7 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' changes their stance to reflect attacks!'
                     );
                 },
@@ -413,7 +413,7 @@ Effect.database = Database.new(
                     @:amount = (damage.amount / 2)->floor;
 
                     when(amount <= 0) empty;
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' retaliates!'
                     );
 
@@ -443,7 +443,7 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' changes their stance to evade attacks!'
                     );
                 },
@@ -462,7 +462,7 @@ Effect.database = Database.new(
                     when (holder == from) empty;
                     when(Number.random() > 5) empty;
 
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' evades!'
                     );
 
@@ -486,7 +486,7 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:user.name + " snuck behind " + holder.name + '!');
+                    windowEvent.message(text:user.name + " snuck behind " + holder.name + '!');
                 
                 },
 
@@ -501,7 +501,7 @@ Effect.database = Database.new(
                 onDamage : ::(user, item, holder, from, damage) {
                     breakpoint();
                     if (from == user) ::<= {
-                        dialogue.message(text:user.name + "'s sneaking takes " + holder.name + ' by surprise!');
+                        windowEvent.message(text:user.name + "'s sneaking takes " + holder.name + ' by surprise!');
                         damage.amount *= 3;
                     };
                     
@@ -527,11 +527,11 @@ Effect.database = Database.new(
                     INT: 100
                 ),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + ' focuses their mind');
+                    windowEvent.message(text:holder.name + ' focuses their mind');
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + '\'s focus returns to normal.');
+                    windowEvent.message(text:holder.name + '\'s focus returns to normal.');
                 },                
                 onGivenDamage : ::(user, item, holder, to) {
                 },
@@ -562,7 +562,7 @@ Effect.database = Database.new(
                     DEF: 100
                 ),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + ' is covered in a shell of light');
+                    windowEvent.message(text:holder.name + ' is covered in a shell of light');
                 },
                 onGivenDamage : ::(user, item, holder, to) {
                 },
@@ -571,7 +571,7 @@ Effect.database = Database.new(
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + '\'s shell of light fades away.');
+                    windowEvent.message(text:holder.name + '\'s shell of light fades away.');
                 },                
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -639,7 +639,7 @@ Effect.database = Database.new(
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + '\'s Night Veil fades away.');
+                    windowEvent.message(text:holder.name + '\'s Night Veil fades away.');
                 },                
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -672,7 +672,7 @@ Effect.database = Database.new(
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + '\'s Dayshroud fades away.');
+                    windowEvent.message(text:holder.name + '\'s Dayshroud fades away.');
                 },                
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -705,7 +705,7 @@ Effect.database = Database.new(
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + '\'s Call of the Night fades away.');
+                    windowEvent.message(text:holder.name + '\'s Call of the Night fades away.');
                 },                
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -740,14 +740,14 @@ Effect.database = Database.new(
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + '\'s Lunacy fades away.');
+                    windowEvent.message(text:holder.name + '\'s Lunacy fades away.');
                 },                
 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
-                    dialogue.message(text:holder.name + ' attacks in a blind rage!');
+                    windowEvent.message(text:holder.name + ' attacks in a blind rage!');
                     holder.attack(
                         target:random.pickArrayItem(list:holder.enemies),
                         amount:holder.stats.ATK * (0.5),
@@ -782,7 +782,7 @@ Effect.database = Database.new(
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + '\'s Call of the Night fades away.');
+                    windowEvent.message(text:holder.name + '\'s Call of the Night fades away.');
                 },                
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -815,7 +815,7 @@ Effect.database = Database.new(
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + '\'s Night Veil fades away.');
+                    windowEvent.message(text:holder.name + '\'s Night Veil fades away.');
                 },                
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -849,7 +849,7 @@ Effect.database = Database.new(
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + '\'s Dayshroud fades away.');
+                    windowEvent.message(text:holder.name + '\'s Dayshroud fades away.');
                 },                
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -881,7 +881,7 @@ Effect.database = Database.new(
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + '\'s Moonsong fades.');
+                    windowEvent.message(text:holder.name + '\'s Moonsong fades.');
                 },                
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -913,7 +913,7 @@ Effect.database = Database.new(
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + '\'s Sol Attunement fades.');
+                    windowEvent.message(text:holder.name + '\'s Sol Attunement fades.');
                 },                
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -945,7 +945,7 @@ Effect.database = Database.new(
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + '\'s Moonsong fades.');
+                    windowEvent.message(text:holder.name + '\'s Moonsong fades.');
                 },                
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -977,7 +977,7 @@ Effect.database = Database.new(
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + '\'s Sol Attunement fades.');
+                    windowEvent.message(text:holder.name + '\'s Sol Attunement fades.');
                 },                
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1001,7 +1001,7 @@ Effect.database = Database.new(
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:'A halo appears above ' + holder.name + '!');
+                    windowEvent.message(text:'A halo appears above ' + holder.name + '!');
                 },
                 onGivenDamage : ::(user, item, holder, to) {
                 },
@@ -1010,13 +1010,13 @@ Effect.database = Database.new(
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + '\'s halo disappears.');
+                    windowEvent.message(text:holder.name + '\'s halo disappears.');
                 },                
 
                 onDamage : ::(user, item, holder, from, damage) {
                     if (holder.hp == 0) ::<= {
                         damage.amount = 0;
-                        dialogue.message(text:holder.name + ' is protected from death!');
+                        windowEvent.message(text:holder.name + ' is protected from death!');
                         holder.removeEffects(
                             effectBases : [
                                 Effect.database.find(name:'Grace')
@@ -1044,7 +1044,7 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(
+                    windowEvent.message(
                         text: "The " + item.name + ' is consumed.'
                     );
                     item.throwOut();                
@@ -1079,7 +1079,7 @@ Effect.database = Database.new(
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     if (Number.random() > 0.5) ::<= {
-                        dialogue.message(
+                        windowEvent.message(
                             text: "The " + item.name + ' broke.'
                         );
                         item.throwOut();                
@@ -1114,13 +1114,16 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(
-                        text: user.name + ' flung the ' + item.name + ' at ' + holder.name + '!',
-                        onNext ::{
+                    windowEvent.message(
+                        text: user.name + ' flung the ' + item.name + ' at ' + holder.name + '!'
+                    );
+                    
+                    windowEvent.noDisplay(
+                        onStart::{
                             if (Number.random() > 0.8) ::<= {
                                 holder.inventory.add(item);
-                                dialogue.message(
-                                    text: holder.name + ' caught the flung ' + item.name + '!!', onNext::{}
+                                windowEvent.message(
+                                    text: holder.name + ' caught the flung ' + item.name + '!!'
                                 );
                             } else ::<= {
                                 holder.damage(
@@ -1231,7 +1234,7 @@ Effect.database = Database.new(
                 onAffliction : ::(user, item, holder) {
                     @:world = import(module:'game_singleton.world.mt');
                     @:amount = (50 + Number.random()*400)->floor;                    
-                    dialogue.message(text:'The party found ' + amount + 'G.');
+                    windowEvent.message(text:'The party found ' + amount + 'G.');
                     world.party.inventory.addGold(amount);                    
                 },
                 
@@ -1274,7 +1277,7 @@ Effect.database = Database.new(
                     when(!world.party.isMember(entity:holder)) empty;
 
 
-                    dialogue.message(
+                    windowEvent.message(
                         text: 'After the battle, ' + holder.name + ' found some food and cooked a meal for the party.'
                     );
                     world.party.members->foreach(do:::(index, member) {
@@ -1321,7 +1324,7 @@ Effect.database = Database.new(
 
 
                     @:amt = (Number.random() * 20)->ceil;
-                    dialogue.message(
+                    windowEvent.message(
                         text: 'After the battle, ' + holder.name + ' found ' + amt + 'G on the ground dropped from the battling party.'
                     );
                     world.party.inventory.addGold(amount:amt);
@@ -1365,10 +1368,10 @@ Effect.database = Database.new(
                     
 
                     @:amt = 2 + (Number.random() * 4)->floor;
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' scavenged for ingredients...'
                     );
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' found ' + amt + ' ingredient(s).'
                     );
 
@@ -1562,7 +1565,7 @@ Effect.database = Database.new(
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {     
-                    dialogue.message(text:'The poisonroot vines dissipate from ' + holder.name + '.'); 
+                    windowEvent.message(text:'The poisonroot vines dissipate from ' + holder.name + '.'); 
                 },                
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1574,7 +1577,7 @@ Effect.database = Database.new(
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
-                    dialogue.message(text:user.name + ' is strangled by the poisonroot!');                    
+                    windowEvent.message(text:user.name + ' is strangled by the poisonroot!');                    
                     holder.damage(from:user, damage: Damage.new(
                         amount: random.integer(from:1, to:4),
                         damageType: Damage.TYPE.POISON,
@@ -1630,7 +1633,7 @@ Effect.database = Database.new(
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {                    
-                    dialogue.message(text:'The triproot vines dissipate from ' + holder.name + '.'); 
+                    windowEvent.message(text:'The triproot vines dissipate from ' + holder.name + '.'); 
                 },                
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1643,7 +1646,7 @@ Effect.database = Database.new(
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
                     if (Number.random() < 0.4) ::<= {
-                        dialogue.message(text:'The triproot trips ' + holder.name + '!');
+                        windowEvent.message(text:'The triproot trips ' + holder.name + '!');
                         holder.addEffect(from:holder, name:'Stunned', durationTurns:1);                                                
                     };
                 },
@@ -1697,7 +1700,7 @@ Effect.database = Database.new(
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {                    
-                    dialogue.message(text:'The healroot vines dissipate from ' + holder.name + '.'); 
+                    windowEvent.message(text:'The healroot vines dissipate from ' + holder.name + '.'); 
                 },                
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1709,7 +1712,7 @@ Effect.database = Database.new(
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
-                    dialogue.message(text:'The healroot soothe\'s ' + holder.name + '.');
+                    windowEvent.message(text:'The healroot soothe\'s ' + holder.name + '.');
                     holder.heal(amount:holder.stats.HP * 0.05);
                 },
                 onStatRecalculate : ::(user, item, holder, stats) {
@@ -1731,7 +1734,7 @@ Effect.database = Database.new(
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:user.name + ' resumes a normal stance!');
+                    windowEvent.message(text:user.name + ' resumes a normal stance!');
                 },                
                 onGivenDamage : ::(user, item, holder, to) {
                 },
@@ -1742,7 +1745,7 @@ Effect.database = Database.new(
                 onDamage : ::(user, item, holder, from, damage) {
                     @:amount = damage.amount;
                     damage.amount = 0;
-                    dialogue.message(text:user.name + ' leaps in front of ' + holder.name + ', taking damage in their stead!');
+                    windowEvent.message(text:user.name + ' leaps in front of ' + holder.name + ', taking damage in their stead!');
 
                     user.damage(
                         from,
@@ -1773,7 +1776,7 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + ' is strongly guarding themself');
+                    windowEvent.message(text:holder.name + ' is strongly guarding themself');
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
@@ -1786,7 +1789,7 @@ Effect.database = Database.new(
                 
                 onDamage : ::(user, item, holder, from, damage) {
                     if (from != holder) ::<= {
-                        dialogue.message(text:holder.name + ' is protected from the damage!');
+                        windowEvent.message(text:holder.name + ' is protected from the damage!');
                         damage.amount = 0;                        
                     };
                 },
@@ -1823,9 +1826,9 @@ Effect.database = Database.new(
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
                     if (turnIndex >= turnCount)
-                        dialogue.message(text:holder.name + ' realizes ' + user.name + "'s argument was complete junk!")
+                        windowEvent.message(text:holder.name + ' realizes ' + user.name + "'s argument was complete junk!")
                     else                    
-                        dialogue.message(text:holder.name + ' thinks about ' + user.name + "'s argument!");
+                        windowEvent.message(text:holder.name + ' thinks about ' + user.name + "'s argument!");
                 },
                 onStatRecalculate : ::(user, item, holder, stats) {
                 
@@ -1856,9 +1859,9 @@ Effect.database = Database.new(
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
                     if (turnIndex >= turnCount)
-                        dialogue.message(text:holder.name + ' broke free from the grapple!')
+                        windowEvent.message(text:holder.name + ' broke free from the grapple!')
                     else                    
-                        dialogue.message(text:holder.name + ' is being grappled and is unable to move!');
+                        windowEvent.message(text:holder.name + ' is being grappled and is unable to move!');
                 },
                 onStatRecalculate : ::(user, item, holder, stats) {
                 
@@ -1888,7 +1891,7 @@ Effect.database = Database.new(
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
-                    dialogue.message(text:holder.name + ' is in the middle of grappling and cannot move!');
+                    windowEvent.message(text:holder.name + ' is in the middle of grappling and cannot move!');
                 },
                 onStatRecalculate : ::(user, item, holder, stats) {
                 
@@ -1904,7 +1907,7 @@ Effect.database = Database.new(
                 skipTurn : true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(
+                    windowEvent.message(
                         text: holder.name + ' starts to run from the fight!'
                     );
                 },
@@ -1921,7 +1924,7 @@ Effect.database = Database.new(
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
-                    dialogue.message(text: user.name + ' runs from the battle!');
+                    windowEvent.message(text: user.name + ' runs from the battle!');
                     user.requestsRemove = true;
                 },
                 onStatRecalculate : ::(user, item, holder, stats) {
@@ -1966,11 +1969,11 @@ Effect.database = Database.new(
                 skipTurn : true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + ' was stunned!');
+                    windowEvent.message(text:holder.name + ' was stunned!');
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + ' came to their senses!');
+                    windowEvent.message(text:holder.name + ' came to their senses!');
                 },                
                 onGivenDamage : ::(user, item, holder, to) {
                 },
@@ -2127,7 +2130,7 @@ Effect.database = Database.new(
                     @:world = import(module:'game_singleton.world.mt');
 
                     if (world.time > world.TIME.EVENING) ::<= {
-                        dialogue.message(text:'The moon shimmers... ' + holder.name +' softly glows');                    
+                        windowEvent.message(text:'The moon shimmers... ' + holder.name +' softly glows');                    
                     };
                 },
                 onGivenDamage : ::(user, item, holder, to) {
@@ -2166,7 +2169,7 @@ Effect.database = Database.new(
                     SPD:35
                 ),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:holder.name +' is ready to coordinate!');                    
+                    windowEvent.message(text:holder.name +' is ready to coordinate!');                    
                 },
                 onGivenDamage : ::(user, item, holder, to) {
                 },
@@ -2196,7 +2199,7 @@ Effect.database = Database.new(
                     
                 ),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:holder.name +' braces for incoming damage!');                    
+                    windowEvent.message(text:holder.name +' braces for incoming damage!');                    
                 },
                 onGivenDamage : ::(user, item, holder, to) {
                 },
@@ -2205,7 +2208,7 @@ Effect.database = Database.new(
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + ' no longer braces for damage.');
+                    windowEvent.message(text:holder.name + ' no longer braces for damage.');
                 },                
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2233,7 +2236,7 @@ Effect.database = Database.new(
                     @:world = import(module:'game_singleton.world.mt');
 
                     if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
-                        dialogue.message(text:'The sun intensifies... ' + holder.name +' softly glows');                    
+                        windowEvent.message(text:'The sun intensifies... ' + holder.name +' softly glows');                    
                     };
                 },
                 onGivenDamage : ::(user, item, holder, to) {
@@ -2283,7 +2286,7 @@ Effect.database = Database.new(
                     if (Number.random() > 0.8 && damage.damageType == Damage.TYPE.PHYS) ::<= {
                         @:Entity = import(module:'game_class.entity.mt');
                     
-                        dialogue.message(text:holder.name + " parries the blow, but their non-combat weapon breaks in the process!");
+                        windowEvent.message(text:holder.name + " parries the blow, but their non-combat weapon breaks in the process!");
                         damage.amount = 0;
                         @:item = holder.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
                         holder.unequip(slot:Entity.EQUIP_SLOTS.HAND_L, silent:true);
@@ -2320,7 +2323,7 @@ Effect.database = Database.new(
                 onDamage : ::(user, item, holder, from, damage) {
                     if (from != holder) ::<= {
                         @:Entity = import(module:'game_class.entity.mt');                    
-                        dialogue.message(text:holder.name + " dodges the damage from Flight!");
+                        windowEvent.message(text:holder.name + " dodges the damage from Flight!");
                         damage.amount = 0;
                     };
                 },
@@ -2348,7 +2351,7 @@ Effect.database = Database.new(
                 
                 onGivenDamage : ::(user, item, holder, to) {
                     if (to.isIncapacitated()) ::<= {
-                        dialogue.message(text:holder.name + "'s ending blow to " + to.name + " increases "+ holder.name + "'s abilities due to their Assassin's Pride.");                        
+                        windowEvent.message(text:holder.name + "'s ending blow to " + to.name + " increases "+ holder.name + "'s abilities due to their Assassin's Pride.");                        
                         user.addEffect(from:holder, name: 'Pride', durationTurns: 10);                        
                     };
                 },
@@ -2379,7 +2382,7 @@ Effect.database = Database.new(
                     SPD:25
                 ),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " is feeling prideful.");
+                    windowEvent.message(text:holder.name + " is feeling prideful.");
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
@@ -2424,7 +2427,7 @@ Effect.database = Database.new(
                 
                 onDamage : ::(user, item, holder, from, damage) {
                     if (user == from) ::<= {
-                        dialogue.message(text: user.name + '\'s duel challenge focuses damage!');
+                        windowEvent.message(text: user.name + '\'s duel challenge focuses damage!');
                         damage.amount *= 2.25;
                     };
                 },
@@ -2445,12 +2448,12 @@ Effect.database = Database.new(
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     if (Number.random() > 0.7) ::<={
-                        dialogue.message(
+                        windowEvent.message(
                             text: "The " + item.name + ' is used in its entirety.'
                         );
                         item.throwOut();                                    
                     } else ::<={
-                        dialogue.message(
+                        windowEvent.message(
                             text: "A bit of the " + item.name + ' is used.'
                         );                    
                     };
@@ -2488,12 +2491,12 @@ Effect.database = Database.new(
                     SPD: -20
                 ),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " started to bleed out!");
+                    windowEvent.message(text:holder.name + " started to bleed out!");
                 
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " is no longer bleeding out.");
+                    windowEvent.message(text:holder.name + " is no longer bleeding out.");
                 },                
                 onGivenDamage : ::(user, item, holder, to) {
                 },
@@ -2506,7 +2509,7 @@ Effect.database = Database.new(
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
-                    dialogue.message(text:holder.name + " suffered from bleeding!");
+                    windowEvent.message(text:holder.name + " suffered from bleeding!");
                     
                     holder.damage(
                         from: holder,
@@ -2537,7 +2540,7 @@ Effect.database = Database.new(
                     @:learned = holder.profession.gainSP(amount:1);
                     learned->foreach(do:::(index, ability) {
                         holder.learnAbility(name:ability);
-                        dialogue.message(text: holder.name + ' learned the ability: ' + ability);                        
+                        windowEvent.message(text: holder.name + ' learned the ability: ' + ability);                        
                     });
                 
                 },
@@ -2570,7 +2573,7 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:"The " + item.name + " explodes on " + user.name + "!");
+                    windowEvent.message(text:"The " + item.name + " explodes on " + user.name + "!");
                     
                     holder.damage(
                         from: holder,
@@ -2618,12 +2621,12 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " was poisoned!");
+                    windowEvent.message(text:holder.name + " was poisoned!");
                 
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " is no longer poisoned.");
+                    windowEvent.message(text:holder.name + " is no longer poisoned.");
                 },                
                 onGivenDamage : ::(user, item, holder, to) {
                 },
@@ -2636,7 +2639,7 @@ Effect.database = Database.new(
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
-                    dialogue.message(text:holder.name + " was hurt by the poison!");
+                    windowEvent.message(text:holder.name + " was hurt by the poison!");
                     
                     holder.damage(
                         from: holder,
@@ -2661,19 +2664,19 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " was blinded!");
+                    windowEvent.message(text:holder.name + " was blinded!");
                 
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " is no longer blind.");
+                    windowEvent.message(text:holder.name + " is no longer blind.");
                 },                
                 onGivenDamage : ::(user, item, holder, to) {
                 },
 
                 onGiveDamage : ::(user, item, holder, to, damage) {
                     when (Number.random() > 0.5) empty;
-                    dialogue.message(text:holder.name + " missed in their blindness!");
+                    windowEvent.message(text:holder.name + " missed in their blindness!");
                     damage.amount = 0;
                 },
 
@@ -2699,12 +2702,12 @@ Effect.database = Database.new(
                 skipTurn : false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " was burned!");
+                    windowEvent.message(text:holder.name + " was burned!");
                 
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " is no longer burned.");
+                    windowEvent.message(text:holder.name + " is no longer burned.");
                 },                
                 onGivenDamage : ::(user, item, holder, to) {
                 },
@@ -2718,7 +2721,7 @@ Effect.database = Database.new(
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
                     when(Number.random() > 0.5) empty;
-                    dialogue.message(text:holder.name + " was hurt by burns!");
+                    windowEvent.message(text:holder.name + " was hurt by burns!");
                     holder.damage(
                         from:holder,
                         damage : Damage.new(
@@ -2741,12 +2744,12 @@ Effect.database = Database.new(
                 skipTurn : true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " was frozen");
+                    windowEvent.message(text:holder.name + " was frozen");
                 
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " is no longer frozen.");
+                    windowEvent.message(text:holder.name + " is no longer frozen.");
                 },                
                 onGivenDamage : ::(user, item, holder, to) {
                 },
@@ -2777,12 +2780,12 @@ Effect.database = Database.new(
                     ATK: -100
                 ),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " was paralyzed");
+                    windowEvent.message(text:holder.name + " was paralyzed");
                 
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " is no longer paralyzed.");
+                    windowEvent.message(text:holder.name + " is no longer paralyzed.");
                 },                
                 onGivenDamage : ::(user, item, holder, to) {
                 },
@@ -2812,12 +2815,12 @@ Effect.database = Database.new(
                     DEF: -50
                 ),
                 onAffliction : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " was petrified!");
+                    windowEvent.message(text:holder.name + " was petrified!");
                 
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
-                    dialogue.message(text:holder.name + " is no longer petrified!");
+                    windowEvent.message(text:holder.name + " is no longer petrified!");
                 },                
                 onGivenDamage : ::(user, item, holder, to) {
                 },
