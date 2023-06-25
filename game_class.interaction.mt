@@ -148,10 +148,40 @@ Interaction.database = Database.new(
                             // if cancelled
                             when(talkee == empty) empty;
 
-                            talkee.interactPerson(
-                                party,
-                                location
-                            );
+
+                            if (location.landmark.peaceful == false) ::<= {
+                                @:Event = import(module:'game_class.event.mt');
+
+                                if (location.landmark.base.guarded == true) ::<= {
+                                    windowEvent.queueMessage(speaker:talkee.name, text:'Guards! Guards! Help!');
+                                    location.landmark.island.addEvent(
+                                        event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
+                                            island:location.landmark.island, party, landmark:location.landmark //, currentTime
+                                        )
+                                    );
+                                } else ::<= {
+                                    @:world = import(module:'game_singleton.world.mt');
+                                    windowEvent.queueMessage(speaker:talkee.name, text:'You never should have come here!');
+                                    world.battle.start(
+                                        party,                            
+                                        allies: party.members,
+                                        enemies: [talkee],
+                                        landmark: {},
+                                        onEnd::(result) {
+                                            breakpoint();
+                                            when(result == Battle.RESULTS.ENEMIES_WIN)
+                                                windowEvent.jumpToTag(name:'MainMenu', clearResolve:true);
+                                        
+                                            location.ownedBy = empty;                                                                        
+                                        }
+                                    );                                
+                                };
+                            } else ::<= {
+                                talkee.interactPerson(
+                                    party,
+                                    location
+                                );
+                            };
 
                         }
                     );
@@ -888,31 +918,6 @@ Interaction.database = Database.new(
                 
                     // the steal attempt happens first before items 
                     //
-                    if (location.ownedBy != empty) ::<= {
-                        windowEvent.queueMessage(
-                            speaker: location.ownedBy.name,
-                            text: "What do you think you're doing?!"
-                        );
-                        @:world = import(module:'game_singleton.world.mt');
-                        match(world.battle.start(
-                            party,                            
-                            allies: party.members,
-                            enemies: [location.ownedBy],
-                            landmark: {}
-                        ).result) {
-                          (Battle.RESULTS.ALLIES_WIN,
-                           Battle.RESULTS.NOONE_WIN): ::<= {
-                            location.ownedBy = empty;                          
-                          },
-                          
-                          (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                            windowEvent.jumpToTag(name:'MainMenu');
-                          }
-                        
-                        };                        
-                        
-                    };
-                    
                     when (location.inventory.items->keycount == 0) ::<= {
                         windowEvent.queueMessage(text: "There was nothing to steal.");                            
                     };
@@ -923,6 +928,36 @@ Interaction.database = Database.new(
                     when(party.inventory.isFull) ::<= {
                         windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
                     };
+
+
+                    if (location.ownedBy != empty) ::<= {
+                        windowEvent.queueMessage(
+                            speaker: location.ownedBy.name,
+                            text: "What do you think you're doing?!"
+                        );
+                        @:world = import(module:'game_singleton.world.mt');
+                        world.battle.start(
+                            party,                            
+                            allies: party.members,
+                            enemies: [location.ownedBy],
+                            landmark: {},
+                            onEnd::(result) {
+                              match(result) {
+                                  (Battle.RESULTS.ALLIES_WIN,
+                                   Battle.RESULTS.NOONE_WIN): ::<= {
+                                    location.ownedBy = empty;                          
+                                  },
+                                  
+                                  (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                                    windowEvent.jumpToTag(name:'MainMenu');
+                                  }
+                              };
+                            }
+                        );
+                        
+                    };
+                    
+
 
 
                     location.inventory.remove(item);

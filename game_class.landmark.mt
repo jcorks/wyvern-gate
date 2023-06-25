@@ -410,8 +410,8 @@ Landmark.Base = class(
                 dungeonMap: Boolean,
                 mapHint : Object,
                 onCreate : Function,
-                onVisit : Function
-
+                onVisit : Function,
+                guarded : Boolean
             }
         );
         
@@ -440,6 +440,7 @@ Landmark.Base.database = Database.new(
                 isUnique : false,
                 peaceful : true,
                 dungeonMap : false,
+                guarded : true,
                 possibleLocations : [
                     {name:'home', rarity: 1},
                     {name:'Tavern', rarity: 3},
@@ -473,6 +474,7 @@ Landmark.Base.database = Database.new(
                 isUnique : false,
                 maxLocations : 12,
                 peaceful : true,
+                guarded : true,
                 dungeonMap : false,
                 possibleLocations : [
                     {name:'home', rarity: 1},
@@ -513,6 +515,7 @@ Landmark.Base.database = Database.new(
                 isUnique : false,
                 maxLocations : 5,
                 peaceful : true,
+                guarded : false,
                 dungeonMap : false,
                 possibleLocations : [
                     {name:'ore vein', rarity: 1},
@@ -547,6 +550,7 @@ Landmark.Base.database = Database.new(
                 minLocations : 4,
                 maxLocations : 10,
                 peaceful : true,
+                guarded : false,
                 dungeonMap : false,
                 possibleLocations : [
 
@@ -577,6 +581,7 @@ Landmark.Base.database = Database.new(
                 minLocations : 4,
                 maxLocations : 10,
                 peaceful : true,
+                guarded : false,
                 dungeonMap : true,
                 possibleLocations : [                    
                 ],
@@ -601,6 +606,7 @@ Landmark.Base.database = Database.new(
                 minLocations : 2,
                 maxLocations : 2,
                 peaceful: false,
+                guarded : false,
                 dungeonMap : true,
                 possibleLocations : [
                     {name: 'Stairs Down', rarity:1},
@@ -629,6 +635,7 @@ Landmark.Base.database = Database.new(
                 minLocations : 2,
                 maxLocations : 2,
                 peaceful: true,
+                guarded : false,
                 dungeonMap : true,
                 possibleLocations : [
                     {name: 'Small Chest', rarity:3},
@@ -658,6 +665,7 @@ Landmark.Base.database = Database.new(
                 isUnique : true,
                 minLocations : 1,
                 maxLocations : 5,
+                guarded : false,
                 peaceful: true,
                 dungeonMap : false,
                 possibleLocations : [
@@ -692,6 +700,7 @@ Landmark.Base.database = Database.new(
                 isUnique : true,
                 minLocations : 2,
                 maxLocations : 2,
+                guarded : false,
                 peaceful: true,
                 dungeonMap : false,
                 possibleLocations : [
@@ -724,6 +733,7 @@ Landmark.Base.database = Database.new(
                 peaceful: true,
                 isUnique : false,
                 dungeonMap : false,
+                guarded : true,
                 possibleLocations : [
                     {name:'home', rarity:5},
                     {name:'shop', rarity:40}
@@ -756,6 +766,7 @@ Landmark.Base.database = Database.new(
                 maxLocations : 7,
                 isUnique : false,
                 dungeonMap : false,
+                guarded : false,
                 possibleLocations : [
                     {name:'home', rarity:1},
                     {name:'Tavern', rarity:7},
@@ -784,6 +795,7 @@ Landmark.Base.database = Database.new(
                 dungeonMap : false,
                 minLocations : 5,
                 maxLocations : 10,
+                guarded : false,
                 possibleLocations : [
                     {name:'home', rarity:1},
                     {name:'Tavern', rarity:7},
@@ -826,6 +838,7 @@ Landmark.Base.database = Database.new(
                 dungeonMap : true,
                 minLocations : 3,
                 maxLocations : 5,
+                guarded : false,
                 possibleLocations : [
                     {name: 'Small Chest', rarity:1},
                 ],
@@ -856,6 +869,7 @@ Landmark.Base.database = Database.new(
                 dungeonMap : true,
                 minLocations : 0,
                 maxLocations : 0,
+                guarded : false,
                 possibleLocations : [],
                 requiredLocations : [],
                 mapHint: {},
@@ -876,6 +890,7 @@ Landmark.Base.database = Database.new(
                 
                 minLocations : 0,
                 maxLocations : 0,
+                guarded : false,
                 possibleLocations : [],
                 requiredLocations : [],
                 mapHint: {},
@@ -892,6 +907,7 @@ Landmark.Base.database = Database.new(
                 peaceful: false,
                 isUnique : false,
                 dungeonMap : true,
+                guarded : false,
                 minLocations : 0,
                 maxLocations : 0,
                 possibleLocations : [],

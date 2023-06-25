@@ -66,3 +66,10 @@
 - added Rapier and Lance weapons.
 - added descriptions to entities with unique qualities and traits.
 - changed death to only occur on explicit attacking of a knocked out individual rather than any damage, preventing a lot of accidental deaths
+
+0.1.4b
+- Revamped API for changing window management to be less error-prone and unpredictable
+- Added items (2-6) to homes and farms to be stolen if desired
+- Fixed up non-peaceful encounters
+- Added combat when talking to someone in a non-peaceful area
+

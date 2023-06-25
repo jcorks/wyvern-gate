@@ -337,7 +337,7 @@ ItemEnchant.database = Database.new(
         ItemEnchant.new(
             data : {
                 name : 'Burning',
-                description : 'The material its made of is warm to the touch. Gives it a fire aspect when used as a weapon, and gives ice resistance when used as armor.',
+                description : 'The material its made of is warm to the touch. Grants a fire aspect to attacks and gives ice resistance when used as armor.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
@@ -354,7 +354,7 @@ ItemEnchant.database = Database.new(
         ItemEnchant.new(
             data : {
                 name : 'Icy',
-                description : 'The material its made of is cold to the touch. Gives it an ice aspect when used as a weapon, and gives fire resistance when used as armor.',
+                description : 'The material its made of is cold to the touch. Grants an ice aspect to attacks and gives fire resistance when used as armor.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
@@ -371,7 +371,7 @@ ItemEnchant.database = Database.new(
         ItemEnchant.new(
             data : {
                 name : 'Shock',
-                description : 'The material its made of gently hums. Gives it an thunder aspect when used as a weapon, and gives thunder resistance when used as armor.',
+                description : 'The material its made of gently hums. Grants a thunder aspect to attacks and gives thunder resistance when used as armor.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
@@ -388,7 +388,7 @@ ItemEnchant.database = Database.new(
         ItemEnchant.new(
             data : {
                 name : 'Toxic',
-                description : 'The material its made has been made poisonous. Gives it a poison aspect when used as a weapon, and gives poison resistance when used as armor.',
+                description : 'The material its made has been made poisonous. Grants a poison aspect to attacks and gives poison resistance when used as armor.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
@@ -405,7 +405,7 @@ ItemEnchant.database = Database.new(
         ItemEnchant.new(
             data : {
                 name : 'Shimmering',
-                description : 'The material its made of glows softly. Gives it a light aspect when used as a weapon, and gives dark resistance when used as armor.',
+                description : 'The material its made of glows softly. Grants a light aspect to attacks and gives dark resistance when used as armor.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
@@ -422,7 +422,7 @@ ItemEnchant.database = Database.new(
         ItemEnchant.new(
             data : {
                 name : 'Dark',
-                description : 'The material its made of is very dark. Gives it a dark aspect when used as a weapon, and gives light resistance when used as armor.',
+                description : 'The material its made of is very dark. Grants a dark aspect to attacks and gives light resistance when used as armor.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,

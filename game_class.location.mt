@@ -298,6 +298,14 @@ Location.Base.database = Database.new(
             maxOccupants : 0,
             
             onInteract ::(location) {
+                // i THINK this is exploitable
+                if (location.ownedBy != empty && location.inventory.isEmpty)
+                    [0, 2+(Number.random()*4)->ceil]->for(do:::(i) {
+                        // no weight, as the value scales
+                        location.inventory.add(item:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
+                        .new(from:location.ownedBy, rngEnchantHint:true));
+                    });
+            
                 return true;
 
             },            
@@ -305,8 +313,7 @@ Location.Base.database = Database.new(
             onCreate ::(location) {
                 @:Profession = import(module:'game_class.profession.mt');
             
-                location.ownedBy.profession = Profession.Base.database.find(name:'Farmer').new();
-            
+                location.ownedBy.profession = Profession.Base.database.find(name:'Farmer').new();                
             },
                         
             onTimeChange ::(location, time) {
@@ -352,6 +359,16 @@ Location.Base.database = Database.new(
             maxOccupants : 0,
             
             onInteract ::(location) {
+            
+                // i THINK this is exploitable
+                if (location.ownedBy != empty && location.inventory.isEmpty)
+                    [0, 2+(Number.random()*4)->ceil]->for(do:::(i) {
+                        // no weight, as the value scales
+                        location.inventory.add(item:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
+                        .new(from:location.ownedBy, rngEnchantHint:true));
+                    });
+            
+            
                 return true;
 
             },            

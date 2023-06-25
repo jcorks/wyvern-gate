@@ -389,7 +389,7 @@
                     }; 
 
 
-                    if (alliesWin) ::<= {            
+                    if (alliesWin == true) ::<= {            
 
                         @exp = 0;
                         enemies_->foreach(do:::(index, enemy) {

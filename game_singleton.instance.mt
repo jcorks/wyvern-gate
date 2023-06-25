@@ -34,7 +34,7 @@
     return (xd**2 + yd**2)**0.5;
 };
 @:JSON = import(module:'Matte.Core.JSON');
-@:VERSION = '0.1.4a';
+@:VERSION = '0.1.4b';
 @world = import(module:'game_singleton.world.mt');
 
 return class(
@@ -52,33 +52,38 @@ return class(
         
         
         @:aggress::(location, party) {
-            @choice = windowEvent.queueChoicesNow(
+            windowEvent.queueChoices(
                 prompt: 'Aggress how?',
                 choices: location.base.aggressiveInteractions,
-                canCancel : true
-            );
-            
-            when(choice == 0) empty;
-            
-            when (location.landmark.peaceful && (windowEvent.queueChoicesNow(
-                prompt: 'Are you sure?',
-                choices: ['Yes', 'No']
-            ) == 2)) empty;
-            
-            
+                canCancel : true,
+                onChoice ::(choice) {
+                    when(choice == 0) empty;
+
+
+                    @:interaction = Interaction.database.find(name:
+                        location.base.aggressiveInteractions[choice-1]
+                    );
+                    
+                    when (!location.landmark.peaceful) ::<= {
+                        interaction.onInteract(location, party);                    
+                    };
                         
-            @:interaction = Interaction.database.find(name:
-                location.base.aggressiveInteractions[choice-1]
+                    
+                    windowEvent.queueAskBoolean(
+                        prompt: 'Are you sure?',
+                        onChoice::(which) {
+                            when(which == false) empty;
+                            interaction.onInteract(location, party);                    
+                            
+                            if (location.landmark.peaceful) ::<= {
+                                location.landmark.peaceful = false;
+                                windowEvent.queueMessage(text:'The people here are now aware of your aggression.');
+                            };                
+                                                    
+                        }
+                    );
+                }
             );
-            
-            interaction.onInteract(location, party);
-
-            if (location.landmark.peaceful) ::<= {
-                location.landmark.peaceful = false;
-                windowEvent.queueMessage(text:'The people here are now aware of your aggression.');
-            };
-
-            
         };
         
         @:systemMenu :: {
@@ -258,6 +263,21 @@ return class(
                                         // every 5 steps, heal 1% HP
                                         if (stepCount % 15 == 0) 
                                             party.members->foreach(do:::(i, member) <- member.heal(amount:(member.stats.HP * 0.01)->ceil));
+
+
+                                        stepsSinceLast += 1;
+                                        if (landmark.peaceful == false) ::<= {
+                                            if (stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
+                                                island.addEvent(
+                                                    event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
+                                                        island, party, landmark //, currentTime
+                                                    )
+                                                );
+                                                stepsSinceLast = 0;
+                                            };
+                                        };
+
+
                                         
                                         // cancel if we've arrived somewhere
                                         @:arrival = landmark.map.getNamedItemsUnderPointer();

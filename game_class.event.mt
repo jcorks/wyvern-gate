@@ -515,7 +515,8 @@ Event.Base.database = Database.new(
                                             amount:member.stats.AP * (0.1),
                                             damageType : Damage.TYPE.PHYS,
                                             damageClass: Damage.CLASS.AP
-                                        )
+                                        ),
+                                        dodgeable:false
                                     );
                                 });
                             
@@ -587,9 +588,11 @@ Event.Base.database = Database.new(
                                             'The party sets up camp, and sleeps for a brief time.'   
                                         ]
                                         
-                                ),
-
-                                onNext ::{
+                                )
+                            );
+                            
+                            windowEvent.noDisplay(
+                                onLeave::{
                                     @:world = import(module:'game_singleton.world.mt');
                                     [0, 5*3]->for(do:::(i) {
                                         world.stepTime();
@@ -746,9 +749,7 @@ Event.Base.database = Database.new(
                         ];
                         out->foreach(do:::(i, e) <- e.anonymize());
                         return out;
-                    } else 
-                        match(event.landmark.base.name) {
-                          ('town')::<={
+                    } else (if (event.landmark.base.guarded) ::<= {
                             
                             // not only do these places have guards, but the guards are 
                             // equipped with standard gear.
@@ -764,11 +765,12 @@ Event.Base.database = Database.new(
                             e->foreach(do:::(index, guard) {
                                 guard.equip(
                                     item:Item.Base.database.find(
-                                        name:'Polearm'
+                                        name:'Halberd'
                                     ).new(
                                         from:guard, 
-                                        modHint:'Standard',
-                                        materialHint: 'Mythril'
+                                        qualityHint:'Standard',
+                                        materialHint: 'Mythril',
+                                        rngEnchantHint: true
                                     ),
                                     slot: Entity.EQUIP_SLOTS.HAND_R,
                                     silent:true, 
@@ -780,8 +782,9 @@ Event.Base.database = Database.new(
                                         name:'Plate Armor'
                                     ).new(
                                         from:guard, 
-                                        modHint:'Standard',
-                                        materialHint: 'Mythril'
+                                        qualityHint:'Standard',
+                                        materialHint: 'Mythril',
+                                        rngEnchantHint: true
                                     ),
                                     slot: Entity.EQUIP_SLOTS.ARMOR,
                                     silent:true, 
@@ -790,8 +793,11 @@ Event.Base.database = Database.new(
                                 guard.anonymize();
                             });
                             
+                            windowEvent.queueMessage(speaker:e.name, text:'There they are!');
+                            
+                            
                             return e;
-                          },
+                          } else empty);/*,
                             
                             
                           default: match(true) {
@@ -812,9 +818,9 @@ Event.Base.database = Database.new(
                                     island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.05)->floor),
                                     island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.05)->floor)                                                      
                               ]
-                          }
-                        }
-                    ;
+                          }*/
+                        
+                    when(enemies == empty) 0;
 
 
                     @:world = import(module:'game_singleton.world.mt');
@@ -825,7 +831,14 @@ Event.Base.database = Database.new(
                         allies: party.members,
                         enemies,
                         landmark: {},
-                        onEnd::(result){}
+                        onEnd::(result){
+                        
+                            if (Battle.RESULTS.ENEMIES_WIN)::<= {
+                                breakpoint();
+                                windowEvent.jumpToTag(name:'MainMenu', clearResolve:true);
+                            };
+
+                        }
                     );
                 
                     

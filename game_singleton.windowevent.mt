@@ -88,8 +88,7 @@
         @onInput;
         @isCursor = true;
         @choiceStack = [];
-        @:nextResolve = [];
-        @:afterResolve = [];
+        @nextResolve = [];
     
     
         @:renderThis ::(data => Object, selfRender) {
@@ -146,6 +145,11 @@
                   (CHOICE_MODE.CURSOR_MOVE):    commitInput_cursorMove(data:val, input),
                   (CHOICE_MODE.NODISPLAY):      commitInput_noDisplay(data:val, input)
                 };        
+                
+                // event callbacks mightve bonked out 
+                // this current val. Double check 
+                if (choiceStack->findIndex(value:val) == -1)
+                    continue = false;
             };
             // true means done
             if (continue == true || choiceStack->keycount == 0) ::<= {
@@ -162,12 +166,7 @@
                 @:cbs = nextResolve[0];
                 nextResolve->remove(key:0);
                 cbs->foreach(do:::(i, cb) <- cb());
-            } else
-                if (afterResolve->keycount) ::<= {
-                    @:cbs = afterResolve[0];
-                    afterResolve->remove(key:0);
-                    cbs->foreach(do:::(i, cb) <- cb());
-                }; 
+            };
         };
 
 
@@ -719,15 +718,15 @@
             },
 
             // pops all choices in the stack until the tag is hit.
-            jumpToTag::(name => String, goBeforeTag, doResolveNext) {
+            jumpToTag::(name => String, goBeforeTag, doResolveNext, clearResolve) {
                 [::] {
                     forever(do::{
                         if (choiceStack->keycount == 0)
                             error(detail:'jumpToTag() could not find a dialogue tag with name ' + name);
                             
                         @:data = choiceStack[choiceStack->keycount-1];
-                        data.keep = false;
                         if (data.jumpTag != name) ::<= {
+                            data.keep = false;
                             next(dontResolveNext:true);
                         } else 
                             send();
@@ -741,9 +740,15 @@
                 };
                 canvas.commit();                
                 choiceStack[choiceStack->keycount-1].rendered = empty;
+                if (clearResolve) ::<= {
+                    nextResolve = [];
+                };
+
+
                 if (doResolveNext) ::<={
                     resolveNext();
                 };
+                
                     
                 this.commitInput();
             },

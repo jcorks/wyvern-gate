@@ -90,6 +90,10 @@ return class(
                 }
             },
             
+            isEmpty : {
+                get ::<- items->keycount == 0
+            },
+            
             isFull : {
                 get :: <- items->keycount >= maxItems
             },
