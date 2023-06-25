@@ -52,7 +52,7 @@ Interaction.database = Database.new(
                 displayName : 'Exit',
                 onInteract ::(location, party) {
                     when (location.landmark.peaceful == false && (location.landmark.name == 'town' || location.landmark.name == 'city')) ::<= {
-                        windowEvent.message(
+                        windowEvent.queueMessage(
                             speaker: '???',
                             text: "There they are!!"
                         );
@@ -91,7 +91,7 @@ Interaction.database = Database.new(
                 name : 'examine',
                 onInteract ::(location, party) {
                     // jumps to the prev menu lock
-                    windowEvent.message(speaker:location.name, text:location.description);             
+                    windowEvent.queueMessage(speaker:location.name, text:location.description);             
                 }
             }
         ),
@@ -102,7 +102,7 @@ Interaction.database = Database.new(
                 name : 'vandalize',
                 onInteract ::(location, party) {
                     // jumps to the prev menu lock
-                    windowEvent.message(text:'You try to vandalize the location, but you do a poor job.');             
+                    windowEvent.queueMessage(text:'You try to vandalize the location, but you do a poor job.');             
                 }
             }
         ),
@@ -133,11 +133,11 @@ Interaction.database = Database.new(
                     });
                     
                     when (choices->keycount == 0)
-                        windowEvent.message(text:'No one is within the ' + location.base.name);             
+                        windowEvent.queueMessage(text:'No one is within the ' + location.base.name);             
 
                     @talkee;
                     
-                    windowEvent.choices(
+                    windowEvent.queueChoices(
                         prompt: 'Talk to whom?',
                         choices : [...choices]->map(to:::(value) <- value.name),
                         canCancel : true,
@@ -169,22 +169,22 @@ Interaction.database = Database.new(
                 name : 'drink:tavern',
                 onInteract ::(location, party) {
                     when (location.landmark.peaceful == false) ::<= {
-                        windowEvent.message(
+                        windowEvent.queueMessage(
                             speaker: 'Bartender',
                             text: "Nope. Not servin' ya. Get out."
                         );
                     };
                     
-                    windowEvent.askBoolean(
+                    windowEvent.queueAskBoolean(
                         prompt: 'Buy a drink? (1G)',
                         onChoice::(which) {
                             when(which  == false) empty; 
                     when (party.inventory.gold < 5)
-                        windowEvent.message(text:'Not enough gold...');
+                        windowEvent.queueMessage(text:'Not enough gold...');
                     
                         party.inventory.subtractGold(amount:5);
                         
-                        windowEvent.message(
+                        windowEvent.queueMessage(
                             text: random.pickArrayItem(list:
                                 [
                                     'The frothy drink calms your soul.',
@@ -208,28 +208,29 @@ Interaction.database = Database.new(
                         match(true) {
                           // normal
                           (chance < 0.8)::<= {
-                            windowEvent.message(
+                            windowEvent.queueMessage(
                                 text:'Someone sits next to you.'
                             );   
                             
                             @:talkee = location.landmark.island.newInhabitant();
                             talkee.interactPerson(
                                 party,
-                                location
+                                location,
+                                onDone::{
+                                    windowEvent.queueMessage(text:'You finish your drink.');                                
+                                }
                             );
-                            
-                            windowEvent.message(text:'You finish your drink.');
                           },
 
                           // drunkard
                           (chance < 0.9)::<= {                            
                             @:talkee = location.landmark.island.newInhabitant();
-
-                            windowEvent.message(
+                            talkee.anonymize();
+                            windowEvent.queueMessage(
                                 text:'Someone stumbles toward you...'
                             );
 
-                            windowEvent.message(
+                            windowEvent.queueMessage(
                                 speaker: '???',
                                 text: random.pickArrayItem(
                                     list: [
@@ -247,24 +248,25 @@ Interaction.database = Database.new(
                                 enemies: [talkee],
                                 landmark: {},
                                 onEnd::(result) {
+                                    breakpoint();
                                     when(result == Battle.RESULTS.ENEMIES_WIN)
                                         windowEvent.jumpToTag(name:'MainMenu');
                                 
                                     if (talkee.isDead) ::<= {
-                                        windowEvent.message(
+                                        windowEvent.queueMessage(
                                             speaker: 'Bartender',
                                             text:"You killed 'em...?"
                                         );                            
-                                        windowEvent.message(
+                                        windowEvent.queueMessage(
                                             speaker: 'Bartender',
                                             text:"*sigh*"
                                         );                            
-                                        windowEvent.message(
+                                        windowEvent.queueMessage(
                                             text:'The guards are alerted of the death.'
                                         );                            
                                         location.landmark.peaceful = false;
                                     } else ::<= {
-                                        windowEvent.message(
+                                        windowEvent.queueMessage(
                                             speaker: 'Bartender',
                                             text:'Gah, what a drunk. Sorry \'bout that.'
                                         );                            
@@ -277,7 +279,7 @@ Interaction.database = Database.new(
                           },
                           
                           default: 
-                            windowEvent.message(
+                            windowEvent.queueMessage(
                                 text:'The drink is enjoyed in solitude.'
                             )
                           
@@ -304,10 +306,10 @@ Interaction.database = Database.new(
 
                     @:miners = party.members->filter(by:::(value) <- value.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L).base.name == 'Pickaxe');
                     when(miners->keycount == 0)
-                        windowEvent.message(text:'No party member has a pickaxe equipped. Ore cannot be mined.');
+                        windowEvent.queueMessage(text:'No party member has a pickaxe equipped. Ore cannot be mined.');
 
                     when (location.data.charges <= 0)
-                        windowEvent.message(text:'The ore vein is depleted...');
+                        windowEvent.queueMessage(text:'The ore vein is depleted...');
                         
 
                     
@@ -315,17 +317,17 @@ Interaction.database = Database.new(
                     
 
                     @:mining ::(miner) {
-                        windowEvent.message(text:'*clank clank*');
+                        windowEvent.queueMessage(text:'*clank clank*');
 
                         if (Number.random() > 0.9) ::<= {
-                            windowEvent.message(speaker:miner.name, text:'Oh...?');
+                            windowEvent.queueMessage(speaker:miner.name, text:'Oh...?');
 
                             @:item = Item.Base.database.find(name:'Ore').new(from:miner);
                             
-                            windowEvent.message(text:'The party obtained some Ore!');     
+                            windowEvent.queueMessage(text:'The party obtained some Ore!');     
 
                             when (party.inventory.isFull) ::<= {
-                                windowEvent.message(text:'The party\'s inventory is full...');     
+                                windowEvent.queueMessage(text:'The party\'s inventory is full...');     
                                 send();
                             };
                             party.inventory.add(item);
@@ -334,15 +336,15 @@ Interaction.database = Database.new(
                             location.data.charges -= 1;      
                             
                             when (location.data.charges <= 0) ::<= {
-                                windowEvent.message(text:'The ore vein is depleted...');
+                                windowEvent.queueMessage(text:'The ore vein is depleted...');
                                 send();
                             };
                             
                         } else ::<= {
-                            windowEvent.message(text:'Nothing yet...');
+                            windowEvent.queueMessage(text:'Nothing yet...');
 
                         };
-                        windowEvent.askBoolean(
+                        windowEvent.queueAskBoolean(
                             prompt:'Continue?',
                             onChoice::(which) {
                                 when(which == true)
@@ -352,7 +354,7 @@ Interaction.database = Database.new(
                     };
                     
                     
-                    windowEvent.choices(
+                    windowEvent.queueChoices(
                         prompt: 'Who will mine?',
                         choices: minerNames,
                         canCancel : true,
@@ -377,13 +379,13 @@ Interaction.database = Database.new(
                     @:ores = party.inventory.items->filter(by:::(value) <- value.base.name == 'Ore');
                     
                     when(ores->keycount < 2)
-                        windowEvent.message(text: 'The party doesn\'t have enough ore to smelt into ingots. 2 units of ore are required per ingot.');
+                        windowEvent.queueMessage(text: 'The party doesn\'t have enough ore to smelt into ingots. 2 units of ore are required per ingot.');
 
                     party.inventory.remove(item:ores[0]);
                     party.inventory.remove(item:ores[1]);
                     
                     @:metal = Item.Base.database.getRandomWeightedFiltered(filter:::(value) <- value.hasAttribute(attribute:Item.ATTRIBUTE.RAW_METAL)).new();                        
-                    windowEvent.message(text: 'Smelted 2 ore chunks into ' + correctA(word:metal.name) + '!');
+                    windowEvent.queueMessage(text: 'Smelted 2 ore chunks into ' + correctA(word:metal.name) + '!');
                     party.inventory.add(item:metal);                    
                         
                 }
@@ -398,7 +400,7 @@ Interaction.database = Database.new(
                 name : 'sell:shop',
                 onInteract ::(location, party) {
                     when (location.landmark.peaceful == false && location.ownedBy != empty) ::<= {
-                        windowEvent.message(
+                        windowEvent.queueMessage(
                             speaker: location.ownedBy.name,
                             text: "You're not welcome here!!"
                         );
@@ -424,14 +426,14 @@ Interaction.database = Database.new(
 
                     @:world = import(module:'game_singleton.world.mt');
                     when (world.time < world.TIME.MORNING || world.time > world.TIME.EVENING)
-                        windowEvent.message(text: 'The shop appears to be closed at this hour..');                            
+                        windowEvent.queueMessage(text: 'The shop appears to be closed at this hour..');                            
 
 
                     @:doAct ::{
                         @items = party.inventory.items;
                         
                         when(items->keycount == 0) ::<= {
-                            windowEvent.message(text: "The inventory is empty.");
+                            windowEvent.queueMessage(text: "The inventory is empty.");
                         };                                
                         
                         //@basePrices = [...items]->map(to:::(value) <- (((value.price * 0.4)/5)->ceil)*5); // compiler bug here if uncomment
@@ -446,7 +448,7 @@ Interaction.database = Database.new(
                             choices->push(value: item.name + '(' + basePrices[index] + 'G)');
                         });
                         
-                        windowEvent.choices(
+                        windowEvent.queueChoices(
                             choices,
                             prompt: 'Sell which? (current: ' + party.inventory.gold + 'G)',
                             canCancel : true,
@@ -456,7 +458,7 @@ Interaction.database = Database.new(
                                 @item = items[choice-1];
                                 @price = basePrices[choice-1];
                                 
-                                windowEvent.message(text: 'Sold the ' + item.name + ' for ' + price + 'G');
+                                windowEvent.queueMessage(text: 'Sold the ' + item.name + ' for ' + price + 'G');
 
                                 party.inventory.addGold(amount:price);
                                 party.inventory.remove(item);
@@ -483,7 +485,7 @@ Interaction.database = Database.new(
                 name : 'buy:shop',
                 onInteract ::(location, party) {
                     when (location.landmark.peaceful == false && location.ownedBy != empty) ::<= {
-                        windowEvent.message(
+                        windowEvent.queueMessage(
                             speaker: location.ownedBy.name,
                             text: "You're not welcome here!!"
                         );
@@ -509,7 +511,7 @@ Interaction.database = Database.new(
                     @:world = import(module:'game_singleton.world.mt');
                     
                     when (world.time < world.TIME.MORNING || world.time > world.TIME.EVENING)
-                        windowEvent.message(text: 'The shop appears to be closed at this hour..');                            
+                        windowEvent.queueMessage(text: 'The shop appears to be closed at this hour..');                            
  
                     
                     
@@ -526,7 +528,7 @@ Interaction.database = Database.new(
                             choices->push(value: item.name + '(' + basePrices[index] + 'G)');
                         });
                         
-                        windowEvent.choices(
+                        windowEvent.queueChoices(
                             choices,
                             prompt: 'Buy which? (current: ' + party.inventory.gold + 'G)',
                             canCancel : true,
@@ -536,7 +538,7 @@ Interaction.database = Database.new(
                                 @item = items[choice-1];
                                 @price = basePrices[choice-1];
                                 
-                                windowEvent.choices(
+                                windowEvent.queueChoices(
                                     prompt: item.name,
                                     choices: ['Buy', 'Compare Equipment'],
                                     canCancel: true,
@@ -547,20 +549,20 @@ Interaction.database = Database.new(
                                           // buy
                                           (0)::<= {
                                             when(world.party.inventory.isFull) ::<= {
-                                                windowEvent.message(text: 'The party\'s inventory is full.');
+                                                windowEvent.queueMessage(text: 'The party\'s inventory is full.');
                                             };
                                                 
                                             
-                                            when(!party.inventory.subtractGold(amount:price)) windowEvent.message(text:'The party cannot afford this.');
+                                            when(!party.inventory.subtractGold(amount:price)) windowEvent.queueMessage(text:'The party cannot afford this.');
                                             location.inventory.remove(item);
                                             
                                             if (item.base.name == 'Wyvern Key' && world.storyFlags.foundFirstKey == false) ::<= {
                                                 location.landmark.island.world.storyFlags.foundFirstKey = true;
-                                                windowEvent.message(
+                                                windowEvent.queueMessage(
                                                     speaker:location.ownedBy.name,
                                                     text: 'Going up the strata, eh? Best of luck to ye. Those wyverns are pretty ruthless.'
                                                 );
-                                                windowEvent.message(
+                                                windowEvent.queueMessage(
                                                     speaker:location.ownedBy.name,
                                                     text: 'Though, can\'t say I\'m not curious what lies at the top...'
                                                 );
@@ -568,14 +570,14 @@ Interaction.database = Database.new(
                                             };
                                             
                                             
-                                            windowEvent.message(text: 'Bought ' + correctA(word:item.name));
+                                            windowEvent.queueMessage(text: 'Bought ' + correctA(word:item.name));
                                             party.inventory.add(item);                              
                                           },
                                           
                                           // compare 
                                           (1)::<= {
                                             @:memberNames = [...party.members]->map(to:::(value) <- value.name);
-                                            @:choice = windowEvent.choices(
+                                            @:choice = windowEvent.queueChoices(
                                                 prompt: 'Compare equipment for whom?',
                                                 choices: memberNames,
                                                 onChoice::(choice) {
@@ -618,7 +620,7 @@ Interaction.database = Database.new(
 
                     @:items = party.inventory.items->filter(by:::(value) <- value.base.hasAttribute(attribute:Item.ATTRIBUTE.RAW_METAL));
                     when(items->keycount == 0)
-                        windowEvent.message(text:'No suitable ingots or materials were found in the party inventory.');
+                        windowEvent.queueMessage(text:'No suitable ingots or materials were found in the party inventory.');
 
 
                     @charge = false;
@@ -628,7 +630,7 @@ Interaction.database = Database.new(
                        
                         @:itemNames = [...items]->map(to:::(value) <- value.name);
         
-                        windowEvent.choices(
+                        windowEvent.queueChoices(
                             prompt: 'Which material?',
                             choices: itemNames,
                             canCancel: true,
@@ -643,7 +645,7 @@ Interaction.database = Database.new(
                                 );
 
                                 @:outputBase = random.pickArrayItem(list:toMake);
-                                when(windowEvent.askBoolean(
+                                when(windowEvent.queueAskBoolean(
                                     prompt:'Smith with ' + ore.base.name + '?',
                                     onChoice::(which) {
                                     
@@ -659,16 +661,19 @@ Interaction.database = Database.new(
                                     from: smith
                                 );
                                 
-                                windowEvent.message(
+                                windowEvent.queueMessage(
                                     speaker: smith.name,
                                     text: 'No problem!'
                                 );
                                 
-                                windowEvent.message(
-                                    text:smith.name + ' forged a ' + output.name,
-                                    onNext ::{
+                                windowEvent.queueMessage(
+                                    text:smith.name + ' forged a ' + output.name
+                                );
+                                
+                                windowEvent.queueNoDisplay(
+                                    onEnter ::{
                                         party.inventory.remove(item:ore);
-                                        party.inventory.add(item:output);                                                                    
+                                        party.inventory.add(item:output);                                                                                                        
                                     }
                                 );
                             }
@@ -678,21 +683,21 @@ Interaction.database = Database.new(
                 
                     @:smiths = party.members->filter(by:::(value) <- value.profession.base.name == 'Blacksmith');
                     if (smiths->keycount == 0) ::<= {
-                        windowEvent.message(text:'No one in your party can work the forge (no one is a Blacksmith)');
+                        windowEvent.queueMessage(text:'No one in your party can work the forge (no one is a Blacksmith)');
 
                         @:world = import(module:'game_singleton.world.mt');
                         when (world.time < world.TIME.MORNING || world.time > world.TIME.EVENING)                            
-                            windowEvent.message(text:'The blacksmith here would normally be able to forge for you, but the blacksmith is gone for the night.');
+                            windowEvent.queueMessage(text:'The blacksmith here would normally be able to forge for you, but the blacksmith is gone for the night.');
 
-                        windowEvent.message(text:'The blacksmith offers to work the forge for you.');
+                        windowEvent.queueMessage(text:'The blacksmith offers to work the forge for you.');
 
 
-                        windowEvent.askBoolean(
+                        windowEvent.queueAskBoolean(
                             prompt: 'Hire to forge for 300G?',
                             onChoice::(which) {
                                 when(which == false) empty;
                                 when(party.inventory.gold < 300)
-                                    windowEvent.message(text:'The party cannot afford to pay the blacksmith.');
+                                    windowEvent.queueMessage(text:'The party cannot afford to pay the blacksmith.');
                                 
                                 smith = location.ownedBy;
                                 charge = true;
@@ -702,7 +707,7 @@ Interaction.database = Database.new(
                     } else ::<= {                            
                         @:names = [...smiths]->map(to:::(value) <- value.name);
                         
-                        windowEvent.choices(
+                        windowEvent.queueChoices(
                             prompt: 'Who should work the forge?',
                             choices: names,
                             canCancel: true,
@@ -710,7 +715,7 @@ Interaction.database = Database.new(
                                 when(choice == 0) empty;
                                 @:hammer = smiths[choice-1].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
                                 when (hammer == empty || hammer.base.name != 'Hammer')
-                                    windowEvent.message(text:'Smithing requires a Hammer to be equipped.');
+                                    windowEvent.queueMessage(text:'Smithing requires a Hammer to be equipped.');
 
 
                                 smith = smiths[choice-1];
@@ -744,20 +749,23 @@ Interaction.database = Database.new(
                             
                     });
                     when(keys->keycount == 0)
-                        windowEvent.message(text:'Entering a gate requires a key. The party has none.');
+                        windowEvent.queueMessage(text:'Entering a gate requires a key. The party has none.');
                         
                     
                         
-                    windowEvent.choices(
+                    windowEvent.queueChoices(
                         prompt: 'Enter with which?',
                         choices: keynames,
                         canCancel: true,
                         onChoice:::(choice) {
                             when(choice == 0) empty;
                             canvas.clear();
-                            windowEvent.message(text:'As the key is pushed in, the gate gently whirrs and glows with a blinding light...');
-                            windowEvent.message(text:'As you enter, you feel the world around you fade.');
-                            windowEvent.message(text:'...', onNext::{
+                            windowEvent.queueMessage(text:'As the key is pushed in, the gate gently whirrs and glows with a blinding light...');
+                            windowEvent.queueMessage(text:'As you enter, you feel the world around you fade.');
+                            windowEvent.queueMessage(text:'...');
+                            
+                            windowEvent.queueNoDisplay( 
+                                onEnter::{
                                 @:Event = import(module:'game_class.event.mt');
                                 @:Landmark = import(module:'game_class.landmark.mt');
                                 @:world = import(module:'game_singleton.world.mt');
@@ -820,7 +828,7 @@ Interaction.database = Database.new(
                     };
 
                     canvas.clear();
-                    windowEvent.message(text:'The party travels to the next floor.');
+                    windowEvent.queueMessage(text:'The party travels to the next floor.');
                     
                     
                     @:instance = import(module:'game_singleton.instance.mt');
@@ -881,7 +889,7 @@ Interaction.database = Database.new(
                     // the steal attempt happens first before items 
                     //
                     if (location.ownedBy != empty) ::<= {
-                        windowEvent.message(
+                        windowEvent.queueMessage(
                             speaker: location.ownedBy.name,
                             text: "What do you think you're doing?!"
                         );
@@ -906,14 +914,14 @@ Interaction.database = Database.new(
                     };
                     
                     when (location.inventory.items->keycount == 0) ::<= {
-                        windowEvent.message(text: "There was nothing to steal.");                            
+                        windowEvent.queueMessage(text: "There was nothing to steal.");                            
                     };
                     
                     @:item = random.pickArrayItem(list:location.inventory.items);
-                    windowEvent.message(text:'Stole ' + item.name);
+                    windowEvent.queueMessage(text:'Stole ' + item.name);
 
                     when(party.inventory.isFull) ::<= {
-                        windowEvent.message(text: '...but the party\'s inventory was full.');
+                        windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
                     };
 
 
@@ -934,39 +942,47 @@ Interaction.database = Database.new(
                 
                     @:cost = (level * (party.members->keycount)) * 2;
                 
-                    when(windowEvent.askBoolean(
-                        prompt: 'Rest for ' + cost + 'G?'
-                    ) == false) empty;
+                    windowEvent.queueAskBoolean(
+                        prompt: 'Rest for ' + cost + 'G?',
+                        onChoice::(which) {
+                            when(which == false) empty;
 
-                    when(party.inventory.gold < cost)
-                        windowEvent.message(text:'Not enough gold...');
+                            when(party.inventory.gold < cost)
+                                windowEvent.queueMessage(text:'Not enough gold...');
 
-                    party.inventory.subtractGold(amount:cost);
+                            party.inventory.subtractGold(amount:cost);
 
-                    canvas.pushState();
-                    canvas.clear();
-                    windowEvent.message(
-                        text: 'A restful slumber is welcomed...'
-                    );                    
-                    canvas.popState();
-                    // get those refreshing 7 hours!
-                    @:world = import(module:'game_singleton.world.mt');
-                    [::] {
-                        forever(do:::{
-                            world.stepTime();
-                            if (world.time == world.TIME.MORNING)
-                                send();                        
-                        });
-                    };
 
-                    windowEvent.message(
-                        text: 'The party is refreshed.'
+                            windowEvent.queueMessage(
+                                text: 'A restful slumber is welcomed...',
+                                renderable : {
+                                    render::<- canvas.blackout()
+                                }
+                            );                    
+
+
+
+                            // get those refreshing 7 hours!
+                            @:world = import(module:'game_singleton.world.mt');
+                            [::] {
+                                forever(do:::{
+                                    world.stepTime();
+                                    if (world.time == world.TIME.MORNING)
+                                        send();                        
+                                });
+                            };
+
+                            windowEvent.queueMessage(
+                                text: 'The party is refreshed.'
+                            );
+
+                            party.members->foreach(do:::(i, member) {
+                                member.rest();
+                            });      
+
+
+                        }
                     );
-
-                    party.members->foreach(do:::(i, member) {
-                        member.rest();
-                    });                                    
-
                 },
             }
         ),
@@ -981,7 +997,7 @@ Interaction.database = Database.new(
                         names->push(value:member.name);
                     });
                     
-                    @choice = windowEvent.choicesNow(
+                    @choice = windowEvent.queueChoicesNow(
                         leftWeight: 1,
                         topWeight: 1,
                         choices: names,
@@ -995,11 +1011,11 @@ Interaction.database = Database.new(
                     @cost = ((whom.level + whom.stats.sum/30)*10)->ceil;
 
                     when(whom.profession.base.name == location.ownedBy.profession.base.name)
-                        windowEvent.message(
+                        windowEvent.queueMessage(
                             text: whom.name + ' is already ' + correctA(word:location.ownedBy.profession.base.name) + '.'
                         );
                     
-                    windowEvent.message(
+                    windowEvent.queueMessage(
                         text:
                             'Profession: ' + location.ownedBy.profession.base.name + '\n\n' +
                             location.ownedBy.profession.base.description + '\n' +
@@ -1007,25 +1023,25 @@ Interaction.database = Database.new(
                     );
 
 
-                    windowEvent.message(
+                    windowEvent.queueMessage(
                         text: 'Changing ' + whom.name + "'s profession from " + whom.profession.base.name + ' to ' + location.ownedBy.profession.base.name + ' will cost ' + cost + 'G.'
 
                     );
 
                     when(party.inventory.gold < cost)
-                        windowEvent.message(
+                        windowEvent.queueMessage(
                             text: 'The party cannot afford this.'
                         );
 
 
-                    when (windowEvent.askBoolean(
+                    when (windowEvent.queueAskBoolean(
                         prompt: 'Continue?'
                     ) == false) empty;
 
                     party.inventory.subtractGold(amount:cost);       
                     whom.profession = Profession.Base.database.find(name: location.ownedBy.profession.base.name).new();
 
-                    windowEvent.message(
+                    windowEvent.queueMessage(
                         text: '' + whom.name + " is now " + correctA(word:whom.profession.base.name) + '.'
 
                     );
@@ -1073,18 +1089,18 @@ Interaction.database = Database.new(
                     });
 
 
-                    windowEvent.message(
+                    windowEvent.queueMessage(
                         text:'The croud cheers furiously as the teams get ready.'
                     );
                     
-                    windowEvent.message(
+                    windowEvent.queueMessage(
                         speaker:'Announcer',
                         text:'The next match is about to begin! Here we have "' + teamAname + '" up against "' + teamBname + '"! Place your bets!'
                     );
                     
                     
 
-                    windowEvent.choices(
+                    windowEvent.queueChoices(
                         choices: [
                             teamAname + ' stats',
                             teamBname + ' stats',
@@ -1100,7 +1116,7 @@ Interaction.database = Database.new(
                               // team A examine
                               (0): ::<= {
                                 [0, 3]->for(do:::(i) {
-                                    windowEvent.message(text:teamAname + ' - Member ' + (i+1));
+                                    windowEvent.queueMessage(text:teamAname + ' - Member ' + (i+1));
                                     teamA[i].describe();
                                 });
                               },
@@ -1108,7 +1124,7 @@ Interaction.database = Database.new(
                               // team B examine
                               (1): ::<= {
                                 [0, 3]->for(do:::(i) {
-                                    windowEvent.message(text:teamBname + ' - Member ' + (i+1));
+                                    windowEvent.queueMessage(text:teamBname + ' - Member ' + (i+1));
                                     teamB[i].describe();
                                 });
                               },
@@ -1130,7 +1146,7 @@ Interaction.database = Database.new(
                                     100000,
                                     1000000
                                 ];
-                                @choice = windowEvent.choices(
+                                @choice = windowEvent.queueChoices(
                                     prompt: 'Bet how much? (payout - 2:1)',
                                     choices: [...bets]->map(to:::(value) <- String(from:value)),
                                     canCancel: true,
@@ -1139,9 +1155,9 @@ Interaction.database = Database.new(
                                         bet = bets[choice-1];
                                         
                                         when(party.inventory.gold < bet)
-                                            windowEvent.message(text:'The party cannot afford this bet.');
+                                            windowEvent.queueMessage(text:'The party cannot afford this bet.');
                                             
-                                        choice = windowEvent.choices(
+                                        choice = windowEvent.queueChoices(
                                             prompt: 'Bet on which team?',
                                             choices: [
                                                 teamAname,
@@ -1167,7 +1183,7 @@ Interaction.database = Database.new(
                                                     },
                                                     onTurn ::{
                                                         if (Number.random() < 0.7) ::<= {
-                                                            windowEvent.message(text:random.pickArrayItem(list:[
+                                                            windowEvent.queueMessage(text:random.pickArrayItem(list:[
                                                                 '"YEAH, tear them limb from limb!"',
                                                                 'The croud jeers at team ' + (if (Number.random() < 0.5) teamAname else teamBname) + '.',  
                                                                 'The croud goes silent.',
@@ -1182,12 +1198,12 @@ Interaction.database = Database.new(
                                                         @aWon = result == Battle.RESULTS.ALLIES_WIN;
                                                         windowEvent.jumpToTag(name:'Bet', goBeforeTag:true);
                                                         if (aWon) ::<= {
-                                                            windowEvent.message(
+                                                            windowEvent.queueMessage(
                                                                 text: teamAname + ' wins!'
                                                             );                                    
                                                         
                                                         } else ::<= {
-                                                            windowEvent.message(
+                                                            windowEvent.queueMessage(
                                                                 text: teamBname + ' wins!'
                                                             );                                    
                                                         };
@@ -1195,12 +1211,12 @@ Interaction.database = Database.new(
                                                         
                                                         // payout
                                                         if ((betOnA && aWon) || (!betOnA && !aWon)) ::<= {
-                                                            windowEvent.message(
+                                                            windowEvent.queueMessage(
                                                                 text:'The party won ' + (bet)->floor + 'G.'
                                                             );                                    
                                                             party.inventory.addGold(amount:(bet)->floor);
                                                         } else ::<= {
-                                                            windowEvent.message(
+                                                            windowEvent.queueMessage(
                                                                 text:'The party lost ' + bet + 'G.'
                                                             );                                    
                                                             party.inventory.subtractGold(amount:bet);
@@ -1240,16 +1256,16 @@ Interaction.database = Database.new(
                 onInteract ::(location, party) {
                     @:world = import(module:'game_singleton.world.mt');
                     when(location.inventory.items->keycount == 0)
-                        windowEvent.message(text:'The chest was empty.');
+                        windowEvent.queueMessage(text:'The chest was empty.');
                     
-                    windowEvent.message(text:'The party opened the chest...');
+                    windowEvent.queueMessage(text:'The party opened the chest...');
                     
                     when(world.party.inventory.isFull) ::<= {
-                        windowEvent.message(text: '...but the party\'s inventory was full.');
+                        windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
                     };
                     
                     location.inventory.items->foreach(do:::(i, item) {
-                        windowEvent.message(text:'The party found ' + correctA(word:item.name) + '.');
+                        windowEvent.queueMessage(text:'The party found ' + correctA(word:item.name) + '.');
                     });
                     
                     location.inventory.items->foreach(do:::(i, item) {
@@ -1259,7 +1275,7 @@ Interaction.database = Database.new(
 
                 
                     @:amount = (20 + Number.random()*75)->floor;
-                    windowEvent.message(text:'The party found ' + amount + 'G');
+                    windowEvent.queueMessage(text:'The party found ' + amount + 'G');
                     world.party.inventory.addGold(amount);    
 
                 }
@@ -1273,16 +1289,16 @@ Interaction.database = Database.new(
                 onInteract ::(location, party) {
                     @:world = import(module:'game_singleton.world.mt');
                     when(location.inventory.items->keycount == 0)
-                        windowEvent.message(text:location.ownedBy.name + '\'s body contained no items');
+                        windowEvent.queueMessage(text:location.ownedBy.name + '\'s body contained no items');
                     
-                    windowEvent.message(text:'The party looted the body...');
+                    windowEvent.queueMessage(text:'The party looted the body...');
                     
                     when(world.party.inventory.isFull) ::<= {
-                        windowEvent.message(text: '...but the party\'s inventory was full.');
+                        windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
                     };
                     
                     location.inventory.items->foreach(do:::(i, item) {
-                        windowEvent.message(text:'The party found ' + correctA(word:item.name) + '.');
+                        windowEvent.queueMessage(text:'The party found ' + correctA(word:item.name) + '.');
                     });
                     
                     location.inventory.items->foreach(do:::(i, item) {
@@ -1314,9 +1330,9 @@ Interaction.database = Database.new(
                     when(world.storyFlags.data_locationsDiscovered <
                          world.storyFlags.data_locationsNeeded) ::<= {
                         when (world.storyFlags.data_locationsDiscovered == 0)
-                            windowEvent.message(speaker:'Sylvia', text: '"Don\'t forget to visit new locations with the runestone!"');
+                            windowEvent.queueMessage(speaker:'Sylvia', text: '"Don\'t forget to visit new locations with the runestone!"');
 
-                        windowEvent.message(speaker:'Sylvia', text: '"Hmmm according to the stone, I still need ' + (world.storyFlags.data_locationsNeeded - world.storyFlags.data_locationsDiscovered) + ' rune samples."');
+                        windowEvent.queueMessage(speaker:'Sylvia', text: '"Hmmm according to the stone, I still need ' + (world.storyFlags.data_locationsNeeded - world.storyFlags.data_locationsDiscovered) + ' rune samples."');
                     };
                 }
             }
@@ -1330,11 +1346,11 @@ Interaction.database = Database.new(
                     @:tablets = world.party.inventory.items->filter(by:::(value) <- value.base.name->contains(key:'Tablet ('));
                     
                     when (tablets->keycount == 0) ::<= {
-                        windowEvent.message(speaker: 'Sylvia', text: '"No tablets, eh? They are pretty hard to come across. I\'ll be here for you when you have any though!"');
+                        windowEvent.queueMessage(speaker: 'Sylvia', text: '"No tablets, eh? They are pretty hard to come across. I\'ll be here for you when you have any though!"');
                     };
                     
                     @:tabletNames = [...tablets]->map(to:::(value) <- value.name);
-                    @choice = windowEvent.choicesNow(
+                    @choice = windowEvent.queueChoicesNow(
                         choices : tabletNames,
                         prompt: 'Give which?',
                         canCancel : true
@@ -1342,18 +1358,18 @@ Interaction.database = Database.new(
                     when(choice == 0) empty;
                     @:tablet = tablets[choice-1];
                     
-                    when(windowEvent.askBoolean(
+                    when(windowEvent.queueAskBoolean(
                         prompt: 'Give the ' + tablet.name + '?'
                     ) == false) empty;
                     
                     world.party.inventory.remove(item:tablet);
-                    windowEvent.message(speaker: 'Sylvia', text: 'Let\'s see what this one says...');
+                    windowEvent.queueMessage(speaker: 'Sylvia', text: 'Let\'s see what this one says...');
                     @item;
                     
                     
                     match(tablet.name) {
                       ('Tablet (Green)')::<= { 
-                        windowEvent.message(speaker: 'Sylvia', text: 
+                        windowEvent.queueMessage(speaker: 'Sylvia', text: 
                             random.pickArrayItem(list: [
                                 '"Seems to be a personal journal. It\'s stuff like this that reminds me how little we know about the day-to-day"',
                                 '"It\'s a .... shopping list? Wait no that can\'t be right.."',
@@ -1362,7 +1378,7 @@ Interaction.database = Database.new(
                             ])
                         );
                         
-                        windowEvent.message(speaker: 'Sylvia', text: '"Here! Thanks again."');
+                        windowEvent.queueMessage(speaker: 'Sylvia', text: '"Here! Thanks again."');
                         item = Item.Base.database.getRandomFiltered(filter:::(value) <- 
                             value.name->contains(key:' Potion') ||
                             value.name->contains(key:'Ingot')
@@ -1371,13 +1387,13 @@ Interaction.database = Database.new(
 
 
                       ('Tablet (Orange)')::<= {
-                        windowEvent.message(speaker: 'Sylvia', text: 
+                        windowEvent.queueMessage(speaker: 'Sylvia', text: 
                             random.pickArrayItem(list: [
                                 '"Seems to be a historical recounting, or some sort of official record..."',
                             ])
                         );
                         
-                        windowEvent.message(speaker: 'Sylvia', text: '"Here! Thanks again."');
+                        windowEvent.queueMessage(speaker: 'Sylvia', text: '"Here! Thanks again."');
                         item = Item.Base.database.getRandomFiltered(filter:::(value) <- 
                             value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON) &&
                             !value.isUnique
@@ -1386,13 +1402,13 @@ Interaction.database = Database.new(
 
 
                       ('Tablet (Red)')::<= {
-                        windowEvent.message(speaker: 'Sylvia', text: 
+                        windowEvent.queueMessage(speaker: 'Sylvia', text: 
                             random.pickArrayItem(list: [
                                 '"Oh wow. It seems to be some sort of religious text.."',
                             ])
                         );
                         
-                        windowEvent.message(speaker: 'Sylvia', text: '"Here! Thanks again."');
+                        windowEvent.queueMessage(speaker: 'Sylvia', text: '"Here! Thanks again."');
                         item = Item.Base.database.getRandomFiltered(filter:::(value) <- 
                             (value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON) ||
                              value.equipType == Item.TYPE.RING ||
@@ -1405,7 +1421,7 @@ Interaction.database = Database.new(
 
                     item = item.new(from:location.ownedBy);                    
                     world.party.inventory.add(item);
-                    windowEvent.message(speaker:'', text:'The party received ' + correctA(word:item.name) + '!');
+                    windowEvent.queueMessage(speaker:'', text:'The party received ' + correctA(word:item.name) + '!');
                     
                     
                     

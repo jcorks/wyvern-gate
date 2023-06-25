@@ -358,12 +358,12 @@
                 });
                 
                 if (this.stats.SPD < 0) ::<= {
-                    windowEvent.message(text:this.name + ' cannot move due to negative speed!');
+                    windowEvent.queueMessage(text:this.name + ' cannot move due to negative speed!');
                     act = false;
                 };
 
                 if (this.stats.DEX < 0) ::<= {
-                    windowEvent.message(text:this.name + ' fumbles about due to negative dexterity!');
+                    windowEvent.queueMessage(text:this.name + ' fumbles about due to negative dexterity!');
                     act = false;
                 };
 
@@ -514,7 +514,7 @@
                 };
                 
                 when(whiff) ::<= {
-                    windowEvent.message(text:random.pickArrayItem(list:[
+                    windowEvent.queueMessage(text:random.pickArrayItem(list:[
                         this.name + ' lithely dodges ' + from.name + '\'s attack!',                 
                         this.name + ' narrowly dodges ' + from.name + '\'s attack!',                 
                         this.name + ' dances around ' + from.name + '\'s attack!',                 
@@ -538,7 +538,7 @@
                 if (critChance < 0.90) critChance = 0.9;
                 if (Number.random() > critChance) ::<={
                     damage.amount += from.stats.DEX * 2.5;
-                    windowEvent.message(text: 'Critical damage!');
+                    windowEvent.queueMessage(text: 'Critical damage!');
                 };
 
                 damage.amount -= stats.DEF/4;
@@ -569,17 +569,17 @@
                 if (damage.damageClass == Damage.CLASS.HP) ::<= {
                     hp -= damage.amount;
                     if (hp < 0) hp = 0;
-                    windowEvent.message(text: '' + this.name + ' received ' + damage.amount + ' '+damageTypeName() + 'damage (HP:' + this.renderHP() + ')' );
+                    windowEvent.queueMessage(text: '' + this.name + ' received ' + damage.amount + ' '+damageTypeName() + 'damage (HP:' + this.renderHP() + ')' );
                 } else ::<= {
                     ap -= damage.amount;
                     if (ap < 0) ap = 0;                
-                    windowEvent.message(text: '' + this.name + ' received ' + damage.amount + ' AP damage (AP:' + ap + '/' + stats.AP + ')' );
+                    windowEvent.queueMessage(text: '' + this.name + ' received ' + damage.amount + ' AP damage (AP:' + ap + '/' + stats.AP + ')' );
 
                 };
                 @:world = import(module:'game_singleton.world.mt');
 
                 if (world.party.isMember(entity:this) && damage.amount > stats.HP * 0.2 && Number.random() > 0.7)
-                    windowEvent.message(
+                    windowEvent.queueMessage(
                         speaker: this.name,
                         text: '"' + random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.HURT]) + '"'
                     );
@@ -604,14 +604,14 @@
                 
                 
                 if (world.party.isMember(entity:this) && hp == 0 && Number.random() > 0.7) ::<= {
-                    windowEvent.message(
+                    windowEvent.queueMessage(
                         speaker: this.name,
                         text: '"' + random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.DEATH]) + '"'
                     );
                 };
                 
                 if (hp == 0)
-                    windowEvent.message(text: '' + this.name + ' has been knocked out.');                                
+                    windowEvent.queueMessage(text: '' + this.name + ' has been knocked out.');                                
                                 
                 return true;
             },
@@ -627,7 +627,7 @@
                 hp += amount;
                 if (hp > stats.HP) hp = stats.HP;
                 if (silent == empty)
-                    windowEvent.message(text: '' + this.name + ' heals ' + amount + ' HP (HP:' + this.renderHP() + ')');
+                    windowEvent.queueMessage(text: '' + this.name + ' heals ' + amount + ' HP (HP:' + this.renderHP() + ')');
             },
             
             healAP ::(amount => Number, silent) {
@@ -635,7 +635,7 @@
                 ap += amount;
                 if (ap > stats.AP) ap = stats.AP;
                 if (silent == empty)
-                    windowEvent.message(text: '' + this.name + ' heals ' + amount + ' AP (AP:' + ap + '/' + stats.AP + ')');
+                    windowEvent.queueMessage(text: '' + this.name + ' heals ' + amount + ' AP (AP:' + ap + '/' + stats.AP + ')');
                 
                 
             },
@@ -749,7 +749,7 @@
             
             kill :: {
                 hp = 0;
-                windowEvent.message(text: '' + this.name + ' has died!');                
+                windowEvent.queueMessage(text: '' + this.name + ' has died!');                
                 flags.add(flag:StateFlags.IS_DEAD);
                 isDead = true;                
             },
@@ -856,6 +856,7 @@
             },
             
             equip ::(item => none->type, slot => Number, silent, inventory => Inventory.type) {
+                breakpoint();
                 this.recalculateStats();
                 @:oldstats = StatSet.new();
                 oldstats.add(stats: this.stats);
@@ -893,9 +894,9 @@
                 
                 if (silent != true) ::<={
                     if (olditem.name == 'None') ::<= {
-                        windowEvent.message(text:this.name + ' has equipped the ' + item.name + '.');                    
+                        windowEvent.queueMessage(text:this.name + ' has equipped the ' + item.name + '.');                    
                     } else ::<= {
-                        windowEvent.message(text:this.name + ' unequipped the ' + olditem.name + ' and equipped the ' + item.name + '.');                    
+                        windowEvent.queueMessage(text:this.name + ' unequipped the ' + olditem.name + ' and equipped the ' + item.name + '.');                    
                     };
                     oldstats.printDiff(prompt: '(Equipped: ' + item.name + ')', other:this.stats);
                 };
@@ -954,14 +955,14 @@
             },
             
             useAbility::(ability, targets, turnIndex, extraData) {
-                when(ap < ability.apCost) windowEvent.message(
+                when(ap < ability.apCost) windowEvent.queueMessage(
                     text: this.name + " tried to use " + ability.name + ", but couldn\'t muster the mental strength!"
                 );
-                when(hp < ability.hpCost) windowEvent.message(
+                when(hp < ability.hpCost) windowEvent.queueMessage(
                     text: this.name + " tried to use " + ability.name + ", but couldn't muster the strength!"
                 );
                 
-                when (abilitiesUsedBattle != empty && ability.oncePerBattle && abilitiesUsedBattle[ability.name] == true) windowEvent.message(
+                when (abilitiesUsedBattle != empty && ability.oncePerBattle && abilitiesUsedBattle[ability.name] == true) windowEvent.queueMessage(
                     text: this.name + " tried to use " + ability.name + ", but it worked the first time!"
                 );
                 if (abilitiesUsedBattle) abilitiesUsedBattle[ability.name] = true;
@@ -976,22 +977,30 @@
             },
             
             // interacts with this entity
-            interactPerson ::(party, location, onNext) {
-                when(onInteract) onInteract(party, location, onNext);
-                windowEvent.message(
+            interactPerson ::(party, location, onDone) {
+                when(onInteract) onInteract(party, location, onDone);
+                
+                @:finish ::{
+                    onDone();
+                    windowEvent.jumpToTag(name:'InteractPerson', goBeforeTag:true, doResolveNext:true);
+                };
+                
+                windowEvent.queueMessage(
                     speaker: name,
                     text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.GREET])
                 );                
-                windowEvent.choices(
+                windowEvent.queueChoices(
                     canCancel : true,
                     prompt: 'Talking to ' + name,
-                    onNext: onNext,
                     choices: [
                         'chat',
                         'hire',
                         'aggress...'
                     ],
-                    
+                    keep: true,
+                    onLeave :onDone,
+                    canCancel: true,
+                    jumpTag: 'InteractPerson',
                     onChoice::(choice) {
                 
                         when(choice == 0) empty;
@@ -999,7 +1008,7 @@
                         match(choice-1) {
                           // Chat
                           (0): ::<= {
-                            windowEvent.message(
+                            windowEvent.queueMessage(
                                 speaker: name,
                                 text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.CHAT])
                             );                                                        
@@ -1008,17 +1017,17 @@
                           // hire 
                           (1): ::<= {
                             when(party.isMember(entity:this))
-                                windowEvent.message(
+                                windowEvent.queueMessage(
                                     text: name + ' is already a party member.'
                                 );                
                           
                             when (party.members->keycount >= 3 || !adventurous)
-                                windowEvent.message(
+                                windowEvent.queueMessage(
                                     speaker: name,
                                     text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_DENY])
                                 );                
                                 
-                            windowEvent.message(
+                            windowEvent.queueMessage(
                                 speaker: name,
                                 text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_ACCEPT])
                             );                
@@ -1028,18 +1037,18 @@
 
                             this.describe();
 
-                            windowEvent.askBoolean(
+                            windowEvent.queueAskBoolean(
                                 prompt: 'Hire for ' + cost + 'G?',
                                 onChoice::(which) {
                                     when(which == false) empty;
                                     when(party.inventory.gold < cost)
-                                        windowEvent.message(
+                                        windowEvent.queueMessage(
                                             text: 'The party cannot afford to hire ' + name
                                         );                
                                         
                                     party.inventory.subtractGold(amount:cost);
                                     party.add(member:this);
-                                        windowEvent.message(
+                                        windowEvent.queueMessage(
                                             text: name + ' joins the party!'
                                         );                
 
@@ -1207,7 +1216,7 @@
                     prompt:this.name + '(Base -> w/Mods.)'
                 );
                 
-                windowEvent.messageSet(
+                windowEvent.queueMessageSet(
                     speaker: this.name,
                     pageAfter:canvas.height-4,
                     set: [ 

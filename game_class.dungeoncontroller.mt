@@ -64,7 +64,7 @@ return class(
             entities->push(value:ent);
             map_.setItem(data:ent, x:tileX, y:tileY, discovered:true, symbol:'*');
             if (entities->keycount == 1)
-                windowEvent.message(
+                windowEvent.queueMessage(
                     text:random.pickArrayItem(list:[
                         'Are those foosteps? Be careful.',
                         'Hmm. Footsteps nearby.',
@@ -115,15 +115,18 @@ return class(
                                   
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
                                     @:windowEvent = import(module:'game_singleton.windowevent.mt');
-                                    windowEvent.message(text:'Perhaps these Chosen were not ready...',
+                                    windowEvent.queueMessage(text:'Perhaps these Chosen were not ready...',
                                         renderable : {
                                             render :: {
                                                 @:canvas = import(module:'game_singleton.canvas');
                                                 canvas.blackout();
                                                 canvas.commit();
                                             }
-                                        },
-                                        onNext ::{
+                                        }
+                                    );
+                                    
+                                    windowEvent.queueNoDisplay(
+                                        onEnter :: {                                        
                                             windowEvent.jumpToTag(name:'MainMenu');                                        
                                         }
                                     );

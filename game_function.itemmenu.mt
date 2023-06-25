@@ -34,13 +34,14 @@ return ::(
     
     @:commitAction ::(action) {
         onAct(action);    
-        windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
+        if (windowEvent.canJumpToTag(name:'Item'))
+            windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
     };
     
 
     pickItem(inventory:party.inventory, canCancel:true, onPick::(item) {
         when(item == empty) empty;
-        windowEvent.choices(
+        windowEvent.queueChoices(
             leftWeight: 1,
             topWeight: 1,
             prompt: '[' + item.name + ']',
@@ -75,7 +76,7 @@ return ::(
                         });
                       
                       
-                        choice = windowEvent.choices(
+                        choice = windowEvent.queueChoices(
                           leftWeight: 1,
                           topWeight: 1,
                           prompt: 'On whom?',
@@ -98,7 +99,7 @@ return ::(
                       },
                       
                       (Item.USE_TARGET_HINT.GROUP): ::<={
-                        choice = windowEvent.choices(
+                        choice = windowEvent.queueChoices(
                           leftWeight: 1,
                           topWeight: 1,
                           prompt: 'On whom?',
@@ -152,8 +153,7 @@ return ::(
                   
                   (2): ::<={ // inventory
                     item.describe(
-                        by:user,
-                        onNext::{}
+                        by:user
                     );
                     
                   },

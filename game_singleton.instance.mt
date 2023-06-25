@@ -52,7 +52,7 @@ return class(
         
         
         @:aggress::(location, party) {
-            @choice = windowEvent.choicesNow(
+            @choice = windowEvent.queueChoicesNow(
                 prompt: 'Aggress how?',
                 choices: location.base.aggressiveInteractions,
                 canCancel : true
@@ -60,7 +60,7 @@ return class(
             
             when(choice == 0) empty;
             
-            when (location.landmark.peaceful && (windowEvent.choicesNow(
+            when (location.landmark.peaceful && (windowEvent.queueChoicesNow(
                 prompt: 'Are you sure?',
                 choices: ['Yes', 'No']
             ) == 2)) empty;
@@ -75,14 +75,14 @@ return class(
 
             if (location.landmark.peaceful) ::<= {
                 location.landmark.peaceful = false;
-                windowEvent.message(text:'The people here are now aware of your aggression.');
+                windowEvent.queueMessage(text:'The people here are now aware of your aggression.');
             };
 
             
         };
         
         @:systemMenu :: {
-            windowEvent.choices(
+            windowEvent.queueChoices(
                 choices: [
                     'Save',
                     'Quit'
@@ -94,7 +94,7 @@ return class(
                     match(choice-1) {
                       // save 
                       (0)::<= {
-                        windowEvent.choicesNow(
+                        windowEvent.queueChoicesNow(
                             prompt:'Save which slot?',
                             choices: [
                                 'Slot 1',
@@ -107,14 +107,14 @@ return class(
                                 
                                 
                                 onSaveState(slot:choice, data:JSON.encode(object:this.state));        
-                                windowEvent.message(text:'Saved successfully to slot ' + choice);
+                                windowEvent.queueMessage(text:'Saved successfully to slot ' + choice);
                             }
                         );
                         
                       },
                       // quit
                       (1)::<= {
-                        windowEvent.choices(
+                        windowEvent.queueChoices(
                             prompt:'Quit?',
                             choices: [
                                 'Yes',
@@ -159,7 +159,7 @@ return class(
                 
                 @stepCount = 0;
 
-                windowEvent.choices(
+                windowEvent.queueChoices(
                     leftWeight: 1,
                     topWeight: 1,
                     prompt: 'What next?',
@@ -199,7 +199,7 @@ return class(
                                     choices->push(value:location.name);
                                 });
                                 
-                                windowEvent.choices(
+                                windowEvent.queueChoices(
                                     leftWeight: 1,
                                     topWeight: 1,
                                     prompt: 'Walk where?',
@@ -228,7 +228,7 @@ return class(
                                         @:arrival = landmark.map.getNamedItemsUnderPointer();
                                         if (arrival != empty) ::<= {
                                             arrival->foreach(do:::(index, arr) {
-                                                windowEvent.message(
+                                                windowEvent.queueMessage(
                                                     text:"The party has arrived at " + arr.name
                                                 );
                                             });
@@ -238,7 +238,7 @@ return class(
                                 
                                 
                             } else ::<= {
-                                windowEvent.cursorMove(
+                                windowEvent.queueCursorMove(
                                     leftWeight: 1,
                                     topWeight: 1,
                                     prompt: 'Walk which way?',
@@ -263,7 +263,7 @@ return class(
                                         @:arrival = landmark.map.getNamedItemsUnderPointer();
                                         if (arrival != empty && arrival->keycount > 0) ::<= {
                                             arrival->foreach(do:::(index, arr) {
-                                                windowEvent.message(
+                                                windowEvent.queueMessage(
                                                     text:"The party has arrived at the " + arr.name
                                                 );
                                             });
@@ -312,7 +312,7 @@ return class(
                             if (locationAt.base.aggressiveInteractions->keycount)
                                 choices->push(value: 'Aggress...');
                                 
-                            windowEvent.choices(
+                            windowEvent.queueChoices(
                                 prompt: 'Interaction',
                                 choices:choices,
                                 canCancel : true,
@@ -349,13 +349,13 @@ return class(
                 this.onSaveState = onSaveState;
                 this.onLoadState = onLoadState;
                                 
-                windowEvent.message(
+                windowEvent.queueMessage(
                     text: ' Wyvern Gate ' + VERSION + ' '
                 );
-                windowEvent.message(
+                windowEvent.queueMessage(
                     text: 'Note: this game is under heavy development. Depending on your platform, use either Number keys + Enter, gamepad up/down/left/right / confirm / cancel, or arrow keys / enter / backspace to navigate.\nGoodluck!'
                 );                
-                windowEvent.choices(
+                windowEvent.queueChoices(
                     choices : ['Load', 'New', 'Quit'],
                     topWeight: 0.75,
                     keep : true,
@@ -369,7 +369,7 @@ return class(
                         match(choice-1) {
                           // Load 
                           (0)::<= {
-                            @:choice = windowEvent.choices(
+                            @:choice = windowEvent.queueChoices(
                                 choices: [
                                     'Slot 1',
                                     'Slot 2',
@@ -381,7 +381,7 @@ return class(
                             @:data = onLoadState(slot:choice);
 
                             when(data == empty)
-                                windowEvent.message(text:'There is no data in this slot');
+                                windowEvent.queueMessage(text:'There is no data in this slot');
                                 
                             this.state = JSON.decode(string:data);
                             this.startInstance();
@@ -468,7 +468,7 @@ return class(
                 breakpoint();
                 when(party.isIncapacitated()) ::<= {
                     canvas.clear();
-                    windowEvent.message(text: 'Perhaps fate has entrusted someone else with the future...');                            
+                    windowEvent.queueMessage(text: 'Perhaps fate has entrusted someone else with the future...');                            
                     party.clear();
                     send();
                 };
@@ -540,20 +540,20 @@ return class(
                 
                 
                 /*
-                windowEvent.message(
+                windowEvent.queueMessage(
                     text: '... As it were, today is the beginning of a new adventure.'
                 );
 
 
-                windowEvent.message(
+                windowEvent.queueMessage(
                     text: '' + party.members[0].name + ' and their faithful companion ' + party.members[1].name + ' have decided to leave their long-time home of ' + island.name + '. Emboldened by countless tales of long lost eras, these 2 set out to discover the vast, mysterious, and treacherous world before them.'
                 );
 
-                windowEvent.message(
+                windowEvent.queueMessage(
                     text: 'Their first task is to find a way off their island.\nDue to their distances and dangerous winds, travel between sky islands is only done via the Wyvern Gates, ancient portals of seemingly-eternal magick that connect these islands.'
                 );
                 
-                windowEvent.message(
+                windowEvent.queueMessage(
                     text: party.members[0].name + ' has done the hard part and acquired a key to the Gate.\nAll thats left is to go to it and find where it leads.'
                 );
                 */
@@ -563,11 +563,11 @@ return class(
                     this.visitIsland();
                     
                     
-                    island.addEvent(
+                    /*island.addEvent(
                         event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
                             island, party, landmark //, currentTime
                         )
-                    );  
+                    );*/  
                 });
                 
           
@@ -581,8 +581,7 @@ return class(
                 
                 // cancel and flush current VisitIsland session
                 if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
-                    windowEvent.jumpToTag(name:'VisitIsland');
-                    windowEvent.forceExit();
+                    windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
                 };
                 // check if we're AT a location.
                 island.map.title = "(Map of " + island.name + ')';
@@ -590,7 +589,7 @@ return class(
 
 
 
-                windowEvent.choices(
+                windowEvent.queueChoices(
                     leftWeight: 1,
                     topWeight: 1,
                     prompt: 'What next?',
@@ -622,7 +621,7 @@ return class(
                           // travel
                           (0): ::<= {
 
-                            windowEvent.cursorMove(
+                            windowEvent.queueCursorMove(
                                 leftWeight: 1,
                                 topWeight: 1,
                                 prompt: 'Traveling...',
@@ -646,9 +645,11 @@ return class(
                                     @:arrival = island.map.getNamedItemsUnderPointerRadius(radius:5);
                                     if (arrival != empty) ::<= {
                                         arrival->foreach(do:::(i, arr) {
-                                            windowEvent.message(
-                                                text:"The party has arrived at the " + arr.data.name,
-                                                onNext::{
+                                            windowEvent.queueMessage(
+                                                text:"The party has arrived at the " + arr.data.name
+                                            );
+                                            windowEvent.queueNoDisplay(
+                                                onEnter::{
                                                     arr.data.discover();
                                                     island.map.discover(data:arr.data);                                            
                                                 }
@@ -670,7 +671,7 @@ return class(
                         
                           // check
                           (1): ::<= {
-                            choice = windowEvent.choices(
+                            choice = windowEvent.queueChoices(
                                 leftWeight: 1,
                                 topWeight: 1,
                                 prompt: 'Check which?',
@@ -680,7 +681,7 @@ return class(
                                 canCancel: true,
                                 onChoice::(choice){
                                     match(choice-1) {
-                                      (0): windowEvent.message(speaker: 'About ' + island.name, text: island.description)
+                                      (0): windowEvent.queueMessage(speaker: 'About ' + island.name, text: island.description)
                                     };                                                        
                                 }
                             );
@@ -690,7 +691,7 @@ return class(
 
                           (3): ::<= {
                             island.incrementTime();
-                            windowEvent.message(text:'Nothing to see but the peaceful scenery of ' + island.name + '.');                          
+                            windowEvent.queueMessage(text:'Nothing to see but the peaceful scenery of ' + island.name + '.');                          
                           },
                           // party options
                           (2): partyOptions(),

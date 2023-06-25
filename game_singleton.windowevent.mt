@@ -82,15 +82,14 @@
     CANCEL : 5
 };
 
-return class(
-    name: 'Wyvern.UI',
+@:WindowEvent = class(
+    name: 'Wyvern.WindowEvent',
     define:::(this) {
         @onInput;
         @isCursor = true;
         @choiceStack = [];
         @:nextResolve = [];
         @:afterResolve = [];
-        @bg;
     
     
         @:renderThis ::(data => Object, selfRender) {
@@ -98,15 +97,19 @@ return class(
                 canvas.pushState();      
                 data.pushedCanvasState = true;
             };
+            canvas.clear();
 
-            if (bg)
-                bg.render();
-            if (data.renderable) 
-                data.renderable.render();        
+            @renderAgain = false;
+            if (data.renderable) ::<= {
+                renderAgain = (data.renderable.render()) == this.RENDER_AGAIN;        
+            };
             if (selfRender)
                 selfRender();
             canvas.commit();
-            data.rendered = true;
+            
+            
+            if (renderAgain == false)
+                data.rendered = true;
         };
         
         @next ::(dontResolveNext) {
@@ -116,13 +119,16 @@ return class(
                     choiceStack->push(value:data);
                 } else ::<= {
                     canvas.popState();
+                    if (data.onLeave)
+                        data.onLeave();
                     if (choiceStack->keycount > 0)
                         choiceStack[choiceStack->keycount-1].rendered = empty;
                 };
             };
-            if (dontResolveNext == empty)
+            if (dontResolveNext == empty) ::<= {
                 resolveNext();
-            this.commitInput();        
+                this.commitInput();        
+            };
         };
         
         @:commitInput ::(input) {
@@ -293,7 +299,6 @@ return class(
             @:defaultChoice = data.defaultChoice;
             @:onChoice = data.onChoice;
             @:choice = input;         
-            @:renderable = data.renderable;   
             
 
             when(choice == CURSOR_ACTIONS.CANCEL) ::<= {
@@ -324,7 +329,6 @@ return class(
         };        
     
         @:commitInput_noDisplay ::(data => Object, input) {
-            @:renderable = data.renderable;   
             
             //if (canCancel) ::<= {
             //    choicesModified->push(value:'(Cancel)');
@@ -333,11 +337,8 @@ return class(
             if (data.rendered == empty || input != empty)
                 renderThis(data);
 
-            if (data.started == empty) ::<= {
-                data.onStart();
-                data.started = true;
-            };
-
+            data.onEnter();
+          
             return true;    
         };       
     
@@ -523,17 +524,21 @@ return class(
         this.interface = {
             commitInput : commitInput,
             
+            RENDER_AGAIN : {
+                get ::<- 1
+            },
             
             // Similar to message, but accepts a set of 
             // messages to display
-            messageSet::(speaker, set => Object, leftWeight, topWeight, pageAfter) {
+            queueMessageSet::(speaker, set => Object, leftWeight, topWeight, pageAfter, onLeave) {
                 set->foreach(do::(i, text) <- 
-                    this.message(
+                    this.queueMessage(
                         speaker,
                         text,
                         leftWeight,
                         topWeight,
-                        pageAfter
+                        pageAfter,
+                        onLeave
                     )
                 );
             },
@@ -543,7 +548,7 @@ return class(
             //
             // The function returns when the message is displayed in full
             // to the user.
-            message::(speaker, text, leftWeight, topWeight, pageAfter, renderable) {
+            queueMessage::(speaker, text, leftWeight, topWeight, pageAfter, renderable, onLeave) {
                 if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
                 // first: split the text.
                 //text = text->replace(keys:['\r'], with: '');
@@ -581,19 +586,20 @@ return class(
                 lines->push(value:line);
                 
 
-                this.display(
+                this.queueDisplay(
                     leftWeight, topWeight,
                     prompt:speaker,
                     renderable,
                     lines,
-                    pageAfter
+                    pageAfter,
+                    onLeave
                 );              
             },
             
             // Similar to display(), but takes in an array of string arrays and 
             // treats them as columns, appended left-to-right separated with a 
             // space.
-            displayColumns::(prompt, columns, leftWeight, topWeight, pageAfter) {
+            queueDisplayColumns::(prompt, columns, leftWeight, topWeight, pageAfter, onLeave) {
                 @:lines = [];
                 @:widths = [];
                 @rowcount = 0;
@@ -624,8 +630,8 @@ return class(
                     lines->push(value:line);
                 });                
            
-                this.display(
-                    prompt, lines, pageAfter, leftWeight, topWeight
+                this.queueDisplay(
+                    prompt, lines, pageAfter, leftWeight, topWeight, onLeave
                 );
             },
             
@@ -633,7 +639,7 @@ return class(
             // If it doesnt fit, display will try and make it scrollable.
             //
             // lines should be an array of strings.
-            display::(prompt, lines, pageAfter, leftWeight, topWeight, renderable) {
+            queueDisplay::(prompt, lines, pageAfter, leftWeight, topWeight, renderable, onLeave) {
                 nextResolve->push(value:[::{
                     if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
                     [0, lines->keycount, pageAfter]->for(do:::(i) {
@@ -643,6 +649,7 @@ return class(
                             lines:lines->subset(from:i, to:min(a:i+pageAfter, b:lines->keycount)-1),
                             pageAfter: pageAfter,
                             prompt: prompt,
+                            onLeave: onLeave,
                             mode: CHOICE_MODE.DISPLAY,
                             renderable: renderable
                         });
@@ -652,14 +659,16 @@ return class(
             
             // A place holder action. This can be used to run a function 
             // in order, or for rendering graphics.
-            noDisplay::(renderable, keep, onStart => Function, jumpTag) {
+            // onEnter runs whenever the display is entered.
+            queueNoDisplay::(renderable, keep, onEnter => Function, jumpTag, onLeave) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode: CHOICE_MODE.NODISPLAY,
                         keep: keep,
                         renderable:renderable,
-                        onStart:onStart,
-                        jumpTag: jumpTag
+                        onEnter:onEnter,
+                        jumpTag: jumpTag,
+                        onLeave: onLeave
                     });
                 }]);                
             },
@@ -674,7 +683,7 @@ return class(
             // Like all UI choices, the weight can be chosen.
             // Prompt will be displayed, like speaker in the message callback
             //
-            choices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, renderable, keep, onGetChoices, jumpTag) {
+            queueChoices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, renderable, keep, onGetChoices, jumpTag, onLeave) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode: CHOICE_MODE.CURSOR,
@@ -685,6 +694,7 @@ return class(
                         canCancel: canCancel,
                         defaultChoice: defaultChoice,
                         onChoice: onChoice,
+                        onLeave : onLeave,
                         keep: keep,
                         onGetChoices : onGetChoices,
                         renderable:renderable,
@@ -725,18 +735,21 @@ return class(
                 };
                 if (goBeforeTag != empty) ::<= {
                     canvas.popState();
-                    choiceStack->pop;                            
+                    @:data = choiceStack->pop; 
+                    if (data.onLeave)
+                        data.onLeave();                  
                 };
                 canvas.commit();                
                 choiceStack[choiceStack->keycount-1].rendered = empty;
-                if (doResolveNext)
+                if (doResolveNext) ::<={
                     resolveNext();
+                };
                     
                 this.commitInput();
             },
        
             
-            choiceColumns::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function, keep, renderable, jumpTag) {
+            queueChoiceColumns::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function, keep, renderable, jumpTag, onLeave) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode:if (isCursor) CHOICE_MODE.COLUMN_CURSOR else CHOICE_MODE.COLUMN_NUMBER,
@@ -748,12 +761,13 @@ return class(
                         topWeight : topWeight,
                         canCancel : canCancel,
                         onChoice : onChoice,
+                        onLeave : onLeave,
                         keep : keep,
                         renderable:renderable,
                     });
                 }]);
             },            
-            cursorMove ::(prompt, leftWeight, topWeight, onMove, renderable) {
+            queueCursorMove ::(prompt, leftWeight, topWeight, onMove, renderable, onLeave) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode: CHOICE_MODE.CURSOR_MOVE,
@@ -761,6 +775,7 @@ return class(
                         leftWeight: leftWeight,
                         topWeight: topWeight,
                         onChoice:onMove,
+                        onLeave:onLeave,
                         renderable:renderable,
                     });
                     canvas.clear();
@@ -780,22 +795,18 @@ return class(
             },
 
             // ask yes or no immediately.
-            askBoolean::(prompt, onChoice => Function) {
-                this.choices(prompt, choices:['Yes', 'No'], canCancel:false,
+            queueAskBoolean::(prompt, onChoice => Function, onLeave) {
+                this.queueChoices(prompt, choices:['Yes', 'No'], canCancel:false, onLeave:onLeave,
                     onChoice::(choice){
                         onChoice(which: choice == 1);
                     }
                 );
             },
             
-            // sets an object to always draw behind 
-            // when committing a new visual. Set to 
-            // empty to stop.
-            backgroundRenderable :{
-                set ::(value) <- bg = value
-            }
 
         };    
     }
 ).new();
+
+return WindowEvent;
 

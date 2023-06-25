@@ -874,6 +874,7 @@ return class(
             },
             
             render :: {
+                canvas.blackout();
                 if (paged)
                     renderPaged()
                 else 

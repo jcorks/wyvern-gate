@@ -37,7 +37,7 @@ return ::(
     };
 
 
-    windowEvent.choiceColumns(
+    windowEvent.queueChoiceColumns(
         leftWeight: 1,
         topWeight: 1,
         choices : [
@@ -71,7 +71,7 @@ return ::(
                     );
                 });
                 
-                windowEvent.choices(
+                windowEvent.queueChoices(
                     leftWeight: 1,
                     topWeight: 1,
                     prompt:'What ability should ' + user.name + ' use?',
@@ -102,7 +102,7 @@ return ::(
                             });
                           
                           
-                            windowEvent.choices(
+                            windowEvent.queueChoices(
                               leftWeight: 1,
                               topWeight: 1,
                               prompt: 'Against whom?',
@@ -189,7 +189,7 @@ return ::(
               },
               
               (1): ::<={ // Info
-                windowEvent.choices(
+                windowEvent.queueChoices(
                   topWeight: 1,
                   prompt: 'Check which?', 
                   leftWeight: 1,
@@ -207,7 +207,7 @@ return ::(
                       (0): ::<={ // abilities
                         @:names = [...user.abilitiesAvailable]->map(to:::(value){return value.name;});
                         
-                        windowEvent.choices(
+                        windowEvent.queueChoices(
                           leftWeight: 1,
                           topWeight: 1,
                           prompt: 'Check which ability?',
@@ -219,7 +219,7 @@ return ::(
                                 
                             @:ability = user.abilitiesAvailable[choice-1];
 
-                            windowEvent.message(
+                            windowEvent.queueMessage(
                                 speaker: 'Ability: ' + ability.name,
                                 text:ability.description
                             );                          
@@ -230,7 +230,7 @@ return ::(
                       (1): ::<={ // allies
                         @:names = [...allies]->map(to:::(value){return value.name;});
                         
-                        choice = windowEvent.choices(
+                        choice = windowEvent.queueChoices(
                             topWeight: 1,
                             leftWeight: 1,
                             prompt:'Check which ally?',

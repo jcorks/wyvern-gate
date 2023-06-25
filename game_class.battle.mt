@@ -54,7 +54,7 @@
         @turnIndex = 0;
         @redraw;
         @party_;
-        @turnPoppable;
+        @turnPoppable = [];
         
         @result;
         @externalRenderable;
@@ -103,7 +103,6 @@
                     alliesWin = true;
                     battleEnd();
                 };
-                initTurn();
             };
         };
         
@@ -117,14 +116,12 @@
             // act turn can signal to not act
             when(!ent.actTurn()) ::<={
                 endTurn();
-                nextTurn();
             };
 
 
             // may have died this turn.
             when (ent.isIncapacitated()) ::<={
                 endTurn();
-                nextTurn();
             };
             
             // multi turn actions
@@ -147,7 +144,6 @@
                     actions[ent] = empty;
                 };
                 endTurn();
-                nextTurn();
             } else ::<= {
 
 
@@ -331,7 +327,7 @@
                 };
 
                 if (npcBattle == empty) ::<= {
-                    windowEvent.message(
+                    windowEvent.queueMessage(
                         text: if (enemies->keycount == 1) 
                             "You're confronted by someone!"
                         else 
@@ -339,7 +335,7 @@
                     );    
                     
                     enemies->foreach(do:::(index, enemy) {
-                        windowEvent.message(
+                        windowEvent.queueMessage(
                             text: enemy.name + '(' + enemy.stats.HP + ' HP) blocks your path!'
                         );                    
                     });
@@ -370,7 +366,6 @@
                       (alliesWin):      RESULTS.ALLIES_WIN,
                       default:          RESULTS.ENEMIES_WIN
                     };
-                    windowEvent.jumpToTag(name:'Battle', goBeforeTag:true);
                     
                     allies->foreach(do:::(k, v) {
                         v.battleEnd();
@@ -383,13 +378,14 @@
                     
                     when (npcBattle != empty) ::<= {
                         active = false;
-                        windowEvent.message(text: 'The battle is over.');
+                        windowEvent.queueMessage(text: 'The battle is over.');
 
                         allies_ = [];
                         enemies_ = [];
                         active = false;
                         onEnd(result);                    
-                        windowEvent.resolveNext();                                            
+                        if (windowEvent.canJumpToTag(name:'Battle'))                                            
+                            windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);
                     }; 
 
 
@@ -402,7 +398,7 @@
                         exp /= allies_->keycount;
                         exp = exp->ceil;
                         if (exp == true)
-                            windowEvent.message(text: 'Each party member gains ' + exp + ' EXP.');
+                            windowEvent.queueMessage(text: 'Each party member gains ' + exp + ' EXP.');
                             
                         allies_->foreach(do:::(index, ally) {
                             ally.stats.resetMod();
@@ -415,14 +411,14 @@
                                 ally.gainExp(amount:exp, chooseStat:::(
                                     hp, ap, atk, def, int, luk, dex, spd
                                 ) {
-                                    windowEvent.message(text: ally.name + ' has leveled up.');
+                                    windowEvent.queueMessage(text: ally.name + ' has leveled up.');
 
 
                                     ally.stats.resetMod();
                                     stats.printDiff(other:ally.stats, prompt:ally.name + ' - (Level:  ' + level  + ' -> ' + (ally.level+1) + ': Base Stats)');                        
                                     stats = StatSet.new();
                                     stats.add(stats:ally.stats);                        
-                                    return windowEvent.choicesNow(
+                                    return windowEvent.queueChoicesNow(
                                         prompt: ally.name + ' - Focus which?',
                                         choices: [
                                             'HP  (+' + hp + ')',
@@ -463,30 +459,32 @@
                             });
                             
                             if (loot->keycount > 0) ::<= {
-                                windowEvent.message(text: 'It looks like they dropped some items during the fight...');
+                                windowEvent.queueMessage(text: 'It looks like they dropped some items during the fight...');
                                 @message = 'The party found:\n\n';
                                 loot->foreach(do:::(index, item) {
                                     @message = 'The party found ' + correctA(word:item.name);
-                                    windowEvent.message(text: message);
+                                    windowEvent.queueMessage(text: message);
                                     party.inventory.add(item);
                                 });
                             };
                         };
                         
-                        windowEvent.message(text: 'The battle is won.');
-                        windowEvent.noDisplay(onStart::{
-                            onEnd(result);                                             
-                            windowEvent.resolveNext();                                                                    
+                        windowEvent.queueMessage(text: 'The battle is won.');
+                        windowEvent.queueNoDisplay(onEnter::{
+                            onEnd(result);  
+                            if (windowEvent.canJumpToTag(name:'Battle'))                                              
+                                windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);
                         });
 
                                        
 
                     } else ::<= {
                         if (party.members->all(condition:::(value) <- value.isIncapacitated())) ::<= {
-                            windowEvent.message(text: 'The battle is lost.');
-                            windowEvent.noDisplay(onStart::{
+                            windowEvent.queueMessage(text: 'The battle is lost.');
+                            windowEvent.queueNoDisplay(onEnter::{
                                 onEnd(result); 
-                                windowEvent.resolveNext();                                            
+                                if (windowEvent.canJumpToTag(name:'Battle'))                                               
+                                    windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);
                             });                       
                             
                         };
@@ -494,24 +492,29 @@
                     allies_ = [];
                     enemies_ = [];
                     active = false;
-                    windowEvent.backgroundRenderable = empty;
                 };
 
 
-
-                windowEvent.noDisplay(
+                @started = false;
+                windowEvent.queueNoDisplay(
                     renderable :{
                         render::{
                             if (externalRenderable)
                                 externalRenderable.render();
                             this.render();
+                            return windowEvent.RENDER_AGAIN;
                         }
                     },
                     keep: true,
                     jumpTag: 'Battle',
-                    onStart::{
-                        if (onStart) onStart();
-                        initTurn();  
+                    onEnter::{
+                        if (!started && onStart) ::<= {
+                            onStart();
+                            started = true;
+                        };
+                        
+                        if (turnPoppable->keycount == 0)
+                            initTurn();  
                         nextTurn();
                     }
                 );
@@ -538,12 +541,12 @@
             join ::(enemy, ally) {
                 if (enemy != empty) ::<= {
                     when (enemies_->findIndex(value:enemy) != -1) empty;
-                    windowEvent.message(text:enemy.name + ' joins the fray!');
+                    windowEvent.queueMessage(text:enemy.name + ' joins the fray!');
                     enemies_->push(value:enemy);
                 };
                 if (ally != empty) ::<= {
                     when (allies_->findIndex(value:ally) != -1) empty;
-                    windowEvent.message(text:ally.name + ' joins the fray!');
+                    windowEvent.queueMessage(text:ally.name + ' joins the fray!');
                     allies_->push(value:ally);
                 };
                     
@@ -567,10 +570,9 @@
                     actions[entityTurn] = action;
                 };  
                 
-                windowEvent.noDisplay(
-                    onStart ::{
+                windowEvent.queueNoDisplay(
+                    onEnter ::{
                         endTurn();
-                        nextTurn();                    
                     }
                 );
             },

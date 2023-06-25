@@ -58,7 +58,7 @@ return class(
                     members->foreach(do:::(index, m) {
                         if (m == member)::<={
                             members->remove(key:index);
-                            windowEvent.message(text:m.name + ' has been removed from the party.');
+                            windowEvent.queueMessage(text:m.name + ' has been removed from the party.');
                             send();
                         };                        
                     });

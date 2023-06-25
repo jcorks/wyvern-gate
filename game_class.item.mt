@@ -337,20 +337,20 @@
                 }
             },
             
-            describe ::(by, onNext) {
+            describe ::(by) {
                 @:Effect = import(module:'game_class.effect.mt');
-                windowEvent.message(
+                windowEvent.queueMessage(
                     speaker:this.name,
                     text:description,
                     pageAfter:canvas.height-4
                 );
-                windowEvent.message(
+                windowEvent.queueMessage(
                     speaker:this.name + ' - Equip Stats',
                     text:stats.description,
                     pageAfter:canvas.height-4
                 );
 
-                windowEvent.message(
+                windowEvent.queueMessage(
                     speaker:this.name + ' - Equip Effects',
                     pageAfter:canvas.height-4,
                     text:::<={
@@ -362,7 +362,7 @@
                         return out;
                     }
                 );                
-                windowEvent.message(
+                windowEvent.queueMessage(
                     speaker:this.name + ' - Use Effects',
                     pageAfter:canvas.height-4,
                     text:::<={
@@ -378,7 +378,7 @@
 
                 if (by != empty) ::<= {
                     when(by.profession.base.weaponAffinity != base_.name) empty;
-                    windowEvent.message(
+                    windowEvent.queueMessage(
                         speaker:by.name,
                         pageAfter:canvas.height-4,
                         text:'Oh! This weapon type really works for me as ' + correctA(word:by.profession.base.name) + '.'
@@ -405,7 +405,7 @@
                     ));
                     
                     if (silent == empty && base_.name != 'None') ::<= {
-                        windowEvent.message(text:'The party get\'s more used to using the ' + this.name + '.');
+                        windowEvent.queueMessage(text:'The party get\'s more used to using the ' + this.name + '.');
                         oldStats.printDiffRate(other:stats, prompt:this.name);
                     };
                 

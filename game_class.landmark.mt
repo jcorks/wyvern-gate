@@ -338,7 +338,7 @@
                 if (!discovered)
                     if (world.party.inventory.items->filter(by:::(value) <- value.base.name == 'Runestone')->keycount != 0) ::<= {
                         world.storyFlags.data_locationsDiscovered += 1;
-                        windowEvent.message(text:'Location found! ' + world.storyFlags.data_locationsDiscovered + ' / ' 
+                        windowEvent.queueMessage(text:'Location found! ' + world.storyFlags.data_locationsDiscovered + ' / ' 
                                                                  + world.storyFlags.data_locationsNeeded + ' locations.');               
                     };
                 discovered = true;
@@ -643,7 +643,7 @@ Landmark.Base.database = Database.new(
                 
                 onVisit ::(landmark, island) {
                     @:windowEvent = import(module:'game_singleton.windowevent.mt');
-                    windowEvent.message(text:'It seems this area has been long forgotten...');
+                    windowEvent.queueMessage(text:'It seems this area has been long forgotten...');
                 }
                 
             }
@@ -676,7 +676,7 @@ Landmark.Base.database = Database.new(
                 onCreate ::(landmark, island){},
                 onVisit ::(landmark, island) {
                     @:windowEvent = import(module:'game_singleton.windowevent.mt');
-                    windowEvent.message(text:'The party enters the pit full of treasure.');
+                    windowEvent.queueMessage(text:'The party enters the pit full of treasure.');
                
                 }
                 

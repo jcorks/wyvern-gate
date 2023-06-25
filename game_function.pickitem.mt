@@ -21,7 +21,7 @@
 
 
 return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt) {
-    windowEvent.choices(
+    windowEvent.queueChoices(
         leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
         topWeight:  if (topWeight == empty)  1 else topWeight => Number,
         prompt: if (prompt == empty) 'Choose an item:' else prompt => String,
@@ -29,7 +29,7 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
         onGetChoices ::{
             @:names = [...inventory.items]->map(to:::(value) {return value.name;});
             when(names->keycount == 0) ::<={
-                windowEvent.message(text: "The inventory is empty.");
+                windowEvent.queueMessage(text: "The inventory is empty.");
             };
             return names;
         },

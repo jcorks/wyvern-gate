@@ -195,7 +195,7 @@ return class(
             },
             
             printDiff ::(other, prompt) {
-                windowEvent.displayColumns(
+                windowEvent.queueDisplayColumns(
                     prompt,
                     pageAfter: 10,
                     columns: [
@@ -260,7 +260,7 @@ return class(
             },
             
             printDiffRate ::(other, prompt) {
-                windowEvent.displayColumns(
+                windowEvent.queueDisplayColumns(
                     prompt,
                     pageAfter: 10,
                     columns: [

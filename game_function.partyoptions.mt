@@ -24,7 +24,7 @@
 
 
 return ::{
-    windowEvent.choices(
+    windowEvent.queueChoices(
         leftWeight: 1,
         topWeight: 1,
         prompt: 'Party Options',
@@ -81,7 +81,7 @@ return ::{
                     names->push(value:member.name);
                 });
                 
-                @:choice = windowEvent.choices(
+                @:choice = windowEvent.queueChoices(
                     leftWeight: 1,
                     topWeight: 1,
                     choices: names,
@@ -106,7 +106,7 @@ return ::{
                 world.party.members->foreach(do:::(index, member) {
                     names->push(value:member.name);
                 });
-                windowEvent.choices(
+                windowEvent.queueChoices(
                     leftWeight: 1,
                     topWeight: 1,
                     keep:true,
