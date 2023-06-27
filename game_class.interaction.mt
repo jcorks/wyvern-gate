@@ -858,7 +858,7 @@ Interaction.database = Database.new(
                     };
 
                     canvas.clear();
-                    windowEvent.queueMessage(text:'The party travels to the next floor.');
+                    windowEvent.queueMessage(text:'The party travels to the next floor.', renderable:{render::{canvas.blackout();}});
                     
                     
                     @:instance = import(module:'game_singleton.instance.mt');

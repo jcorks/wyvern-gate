@@ -41,6 +41,7 @@
         @contested = false;
         @name;
         @data = {}; // simple table
+        @visited = false;
         this.constructor = ::(base, landmark, xHint, yHint, state, targetLandmarkHint, ownedByHint) {
             landmark_ = landmark;     
 
@@ -51,20 +52,10 @@
             base_ = base;
             x = if (xHint == empty) (Number.random() * landmark.width ) else xHint;  
             y = if (yHint == empty) (Number.random() * landmark.height) else yHint;
-            if (base.owned) ::<= {
-                if (ownedByHint == empty)
-                    ownedBy = landmark.island.newInhabitant()
-                else
-                    ownedBy = ownedByHint;
-                    
-                description = random.pickArrayItem(list:base.descriptions) + ' This ' + base.name + ' is ' + base.ownVerb + ' by ' + ownedBy.name + '.';
-            } else ::<= {
-                description = random.pickArrayItem(list:base.descriptions);            
-            };
-            [0, random.integer(from:base.minOccupants, to:base.maxOccupants)]->for(do:::(i) {
-                occupants->push(value:landmark.island.newInhabitant());
-            });
-            name = if (ownedBy == empty) base_.name else (ownedBy.name + "'s " + base_.name);
+            if (ownedByHint != empty)
+                ownedBy = ownedByHint;
+                   
+            description = random.pickArrayItem(list:base.descriptions);            
             base.onCreate(location:this);
             return this;
         };
@@ -138,7 +129,7 @@
             },
             
             description : {
-                get ::<- description
+                get ::<- description + (if (ownedBy != empty) ' This ' + base_.name + ' is ' + base_.ownVerb + ' by ' + ownedBy.name + '.' else '')
             },
             
             contested : {
@@ -158,7 +149,7 @@
             },
             
             name : {
-                get::<- name,
+                get::<- if (name == empty) (if (ownedBy == empty) base_.name else (ownedBy.name + "'s " + base_.name)) else name,
                 set::(value) <- name = value
             },
             occupants : {
@@ -174,6 +165,100 @@
             
             landmark : {
                 get ::<- landmark_
+            },
+            
+            interact ::{
+                @world = import(module:'game_singleton.world.mt');
+                @party = world.party;            
+                @:Interaction = import(module:'game_class.interaction.mt');
+            
+            
+                @:aggress::(location, party) {
+                    windowEvent.queueChoices(
+                        prompt: 'Aggress how?',
+                        choices: location.base.aggressiveInteractions,
+                        canCancel : true,
+                        onChoice ::(choice) {
+                            when(choice == 0) empty;
+
+
+                            @:interaction = Interaction.database.find(name:
+                                location.base.aggressiveInteractions[choice-1]
+                            );
+                            
+                            when (!location.landmark.peaceful) ::<= {
+                                interaction.onInteract(location, party);                    
+                            };
+                                
+                            
+                            windowEvent.queueAskBoolean(
+                                prompt: 'Are you sure?',
+                                onChoice::(which) {
+                                    when(which == false) empty;
+                                    interaction.onInteract(location, party);                    
+                                    
+                                    if (location.landmark.peaceful) ::<= {
+                                        location.landmark.peaceful = false;
+                                        windowEvent.queueMessage(text:'The people here are now aware of your aggression.');
+                                    };                
+                                                            
+                                }
+                            );
+                        }
+                    );
+                };            
+            
+            
+                // initial interaction 
+                // Initial interaction triggers an event.
+                
+                if (visited == false) ::<= {
+                    [0, random.integer(from:base_.minOccupants, to:base_.maxOccupants)]->for(do:::(i) {
+                        occupants->push(value:landmark_.island.newInhabitant());
+                    });
+                
+                
+                    visited = true;
+                    this.base.onFirstInteract(location:this);
+                };
+                    
+                
+                @canInteract = [::] {
+                    return this.base.onInteract(location:this);
+                };
+                    
+                when(canInteract == false) empty;
+              
+                @:interactionNames = [...this.base.interactions]->map(to:::(value) {
+                    return Interaction.database.find(name:value).displayName;
+                });
+                    
+                @:choices = [...interactionNames];
+
+                if (this.base.aggressiveInteractions->keycount)
+                    choices->push(value: 'Aggress...');
+                    
+                windowEvent.queueChoices(
+                    prompt: 'Interaction',
+                    choices:choices,
+                    canCancel : true,
+                    keep: true,
+                    onChoice::(choice) {
+               
+                        when(choice == 0) empty;
+
+                        // aggress
+                        when(this.base.aggressiveInteractions->keycount > 0 && choice-1 == this.base.interactions->keycount) ::<= {
+                            aggress(location:this, party);
+                        };
+                        
+                        Interaction.database.find(name:this.base.interactions[choice-1]).onInteract(
+                            location: this,
+                            party
+                        );
+                        this.landmark.step();                            
+                    }
+                );            
             }
         };
     }
@@ -191,7 +276,6 @@ Location.Base = class(
                 rarity: Number,
                 descriptions : Object,
                 symbol : String,
-                owned : Boolean,
                 
                 // List of interaction names
                 interactions : Object,
@@ -211,6 +295,9 @@ Location.Base = class(
                 // The return value is whether to continue with interaction options 
                 // or not.
                 onInteract : Function,
+                
+                // Called on first time interaction is attempted. 
+                onFirstInteract : Function,
                 
                 // when the location is created
                 onCreate : Function,
@@ -232,7 +319,6 @@ Location.Base.database = Database.new(
             name: 'Entrance',
             rarity: 100000000,
             ownVerb: '',
-            owned : false,
             descriptions: [
                 "A sturdy gate surrounded by a well-maintained fence around the area.",
                 "A decrepit gate surrounded by a feeble attempt at fencing.",
@@ -251,6 +337,10 @@ Location.Base.database = Database.new(
             
             minOccupants : 0,
             maxOccupants : 0,
+            
+            onFirstInteract ::(location){
+            
+            },
 
             onInteract ::(location) {
                 return true;
@@ -275,7 +365,6 @@ Location.Base.database = Database.new(
             name: 'farm',
             rarity: 100,
             ownVerb: 'owned',
-            owned : true,
             symbol: 'F',
 
             descriptions: [
@@ -296,24 +385,23 @@ Location.Base.database = Database.new(
             
             minOccupants : 0,
             maxOccupants : 0,
+            onFirstInteract ::(location){
+                location.ownedBy = location.landmark.island.newInhabitant();
+                @:Profession = import(module:'game_class.profession.mt');
+                location.ownedBy.profession = Profession.Base.database.find(name:'Farmer').new();                
+                
+                [0, 2+(Number.random()*4)->ceil]->for(do:::(i) {
+                    // no weight, as the value scales
+                    location.inventory.add(item:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
+                    .new(from:location.ownedBy, rngEnchantHint:true));
+                });
+            },
             
             onInteract ::(location) {
-                // i THINK this is exploitable
-                if (location.ownedBy != empty && location.inventory.isEmpty)
-                    [0, 2+(Number.random()*4)->ceil]->for(do:::(i) {
-                        // no weight, as the value scales
-                        location.inventory.add(item:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
-                        .new(from:location.ownedBy, rngEnchantHint:true));
-                    });
-            
                 return true;
-
             },            
             
             onCreate ::(location) {
-                @:Profession = import(module:'game_class.profession.mt');
-            
-                location.ownedBy.profession = Profession.Base.database.find(name:'Farmer').new();                
             },
                         
             onTimeChange ::(location, time) {
@@ -333,7 +421,6 @@ Location.Base.database = Database.new(
             name: 'home',
             rarity: 100,
             ownVerb: 'owned',
-            owned : true,
             symbol: '^',
 
             descriptions: [
@@ -357,18 +444,16 @@ Location.Base.database = Database.new(
             
             minOccupants : 0,
             maxOccupants : 0,
+            onFirstInteract ::(location) {
+                location.ownedBy = location.landmark.island.newInhabitant();
             
-            onInteract ::(location) {
-            
-                // i THINK this is exploitable
-                if (location.ownedBy != empty && location.inventory.isEmpty)
-                    [0, 2+(Number.random()*4)->ceil]->for(do:::(i) {
-                        // no weight, as the value scales
-                        location.inventory.add(item:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
-                        .new(from:location.ownedBy, rngEnchantHint:true));
-                    });
-            
-            
+                [0, 2+(Number.random()*4)->ceil]->for(do:::(i) {
+                    // no weight, as the value scales
+                    location.inventory.add(item:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
+                    .new(from:location.ownedBy, rngEnchantHint:true));
+                });            
+            },            
+            onInteract ::(location) {            
                 return true;
 
             },            
@@ -393,7 +478,6 @@ Location.Base.database = Database.new(
             name: 'ore vein',
             rarity: 100,
             ownVerb: '???',
-            owned : false,
             symbol: '%',
 
             descriptions: [
@@ -411,7 +495,8 @@ Location.Base.database = Database.new(
             
             minOccupants : 0,
             maxOccupants : 0,
-            
+            onFirstInteract ::(location) {
+            },            
             onInteract ::(location) {
                 return true;
 
@@ -433,7 +518,6 @@ Location.Base.database = Database.new(
             name: 'smelter',
             rarity: 100,
             ownVerb: '???',
-            owned : false,
             symbol: 'm',
 
             descriptions: [
@@ -452,7 +536,9 @@ Location.Base.database = Database.new(
             
             minOccupants : 0,
             maxOccupants : 0,
-            
+            onFirstInteract ::(location) {
+
+            },            
             onInteract ::(location) {
                 return true;
 
@@ -480,7 +566,6 @@ Location.Base.database = Database.new(
             rarity: 1,
             ownVerb : 'owned',
             symbol: 'W',
-            owned : true,
 
             descriptions: [
                 "What seems to be a stone throne",
@@ -499,6 +584,8 @@ Location.Base.database = Database.new(
             minOccupants : 0,
             maxOccupants : 0,
             
+            onFirstInteract ::(location) {
+            },
             onInteract ::(location) {
                 return true;
 
@@ -565,7 +652,6 @@ Location.Base.database = Database.new(
             rarity: 100,
             ownVerb : 'run',
             symbol: '$',
-            owned : true,
 
             descriptions: [
                 "A modest trading shop. Relatively small.",
@@ -587,15 +673,9 @@ Location.Base.database = Database.new(
             
             minOccupants : 0,
             maxOccupants : 0,
-            
-            onInteract ::(location) {
-                return true;
-
-            },            
-            
-            onCreate ::(location) {
+            onFirstInteract ::(location) {
                 @:Profession = import(module:'game_class.profession.mt');
-            
+                location.ownedBy = location.landmark.island.newInhabitant();            
                 location.ownedBy.profession = Profession.Base.database.find(name:'Trader').new();
                 location.inventory.maxItems = 50;
 
@@ -632,7 +712,13 @@ Location.Base.database = Database.new(
                 location.inventory.add(item:Item.Base.database.find(
                     name: 'Hammer'
                 ).new(from:location.ownedBy));                
+            },
+            onInteract ::(location) {
+                return true;
 
+            },            
+            
+            onCreate ::(location) {
 
             },
             
@@ -647,7 +733,6 @@ Location.Base.database = Database.new(
             rarity: 100,
             ownVerb : 'run',
             symbol: '$',
-            owned : true,
 
             descriptions: [
                 'An enchanter\'s stand.'
@@ -668,13 +753,10 @@ Location.Base.database = Database.new(
             
             minOccupants : 0,
             maxOccupants : 0,
+            onFirstInteract ::(location) {
+                location.ownedBy = location.landmark.island.newInhabitant();
             
-            onInteract ::(location) {
-                return true;
-
-            },            
             
-            onCreate ::(location) {
                 @:ItemEnchant = import(module:'game_class.itemenchant.mt');
             
                 location.data.enchants = [
@@ -695,6 +777,14 @@ Location.Base.database = Database.new(
                             location.data.enchants->remove(key:n);
                     });
                 });
+            },            
+            onInteract ::(location) {
+                return true;
+
+            },            
+            
+            onCreate ::(location) {
+
 
             },
             
@@ -708,7 +798,6 @@ Location.Base.database = Database.new(
             rarity: 100,
             ownVerb : 'run',
             symbol: '/',
-            owned : true,
 
             descriptions: [
                 "A modest trading shop. Relatively small.",
@@ -730,16 +819,9 @@ Location.Base.database = Database.new(
             
             minOccupants : 0,
             maxOccupants : 0,
-            
-            onInteract ::(location) {
-                
-                return true;
-
-            },            
-            
-            onCreate ::(location) {
+            onFirstInteract ::(location) {
                 @:Profession = import(module:'game_class.profession.mt');
-            
+                location.ownedBy = location.landmark.island.newInhabitant();            
                 location.ownedBy.profession = Profession.Base.database.find(name:'Blacksmith').new();
                 location.name = 'Blacksmith';
                 [0, 1 + (location.ownedBy.level / 4)->ceil]->for(do:::(i) {
@@ -755,6 +837,15 @@ Location.Base.database = Database.new(
                     );
 
                 });
+            },            
+            onInteract ::(location) {
+                
+                return true;
+
+            },            
+            
+            onCreate ::(location) {
+
             },
             
             onTimeChange::(location, time) {
@@ -768,7 +859,6 @@ Location.Base.database = Database.new(
             rarity: 100,
             ownVerb : 'run',
             symbol: '&',
-            owned : false,
 
             descriptions: [
                 "A modest tavern with a likely rich history.",
@@ -787,6 +877,9 @@ Location.Base.database = Database.new(
             
             minOccupants : 1,
             maxOccupants : 6,
+            onFirstInteract ::(location) {
+                location.ownedBy = location.landmark.island.newInhabitant();            
+            },
             
             onInteract ::(location) {
 
@@ -805,7 +898,6 @@ Location.Base.database = Database.new(
             rarity: 100,
             ownVerb : 'run',
             symbol: '!',
-            owned : false,
 
             descriptions: [
                 "A fighting arena",
@@ -825,6 +917,7 @@ Location.Base.database = Database.new(
             
             minOccupants : 1,
             maxOccupants : 6,
+            onFirstInteract ::(location) {},
             
             onInteract ::(location) {
 
@@ -843,7 +936,6 @@ Location.Base.database = Database.new(
             rarity: 100,
             ownVerb : 'run',
             symbol: '=',
-            owned : false,
 
             descriptions: [
                 "An inn",
@@ -862,6 +954,7 @@ Location.Base.database = Database.new(
             
             minOccupants : 1,
             maxOccupants : 4,
+            onFirstInteract ::(location) {},
             
             onInteract ::(location) {
 
@@ -880,7 +973,6 @@ Location.Base.database = Database.new(
             rarity: 100,
             ownVerb : 'run',
             symbol: '+',
-            owned : true,
 
             descriptions: [
                 "A school",
@@ -899,11 +991,13 @@ Location.Base.database = Database.new(
             
             minOccupants : 1,
             maxOccupants : 4,
+            onFirstInteract ::(location) {},
             
             onInteract ::(location) {
                 
             },            
             onCreate ::(location) {
+                location.ownedBy = location.landmark.island.newInhabitant();
                 location.name = location.ownedBy.profession.base.name + ' school';
             },
             
@@ -917,7 +1011,6 @@ Location.Base.database = Database.new(
             rarity: 100,
             ownVerb : '',
             symbol: '[]',
-            owned : false,
 
             descriptions: [
                 "A library",
@@ -936,6 +1029,7 @@ Location.Base.database = Database.new(
             
             minOccupants : 1,
             maxOccupants : 10,
+            onFirstInteract ::(location) {},
             
             onInteract ::(location) {
                 
@@ -954,7 +1048,6 @@ Location.Base.database = Database.new(
             rarity: 100,
             ownVerb : '',
             symbol: '@',
-            owned : false,
 
             descriptions: [
                 "A large stone ring, tall enough to fit a few people and a wagon.",
@@ -971,6 +1064,7 @@ Location.Base.database = Database.new(
             minOccupants : 0,
             maxOccupants : 0,
             
+            onFirstInteract ::(location) {},
             onInteract ::(location) {
                 return true;                
             },
@@ -989,7 +1083,6 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : '',
             symbol: '\\',
-            owned : false,
 
             descriptions: [
                 "Decrepit stairs",
@@ -1006,6 +1099,7 @@ Location.Base.database = Database.new(
             minOccupants : 0,
             maxOccupants : 0,
             
+            onFirstInteract ::(location) {},
             onInteract ::(location) {
             },
             
@@ -1022,7 +1116,6 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : '',
             symbol: '?',
-            owned : false,
 
             descriptions: [
                 "A suspicious pit.",
@@ -1039,6 +1132,7 @@ Location.Base.database = Database.new(
             minOccupants : 0,
             maxOccupants : 0,
             
+            onFirstInteract ::(location) {},
             onInteract ::(location) {
 
                 return true;
@@ -1061,7 +1155,6 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : '',
             symbol: '^',
-            owned : false,
 
             descriptions: [
                 "Decrepit stairs",
@@ -1078,6 +1171,7 @@ Location.Base.database = Database.new(
             minOccupants : 0,
             maxOccupants : 0,
             
+            onFirstInteract ::(location) {},
             onInteract ::(location) {
             },
             
@@ -1094,7 +1188,6 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : '',
             symbol: '$',
-            owned : false,
 
             descriptions: [
             ],
@@ -1109,6 +1202,7 @@ Location.Base.database = Database.new(
             
             minOccupants : 0,
             maxOccupants : 0,
+            onFirstInteract ::(location) {},
             
             onInteract ::(location) {
             },
@@ -1130,7 +1224,6 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : '',
             symbol: '$',
-            owned : false,
 
             descriptions: [
             ],
@@ -1146,10 +1239,7 @@ Location.Base.database = Database.new(
             minOccupants : 0,
             maxOccupants : 0,
             
-            onInteract ::(location) {
-            },
-            
-            onCreate ::(location) {
+            onFirstInteract ::(location) {
                 @:nameGen = import(module:'game_singleton.namegen.mt');
                 @:Story = import(module:'game_singleton.story.mt');
                 
@@ -1179,7 +1269,13 @@ Location.Base.database = Database.new(
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false
                     ).new(from:location.landmark.island.newInhabitant(),rngEnchantHint:true));
-                });
+                });            
+            },
+            onInteract ::(location) {
+            },
+            
+            onCreate ::(location) {
+
             },
             
             onTimeChange::(location, time) {
@@ -1192,7 +1288,6 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : 'owned',
             symbol: 'x',
-            owned : true,
 
             descriptions: [
                 'An incapacitated individual.'
@@ -1208,7 +1303,7 @@ Location.Base.database = Database.new(
             
             minOccupants : 0,
             maxOccupants : 0,
-            
+            onFirstInteract::(location){},            
             onInteract ::(location) {
             },
             
@@ -1229,7 +1324,6 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : '',
             symbol: '*',
-            owned : false,
 
             descriptions: [
                 "A library stocked with books many times a person\'s height. Various colors and sizes of book bindings cover each columned shelf",
@@ -1247,6 +1341,7 @@ Location.Base.database = Database.new(
             minOccupants : 0,
             maxOccupants : 0,
             
+            onFirstInteract::(location){},            
             onInteract ::(location) {
                 @:world = import(module:'game_singleton.world.mt');                
                 if (world.storyFlags.action_interactedSylviaLibrary == false) ::<= {

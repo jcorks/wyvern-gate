@@ -51,40 +51,7 @@ return class(
         
         
         
-        @:aggress::(location, party) {
-            windowEvent.queueChoices(
-                prompt: 'Aggress how?',
-                choices: location.base.aggressiveInteractions,
-                canCancel : true,
-                onChoice ::(choice) {
-                    when(choice == 0) empty;
 
-
-                    @:interaction = Interaction.database.find(name:
-                        location.base.aggressiveInteractions[choice-1]
-                    );
-                    
-                    when (!location.landmark.peaceful) ::<= {
-                        interaction.onInteract(location, party);                    
-                    };
-                        
-                    
-                    windowEvent.queueAskBoolean(
-                        prompt: 'Are you sure?',
-                        onChoice::(which) {
-                            when(which == false) empty;
-                            interaction.onInteract(location, party);                    
-                            
-                            if (location.landmark.peaceful) ::<= {
-                                location.landmark.peaceful = false;
-                                windowEvent.queueMessage(text:'The people here are now aware of your aggression.');
-                            };                
-                                                    
-                        }
-                    );
-                }
-            );
-        };
         
         @:systemMenu :: {
             windowEvent.queueChoices(
@@ -314,45 +281,7 @@ return class(
                             locationAt = locationAt[choice].data;
                             
                             
-                            // initial interaction 
-                            // Initial interaction triggers an event.
-                            
-                            @canInteract = [::] {
-                                return locationAt.base.onInteract(location:locationAt);
-                            };
-                                
-                            when(canInteract == false) empty;
-                          
-                            @:interactionNames = [...locationAt.base.interactions]->map(to:::(value) {
-                                return Interaction.database.find(name:value).displayName;
-                            });
-                                
-                            @:choices = [...interactionNames];
-
-                            if (locationAt.base.aggressiveInteractions->keycount)
-                                choices->push(value: 'Aggress...');
-                                
-                            windowEvent.queueChoices(
-                                prompt: 'Interaction',
-                                choices:choices,
-                                canCancel : true,
-                                keep: true,
-                                onChoice::(choice) {
-                           
-                                    when(choice == 0) empty;
-
-                                    // aggress
-                                    when(locationAt.base.aggressiveInteractions->keycount > 0 && choice-1 == locationAt.base.interactions->keycount) ::<= {
-                                        aggress(location:locationAt, party);
-                                    };
-                                    
-                                    Interaction.database.find(name:locationAt.base.interactions[choice-1]).onInteract(
-                                        location: locationAt,
-                                        party
-                                    );
-                                    landmark.step();                            
-                                }
-                            );
+                            locationAt.interact();
 
                           }
                         

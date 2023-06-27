@@ -132,6 +132,59 @@
 
         };
         
+        @:assignSize = ::{
+            random.pickArrayItem(list:[
+                ::{
+                    description = description + 'It is smaller than expected. ';
+                    stats.add(stats:StatSet.new(
+                        ATK:-10,
+                        DEF:-10,
+                        SPD:10,
+                        DEX:10                    
+                    ));
+                    price *= 0.85;                    
+                },
+
+                ::{
+                    description = description + 'It is quite small. ';
+                    stats.add(stats:StatSet.new(
+                        ATK:-20,
+                        DEF:-20,
+                        SPD:20,
+                        DEX:20                    
+                    ));
+                    price *= 0.75;                    
+                },
+
+                ::{
+                    description = description + 'It is average-sized. ';
+                },
+
+                ::{
+                    description = description + 'It is larger than expected. ';
+                    stats.add(stats:StatSet.new(
+                        ATK:10,
+                        DEF:10,
+                        SPD:-10,
+                        DEX:-10                    
+                    ));
+                    price *= 1.15;                    
+                },
+
+                ::{
+                    description = description + 'It is quite large. ';
+                    stats.add(stats:StatSet.new(
+                        ATK:20,
+                        DEF:20,
+                        SPD:-20,
+                        DEX:-20                    
+                    ));
+                    price *= 1.25;                    
+                }
+
+            
+            ])();
+        };
         
         this.constructor = ::(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint) {
             when(state != empty) ::<= {
@@ -152,6 +205,10 @@
             base.useEffects->foreach(do:::(i, effect) {
                 useEffects->push(value:effect);
             });
+            
+            if (base.hasSize)   
+                assignSize();
+            
             
             if (base.hasQuality) ::<= {
                 // random chance to have a maker's emblem on it, indicating 
@@ -501,7 +558,8 @@ Item.Base = class(
                 useTargetHint : Number,
                 onCreate : Function,
                 basePrice : Number,
-                canBeColored: Boolean   
+                canBeColored: Boolean,
+                hasSize : Boolean   
             
             }
         );
@@ -544,6 +602,7 @@ Item.Base.database = Database.new(items: [
             equipEffects : [],
             attributes : [],
             canBeColored : false,
+            hasSize : false,
             onCreate ::(item, user, creationHint) {},
         }
     ),
@@ -563,6 +622,7 @@ Item.Base.database = Database.new(items: [
         isUnique : true,
         canBeColored : false,
         useTargetHint : USE_TARGET_HINT.ONE,
+        hasSize : false,
         onCreate ::(item, user, creationHint) {},
         
         equipMod : StatSet.new(
@@ -595,6 +655,7 @@ Item.Base.database = Database.new(items: [
         basePrice : 30000,
         keyItem : false,
         weight : 0.3,
+        hasSize : false,
         canHaveEnchants : false,
         hasQuality : false,
         hasMaterial : false,
@@ -633,6 +694,7 @@ Item.Base.database = Database.new(items: [
         canBeColored : false,
         isUnique : true,
         weight : 0.1,
+        hasSize : false,
         levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
 
@@ -667,6 +729,7 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         basePrice: 20,
         levelMinimum : 1,
+        hasSize : false,
         canHaveEnchants : false,
         hasQuality : false,
         hasMaterial : false,
@@ -699,6 +762,7 @@ Item.Base.database = Database.new(items: [
         weight : 0.5,
         rarity : 100,
         canBeColored : false,
+        hasSize : false,
         keyItem : false,
         basePrice: 100,
         levelMinimum : 1,
@@ -741,6 +805,7 @@ Item.Base.database = Database.new(items: [
         hasQuality : false,
         hasMaterial : false,
         isUnique : false,        
+        hasSize : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         equipMod : StatSet.new(
             SPD: -2, // itll slow you down
@@ -772,6 +837,7 @@ Item.Base.database = Database.new(items: [
         basePrice: 20,
         levelMinimum : 1,
         canHaveEnchants : false,
+        hasSize : false,
         hasQuality : false,
         hasMaterial : false,
         isUnique : false,        
@@ -807,6 +873,7 @@ Item.Base.database = Database.new(items: [
         canHaveEnchants : false,
         hasQuality : false,
         hasMaterial : false,
+        hasSize : false,
         isUnique : false,        
         useTargetHint : USE_TARGET_HINT.ONE,
         equipMod : StatSet.new(
@@ -841,6 +908,7 @@ Item.Base.database = Database.new(items: [
         hasMaterial : false,
         levelMinimum : 1,
         keyItem : false,
+        hasSize : false,
         isUnique : false,
         canHaveEnchants : false,
         hasQuality : false,
@@ -876,6 +944,7 @@ Item.Base.database = Database.new(items: [
         canBeColored : false,
         keyItem : false,
         levelMinimum : 1,
+        hasSize : false,
         hasMaterial : false,
         isUnique : false,
         canHaveEnchants : false,
@@ -914,6 +983,7 @@ Item.Base.database = Database.new(items: [
         hasQuality : true,
         hasMaterial : true,
         isUnique : false,
+        hasSize : true,
         useTargetHint : USE_TARGET_HINT.ONE,
 
         // fatigued
@@ -947,6 +1017,7 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         canBeColored : false,
         weight : 4,
+        hasSize : true,
         levelMinimum : 1,
         canHaveEnchants : false,
         hasQuality : true,
@@ -990,6 +1061,7 @@ Item.Base.database = Database.new(items: [
         levelMinimum : 1,
         canHaveEnchants : false,
         hasQuality : true,
+        hasSize : true,
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
@@ -1029,6 +1101,7 @@ Item.Base.database = Database.new(items: [
         weight : 4,
         basePrice: 17,
         levelMinimum : 1,
+        hasSize : true,
         canHaveEnchants : false,
         hasQuality : true,
         hasMaterial : true,
@@ -1069,6 +1142,7 @@ Item.Base.database = Database.new(items: [
         weight : 4,
         basePrice: 50,
         levelMinimum : 1,
+        hasSize : true,
         canHaveEnchants : true,
         hasQuality : true,
         hasMaterial : true,
@@ -1105,6 +1179,7 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         weight : 4,
         basePrice: 100,
+        hasSize : true,
         levelMinimum : 1,
         canHaveEnchants : true,
         hasQuality : true,
@@ -1140,6 +1215,7 @@ Item.Base.database = Database.new(items: [
         rarity : 300,
         keyItem : false,
         weight : 2,
+        hasSize : true,
         canBeColored : true,
         basePrice: 76,
         levelMinimum : 1,
@@ -1176,6 +1252,7 @@ Item.Base.database = Database.new(items: [
         equipType: TYPE.TWOHANDED,
         rarity : 300,
         weight : 12,
+        hasSize : true,
         keyItem : false,
         canBeColored : true,
         basePrice: 87,
@@ -1212,6 +1289,7 @@ Item.Base.database = Database.new(items: [
         equipType: TYPE.HAND,
         rarity : 300,
         weight : 1,
+        hasSize : true,
         canBeColored : true,
         keyItem : false,
         basePrice: 35,
@@ -1253,6 +1331,7 @@ Item.Base.database = Database.new(items: [
         basePrice: 30,
         levelMinimum : 1,
         canHaveEnchants : true,
+        hasSize : true,
         hasQuality : true,
         hasMaterial : true,
         isUnique : false,
@@ -1288,6 +1367,7 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         basePrice: 105,
+        hasSize : true,
         levelMinimum : 1,
         canHaveEnchants : true,
         hasQuality : true,
@@ -1325,6 +1405,7 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         basePrice: 105,
+        hasSize : true,
         levelMinimum : 1,
         canHaveEnchants : true,
         hasQuality : true,
@@ -1362,6 +1443,7 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         basePrice: 105,
+        hasSize : true,
         levelMinimum : 1,
         canHaveEnchants : true,
         hasQuality : true,
@@ -1401,6 +1483,7 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         basePrice: 40,
         levelMinimum : 1,
+        hasSize : true,
         canHaveEnchants : true,
         hasQuality : true,
         hasMaterial : true,
@@ -1435,6 +1518,7 @@ Item.Base.database = Database.new(items: [
         equipType: TYPE.TWOHANDED,
         rarity : 100,
         weight : 9,
+        hasSize : true,
         canBeColored : true,
         keyItem : false,
         basePrice: 100,
@@ -1476,6 +1560,7 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         basePrice: 100,
         levelMinimum : 1,
+        hasSize : true,
         canHaveEnchants : true,
         hasQuality : true,
         hasMaterial : true,
@@ -1515,6 +1600,7 @@ Item.Base.database = Database.new(items: [
         keyItem : false,
         canBeColored : true,
         levelMinimum : 1,
+        hasSize : true,
         canHaveEnchants : true,
         hasQuality : true,
         hasMaterial : true,
@@ -1553,6 +1639,7 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
+        hasSize : false,
         canHaveEnchants : true,
         hasQuality : true,
         hasMaterial : true,
@@ -1587,6 +1674,7 @@ Item.Base.database = Database.new(items: [
         rarity : 100,
         weight : 1,
         canBeColored : true,
+        hasSize : false,
         keyItem : false,
         levelMinimum : 1,
         canHaveEnchants : true,
@@ -1618,6 +1706,7 @@ Item.Base.database = Database.new(items: [
         equipType: TYPE.ARMOR,
         rarity : 100,
         weight : 1,
+        hasSize : false,
         canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
@@ -1650,6 +1739,7 @@ Item.Base.database = Database.new(items: [
         rarity : 100,
         weight : 1,
         canBeColored : true,
+        hasSize : false,
         keyItem : false,
         levelMinimum : 1,
         canHaveEnchants : true,
@@ -1681,6 +1771,7 @@ Item.Base.database = Database.new(items: [
         rarity : 100,
         weight : 1,
         canBeColored : true,
+        hasSize : false,
         keyItem : false,
         levelMinimum : 1,
         canHaveEnchants : true,
@@ -1711,6 +1802,7 @@ Item.Base.database = Database.new(items: [
         equipType: TYPE.TRINKET,
         rarity : 100,
         weight : 1,
+        hasSize : false,
         canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
@@ -1742,6 +1834,7 @@ Item.Base.database = Database.new(items: [
         rarity : 100,
         weight : 1,
         canBeColored : true,
+        hasSize : false,
         keyItem : false,
         levelMinimum : 1,
         canHaveEnchants : true,
@@ -1771,6 +1864,7 @@ Item.Base.database = Database.new(items: [
         equipType: TYPE.TRINKET,
         rarity : 350,
         weight : 10,
+        hasSize : false,
         canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
@@ -1805,6 +1899,7 @@ Item.Base.database = Database.new(items: [
         rarity : 350,
         weight : 1,
         canBeColored : true,
+        hasSize : false,
         keyItem : false,
         levelMinimum : 1,
         canHaveEnchants : true,
@@ -1838,6 +1933,7 @@ Item.Base.database = Database.new(items: [
         weight : 1,
         canBeColored : true,
         keyItem : false,
+        hasSize : false,
         levelMinimum : 1,
         canHaveEnchants : true,
         hasQuality : true,
@@ -1870,6 +1966,7 @@ Item.Base.database = Database.new(items: [
         rarity : 500,
         weight : 1,
         canBeColored : true,
+        hasSize : false,
         keyItem : false,
         levelMinimum : 1,
         canHaveEnchants : true,
@@ -1906,6 +2003,7 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         levelMinimum : 1,
+        hasSize : false,
         canHaveEnchants : true,
         hasQuality : true,
         hasMaterial : true,
@@ -1936,6 +2034,7 @@ Item.Base.database = Database.new(items: [
         examine : '',
         equipType: TYPE.TWOHANDED,
         rarity : 10000000,
+        hasSize : false,
         basePrice: 1,
         keyItem : true,
         canBeColored : false,
@@ -1975,6 +2074,7 @@ Item.Base.database = Database.new(items: [
         examine : 'Pure copper ingot.',
         equipType: TYPE.TWOHANDED,
         rarity : 150,
+        hasSize : false,
         weight : 5,
         canBeColored : false,
         keyItem : false,
@@ -2012,6 +2112,7 @@ Item.Base.database = Database.new(items: [
         examine : 'Pure iron ingot',
         equipType: TYPE.TWOHANDED,
         rarity : 200,
+        hasSize : false,
         weight : 5,
         keyItem : false,
         canBeColored : false,
@@ -2046,6 +2147,7 @@ Item.Base.database = Database.new(items: [
         description: 'Steel Ingot',
         examine : 'Pure Steel ingot.',
         equipType: TYPE.TWOHANDED,
+        hasSize : false,
         rarity : 300,
         canBeColored : false,
         weight : 5,
@@ -2083,6 +2185,7 @@ Item.Base.database = Database.new(items: [
         description: 'Mythril Ingot',
         examine : 'Pure iron ingot',
         equipType: TYPE.TWOHANDED,
+        hasSize : false,
         rarity : 1000,
         canBeColored : false,
         weight : 5,
@@ -2120,6 +2223,7 @@ Item.Base.database = Database.new(items: [
         equipType: TYPE.TWOHANDED,
         rarity : 1550,
         canBeColored : false,
+        hasSize : false,
         weight : 5,
         keyItem : false,
         basePrice: 175,
@@ -2157,6 +2261,7 @@ Item.Base.database = Database.new(items: [
         weight : 5,
         canBeColored : false,
         keyItem : false,
+        hasSize : false,
         basePrice: 300,
         canHaveEnchants : false,
         hasQuality : false,
@@ -2193,6 +2298,7 @@ Item.Base.database = Database.new(items: [
         canBeColored : false,
         basePrice: 115,
         keyItem : false,
+        hasSize : false,
         weight : 5,
         canHaveEnchants : false,
         hasQuality : false,
@@ -2228,6 +2334,7 @@ Item.Base.database = Database.new(items: [
         weight : 5,
         canBeColored : false,
         keyItem : false,
+        hasSize : false,
         basePrice: 115,
         canHaveEnchants : false,
         hasQuality : false,
@@ -2263,6 +2370,7 @@ Item.Base.database = Database.new(items: [
         weight : 5,
         canBeColored : false,
         keyItem : false,
+        hasSize : false,
         canHaveEnchants : false,
         hasQuality : false,
         hasMaterial : false,
@@ -2293,6 +2401,7 @@ Item.Base.database = Database.new(items: [
         description: "Raw ore. It's hard to tell exactly what kind of metal it is.",
         examine : 'Could be smelted into',
         equipType: TYPE.TWOHANDED,
+        hasSize : false,
         rarity : 100,
         weight : 5,
         canBeColored : false,
@@ -2329,6 +2438,7 @@ Item.Base.database = Database.new(items: [
         equipType: TYPE.HAND,
         rarity : 100,
         weight : 5,
+        hasSize : false,
         canBeColored : false,
         keyItem : false,
         canHaveEnchants : false,
@@ -2367,6 +2477,7 @@ Item.Base.database = Database.new(items: [
         canBeColored : false,
         keyItem : false,
         canHaveEnchants : false,
+        hasSize : false,
         hasQuality : false,
         hasMaterial : false,
         isUnique : false,
@@ -2404,6 +2515,7 @@ Item.Base.database = Database.new(items: [
         rarity : 300,
         weight : 10,
         canBeColored : false,
+        hasSize : false,
         keyItem : true,
         canHaveEnchants : false,
         hasQuality : false,
@@ -2438,6 +2550,7 @@ Item.Base.database = Database.new(items: [
         equipType: TYPE.TWOHANDED,
         rarity : 3000,
         weight : 10,
+        hasSize : false,
         keyItem : false,
         canBeColored : false,
         canHaveEnchants : false,
@@ -2474,6 +2587,7 @@ Item.Base.database = Database.new(items: [
         equipType: TYPE.TWOHANDED,
         rarity : 300000000,
         weight : 1,
+        hasSize : false,
         keyItem : false,
         canBeColored : false,
         canHaveEnchants : false,
@@ -2509,6 +2623,7 @@ Item.Base.database = Database.new(items: [
         equipType: TYPE.TWOHANDED,
         rarity : 100,
         weight : 10,
+        hasSize : false,
         canBeColored : false,
         basePrice: 1,
         keyItem : false,
@@ -2560,6 +2675,7 @@ Item.Base.database = Database.new(items: [
         examine : '',
         equipType: TYPE.TWOHANDED,
         rarity : 100,
+        hasSize : false,
         weight : 10,
         canBeColored : false,
         basePrice: 1,
@@ -2613,6 +2729,7 @@ Item.Base.database = Database.new(items: [
         rarity : 100,
         weight : 10,
         canBeColored : false,
+        hasSize : false,
         basePrice: 1,
         keyItem : false,
         levelMinimum : 1000000000,
@@ -2663,6 +2780,7 @@ Item.Base.database = Database.new(items: [
         equipType: TYPE.TWOHANDED,
         rarity : 100,
         weight : 10,
+        hasSize : false,
         canBeColored : false,
         basePrice: 1,
         keyItem : false,
@@ -2717,6 +2835,7 @@ Item.Base.database = Database.new(items: [
         canBeColored : false,
         basePrice: 100,
         keyItem : false,
+        hasSize : false,
         levelMinimum : 1000000000,
         canHaveEnchants : false,
         hasQuality : false,
