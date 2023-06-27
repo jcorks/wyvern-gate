@@ -1167,7 +1167,83 @@ Item.Base.database = Database.new(items: [
         onCreate ::(item, user, creationHint) {}
 
     }),
-    
+
+
+    Item.Base.new(data : {
+        name : "Falchion",
+        description: 'A basic sword with a large blade. The hilt has a $color$ trim.',
+        examine : 'Swords like these are quite common and are of adequate quality even if simple.',
+        equipType: TYPE.HAND,
+        rarity : 300,
+        canBeColored : true,
+        keyItem : false,
+        weight : 4,
+        basePrice: 50,
+        levelMinimum : 1,
+        hasSize : true,
+        canHaveEnchants : true,
+        hasQuality : true,
+        hasMaterial : true,
+        isUnique : false,
+        useTargetHint : USE_TARGET_HINT.ONE,
+
+        // fatigued
+        equipMod : StatSet.new(
+            ATK: 35,
+            DEF: 10,
+            SPD: -10
+        ),
+        useEffects : [
+            'Fling',
+        ],
+        equipEffects : [],
+        attributes : [
+            ATTRIBUTE.SHARP,
+            ATTRIBUTE.METAL,
+            ATTRIBUTE.WEAPON
+        ],
+        onCreate ::(item, user, creationHint) {}
+
+    }),    
+
+    Item.Base.new(data : {
+        name : "Scimitar",
+        description: 'A basic sword with a curved blade. The hilt has a $color$ trim.',
+        examine : 'Swords like these are quite common and are of adequate quality even if simple.',
+        equipType: TYPE.HAND,
+        rarity : 300,
+        canBeColored : true,
+        keyItem : false,
+        weight : 4,
+        basePrice: 50,
+        levelMinimum : 1,
+        hasSize : true,
+        canHaveEnchants : true,
+        hasQuality : true,
+        hasMaterial : true,
+        isUnique : false,
+        useTargetHint : USE_TARGET_HINT.ONE,
+
+        // fatigued
+        equipMod : StatSet.new(
+            ATK: 30,
+            DEF: 10,
+            SPD: -10,
+            DEX: 5
+        ),
+        useEffects : [
+            'Fling',
+        ],
+        equipEffects : [],
+        attributes : [
+            ATTRIBUTE.SHARP,
+            ATTRIBUTE.METAL,
+            ATTRIBUTE.WEAPON
+        ],
+        onCreate ::(item, user, creationHint) {}
+
+    }), 
+
     
     Item.Base.new(data : {
         name : "Rapier",
@@ -1189,9 +1265,10 @@ Item.Base.database = Database.new(items: [
 
         // fatigued
         equipMod : StatSet.new(
-            ATK: 40,
+            ATK: 35,
             SPD: 10,
-            DEF:-10
+            DEF:-10,
+            DEX: 10
         ),
         useEffects : [
             'Fling',

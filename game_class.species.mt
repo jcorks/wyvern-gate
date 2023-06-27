@@ -122,6 +122,34 @@ Species.database = Database.new(items: [
         passives : [
         ]
     }),
+    
+    Species.new(data:{
+        name : 'Kitsune',
+        rarity : 10,
+        description: 'A canid race.',
+        growth : StatSet.new(
+            HP : 2,
+            AP : 5,
+            ATK: 2,
+            DEF: 1,
+            INT: 8,
+            LUK: 3,
+            SPD: 7,
+            DEX: 8
+        ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'face',
+            'body'
+        ],
+        
+        special : false,
+        passives : [
+        ]
+    }),    
 
     Species.new(data:{
         name : 'Tiger',
@@ -512,7 +540,6 @@ Species.database = Database.new(items: [
         
         special : false,
         passives : [
-            "Moon's Blessing"
         ]
     }),
     
