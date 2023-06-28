@@ -791,8 +791,8 @@ Interaction.database = Database.new(
                             when(choice == 0) empty;
                             canvas.clear();
                             windowEvent.queueMessage(text:'As the key is pushed in, the gate gently whirrs and glows with a blinding light...');
-                            windowEvent.queueMessage(text:'As you enter, you feel the world around you fade.');
-                            windowEvent.queueMessage(text:'...');
+                            windowEvent.queueMessage(text:'As you enter, you feel the world around you fade.', renderable:{render::{canvas.blackout();}});
+                            windowEvent.queueMessage(text:'...', renderable:{render::{canvas.blackout();}});
                             
                             windowEvent.queueNoDisplay( 
                                 onEnter::{
@@ -868,6 +868,21 @@ Interaction.database = Database.new(
                 },
             }
         ),  
+
+
+        Interaction.new(
+            data : {
+                displayName : 'Climb Up',
+                name : 'climb up',
+                onInteract ::(location, party) {
+
+                    windowEvent.queueMessage(text:'The party uses the ladder to climb up to the surface.', renderable:{render::{canvas.blackout();}});
+                    windowEvent.queueNoDisplay(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});                    
+                },
+            }
+        ),  
+
+
         
         Interaction.new(
             data : {

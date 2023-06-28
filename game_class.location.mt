@@ -600,7 +600,7 @@ Location.Base.database = Database.new(
                     @:Story = import(module:'game_singleton.story.mt');
                     @:Scene = import(module:'game_class.scene.mt');
                     @:StatSet = import(module:'game_class.statset.mt');
-                
+                    location.ownedBy = location.landmark.island.newInhabitant();
                     location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
                     location.ownedBy.species = Species.database.find(name:'Wyvern of Fire');
                     location.ownedBy.profession = Profession.Base.database.find(name:'Wyvern of Fire').new();               
@@ -610,7 +610,7 @@ Location.Base.database = Database.new(
                     });
 
                     
-                    location.ownedBy.onInteract = ::(party, location, onNext) {
+                    location.ownedBy.onInteract = ::(party, location, onDone) {
                         if (!Story.defeatedWyvernFire) ::<= {
                             Scene.database.find(name:'scene_wyvernfire0').act(onDone::{}, location, landmark:location.landmark);
                         } else ::<= {
@@ -619,14 +619,14 @@ Location.Base.database = Database.new(
                         };
                     };
                     location.ownedBy.stats.state = StatSet.new(
-                        HP:   140,
+                        HP:   110,
                         AP:   999,
                         ATK:  7,
                         INT:  16,
-                        DEF:  14,
+                        DEF:  9,
                         LUK:  8,
                         SPD:  16,
-                        DEX:  16
+                        DEX:  8
                     ).state;
                     location.ownedBy.heal(amount:9999, silent:true); 
                     location.ownedBy.healAP(amount:9999, silent:true); 
@@ -1110,6 +1110,39 @@ Location.Base.database = Database.new(
             
             }
         }),
+        
+        Location.Base.new(data:{
+            name: 'Ladder',
+            rarity: 1000000000000,
+            ownVerb : '',
+            symbol: '=',
+
+            descriptions: [
+                "Ladder leading to the surface.",
+            ],
+            interactions : [
+                'climb up',
+            ],
+            
+            aggressiveInteractions : [
+            ],
+
+
+            
+            minOccupants : 0,
+            maxOccupants : 0,
+            
+            onFirstInteract ::(location) {},
+            onInteract ::(location) {
+            },
+            
+            onCreate ::(location) {
+            },
+            
+            onTimeChange::(location, time) {
+            
+            }
+        }),        
         
         Location.Base.new(data:{
             name: '?????',

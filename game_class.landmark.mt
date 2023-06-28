@@ -649,8 +649,9 @@ Landmark.Base.database = Database.new(
                 },
                 
                 onVisit ::(landmark, island) {
+                    @:canvas = import(module:'game_singleton.canvas.mt');
                     @:windowEvent = import(module:'game_singleton.windowevent.mt');
-                    windowEvent.queueMessage(text:'It seems this area has been long forgotten...');
+                    windowEvent.queueMessage(text:'It seems this area has been long forgotten...', renderable:{render::<-canvas.blackout()});
                 }
                 
             }
@@ -673,6 +674,7 @@ Landmark.Base.database = Database.new(
                 ],
                 requiredLocations : [
                     'Large Chest',
+                    'Ladder'
                 ],
                 
                 mapHint : {

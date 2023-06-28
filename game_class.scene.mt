@@ -99,6 +99,7 @@ Scene.database = Database.new(
                     ::(location, landmark, doNext) {
                         @:world = import(module:'game_singleton.world.mt');
                         @:Battle = import(module:'game_class.battle.mt');
+                        @:canvas = import(module:'game_singleton.canvas.mt');
 
                         @:end = ::(result){
 
@@ -122,6 +123,7 @@ Scene.database = Database.new(
                                     allies: world.party.members,
                                     enemies: [location.ownedBy],
                                     landmark: landmark,
+                                    renderable:{render::{canvas.blackout();}},
                                     onEnd::(result) {
                                         end(result);
                                     }
@@ -135,6 +137,7 @@ Scene.database = Database.new(
                             allies: world.party.members,
                             enemies: [location.ownedBy],
                             landmark: landmark,
+                            renderable:{render::{canvas.blackout();}},
                             onEnd::(result) {
                                 end(result);
                             }

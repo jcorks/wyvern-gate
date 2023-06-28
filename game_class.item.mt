@@ -206,8 +206,6 @@
                 useEffects->push(value:effect);
             });
             
-            if (base.hasSize)   
-                assignSize();
             
             
             if (base.hasQuality) ::<= {
@@ -260,15 +258,31 @@
                 };
 
                 
-                if (rngEnchantHint != empty || Number.random() > 0.5) ::<= {
-                    @:count = random.pickArrayItem(list:[1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 4]);
-                    [0, count]->for(do:::(i) {
-                        @:mod = ItemEnchant.database.getRandom();
+                if (rngEnchantHint != empty) ::<= {
+                    @:story = import(module:'game_singleton.story.mt');
+                    @enchantCount = random.integer(from:0, to:1+match(true) {
+                        (story.defeatedWyvernLight):   7,
+                        (story.defeatedWyvernIce):     4,
+                        (story.defeatedWyvernFire):    2,
+                        default: 0
+                    });
+                    
+                    [0, enchantCount]->for(do:::(i) {
+                        @mod = if (story.defeatedWyvernThunder)
+                            ItemEnchant.database.getRandom()
+                        else
+                            ItemEnchant.database.getRandomFiltered(
+                                filter::(value) <- value.isRare == false
+                            );
+                            
                         this.addEnchant(name:mod.name);
                     });
                 };
             };
             
+            if (base.hasSize)   
+                assignSize();
+
 
             if (base.canBeColored) ::<= {
                 color = if (colorHint) ItemColor.database.find(name:colorHint) else ItemColor.database.getRandom();
@@ -1167,6 +1181,45 @@ Item.Base.database = Database.new(items: [
         onCreate ::(item, user, creationHint) {}
 
     }),
+    
+    
+    Item.Base.new(data : {
+        name : "Chakram",
+        description: 'A pair of round blades. The handles have a $color$ trim.',
+        examine : '.',
+        equipType: TYPE.TWOHANDED,
+        rarity : 300,
+        canBeColored : true,
+        keyItem : false,
+        weight : 4,
+        basePrice: 200,
+        levelMinimum : 1,
+        hasSize : true,
+        canHaveEnchants : true,
+        hasQuality : true,
+        hasMaterial : true,
+        isUnique : false,
+        useTargetHint : USE_TARGET_HINT.ONE,
+
+        // fatigued
+        equipMod : StatSet.new(
+            ATK: 25,
+            DEF: 5,
+            SPD: 15,
+            DEX: 25
+        ),
+        useEffects : [
+            'Fling',
+        ],
+        equipEffects : [],
+        attributes : [
+            ATTRIBUTE.SHARP,
+            ATTRIBUTE.METAL,
+            ATTRIBUTE.WEAPON
+        ],
+        onCreate ::(item, user, creationHint) {}
+
+    }),    
 
 
     Item.Base.new(data : {
@@ -1178,7 +1231,7 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         weight : 4,
-        basePrice: 50,
+        basePrice: 150,
         levelMinimum : 1,
         hasSize : true,
         canHaveEnchants : true,
@@ -1215,7 +1268,7 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         weight : 4,
-        basePrice: 50,
+        basePrice: 150,
         levelMinimum : 1,
         hasSize : true,
         canHaveEnchants : true,
@@ -1254,7 +1307,7 @@ Item.Base.database = Database.new(items: [
         canBeColored : true,
         keyItem : false,
         weight : 4,
-        basePrice: 100,
+        basePrice: 120,
         hasSize : true,
         levelMinimum : 1,
         canHaveEnchants : true,

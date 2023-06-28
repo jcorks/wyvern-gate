@@ -72,4 +72,11 @@
 - Added items (2-6) to homes and farms to be stolen if desired
 - Fixed up non-peaceful encounters
 - Added combat when talking to someone in a non-peaceful area
+- Added ladder to treasure room to escape back to the surface from shrines 
+- Rebalanced enchantments to have their counts on items be tiered based on which Wyverns youve defeated 
+- Introduced "rare" enchantments that are more potent than normal enchants 
+- Fixed a bug that allowed re-use of consumable items 
+- Added chakram
+- Added rune enchants
+- Slightly nerfed Kaedjaal in response to rebalance of enchants
 

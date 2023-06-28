@@ -459,11 +459,11 @@ return class(
                 @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
                 @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
                 // debug
-                    party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
-                    ).new(from:island.newInhabitant(),rngEnchantHint:true));
+                    //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
+                    //).new(from:island.newInhabitant(),rngEnchantHint:true));
                     
-                    //party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
-                    //).new(from:island.newInhabitant()));
+                    party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
+                    ).new(from:island.newInhabitant()));
                     /*
 
                     

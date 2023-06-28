@@ -35,7 +35,8 @@
                 equipMod : StatSet.type, // percentages
                 useEffects : Object,
                 equipEffects : Object,
-                priceMod : Number
+                priceMod : Number,
+                isRare : Boolean
             }
         );
     }
@@ -45,6 +46,463 @@
 ItemEnchant.database = Database.new(
     items : [
 
+
+
+
+
+
+        ItemEnchant.new(
+            data : {
+                name : 'Burning',
+                description : 'The material its made of is warm to the touch. Grants a fire aspect to attacks and gives ice resistance when used as armor.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 200,
+                isRare : false,
+                
+                equipEffects : [
+                    "Burning"
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Icy',
+                description : 'The material its made of is cold to the touch. Grants an ice aspect to attacks and gives fire resistance when used as armor.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 200,
+                isRare : false,
+                
+                equipEffects : [
+                    "Icy"
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Shock',
+                description : 'The material its made of gently hums. Grants a thunder aspect to attacks and gives thunder resistance when used as armor.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 200,
+                isRare : false,
+                
+                equipEffects : [
+                    "Shock"
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Toxic',
+                description : 'The material its made has been made poisonous. Grants a poison aspect to attacks and gives poison resistance when used as armor.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 200,
+                isRare : false,
+                
+                equipEffects : [
+                    "Toxic"
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Shimmering',
+                description : 'The material its made of glows softly. Grants a light aspect to attacks and gives dark resistance when used as armor.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 200,
+                isRare : false,
+                
+                equipEffects : [
+                    "Shimmering"
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Dark',
+                description : 'The material its made of is very dark. Grants a dark aspect to attacks and gives light resistance when used as armor.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 200,
+                isRare : false,
+                
+                equipEffects : [
+                    "Dark"
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+
+
+        ItemEnchant.new(
+            data : {
+                name : 'Rune: Power',
+                description : 'Imbued with a potent rune of power.',
+                equipMod : StatSet.new(
+                    ATK: 150,
+                    DEX: -10,
+                    SPD: -10,
+                    DEF: -10,
+                    INT: -10                    
+                ),
+                levelMinimum : 1,
+                priceMod: 20000,
+                isRare : true,
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+        
+        ItemEnchant.new(
+            data : {
+                name : 'Rune: Shield',
+                description : 'Imbued with a potent rune of shielding.',
+                equipMod : StatSet.new(
+                    DEF: 150,
+                    DEX: -10,
+                    ATK: -10,
+                    SPD: -10,
+                    INT: -10                    
+                ),
+                levelMinimum : 1,
+                priceMod: 20000,
+                isRare : true,
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),        
+
+        ItemEnchant.new(
+            data : {
+                name : 'Rune: Reflex',
+                description : 'Imbued with a potent rune of reflex.',
+                equipMod : StatSet.new(
+                    DEX: 150,
+                    DEF: -10,
+                    ATK: -10,
+                    SPD: -10,
+                    INT: -10                    
+                ),
+                levelMinimum : 1,
+                priceMod: 20000,
+                isRare : true,
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ), 
+
+        ItemEnchant.new(
+            data : {
+                name : 'Rune: Speed',
+                description : 'Imbued with a potent rune of speed.',
+                equipMod : StatSet.new(
+                    SPD: 150,
+                    DEF: -10,
+                    ATK: -10,
+                    DEX: -10,
+                    INT: -10                    
+                ),
+                levelMinimum : 1,
+                priceMod: 20000,
+                isRare : true,
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Rune: Mind',
+                description : 'Imbued with a potent rune of mind.',
+                equipMod : StatSet.new(
+                    INT: 150,
+                    DEF: -10,
+                    ATK: -10,
+                    DEX: -10,
+                    SPD: -10                    
+                ),
+                levelMinimum : 1,
+                priceMod: 20000,
+                isRare : true,
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Morion',
+                description : 'Set with an enchanted morion stone.',
+                equipMod : StatSet.new(
+                    SPD: 50,
+                    DEX: 50,
+                    ATK: -25,
+                    DEF: -25,
+                    INT: -25
+                ),
+                priceMod: 1200,
+                isRare : true,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+        
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Amethyst',
+                description : 'Set with an enchanted amethyst.',
+                equipMod : StatSet.new(
+                    SPD: -25,
+                    DEX: 50,
+                    ATK: 50,
+                    DEF: -25,
+                    INT: -25
+                ),
+                priceMod: 1200,
+                isRare : true,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Citrine',
+                description : 'Set with an enchanted citrine stone.',
+                equipMod : StatSet.new(
+                    SPD: -25,
+                    DEX: -25,
+                    ATK: 50,
+                    DEF: 50,
+                    INT: -25
+                ),
+                priceMod: 1200,
+                isRare : true,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Garnet',
+                description : 'Set with an enchanted garnet stone.',
+                equipMod : StatSet.new(
+                    SPD: -25,
+                    DEX: -25,
+                    ATK: -25,
+                    DEF: 50,
+                    INT: 50
+                ),
+                priceMod: 1200,
+                isRare : true,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Praesolite',
+                description : 'Set with an enchanted praesolite stone.',
+                equipMod : StatSet.new(
+                    SPD: 50,
+                    DEX: -25,
+                    ATK: -25,
+                    DEF: -25,
+                    INT: 50
+                ),
+                priceMod: 1200,
+                isRare : true,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Aquamarine',
+                description : 'Set with an enchanted aquamarine stone.',
+                equipMod : StatSet.new(
+                    SPD: 50,
+                    DEX: -25,
+                    ATK: 50,
+                    DEF: -25,
+                    INT: -25
+                ),
+                priceMod: 1200,
+                isRare : true,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Diamond',
+                description : 'Set with an enchanted diamond stone.',
+                equipMod : StatSet.new(
+                    SPD: 50,
+                    DEX: -25,
+                    ATK: -25,
+                    DEF: 50,
+                    INT: -25
+                ),
+                priceMod: 1200,
+                isRare : true,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+        
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Pearl',
+                description : 'Set with an enchanted pearl.',
+                equipMod : StatSet.new(
+                    SPD: -25,
+                    DEX: 50,
+                    ATK: -25,
+                    DEF: 50,
+                    INT: -25
+                ),
+                priceMod: 1200,
+                isRare : true,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Ruby',
+                description : 'Set with an enchanted ruby.',
+                equipMod : StatSet.new(
+                    SPD: -25,
+                    DEX: 50,
+                    ATK: -25,
+                    DEF: -25,
+                    INT: 50
+                ),
+                priceMod: 1200,
+                isRare : true,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Sapphire',
+                description : 'Set with an enchanted sapphire.',
+                equipMod : StatSet.new(
+                    SPD: 50,
+                    DEX: -25,
+                    ATK: 50,
+                    DEF: -25,
+                    INT: -25
+                ),
+                priceMod: 1200,
+                isRare : true,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.new(
+            data : {
+                name : 'Inlet: Opal',
+                description : 'Set with an enchanted opal stone.',
+                equipMod : StatSet.new(
+                    SPD: -25,
+                    DEX: -25,
+                    ATK: 50,
+                    DEF: -25,
+                    INT: 50
+                ),
+                priceMod: 1200,
+                isRare : true,
+                levelMinimum : 1,
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
 
 
         ItemEnchant.new(
@@ -59,6 +517,7 @@ ItemEnchant.database = Database.new(
                 ),
                 levelMinimum : 5,
                 priceMod: 300,
+                isRare : true,
                 
                 equipEffects : [
                 ],
@@ -81,6 +540,7 @@ ItemEnchant.database = Database.new(
                     HP: -40
                 ),
                 priceMod: 2000,
+                isRare : true,
                 levelMinimum : 1,
                 equipEffects : [
                 ],
@@ -102,334 +562,9 @@ ItemEnchant.database = Database.new(
                     AP: -40
                 ),
                 priceMod: 2000,
+                isRare : true,
                 levelMinimum : 1,
                 equipEffects : [
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-
-
-        ItemEnchant.new(
-            data : {
-                name : 'Inlet: Morion',
-                description : 'Set with an enchanted morion stone.',
-                equipMod : StatSet.new(
-                    SPD: 50,
-                    DEX: 50,
-                    ATK: -25,
-                    DEF: -25,
-                    INT: -25
-                ),
-                priceMod: 1200,
-                levelMinimum : 1,
-                equipEffects : [
-                ],
-                
-                useEffects : []
-            }
-        ),
-        
-        ItemEnchant.new(
-            data : {
-                name : 'Inlet: Amethyst',
-                description : 'Set with an enchanted amethyst.',
-                equipMod : StatSet.new(
-                    SPD: -25,
-                    DEX: 50,
-                    ATK: 50,
-                    DEF: -25,
-                    INT: -25
-                ),
-                priceMod: 1200,
-                levelMinimum : 1,
-                equipEffects : [
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-        ItemEnchant.new(
-            data : {
-                name : 'Inlet: Citrine',
-                description : 'Set with an enchanted citrine stone.',
-                equipMod : StatSet.new(
-                    SPD: -25,
-                    DEX: -25,
-                    ATK: 50,
-                    DEF: 50,
-                    INT: -25
-                ),
-                priceMod: 1200,
-                levelMinimum : 1,
-                equipEffects : [
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-        ItemEnchant.new(
-            data : {
-                name : 'Inlet: Garnet',
-                description : 'Set with an enchanted garnet stone.',
-                equipMod : StatSet.new(
-                    SPD: -25,
-                    DEX: -25,
-                    ATK: -25,
-                    DEF: 50,
-                    INT: 50
-                ),
-                priceMod: 1200,
-                levelMinimum : 1,
-                equipEffects : [
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-
-        ItemEnchant.new(
-            data : {
-                name : 'Inlet: Praesolite',
-                description : 'Set with an enchanted praesolite stone.',
-                equipMod : StatSet.new(
-                    SPD: 50,
-                    DEX: -25,
-                    ATK: -25,
-                    DEF: -25,
-                    INT: 50
-                ),
-                priceMod: 1200,
-                levelMinimum : 1,
-                equipEffects : [
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-        ItemEnchant.new(
-            data : {
-                name : 'Inlet: Aquamarine',
-                description : 'Set with an enchanted aquamarine stone.',
-                equipMod : StatSet.new(
-                    SPD: 50,
-                    DEX: -25,
-                    ATK: 50,
-                    DEF: -25,
-                    INT: -25
-                ),
-                priceMod: 1200,
-                levelMinimum : 1,
-                equipEffects : [
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-        ItemEnchant.new(
-            data : {
-                name : 'Inlet: Diamond',
-                description : 'Set with an enchanted diamond stone.',
-                equipMod : StatSet.new(
-                    SPD: 50,
-                    DEX: -25,
-                    ATK: -25,
-                    DEF: 50,
-                    INT: -25
-                ),
-                priceMod: 1200,
-                levelMinimum : 1,
-                equipEffects : [
-                ],
-                
-                useEffects : []
-            }
-        ),
-        
-        ItemEnchant.new(
-            data : {
-                name : 'Inlet: Pearl',
-                description : 'Set with an enchanted pearl.',
-                equipMod : StatSet.new(
-                    SPD: -25,
-                    DEX: 50,
-                    ATK: -25,
-                    DEF: 50,
-                    INT: -25
-                ),
-                priceMod: 1200,
-                levelMinimum : 1,
-                equipEffects : [
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-        ItemEnchant.new(
-            data : {
-                name : 'Inlet: Ruby',
-                description : 'Set with an enchanted ruby.',
-                equipMod : StatSet.new(
-                    SPD: -25,
-                    DEX: 50,
-                    ATK: -25,
-                    DEF: -25,
-                    INT: 50
-                ),
-                priceMod: 1200,
-                levelMinimum : 1,
-                equipEffects : [
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-        ItemEnchant.new(
-            data : {
-                name : 'Inlet: Sapphire',
-                description : 'Set with an enchanted sapphire.',
-                equipMod : StatSet.new(
-                    SPD: 50,
-                    DEX: -25,
-                    ATK: 50,
-                    DEF: -25,
-                    INT: -25
-                ),
-                priceMod: 1200,
-                levelMinimum : 1,
-                equipEffects : [
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-        ItemEnchant.new(
-            data : {
-                name : 'Inlet: Opal',
-                description : 'Set with an enchanted opal stone.',
-                equipMod : StatSet.new(
-                    SPD: -25,
-                    DEX: -25,
-                    ATK: 50,
-                    DEF: -25,
-                    INT: 50
-                ),
-                priceMod: 1200,
-                levelMinimum : 1,
-                equipEffects : [
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-
-        ItemEnchant.new(
-            data : {
-                name : 'Burning',
-                description : 'The material its made of is warm to the touch. Grants a fire aspect to attacks and gives ice resistance when used as armor.',
-                equipMod : StatSet.new(
-                ),
-                levelMinimum : 1,
-                priceMod: 200,
-                
-                equipEffects : [
-                    "Burning"
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-        ItemEnchant.new(
-            data : {
-                name : 'Icy',
-                description : 'The material its made of is cold to the touch. Grants an ice aspect to attacks and gives fire resistance when used as armor.',
-                equipMod : StatSet.new(
-                ),
-                levelMinimum : 1,
-                priceMod: 200,
-                
-                equipEffects : [
-                    "Icy"
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-        ItemEnchant.new(
-            data : {
-                name : 'Shock',
-                description : 'The material its made of gently hums. Grants a thunder aspect to attacks and gives thunder resistance when used as armor.',
-                equipMod : StatSet.new(
-                ),
-                levelMinimum : 1,
-                priceMod: 200,
-                
-                equipEffects : [
-                    "Shock"
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-        ItemEnchant.new(
-            data : {
-                name : 'Toxic',
-                description : 'The material its made has been made poisonous. Grants a poison aspect to attacks and gives poison resistance when used as armor.',
-                equipMod : StatSet.new(
-                ),
-                levelMinimum : 1,
-                priceMod: 200,
-                
-                equipEffects : [
-                    "Toxic"
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-        ItemEnchant.new(
-            data : {
-                name : 'Shimmering',
-                description : 'The material its made of glows softly. Grants a light aspect to attacks and gives dark resistance when used as armor.',
-                equipMod : StatSet.new(
-                ),
-                levelMinimum : 1,
-                priceMod: 200,
-                
-                equipEffects : [
-                    "Shimmering"
-                ],
-                
-                useEffects : []
-            }
-        ),
-
-        ItemEnchant.new(
-            data : {
-                name : 'Dark',
-                description : 'The material its made of is very dark. Grants a dark aspect to attacks and gives light resistance when used as armor.',
-                equipMod : StatSet.new(
-                ),
-                levelMinimum : 1,
-                priceMod: 200,
-                
-                equipEffects : [
-                    "Dark"
                 ],
                 
                 useEffects : []
