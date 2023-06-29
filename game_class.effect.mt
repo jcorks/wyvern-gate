@@ -108,7 +108,12 @@ Effect.database = Database.new(
                     windowEvent.queueMessage(
                         text: holder.name + ' takes a defensive stance!'
                     );
-                
+                    if (holder.hp < holder.stats.HP * 0.5) ::<= {
+                        windowEvent.queueMessage(
+                            text: holder.name + ' catches their breath while defending!'
+                        );
+                        holder.heal(amount:holder.stats.HP * 0.1);
+                    };
                 },
 
                 onRemoveEffect : ::(user, item, holder) {

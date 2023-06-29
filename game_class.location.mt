@@ -686,7 +686,7 @@ Location.Base.database = Database.new(
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false &&
                                             location.ownedBy.level >= value.levelMinimum
-                    ).new(from:location.ownedBy));
+                    ).new(from:location.ownedBy, rngEnchantHint:true));
                 });
 
 

@@ -116,13 +116,19 @@
                 customName = base_.name
             ;
                 
-            @enchantName = '';
-            
-            if (enchants->keycount == 1)
-                enchantName = ' (' + enchants[0].name + ')'
-            else if(enchants->keycount > 1)
-                enchantName = ' (Unique)'
-            ;
+            @enchantName = ' ' + match(enchants->keycount) {
+              (0) :'',
+              (1) :'(I)',
+              (2) :'(II)',
+              (3) :'(III)',
+              (4) :'(IV)',
+              (5) :'(V)',
+              (6) :'(VI)',
+              (7) :'(VII)',
+              (8) :'(VIII)',
+              (9) :'(IX)',
+              (10) :'(X)'            
+            };
             
             customName = if (base_.hasQuality && quality != empty)
                 quality.name + ' ' + baseName + enchantName 
@@ -258,9 +264,9 @@
                 };
 
                 
-                if (rngEnchantHint != empty) ::<= {
+                if (rngEnchantHint != empty && Number.random() < 0.5) ::<= {
                     @:story = import(module:'game_singleton.story.mt');
-                    @enchantCount = random.integer(from:0, to:1+match(true) {
+                    @enchantCount = random.integer(from:1, to:2+match(true) {
                         (story.defeatedWyvernLight):   7,
                         (story.defeatedWyvernIce):     4,
                         (story.defeatedWyvernFire):    2,
@@ -269,13 +275,13 @@
                     
                     [0, enchantCount]->for(do:::(i) {
                         @mod = if (story.defeatedWyvernThunder)
-                            ItemEnchant.database.getRandom()
+                            ItemEnchant.Base.getRandom().new()
                         else
-                            ItemEnchant.database.getRandomFiltered(
+                            ItemEnchant.Base.database.getRandomFiltered(
                                 filter::(value) <- value.isRare == false
-                            );
+                            ).new();
                             
-                        this.addEnchant(name:mod.name);
+                        this.addEnchant(mod);
                     });
                 };
             };
@@ -384,19 +390,18 @@
                 set ::(value) <- price = value
             },
             
-            addEnchant::(name) {
-                @:mod = ItemEnchant.database.find(name);
-
-
+            addEnchant::(mod) {
+    
                 enchants->push(value:mod);
-                mod.equipEffects->foreach(do:::(i, effect) {
+                mod.base.equipEffects->foreach(do:::(i, effect) {
                     equipEffects->push(value:effect);
                 });
-                stats.add(stats:mod.equipMod);
+                breakpoint();
+                stats.add(stats:mod.base.equipMod);
                 if (description->contains(key:mod.description) == false)
                     description = description + mod.description + ' ';
                 recalculateName();
-                price += mod.priceMod;
+                price += mod.base.priceMod;
                 price = price->ceil;
             },
             

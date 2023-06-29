@@ -21,12 +21,17 @@
 return class(
     name : 'Wyvern.StateFlag',
     statics : {
-        HURT_THIS_TURN : 0,
-        WENT_THIS_TURN : 1,
-        HEALED_THIS_TURN : 2,
-        IS_FALLEN : 3, // HP = 0
-        IS_DEAD : 4, // was hit with HP == 0
-        WAS_SKIPPED : 5
+        HURT : 0,
+        WENT : 1,
+        HEALED : 2,
+        FALLEN : 3, // HP = 0
+        DIED : 4, // was hit with HP == 0
+        SKIPPED : 5,
+        DEFENDED : 6, // defended,
+        DEFEATED_ENEMY : 7,
+        DODGED_ATTACK : 8,
+        ATTACKED : 9,
+        ABILITY : 10,
     },
     define :::(this) {
         @set = [];
@@ -44,16 +49,16 @@ return class(
             
             unset::(flag, flags) {
                 when(flag) ::<= {
-                    set[flag] = false;
+                    set[flag] = empty;
                 };
                 
                 flags->foreach(do:::(index, flag) {
-                    set[flag] = false;
+                    set[flag] = empty;
                 });
             },
             
             has::(flag) {
-                return set[flag];
+                return set[flag] == true;
             },
             
             reset:: {

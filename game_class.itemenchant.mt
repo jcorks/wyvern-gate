@@ -18,10 +18,78 @@
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
+@:ItemEnchantCondition = import(module:'game_class.itemenchantcondition.mt');
 
 
 @:ItemEnchant = class(
     name : 'Wyvern.ItemEnchant',
+    statics : {
+        Base : empty
+    },
+    define:::(this) {
+        @base_;
+        @condition;
+        
+        this.constructor = ::(base, conditionHint, state) {
+            base_ = base;
+            when(state != empty) ::<= {
+                this.state = state;
+                return this;
+            };
+            
+            if (base.triggerConditionEffects->keycount > 0) ::<= {
+                if (conditionHint != empty) ::<= {
+                    condition = ItemEnchantCondition.database.find(name:conditionHint);
+                } else ::<= {
+                    condition = ItemEnchantCondition.database.getRandom();
+                };
+            };
+            return this;
+        };
+        
+        this.interface = {
+            description : {
+                get ::{
+                    when(condition == empty) base_.description;
+                    return condition.description + base_.description;
+                    
+                }
+            },
+            
+            name : {
+                get ::{
+                    when(condition == empty) base_.name;
+                    breakpoint();
+                    return condition.name + ': ' + base_.name;
+                }
+            },
+            
+            base : {
+                get ::<- base_
+            },
+            
+            onTurnCheck ::(wielder, item, battle) {
+                when(condition == empty) empty;
+                condition.onTurnCheck(wielder, item, battle);
+            },
+            
+            state : {
+                get ::{
+                
+                },
+                
+                set ::(value) {
+                
+                }
+            }
+        };
+    }
+
+);
+
+
+ItemEnchant.Base = class(
+    name : 'Wyvern.ItemEnchant.Base',
     statics : {
         database : empty
     },
@@ -35,23 +103,263 @@
                 equipMod : StatSet.type, // percentages
                 useEffects : Object,
                 equipEffects : Object,
+                triggerConditionEffects : Object,
                 priceMod : Number,
                 isRare : Boolean
             }
         );
+        
+        this.interface = {
+            new::(conditionHint) {
+                return ItemEnchant.new(base:this, conditionHint);
+            }
+        };
     }
 );
 
 
-ItemEnchant.database = Database.new(
+ItemEnchant.Base.database = Database.new(
     items : [
 
 
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Heal All',
+                description : ', will slightly recover allies wounds.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 350,
+                isRare : false,
+                
+                triggerConditionEffects : [
+                    'Trigger Heal All' // 1 HP
+                ],
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Evade',
+                description : ', will allow the user to evade an attack.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 350,
+                isRare : false,
+                
+                triggerConditionEffects : [
+                    'Trigger Regen' // 100% next turn
+                ],
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
 
 
 
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Regen',
+                description : ', will slightly recover the users wounds.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 350,
+                isRare : false,
+                
+                triggerConditionEffects : [
+                    'Trigger Regen'
+                ],
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Spikes',
+                description : ', damage an enemy.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 350,
+                isRare : false,
+                
+                triggerConditionEffects : [
+                    'Trigger Spikes'
+                ],
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Ease',
+                description : ', will recover from mental fatigue.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 350,
+                isRare : false,
+                
+                triggerConditionEffects : [
+                    'Trigger AP Regen'
+                ],
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Shield',
+                description : ', may block attacks.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 250,
+                isRare : false,
+                
+                triggerConditionEffects : [
+                    'Trigger Block' // 100% block
+                ],
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Boost Strength',
+                description : ', will greatly boost the wielder\'s power.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 250,
+                isRare : false,
+                
+                triggerConditionEffects : [
+                    'Trigger Strength Boost'
+                ],
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Boost Defense',
+                description : ', will greatly boost the wielder\'s defense.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 250,
+                isRare : false,
+                
+                triggerConditionEffects : [
+                    'Trigger Defense Boost'
+                ],
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Boost Mind',
+                description : ', will greatly boost the wielder\'s mental acquity.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 250,
+                isRare : false,
+                
+                triggerConditionEffects : [
+                    'Trigger Mind Boost'
+                ],
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Boost Dex',
+                description : ', will greatly boost the wielder\'s dexterity.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 250,
+                isRare : false,
+                
+                triggerConditionEffects : [
+                    'Trigger Dex Boost'
+                ],
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Boost Speed',
+                description : ', will greatly boost the wielder\'s speed.',
+                equipMod : StatSet.new(
+                ),
+                levelMinimum : 1,
+                priceMod: 250,
+                isRare : false,
+                
+                triggerConditionEffects : [
+                    'Trigger Speed Boost'
+                ],
+                
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+
+
+        ItemEnchant.Base.new(
             data : {
                 name : 'Burning',
                 description : 'The material its made of is warm to the touch. Grants a fire aspect to attacks and gives ice resistance when used as armor.',
@@ -61,6 +369,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 200,
                 isRare : false,
                 
+                triggerConditionEffects : [
+                ],
+                
                 equipEffects : [
                     "Burning"
                 ],
@@ -69,7 +380,7 @@ ItemEnchant.database = Database.new(
             }
         ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Icy',
                 description : 'The material its made of is cold to the touch. Grants an ice aspect to attacks and gives fire resistance when used as armor.',
@@ -79,6 +390,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 200,
                 isRare : false,
                 
+                triggerConditionEffects : [
+                ],
+                
                 equipEffects : [
                     "Icy"
                 ],
@@ -87,7 +401,7 @@ ItemEnchant.database = Database.new(
             }
         ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Shock',
                 description : 'The material its made of gently hums. Grants a thunder aspect to attacks and gives thunder resistance when used as armor.',
@@ -97,6 +411,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 200,
                 isRare : false,
                 
+                triggerConditionEffects : [
+                ],
+                
                 equipEffects : [
                     "Shock"
                 ],
@@ -105,7 +422,7 @@ ItemEnchant.database = Database.new(
             }
         ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Toxic',
                 description : 'The material its made has been made poisonous. Grants a poison aspect to attacks and gives poison resistance when used as armor.',
@@ -115,6 +432,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 200,
                 isRare : false,
                 
+                triggerConditionEffects : [
+                ],
+                
                 equipEffects : [
                     "Toxic"
                 ],
@@ -123,7 +443,7 @@ ItemEnchant.database = Database.new(
             }
         ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Shimmering',
                 description : 'The material its made of glows softly. Grants a light aspect to attacks and gives dark resistance when used as armor.',
@@ -133,6 +453,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 200,
                 isRare : false,
                 
+                triggerConditionEffects : [
+                ],
+                
                 equipEffects : [
                     "Shimmering"
                 ],
@@ -141,7 +464,7 @@ ItemEnchant.database = Database.new(
             }
         ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Dark',
                 description : 'The material its made of is very dark. Grants a dark aspect to attacks and gives light resistance when used as armor.',
@@ -150,6 +473,9 @@ ItemEnchant.database = Database.new(
                 levelMinimum : 1,
                 priceMod: 200,
                 isRare : false,
+                
+                triggerConditionEffects : [
+                ],
                 
                 equipEffects : [
                     "Dark"
@@ -161,7 +487,7 @@ ItemEnchant.database = Database.new(
 
 
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Rune: Power',
                 description : 'Imbued with a potent rune of power.',
@@ -176,6 +502,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 20000,
                 isRare : true,
                 
+                triggerConditionEffects : [
+                ],
+                
                 equipEffects : [
                 ],
                 
@@ -183,7 +512,7 @@ ItemEnchant.database = Database.new(
             }
         ),
         
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Rune: Shield',
                 description : 'Imbued with a potent rune of shielding.',
@@ -198,6 +527,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 20000,
                 isRare : true,
                 
+                triggerConditionEffects : [
+                ],
+                
                 equipEffects : [
                 ],
                 
@@ -205,7 +537,7 @@ ItemEnchant.database = Database.new(
             }
         ),        
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Rune: Reflex',
                 description : 'Imbued with a potent rune of reflex.',
@@ -220,6 +552,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 20000,
                 isRare : true,
                 
+                triggerConditionEffects : [
+                ],
+                
                 equipEffects : [
                 ],
                 
@@ -227,7 +562,7 @@ ItemEnchant.database = Database.new(
             }
         ), 
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Rune: Speed',
                 description : 'Imbued with a potent rune of speed.',
@@ -242,6 +577,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 20000,
                 isRare : true,
                 
+                triggerConditionEffects : [
+                ],
+                
                 equipEffects : [
                 ],
                 
@@ -249,7 +587,7 @@ ItemEnchant.database = Database.new(
             }
         ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Rune: Mind',
                 description : 'Imbued with a potent rune of mind.',
@@ -264,6 +602,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 20000,
                 isRare : true,
                 
+                triggerConditionEffects : [
+                ],
+                
                 equipEffects : [
                 ],
                 
@@ -272,7 +613,7 @@ ItemEnchant.database = Database.new(
         ),
 
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Inlet: Morion',
                 description : 'Set with an enchanted morion stone.',
@@ -286,6 +627,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 1200,
                 isRare : true,
                 levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
                 equipEffects : [
                 ],
                 
@@ -293,7 +637,7 @@ ItemEnchant.database = Database.new(
             }
         ),
         
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Inlet: Amethyst',
                 description : 'Set with an enchanted amethyst.',
@@ -307,6 +651,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 1200,
                 isRare : true,
                 levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
                 equipEffects : [
                 ],
                 
@@ -314,7 +661,7 @@ ItemEnchant.database = Database.new(
             }
         ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Inlet: Citrine',
                 description : 'Set with an enchanted citrine stone.',
@@ -328,6 +675,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 1200,
                 isRare : true,
                 levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
                 equipEffects : [
                 ],
                 
@@ -335,7 +685,7 @@ ItemEnchant.database = Database.new(
             }
         ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Inlet: Garnet',
                 description : 'Set with an enchanted garnet stone.',
@@ -349,6 +699,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 1200,
                 isRare : true,
                 levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
                 equipEffects : [
                 ],
                 
@@ -357,7 +710,7 @@ ItemEnchant.database = Database.new(
         ),
 
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Inlet: Praesolite',
                 description : 'Set with an enchanted praesolite stone.',
@@ -371,6 +724,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 1200,
                 isRare : true,
                 levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
                 equipEffects : [
                 ],
                 
@@ -378,7 +734,7 @@ ItemEnchant.database = Database.new(
             }
         ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Inlet: Aquamarine',
                 description : 'Set with an enchanted aquamarine stone.',
@@ -392,6 +748,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 1200,
                 isRare : true,
                 levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
                 equipEffects : [
                 ],
                 
@@ -399,7 +758,7 @@ ItemEnchant.database = Database.new(
             }
         ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Inlet: Diamond',
                 description : 'Set with an enchanted diamond stone.',
@@ -413,6 +772,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 1200,
                 isRare : true,
                 levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
                 equipEffects : [
                 ],
                 
@@ -420,7 +782,7 @@ ItemEnchant.database = Database.new(
             }
         ),
         
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Inlet: Pearl',
                 description : 'Set with an enchanted pearl.',
@@ -434,6 +796,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 1200,
                 isRare : true,
                 levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
                 equipEffects : [
                 ],
                 
@@ -441,7 +806,7 @@ ItemEnchant.database = Database.new(
             }
         ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Inlet: Ruby',
                 description : 'Set with an enchanted ruby.',
@@ -455,6 +820,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 1200,
                 isRare : true,
                 levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
                 equipEffects : [
                 ],
                 
@@ -462,7 +830,7 @@ ItemEnchant.database = Database.new(
             }
         ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Inlet: Sapphire',
                 description : 'Set with an enchanted sapphire.',
@@ -476,6 +844,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 1200,
                 isRare : true,
                 levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
                 equipEffects : [
                 ],
                 
@@ -483,7 +854,7 @@ ItemEnchant.database = Database.new(
             }
         ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Inlet: Opal',
                 description : 'Set with an enchanted opal stone.',
@@ -497,6 +868,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 1200,
                 isRare : true,
                 levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
                 equipEffects : [
                 ],
                 
@@ -505,7 +879,7 @@ ItemEnchant.database = Database.new(
         ),
 
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Cursed',
                 description : 'Somehow, cursed magicks have seeped into this.',
@@ -519,6 +893,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 300,
                 isRare : true,
                 
+                triggerConditionEffects : [
+                ],
+                
                 equipEffects : [
                 ],
                 
@@ -527,7 +904,7 @@ ItemEnchant.database = Database.new(
         ),
 
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Inlet: Bloodstone',
                 description : 'Set with a large bloodstone, shining sinisterly',
@@ -542,6 +919,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 2000,
                 isRare : true,
                 levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
                 equipEffects : [
                 ],
                 
@@ -549,7 +929,7 @@ ItemEnchant.database = Database.new(
             }
         ),
 
-        ItemEnchant.new(
+        ItemEnchant.Base.new(
             data : {
                 name : 'Inlet: Soulstone',
                 description : 'Set with a large soulstone, shining sinisterly',
@@ -564,6 +944,9 @@ ItemEnchant.database = Database.new(
                 priceMod: 2000,
                 isRare : true,
                 levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
                 equipEffects : [
                 ],
                 

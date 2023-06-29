@@ -1022,7 +1022,7 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' does first aid on ' + targets[0].name + '!'
                         );
-                        targets[0].heal(amount:((targets[0].stats.HP*0.15)->ceil));
+                        targets[0].heal(amount:((targets[0].stats.HP*0.25)->ceil));
                     }
                 }
             ),
@@ -1042,7 +1042,7 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' mends ' + targets[0].name + '!'
                         );
-                        targets[0].heal(amount:((targets[0].stats.HP*0.10)->ceil));
+                        targets[0].heal(amount:((targets[0].stats.HP*0.25)->ceil));
                     }
                 }
             ),
@@ -1368,7 +1368,7 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' casts Cure on ' + targets[0].name + '!'
                         );
-                        targets[0].heal(amount:((targets[0].stats.HP*0.3)->ceil));
+                        targets[0].heal(amount:((targets[0].stats.HP*0.5)->ceil));
                     }
                 }
             ),
@@ -1464,7 +1464,7 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' casts Greater Cure on ' + targets[0].name + '!'
                         );
-                        targets[0].heal(amount:((targets[0].stats.HP*0.4)->ceil));
+                        targets[0].heal(amount:((targets[0].stats.HP*0.7)->ceil));
                     }
                 }
             ),
@@ -1591,7 +1591,7 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' meditates!'
                         );
-                        user.healAP(amount:((user.stats.AP*0.1)->ceil));
+                        user.healAP(amount:((user.stats.AP*0.2)->ceil));
                     }
                 }
             ),
@@ -1611,7 +1611,7 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' casts Soothe on ' + targets[0].name + '!'
                         );
-                        user.healAP(amount:((user.stats.AP*0.12)->ceil));
+                        user.healAP(amount:((user.stats.AP*0.22)->ceil));
                     }
                 }
             ),
