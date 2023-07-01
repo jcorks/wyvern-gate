@@ -64,6 +64,14 @@
 };
 
 
+@:removeDuplicates ::(list) {
+    @:temp = {};
+    list->foreach(do:::(index, val) {
+        temp[val] = val;
+    });
+    return temp->keys;
+};
+
 
 @:EQUIP_SLOTS = {
     HAND_L : 0,
@@ -367,7 +375,8 @@
                     act = false;
                 };
 
-                
+                if (act == false)
+                    this.flags.add(flag:StateFlags.SKIPPED);
                 return act;
             },
 
@@ -484,10 +493,13 @@
                 });
                 when(dmg.amount <= 0) empty;
                 when(target.hp == 0) ::<= {
+                    this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
+                    target.flags.add(flag:StateFlags.DIED);
                     target.kill();                
                 };
 
                 when(!target.damage(from:this, damage:dmg, dodgeable:true)) empty;
+                this.flags.add(flag:StateFlags.ATTACKED);
 
 
                 
@@ -520,6 +532,7 @@
                         this.name + ' dances around ' + from.name + '\'s attack!',                 
                         from.name + '\'s attack completely misses ' + this.name + '!'
                     ]));
+                    this.flags.add(flag:StateFlags.DODGED_ATTACK);
                     return false;
                 };
 
@@ -585,7 +598,7 @@
                     );
                     
 
-                flags.add(flag:StateFlags.HURT_THIS_TURN);
+                flags.add(flag:StateFlags.HURT);
                 
                 if (damage.damageType == Damage.TYPE.FIRE && Number.random() > 0.9)
                     this.addEffect(from, name:'Burned',durationTurns:5);
@@ -610,9 +623,12 @@
                     );
                 };
                 
-                if (hp == 0)
+                if (hp == 0) ::<= {
                     windowEvent.queueMessage(text: '' + this.name + ' has been knocked out.');                                
-                                
+                    this.flags.add(flag:StateFlags.FALLEN);
+                    from.flags.add(flag:StateFlags.DEFEATED_ENEMY);
+                };
+
                 return true;
             },
             
@@ -625,6 +641,7 @@
                 when(hp >= stats.HP) empty;
                 amount = amount->ceil;
                 hp += amount;
+                this.flags.add(flag:StateFlags.HEALED);
                 if (hp > stats.HP) hp = stats.HP;
                 if (silent == empty)
                     windowEvent.queueMessage(text: '' + this.name + ' heals ' + amount + ' HP (HP:' + this.renderHP() + ')');
@@ -750,7 +767,7 @@
             kill :: {
                 hp = 0;
                 windowEvent.queueMessage(text: '' + this.name + ' has died!');                
-                flags.add(flag:StateFlags.IS_DEAD);
+                flags.add(flag:StateFlags.DIED);
                 isDead = true;                
             },
             
@@ -798,7 +815,12 @@
             
             abilitiesAvailable : {
                 get :: {
-                    return abilitiesAvailable;
+                    @:out = [...abilitiesAvailable];
+                    EQUIP_SLOTS->foreach(do::(i, val) {
+                        if (equips[val] != empty && equips[val].ability != empty)
+                            out->push(value:Ability.database.find(name:equips[val].ability));
+                    });
+                    return removeDuplicates(list:out);
                 }
             },
             

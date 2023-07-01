@@ -23,6 +23,7 @@
 @:Random = import(module:'game_singleton.random.mt');
 @:Party = import(module:'game_class.party.mt');
 @:correctA = import(module:'game_function.correcta.mt');
+@:StateFlags = import(module:'game_class.stateflags.mt');
 
 @: RESULTS = {
     ALLIES_WIN: 0,
@@ -138,6 +139,7 @@
                     turnIndex : action.turnIndex,
                     extraData : action.extraData
                 );
+                ent.flags.add(flag:StateFlags.WENT);
 
                 
                 if (action.turnIndex >= action.ability.durationTurns) ::<= {
@@ -564,6 +566,11 @@
                     turnIndex : action.turnIndex,
                     extraData : action.extraData
                 );
+                entityTurn.flags.add(flag:StateFlags.WENT);
+                if (action.ability.name != 'Attack' &&
+                    action.ability.name != 'Defend' &&
+                    action.ability.name != 'Use Item')
+                    entityTurn.flags.add(flag:StateFlags.ABILITY);
         
                 if (action.ability.durationTurns > 0) ::<= {
                     action.turnIndex = 0;

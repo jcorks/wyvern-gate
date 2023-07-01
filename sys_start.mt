@@ -13,9 +13,23 @@ return ::(terminal, arg, onDone) {
 
         @currentCanvas;
         @canvasChanged = false;
-        canvas.onCommit = ::(lines){
+
+        @:rerender = ::{
+            windowEvent.commitInput(input:lastInput);
+            if (canvasChanged) ::<= {
+                @:lines = currentCanvas;
+                lines->foreach(do:::(index, line) {
+                    terminal.updateLine(index, text:line);
+                }); 
+                canvasChanged = false;    
+            };
+        };
+
+        canvas.onCommit = ::(lines, renderNow) {
             currentCanvas = lines;
             canvasChanged = true;
+            if (renderNow != empty)
+                rerender();
         };
 
         Shell.onProgramKeyboard = ::(input, value) {
@@ -51,14 +65,7 @@ return ::(terminal, arg, onDone) {
 
         @lastInput;
         Shell.onProgramCycle = ::{
-            windowEvent.commitInput(input:lastInput);
-            if (canvasChanged) ::<= {
-                @:lines = currentCanvas;
-                lines->foreach(do:::(index, line) {
-                    terminal.updateLine(index, text:line);
-                }); 
-                canvasChanged = false;    
-            };
+            rerender();
 
         };
 

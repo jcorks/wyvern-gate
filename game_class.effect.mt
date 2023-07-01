@@ -439,6 +439,54 @@ Effect.database = Database.new(
             }
         ),                 
 
+        Effect.new(
+            data : {
+                name : 'Counter',
+                description: 'Dodges attacks and retaliates.',
+                battleOnly : true,
+                skipTurn : true,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(
+                        text: holder.name + ' is prepared for an attack!'
+                    );
+                },
+
+                onRemoveEffect : ::(user, item, holder) {
+                
+                },                
+                onGivenDamage : ::(user, item, holder, to) {
+                },
+
+                onGiveDamage : ::(user, item, holder, to, damage) {
+                },
+
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    @dmg = damage.amount * 0.75;
+                    when (dmg < 1) empty;
+                    damage.amount = 0;
+                    windowEvent.queueMessage(
+                        text: holder.name + ' counters!'
+                    );
+
+
+                    holder.attack(
+                        target:from,
+                        amount: dmg,
+                        damageType : Damage.TYPE.PHYS,
+                        damageClass: Damage.CLASS.HP
+                    );                        
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                    
+                }
+            }
+        ),
 
         Effect.new(
             data : {

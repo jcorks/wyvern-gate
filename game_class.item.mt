@@ -98,6 +98,7 @@
         @islandTierHint;
         @equipEffects = [];
         @useEffects = [];
+        @ability;
         @victoryCount = 0; // like exp, stat mods increase with victories
                            // conceptually: the user becomes more familiar
                            // with how to effectively use it in their hands
@@ -116,18 +117,18 @@
                 customName = base_.name
             ;
                 
-            @enchantName = ' ' + match(enchants->keycount) {
+            @enchantName = match(enchants->keycount) {
               (0) :'',
-              (1) :'(I)',
-              (2) :'(II)',
-              (3) :'(III)',
-              (4) :'(IV)',
-              (5) :'(V)',
-              (6) :'(VI)',
-              (7) :'(VII)',
-              (8) :'(VIII)',
-              (9) :'(IX)',
-              (10) :'(X)'            
+              (1) :' (I)',
+              (2) :' (II)',
+              (3) :' (III)',
+              (4) :' (IV)',
+              (5) :' (V)',
+              (6) :' (VI)',
+              (7) :' (VII)',
+              (8) :' (VIII)',
+              (9) :' (IX)',
+              (10) :' (X)'            
             };
             
             customName = if (base_.hasQuality && quality != empty)
@@ -198,12 +199,12 @@
                 return this;
             };
             
-            
+            ability = random.pickArrayItem(list:base.possibleAbilities);
             base_ = base;
             stats.add(stats:base.equipMod);
             price = base.basePrice;
             price *= 1.05 * base_.weight;
-            description = base.description + ' ';
+            description = base.description + (if (ability == empty) ' ' else ' If equipped, grants the ability: "' + ability + '". ');
             base.equipEffects->foreach(do:::(i, effect) {
                 equipEffects->push(value:effect);
             });
@@ -348,6 +349,10 @@
                 set ::(value => Inventory.type) {
                     container = value;
                 }
+            },
+
+            ability : {
+                get ::<- ability
             },
             
             equipEffects : {
@@ -578,7 +583,8 @@ Item.Base = class(
                 onCreate : Function,
                 basePrice : Number,
                 canBeColored: Boolean,
-                hasSize : Boolean   
+                hasSize : Boolean,
+                possibleAbilities : Object
             
             }
         );
@@ -623,6 +629,7 @@ Item.Base.database = Database.new(items: [
             canBeColored : false,
             hasSize : false,
             onCreate ::(item, user, creationHint) {},
+            possibleAbilities : [],
         }
     ),
     Item.Base.new(data : {
@@ -643,6 +650,7 @@ Item.Base.database = Database.new(items: [
         useTargetHint : USE_TARGET_HINT.ONE,
         hasSize : false,
         onCreate ::(item, user, creationHint) {},
+        possibleAbilities : [],
         
         equipMod : StatSet.new(
             DEF: 4,   // 
@@ -686,6 +694,7 @@ Item.Base.database = Database.new(items: [
             DEF: 4, 
             ATK: 10
         ),
+        possibleAbilities : [],
         useEffects : [
             'Fling',
         ],
@@ -727,6 +736,7 @@ Item.Base.database = Database.new(items: [
         useEffects : [
             'Fling',
         ],
+        possibleAbilities : [],
         equipEffects : [
             // Growth potential + 3 for all stats
             "Skie's Aura"     
@@ -762,6 +772,7 @@ Item.Base.database = Database.new(items: [
             'HP Recovery: All',
             'Consume Item'       
         ],
+        possibleAbilities : [],
         equipEffects : [
         ],
         attributes : [
@@ -789,6 +800,7 @@ Item.Base.database = Database.new(items: [
         hasQuality : false,
         hasMaterial : false,
         isUnique : false,        
+        possibleAbilities : [],
         useTargetHint : USE_TARGET_HINT.ONE,
         equipMod : StatSet.new(
             SPD: -2, // itll slow you down
@@ -825,6 +837,7 @@ Item.Base.database = Database.new(items: [
         hasMaterial : false,
         isUnique : false,        
         hasSize : false,
+        possibleAbilities : [],
         useTargetHint : USE_TARGET_HINT.ONE,
         equipMod : StatSet.new(
             SPD: -2, // itll slow you down
@@ -861,6 +874,7 @@ Item.Base.database = Database.new(items: [
         hasMaterial : false,
         isUnique : false,        
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [],
         equipMod : StatSet.new(
             SPD: -2, // itll slow you down
             DEX: -10   // its oddly shaped.
@@ -894,6 +908,7 @@ Item.Base.database = Database.new(items: [
         hasMaterial : false,
         hasSize : false,
         isUnique : false,        
+        possibleAbilities : [],
         useTargetHint : USE_TARGET_HINT.ONE,
         equipMod : StatSet.new(
             SPD: -2, // itll slow you down
@@ -931,6 +946,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         canHaveEnchants : false,
         hasQuality : false,
+        possibleAbilities : [],
         useTargetHint : USE_TARGET_HINT.ONE,
         equipMod : StatSet.new(
             SPD: -2, // itll slow you down
@@ -968,6 +984,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         canHaveEnchants : false,
         hasQuality : false,
+        possibleAbilities : [],
         useTargetHint : USE_TARGET_HINT.ONE,
         equipMod : StatSet.new(
             SPD: -2, // itll slow you down
@@ -1003,6 +1020,9 @@ Item.Base.database = Database.new(items: [
         hasMaterial : true,
         isUnique : false,
         hasSize : true,
+        possibleAbilities : [
+            "Stab"
+        ],
         useTargetHint : USE_TARGET_HINT.ONE,
 
         // fatigued
@@ -1059,6 +1079,9 @@ Item.Base.database = Database.new(items: [
             'Non-combat Weapon' // high chance to deflect, but when it deflects, the weapon breaks
             
         ],
+        possibleAbilities : [
+            "Stun"
+        ],
         attributes : [
             ATTRIBUTE.SHARP,
             ATTRIBUTE.METAL
@@ -1100,6 +1123,11 @@ Item.Base.database = Database.new(items: [
             'Non-combat Weapon' // high chance to deflect, but when it deflects, the weapon breaks
             
         ],
+        possibleAbilities : [
+            "Stab"
+        ],
+
+
         attributes : [
             ATTRIBUTE.SHARP,
             ATTRIBUTE.METAL
@@ -1140,6 +1168,10 @@ Item.Base.database = Database.new(items: [
             'Non-combat Weapon' // high chance to deflect, but when it deflects, the weapon breaks
             
         ],
+        possibleAbilities : [
+            "Stab"
+        ],
+
         attributes : [
             ATTRIBUTE.SHARP,
             ATTRIBUTE.METAL
@@ -1177,6 +1209,13 @@ Item.Base.database = Database.new(items: [
         useEffects : [
             'Fling',
         ],
+        possibleAbilities : [
+            "Stab",
+            "Doublestrike",
+            "Triplestrike",
+            "Stun"
+        ],
+
         equipEffects : [],
         attributes : [
             ATTRIBUTE.SHARP,
@@ -1205,6 +1244,11 @@ Item.Base.database = Database.new(items: [
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Stab",
+            "Stun",
+            "Swipe Kick"
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1244,6 +1288,13 @@ Item.Base.database = Database.new(items: [
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Stab",
+            "Doublestrike",
+            "Triplestrike",
+            "Stun",
+            "Counter"
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1281,6 +1332,12 @@ Item.Base.database = Database.new(items: [
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Stab",
+            "Doublestrike",
+            "Triplestrike",
+            "Stun",
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1320,6 +1377,12 @@ Item.Base.database = Database.new(items: [
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Stab",
+            "Doublestrike",
+            "Triplestrike",
+            "Counter"
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1359,6 +1422,12 @@ Item.Base.database = Database.new(items: [
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Doublestrike",
+            "Triplestrike",
+            "Sharpshoot",
+            "Tranquilizer"
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1397,10 +1466,16 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Stun",
+            "Stab",
+            "Big Swing",
+            "Leg Sweep"
+        ],
 
         // fatigued
         equipMod : StatSet.new(
-            ATK: 25,
+            ATK: 30,
             DEF: 25,
             SPD: -15
         ),
@@ -1443,6 +1518,11 @@ Item.Base.database = Database.new(items: [
         useEffects : [
             'Fling',
         ],
+        possibleAbilities : [
+            "Stab",
+            "Doublestrike",
+            "Triplestrike"
+        ],
         equipEffects : [],
         attributes : [
             ATTRIBUTE.SHARP,
@@ -1471,6 +1551,9 @@ Item.Base.database = Database.new(items: [
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Stun"
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1509,6 +1592,12 @@ Item.Base.database = Database.new(items: [
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Stun",
+            "Stab",
+            "Big Swing",
+            "Leg Sweep"
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1547,6 +1636,12 @@ Item.Base.database = Database.new(items: [
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Stun",
+            "Stab",
+            "Big Swing",
+            "Leg Sweep"
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1585,6 +1680,12 @@ Item.Base.database = Database.new(items: [
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Stun",
+            "Stab",
+            "Big Swing",
+            "Leg Sweep"
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1624,6 +1725,11 @@ Item.Base.database = Database.new(items: [
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Stun",
+            "Big Swing",
+            "Leg Sweep"
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1648,7 +1754,7 @@ Item.Base.database = Database.new(items: [
 
     Item.Base.new(data : {
         name : "Mage-rod",
-        description: 'Similar to a wand, promotes mental accuity. The handle has a $color$ trim.',
+        description: 'Similar to a wand, promotes mental acuity. The handle has a $color$ trim.',
         examine : '',
         equipType: TYPE.TWOHANDED,
         rarity : 100,
@@ -1663,6 +1769,17 @@ Item.Base.database = Database.new(items: [
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Fire",
+            "Ice",
+            "Thunder",
+            "Flare",
+            "Frozen Flame",
+            "Explostion",
+            "Flash",
+            "Cure",
+            "Greater Cure"
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1701,6 +1818,17 @@ Item.Base.database = Database.new(items: [
         hasMaterial : true,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Fire",
+            "Ice",
+            "Thunder",
+            "Flare",
+            "Frozen Flame",
+            "Explostion",
+            "Flash",
+            "Cure",
+            "Greater Cure"
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1742,6 +1870,11 @@ Item.Base.database = Database.new(items: [
         basePrice: 200,
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Stun",
+            "Big Swing",
+            "Leg Sweep"
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1781,7 +1914,17 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 220,
-
+        possibleAbilities : [
+            "Fire",
+            "Ice",
+            "Thunder",
+            "Flare",
+            "Frozen Flame",
+            "Explostion",
+            "Flash",
+            "Cure",
+            "Greater Cure"
+        ],
         // fatigued
         equipMod : StatSet.new(
             DEF: 15,
@@ -1818,6 +1961,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 15,
+        possibleAbilities : [],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1851,6 +1995,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 15,
+        possibleAbilities : [],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1883,6 +2028,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 10,
+        possibleAbilities : [],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1915,6 +2061,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 10,
+        possibleAbilities : [],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1947,6 +2094,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 14,
+        possibleAbilities : [],
 
         // fatigued
         equipMod : StatSet.new(
@@ -1978,6 +2126,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 10,
+        possibleAbilities : [],
 
         // fatigued
         equipMod : StatSet.new(
@@ -2009,6 +2158,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 200,
+        possibleAbilities : [],
 
         // fatigued
         equipMod : StatSet.new(
@@ -2043,6 +2193,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 350,
+        possibleAbilities : [],
 
         // fatigued
         equipMod : StatSet.new(
@@ -2076,6 +2227,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 200,
+        possibleAbilities : [],
 
         // fatigued
         equipMod : StatSet.new(
@@ -2110,6 +2262,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 350,
+        possibleAbilities : [],
 
         // fatigued
         equipMod : StatSet.new(
@@ -2145,6 +2298,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 400,
+        possibleAbilities : [],
 
         // fatigued
         equipMod : StatSet.new(
@@ -2179,6 +2333,7 @@ Item.Base.database = Database.new(items: [
         hasQuality : true,
         hasMaterial : false,
         isUnique : true,
+        possibleAbilities : [],
         useTargetHint : USE_TARGET_HINT.ONE,
 
         // fatigued
@@ -2220,6 +2375,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 2, // well. its hard!
@@ -2258,6 +2414,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 2, // well. its hard!
@@ -2294,6 +2451,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 2, // well. its hard!
@@ -2332,6 +2490,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 2, // well. its hard!
@@ -2368,6 +2527,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 2, // well. its hard!
@@ -2404,6 +2564,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 2, // well. its hard!
@@ -2441,6 +2602,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 2, // well. its hard!
@@ -2477,6 +2639,7 @@ Item.Base.database = Database.new(items: [
         isUnique : false,
         levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 2, // well. its hard!
@@ -2513,6 +2676,7 @@ Item.Base.database = Database.new(items: [
         basePrice: 250,
         levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 2, // well. its hard!
@@ -2548,6 +2712,7 @@ Item.Base.database = Database.new(items: [
         levelMinimum : 100000,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 5,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 2, // well. its hard!
@@ -2583,6 +2748,7 @@ Item.Base.database = Database.new(items: [
         levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 5,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 2, // well. its hard!
@@ -2619,6 +2785,7 @@ Item.Base.database = Database.new(items: [
         levelMinimum : 1,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 600,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 10, // well. its hard!
@@ -2659,6 +2826,7 @@ Item.Base.database = Database.new(items: [
         levelMinimum : 1000000,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 0,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 2, // well. its hard!
@@ -2695,6 +2863,7 @@ Item.Base.database = Database.new(items: [
         levelMinimum : 10000000,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 1,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 2, // well. its hard!
@@ -2732,6 +2901,7 @@ Item.Base.database = Database.new(items: [
         levelMinimum : 10000000,
         useTargetHint : USE_TARGET_HINT.ONE,
         basePrice: 5,
+        possibleAbilities : [],
 
         equipMod : StatSet.new(
             ATK: 0,
@@ -2768,6 +2938,9 @@ Item.Base.database = Database.new(items: [
         hasMaterial : false,
         isUnique : true,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Fire" // for fun!
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -2821,6 +2994,9 @@ Item.Base.database = Database.new(items: [
         hasMaterial : false,
         isUnique : true,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Ice" // for fun!
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -2873,6 +3049,9 @@ Item.Base.database = Database.new(items: [
         hasMaterial : false,
         isUnique : true,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Thunder" // for fun!
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -2925,6 +3104,9 @@ Item.Base.database = Database.new(items: [
         hasMaterial : false,
         isUnique : true,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Explosion" // for fun!
+        ],
 
         // fatigued
         equipMod : StatSet.new(
@@ -2977,6 +3159,8 @@ Item.Base.database = Database.new(items: [
         hasMaterial : false,
         isUnique : true,
         useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+        ],
 
         // fatigued
         equipMod : StatSet.new(

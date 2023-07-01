@@ -10,10 +10,12 @@ term.position = {
     y:  Topaz.defaultDisplay.height/2 - term.LINE_SPACING*2
 };
 Topaz.defaultDisplay.root = term;
+/*
 Topaz.defaultDisplay.setParameter(
     parameter:Topaz.Display.PARAMETER.FULLSCREEN,
     value:true
 );
+*/
 
 @:shell = import(module:'sys_shell.mt');
 import(module:'sys_bootseq.mt')(

@@ -97,7 +97,66 @@ Ability.database = Database.new(
                     }
                 }
             ),
-            
+
+            Ability.new(
+                data: {
+                    name: 'Sharpshoot',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Damages a target based on the user's ATK and DEX.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 0,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' takes aim at ' + targets[0].name + '!'
+                        );
+                        
+                        user.attack(
+                            target:targets[0],
+                            amount:user.stats.ATK * (0.2) + user.stats.DEX * (0.5),
+                            damageType : Damage.TYPE.PHYS,
+                            damageClass: Damage.CLASS.HP
+                        );                        
+                                                
+                    }
+                }
+            ),
+
+
+            Ability.new(
+                data: {
+                    name: 'Tranquilizer',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Damages a target based on the user's DEX with a 45% chance to paralyze.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 0,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' attempts to tranquilize ' + targets[0].name + '!'
+                        );
+                        
+                        user.attack(
+                            target:targets[0],
+                            amount:user.stats.DEX * (0.5),
+                            damageType : Damage.TYPE.PHYS,
+                            damageClass: Damage.CLASS.HP
+                        );                        
+
+                        if (Number.random() < 0.45)
+                            targets[0].addEffect(from:user, name:'Paralyzed', durationTurns:5);
+
+
+                    }
+                }
+            ),
+
+
+
             Ability.new(
                 data: {
                     name: 'Coordination',
@@ -1658,6 +1717,25 @@ Ability.database = Database.new(
                 }
             ),            
 
+
+            Ability.new(
+                data: {
+                    name: 'Counter',
+                    targetMode : TARGET_MODE.NONE,
+                    description: 'If attacked, dodges and retaliates for 3 turns.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 2,
+                    usageHintAI : USAGE_HINT.DEBUFF,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        targets[0].addEffect(from:user, name: 'Counter', durationTurns: 3);
+                    }
+                }
+            ),
+
+
+
             Ability.new(
                 data: {
                     name: 'Unarm',
@@ -1790,6 +1868,7 @@ Ability.database = Database.new(
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         user.addEffect(from:user, name: 'Defend', durationTurns:1);
+                        user.flags.add(flag:StateFlags.DEFENDED);
                     }
                 }
             ),
