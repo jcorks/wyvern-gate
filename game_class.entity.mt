@@ -815,12 +815,15 @@
             
             abilitiesAvailable : {
                 get :: {
-                    @:out = [...abilitiesAvailable];
+                    @out = [...abilitiesAvailable];
                     EQUIP_SLOTS->foreach(do::(i, val) {
-                        if (equips[val] != empty && equips[val].ability != empty)
-                            out->push(value:Ability.database.find(name:equips[val].ability));
+                        if (equips[val] != empty && equips[val].ability != empty) ::<= {
+                            @:ab = Ability.database.find(name:equips[val].ability);
+                            when(out->findIndex(value:ab) != -1) empty;
+                            out->push(value:ab);
+                        };
                     });
-                    return removeDuplicates(list:out);
+                    return out;
                 }
             },
             

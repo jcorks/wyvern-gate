@@ -462,8 +462,9 @@ return class(
                     //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
                     //).new(from:island.newInhabitant(),rngEnchantHint:true));
                     
-                    party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
-                    ).new(from:island.newInhabitant()));
+                    //party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
+                    //).new(from:island.newInhabitant()));
+
                     /*
 
                     

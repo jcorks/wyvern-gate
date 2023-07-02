@@ -406,7 +406,8 @@ Event.Base.database = Database.new(
                                         amount:opener.stats.HP * (0.7),
                                         damageType : Damage.TYPE.PHYS,
                                         damageClass: Damage.CLASS.HP
-                                    )
+                                    ),
+                                    dodgeable: false
                                 );
                             };
                         }; 
@@ -419,7 +420,7 @@ Event.Base.database = Database.new(
                             @:item = Item.Base.database.getRandomFiltered(
                                 filter:::(value) <- value.isUnique == false && value.canHaveEnchants
                             ).new(rngEnchantHint:true, from:opener);
-                            @message = 'The party found ' + correctA(word:item.nam);
+                            @message = 'The party found ' + correctA(word:item.name);
                             windowEvent.queueMessage(text: message);
 
                             when(party.inventory.isFull) ::<= {
@@ -591,7 +592,7 @@ Event.Base.database = Database.new(
                                 )
                             );
                             
-                            windowEvent.noDisplay(
+                            windowEvent.queueNoDisplay(
                                 onLeave::{
                                     @:world = import(module:'game_singleton.world.mt');
                                     [0, 5*3]->for(do:::(i) {

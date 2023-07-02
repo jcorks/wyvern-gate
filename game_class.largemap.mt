@@ -123,11 +123,10 @@ return class(
             generateTerrain(width:this.width, height:this.height)->foreach(do::(index, value) {
                 //when(value.x < 0 || value.x > this.width || value.y < 0 || value.y > this.height)
                     //empty;
-                this.setItem(
+                this.setScenery(
                     x:value.x,
                     y:value.y,
-                    symbol:value.symbol,
-                    discovered: true
+                    symbol:value.symbol
                 );
             });
             return this;

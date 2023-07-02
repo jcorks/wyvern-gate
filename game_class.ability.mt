@@ -2587,7 +2587,7 @@ Ability.database = Database.new(
                         when(count < 3)
                             windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
-                        windowEvent.queueMessage(text: '... and made a Pink Potion!');
+                        windowEvent.queueMessage(text: '... and made a Cyan Potion!');
                         inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');

@@ -39,7 +39,7 @@
 @:UNPAGED_ROOM_SIZE_LIMIT = 70;
 @:SIGHT_RAY_LIMIT = 6;
 @:SIGHT_RAY_EPSILON = 0.4;
-@:OOB_RANGE = 96;
+@:OOB_RANGE = 32;
 
 
 
@@ -75,6 +75,7 @@ return class(
         @paged = true;
         @outOfBoundsCharacter = '▓';
         @wallCharacter = '▓';
+        @scenery = [];
         
         @:aStarIndex = [];
         @obscured = []; 
@@ -371,24 +372,35 @@ return class(
                     @itemX = (x) + regionX*mapSizeW - mapSizeW*0.5;
                     @itemY = (y) + regionY*mapSizeH - mapSizeH*0.5;
                     
-                    
+
+
+                    canvas.movePen(x:left + x, y:top + y);  
+
                     when(isWalled(x:itemX, y:itemY)) ::<= {
-                        canvas.movePen(x:left + x, y:top + y);  
                         canvas.drawChar(text:wallCharacter);
                     };
                     
-                    @:items = this.itemsAt(x:itemX, y:itemY);
-                    when(items != empty) ::<= {
-                        canvas.movePen(x:left + x, y:top + y);
-                        canvas.drawChar(text:if (items[items->keycount-1].discovered) items[items->keycount-1].symbol else '?');
-                    };
-                    
+
                     when(itemX < 0 || itemY < 0 || itemX >= width+0 || itemY >= height+0) ::<= {
+                        when (scenery[itemY+OOB_RANGE] != empty && scenery[itemY+OOB_RANGE][itemX+OOB_RANGE] != empty) ::<= {
+                            canvas.drawChar(text:scenery[itemY+OOB_RANGE][itemX+OOB_RANGE]);
+                        };
+
                         when(!renderOutOfBounds) empty;
-                        canvas.movePen(x:left + x, y:top + y);  
                         canvas.drawChar(text:outOfBoundsCharacter);
                     };
-                    canvas.movePen(x:left + x, y:top + y);  
+
+
+                    @:items = this.itemsAt(x:itemX, y:itemY);
+                    when(items != empty) ::<= {
+                        canvas.drawChar(text:if (items[items->keycount-1].discovered) items[items->keycount-1].symbol else '?');
+                    };
+
+                    when (scenery[itemY+OOB_RANGE] != empty && scenery[itemY+OOB_RANGE][itemX+OOB_RANGE] != empty) ::<= {
+                        canvas.drawChar(text:scenery[itemY+OOB_RANGE][itemX+OOB_RANGE]);
+                    };
+
+
                     canvas.drawChar(text:' ');
                 });                
             });                
@@ -471,17 +483,16 @@ return class(
 
 
                     @:items = this.itemsAt(x:itemX, y:itemY);
-
+                    canvas.movePen(x:left + x, y:top + y);  
 
 
 
                     when((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY)) ::<= {
-                        when(items != empty && items->keycount > 0) ::<= {
-                            canvas.movePen(x:left + x, y:top + y);
-                            canvas.drawChar(text:if (items[0].discovered) items[0].symbol else '?');
+                        when (scenery[itemY+OOB_RANGE] != empty && scenery[itemY+OOB_RANGE][itemX+OOB_RANGE] != empty) ::<= {
+                            canvas.drawChar(text:scenery[itemY+OOB_RANGE][itemX+OOB_RANGE]);
                         };
+
                         when(renderOutOfBounds) ::<= {
-                            canvas.movePen(x:left + x, y:top + y);  
                             canvas.drawChar(text:outOfBoundsCharacter);
                         };
                     };
@@ -493,21 +504,22 @@ return class(
                     //        obscured[itemX][itemY] = false;
                     
                     when(obscured[itemX+itemY*UNPAGED_ROOM_SIZE_LIMIT] == true) ::<= {
-                        canvas.movePen(x:left + x, y:top + y);  
                         canvas.drawChar(text:outOfBoundsCharacter);                        
                     };
 
 
                     when(isWalled(x:itemX, y:itemY)) ::<= {
-                        canvas.movePen(x:left + x, y:top + y);  
                         canvas.drawChar(text:wallCharacter);
                     };
 
                     when(items != empty && items->keycount > 0) ::<= {
-                        canvas.movePen(x:left + x, y:top + y);
                         canvas.drawChar(text:if (items[0].discovered) items[0].symbol else '?');
                     };                    
 
+
+                    when (scenery[itemY+OOB_RANGE] != empty && scenery[itemY+OOB_RANGE][itemX+OOB_RANGE] != empty) ::<= {
+                        canvas.drawChar(text:scenery[itemY+OOB_RANGE][itemX+OOB_RANGE]);
+                    };
                 });                
             });               
             
@@ -567,7 +579,38 @@ return class(
                 wallIndex[x+y*UNPAGED_ROOM_SIZE_LIMIT] = empty;
             },
             
-        
+            setScenery ::(
+                x =>Number,
+                y =>Number,
+                symbol => String
+            ) {
+                x += OOB_RANGE;
+                y += OOB_RANGE;
+
+                @layer = scenery[y];
+                if (layer == empty) ::<= {
+                    layer = [];
+                    scenery[y] = layer;
+                };
+
+                if (layer[x] == empty)
+                    layer[x] = symbol;
+            },
+
+            clearScenery ::(
+                x =>Number,
+                y =>Number
+            ) {
+                x += OOB_RANGE;
+                y += OOB_RANGE;
+
+                @layer = scenery[y];
+                when (layer == empty) empty;
+                layer[x] = empty;
+            },
+
+
+
             setItem::(
                 data,
                 x,

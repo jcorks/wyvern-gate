@@ -177,6 +177,7 @@ return class(
                     [area.y+1, area.y + area.height]->for(do:::(y) {
                         this.removeWall(x, y);
                         this.clearItems(x, y);
+                        this.clearScenery(x, y);
                     });
                 });
             });
@@ -184,6 +185,7 @@ return class(
             cavities->foreach(do:::(i, cav) {
                 this.removeWall(x:cav.x, y:cav.y);
                 this.clearItems(x:cav.x, y:cav.y);
+                this.clearScenery(x:cav.x, y:cav.y);
             });            
             cavities = [];
         };
@@ -242,11 +244,11 @@ return class(
         };
     
         @:generateLayout :: {
-            [-90, ROOM_SIZE+90]->for(do:::(y) {
-                [-90, ROOM_SIZE+90]->for(do:::(x) {
+            [-30, ROOM_SIZE+30]->for(do:::(y) {
+                [-30, ROOM_SIZE+30]->for(do:::(x) {
                     if (Number.random() < ROOM_SCATTER_RATE / 4)
-                        this.setItem(
-                            x, y, symbol: ROOM_SCATTER_CHAR, discovered:true
+                        this.setScenery(
+                            x, y, symbol: ROOM_SCATTER_CHAR
                         );
                 });
             });

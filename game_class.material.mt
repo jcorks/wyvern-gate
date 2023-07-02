@@ -87,14 +87,28 @@ Material.database = Database.new(
             }
         ),
 
-
+        Material.new(
+            data : {
+                name : 'Gold',
+                description : 'The gold used gives a radiant glow.',
+                rarity : 50,
+                levelMinimum : 1,
+                statMod : StatSet.new(
+                    DEF: 10,
+                    ATK: 10,
+                    INT: 30,
+                    SPD: 5
+                ),
+                pricePercentMod: 300
+            }
+        ),
 
 
         Material.new(
             data : {
                 name : 'Mythril',
                 description : 'The mythril used makes it radiantly green',
-                rarity : 300,
+                rarity : 100,
                 levelMinimum : 30,
                 statMod : StatSet.new(
                     DEF: 70,
@@ -109,7 +123,7 @@ Material.database = Database.new(
             data : {
                 name : 'Adamantine',
                 description : 'The adamantine used makes it earthly',
-                rarity : 500,
+                rarity : 150,
                 levelMinimum : 45,
                 statMod : StatSet.new(
                     DEF: 100,
@@ -123,7 +137,7 @@ Material.database = Database.new(
             data : {
                 name : 'Quicksilver',
                 description : 'The quicksilver used makes it remarkably shiny.',
-                rarity : 500,
+                rarity : 150,
                 levelMinimum : 35,
                 statMod : StatSet.new(
                     DEF: 50,
@@ -138,7 +152,7 @@ Material.database = Database.new(
             data : {
                 name : 'Dragonglass',
                 description : 'The dragonglass used gives it a deep black color.',
-                rarity : 500,
+                rarity : 200,
                 levelMinimum : 55,
                 statMod : StatSet.new(
                     DEF: -20,
@@ -168,7 +182,7 @@ Material.database = Database.new(
         Material.new(
             data : {
                 name : 'Sunstone',
-                rarity : 300,
+                rarity : 150,
                 description : 'The sunstone used gives it a warm touch.',
                 levelMinimum : 15,
                 statMod : StatSet.new(
@@ -183,7 +197,7 @@ Material.database = Database.new(
         Material.new(
             data : {
                 name : 'Moonstone',
-                rarity : 300,
+                rarity : 150,
                 description : 'The moonstone used gives it a cold touch.',
                 levelMinimum : 15,
                 statMod : StatSet.new(

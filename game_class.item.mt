@@ -247,7 +247,7 @@
             if (base.hasMaterial) ::<= {
                 if (materialHint == empty) ::<= {
                     material = Material.database.getRandomWeightedFiltered(
-                        filter:::(value) <- from.level >= value.levelMinimum
+                        filter:::(value) <- if (story.defeatedWyvernFire) true else from.level >= value.levelMinimum
                     );
                 } else ::<= {
                     material = Material.database.find(name:materialHint);                
@@ -267,9 +267,9 @@
                 
                 if (rngEnchantHint != empty && Number.random() < 0.5) ::<= {
                     @:story = import(module:'game_singleton.story.mt');
-                    @enchantCount = random.integer(from:1, to:2+match(true) {
-                        (story.defeatedWyvernLight):   7,
-                        (story.defeatedWyvernIce):     4,
+                    @enchantCount = random.integer(from:1, to:1+match(true) {
+                        (story.defeatedWyvernLight):   4,
+                        (story.defeatedWyvernIce):     3,
                         (story.defeatedWyvernFire):    2,
                         default: 0
                     });
