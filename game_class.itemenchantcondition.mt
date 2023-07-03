@@ -51,7 +51,7 @@ ItemEnchantCondition.database = Database.new(
                 description : 'After the wielder attacks',
                 isState : false,
                 onTurnCheck ::(wielder, item, battle) {
-                    return wielder.has(flag:StateFlags.ATTACKED);
+                    return wielder.flags.has(flag:StateFlags.ATTACKED);
                 }
             }
         ),
@@ -62,7 +62,7 @@ ItemEnchantCondition.database = Database.new(
                 description : 'After the wielder defends',
                 isState : false,
                 onTurnCheck ::(wielder, item, battle) {
-                    return wielder.has(flag:StateFlags.DEFENDED);
+                    return wielder.flags.has(flag:StateFlags.DEFENDED);
                 }                
             }
         ),
@@ -74,7 +74,7 @@ ItemEnchantCondition.database = Database.new(
                 description : 'After the wielder uses an ability',
                 isState : false,
                 onTurnCheck ::(wielder, item, battle) {
-                    return wielder.has(flag:StateFlags.ABILITY);
+                    return wielder.flags.has(flag:StateFlags.ABILITY);
                 }                                
             }
         ),
@@ -85,7 +85,7 @@ ItemEnchantCondition.database = Database.new(
                 description : 'After the wielder heals',                
                 isState : false,
                 onTurnCheck ::(wielder, item, battle) {
-                    return wielder.has(flag:StateFlags.HEALED);
+                    return wielder.flags.has(flag:StateFlags.HEALED);
                 }                                
             }
         ),
@@ -96,7 +96,7 @@ ItemEnchantCondition.database = Database.new(
                 description : 'After the wielder is hurt',                
                 isState : false,
                 onTurnCheck ::(wielder, item, battle) {
-                    return wielder.has(flag:StateFlags.HURT);
+                    return wielder.flags.has(flag:StateFlags.HURT);
                 }                                
             }
         ),
@@ -107,7 +107,7 @@ ItemEnchantCondition.database = Database.new(
                 description : 'After the wielder defeats an enemy',                
                 isState : false,
                 onTurnCheck ::(wielder, item, battle) {
-                    return wielder.has(flag:StateFlags.DEFEATED_ENEMY);
+                    return wielder.flags.has(flag:StateFlags.DEFEATED_ENEMY);
                 }                                
             }
         ),        
@@ -118,7 +118,7 @@ ItemEnchantCondition.database = Database.new(
                 description : 'After the wielder dodges an attack',                
                 isState : false,
                 onTurnCheck ::(wielder, item, battle) {
-                    return wielder.has(flag:StateFlags.DODGED_ATTACK);
+                    return wielder.flags.has(flag:StateFlags.DODGED_ATTACK);
                 }                                
             }
         ),   

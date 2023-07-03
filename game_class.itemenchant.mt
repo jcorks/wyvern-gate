@@ -70,7 +70,13 @@
             
             onTurnCheck ::(wielder, item, battle) {
                 when(condition == empty) empty;
-                condition.onTurnCheck(wielder, item, battle);
+                if (condition.onTurnCheck(wielder, item, battle) == true) ::<= {
+                    base_.triggerConditionEffects->foreach(do:::(i, effectName) {
+                        wielder.addEffect(
+                            from:wielder, name: effectName, durationTurns: 1, item
+                        );                        
+                    });
+                };
             },
             
             state : {
@@ -124,8 +130,8 @@ ItemEnchant.Base.database = Database.new(
 
         ItemEnchant.Base.new(
             data : {
-                name : 'Heal All',
-                description : ', will slightly recover allies wounds.',
+                name : 'Protect',
+                description : ', will cast Protect on the wielder for a while, which greatly increases defense.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
@@ -133,7 +139,7 @@ ItemEnchant.Base.database = Database.new(
                 isRare : false,
                 
                 triggerConditionEffects : [
-                    'Trigger Heal All' // 1 HP
+                    'Trigger Protect' // 1 HP
                 ],
                 
                 equipEffects : [
@@ -146,7 +152,7 @@ ItemEnchant.Base.database = Database.new(
         ItemEnchant.Base.new(
             data : {
                 name : 'Evade',
-                description : ', will allow the user to evade an attack.',
+                description : ', will allow the wielder to evade attacks the next turn.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
@@ -154,7 +160,7 @@ ItemEnchant.Base.database = Database.new(
                 isRare : false,
                 
                 triggerConditionEffects : [
-                    'Trigger Regen' // 100% next turn
+                    'Trigger Evade' // 100% next turn
                 ],
                 
                 equipEffects : [
@@ -190,7 +196,7 @@ ItemEnchant.Base.database = Database.new(
         ItemEnchant.Base.new(
             data : {
                 name : 'Spikes',
-                description : ', damage an enemy.',
+                description : ', will damage an enemy when attacked for a few turns.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
@@ -234,7 +240,7 @@ ItemEnchant.Base.database = Database.new(
         ItemEnchant.Base.new(
             data : {
                 name : 'Shield',
-                description : ', may block attacks.',
+                description : ', casts Shield for a while, which may block attacks.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
@@ -255,7 +261,7 @@ ItemEnchant.Base.database = Database.new(
         ItemEnchant.Base.new(
             data : {
                 name : 'Boost Strength',
-                description : ', will greatly boost the wielder\'s power.',
+                description : ', will boost the wielder\'s power for a while.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
@@ -276,7 +282,7 @@ ItemEnchant.Base.database = Database.new(
         ItemEnchant.Base.new(
             data : {
                 name : 'Boost Defense',
-                description : ', will greatly boost the wielder\'s defense.',
+                description : ', will boost the wielder\'s defense for a while.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
@@ -297,7 +303,7 @@ ItemEnchant.Base.database = Database.new(
         ItemEnchant.Base.new(
             data : {
                 name : 'Boost Mind',
-                description : ', will greatly boost the wielder\'s mental acquity.',
+                description : ', will boost the wielder\'s mental acquity for a while.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
@@ -318,7 +324,7 @@ ItemEnchant.Base.database = Database.new(
         ItemEnchant.Base.new(
             data : {
                 name : 'Boost Dex',
-                description : ', will greatly boost the wielder\'s dexterity.',
+                description : ', will boost the wielder\'s dexterity for a while.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,
@@ -339,7 +345,7 @@ ItemEnchant.Base.database = Database.new(
         ItemEnchant.Base.new(
             data : {
                 name : 'Boost Speed',
-                description : ', will greatly boost the wielder\'s speed.',
+                description : ', will boost the wielder\'s speed for a while.',
                 equipMod : StatSet.new(
                 ),
                 levelMinimum : 1,

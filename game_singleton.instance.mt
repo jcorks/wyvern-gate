@@ -455,8 +455,8 @@ return class(
                 );               
                 
                 
-                
-                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
+                @:Species = import(module:'game_class.species.mt');
+                @:p0 = island.newInhabitant(speciesHint: Species.database.find(name:'Tanuki'), levelHint:5);
                 @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
                 // debug
                     //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'

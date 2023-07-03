@@ -343,7 +343,11 @@
                 });
             },
             
-            endTurn :: {
+            endTurn ::(battle) {
+                EQUIP_SLOTS->foreach(do:::(str, i) {
+                    when(i == 0 && equips[0] == equips[1]) empty;
+                    equips[i].onTurnEnd(wielder:this, battle);
+                });
             },
 
             // lets the entity know that their turn has come.            
@@ -489,8 +493,16 @@
                 // phys is always assumed to be with equipped weapon
                 effects->foreach(do:::(index, effect) {
                     when (dmg.amount <= 0) empty;
-                    effect.effect.onGiveDamage(user:effect.from, item:effect.item, holder:this, to:target, damage:dmg);
+                    effect.effect.onPreAttackOther(user:effect.from, item:effect.item, holder:this, to:target, damage:dmg);
                 });
+                
+                when(dmg.amount <= 0) empty;
+                target.effects->foreach(do:::(index, effect) {
+                    when (dmg.amount <= 0) empty;
+                    effect.effect.onAttacked(user:target, item:effect.item, holder:target, by:this, damage:dmg);                
+                });
+                
+
                 when(dmg.amount <= 0) empty;
                 when(target.hp == 0) ::<= {
                     this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
@@ -499,12 +511,13 @@
                 };
 
                 when(!target.damage(from:this, damage:dmg, dodgeable:true)) empty;
+
                 this.flags.add(flag:StateFlags.ATTACKED);
 
 
                 
                 effects->foreach(do:::(index, effect) {
-                    effect.effect.onGivenDamage(user:effect.from, item:effect.item, holder:this, to:target);
+                    effect.effect.onPostAttackOther(user:effect.from, item:effect.item, holder:this, to:target);
                 });
 
             },

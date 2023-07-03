@@ -37,8 +37,9 @@
                 skipTurn : Boolean, // whether this effect makes the user not act for a turn
                 stats : StatSet.type,
                 onAffliction : Function, //Called once when first activated
-                onGivenDamage : Function, // Called AFTER the user has explicitly damaged a target
-                onGiveDamage : Function, // called when user is giving damage
+                onPostAttackOther : Function, // Called AFTER the user has explicitly damaged a target
+                onPreAttackOther : Function, // called when user is giving damage
+                onAttacked : Function, // called when user is attacked, before being damaged.
                 onRemoveEffect : Function, //Called once when removed. All effects will be removed at some point.
                 onDamage : Function, // when the holder of the effect is hurt
                 onNextTurn : Function, //< on end phase of turn once added as an effect. Not called if duration is 0
@@ -70,10 +71,14 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     Scene.database.find(name:'scene0_0_sylviaenter').act();
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
 
@@ -118,12 +123,15 @@ Effect.database = Database.new(
 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
                 },
 
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
 
                 onDamage : ::(user, item, holder, from, damage) {
                     windowEvent.queueMessage(text:holder.name + "'s defending stance reduces damage!");
@@ -155,12 +163,15 @@ Effect.database = Database.new(
 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
                 },
 
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
 
                 onDamage : ::(user, item, holder, from, damage) {
                     windowEvent.queueMessage(text:holder.name + "'s defending stance reduces damage significantly!");
@@ -192,10 +203,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
 
@@ -228,10 +242,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
 
@@ -263,10 +280,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
 
@@ -298,10 +318,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
 
@@ -334,10 +357,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
 
@@ -370,10 +396,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
 
@@ -405,10 +434,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
 
@@ -455,10 +487,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
 
@@ -504,10 +539,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
 
@@ -545,10 +583,13 @@ Effect.database = Database.new(
 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -586,10 +627,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + '\'s focus returns to normal.');
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -615,16 +659,446 @@ Effect.database = Database.new(
                     DEF: 100
                 ),
                 onAffliction : ::(user, item, holder) {
-                    windowEvent.queueMessage(text:holder.name + ' is covered in a shell of light');
+                    windowEvent.queueMessage(text:holder.name + ' is covered in a shell of light!');
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + '\'s shell of light fades away.');
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),  
+
+        Effect.new(
+            data : {
+                name : 'Shield',
+                description: 'DEF +10%, 30% chance to block',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                    DEF: 10
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:'A shield of light appears before ' + holder.name + '!');
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onRemoveEffect : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s shield of light fades away.');
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                    if (Number.random() < 0.3) ::<= {
+                        windowEvent.queueMessage(text:holder.name + '\'s shield of light blocks the attack!');
+                        damage.amount = 0;
+                    };                
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+        
+
+        Effect.new(
+            data : {
+                name : 'Trigger Protect',
+                description: 'Casts Protect',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                    windowEvent.queueMessage(text:'It casts Protect on ' + holder.name + '!');
+                    holder.addEffect(
+                        from:user, name: 'Protect', durationTurns: 3
+                    );                        
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ), 
+
+        Effect.new(
+            data : {
+                name : 'Trigger Evade',
+                description: 'Allows the user to evade all attacks for the next turn.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                    holder.addEffect(
+                        from:user, name: 'Evade', durationTurns: 1
+                    );                        
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ), 
+
+        Effect.new(
+            data : {
+                name : 'Evade',
+                description: 'Allows the user to evade all attacks.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + ' is covered in a mysterious wind!');
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                    windowEvent.queueMessage(text:holder.name + '\'s mysterious wind caused the attack to miss!');
+                    damage.amount = 0;
+                },
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ), 
+
+
+        Effect.new(
+            data : {
+                name : 'Trigger Regen',
+                description: 'Slightly heals wounds.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                    holder.heal(
+                        amount: holder.stats.HP * 0.05
+                    );                        
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ), 
+
+        Effect.new(
+            data : {
+                name : 'Trigger Spikes',
+                description: 'Casts Spikes',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                    windowEvent.queueMessage(text:'It covers ' + holder.name + ' in spikes of light!');
+                    holder.addEffect(
+                        from:user, name: 'Spikes', durationTurns: 3
+                    );                        
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ), 
+
+        Effect.new(
+            data : {
+                name : 'Spikes',
+                description: 'DEF +10%, light damage when attacked.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                    DEF: 10
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + ' is covered in spikes of light.');
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                    windowEvent.queueMessage(text:by.name + ' gets hurt by ' + holder.name + '\'s spikes of light!');
+                    by.damage(from:holder, damage:Damage.new(
+                        amount:random.integer(from:1, to:4),
+                        damageType:Damage.TYPE.LIGHT,
+                        damageClass:Damage.CLASS.HP
+                    ),dodgeable: false);
+                },
+
+                onRemoveEffect : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s spikes of light fade.');
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ), 
+
+        Effect.new(
+            data : {
+                name : 'Trigger AP Regen',
+                description: 'Slightly recovers AP.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                    holder.healAP(
+                        amount: holder.stats.AP * 0.05
+                    );                        
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ), 
+
+        Effect.new(
+            data : {
+                name : 'Trigger Shield',
+                description: 'Casts Shield',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                    windowEvent.queueMessage(text:'It casts Shield on ' + holder.name + '!');
+                    holder.addEffect(
+                        from:user, name: 'Shield', durationTurns: 3
+                    );                        
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),         
+
+
+        Effect.new(
+            data : {
+                name : 'Trigger Strength Boost',
+                description: 'Triggers a boost in strength.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                    holder.addEffect(
+                        from:user, name: 'Strength Boost', durationTurns: 3
+                    );                        
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),   
+
+        Effect.new(
+            data : {
+                name : 'Strength Boost',
+                description: 'ATK +70%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                    ATK:70
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s power is increased!');
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                onRemoveEffect : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s power boost fades!');
                 },                
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -638,25 +1112,331 @@ Effect.database = Database.new(
                 }
             }
         ),  
+
+        Effect.new(
+            data : {
+                name : 'Trigger Defense Boost',
+                description: 'Triggers a boost in defense.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                    holder.addEffect(
+                        from:user, name: 'Defense Boost', durationTurns: 3
+                    );                        
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),   
+
+        Effect.new(
+            data : {
+                name : 'Defense Boost',
+                description: 'DEF +70%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                    DEF:70
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s defense is increased!');
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                onRemoveEffect : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s defense boost fades!');
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),  
+
+        Effect.new(
+            data : {
+                name : 'Trigger Mind Boost',
+                description: 'Triggers a boost in mental acuity.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                    holder.addEffect(
+                        from:user, name: 'Mind Boost', durationTurns: 3
+                    );                        
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),   
+
+        Effect.new(
+            data : {
+                name : 'Mind Boost',
+                description: 'INT +70%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                    INT:70
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s mental acuity is increased!');
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                onRemoveEffect : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s intelligence boost fades!');
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),  
+
+        Effect.new(
+            data : {
+                name : 'Trigger Dex Boost',
+                description: 'Triggers a boost in dexterity.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                    holder.addEffect(
+                        from:user, name: 'Dex Boost', durationTurns: 3
+                    );                        
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),   
+
+        Effect.new(
+            data : {
+                name : 'Mind Boost',
+                description: 'DEX +70%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                    DEX:70
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s dexterity is increased!');
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                onRemoveEffect : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s dexterity boost fades!');
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),  
+
+        Effect.new(
+            data : {
+                name : 'Trigger Speed Boost',
+                description: 'Triggers a boost in speed.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                    holder.addEffect(
+                        from:user, name: 'Speed Boost', durationTurns: 3
+                    );                        
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),   
+
+        Effect.new(
+            data : {
+                name : 'Speed Boost',
+                description: 'SPD +70%',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                    SPD:70
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s speed is increased!');
+                },
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                onRemoveEffect : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:holder.name + '\'s speed boost fades!');
+                },                
+
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),  
+
+
         
         Effect.new(
             data : {
                 name : 'Weapon Affinity',
-                description: 'User has their profession\'s ideal weapon. ATK,DEF,SPD,INT +60%',
+                description: 'User has their profession\'s ideal weapon. ATK,DEF,SPD,INT,DEX +60%',
                 battleOnly : true,
                 skipTurn : false,
                 stats: StatSet.new(
                     ATK: 60,
                     DEF: 60,
                     SPD: 60,
-                    INT: 60
+                    INT: 60,
+                    DEX: 60
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
@@ -685,10 +1465,13 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
@@ -718,10 +1501,13 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
@@ -751,10 +1537,13 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
@@ -786,10 +1575,13 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
@@ -828,10 +1620,13 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
@@ -861,10 +1656,13 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
@@ -895,10 +1693,13 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
@@ -927,10 +1728,13 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
@@ -959,10 +1763,13 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
@@ -991,10 +1798,13 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
@@ -1023,10 +1833,13 @@ Effect.database = Database.new(
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
@@ -1056,10 +1869,13 @@ Effect.database = Database.new(
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(text:'A halo appears above ' + holder.name + '!');
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
@@ -1105,10 +1921,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1141,10 +1960,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1197,10 +2019,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1228,10 +2053,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1259,10 +2087,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1293,10 +2124,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1339,10 +2173,13 @@ Effect.database = Database.new(
                     });
                     
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1383,10 +2220,13 @@ Effect.database = Database.new(
                     world.party.inventory.addGold(amount:amt);
                     
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1433,10 +2273,13 @@ Effect.database = Database.new(
                     });
                     
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1467,10 +2310,13 @@ Effect.database = Database.new(
                 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -1482,37 +2328,6 @@ Effect.database = Database.new(
             }
         ),
 
-
-        Effect.new(
-            data : {
-                name : 'Trained Hand',
-                description: 'ATK +30%',
-                battleOnly : true,
-                skipTurn : false,
-                stats: StatSet.new(),
-                onAffliction : ::(user, item, holder) {
-                
-                },
-                
-                onRemoveEffect : ::(user, item, holder) {                    
-                },                
-                
-                onDamage : ::(user, item, holder, from, damage) {
-                },
-                onGivenDamage : ::(user, item, holder, to) {
-                },
-
-                onGiveDamage : ::(user, item, holder, to, damage) {
-                },
-                
-                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
-                
-                },
-                onStatRecalculate : ::(user, item, holder, stats) {
-                
-                }
-            }
-        ),
 
         
         Effect.new(
@@ -1530,10 +2345,13 @@ Effect.database = Database.new(
                 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -1560,10 +2378,13 @@ Effect.database = Database.new(
                 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -1591,10 +2412,13 @@ Effect.database = Database.new(
                 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -1623,10 +2447,13 @@ Effect.database = Database.new(
                 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -1659,10 +2486,13 @@ Effect.database = Database.new(
                 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -1691,10 +2521,13 @@ Effect.database = Database.new(
                 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -1726,10 +2559,13 @@ Effect.database = Database.new(
                 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -1758,10 +2594,13 @@ Effect.database = Database.new(
                 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -1789,10 +2628,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     windowEvent.queueMessage(text:user.name + ' resumes a normal stance!');
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1834,10 +2676,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1868,10 +2713,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1901,10 +2749,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1934,10 +2785,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -1967,12 +2821,15 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
                 },
                 
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
                 onDamage : ::(user, item, holder, from, damage) {
                 },
                 
@@ -1998,11 +2855,16 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
                 },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+
                 
                 onDamage : ::(user, item, holder, from, damage) {
                 },
@@ -2028,10 +2890,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + ' came to their senses!');
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2059,10 +2924,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2090,10 +2958,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2121,10 +2992,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2152,10 +3026,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2186,10 +3063,13 @@ Effect.database = Database.new(
                         windowEvent.queueMessage(text:'The moon shimmers... ' + holder.name +' softly glows');                    
                     };
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
@@ -2224,10 +3104,14 @@ Effect.database = Database.new(
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name +' is ready to coordinate!');                    
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
@@ -2254,10 +3138,13 @@ Effect.database = Database.new(
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name +' braces for incoming damage!');                    
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
@@ -2292,10 +3179,13 @@ Effect.database = Database.new(
                         windowEvent.queueMessage(text:'The sun intensifies... ' + holder.name +' softly glows');                    
                     };
                 },
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
@@ -2329,10 +3219,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2367,10 +3260,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2402,14 +3298,17 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 },                
                 
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                     if (to.isIncapacitated()) ::<= {
                         windowEvent.queueMessage(text:holder.name + "'s ending blow to " + to.name + " increases "+ holder.name + "'s abilities due to their Assassin's Pride.");                        
                         user.addEffect(from:holder, name: 'Pride', durationTurns: 10);                        
                     };
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
 
@@ -2441,10 +3340,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                 },                
                 
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
 
@@ -2472,10 +3374,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2514,10 +3419,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
                 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2551,10 +3459,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + " is no longer bleeding out.");
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2600,10 +3511,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2641,10 +3555,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2681,10 +3598,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + " is no longer poisoned.");
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2724,13 +3644,16 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + " is no longer blind.");
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
                     when (Number.random() > 0.5) empty;
                     windowEvent.queueMessage(text:holder.name + " missed in their blindness!");
                     damage.amount = 0;
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2762,10 +3685,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + " is no longer burned.");
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2804,10 +3730,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + " is no longer frozen.");
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2840,10 +3769,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + " is no longer paralyzed.");
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2875,10 +3807,13 @@ Effect.database = Database.new(
                 onRemoveEffect : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + " is no longer petrified!");
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2905,10 +3840,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2945,10 +3883,13 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -2991,7 +3932,7 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                     to.damage(from:to, damage: Damage.new(
                         amount: random.integer(from:1, to:4),
                         damageType: Damage.TYPE.FIRE,
@@ -2999,7 +3940,10 @@ Effect.database = Database.new(
                     ),dodgeable: false);
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -3029,7 +3973,7 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                     to.damage(from:to, damage: Damage.new(
                         amount: random.integer(from:1, to:4),
                         damageType: Damage.TYPE.ICE,
@@ -3037,7 +3981,10 @@ Effect.database = Database.new(
                     ),dodgeable: false);
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -3067,7 +4014,7 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                     to.damage(from:to, damage: Damage.new(
                         amount: random.integer(from:1, to:4),
                         damageType: Damage.TYPE.THUNDER,
@@ -3075,7 +4022,10 @@ Effect.database = Database.new(
                     ),dodgeable: false);
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -3105,7 +4055,7 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                     to.damage(from:to, damage: Damage.new(
                         amount: random.integer(from:1, to:4),
                         damageType: Damage.TYPE.POISON,
@@ -3115,7 +4065,10 @@ Effect.database = Database.new(
                     );
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -3145,7 +4098,7 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                     to.damage(from:to, damage: Damage.new(
                         amount: random.integer(from:1, to:4),
                         damageType: Damage.TYPE.LIGHT,
@@ -3153,7 +4106,10 @@ Effect.database = Database.new(
                     ),dodgeable: false);
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {
@@ -3182,7 +4138,7 @@ Effect.database = Database.new(
                 
                 onRemoveEffect : ::(user, item, holder) {
                 },                
-                onGivenDamage : ::(user, item, holder, to) {
+                onPostAttackOther : ::(user, item, holder, to) {
                     to.damage(from:to, damage: Damage.new(
                         amount: random.integer(from:1, to:4),
                         damageType: Damage.TYPE.DARK,
@@ -3190,7 +4146,10 @@ Effect.database = Database.new(
                     ),dodgeable: false);
                 },
 
-                onGiveDamage : ::(user, item, holder, to, damage) {
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
                 },
 
                 onDamage : ::(user, item, holder, from, damage) {

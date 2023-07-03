@@ -243,6 +243,7 @@
                 };
             };
             
+            @:story = import(module:'game_singleton.story.mt');
 
             if (base.hasMaterial) ::<= {
                 if (materialHint == empty) ::<= {
@@ -266,16 +267,15 @@
 
                 
                 if (rngEnchantHint != empty && Number.random() < 0.5) ::<= {
-                    @:story = import(module:'game_singleton.story.mt');
                     @enchantCount = random.integer(from:1, to:1+match(true) {
                         (story.defeatedWyvernLight):   4,
-                        (story.defeatedWyvernIce):     3,
+                        (story.defeatedWyvernThunder): 3,
                         (story.defeatedWyvernFire):    2,
                         default: 0
                     });
                     
                     [0, enchantCount]->for(do:::(i) {
-                        @mod = if (story.defeatedWyvernThunder)
+                        @mod = if (story.defeatedWyvernIce)
                             ItemEnchant.Base.getRandom().new()
                         else
                             ItemEnchant.Base.database.getRandomFiltered(
@@ -416,6 +416,12 @@
                 
                     return description + '\nEquip effects: \n' + stats.getRates();
                 }
+            },
+            
+            onTurnEnd ::(wielder, battle){
+                enchants->foreach(do:::(i, enchant) {
+                    enchant.onTurnCheck(wielder, item:this, battle);
+                });
             },
             
             describe ::(by) {

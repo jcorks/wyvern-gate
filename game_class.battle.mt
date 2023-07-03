@@ -88,7 +88,7 @@
             turnIndex+=1;
             if (turnPoppable->keycount == 0) ::<= {      
                 turn->foreach(do:::(index, obj) {
-                    obj.entity.endTurn();
+                    obj.entity.endTurn(battle:this);
                 });
 
                 if (onTurn_ != empty)

@@ -516,6 +516,35 @@ Species.database = Database.new(items: [
     }),
 
     Species.new(data:{
+        name : 'Tanuki',
+        rarity : 40,
+        description: 'A canid race of medium stature',
+        growth : StatSet.new(
+            HP : 3,
+            AP : 4,
+            ATK: 2,
+            DEF: 2,
+            INT: 5,
+            LUK: 2,
+            SPD: 3,
+            DEX: 6
+        ),
+        qualities : [
+            'snout',
+            'fur',
+            'eyes',
+            'ears',
+            'face',
+            'body'
+        ],
+        
+        special : false,
+        passives : [
+        ]
+    }),
+
+
+    Species.new(data:{
         name : 'Werewolf',
         rarity : 200,
         description: 'Canid race thought to be blessed by the moon.',
