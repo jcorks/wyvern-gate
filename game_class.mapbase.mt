@@ -885,10 +885,15 @@ return class(
 
                 
                 } else ::<= {
-                    @itemX = (x - pointer.x);
-                    @itemY = (y - pointer.y);
+                    @camX = pointer.x;
+                    @camY = pointer.y;
                     
-                    return (x >= -mapSizeW/2 && y >= -mapSizeH/2 && x <= mapSizeW/2 && y <= mapSizeH/2);
+                    @camLeft   = camX - mapSizeW/2;
+                    @camTop    = camY - mapSizeH/2;
+                    @camRight  = camX + mapSizeW/2;
+                    @camBottom = camY + mapSizeH/2;
+                    
+                    return x >= camLeft && x <= camRight && y >= camTop && y <= camBottom;
                 };
 
             },

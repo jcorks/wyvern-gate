@@ -1327,7 +1327,7 @@ Ability.database = Database.new(
                         user.enemies->foreach(do:::(index, enemy) {
                             user.attack(
                                 target:enemy,
-                                amount:user.stats.INT * (1.85),
+                                amount:user.stats.INT * (1.4),
                                 damageType : Damage.TYPE.FIRE,
                                 damageClass: Damage.CLASS.HP
                             );
@@ -1364,7 +1364,7 @@ Ability.database = Database.new(
                     description: 'Magick that deals 4 random strikes.',
                     durationTurns: 0,
                     hpCost : 0,
-                    apCost : 1,
+                    apCost : 2,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -1375,8 +1375,8 @@ Ability.database = Database.new(
                             @:target = random.pickArrayItem(list:user.enemies);
                             user.attack(
                                 target,
-                                amount:user.stats.INT * (1.2),
-                                damageType : Damage.TYPE.FIRE,
+                                amount:user.stats.INT * (0.65),
+                                damageType : Damage.TYPE.THUNDER,
                                 damageClass: Damage.CLASS.HP
                             );
                         

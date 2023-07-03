@@ -50,7 +50,8 @@ return ::(
                 'Use',
                 'Equip',
                 'Check',
-                'Compare'
+                'Compare',
+                'Toss'
             ],
             onChoice::(choice) {
                 when (choice == 0) empty;              
@@ -173,9 +174,18 @@ return ::(
                         prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
                         other:item.equipMod
                     ); 
-                    
-                    
-                    
+                  },
+                  
+                  (4)::<= {
+                    windowEvent.queueAskBoolean(
+                        prompt:'Are you sure you wish to throw away the ' + item.name + '?',
+                        onChoice::(which) {
+                            party.inventory.remove(item);
+                            windowEvent.queueMessage(text:'The ' + item.name + ' was thrown away.');
+                            if (windowEvent.canJumpToTag(name:'Item'))
+                                windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
+                        }
+                    );
                   }
                 };              
             

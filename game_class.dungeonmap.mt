@@ -93,9 +93,10 @@ return class(
 
 
             if (left < 0) left = 0;
-            if (left + width > ROOM_SIZE) left = ROOM_SIZE - width - 1;
+            if (left + width +2 >= ROOM_SIZE-1) left = ROOM_SIZE - width - 3;
             if (top < 0) top = 0;
-            if (top + height > ROOM_SIZE) top = ROOM_SIZE - height - 1;
+            if (top + height +2 >= ROOM_SIZE-1) top = ROOM_SIZE - height - 3;
+            
 
             areas->push(value: Area.new(
                 x: left,
@@ -217,6 +218,19 @@ return class(
             
                 @fromx_y = if (ax < bx) ay else by;
 
+                next = b;
+                
+                if(fromx <= 0) fromx = 1;
+                if(fromx >= ROOM_SIZE-1) fromx = ROOM_SIZE-2;
+                if(fromy <= 0) fromy = 1;
+                if(fromy >= ROOM_SIZE-1) fromy = ROOM_SIZE-2;
+                if(tox <= 0) tox = 1;
+                if(tox >= ROOM_SIZE-1) tox = ROOM_SIZE-2;
+                if(toy <= 0) toy = 1;
+                if(toy >= ROOM_SIZE-1) toy = ROOM_SIZE-2;
+
+
+
                 [fromx-1, tox+1]->for(do:::(i) {
                     addCavity(
                         x:i,
@@ -233,7 +247,6 @@ return class(
                 });
 
                 
-                next = b;
             });
         };
     
