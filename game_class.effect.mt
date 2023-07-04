@@ -2258,9 +2258,10 @@ Effect.database = Database.new(
                     
                     when(user.isIncapacitated()) empty;
                     when(!world.party.isMember(entity:holder)) empty;
-                    
+                                        
+                    when(Number.random() < 0.5) empty;                    
 
-                    @:amt = 2 + (Number.random() * 4)->floor;
+                    @:amt = 1;
                     windowEvent.queueMessage(
                         text: holder.name + ' scavenged for ingredients...'
                     );

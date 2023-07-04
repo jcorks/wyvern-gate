@@ -59,8 +59,7 @@ return class(
                     battle.entityCommitAction(action:BattleAction.new(
                         state : {
                             ability: 
-                                user_.abilitiesAvailable[0],
-                                //Ability.database.find(name:'Bribe'),
+                                Ability.database.find(name:'Attack'),
 
                             targets: [
                                 Random.pickArrayItem(list:enemies_)
@@ -81,7 +80,7 @@ return class(
             
             
                 // default: just attack if all you have is defend and attack
-                when(user_.abilitiesAvailable->keycount <= 2 || Number.random() < 0.4)
+                when(user_.abilitiesAvailable->keycount <= 2 || Number.random() < 0.6)
                     defaultAttack();          
 
                 // else pick a non-defend ability

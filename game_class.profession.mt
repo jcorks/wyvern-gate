@@ -630,7 +630,7 @@ Profession.Base.database = Database.new(
                     'Black Brew',    //X petrify
                 ],
                 passives : [
-                    'Alchemist\'s Scavenging' // find 2-5 Ingredient Packs
+                    'Alchemist\'s Scavenging' // find 1 Ingredient Pack
                 ]
             }),
 
@@ -1080,7 +1080,8 @@ Profession.Base.database = Database.new(
                     'Frozen Flame',
                     'Ice',
                     'Magic Mist', // remove all effects
-                    'Wild Swing'
+                    'Wild Swing',
+                    'Sheer Cold'
                 ],
                 passives : [
                 ]

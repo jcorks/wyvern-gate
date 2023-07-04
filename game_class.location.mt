@@ -389,10 +389,14 @@ Location.Base.database = Database.new(
                 location.ownedBy = location.landmark.island.newInhabitant();
                 @:Profession = import(module:'game_class.profession.mt');
                 location.ownedBy.profession = Profession.Base.database.find(name:'Farmer').new();                
+                @:story = import(module:'game_singleton.story.mt');
                 
                 [0, 2+(Number.random()*4)->ceil]->for(do:::(i) {
                     // no weight, as the value scales
-                    location.inventory.add(item:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
+                    location.inventory.add(item:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false
+                                            && value.tier <= story.tier
+                    
+                    )
                     .new(from:location.ownedBy, rngEnchantHint:true));
                 });
             },
@@ -446,10 +450,14 @@ Location.Base.database = Database.new(
             maxOccupants : 0,
             onFirstInteract ::(location) {
                 location.ownedBy = location.landmark.island.newInhabitant();
+                @:story = import(module:'game_singleton.story.mt');
             
                 [0, 2+(Number.random()*4)->ceil]->for(do:::(i) {
                     // no weight, as the value scales
-                    location.inventory.add(item:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
+                    location.inventory.add(item:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false
+                                            && value.tier <= story.tier
+                    
+                    )
                     .new(from:location.ownedBy, rngEnchantHint:true));
                 });            
             },            
@@ -562,7 +570,7 @@ Location.Base.database = Database.new(
 
 
         Location.Base.new(data:{
-            name: 'Wyvern Throne',
+            name: 'Wyvern Throne of Fire',
             rarity: 1,
             ownVerb : 'owned',
             symbol: 'W',
@@ -593,49 +601,42 @@ Location.Base.database = Database.new(
             
             onCreate ::(location) {
                 location.name = 'Wyvern Throne';
-                match(location.landmark.island.tier) {
-                  (0): ::<= {
-                    @:Profession = import(module:'game_class.profession.mt');
-                    @:Species = import(module:'game_class.species.mt');
-                    @:Story = import(module:'game_singleton.story.mt');
-                    @:Scene = import(module:'game_class.scene.mt');
-                    @:StatSet = import(module:'game_class.statset.mt');
-                    location.ownedBy = location.landmark.island.newInhabitant();
-                    location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
-                    location.ownedBy.species = Species.database.find(name:'Wyvern of Fire');
-                    location.ownedBy.profession = Profession.Base.database.find(name:'Wyvern of Fire').new();               
-                    location.ownedBy.clearAbilities();
-                    location.ownedBy.profession.gainSP(amount:10)->foreach(do:::(i, ability) {
-                        location.ownedBy.learnAbility(name:ability);
-                    });
+                @:Profession = import(module:'game_class.profession.mt');
+                @:Species = import(module:'game_class.species.mt');
+                @:Story = import(module:'game_singleton.story.mt');
+                @:Scene = import(module:'game_class.scene.mt');
+                @:StatSet = import(module:'game_class.statset.mt');
+                location.ownedBy = location.landmark.island.newInhabitant();
+                location.ownedBy.name = 'Wyvern of Fire';
+                location.ownedBy.species = Species.database.find(name:'Wyvern of Fire');
+                location.ownedBy.profession = Profession.Base.database.find(name:'Wyvern of Fire').new();               
+                location.ownedBy.clearAbilities();
+                location.ownedBy.profession.gainSP(amount:10)->foreach(do:::(i, ability) {
+                    location.ownedBy.learnAbility(name:ability);
+                });
 
-                    
-                    location.ownedBy.onInteract = ::(party, location, onDone) {
-                        if (!Story.defeatedWyvernFire) ::<= {
-                            Scene.database.find(name:'scene_wyvernfire0').act(onDone::{}, location, landmark:location.landmark);
-                        } else ::<= {
-                            // just visiting!
-                            Scene.database.find(name:'scene_wyvernfire1').act(onDone::{}, location, landmark:location.landmark);                        
-                        };
+                
+                location.ownedBy.onInteract = ::(party, location, onDone) {
+                    if (Story.tier < 1) ::<= {
+                        Scene.database.find(name:'scene_wyvernfire0').act(onDone::{}, location, landmark:location.landmark);
+                    } else ::<= {
+                        // just visiting!
+                        Scene.database.find(name:'scene_wyvernfire1').act(onDone::{}, location, landmark:location.landmark);                        
                     };
-                    location.ownedBy.stats.state = StatSet.new(
-                        HP:   110,
-                        AP:   999,
-                        ATK:  7,
-                        INT:  16,
-                        DEF:  9,
-                        LUK:  8,
-                        SPD:  16,
-                        DEX:  8
-                    ).state;
-                    location.ownedBy.heal(amount:9999, silent:true); 
-                    location.ownedBy.healAP(amount:9999, silent:true); 
-                  },
-                  default: ::<= {
-                    error(detail:'This wyvern is currently out!');
-                  }
-
                 };
+                location.ownedBy.stats.state = StatSet.new(
+                    HP:   110,
+                    AP:   999,
+                    ATK:  7,
+                    INT:  5,
+                    DEF:  9,
+                    LUK:  8,
+                    SPD:  16,
+                    DEX:  8
+                ).state;
+                location.ownedBy.heal(amount:9999, silent:true); 
+                location.ownedBy.healAP(amount:9999, silent:true); 
+
                 
 
 
@@ -646,6 +647,87 @@ Location.Base.database = Database.new(
             
             }
         }),
+
+
+        Location.Base.new(data:{
+            name: 'Wyvern Throne of Ice',
+            rarity: 1,
+            ownVerb : 'owned',
+            symbol: 'W',
+
+            descriptions: [
+                "What seems to be a stone throne",
+            ],
+            interactions : [
+                'talk',
+                'examine'
+            ],
+            
+            aggressiveInteractions : [
+                'vandalize',            
+            ],
+
+
+            
+            minOccupants : 0,
+            maxOccupants : 0,
+            
+            onFirstInteract ::(location) {
+            },
+            onInteract ::(location) {
+                return true;
+
+            },            
+            
+            onCreate ::(location) {
+                location.name = 'Wyvern Throne';
+                @:Profession = import(module:'game_class.profession.mt');
+                @:Species = import(module:'game_class.species.mt');
+                @:Story = import(module:'game_singleton.story.mt');
+                @:Scene = import(module:'game_class.scene.mt');
+                @:StatSet = import(module:'game_class.statset.mt');
+                location.ownedBy = location.landmark.island.newInhabitant();
+                location.ownedBy.name = 'Wyvern of Ice';
+                location.ownedBy.species = Species.database.find(name:'Wyvern of Ice');
+                location.ownedBy.profession = Profession.Base.database.find(name:'Wyvern of Ice').new();               
+                location.ownedBy.clearAbilities();
+                location.ownedBy.profession.gainSP(amount:10)->foreach(do:::(i, ability) {
+                    location.ownedBy.learnAbility(name:ability);
+                });
+
+                
+                location.ownedBy.onInteract = ::(party, location, onDone) {
+                    if (Story.tier < 2) ::<= {
+                        Scene.database.find(name:'scene_wyvernice0').act(onDone::{}, location, landmark:location.landmark);
+                    } else ::<= {
+                        // just visiting!
+                        Scene.database.find(name:'scene_wyvernice1').act(onDone::{}, location, landmark:location.landmark);                        
+                    };
+                };
+                location.ownedBy.stats.state = StatSet.new(
+                    HP:   190,
+                    AP:   999,
+                    ATK:  6,
+                    INT:  4,
+                    DEF:  7,
+                    LUK:  6,
+                    SPD:  20,
+                    DEX:  7
+                ).state;
+                location.ownedBy.heal(amount:9999, silent:true); 
+                location.ownedBy.healAP(amount:9999, silent:true); 
+
+                
+
+
+
+            },
+            
+            onTimeChange::(location, time) {
+            
+            }
+        }),
+
 
         Location.Base.new(data:{
             name: 'shop',
@@ -680,12 +762,14 @@ Location.Base.database = Database.new(
                 location.inventory.maxItems = 50;
 
                 @:nameGen = import(module:'game_singleton.namegen.mt');
+                @:story = import(module:'game_singleton.story.mt');
 
                 [0, 30 + (location.ownedBy.level / 4)->ceil]->for(do:::(i) {
                     // no weight, as the value scales
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false &&
                                             location.ownedBy.level >= value.levelMinimum
+                                            && value.tier <= story.tier
                     ).new(from:location.ownedBy, rngEnchantHint:true));
                 });
 
@@ -824,6 +908,7 @@ Location.Base.database = Database.new(
                 location.ownedBy = location.landmark.island.newInhabitant();            
                 location.ownedBy.profession = Profession.Base.database.find(name:'Blacksmith').new();
                 location.name = 'Blacksmith';
+                @:story = import(module:'game_singleton.story.mt');
                 [0, 1 + (location.ownedBy.level / 4)->ceil]->for(do:::(i) {
 
                     location.inventory.add(
@@ -832,6 +917,7 @@ Location.Base.database = Database.new(
                                 value.isUnique == false && 
                                 location.ownedBy.level >= value.levelMinimum &&
                                 value.hasAttribute(attribute:Item.ATTRIBUTE.METAL)
+                                && value.tier <= story.tier
                             )
                         ).new(from:location.ownedBy)
                     );
@@ -1241,8 +1327,10 @@ Location.Base.database = Database.new(
             },
             
             onCreate ::(location) {
+                @:story = import(module:'game_singleton.story.mt');
                 location.inventory.add(item:Item.Base.database.getRandomFiltered(
                     filter:::(value) <- value.isUnique == false && value.canHaveEnchants
+                                            && value.tier <= story.tier
                 ).new(rngEnchantHint:true, from:location.landmark.island.newInhabitant()));
             },
             
@@ -1298,9 +1386,11 @@ Location.Base.database = Database.new(
                         Story.foundLightKey = true;
                     }
                 };
+                @:story = import(module:'game_singleton.story.mt');
                 [0, 3+(Number.random()*2)->ceil]->for(do:::(i) {
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false
+                                            && value.tier <= story.tier
                     ).new(from:location.landmark.island.newInhabitant(),rngEnchantHint:true));
                 });            
             },

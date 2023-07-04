@@ -111,7 +111,7 @@ ItemEnchant.Base = class(
                 equipEffects : Object,
                 triggerConditionEffects : Object,
                 priceMod : Number,
-                isRare : Boolean
+                tier : Number
             }
         );
         
@@ -136,7 +136,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 350,
-                isRare : false,
+                tier : 2,
                 
                 triggerConditionEffects : [
                     'Trigger Protect' // 1 HP
@@ -157,7 +157,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 350,
-                isRare : false,
+                tier : 1,
                 
                 triggerConditionEffects : [
                     'Trigger Evade' // 100% next turn
@@ -180,7 +180,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 350,
-                isRare : false,
+                tier : 2,
                 
                 triggerConditionEffects : [
                     'Trigger Regen'
@@ -201,7 +201,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 350,
-                isRare : false,
+                tier : 1,
                 
                 triggerConditionEffects : [
                     'Trigger Spikes'
@@ -224,7 +224,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 350,
-                isRare : false,
+                tier : 1,
                 
                 triggerConditionEffects : [
                     'Trigger AP Regen'
@@ -245,7 +245,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 250,
-                isRare : false,
+                tier : 1,
                 
                 triggerConditionEffects : [
                     'Trigger Block' // 100% block
@@ -266,7 +266,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 250,
-                isRare : false,
+                tier : 0,
                 
                 triggerConditionEffects : [
                     'Trigger Strength Boost'
@@ -287,7 +287,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 250,
-                isRare : false,
+                tier : 0,
                 
                 triggerConditionEffects : [
                     'Trigger Defense Boost'
@@ -308,7 +308,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 250,
-                isRare : false,
+                tier : 0,
                 
                 triggerConditionEffects : [
                     'Trigger Mind Boost'
@@ -329,7 +329,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 250,
-                isRare : false,
+                tier : 0,
                 
                 triggerConditionEffects : [
                     'Trigger Dex Boost'
@@ -350,7 +350,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 250,
-                isRare : false,
+                tier : 0,
                 
                 triggerConditionEffects : [
                     'Trigger Speed Boost'
@@ -373,7 +373,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 200,
-                isRare : false,
+                tier : 0,
                 
                 triggerConditionEffects : [
                 ],
@@ -394,7 +394,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 200,
-                isRare : false,
+                tier : 0,
                 
                 triggerConditionEffects : [
                 ],
@@ -415,7 +415,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 200,
-                isRare : false,
+                tier : 0,
                 
                 triggerConditionEffects : [
                 ],
@@ -436,7 +436,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 200,
-                isRare : false,
+                tier : 0,
                 
                 triggerConditionEffects : [
                 ],
@@ -457,7 +457,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 200,
-                isRare : false,
+                tier : 0,
                 
                 triggerConditionEffects : [
                 ],
@@ -478,7 +478,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 200,
-                isRare : false,
+                tier : 0,
                 
                 triggerConditionEffects : [
                 ],
@@ -506,7 +506,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 20000,
-                isRare : true,
+                tier : 3,
                 
                 triggerConditionEffects : [
                 ],
@@ -531,7 +531,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 20000,
-                isRare : true,
+                tier : 3,
                 
                 triggerConditionEffects : [
                 ],
@@ -556,7 +556,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 20000,
-                isRare : true,
+                tier : 3,
                 
                 triggerConditionEffects : [
                 ],
@@ -581,7 +581,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 20000,
-                isRare : true,
+                tier : 3,
                 
                 triggerConditionEffects : [
                 ],
@@ -606,7 +606,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 20000,
-                isRare : true,
+                tier : 3,
                 
                 triggerConditionEffects : [
                 ],
@@ -631,7 +631,7 @@ ItemEnchant.Base.database = Database.new(
                     INT: -25
                 ),
                 priceMod: 1200,
-                isRare : true,
+                tier : 2,
                 levelMinimum : 1,
                 
                 triggerConditionEffects : [
@@ -655,7 +655,7 @@ ItemEnchant.Base.database = Database.new(
                     INT: -25
                 ),
                 priceMod: 1200,
-                isRare : true,
+                tier : 2,
                 levelMinimum : 1,
                 
                 triggerConditionEffects : [
@@ -679,7 +679,7 @@ ItemEnchant.Base.database = Database.new(
                     INT: -25
                 ),
                 priceMod: 1200,
-                isRare : true,
+                tier : 2,
                 levelMinimum : 1,
                 
                 triggerConditionEffects : [
@@ -703,7 +703,7 @@ ItemEnchant.Base.database = Database.new(
                     INT: 50
                 ),
                 priceMod: 1200,
-                isRare : true,
+                tier : 2,
                 levelMinimum : 1,
                 
                 triggerConditionEffects : [
@@ -728,7 +728,7 @@ ItemEnchant.Base.database = Database.new(
                     INT: 50
                 ),
                 priceMod: 1200,
-                isRare : true,
+                tier : 2,
                 levelMinimum : 1,
                 
                 triggerConditionEffects : [
@@ -752,7 +752,7 @@ ItemEnchant.Base.database = Database.new(
                     INT: -25
                 ),
                 priceMod: 1200,
-                isRare : true,
+                tier : 2,
                 levelMinimum : 1,
                 
                 triggerConditionEffects : [
@@ -776,7 +776,7 @@ ItemEnchant.Base.database = Database.new(
                     INT: -25
                 ),
                 priceMod: 1200,
-                isRare : true,
+                tier : 2,
                 levelMinimum : 1,
                 
                 triggerConditionEffects : [
@@ -800,7 +800,7 @@ ItemEnchant.Base.database = Database.new(
                     INT: -25
                 ),
                 priceMod: 1200,
-                isRare : true,
+                tier : 2,
                 levelMinimum : 1,
                 
                 triggerConditionEffects : [
@@ -824,7 +824,7 @@ ItemEnchant.Base.database = Database.new(
                     INT: 50
                 ),
                 priceMod: 1200,
-                isRare : true,
+                tier : 2,
                 levelMinimum : 1,
                 
                 triggerConditionEffects : [
@@ -848,7 +848,7 @@ ItemEnchant.Base.database = Database.new(
                     INT: -25
                 ),
                 priceMod: 1200,
-                isRare : true,
+                tier : 2,
                 levelMinimum : 1,
                 
                 triggerConditionEffects : [
@@ -872,7 +872,7 @@ ItemEnchant.Base.database = Database.new(
                     INT: 50
                 ),
                 priceMod: 1200,
-                isRare : true,
+                tier : 2,
                 levelMinimum : 1,
                 
                 triggerConditionEffects : [
@@ -897,7 +897,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 5,
                 priceMod: 300,
-                isRare : true,
+                tier : 1,
                 
                 triggerConditionEffects : [
                 ],
@@ -915,15 +915,15 @@ ItemEnchant.Base.database = Database.new(
                 name : 'Inlet: Bloodstone',
                 description : 'Set with a large bloodstone, shining sinisterly',
                 equipMod : StatSet.new(
-                    SPD: 20,
-                    DEX: 20,
-                    ATK: 20,
-                    DEF: 20,
-                    INT: 20,
+                    SPD: 30,
+                    DEX: 30,
+                    ATK: 30,
+                    DEF: 30,
+                    INT: 30,
                     HP: -40
                 ),
                 priceMod: 2000,
-                isRare : true,
+                tier : 3,
                 levelMinimum : 1,
                 
                 triggerConditionEffects : [
@@ -940,15 +940,15 @@ ItemEnchant.Base.database = Database.new(
                 name : 'Inlet: Soulstone',
                 description : 'Set with a large soulstone, shining sinisterly',
                 equipMod : StatSet.new(
-                    SPD: 20,
-                    DEX: 20,
-                    ATK: 20,
-                    DEF: 20,
-                    INT: 20,
+                    SPD: 30,
+                    DEX: 30,
+                    ATK: 30,
+                    DEF: 30,
+                    INT: 30,
                     AP: -40
                 ),
                 priceMod: 2000,
-                isRare : true,
+                tier : 3,
                 levelMinimum : 1,
                 
                 triggerConditionEffects : [

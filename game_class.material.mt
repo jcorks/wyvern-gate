@@ -31,7 +31,7 @@
             attributes : {
                 name : String,
                 rarity : Number,
-                levelMinimum : Number,
+                tier : Number,
                 description : String,
                 statMod : StatSet.type, // percentages
                 pricePercentMod : Number
@@ -46,10 +46,25 @@ Material.database = Database.new(
     items: [
         Material.new(
             data : {
+                name : 'Hardstone',
+                description : 'The polished hardstone it\'s made of is dark and shiny.',
+                rarity : 3,
+                tier : 0,
+                statMod : StatSet.new(
+                    DEF: 3,
+                    ATK: 7,
+                    SPD: -5
+                ),
+                pricePercentMod: 20
+            }
+        ),
+
+        Material.new(
+            data : {
                 name : 'Copper',
                 description : 'The copper material used gives off a radiant brown color.',
                 rarity : 3,
-                levelMinimum : 1,
+                tier : 0,
                 statMod : StatSet.new(
                     DEF: 5,
                     ATK: 6
@@ -63,7 +78,7 @@ Material.database = Database.new(
                 name : 'Steel',
                 description : 'The steel used gives a persistent shine.',
                 rarity : 5,
-                levelMinimum : 1,
+                tier : 1,
                 statMod : StatSet.new(
                     DEF: 30,
                     ATK: 30
@@ -77,7 +92,7 @@ Material.database = Database.new(
                 name : 'Iron',
                 description : 'The iron used gives it a solid grey color.',
                 rarity : 2,
-                levelMinimum : 1,
+                tier : 0,
                 statMod : StatSet.new(
                     DEF: 10,
                     ATK: 20,
@@ -92,7 +107,7 @@ Material.database = Database.new(
                 name : 'Gold',
                 description : 'The gold used gives a radiant glow.',
                 rarity : 50,
-                levelMinimum : 1,
+                tier : 1,
                 statMod : StatSet.new(
                     DEF: 10,
                     ATK: 10,
@@ -103,13 +118,28 @@ Material.database = Database.new(
             }
         ),
 
+        Material.new(
+            data : {
+                name : 'Tungsten',
+                description : 'The tungsten used gives it a whitish-grey color.',
+                rarity : 2,
+                tier : 1,
+                statMod : StatSet.new(
+                    DEF: 20,
+                    ATK: 25,
+                    SPD: -10
+                ),
+                pricePercentMod: 35
+            }
+        ),
+
 
         Material.new(
             data : {
                 name : 'Mythril',
                 description : 'The mythril used makes it radiantly green',
                 rarity : 100,
-                levelMinimum : 30,
+                tier : 2,
                 statMod : StatSet.new(
                     DEF: 70,
                     ATK: 70,
@@ -124,7 +154,7 @@ Material.database = Database.new(
                 name : 'Adamantine',
                 description : 'The adamantine used makes it earthly',
                 rarity : 150,
-                levelMinimum : 45,
+                tier : 3,
                 statMod : StatSet.new(
                     DEF: 100,
                     ATK: 100
@@ -138,7 +168,7 @@ Material.database = Database.new(
                 name : 'Quicksilver',
                 description : 'The quicksilver used makes it remarkably shiny.',
                 rarity : 150,
-                levelMinimum : 35,
+                tier : 3,
                 statMod : StatSet.new(
                     DEF: 50,
                     ATK: 50,
@@ -153,7 +183,7 @@ Material.database = Database.new(
                 name : 'Dragonglass',
                 description : 'The dragonglass used gives it a deep black color.',
                 rarity : 200,
-                levelMinimum : 55,
+                tier : 3,
                 statMod : StatSet.new(
                     DEF: -20,
                     ATK: 150,
@@ -168,7 +198,7 @@ Material.database = Database.new(
                 name : 'Composite',
                 rarity : 20,
                 description : 'The composite material used is sturdy.',
-                levelMinimum : 20,
+                tier : 1,
                 statMod : StatSet.new(
                     DEF: 45,
                     ATK: 45,
@@ -178,13 +208,29 @@ Material.database = Database.new(
             }
         ),    
 
+        Material.new(
+            data : {
+                name : 'Crystal',
+                rarity : 150,
+                description : 'The crystal used makes it semi-transparent.',
+                tier : 2,
+                statMod : StatSet.new(
+                    DEF: 35,
+                    INT: 35,
+                    ATK: 35
+                ),
+                pricePercentMod: 150
+            }
+        ),   
+
+
 
         Material.new(
             data : {
                 name : 'Sunstone',
                 rarity : 150,
                 description : 'The sunstone used gives it a warm touch.',
-                levelMinimum : 15,
+                tier : 1,
                 statMod : StatSet.new(
                     DEF: 35,
                     INT: 15,
@@ -199,7 +245,7 @@ Material.database = Database.new(
                 name : 'Moonstone',
                 rarity : 150,
                 description : 'The moonstone used gives it a cold touch.',
-                levelMinimum : 15,
+                tier : 1,
                 statMod : StatSet.new(
                     DEF: 15,
                     INT: 35,

@@ -136,6 +136,9 @@
         kael            wing
         djaal           fire / flame
         luhl            reality
+        kaarrjuhzaal    groveler
+        ziikkael        fang
+        ttaal           ice / cold / snow
         
         
         // verbs. infinitive always ends in uh 

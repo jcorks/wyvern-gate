@@ -75,7 +75,7 @@ Scene.database = Database.new(
                     ['???', '...Selected to seek me, the Wyvern of Light...'],
                     ['???', 'If you seek me, I will grant you and anyone with you a wish...'],
                     ['???', 'But be warned: others will seek their own wish and will accept no others...'],
-                    ['???', 'Come, chosen: seek me and the Gate Keys among the Shrines...'],
+                    ['???', 'Come, Chosen: seek me and the Gate Keys among the Shrines...'],
                     ['???', '...I will await you, Chosen...'],
                 ]
             }
@@ -100,7 +100,7 @@ Scene.database = Database.new(
                         @:world = import(module:'game_singleton.world.mt');
                         @:Battle = import(module:'game_class.battle.mt');
                         @:canvas = import(module:'game_singleton.canvas.mt');
-
+                        location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
                         @:end = ::(result){
 
                             when(result == Battle.RESULTS.ENEMIES_WIN) ::<= {
@@ -151,6 +151,7 @@ Scene.database = Database.new(
                     ['', 'The party hands over the Wyvern Key of Fire.'],
                     ['Kaedjaal', 'May you find peace and prosperity in your heart. Remember: seek the shrine to find the Key.'],
                     ::(location, landmark, doNext) {
+                        location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
                         @:world = import(module:'game_singleton.world.mt');
                         @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Fire');
                         if (key != empty) key = key[0];
@@ -188,8 +189,18 @@ Scene.database = Database.new(
                                 text: 'Rrohziil, Please keep it safe. It breaks my heart to give these away to Chosen who already should have one...'
                             );
                         };
+                        
+                        @:story = import(module:'game_singleton.story.mt');
+                        if (story.tier < 1)
+                            story.tier = 1;
+                        
                         @:instance = import(module:'game_singleton.instance.mt');
+                        // cancel and flush current VisitIsland session
                         instance.visitIsland(where:key.islandEntry);
+                        if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
+                            windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
+                        };
+
                         breakpoint();
                         doNext();
                     }
@@ -257,10 +268,11 @@ Scene.database = Database.new(
                                     when(items->keycount == 3) ::<= {
                                         windowEvent.queueMessage(speaker:'Kaedjaal', text:'Excellent. Let me, in exchange, give you this.');   
                                         @:item = Item.Base.database.getRandomFiltered(
-                                            filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                                        ).new(rngModHint:true, from:location.landmark.island.newInhabitant(), colorHint:'Red');
-                                        item.addModifier(name:'Burning');
-                                        item.addModifier(name:'Burning');
+                                            filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial
+                                        ).new(rngEnchantHint:true, from:location.landmark.island.newInhabitant(), colorHint:'Red', materialHint: 'Gold');
+                                        @:ItemEnchant = import(module:'game_class.itemenchant.mt');
+                                        item.addEnchant(mod:ItemEnchant.Base.database.find(name:'Burning').new());
+                                        item.addEnchant(mod:ItemEnchant.Base.database.find(name:'Burning').new());
 
 
                                         windowEvent.queueMessage(text:'In exchange, the party was given ' + correctA(word:item.name) + '.');
@@ -295,7 +307,6 @@ Scene.database = Database.new(
                                                     (2): 'third'
                                                 }) + ' item.',
                                         onPick:::(item){
-                                            windowEvent.forceExit();
                                             chooseItem(item);
                                         }
                                     );
@@ -330,7 +341,129 @@ Scene.database = Database.new(
                     }
                 ]
             }
-        )      
+        ),
+
+
+        Scene.new(
+            data : {
+                name : 'scene_wyvernice0',
+                script: [
+                    ['???',      '...'],
+                    ['???', '... Another Chosen, or so you would be called.'],
+                    ['???', 'WHy my sibling wastes our time with some of these karrjuhzaalii to us is a mystery to me.'],
+                    ['???', 'But with me, your journey may end here. I will not let you pass unless you earn it.'],
+                    ['???', 'I will not be as easy-going as Kaedjaal.'],
+                    ['???', 'Through the unforgiving cold and ice, you will understand the power which you challenge.'],
+                    ['Ziikkaettaal', 'I, Ziikkaettaal will halt your path now, Chosen!'],
+                    ::(location, landmark, doNext) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @:Battle = import(module:'game_class.battle.mt');
+                        @:canvas = import(module:'game_singleton.canvas.mt');
+                        location.ownedBy.name = 'Ziikkaettaal, Wyvern of Ice';
+                        @:end = ::(result){
+
+                            when(result == Battle.RESULTS.ENEMIES_WIN) ::<= {
+                                windowEvent.queueMessage(
+                                    speaker:'Ziikkaettaal',
+                                    text:'Hm. As expected.'
+                                );
+                                
+                                windowEvent.queueNoDisplay(
+                                    onEnter::{
+                                        windowEvent.jumpToTag(name:'MainMenu');                                    
+                                    }
+                                );
+                            };
+                            
+                        
+                            when (!location.ownedBy.isIncapacitated()) ::<= {
+                                world.battle.start(
+                                    party: world.party,                            
+                                    allies: world.party.members,
+                                    enemies: [location.ownedBy],
+                                    landmark: landmark,
+                                    renderable:{render::{canvas.blackout();}},
+                                    onEnd::(result) {
+                                        end(result);
+                                    }
+                                );                                
+                            }; 
+                            
+                            doNext();
+                        };
+                        world.battle.start(
+                            party:world.party,                            
+                            allies: world.party.members,
+                            enemies: [location.ownedBy],
+                            landmark: landmark,
+                            renderable:{render::{canvas.blackout();}},
+                            onEnd::(result) {
+                                end(result);
+                            }
+                        );                         
+                    },
+                    ['Ziikkaettaal', 'I... I see. Kaedjaal was perhaps right to let you continue to me.'],
+                    ['Ziikkaettaal', 'It has been some time since I have let another Chosen pass.'],
+                    ['Ziikkaettaal', 'You have handled yourself well.'],
+                    ['', 'The party hands over the Wyvern Key of Ice.'],
+                    ['Ziikkaettaal', 'May you find peace and prosperity in your heart. Remember: seek the shrine to find the Key.'],
+                    ::(location, landmark, doNext) {
+                        location.ownedBy.name = 'Kaedjaa, Wyvern of Ice';
+                        @:world = import(module:'game_singleton.world.mt');
+                        @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Fire');
+                        if (key != empty) key = key[0];
+                        // could be equipped by hooligans and jokesters
+                        if (key == empty) ::<= {
+                            key = [::] {
+                                world.party.members->foreach(do:::(i, member) {
+                                    @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_L);
+                                    if (wep.name == 'Wyvern Key of Ice') ::<= {
+                                        send(message:key);
+                                    };
+                                });
+                            };
+                        };
+                        // you can technically throw it out or Literally Throw It.
+                        when(key == empty) ::<= {
+                            windowEvent.queueMessage(
+                                speaker: 'Ziikkaettaal',
+                                                //(Friend   of   Me)  My friend...
+                                text: '*tells you off in dragonish*'
+                            );
+                            
+                            @:item = Item.Base.database.find(name:'Wyvern Key of Ice'
+                                        ).new(from:location.ownedBy);
+                            windowEvent.queueMessage(text:'The party was given a ' + item.name + '.');
+                            world.party.inventory.add(item);
+                            key = item;
+
+                            windowEvent.queueMessage(
+                                speaker: 'Ziikkaettaal',
+                                text: '*hisses*'
+                            );
+                        };
+                        
+                        @:story = import(module:'game_singleton.story.mt');
+                        if (story.tier < 2)
+                            story.tier = 2;
+                        
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        // cancel and flush current VisitIsland session
+                        instance.visitIsland(where:key.islandEntry);
+                        if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
+                            windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
+                        };
+
+                        breakpoint();
+                        doNext();
+                    }
+                    
+                    
+                    
+                ]
+            }
+        ), 
+        
             
 
         

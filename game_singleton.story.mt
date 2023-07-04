@@ -41,14 +41,13 @@ return struct(
         
         
         
-        // whether the wyvern of fire has been defeated
-        defeatedWyvernFire : Boolean,
-        
-        defeatedWyvernIce : Boolean,
-        
-        defeatedWyvernThunder : Boolean,
-        
-        defeatedWyvernLight : Boolean,
+        // progression of defeated wyverns
+        // tier 0 -> none 
+        // tier 1 -> fire 
+        // tier 2 -> ice 
+        // tier 3 -> thunder 
+        // tier 4 -> light 
+        tier : Number,
         
         
         
@@ -64,10 +63,7 @@ return struct(
     foundLightKey : false,
     
     
-    defeatedWyvernFire : false,
-    defeatedWyvernIce : false,
-    defeatedWyvernThunder : false,
-    defeatedWyvernLight : false,
+    tier : 0,
     
     hasDarkKey : false,
     

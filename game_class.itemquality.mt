@@ -70,7 +70,7 @@ ItemQuality.database = Database.new(
         ItemQuality.new(
             data : {
                 name : 'Cheap',
-                description : 'It was made with poor quality.',
+                description : 'It is of poor quality.',
                 equipMod : StatSet.new(
                     DEF: -30,
                     ATK: -30,
@@ -90,7 +90,7 @@ ItemQuality.database = Database.new(
         ItemQuality.new(
             data : {
                 name : 'Sturdy',
-                description : 'It has been made unusually sturdily.',
+                description : 'It is unusually sturdy.',
                 equipMod : StatSet.new(
                     DEF: 20,
                     ATK: 10,
@@ -188,10 +188,10 @@ ItemQuality.database = Database.new(
                 name : 'Standard',
                 description : 'The quality of this seems to meet some sort of standard stock, perhaps of military grade.',
                 equipMod : StatSet.new(
-                    SPD: 15,
-                    DEX: 15,
-                    ATK: 15,
-                    DEF: 15
+                    SPD: 25,
+                    DEX: 25,
+                    ATK: 25,
+                    DEF: 25
                 ),
                 pricePercentMod: 120,
                 levelMinimum : 1,

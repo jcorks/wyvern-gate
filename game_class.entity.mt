@@ -519,7 +519,7 @@
                 effects->foreach(do:::(index, effect) {
                     effect.effect.onPostAttackOther(user:effect.from, item:effect.item, holder:this, to:target);
                 });
-
+                return true;
             },
             
             damage ::(from => this.type, damage => Damage.type, dodgeable => Boolean) {
@@ -947,6 +947,7 @@
                 return equips[slot];
             },
             
+            resetEffects : resetEffects,
             
             // returns an array of equip slots that the item can fit in.
             getSlotsForItem ::(item => none->type) {

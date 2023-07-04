@@ -456,16 +456,26 @@ return class(
                 
                 
                 @:Species = import(module:'game_class.species.mt');
-                @:p0 = island.newInhabitant(speciesHint: Species.database.find(name:'Tanuki'), levelHint:5);
+                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
                 @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
                 // debug
                     //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
                     //).new(from:island.newInhabitant(),rngEnchantHint:true));
+
+                    //@:story = import(module:'game_singleton.story.mt');
+                    //story.defeatedWyvernFire = true;
                     
                     //party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
                     //).new(from:island.newInhabitant()));
 
-                    /*
+                    party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Ice'
+                    ).new(from:island.newInhabitant()));
+
+                    @:story = import(module:'game_singleton.story.mt');
+                    story.tier = 1;
+
+
+                    
 
                     
                     [0, 20]->for(do:::(i) {
@@ -473,7 +483,7 @@ return class(
                             filter:::(value) <- value.isUnique == false
                         ).new(from:island.newInhabitant(),rngEnchantHint:true));
                     });
-                    */
+                    
                     
                     
 
@@ -529,10 +539,6 @@ return class(
                     world.island = island;
                 };
                 
-                // cancel and flush current VisitIsland session
-                if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
-                    windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
-                };
                 // check if we're AT a location.
                 island.map.title = "(Map of " + island.name + ')';
 

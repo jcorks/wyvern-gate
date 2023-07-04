@@ -570,7 +570,7 @@ Interaction.database = Database.new(
                                 
                                 windowEvent.queueChoices(
                                     prompt: item.name,
-                                    choices: ['Buy', 'Compare Equipment'],
+                                    choices: ['Buy', 'Check', 'Compare Equipment'],
                                     canCancel: true,
                                     onChoice::(choice) {
                                         when(choice == 0) empty;
@@ -603,9 +603,12 @@ Interaction.database = Database.new(
                                             windowEvent.queueMessage(text: 'Bought ' + correctA(word:item.name));
                                             party.inventory.add(item);                              
                                           },
-                                          
-                                          // compare 
+                                          // check
                                           (1)::<= {
+                                            item.describe();
+                                          },
+                                          // compare 
+                                          (2)::<= {
                                             @:memberNames = [...party.members]->map(to:::(value) <- value.name);
                                             @:choice = windowEvent.queueChoices(
                                                 prompt: 'Compare equipment for whom?',
@@ -801,7 +804,13 @@ Interaction.database = Database.new(
                                 @:world = import(module:'game_singleton.world.mt');
                                 @:instance = import(module:'game_singleton.instance.mt');
 
-                                @:d = Landmark.Base.database.find(name:'Wyvern Dimension').new(
+                                @:d = Landmark.Base.database.find(name:match(keys[choice-1].name) {
+                                    ('Wyvern Key of Fire'):    'Fire Wyvern Dimension',
+                                    ('Wyvern Key of Ice'):     'Ice Wyvern Dimension',
+                                    ('Wyvern Key of Thunder'): 'Thunder Wyvern Dimension',
+                                    ('Wyvern Key of Light'):   'Light Wyvern Dimension',
+                                    default: 'Unknown Wyvern Dimension'
+                                }).new(
                                     island:location.landmark.island,
                                     x: 0,
                                     y: 0

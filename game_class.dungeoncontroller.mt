@@ -48,10 +48,11 @@ return class(
             };
 
             ::<={
+                @story = import(module:'game_singleton.story.mt');
                 @:Item = import(module:'game_class.item.mt');
                 [0, 1+(Number.random()*3)->floor]->for(do:::(i) {
                     @:item = Item.Base.database.getRandomWeightedFiltered(
-                        filter:::(value) <- value.isUnique == false
+                        filter:::(value) <- value.isUnique == false && value.tier <= story.tier
                         
                     );
                     if (item.name != 'None') ::<={

@@ -696,7 +696,7 @@ Landmark.Base.database = Database.new(
         
         Landmark.Base.new(
             data: {
-                name : 'Wyvern Dimension',
+                name : 'Fire Wyvern Dimension',
                 symbol : 'M',
                 rarity : 1,      
                 isUnique : true,
@@ -708,7 +708,7 @@ Landmark.Base.database = Database.new(
                 possibleLocations : [
                 ],
                 requiredLocations : [
-                    'Wyvern Throne',
+                    'Wyvern Throne of Fire',
                 ],
                 
                 mapHint : {
@@ -723,6 +723,38 @@ Landmark.Base.database = Database.new(
                 
             }
         ),        
+
+        Landmark.Base.new(
+            data: {
+                name : 'Ice Wyvern Dimension',
+                symbol : 'M',
+                rarity : 1,      
+                isUnique : true,
+                minLocations : 2,
+                maxLocations : 2,
+                guarded : false,
+                peaceful: true,
+                dungeonMap : false,
+                possibleLocations : [
+                ],
+                requiredLocations : [
+                    'Wyvern Throne of Ice',
+                ],
+                
+                mapHint : {
+                    roomSize: 20,
+                    roomAreaSize: 15,
+                    roomAreaSizeLarge: 15,
+                    emptyAreaCount: 1
+                    
+                },
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
+                
+            }
+        ), 
+
+
         
 
         Landmark.Base.new(

@@ -53,7 +53,7 @@ return class(
         // 14 times per "day"
         // 100 days per "year"
         @turn = 0;
-        @time = TIME.DAWN;
+        @time = TIME.LATE_MORNING;
         @day = (Number.random()*100)->floor;
         @year = 1033;
         @party = Party.new();

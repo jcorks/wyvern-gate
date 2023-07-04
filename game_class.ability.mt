@@ -712,15 +712,14 @@ Ability.database = Database.new(
                             text: user.name + ' tries to sweep everyone\'s legs!'
                         );
                         user.enemies->foreach(do:::(i, enemy) {
-                            user.attack(
+                            if (user.attack(
                                 target:enemy,
                                 amount:user.stats.ATK * (0.3),
                                 damageType : Damage.TYPE.PHYS,
                                 damageClass: Damage.CLASS.HP
-                            );
-                            
-                            if (Number.random() > 0.5)
-                                enemy.addEffect(from:user, name: 'Stunned', durationTurns: 1);    
+                            ) == true)
+                                if (Number.random() > 0.5)
+                                    enemy.addEffect(from:user, name: 'Stunned', durationTurns: 1);    
                         });
                     }
                 }
@@ -826,19 +825,46 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' tries to stun ' + targets[0].name + '!'
                         );
-                        user.attack(
+                        if (user.attack(
                             target:targets[0],
                             amount:user.stats.ATK * (0.3),
                             damageType : Damage.TYPE.PHYS,
                             damageClass: Damage.CLASS.HP
-                        );
-                        
-                        if (Number.random() > 0.5)
-                            targets[0].addEffect(from:user, name: 'Stunned', durationTurns: 1);                        
+                        ) == true)                    
+                            if (Number.random() > 0.5)
+                                targets[0].addEffect(from:user, name: 'Stunned', durationTurns: 1);                        
                             
                     }
                 }
             ),
+
+            Ability.new(
+                data: {
+                    name: 'Sheer Cold',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Damages a target based on the user's strength with a chance to stun.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 3,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: 'A cold air emminates from ' + user.name + '!'
+                        );
+                        if (user.attack(
+                            target:targets[0],
+                            amount:user.stats.ATK * (0.4),
+                            damageType : Damage.TYPE.PHYS,
+                            damageClass: Damage.CLASS.HP
+                        ) == true)                    
+                            if (Number.random() < 0.9)
+                                targets[0].addEffect(from:user, name: 'Frozen', durationTurns: 1);                        
+                            
+                    }
+                }
+            ),
+
 
             Ability.new(
                 data: {
@@ -1467,18 +1493,20 @@ Ability.database = Database.new(
             Ability.new(
                 data: {
                     name: 'Magic Mist',
-                    targetMode : TARGET_MODE.NONE,
+                    targetMode : TARGET_MODE.ALLENEMY,
                     description: "Removes ALL effects.",
                     durationTurns: 0,
                     hpCost : 0,
                     apCost : 1,
-                    usageHintAI : USAGE_HINT.BUFF,
+                    usageHintAI : USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        windowEvent.queueMessage(
-                            text: user.name + ' casts Magic Mist on ' + targets[0].name + '!'
-                        );
-                        user.resetEffects();
+                        targets->foreach(do:::(i, target) {
+                            windowEvent.queueMessage(
+                                text: user.name + ' casts Magic Mist on ' + target.name + '!'
+                            );
+                            user.resetEffects();
+                        });
                     }
                 }
             ),
@@ -1729,7 +1757,7 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        targets[0].addEffect(from:user, name: 'Counter', durationTurns: 3);
+                        user.addEffect(from:user, name: 'Counter', durationTurns: 3);
                     }
                 }
             ),
@@ -2104,7 +2132,7 @@ Ability.database = Database.new(
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         windowEvent.queueMessage(text:targets[0].name + ' was covered in poisonroot seeds!');
-                        user.addEffect(from:targets[0], name:'Poisonroot Growing', durationTurns:4);                            
+                        targets[0].addEffect(from:user, name:'Poisonroot Growing', durationTurns:4);                            
                     }
                 }
             ),
@@ -2121,7 +2149,7 @@ Ability.database = Database.new(
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         windowEvent.queueMessage(text:targets[0].name + ' was covered in triproot seeds!');
-                        user.addEffect(from:targets[0], name:'Triproot Growing', durationTurns:4);                            
+                        targets[0].addEffect(from:user, name:'Triproot Growing', durationTurns:4);                            
                     }
                 }
             ),
@@ -2138,7 +2166,7 @@ Ability.database = Database.new(
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         windowEvent.queueMessage(text:targets[0].name + ' was covered in triproot seeds!');
-                        user.addEffect(from:targets[0], name:'Healroot Growing', durationTurns:4);                            
+                        targets[0].addEffect(from:user, name:'Healroot Growing', durationTurns:4);                            
                     }
                 }
             ),
@@ -2522,7 +2550,7 @@ Ability.database = Database.new(
                 data: {
                     name: 'Pink Brew',
                     targetMode : TARGET_MODE.NONE,
-                    description: 'Uses 3 Ingredients to make a pink potion.',
+                    description: 'Uses 1 Ingredient to make a pink potion.',
                     durationTurns: 0,
                     hpCost : 0,
                     apCost : 1,
@@ -2545,12 +2573,10 @@ Ability.database = Database.new(
                         });
                         
                         windowEvent.queueMessage(text: user.name + ' tried to make a Pink Brew...');
-                        when(count < 3)
+                        when(count < 1)
                             windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
                         windowEvent.queueMessage(text: '... and made a Pink Potion!');
-                        inventory.removeByName(name:'Ingredient');
-                        inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
                         inventory.add(item:Item.Base.database.find(name:'Pink Potion').new(from:user));                            
                     }
@@ -2561,7 +2587,7 @@ Ability.database = Database.new(
                 data: {
                     name: 'Cyan Brew',
                     targetMode : TARGET_MODE.NONE,
-                    description: 'Uses 3 Ingredients to make a cyan potion.',
+                    description: 'Uses 1 Ingredient to make a cyan potion.',
                     durationTurns: 0,
                     hpCost : 0,
                     apCost : 1,
@@ -2584,12 +2610,10 @@ Ability.database = Database.new(
                         });
                         
                         windowEvent.queueMessage(text: user.name + ' tried to make a Cyan Brew...');
-                        when(count < 3)
+                        when(count < 1)
                             windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
                         windowEvent.queueMessage(text: '... and made a Cyan Potion!');
-                        inventory.removeByName(name:'Ingredient');
-                        inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
                         inventory.add(item:Item.Base.database.find(name:'Cyan Potion').new(from:user));                            
                     }
@@ -2601,7 +2625,7 @@ Ability.database = Database.new(
                 data: {
                     name: 'Green Brew',
                     targetMode : TARGET_MODE.NONE,
-                    description: 'Uses 3 Ingredients to make a cyan potion.',
+                    description: 'Uses 1 Ingredient to make a cyan potion.',
                     durationTurns: 0,
                     hpCost : 0,
                     apCost : 1,
@@ -2624,12 +2648,10 @@ Ability.database = Database.new(
                         });
                         
                         windowEvent.queueMessage(text: user.name + ' tried to make a Green Brew...');
-                        when(count < 3)
+                        when(count < 1)
                             windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
                         windowEvent.queueMessage(text: '... and made a Green Potion!');
-                        inventory.removeByName(name:'Ingredient');
-                        inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
                         inventory.add(item:Item.Base.database.find(name:'Green Potion').new(from:user));                            
                     }
@@ -2642,7 +2664,7 @@ Ability.database = Database.new(
                 data: {
                     name: 'Orange Brew',
                     targetMode : TARGET_MODE.NONE,
-                    description: 'Uses 3 Ingredients to make an orange potion.',
+                    description: 'Uses 1 Ingredient to make an orange potion.',
                     durationTurns: 0,
                     hpCost : 0,
                     apCost : 1,
@@ -2665,12 +2687,10 @@ Ability.database = Database.new(
                         });
                         
                         windowEvent.queueMessage(text: user.name + ' tried to make an Orange Brew...');
-                        when(count < 3)
+                        when(count < 1)
                             windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
                         windowEvent.queueMessage(text: '... and made a Orange Potion!');
-                        inventory.removeByName(name:'Ingredient');
-                        inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
                         inventory.add(item:Item.Base.database.find(name:'Orange Potion').new(from:user));                            
                     }
@@ -2681,7 +2701,7 @@ Ability.database = Database.new(
                 data: {
                     name: 'Purple Brew',
                     targetMode : TARGET_MODE.NONE,
-                    description: 'Uses 3 Ingredients to make a purple potion.',
+                    description: 'Uses 1 Ingredient to make a purple potion.',
                     durationTurns: 0,
                     hpCost : 0,
                     apCost : 1,
@@ -2704,12 +2724,10 @@ Ability.database = Database.new(
                         });
                         
                         windowEvent.queueMessage(text: user.name + ' tried to make a Purple Brew...');
-                        when(count < 3)
+                        when(count < 1)
                             windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
                         windowEvent.queueMessage(text: '... and made a Purple Potion!');
-                        inventory.removeByName(name:'Ingredient');
-                        inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
                         inventory.add(item:Item.Base.database.find(name:'Purple Potion').new(from:user));                            
                     }
@@ -2721,7 +2739,7 @@ Ability.database = Database.new(
                 data: {
                     name: 'Black Brew',
                     targetMode : TARGET_MODE.NONE,
-                    description: 'Uses 3 Ingredients to make a black potion.',
+                    description: 'Uses 1 Ingredient to make a black potion.',
                     durationTurns: 0,
                     hpCost : 0,
                     apCost : 1,
@@ -2744,12 +2762,10 @@ Ability.database = Database.new(
                         });
                         
                         windowEvent.queueMessage(text: user.name + ' tried to make a Black Brew...');
-                        when(count < 3)
+                        when(count < 1)
                             windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
                         windowEvent.queueMessage(text: '... and made a Black Potion!');
-                        inventory.removeByName(name:'Ingredient');
-                        inventory.removeByName(name:'Ingredient');
                         inventory.removeByName(name:'Ingredient');
                         inventory.add(item:Item.Base.database.find(name:'Black Potion').new(from:user));                            
                     }
