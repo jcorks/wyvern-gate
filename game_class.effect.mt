@@ -1303,7 +1303,7 @@ Effect.database = Database.new(
 
         Effect.new(
             data : {
-                name : 'Mind Boost',
+                name : 'Dex Boost',
                 description: 'DEX +70%',
                 battleOnly : true,
                 skipTurn : false,

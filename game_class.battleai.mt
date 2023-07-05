@@ -87,15 +87,16 @@ return class(
                 @:list = user_.abilitiesAvailable->filter(by:::(value) <- value.name != 'Attack' && value.name != 'Defend' && value.usageHintAI != Ability.USAGE_HINT.DONTUSE);
 
                 // fallback if only ability known is "dont use"
-                if (list->keycount == 0)
+                when (list->keycount == 0)
                     defaultAttack();
                     
                 @:ability = Random.pickArrayItem(list);
-                
+                when (ability.usageHintAI == Ability.USAGE_HINT.HEAL &&                
+                    user_.hp == user_.stats.HP)
+                    defaultAttack();
                 
                 @atEnemy = (ability.usageHintAI == Ability.USAGE_HINT.OFFENSIVE) ||
                            (ability.usageHintAI == Ability.USAGE_HINT.DEBUFF);
-                breakpoint();
                 
                 @targets = [];
                 match(ability.targetMode) {

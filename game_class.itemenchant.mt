@@ -248,7 +248,7 @@ ItemEnchant.Base.database = Database.new(
                 tier : 1,
                 
                 triggerConditionEffects : [
-                    'Trigger Block' // 100% block
+                    'Trigger Shield' 
                 ],
                 
                 equipEffects : [
