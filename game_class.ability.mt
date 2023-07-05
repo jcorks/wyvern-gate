@@ -1353,7 +1353,7 @@ Ability.database = Database.new(
                         user.enemies->foreach(do:::(index, enemy) {
                             user.attack(
                                 target:enemy,
-                                amount:user.stats.INT * (1.4),
+                                amount:user.stats.INT * (1.2),
                                 damageType : Damage.TYPE.FIRE,
                                 damageClass: Damage.CLASS.HP
                             );
@@ -1401,7 +1401,7 @@ Ability.database = Database.new(
                             @:target = random.pickArrayItem(list:user.enemies);
                             user.attack(
                                 target,
-                                amount:user.stats.INT * (0.65),
+                                amount:user.stats.INT * (0.45),
                                 damageType : Damage.TYPE.THUNDER,
                                 damageClass: Damage.CLASS.HP
                             );

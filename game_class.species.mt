@@ -715,6 +715,7 @@ Species.database = Database.new(items: [
         
         special : true,
         passives : [
+            'Icy'
         ]
     }),
 
