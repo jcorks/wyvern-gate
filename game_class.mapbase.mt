@@ -17,7 +17,7 @@
 */
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:class = import(module:'Matte.Core.Class');
-@:MemoryBuffer = import(module:'Matte.Core.MemoryBuffer');
+//@:MemoryBuffer = import(module:'Matte.Core.MemoryBuffer');
 
 
 
@@ -75,7 +75,8 @@ return class(
         @paged = true;
         @outOfBoundsCharacter = '▓';
         @wallCharacter = '▓';
-        @scenery = MemoryBuffer.new();
+        //@scenery = MemoryBuffer.new();
+        @scenery = [];
         @sceneryValues = empty;
         
         @obscured = []; 
