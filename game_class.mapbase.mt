@@ -17,6 +17,7 @@
 */
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:class = import(module:'Matte.Core.Class');
+@:MemoryBuffer = import(module:'Matte.Core.MemoryBuffer');
 
 
 
@@ -54,7 +55,6 @@ return class(
     define:::(this) {
         @:itemIndex = [];
         @:entities = [];
-        @:wallIndex = [];
         @:items = [];
         @:legendEntries = [];
         @title;
@@ -67,27 +67,23 @@ return class(
             name: "(Party)"
         };
 
-        @width;
-        @height;
+        @width = 1;
+        @height = 1;
         @offsetX = 0;
         @offsetY = 0;
         @drawLegend = false;
         @paged = true;
         @outOfBoundsCharacter = '▓';
         @wallCharacter = '▓';
-        @scenery = [];
+        @scenery = MemoryBuffer.new();
+        @sceneryValues = empty;
         
-        @:aStarIndex = [];
         @obscured = []; 
-        [0, UNPAGED_ROOM_SIZE_LIMIT]->for(do:::(x) {
-            aStarIndex[x] = [];
-            [0, UNPAGED_ROOM_SIZE_LIMIT]->for(do:::(y) {
-                aStarIndex[x][y] = ''+x+'-'+y;
-            });
-        });
+
         
         @:isWalled ::(x, y) {
-            return wallIndex[x + y*UNPAGED_ROOM_SIZE_LIMIT] == true;
+            @at = x+OOB_RANGE + (y+OOB_RANGE) * (OOB_RANGE*2 + width);
+            return scenery[at] == 1;
         };
         
         @renderOutOfBounds = true;
@@ -99,14 +95,14 @@ return class(
 
         @:aStarMapEmplace::(map, key, value) {
             //when(map.index[key.id] != empty) empty;
-            map.index[key.id] = value;
+            map.index[String(from:key.id)] = value;
             //map.list->push(value:value);
         };
         @:aStarMapFind::(map, key) {
-            return map.index[key.id];
+            return map.index[String(from:key.id)];
         };
         @:aStarMapRemove::(map, key) {
-            map.index->remove(key:key.id);
+            map.index->remove(key:String(from:key.id));
             //map.list->remove(key:map->findIndex(value:key));
         };
         @:aStarMapNew :: {
@@ -140,7 +136,7 @@ return class(
 
         @:aStarNewNode::(x, y) {
             when (!isWalled(x, y) && x >= 0 && y >= 0 && x < width && y < height)
-                {x:x, y:y, id:aStarIndex[x][y]};
+                {x:x, y:y, id:x + y*UNPAGED_ROOM_SIZE_LIMIT};
         };
 
         @:aStarGetNeighbors::(current) {
@@ -372,19 +368,18 @@ return class(
                     @itemX = (x) + regionX*mapSizeW - mapSizeW*0.5;
                     @itemY = (y) + regionY*mapSizeH - mapSizeH*0.5;
                     
-
+                    @symbol = this.sceneryAt(x:itemX, y:itemY);
 
                     canvas.movePen(x:left + x, y:top + y);  
 
-                    when(isWalled(x:itemX, y:itemY)) ::<= {
+                    when(symbol == 1) ::<= {
                         canvas.drawChar(text:wallCharacter);
                     };
                     
 
                     when(itemX < 0 || itemY < 0 || itemX >= width+0 || itemY >= height+0) ::<= {
-                        when (scenery[itemY+OOB_RANGE] != empty && scenery[itemY+OOB_RANGE][itemX+OOB_RANGE] != empty) ::<= {
-                            canvas.drawChar(text:scenery[itemY+OOB_RANGE][itemX+OOB_RANGE]);
-                        };
+                        when (symbol != empty)
+                            canvas.drawChar(text:symbol);
 
                         when(!renderOutOfBounds) empty;
                         canvas.drawChar(text:outOfBoundsCharacter);
@@ -396,8 +391,8 @@ return class(
                         canvas.drawChar(text:if (items[items->keycount-1].discovered) items[items->keycount-1].symbol else '?');
                     };
 
-                    when (scenery[itemY+OOB_RANGE] != empty && scenery[itemY+OOB_RANGE][itemX+OOB_RANGE] != empty) ::<= {
-                        canvas.drawChar(text:scenery[itemY+OOB_RANGE][itemX+OOB_RANGE]);
+                    when (symbol != empty) ::<= {
+                        canvas.drawChar(text:symbol);
                     };
 
 
@@ -481,6 +476,7 @@ return class(
                     @itemX = ((x + pointer.x - mapSizeW/2))->floor;
                     @itemY = ((y + pointer.y - mapSizeH/2))->floor;
 
+                    @symbol = this.sceneryAt(x:itemX, y:itemY);
 
                     @:items = this.itemsAt(x:itemX, y:itemY);
                     canvas.movePen(x:left + x, y:top + y);  
@@ -488,8 +484,8 @@ return class(
 
 
                     when((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY)) ::<= {
-                        when (scenery[itemY+OOB_RANGE] != empty && scenery[itemY+OOB_RANGE][itemX+OOB_RANGE] != empty) ::<= {
-                            canvas.drawChar(text:scenery[itemY+OOB_RANGE][itemX+OOB_RANGE]);
+                        when (symbol != empty) ::<= {
+                            canvas.drawChar(text:symbol);
                         };
 
                         when(renderOutOfBounds) ::<= {
@@ -508,7 +504,7 @@ return class(
                     };
 
 
-                    when(isWalled(x:itemX, y:itemY)) ::<= {
+                    when(symbol == 1) ::<= {
                         canvas.drawChar(text:wallCharacter);
                     };
 
@@ -517,8 +513,8 @@ return class(
                     };                    
 
 
-                    when (scenery[itemY+OOB_RANGE] != empty && scenery[itemY+OOB_RANGE][itemX+OOB_RANGE] != empty) ::<= {
-                        canvas.drawChar(text:scenery[itemY+OOB_RANGE][itemX+OOB_RANGE]);
+                    when (symbol != empty) ::<= {
+                        canvas.drawChar(text:symbol);
                     };
                 });                
             });               
@@ -557,12 +553,24 @@ return class(
             
             width : {
                 get ::<- width,
-                set ::(value) <- width = value
+                set ::(value) {
+                    width = value;
+                    scenery.size = (width + OOB_RANGE*2) * (height + OOB_RANGE*2);
+                    [0, scenery.size]->for(do:::(i) {
+                        scenery[i] = 0;
+                    });
+                }
             },
 
             height : {
                 get ::<- height,
-                set ::(value) <- height = value
+                set ::(value) {
+                    height = value;
+                    scenery.size = (width + OOB_RANGE*2) * (height + OOB_RANGE*2);
+                    [0, scenery.size]->for(do:::(i) {
+                        scenery[i] = 0;
+                    });                
+                }
             },
             
             drawLegend : {
@@ -571,30 +579,30 @@ return class(
             },
 
             addWall ::(x, y) {
-                when(x < 0 || y < 0) empty;
-                wallIndex[x + y*UNPAGED_ROOM_SIZE_LIMIT] = true;
+                x += OOB_RANGE;
+                y += OOB_RANGE;
+                scenery[x + y*(OOB_RANGE*2+width)] = 1;                
             },
             
             removeWall ::(x, y) {        
-                wallIndex[x+y*UNPAGED_ROOM_SIZE_LIMIT] = empty;
+                x += OOB_RANGE;
+                y += OOB_RANGE;
+                scenery[x + y*(OOB_RANGE*2+width)] = 0;                
             },
             
-            setScenery ::(
+            sceneryValues : {
+                set ::(value) <- sceneryValues = value
+            },
+            
+            setSceneryIndex ::(
                 x =>Number,
                 y =>Number,
-                symbol => String
+                symbol => Number
             ) {
                 x += OOB_RANGE;
                 y += OOB_RANGE;
+                scenery[x + y*(OOB_RANGE*2+width)] = 2+symbol;
 
-                @layer = scenery[y];
-                if (layer == empty) ::<= {
-                    layer = [];
-                    scenery[y] = layer;
-                };
-
-                if (layer[x] == empty)
-                    layer[x] = symbol;
             },
 
             clearScenery ::(
@@ -604,9 +612,15 @@ return class(
                 x += OOB_RANGE;
                 y += OOB_RANGE;
 
-                @layer = scenery[y];
-                when (layer == empty) empty;
-                layer[x] = empty;
+                scenery[x + y*(OOB_RANGE*2+width)] = 0;
+            },
+            
+            sceneryAt::(x, y) {
+                @at = x+OOB_RANGE + (y+OOB_RANGE) * (OOB_RANGE*2 + width);
+                @:index = scenery[at];
+                when(index == 0) empty;
+                when(index == 1) wallCharacter;
+                return sceneryValues[index-2];
             },
 
 
@@ -622,13 +636,13 @@ return class(
                 x = x->floor;
                 y = y->floor;
                 
-                when(x < -OOB_RANGE || y < -OOB_RANGE || x >= width + OOB_RANGE || y >= height + OOB_RANGE)
+                when(x < 0 || y < 0 || x >= width || y >= height)
                     error(detail:'Bad\n');
                 
-                @loc = itemIndex[x+OOB_RANGE + (y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)];
+                @loc = itemIndex[x + y * (width)];
                 if (loc == empty) ::<= {
                     loc = [];
-                    itemIndex[x+OOB_RANGE + (y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)] = loc;
+                    itemIndex[x + y*(width)] = loc;
                 };
                 @:val = {
                     x: x,
@@ -649,7 +663,7 @@ return class(
             },
             
             itemsAt::(x, y) {
-                return itemIndex[x+OOB_RANGE + (y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)];
+                return itemIndex[x + y*(width)];
             },
             
             obscure::{
@@ -662,7 +676,7 @@ return class(
             },
             
             clearItems::(x, y) {
-                itemIndex[x+OOB_RANGE + (y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)] = empty;
+                itemIndex[x + y*(width)] = empty;
             },
                 
             removeItem::(
@@ -670,7 +684,7 @@ return class(
             ) {
                 @item = retrieveItem(data);
             
-                @items = itemIndex[item.x+OOB_RANGE + (item.y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)];
+                @items = itemIndex[item.x + (item.y)*(width)];
                 when(items == empty) empty;
                 [::] {
                     items->foreach(do:::(key, v) {
@@ -693,7 +707,7 @@ return class(
 
 
                 if(items->keycount == 0)
-                    itemIndex[item.x+OOB_RANGE + (item.y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)] = empty;    
+                    itemIndex[item.x + (item.y)*(width)] = empty;    
                     
                 items = items->filter(by::(value) <- value.data != data);
             },
@@ -729,17 +743,6 @@ return class(
             },
             
             movePointerToward::(x, y) {
-                // direct linear path
-                when(wallIndex->keycount == 0) ::<= {
-                    @xdiff = if (x - pointer.x > 0) 1 else -1;
-                    @ydiff = if (y - pointer.y > 0) 1 else -1;
-                    if (xdiff->abs < 1) xdiff = 0;
-                    if (ydiff->abs < 1) ydiff = 0;
-                    this.movePointerAdjacent(
-                        x: xdiff,
-                        y: ydiff
-                    );
-                };  
                 @:path = aStarPathNext(start:pointer, goal:{x:x, y:y});                
                 when(path == empty) empty;
                 pointer.x = path.x;
@@ -753,16 +756,8 @@ return class(
 
             moveTowardPoint::(data, x, y) {
                 @:ent = retrieveItem(data);            
-                when(wallIndex->keycount == 0) ::<= {
-                    @xdiff = if (x - ent.x > 0) 1 else -1;
-                    @ydiff = if (y - ent.y > 0) 1 else -1;
-                    if (xdiff->abs < 1) xdiff = 0;
-                    if (ydiff->abs < 1) ydiff = 0;
-                    ent.x += xdiff;
-                    ent.y += ydiff;
-                };  
-            
-                @items =  itemIndex[ent.x+OOB_RANGE + (ent.y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)];
+
+                @items =  itemIndex[ent.x + (ent.y)*(width)];
                 items->remove(key:items->findIndex(value:ent));
             
                 @:path = aStarPathNext(start:ent, goal:{x:x, y:y});
@@ -771,11 +766,11 @@ return class(
                 ent.y = path.y;
 
 
-                @loc = itemIndex[ent.x+OOB_RANGE + (ent.y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)];
+                @loc = itemIndex[ent.x + (ent.y)*(width)];
 
                 if (loc == empty) ::<= {
                     loc = [];
-                    itemIndex[ent.x+OOB_RANGE + (ent.y+OOB_RANGE)*(UNPAGED_ROOM_SIZE_LIMIT+OOB_RANGE)] = loc;
+                    itemIndex[ent.x + (ent.y)*(width)] = loc;
                 };
                 loc->push(value:ent);
 

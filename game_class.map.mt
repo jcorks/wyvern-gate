@@ -252,11 +252,12 @@ return class(
         };
     
         @:generateLayout :: {
+            this.sceneryValues = [ROOM_SCATTER_CHAR];
             [-30, ROOM_SIZE+30]->for(do:::(y) {
                 [-30, ROOM_SIZE+30]->for(do:::(x) {
                     if (Number.random() < ROOM_SCATTER_RATE / 4)
-                        this.setScenery(
-                            x, y, symbol: ROOM_SCATTER_CHAR
+                        this.setSceneryIndex(
+                            x, y, symbol: 0
                         );
                 });
             });

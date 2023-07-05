@@ -462,17 +462,17 @@ return class(
                     //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
                     //).new(from:island.newInhabitant(),rngEnchantHint:true));
 
-                    //@:story = import(module:'game_singleton.story.mt');
+                    @:story = import(module:'game_singleton.story.mt');
                     //story.defeatedWyvernFire = true;
                     
                     //party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
                     //).new(from:island.newInhabitant()));
 
-                    party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Ice'
-                    ).new(from:island.newInhabitant()));
+                    //party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Ice'
+                    //).new(from:island.newInhabitant()));
 
-                    @:story = import(module:'game_singleton.story.mt');
-                    story.tier = 1;
+                    //@:story = import(module:'game_singleton.story.mt');
+                    //story.tier = 1;
 
 
                     
@@ -480,7 +480,7 @@ return class(
                     
                     [0, 20]->for(do:::(i) {
                         party.inventory.add(item:Item.Base.database.getRandomFiltered(
-                            filter:::(value) <- value.isUnique == false
+                            filter:::(value) <- value.isUnique == false && value.tier <= story.tier
                         ).new(from:island.newInhabitant(),rngEnchantHint:true));
                     });
                     

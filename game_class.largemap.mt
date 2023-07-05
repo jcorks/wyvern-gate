@@ -31,14 +31,15 @@
     return (xd**2 + yd**2)**0.5;
 };
 
+@:symbolList = [' ', '╿', '.', '`', '^', '░'];
 
 @:generateTerrain::(width, height) {
     @:out = {};
     [0, 20]->for(do:::(i) {
         out->push(value:{
-            x: Number.random() * width,
-            y: Number.random() * height,
-            symbol: random.pickArrayItem(list:['╿', '.', '`', '^', '░'])
+            x: (Number.random() * width)->floor,
+            y: (Number.random() * height)->floor,
+            symbol: random.integer(from:1, to:symbolList->keycount-1)
         });
     });
 
@@ -46,32 +47,32 @@
     [0, 20]->for(do:::(i) {
         out->push(value:{
             x: 0,
-            y: Number.random() * height,
-            symbol: ' '
+            y: (Number.random() * height)->floor,
+            symbol: 0
         });
     });
 
     [0, 20]->for(do:::(i) {
         out->push(value:{
             x: width,
-            y: Number.random() * height,
-            symbol: ' '
+            y: (Number.random() * height)->floor,
+            symbol: 0
         });
     });
 
     [0, 20]->for(do:::(i) {
         out->push(value:{
-            x: Number.random()*width,
+            x: (Number.random()*width)->floor,
             y: 0,
-            symbol: ' '
+            symbol: 0
         });
     });
 
     [0, 20]->for(do:::(i) {
         out->push(value:{
-            x: Number.random()*width,
+            x: (Number.random()*width)->floor,
             y: height,
-            symbol: ' '
+            symbol: 0
         });
     });
 
@@ -115,15 +116,16 @@ return class(
             
             this.width = sizeW;
             this.height = sizeH;
+            this.sceneryValues = symbolList;
             this.offsetX = 100;
             this.offsetY = 100;
             this.paged = true;
             this.drawLegend = true;
             
             generateTerrain(width:this.width, height:this.height)->foreach(do::(index, value) {
-                //when(value.x < 0 || value.x > this.width || value.y < 0 || value.y > this.height)
+                //when(value.x < 0 || value.x >= this.width || value.y < 0 || value.y >= this.height)
                     //empty;
-                this.setScenery(
+                this.setSceneryIndex(
                     x:value.x,
                     y:value.y,
                     symbol:value.symbol
