@@ -21,6 +21,7 @@
 @:Database = import(module:'game_class.database.mt');
 @:Map = import(module:'game_class.map.mt');
 @:DungeonMap = import(module:'game_class.dungeonmap.mt');
+@:StructureMap = import(module:'game_class.structuremap.mt');
 @:DungeonController = import(module:'game_class.dungeoncontroller.mt');
 @:distance = import(module:'game_function.distance.mt');
 @Location = empty; // circular dep.
@@ -126,22 +127,32 @@
                 map = DungeonMap.new(mapHint: base.mapHint);
                 dungeonLogic = DungeonController.new(map, island, landmark:this);
             } else ::<= {
-                map = Map.new(mapHint: base.mapHint);
+                map = StructureMap.new(mapHint:base.mapHint);//Map.new(mapHint: base.mapHint);
             };
 
             sizeW = map.width;
             sizeH = map.height;
 
+            if (base.dungeonMap) ::<= {
+                @area = map.getRandomArea();                
 
-            @area = map.getRandomArea();                
-
-            gate = Location.Base.database.find(name:'Entrance').new(
-                landmark:this, 
-                xHint:area.x + (area.width/2)->floor,
-                yHint:area.y + (area.height/2)->floor
-            );                
-
-
+                gate = Location.Base.database.find(name:'Entrance').new(
+                    landmark:this, 
+                    xHint:area.x + (area.width/2)->floor,
+                    yHint:area.y + (area.height/2)->floor
+                );  
+                
+                locations->push(value:gate);
+                map.setItem(data:gate, x:gate.x, y:gate.y, symbol: gate.base.symbol, discovered:true, name:gate.name);
+                     
+            } else ::<= {
+            
+                gate = Location.Base.database.find(name:'Entrance').new(
+                    landmark:this
+                );            
+                map.addLocation(location:gate);
+            };
+            
             if (base.isUnique)
                 name = base.name
             else
@@ -156,20 +167,19 @@
             });
             */
             @mapIndex = 0;
-
-
-
-
-
-
-
-            
-            
-            locations->push(value:gate);
-            map.setItem(data:gate, x:gate.x, y:gate.y, symbol: gate.base.symbol, discovered:true, name:gate.name);
             map.title = landmark.name + (
                 if (name == '') '' else (' of ' + name)
-            );
+            );         
+
+
+
+
+
+
+
+            
+            
+
 
 
 
@@ -195,10 +205,17 @@
             });
             
             
-            map.setPointer(
-                x:gate.x,
-                y:gate.y
-            );
+            if (base.dungeonMap) ::<= {
+                map.setPointer(
+                    x:gate.x,
+                    y:gate.y
+                );
+            } else ::<= {
+                map.setPointer(
+                    x:101,
+                    y:101
+                );            
+            };
 
             if (floorHint != empty) ::<= {
                 floor = floorHint;
@@ -353,13 +370,21 @@
             },
 
             addLocation ::(name, ownedByHint, x, y) {
-                if (x == empty || y == empty) ::<= {
-                    @xy = getLocationXY();
-                    x = xy.x;
-                    y = xy.y;
+                @loc;
+                if (landmark.dungeonMap) ::<= {
+                    if (x == empty || y == empty) ::<= {
+                        @xy = getLocationXY();
+                        x = xy.x;
+                        y = xy.y;
+                    };
+                    loc = Location.Base.database.find(name:name).new(landmark:this, ownedByHint, xHint:x, yHint:y);
+                    map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
+                        
+                } else ::<= {
+                    loc = Location.Base.database.find(name:name).new(landmark:this, ownedByHint);
+                    map.addLocation(location:loc);
+                
                 };
-                @loc = Location.Base.database.find(name:name).new(landmark:this, ownedByHint, xHint:x, yHint:y);
-                map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
                 locations->push(value:loc);                
             },
 
@@ -497,7 +522,8 @@ Landmark.Base.database = Database.new(
                     roomSize: 30,
                     roomAreaSize: 5,
                     roomAreaSizeLarge: 7,
-                    emptyAreaCount: 18
+                    emptyAreaCount: 18,
+//                    wallCharacter : '|'
                 },
                 onCreate ::(landmark, island){},
                 onVisit ::(landmark, island) {}

@@ -26,7 +26,14 @@
 
 @:Location = class(
     statics : {
-        Base : empty
+        Base : empty,
+        CATEGORY : {
+            ENTRANCE : 0,
+            RESIDENTIAL : 1,
+            BUSINESS : 2,
+            UTILITY : 3,
+            EXIT : 4
+        }
     },
     define:::(this) {
         @base_;
@@ -302,7 +309,13 @@ Location.Base = class(
                 // when the location is created
                 onCreate : Function,
                 // called by the world when the time of day changes
-                onTimeChange : Function
+                onTimeChange : Function,
+                // the type of location it is
+                category : Number,
+                
+                // in structural maps, this determines the structure 
+                // size in min units.
+                minStructureSize : Number
             }
         );
         
@@ -319,6 +332,8 @@ Location.Base.database = Database.new(
             name: 'Entrance',
             rarity: 100000000,
             ownVerb: '',
+            category : Location.CATEGORY.ENTRANCE,
+            minStructureSize : 1,
             descriptions: [
                 "A sturdy gate surrounded by a well-maintained fence around the area.",
                 "A decrepit gate surrounded by a feeble attempt at fencing.",
@@ -350,6 +365,7 @@ Location.Base.database = Database.new(
             onCreate ::(location) {
             
             },
+            
                         
             onTimeChange ::(location, time) {
                 // make everyone come home
@@ -365,7 +381,9 @@ Location.Base.database = Database.new(
             name: 'farm',
             rarity: 100,
             ownVerb: 'owned',
+            category : Location.CATEGORY.RESIDENTIAL,
             symbol: 'F',
+            minStructureSize : 2,
 
             descriptions: [
                 "A well-maintained farm. Looks like an experienced farmer works it.",
@@ -425,7 +443,9 @@ Location.Base.database = Database.new(
             name: 'home',
             rarity: 100,
             ownVerb: 'owned',
+            category : Location.CATEGORY.RESIDENTIAL,
             symbol: '^',
+            minStructureSize : 1,
 
             descriptions: [
                 "A well-kept residence. Looks like it's big enough to hold a few people",
@@ -486,7 +506,9 @@ Location.Base.database = Database.new(
             name: 'ore vein',
             rarity: 100,
             ownVerb: '???',
+            category : Location.CATEGORY.UTILITY,
             symbol: '%',
+            minStructureSize : 1,
 
             descriptions: [
                 "A rocky area with a clearly different color than the its surroundings."
@@ -526,7 +548,9 @@ Location.Base.database = Database.new(
             name: 'smelter',
             rarity: 100,
             ownVerb: '???',
+            category : Location.CATEGORY.UTILITY,
             symbol: 'm',
+            minStructureSize : 1,
 
             descriptions: [
                 "Heated enough to melt metal."
@@ -573,7 +597,9 @@ Location.Base.database = Database.new(
             name: 'Wyvern Throne of Fire',
             rarity: 1,
             ownVerb : 'owned',
+            category : Location.CATEGORY.RESIDENTIAL,
             symbol: 'W',
+            minStructureSize : 1,
 
             descriptions: [
                 "What seems to be a stone throne",
@@ -653,7 +679,9 @@ Location.Base.database = Database.new(
             name: 'Wyvern Throne of Ice',
             rarity: 1,
             ownVerb : 'owned',
+            category : Location.CATEGORY.RESIDENTIAL,
             symbol: 'W',
+            minStructureSize : 1,
 
             descriptions: [
                 "What seems to be a stone throne",
@@ -733,7 +761,9 @@ Location.Base.database = Database.new(
             name: 'shop',
             rarity: 100,
             ownVerb : 'run',
+            category : Location.CATEGORY.BUSINESS,
             symbol: '$',
+            minStructureSize : 1,
 
             descriptions: [
                 "A modest trading shop. Relatively small.",
@@ -816,7 +846,9 @@ Location.Base.database = Database.new(
             name: 'Enchant Stand',
             rarity: 100,
             ownVerb : 'run',
+            category : Location.CATEGORY.BUSINESS,
             symbol: '$',
+            minStructureSize : 1,
 
             descriptions: [
                 'An enchanter\'s stand.'
@@ -881,7 +913,9 @@ Location.Base.database = Database.new(
             name: 'Blacksmith',
             rarity: 100,
             ownVerb : 'run',
+            category : Location.CATEGORY.BUSINESS,
             symbol: '/',
+            minStructureSize : 1,
 
             descriptions: [
                 "A modest trading shop. Relatively small.",
@@ -944,7 +978,9 @@ Location.Base.database = Database.new(
             name: 'Tavern',
             rarity: 100,
             ownVerb : 'run',
+            category : Location.CATEGORY.UTILITY,
             symbol: '&',
+            minStructureSize : 2,
 
             descriptions: [
                 "A modest tavern with a likely rich history.",
@@ -983,7 +1019,9 @@ Location.Base.database = Database.new(
             name: 'Arena',
             rarity: 100,
             ownVerb : 'run',
+            category : Location.CATEGORY.UTILITY,
             symbol: '!',
+            minStructureSize : 2,
 
             descriptions: [
                 "A fighting arena",
@@ -1021,7 +1059,10 @@ Location.Base.database = Database.new(
             name: 'Inn',
             rarity: 100,
             ownVerb : 'run',
+            category : Location.CATEGORY.UTILITY,
             symbol: '=',
+            minStructureSize : 2,
+
 
             descriptions: [
                 "An inn",
@@ -1058,7 +1099,9 @@ Location.Base.database = Database.new(
             name: 'School',
             rarity: 100,
             ownVerb : 'run',
+            category : Location.CATEGORY.UTILITY,
             symbol: '+',
+            minStructureSize : 2,
 
             descriptions: [
                 "A school",
@@ -1096,7 +1139,9 @@ Location.Base.database = Database.new(
             name: 'Library',
             rarity: 100,
             ownVerb : '',
+            category : Location.CATEGORY.UTILITY,
             symbol: '[]',
+            minStructureSize : 2,
 
             descriptions: [
                 "A library",
@@ -1133,7 +1178,9 @@ Location.Base.database = Database.new(
             name: 'Gate',
             rarity: 100,
             ownVerb : '',
+            category : Location.CATEGORY.UTILITY,
             symbol: '@',
+            minStructureSize : 1,
 
             descriptions: [
                 "A large stone ring, tall enough to fit a few people and a wagon.",
@@ -1169,6 +1216,8 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : '',
             symbol: '\\',
+            category : Location.CATEGORY.EXIT,
+            minStructureSize : 1,
 
             descriptions: [
                 "Decrepit stairs",
@@ -1202,6 +1251,8 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : '',
             symbol: '=',
+            category : Location.CATEGORY.EXIT,
+            minStructureSize : 1,
 
             descriptions: [
                 "Ladder leading to the surface.",
@@ -1235,6 +1286,8 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : '',
             symbol: '?',
+            category : Location.CATEGORY.EXIT,
+            minStructureSize : 1,
 
             descriptions: [
                 "A suspicious pit.",
@@ -1274,6 +1327,8 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : '',
             symbol: '^',
+            category : Location.CATEGORY.EXIT,
+            minStructureSize : 1,
 
             descriptions: [
                 "Decrepit stairs",
@@ -1307,6 +1362,8 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : '',
             symbol: '$',
+            category : Location.CATEGORY.UTILITY,
+            minStructureSize : 1,
 
             descriptions: [
             ],
@@ -1345,6 +1402,8 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : '',
             symbol: '$',
+            category : Location.CATEGORY.UTILITY,
+            minStructureSize : 1,
 
             descriptions: [
             ],
@@ -1411,6 +1470,8 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : 'owned',
             symbol: 'x',
+            category : Location.CATEGORY.UTILITY,
+            minStructureSize : 1,
 
             descriptions: [
                 'An incapacitated individual.'
@@ -1447,6 +1508,8 @@ Location.Base.database = Database.new(
             rarity: 1000000000000,
             ownVerb : '',
             symbol: '*',
+            category : Location.CATEGORY.UTILITY,
+            minStructureSize : 2,
 
             descriptions: [
                 "A library stocked with books many times a person\'s height. Various colors and sizes of book bindings cover each columned shelf",
