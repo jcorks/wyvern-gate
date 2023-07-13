@@ -523,7 +523,7 @@ Landmark.Base.database = Database.new(
                     roomAreaSize: 5,
                     roomAreaSizeLarge: 7,
                     emptyAreaCount: 18,
-//                    wallCharacter : '|'
+                    wallCharacter : '|'
                 },
                 onCreate ::(landmark, island){},
                 onVisit ::(landmark, island) {}

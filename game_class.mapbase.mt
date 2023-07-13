@@ -77,14 +77,14 @@ return class(
         @wallCharacter = '▓';
         //@scenery = MemoryBuffer.new();
         @scenery = [];
-        @sceneryValues = empty;
+        @sceneryValues = [];
         
         @obscured = []; 
 
         
         @:isWalled ::(x, y) {
             @at = x+OOB_RANGE + (y+OOB_RANGE) * (OOB_RANGE*2 + width);
-            return scenery[at] == 1;
+            return scenery[at] & 0x10000;
         };
         
         @renderOutOfBounds = true;
@@ -505,7 +505,7 @@ return class(
                     };
 
 
-                    when(symbol == 1) ::<= {
+                    when(symbol == empty && isWalled(x:itemX, y:itemY)) ::<= {
                         canvas.drawChar(text:wallCharacter);
                     };
 
@@ -578,21 +578,27 @@ return class(
                 get ::<- drawLegend,
                 set ::(value) <- drawLegend = value
             },
-
-            addWall ::(x, y) {
+            
+            enableWall ::(x, y) {
                 x += OOB_RANGE;
                 y += OOB_RANGE;
-                scenery[x + y*(OOB_RANGE*2+width)] = 1;                
+                scenery[x + y*(OOB_RANGE*2+width)] |= 0x10000;                
             },
             
-            removeWall ::(x, y) {        
+            disableWall ::(x, y) {        
                 x += OOB_RANGE;
                 y += OOB_RANGE;
-                scenery[x + y*(OOB_RANGE*2+width)] = 0;                
+                if (scenery[x + y*(OOB_RANGE*2+width)] & 0x10000)
+                    scenery[x + y*(OOB_RANGE*2+width)] &= (~0x10000);
             },
             
-            sceneryValues : {
-                set ::(value) <- sceneryValues = value
+            addScenerySymbol ::(character) {
+                @:preIndex = sceneryValues->findIndex(value:character);
+                when(preIndex != -1) preIndex;
+                
+                @:index = sceneryValues->keycount;
+                sceneryValues->push(value:character);
+                return index;
             },
             
             setSceneryIndex ::(
@@ -602,8 +608,13 @@ return class(
             ) {
                 x += OOB_RANGE;
                 y += OOB_RANGE;
-                scenery[x + y*(OOB_RANGE*2+width)] = 2+symbol;
-
+                @index = x + y*(OOB_RANGE*2+width);
+                
+                if (scenery[index] & 0x10000)
+                    scenery[index] = 0x10000 | (1+symbol)
+                else
+                    scenery[index] = (1+symbol)
+                ;
             },
 
             clearScenery ::(
@@ -613,15 +624,20 @@ return class(
                 x += OOB_RANGE;
                 y += OOB_RANGE;
 
-                scenery[x + y*(OOB_RANGE*2+width)] = 0;
+                @index = x + y*(OOB_RANGE*2+width);
+                
+                if (scenery[index] & 0x10000)
+                    scenery[index] = 0x10000
+                else
+                    scenery[index] = 0;
+                ;
             },
             
             sceneryAt::(x, y) {
                 @at = x+OOB_RANGE + (y+OOB_RANGE) * (OOB_RANGE*2 + width);
-                @:index = scenery[at];
+                @:index = scenery[at] & (~0x10000);
                 when(index == 0) empty;
-                when(index == 1) wallCharacter;
-                return sceneryValues[index-2];
+                return sceneryValues[index-1];
             },
 
 

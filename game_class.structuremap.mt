@@ -40,7 +40,7 @@
 @:ZONE_BUILDING_MINIMUM_WIDTH  = 6;
 @:ZONE_BUILDING_MINIMUM_HEIGHT = 5;
 @:ZONE_MINIMUM_SPAN = 2;
-@:ZONE_MAXIMUM_SPAN  = 6;
+@:ZONE_MAXIMUM_SPAN  = 4;
 @:STRUCTURE_MAP_STARTING_X = 100;
 @:STRUCTURE_MAP_STARTING_Y = 100;
 @:STRUCTURE_MAP_SIZE = 200;
@@ -62,10 +62,18 @@
         
         @slots = [];
         @freeSpaces = [];
+        @blockSceneryIndex;
+        
+        @:addBuildingBlock::(x, y) {
+            _map.enableWall(x, y);
+            _map.setSceneryIndex(x, y, symbol:blockSceneryIndex);
+        };
         
         this.constructor = ::(map, category => Number) {
             unitsWide = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
             unitsHigh = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
+
+            blockSceneryIndex = map.addScenerySymbol(character:'▓');
 
             // if category is Entrance, the area is 2x2 
             if (category == Location.CATEGORY.ENTRANCE) ::<= {
@@ -105,18 +113,18 @@
                 x  x
             
             */
-            _map.addWall(x:left + 1, y: top + 1);
-            _map.addWall(x:left + 2, y: top + 1);
-            _map.addWall(x:left + 3, y: top + 1);
-            _map.addWall(x:left + 4, y: top + 1);
+            addBuildingBlock(x:left + 1, y: top + 1);
+            addBuildingBlock(x:left + 2, y: top + 1);
+            addBuildingBlock(x:left + 3, y: top + 1);
+            addBuildingBlock(x:left + 4, y: top + 1);
 
-            _map.addWall(x:left + 1, y: top + 2);
-            _map.addWall(x:left + 2, y: top + 2);
-            _map.addWall(x:left + 3, y: top + 2);
-            _map.addWall(x:left + 4, y: top + 2);
+            addBuildingBlock(x:left + 1, y: top + 2);
+            addBuildingBlock(x:left + 2, y: top + 2);
+            addBuildingBlock(x:left + 3, y: top + 2);
+            addBuildingBlock(x:left + 4, y: top + 2);
 
-            _map.addWall(x:left + 1, y: top + 3);
-            _map.addWall(x:left + 4, y: top + 3);
+            addBuildingBlock(x:left + 1, y: top + 3);
+            addBuildingBlock(x:left + 4, y: top + 3);
 
 
         };  
@@ -155,52 +163,52 @@
             match(which) {
               // North             
               (0):::<={
-                _map.addWall(x:left, y:top);
-                _map.addWall(x:left+1, y:top);
-                _map.addWall(x:left+2, y:top);
-                _map.addWall(x:left+3, y:top);
-                _map.addWall(x:left+4, y:top);
+                addBuildingBlock(x:left, y:top);
+                addBuildingBlock(x:left+1, y:top);
+                addBuildingBlock(x:left+2, y:top);
+                addBuildingBlock(x:left+3, y:top);
+                addBuildingBlock(x:left+4, y:top);
 
-                _map.addWall(x:left,   y:top+1);
-                _map.addWall(x:left+4, y:top+1);
+                addBuildingBlock(x:left,   y:top+1);
+                addBuildingBlock(x:left+4, y:top+1);
 
               },
 
               // East             
               (1):::<={
-                _map.addWall(x:left+5, y:top);
-                _map.addWall(x:left+4, y:top);
-                _map.addWall(x:left+5, y:top+1);
-                _map.addWall(x:left+5, y:top+2);
-                _map.addWall(x:left+5, y:top+3);
-                _map.addWall(x:left+5, y:top+4);
-                _map.addWall(x:left+4, y:top+4);
+                addBuildingBlock(x:left+5, y:top);
+                addBuildingBlock(x:left+4, y:top);
+                addBuildingBlock(x:left+5, y:top+1);
+                addBuildingBlock(x:left+5, y:top+2);
+                addBuildingBlock(x:left+5, y:top+3);
+                addBuildingBlock(x:left+5, y:top+4);
+                addBuildingBlock(x:left+4, y:top+4);
                 
               },
 
               // West             
               (2):::<={
-                _map.addWall(x:left, y:top);
-                _map.addWall(x:left+1, y:top);
-                _map.addWall(x:left, y:top+1);
-                _map.addWall(x:left, y:top+2);
-                _map.addWall(x:left, y:top+3);
-                _map.addWall(x:left, y:top+4);
-                _map.addWall(x:left+1, y:top+4);
+                addBuildingBlock(x:left, y:top);
+                addBuildingBlock(x:left+1, y:top);
+                addBuildingBlock(x:left, y:top+1);
+                addBuildingBlock(x:left, y:top+2);
+                addBuildingBlock(x:left, y:top+3);
+                addBuildingBlock(x:left, y:top+4);
+                addBuildingBlock(x:left+1, y:top+4);
               },
 
 
 
               // South
               (3):::<={
-                _map.addWall(x:left, y:top+4);
-                _map.addWall(x:left+1, y:top+4);
-                _map.addWall(x:left+2, y:top+4);
-                _map.addWall(x:left+3, y:top+4);
-                _map.addWall(x:left+4, y:top+4);
+                addBuildingBlock(x:left, y:top+4);
+                addBuildingBlock(x:left+1, y:top+4);
+                addBuildingBlock(x:left+2, y:top+4);
+                addBuildingBlock(x:left+3, y:top+4);
+                addBuildingBlock(x:left+4, y:top+4);
 
-                _map.addWall(x:left,   y:top+3);
-                _map.addWall(x:left+4, y:top+3);
+                addBuildingBlock(x:left,   y:top+3);
+                addBuildingBlock(x:left+4, y:top+3);
 
 
               }
@@ -231,17 +239,21 @@
             */
             [0, 3]->for(do:::(y) {
                 [0, 10]->for(do:::(x) {
-                    _map.addWall(x:left+x + 1, y:top+y+1);
+                    addBuildingBlock(x:left+x + 1, y:top+y+1);
                 });
             });
 
 
             if (random.flipCoin() == true) ::<= {
-                _map.removeWall(x:left + 2, y: top + 3);
-                _map.removeWall(x:left + 3, y: top + 3);
+                _map.disableWall(x:left + 2, y: top + 3);
+                _map.disableWall(x:left + 3, y: top + 3);
+                _map.clearScenery(x:left + 2, y: top + 3);
+                _map.clearScenery(x:left + 3, y: top + 3);
             } else ::<= {            
-                _map.removeWall(x:left + 8, y: top + 3);
-                _map.removeWall(x:left + 9, y: top + 3);
+                _map.disableWall(x:left + 8, y: top + 3);
+                _map.disableWall(x:left + 9, y: top + 3);
+                _map.clearScenery(x:left + 8, y: top + 3);
+                _map.clearScenery(x:left + 9, y: top + 3);
             };
         }; 
 
@@ -260,13 +272,15 @@
             */
             [0, 7]->for(do:::(y) {
                 [0, 4]->for(do:::(x) {
-                    _map.addWall(x:left+x + 1, y:top+y+1);
+                    addBuildingBlock(x:left+x + 1, y:top+y+1);
                 });
             });
 
 
-            _map.removeWall(x:left + 2, y: top + 7);
-            _map.removeWall(x:left + 3, y: top + 7);
+            _map.disableWall(x:left + 2, y: top + 7);
+            _map.disableWall(x:left + 3, y: top + 7);
+            _map.clearScenery(x:left + 2, y: top + 7);
+            _map.clearScenery(x:left + 3, y: top + 7);
 
         };
         
@@ -285,13 +299,13 @@
                 
                 
                 [0, _w]->for(do::(i) {
-                    _map.addWall(x:i+_x, y:_y);
-                    _map.addWall(x:i+_x, y:_y+_h);
+                    _map.enableWall(x:i+_x, y:_y);
+                    _map.enableWall(x:i+_x, y:_y+_h);
                 });            
 
                 [0, _h]->for(do::(i) {
-                    _map.addWall(x:_x, y:_y+i);
-                    _map.addWall(x:_x+_w, y:_y+i);
+                    _map.enableWall(x:_x, y:_y+i);
+                    _map.enableWall(x:_x+_w, y:_y+i);
                 });
                    
             },
@@ -353,7 +367,7 @@
                                 top:space0.y * ZONE_BUILDING_MINIMUM_HEIGHT + _y+ZONE_CONTENT_PADDING,
                                 which
                             );
-                            
+                            send();
                         });
                     };
                 };
@@ -377,7 +391,7 @@
                 when(size == 2) ::<= {
                     @:wide = random.flipCoin();
                     
-                    [::] {
+                    return [::] {
                         [0, 10]->for(do:::(i) {
                             @:space0 = random.pickArrayItem(list:freeSpaces);
                             @space1;
@@ -415,8 +429,9 @@
                                 );                            
                             };
                             
-                            send();
+                            send(message:true);
                         });
+                        return false;
                     };
                 };
                 
@@ -578,7 +593,7 @@ return class(
 
             // add an opening 
             if (openingX != empty)
-                this.removeWall(x:openingX, y:openingY);
+                this.disableWall(x:openingX, y:openingY);
             
             zones->push(value:zone);
             return zone;

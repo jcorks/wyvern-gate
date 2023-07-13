@@ -106,24 +106,24 @@ return class(
             ));
                     
             [0, width+1]->for(do:::(i) {
-                this.addWall(
+                this.enableWall(
                     x:left + i,
                     y:top
                 );
 
-                this.addWall(
+                this.enableWall(
                     x:left + i,
                     y:top + height
                 );
             });
 
             [0, height+1]->for(do:::(i) {
-                this.addWall(
+                this.enableWall(
                     x:left,
                     y:top + i
                 );
 
-                this.addWall(
+                this.enableWall(
                     x:left + width,
                     y:top + i
                 );
@@ -133,36 +133,36 @@ return class(
         
         @:applyCavities::{
             cavities->foreach(do:::(i, cav) {
-                this.addWall(
+                this.enableWall(
                     x:cav.x+1,
                     y:cav.y
                 );
-                this.addWall(
+                this.enableWall(
                     x:cav.x-1,
                     y:cav.y
                 );
-                this.addWall(
+                this.enableWall(
                     x:cav.x,
                     y:cav.y+1
                 );
-                this.addWall(
+                this.enableWall(
                     x:cav.x,
                     y:cav.y-1
                 );
                 
-                this.addWall(
+                this.enableWall(
                     x:cav.x-1,
                     y:cav.y-1
                 );
-                this.addWall(
+                this.enableWall(
                     x:cav.x+1,
                     y:cav.y+1
                 );
-                this.addWall(
+                this.enableWall(
                     x:cav.x+1,
                     y:cav.y-1
                 );
-                this.addWall(
+                this.enableWall(
                     x:cav.x-1,
                     y:cav.y+1
                 );
@@ -174,13 +174,13 @@ return class(
             areas->foreach(do:::(i, area) {
                 [area.x+1, area.x + area.width]->for(do:::(x) {
                     [area.y+1, area.y + area.height]->for(do:::(y) {
-                        this.removeWall(x, y);
+                        this.disableWall(x, y);
                     });
                 });
             });
             
             cavities->foreach(do:::(i, cav) {
-                this.removeWall(x:cav.x, y:cav.y);
+                this.disableWall(x:cav.x, y:cav.y);
             });            
             cavities = [];
         };
@@ -252,7 +252,7 @@ return class(
     
         @:generateLayout :: {
             /*[0, 200]->for(do:::(i) {
-                addWall(
+                enableWall(
                     x: (ROOM_SIZE * Number.random())->floor,
                     y: (ROOM_SIZE * Number.random())->floor
                 );
