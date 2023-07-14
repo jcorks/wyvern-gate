@@ -399,7 +399,6 @@
                 mod.base.equipEffects->foreach(do:::(i, effect) {
                     equipEffects->push(value:effect);
                 });
-                breakpoint();
                 stats.add(stats:mod.base.equipMod);
                 if (description->contains(key:mod.description) == false)
                     description = description + mod.description + ' ';

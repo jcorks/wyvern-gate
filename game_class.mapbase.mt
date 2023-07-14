@@ -78,6 +78,7 @@ return class(
         //@scenery = MemoryBuffer.new();
         @scenery = [];
         @sceneryValues = [];
+        @stepAction = [];
         
         @obscured = []; 
 
@@ -616,6 +617,14 @@ return class(
                     scenery[index] = (1+symbol)
                 ;
             },
+            
+            setStepAction ::(
+                x => Number,
+                y => Number,
+                action
+            ) {
+                stepAction[x + y*width] = action;
+            },
 
             clearScenery ::(
                 x =>Number,
@@ -739,6 +748,9 @@ return class(
                 x,
                 y
             ) {
+                if (x == pointer.x &&
+                    y == pointer.y) empty;
+            
                 x = x->floor;
                 y = y->floor;
                 when(x < 0 || x > width || y < 0 || y > height)
@@ -747,6 +759,10 @@ return class(
 
                 pointer.x = x;
                 pointer.y = y;
+
+                @:trigger = stepAction[x + y*width];
+                if (trigger != empty)
+                    trigger(); 
             },
             
             getDistanceFromItem ::(data) {
@@ -762,8 +778,11 @@ return class(
             movePointerToward::(x, y) {
                 @:path = aStarPathNext(start:pointer, goal:{x:x, y:y});                
                 when(path == empty) empty;
-                pointer.x = path.x;
-                pointer.y = path.y;
+                
+                this.setPointer(
+                    x: path.x,
+                    y: path.y                
+                );
                 
             },
 
@@ -835,18 +854,20 @@ return class(
                 
                 
 
-                pointer.x += x;
-                pointer.y += y;
+                x += pointer.x;
+                y += pointer.y;
 
-                if (pointer.x < 0) pointer.x  = 0;
-                if (pointer.y < 0) pointer.y  = 0;
-                if (pointer.x >= width) pointer.x  = width-1;
-                if (pointer.y >= height) pointer.y  = height-1;
+                if (x < 0) x  = 0;
+                if (y < 0) y  = 0;
+                if (x >= width) x  = width-1;
+                if (y >= height) y  = height-1;
 
-                if (isWalled(x:pointer.x, y:pointer.y)) ::<= {
-                    pointer.x = oldX;
-                    pointer.y = oldY;
-                };                  
+                if (isWalled(x, y)) ::<= {
+                    x = oldX;
+                    y = oldY;
+                };     
+                this.setPointer(x, y);
+            
             },
             
             

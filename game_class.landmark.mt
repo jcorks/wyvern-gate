@@ -214,7 +214,8 @@
                 map.setPointer(
                     x:101,
                     y:101
-                );            
+                );
+                map.finalize();            
             };
 
             if (floorHint != empty) ::<= {
@@ -482,6 +483,7 @@ Landmark.Base.database = Database.new(
                     roomAreaSize: 7,
                     roomAreaSizeLarge: 9,
                     emptyAreaCount: 6,
+                    wallCharacter: '#',
                     scatterChar: 'Y',
                     scatterRate: 0.3
                 },
