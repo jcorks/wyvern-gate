@@ -34,6 +34,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:EntityQuality = import(module:'game_class.entityquality.mt');
 @:correctA = import(module:'game_function.correcta.mt');
+@:story = import(module:'game_singleton.story.mt');
 
 // returns EXP recommended for next level
 @:levelUp ::(level, stats => StatSet.type, growthPotential => StatSet.type, whichStat) {
@@ -105,6 +106,7 @@
         @personality = Personality.database.getRandom();
         @emotionalState;
         @favoritePlace = Location.Base.database.getRandom();
+        @favoriteItem = Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false);
         @growth = StatSet.new();
         @enemies_ = [];
         @allies_ = [];
@@ -139,6 +141,12 @@
         @:inventory = Inventory.new(size:10);
         inventory.addGold(amount:(Number.random() * 100)->ceil);
         
+        [0, 3]->for(do::(i) {
+            inventory.add(item:Item.Base.database.getRandomFiltered(
+                    filter:::(value) <- value.isUnique == false && value.canHaveEnchants
+                                            && value.tier <= story.tier
+                ).new(rngEnchantHint:true, from:this));
+        });
         @expNext = 10;
         @level = 0;
         @onInteract = empty;
@@ -1032,9 +1040,10 @@
                     canCancel : true,
                     prompt: 'Talking to ' + name,
                     choices: [
-                        'chat',
-                        'hire',
-                        'aggress...'
+                        'Chat',
+                        'Hire',
+                        'Barter',
+                        'Aggress...'
                     ],
                     keep: true,
                     onLeave :onDone,
@@ -1093,6 +1102,92 @@
 
                                 }
                             );
+                          },
+                          
+                          // barter
+                          (2):::<= {
+                            when (inventory.isEmpty) ::<= {
+                                windowEvent.queueMessage(
+                                    text: name + ' has nothing to barter with.'
+                                );                
+                            };
+                            @:item = inventory.items[0];
+
+                            windowEvent.queueMessage(
+                                text: name + ' is interested in acquiring ' + correctA(word:favoriteItem.name) + '. They are willing to trade one for their ' + item.name + '.'
+                            );                
+                            
+                            
+                            @:tradeItems = party.inventory.items->filter(by::(value) <- value.base == favoriteItem);
+                            
+                            when(tradeItems->keycount == 0) ::<= {
+                                windowEvent.queueMessage(
+                                    text: 'You have no such items to trade, sadly.'
+                                );                                                 
+                            };
+                            
+
+
+                            windowEvent.queueChoices(
+                                prompt: name + ' - bartering',
+                                choices: ['Trade', 'Check Item', 'Compare Equipment'],
+                                jumpTag: 'Barter',
+                                canCancel: true,
+                                keep:true,
+                                onChoice::(choice) {
+                                    when(choice == 0) empty;
+                                    
+                                    match(choice-1) {
+                                      // Trade
+                                      (0)::<= {
+                                        windowEvent.queueChoices(
+                                            choices: [...tradeItems]->map(to::(value) <- value.name),
+                                            canCancel: true,
+                                            onChoice::(choice) {
+                                                when(choice == 0) empty;
+                                                
+                                                @:chosenItem = tradeItems[choice-1];
+                                                party.inventory.remove(item:chosenItem);
+                                                this.inventory.remove(item);
+                                                party.inventory.add(item);
+                                                
+                                                windowEvent.queueMessage(
+                                                    text: 'In exchange for your ' + chosenItem.name + ', ' + name + ' gives the party ' + correctA(word:item.name) + '.'
+                                                );                                                                                                 
+                                                
+                                                windowEvent.jumpToTag(name:'Barter', goBeforeTag:true, doResolveNext:true);
+                                            }
+                                        );
+                                      },
+                                      // check
+                                      (1)::<= {
+                                        item.describe();
+                                      },
+                                      // compare 
+                                      (2)::<= {
+                                        @:memberNames = [...party.members]->map(to:::(value) <- value.name);
+                                        @:choice = windowEvent.queueChoices(
+                                            prompt: 'Compare equipment for whom?',
+                                            choices: memberNames,
+                                            onChoice::(choice) {
+                                                @:user = party.members[choice-1];
+                                                @slot = user.getSlotsForItem(item)[0];
+                                                @currentEquip = user.getEquipped(slot);
+                                                
+                                                currentEquip.equipMod.printDiffRate(
+                                                    prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
+                                                    other:item.equipMod
+                                                );                                                                               
+                                            }
+                                        );
+                                      }  
+                                    };   
+                                }
+                            );
+
+                            
+                            
+                            
                           }
                         
                         };                    

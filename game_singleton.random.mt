@@ -86,7 +86,7 @@ return class(
                     
                     // binary ops work with two-s complement 32-bit integers
                     // So out at this point is from -0xffffffff to 0xffffffff; 
-                    return out->abs / (0xffffffff/2);
+                    return out->abs / (0xffffffff/2 + 1);
                 },
                 
                 // reorients the RNG
@@ -154,7 +154,7 @@ return class(
             
             flipCoin:: <- tt800.next() < 0.5,
             
-            try::(percentSuccess) <- tt800.next() < percentSuccess,
+            try::(percentSuccess) <- tt800.next() < percentSuccess / 100,
             
             pickArrayItemWeighted::(list) {
                 @:weightTable = [];

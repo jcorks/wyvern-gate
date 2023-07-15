@@ -136,6 +136,7 @@ return class(
                     topWeight: 1,
                     prompt: 'What next?',
                     keep:true,
+                    jumpTag: 'VisitLandmark',
                     onGetChoices ::{
                         @choices = [                
                             'Walk...',

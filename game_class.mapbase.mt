@@ -85,7 +85,7 @@ return class(
         
         @:isWalled ::(x, y) {
             @at = x+OOB_RANGE + (y+OOB_RANGE) * (OOB_RANGE*2 + width);
-            return scenery[at] & 0x10000;
+            return (scenery[at] & 0x10000) != 0;
         };
         
         @renderOutOfBounds = true;

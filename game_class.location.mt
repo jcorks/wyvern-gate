@@ -144,11 +144,13 @@
                 set ::(value) <- contested = value
             },
             x : {
-                get:: <- x
+                get:: <- x,
+                set::(value) <- x = value
             },
             
             y : {
-                get:: <- y
+                get:: <- y,
+                set::(value) <- y = value
             },
             
             inventory : {

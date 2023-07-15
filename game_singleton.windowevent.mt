@@ -183,10 +183,11 @@
             //if (canCancel) ::<= {
             //    choicesModified->push(value:'(Cancel)');
             //};
+            @exitEmpty = false;
             if (data.rendered == empty || choice != empty) ::<= {
                 @:choices = if (data.onGetChoices) data.onGetChoices() else data.choices;
                 // no choices
-                when(choices == empty || choices->keycount == 0) true;
+                when(choices == empty || choices->keycount == 0) exitEmpty = true;
                 
 
 
@@ -268,13 +269,17 @@
                     selfRender::{
                         renderText(
                             lines: choicesModified,
-                            speaker: prompt,
+                            speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
                             leftWeight,
                             topWeight,
                             limitLines:14
                         ); 
                     }
                 );
+            };
+            when(exitEmpty) ::<= {
+                data.keep = empty;
+                return true;            
             };
                 
             when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
@@ -317,7 +322,7 @@
                 renderThis(data, selfRender::{
                     renderText(
                         lines: ['[Cancel to return]'],
-                        speaker: prompt,
+                        speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
                         leftWeight,
                         topWeight,
                         limitLines:13
@@ -439,7 +444,7 @@
             // its just a regular choice at that point. Most of the time
             // we can be a little sloppy here.
             when(columns->keycount == 1)
-                choices(choices, prompt, leftWeight, topWeight, canCancel);
+                choices(choices, prompt:if (data.onGetPrompt == empty) prompt else data.onGetPrompt(), leftWeight, topWeight, canCancel);
             
             
             // reformat with spacing
@@ -463,7 +468,7 @@
             renderThis(data, selfRender::{
                 renderText(
                     lines: choicesModified,
-                    speaker: prompt,
+                    speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
                     leftWeight,
                     topWeight,
                     limitLines:9
@@ -492,7 +497,7 @@
                         leftWeight: data.leftWeight, 
                         topWeight: data.topWeight, 
                         lines: data.lines,
-                        speaker:data.prompt,
+                        speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
                         limitLines : data.pageAfter,
                         hasNotch: true
                     );
@@ -682,7 +687,7 @@
             // Like all UI choices, the weight can be chosen.
             // Prompt will be displayed, like speaker in the message callback
             //
-            queueChoices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, renderable, keep, onGetChoices, jumpTag, onLeave) {
+            queueChoices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, renderable, keep, onGetChoices, onGetPrompt, jumpTag, onLeave) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode: CHOICE_MODE.CURSOR,
@@ -696,6 +701,7 @@
                         onLeave : onLeave,
                         keep: keep,
                         onGetChoices : onGetChoices,
+                        onGetPrompt : onGetPrompt,
                         renderable:renderable,
                         jumpTag : jumpTag
                     });

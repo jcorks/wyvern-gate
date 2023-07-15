@@ -232,9 +232,9 @@
                 };
                 
                 
-                if (Number.random() < 0.3) ::<= {
+                if (random.try(percentSuccess:30)) ::<= {
                     quality = if (qualityHint == empty)
-                        ItemQuality.database.getRandom()
+                        ItemQuality.database.getRandomWeighted()
                     else 
                         ItemQuality.database.find(name:qualityHint);
                     stats.add(stats:quality.equipMod);

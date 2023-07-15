@@ -211,10 +211,12 @@
                     y:gate.y
                 );
             } else ::<= {
+
                 map.setPointer(
-                    x:101,
-                    y:101
+                    x:gate.x,
+                    y:gate.y
                 );
+
                 map.finalize();            
             };
 
@@ -483,7 +485,7 @@ Landmark.Base.database = Database.new(
                     roomAreaSize: 7,
                     roomAreaSizeLarge: 9,
                     emptyAreaCount: 6,
-                    wallCharacter: '#',
+                    wallCharacter: '!',
                     scatterChar: 'Y',
                     scatterRate: 0.3
                 },

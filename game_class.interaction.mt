@@ -80,8 +80,7 @@ Interaction.database = Database.new(
                     };
 
                     // jumps to the prev menu lock
-                    windowEvent.forceExit();
-                    windowEvent.forceExit();
+                    windowEvent.jumpToTag(name:'VisitLandmark', goBeforeTag:true, clearResolve:true);
                 }
             }
         ),
@@ -459,48 +458,28 @@ Interaction.database = Database.new(
                         windowEvent.queueMessage(text: 'The shop appears to be closed at this hour..');                            
 
 
-                    @:doAct ::{
-                        @items = party.inventory.items;
-                        
-                        when(items->keycount == 0) ::<= {
-                            windowEvent.queueMessage(text: "The inventory is empty.");
-                        };                                
-                        
-                        //@basePrices = [...items]->map(to:::(value) <- (((value.price * 0.4)/5)->ceil)*5); // compiler bug here if uncomment
-                        @basePrices = [];
-                        items->foreach(do:::(index, item) {
-                            @sellPrice = (((item.price * 0.5)/5)*0.5)->ceil;
-                            if (sellPrice < 0) sellPrice = 0;
-                            basePrices[index] = sellPrice;
-                        });
-                        @choices = [];
-                        items->foreach(do:::(index, item) {
-                            choices->push(value: item.name + '(' + basePrices[index] + 'G)');
-                        });
-                        
-                        windowEvent.queueChoices(
-                            choices,
-                            prompt: 'Sell which? (current: ' + party.inventory.gold + 'G)',
-                            canCancel : true,
-                            onChoice ::(choice){                    
-                                when(choice == 0) empty;
+                    @:pickItem = import(module:'game_function.pickitem.mt');
+                    pickItem(
+                        inventory:party.inventory,
+                        canCancel: true,
+                        leftWeight: 0.5,
+                        topWeight: 0.5,
+                        onGetPrompt:: <-  'Sell which? (current: ' + party.inventory.gold + 'G)',
+                        showGold: true,
+                        goldMultiplier: (0.5 / 5)*0.5,
+                        onPick::(item) {
+                            when(item == empty) empty;
 
-                                @item = items[choice-1];
-                                @price = basePrices[choice-1];
-                                
-                                windowEvent.queueMessage(text: 'Sold the ' + item.name + ' for ' + price + 'G');
+                            @price = (item.price * ((0.5 / 5)*0.5))->ceil;
+                            
+                            windowEvent.queueMessage(text: 'Sold the ' + item.name + ' for ' + price + 'G');
 
-                                party.inventory.addGold(amount:price);
-                                party.inventory.remove(item);
-                                
-                                location.inventory.add(item);
-                                doAct();
-                            }
-                        );
-                        
-                        
-                    };
-                    doAct();
+                            party.inventory.addGold(amount:price);
+                            party.inventory.remove(item);
+                            
+                            location.inventory.add(item);
+                        }
+                    );
                 },
                 
 
@@ -539,6 +518,7 @@ Interaction.database = Database.new(
                         );
                     };
                     @:world = import(module:'game_singleton.world.mt');
+                    @:pickItem = import(module:'game_function.pickitem.mt');
                     
                     when (world.time < world.TIME.MORNING || world.time > world.TIME.EVENING)
                         windowEvent.queueMessage(text: 'The shop appears to be closed at this hour..');                            
@@ -546,96 +526,82 @@ Interaction.database = Database.new(
                     
                     
                     
-                    @:doAct = ::{
-                        @items = location.inventory.items;
-                        //@basePrices = [...items]->map(to:::(value) <- (((value.price * 0.4)/5)->ceil)*5); // compiler bug here if uncomment
-                        @basePrices = [];
-                        items->foreach(do:::(index, item) {
-                            basePrices[index] = ((item.price * 0.5)/5)->ceil;
-                        });
-                        @choices = [];
-                        items->foreach(do:::(index, item) {
-                            choices->push(value: item.name + '(' + basePrices[index] + 'G)');
-                        });
-                        
-                        windowEvent.queueChoices(
-                            choices,
-                            prompt: 'Buy which? (current: ' + party.inventory.gold + 'G)',
-                            canCancel : true,
-                            onChoice::(choice) {
-
-                                when(choice == 0) empty;
-                                @item = items[choice-1];
-                                @price = basePrices[choice-1];
-                                
-                                windowEvent.queueChoices(
-                                    prompt: item.name,
-                                    choices: ['Buy', 'Check', 'Compare Equipment'],
-                                    canCancel: true,
-                                    onChoice::(choice) {
-                                        when(choice == 0) empty;
-                                        
-                                        match(choice-1) {
-                                          // buy
-                                          (0)::<= {
-                                            when(world.party.inventory.isFull) ::<= {
-                                                windowEvent.queueMessage(text: 'The party\'s inventory is full.');
-                                            };
-                                                
-                                            
-                                            when(!party.inventory.subtractGold(amount:price)) windowEvent.queueMessage(text:'The party cannot afford this.');
-                                            location.inventory.remove(item);
-                                            
-                                            if (item.base.name == 'Wyvern Key' && world.storyFlags.foundFirstKey == false) ::<= {
-                                                location.landmark.island.world.storyFlags.foundFirstKey = true;
-                                                windowEvent.queueMessage(
-                                                    speaker:location.ownedBy.name,
-                                                    text: 'Going up the strata, eh? Best of luck to ye. Those wyverns are pretty ruthless.'
-                                                );
-                                                windowEvent.queueMessage(
-                                                    speaker:location.ownedBy.name,
-                                                    text: 'Though, can\'t say I\'m not curious what lies at the top...'
-                                                );
-
-                                            };
-                                            
-                                            
-                                            windowEvent.queueMessage(text: 'Bought ' + correctA(word:item.name));
-                                            party.inventory.add(item);                              
-                                          },
-                                          // check
-                                          (1)::<= {
-                                            item.describe();
-                                          },
-                                          // compare 
-                                          (2)::<= {
-                                            @:memberNames = [...party.members]->map(to:::(value) <- value.name);
-                                            @:choice = windowEvent.queueChoices(
-                                                prompt: 'Compare equipment for whom?',
-                                                choices: memberNames,
-                                                onChoice::(choice) {
-                                                    @:user = party.members[choice-1];
-                                                    @slot = user.getSlotsForItem(item)[0];
-                                                    @currentEquip = user.getEquipped(slot);
-                                                    
-                                                    currentEquip.equipMod.printDiffRate(
-                                                        prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
-                                                        other:item.equipMod
-                                                    );                                                                               
-                                                }
-                                            );
-                                          }  
-                                        };                                 
-                                        doAct();
-                                    }
-                                );
-
-                                
+                    pickItem(
+                        inventory:location.inventory,
+                        canCancel: true,
+                        leftWeight: 0.5,
+                        topWeight: 0.5,
+                        onGetPrompt:: <-  'Buy which? (current: ' + party.inventory.gold + 'G)',
+                        showGold: true,
+                        goldMultiplier: (0.5 / 5),
+                        onPick::(item) {
+                            when(item == empty) empty;
+                            @price = (item.price * (0.5 / 5))->ceil;
                             
-                            }
-                        );
-                    };
-                    doAct();
+                            windowEvent.queueChoices(
+                                prompt: item.name,
+                                choices: ['Buy', 'Check', 'Compare Equipment'],
+                                canCancel: true,
+                                onChoice::(choice) {
+                                    when(choice == 0) empty;
+                                    
+                                    match(choice-1) {
+                                      // buy
+                                      (0)::<= {
+                                        when(world.party.inventory.isFull) ::<= {
+                                            windowEvent.queueMessage(text: 'The party\'s inventory is full.');
+                                        };
+                                            
+                                        
+                                        when(!party.inventory.subtractGold(amount:price)) windowEvent.queueMessage(text:'The party cannot afford this.');
+                                        location.inventory.remove(item);
+                                        
+                                        if (item.base.name == 'Wyvern Key' && world.storyFlags.foundFirstKey == false) ::<= {
+                                            location.landmark.island.world.storyFlags.foundFirstKey = true;
+                                            windowEvent.queueMessage(
+                                                speaker:location.ownedBy.name,
+                                                text: 'Going up the strata, eh? Best of luck to ye. Those wyverns are pretty ruthless.'
+                                            );
+                                            windowEvent.queueMessage(
+                                                speaker:location.ownedBy.name,
+                                                text: 'Though, can\'t say I\'m not curious what lies at the top...'
+                                            );
+
+                                        };
+                                        
+                                        
+                                        windowEvent.queueMessage(text: 'Bought ' + correctA(word:item.name));
+                                        party.inventory.add(item);                              
+                                      },
+                                      // check
+                                      (1)::<= {
+                                        item.describe();
+                                      },
+                                      // compare 
+                                      (2)::<= {
+                                        @:memberNames = [...party.members]->map(to:::(value) <- value.name);
+                                        @:choice = windowEvent.queueChoices(
+                                            prompt: 'Compare equipment for whom?',
+                                            choices: memberNames,
+                                            onChoice::(choice) {
+                                                @:user = party.members[choice-1];
+                                                @slot = user.getSlotsForItem(item)[0];
+                                                @currentEquip = user.getEquipped(slot);
+                                                
+                                                currentEquip.equipMod.printDiffRate(
+                                                    prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
+                                                    other:item.equipMod
+                                                );                                                                               
+                                            }
+                                        );
+                                      }  
+                                    };   
+                                }
+                            );
+                        
+                        
+                        }
+                    );
                 },
                 
 

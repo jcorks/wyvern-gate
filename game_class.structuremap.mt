@@ -40,12 +40,12 @@
 @:ZONE_BUILDING_MINIMUM_WIDTH  = 6;
 @:ZONE_BUILDING_MINIMUM_HEIGHT = 5;
 @:ZONE_MINIMUM_SPAN = 2;
-@:ZONE_MAXIMUM_SPAN  = 4;
-@:STRUCTURE__mapSTARTING_X = 100;
-@:STRUCTURE__mapSTARTING_Y = 100;
-@:STRUCTURE__mapSIZE = 200;
+@:ZONE_MAXIMUM_SPAN  = 3;
+@:STRUCTURE_MAP_STARTING_X = 100;
+@:STRUCTURE_MAP_STARTING_Y = 100;
+@:STRUCTURE_MAP_SIZE = 200;
 @:ZONE_CONTENT_PADDING = 2;
-@:STRUCTURE__mapFILLER_MINIMUM_RATE = 0.8;
+@:STRUCTURE_MAP_FILLER_MINIMUM_RATE = 0.8;
 
 
 @Zone = class(
@@ -59,6 +59,7 @@
         @_category;
         @unitsWide;
         @unitsHigh;
+        @gateSide = random.integer(from:NORTH, to:SOUTH);
         
         @slots = [];
         @freeSpaces = [];
@@ -72,6 +73,10 @@
         this.constructor = ::(map, category => Number) {
             unitsWide = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
             unitsHigh = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
+
+            if (unitsWide > ZONE_MAXIMUM_SPAN ||
+                unitsHigh > ZONE_MAXIMUM_SPAN)
+                error(detail:' uhhh RNG brokey.');
 
             blockSceneryIndex = map.addScenerySymbol(character:'▓');
 
@@ -148,107 +153,54 @@
 
         // adds a minimally-sized building
         @:addGate ::(left, top, which, location) {
-            /*
-              xx
-              x
-              x
-              x
-              xx
-            */
+            location.x = left;
+            location.y = top;
 
-            /*
-                xx
-                 x
-                 x
-                 x
-                xx
-            */
-
-            /*
-               xxxxxx
-               x    x
-            */
-
-            /*
-               x    x
-               xxxxxx
-            */
 
             @:interact = ::{
-                breakpoint();
                 location.interact();
             };
+            
+            @:index = _map.addScenerySymbol(character:'#');
 
             match(which) {
               // North             
-              (0):::<={
-                addBuildingBlock(x:left, y:top);
-                addBuildingBlock(x:left+1, y:top);
-                addBuildingBlock(x:left+2, y:top);
-                addBuildingBlock(x:left+3, y:top);
-                addBuildingBlock(x:left+4, y:top);
-
-                addBuildingBlock(x:left,   y:top+1);
-                addBuildingBlock(x:left+4, y:top+1);
-                
-                
-                _map.setStepAction(x:left+1,   y:top+1, action:interact);
-                _map.setStepAction(x:left+2,   y:top+1, action:interact);
-                _map.setStepAction(x:left+3,   y:top+1, action:interact);
+              (NORTH):::<={
+                [-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING+1]->for(do:::(i) {
+                    _map.setStepAction(x:left+i,   y:top-ZONE_CONTENT_PADDING+1, action:interact);
+                    _map.setSceneryIndex(x:left+i,   y:top-ZONE_CONTENT_PADDING+1, symbol:index);
+                });
                 
 
               },
 
               // East             
-              (1):::<={
-                addBuildingBlock(x:left+5, y:top);
-                addBuildingBlock(x:left+4, y:top);
-                addBuildingBlock(x:left+5, y:top+1);
-                addBuildingBlock(x:left+5, y:top+2);
-                addBuildingBlock(x:left+5, y:top+3);
-                addBuildingBlock(x:left+5, y:top+4);
-                addBuildingBlock(x:left+4, y:top+4);
-
-                _map.setStepAction(x:left+4, y:top+1, action:interact);
-                _map.setStepAction(x:left+4, y:top+2, action:interact);
-                _map.setStepAction(x:left+4, y:top+3, action:interact);
+              (EAST):::<={
+                [-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING+1]->for(do:::(i) {
+                    _map.setStepAction(x:left+ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING-1, y:top+i, action:interact);
+                    _map.setSceneryIndex(x:left+ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING-1, y:top+i, symbol:index);
+                });
 
 
                 
               },
 
               // West             
-              (2):::<={
-                addBuildingBlock(x:left, y:top);
-                addBuildingBlock(x:left+1, y:top);
-                addBuildingBlock(x:left, y:top+1);
-                addBuildingBlock(x:left, y:top+2);
-                addBuildingBlock(x:left, y:top+3);
-                addBuildingBlock(x:left, y:top+4);
-                addBuildingBlock(x:left+1, y:top+4);
-
-                _map.setStepAction(x:left+1, y:top+1, action:interact);
-                _map.setStepAction(x:left+1, y:top+2, action:interact);
-                _map.setStepAction(x:left+1, y:top+3, action:interact);
-
+              (WEST):::<={
+                [-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING+1]->for(do:::(i) {
+                    _map.setStepAction(x:left-ZONE_CONTENT_PADDING+1, y:top+i, action:interact);
+                    _map.setSceneryIndex(x:left-ZONE_CONTENT_PADDING+1, y:top+i, symbol:index);
+                });
               },
 
 
 
               // South
-              (3):::<={
-                addBuildingBlock(x:left, y:top+4);
-                addBuildingBlock(x:left+1, y:top+4);
-                addBuildingBlock(x:left+2, y:top+4);
-                addBuildingBlock(x:left+3, y:top+4);
-                addBuildingBlock(x:left+4, y:top+4);
-
-                addBuildingBlock(x:left,   y:top+3);
-                addBuildingBlock(x:left+4, y:top+3);
-
-                _map.setStepAction(x:left+1,   y:top+3, action:interact);
-                _map.setStepAction(x:left+2,   y:top+3, action:interact);
-                _map.setStepAction(x:left+3,   y:top+3, action:interact);
+              (SOUTH):::<={
+                [-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING+1]->for(do:::(i) {
+                    _map.setStepAction(x:left+i,   y:top+ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING-1, action:interact);
+                    _map.setSceneryIndex(x:left+i,   y:top+ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING-1, symbol:index);
+                });
 
               }
               
@@ -256,7 +208,7 @@
             };
 
             
-
+            return which;
 
         };  
 
@@ -396,6 +348,13 @@
             height : {get::<-_h},
             category : {get::<- _category},
             
+            // only for zones that have gates, gets the 
+            // side that the gate is hugging. This is primarily used for 
+            // placement of the first zone in the map so that it logically 
+            // looks like an entrance to the outside.
+            // is empty if there is no gate.
+            gateSide : {get::<- gateSide},
+            
             // returns false if cant fit the location
             addLocation::(location) {
                 // entrances take up 2 slots.
@@ -406,30 +365,33 @@
                             @y0;
                             @x1;
                             @y1;
-                            @which;
-                            if (random.flipCoin()) ::<= {
-                                x0 = if (random.flipCoin()) 0 else unitsWide - 1;
+                            
+                            match(gateSide) {
+                              (EAST, WEST):::<= {
+                                x0 = if (gateSide == WEST) 0 else unitsWide - 1;
                                 y0 = random.integer(from:0, to:unitsHigh-1);
                                 
                                 x1 = x0;
                                 y1 = y0;
-                                which = if (x0 == 0) WEST else EAST;
-                                if (which == WEST)
+                                if (gateSide == WEST)
                                     x1 += 1
                                 else  
                                     x1 -= 1;
-                                
-                            } else ::<= {
+                                                              
+                              },
+                              
+                              
+                              (NORTH, SOUTH):::<= {
                                 x0 = random.integer(from:0, to:unitsWide-1);                                
-                                y0 = if (random.flipCoin()) 0 else unitsHigh - 1;
+                                y0 = if (gateSide == NORTH) 0 else unitsHigh - 1;
 
                                 x1 = x0;
                                 y1 = y0;
-                                which = if (y0 == 0) NORTH else SOUTH;
-                                if (which == SOUTH)
+                                if (gateSide == SOUTH)
                                     y1 += 1
                                 else  
-                                    y1 -= 1;
+                                    y1 -= 1;                              
+                              }
                             };
                             
                             when(slots[x0][y0] != false) empty;
@@ -443,12 +405,11 @@
                             
                             freeSpaces->remove(key:space0);
                             //freeSpaces->remove(key:space1);
-                            
                             addGate(
                                 location,
                                 left:space0.x * ZONE_BUILDING_MINIMUM_WIDTH + _x+ZONE_CONTENT_PADDING,
                                 top:space0.y * ZONE_BUILDING_MINIMUM_HEIGHT + _y+ZONE_CONTENT_PADDING,
-                                which
+                                which:gateSide
                             );
                             send();
                         });
@@ -584,7 +545,7 @@ return class(
 
             this.paged = false;
             this.renderOutOfBounds = true;
-            this.outOfBoundsCharacter = '`';
+            this.outOfBoundsCharacter = ' ';
             
 
             if (mapHint.wallCharacter != empty) this.wallCharacter = mapHint.wallCharacter;
@@ -592,8 +553,8 @@ return class(
             if (mapHint.hasZoningWalls != empty) hasZoningWalls = mapHint.hasZoningWalls;
             if (mapHint.hasFillerBuildings != empty) hasFillerBuildings = mapHint.hasFillerBuildings;
 
-            this.width = STRUCTURE__mapSIZE;
-            this.height = STRUCTURE__mapSIZE;
+            this.width = STRUCTURE_MAP_SIZE;
+            this.height = STRUCTURE_MAP_SIZE;
 
             return this;
         };   
@@ -613,8 +574,8 @@ return class(
             when (
                 top < 0 ||
                 left < 0 ||
-                top + zone.width  > STRUCTURE__mapSIZE ||
-                top + zone.height > STRUCTURE__mapSIZE
+                left + zone.width  > this.width ||
+                top + zone.height > this.height
                 
             ) false;
 
@@ -659,8 +620,33 @@ return class(
             @alongIcenter;
             @preZone;
             if (zones->keycount == 0) ::<= {
-                top  = STRUCTURE__mapSTARTING_Y;
-                left = STRUCTURE__mapSTARTING_X;
+                // fallback
+                match(zone.gateSide) {
+                  (NORTH):::<= {
+                    top = 0;
+                    left = (this.width / 2)->floor;
+                  },
+
+                  (EAST):::<= {
+                    top = (this.height / 2)->floor;
+                    left = this.width - zone.width;
+                  },
+                  
+                  (WEST):::<= {
+                    top = (this.height / 2)->floor;
+                    left = 0;
+                  },
+                  
+                  (SOUTH):::<= {
+                    top = this.height - zone.height;
+                    left = (this.width / 2)->floor;
+                  },
+
+                  default: ::<= {
+                    top  = STRUCTURE_MAP_STARTING_Y;
+                    left = STRUCTURE_MAP_STARTING_X;                                  
+                  }
+                };
             } else ::<= {
                 [::] {
                     forever(do:::{

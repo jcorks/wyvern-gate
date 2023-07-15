@@ -35,7 +35,8 @@
                 equipMod : StatSet.type, // percentages
                 useEffects : Object,
                 equipEffects : Object,
-                pricePercentMod : Number
+                pricePercentMod : Number,
+                rarity: Number
             }
         );
     }
@@ -57,6 +58,7 @@ ItemQuality.database = Database.new(
                 levelMinimum : 1,
                 equipEffects : [
                 ],
+                rarity: 2,
                 
                 useEffects : []
             }
@@ -82,6 +84,8 @@ ItemQuality.database = Database.new(
                 equipEffects : [
                 ],
                 
+                rarity: 3,
+                
                 useEffects : []
             }
         ),
@@ -101,6 +105,8 @@ ItemQuality.database = Database.new(
                 levelMinimum : 1,
                 equipEffects : [
                 ],
+                rarity: 2,
+                
                 
                 useEffects : []
             }
@@ -122,6 +128,8 @@ ItemQuality.database = Database.new(
                 equipEffects : [
                 ],
                 
+                rarity: 5,
+                
                 useEffects : []
             }
         ),
@@ -140,6 +148,7 @@ ItemQuality.database = Database.new(
                 levelMinimum : 1,
                 equipEffects : [
                 ],
+                rarity: 10,
                 
                 useEffects : []
             }
@@ -159,6 +168,7 @@ ItemQuality.database = Database.new(
                 levelMinimum : 1,
                 equipEffects : [
                 ],
+                rarity: 6,
                 
                 useEffects : []
             }
@@ -178,6 +188,7 @@ ItemQuality.database = Database.new(
                 levelMinimum : 1,
                 equipEffects : [
                 ],
+                rarity: 20,
                 
                 useEffects : []
             }
@@ -197,11 +208,53 @@ ItemQuality.database = Database.new(
                 levelMinimum : 1,
                 equipEffects : [
                 ],
+                rarity: 4,
                 
                 useEffects : []
             }
         ),
-        
+
+        ItemQuality.new(
+            data : {
+                name : 'King\'s',
+                description : "The quality of this is as if it were meant for a king.",
+                levelMinimum: 1,
+                equipMod : StatSet.new(
+                    DEF: 50,
+                    ATK: 50,
+                    SPD: 50,
+                    DEX: 50,
+                    INT: 50
+                ),
+                pricePercentMod: 1200,
+                equipEffects : [
+                ],
+                rarity: 25,
+                
+                useEffects : []
+            }
+        ),
+
+        ItemQuality.new(
+            data : {
+                name : 'Queen\'s',
+                description : "The quality of this is as if it were meant for a queen.",
+                levelMinimum: 1,
+                equipMod : StatSet.new(
+                    DEF: 75,
+                    ATK: 75,
+                    SPD: 75,
+                    DEX: 75,
+                    INT: 75
+                ),
+                pricePercentMod: 2500,
+                equipEffects : [
+                ],
+                rarity: 50,
+                
+                useEffects : []
+            }
+        ),
 
         ItemQuality.new(
             data : {
@@ -215,6 +268,7 @@ ItemQuality.database = Database.new(
                     DEX: 100,
                     INT: 100
                 ),
+                rarity: 100,
                 pricePercentMod: 3600,
                 equipEffects : [
                 ],

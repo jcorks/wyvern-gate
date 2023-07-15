@@ -29,7 +29,7 @@ return class(
         this.interface = {    
             reset ::{
                 members = [];
-                inventory = Inventory.new(size:20);
+                inventory = Inventory.new(size:35);
             },
         
             add::(member => Entity.type) {

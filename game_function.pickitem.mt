@@ -20,14 +20,22 @@
 
 
 
-return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt) {
+return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, showGold, goldMultiplier) {
     windowEvent.queueChoices(
         leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
         topWeight:  if (topWeight == empty)  1 else topWeight => Number,
         prompt: if (prompt == empty) 'Choose an item:' else prompt => String,
+        onGetPrompt: onGetPrompt,
         canCancel: canCancel,
         onGetChoices ::{
-            @:names = [...inventory.items]->map(to:::(value) {return value.name;});
+            @:names = [...inventory.items]->map(to:::(value) {
+                when(showGold) ::<= {
+                    @g = value.price * goldMultiplier;
+                    g = g->ceil;
+                    return value.name + '(' + g + 'G)';
+                };
+                return value.name;
+            });
             when(names->keycount == 0) ::<={
                 windowEvent.queueMessage(text: "The inventory is empty.");
             };
