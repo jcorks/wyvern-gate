@@ -29,52 +29,56 @@
     };
 
     const matteList = [
-        'class.ability.mt',
-        'class.battleai.mt',
-        'class.battle.mt',
-        'class.damage.mt',
-        'class.database.mt',
-        'class.dungeoncontroller.mt',
-        'class.dungeonmap.mt',
-        'class.effect.mt',
-        'class.entity.mt',
-        'class.event.mt',
-        'class.interaction.mt',
-        'class.inventory.mt',
-        'class.island.mt',
-        'class.itemcolor.mt',
-        'class.itemmodifier.mt',
-        'class.item.mt',
-        'class.landmark.mt',
-        'class.largemap.mt',
-        'class.location.mt',
-        'class.logtimer.mt',
-        'class.mapbase.mt',
-        'class.map.mt',
-        'class.material.mt',
-        'class.party.mt',
-        'class.personality.mt',
-        'class.profession.mt',
-        'class.scene.mt',
-        'class.species.mt',
-        'class.stateflags.mt',
-        'class.statset.mt',
-        'function.battlemenu.mt',
-        'function.distance.mt',
-        'function.itemmenu.mt',
-        'function.partyoptions.mt',
-        'function.pickitem.mt',
-        'main_external.mt',
-        'singleton.canvas.mt',
-        'singleton.dialogue.mt',
-        'singleton.instance.mt',
-        'singleton.menustack.mt',
-        'singleton.namegen.mt',
-        'singleton.random.mt',
-        'singleton.story.mt',
-        'singleton.world.mt',
-        'struct.battleaction.mt',
-        'struct.mt',
+        'game_class.ability.mt',
+        'game_class.battleai.mt',
+        'game_class.battle.mt',
+        'game_function.correcta.mt',
+        'game_class.damage.mt',
+        'game_class.database.mt',
+        'game_class.dungeoncontroller.mt',
+        'game_class.dungeonmap.mt',
+        'game_class.effect.mt',
+        'game_class.entity.mt',
+        'game_class.entityquality.mt',
+        'game_class.event.mt',
+        'game_class.interaction.mt',
+        'game_class.inventory.mt',
+        'game_class.island.mt',
+        'game_class.itemcolor.mt',
+        'game_class.itemenchant.mt',
+        'game_class.itemenchantcondition.mt',
+        'game_class.item.mt',
+        'game_class.itemquality.mt',
+        'game_class.landmark.mt',
+        'game_class.largemap.mt',
+        'game_class.location.mt',
+        'game_class.logtimer.mt',
+        'game_class.mapbase.mt',
+        'game_class.map.mt',
+        'game_class.structuremap.mt',
+        'game_class.material.mt',
+        'game_class.party.mt',
+        'game_class.personality.mt',
+        'game_class.profession.mt',
+        'game_class.scene.mt',
+        'game_class.species.mt',
+        'game_class.stateflags.mt',
+        'game_class.statset.mt',
+        'game_function.battlemenu.mt',
+        'game_function.distance.mt',
+        'game_function.itemmenu.mt',
+        'game_function.partyoptions.mt',
+        'game_function.pickitem.mt',
+        'main.external.mt',
+        'game_singleton.canvas.mt',
+        'game_singleton.windowevent.mt',
+        'game_singleton.instance.mt',
+        'game_singleton.namegen.mt',
+        'game_singleton.random.mt',
+        'game_singleton.story.mt',
+        'game_singleton.world.mt',
+        'game_struct.battleaction.mt',
+        'game_struct.mt',
         
         'Matte.Core.Class',
         'Matte.Core',
@@ -98,7 +102,7 @@
     );
 
     matte.unhandledError = function(file, line, value) {
-        console.log(matte.heap.valueObjectAccessString(value, 'summary').data);
+        console.log(matte.store.valueObjectAccessString(value, 'summary').data);
     };  
     
 
@@ -106,36 +110,36 @@
 
     matte.setExternalFunction('external_onStartCommit', [], function(fn, args) {
         CANVAS.reset();
-        return matte.heap.createEmpty();        
+        return matte.store.createEmpty();        
     });
 
     matte.setExternalFunction('external_onEndCommit', [],function(fn, args) {
-        return matte.heap.createEmpty();            
+        return matte.store.createEmpty();            
     });
 
 
     matte.setExternalFunction('external_onCommitText', ['a'],function(fn, args) {
         CANVAS.writeCommit(args[0].data);
-        return matte.heap.createEmpty();        
+        return matte.store.createEmpty();        
     });
 
     matte.setExternalFunction('external_onSaveState', ['a'], function(fn, args) {
         //var storage = window['localStorage'];
         storage['wyvernslot'+slot] = args[0].data;
-        return matte.heap.createEmpty();            
+        return matte.store.createEmpty();            
     });
       
     matte.setExternalFunction('external_onLoadState', ['a'], function(fn, args) {
         //var storage = window['localStorage'];
-        return matte.heap.createString(storage['wyvernslot'+args[0].data]);    
+        return matte.store.createString(storage['wyvernslot'+args[0].data]);    
     });      
 
 
     matte.setExternalFunction('external_getInput', [], function(fn, args) {
-        if (LAST_INPUT == -1) return matte.heap.createEmpty();
+        if (LAST_INPUT == -1) return matte.store.createEmpty();
         var out = LAST_INPUT;
         LAST_INPUT = -1;
-        return matte.heap.createNumber(out);
+        return matte.store.createNumber(out);
     });
 
 
@@ -154,7 +158,7 @@
         
         if (loadedCount == matteList.length) {
             clearInterval(task);
-            const update = matte.import('main_external.mt');
+            const update = matte.import('main.external.mt');
             
             
             setInterval(function() {

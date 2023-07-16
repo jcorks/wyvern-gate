@@ -18,11 +18,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-@:Entity = import(module:'class.entity.mt');
-@:Random = import(module:'singleton.random.mt');
+@:Entity = import(module:'game_class.entity.mt');
+@:Random = import(module:'game_singleton.random.mt');
 
-@:canvas = import(module:'singleton.canvas.mt');
-@:instance = import(module:'singleton.instance.mt');
+@:canvas = import(module:'game_singleton.canvas.mt');
+@:instance = import(module:'game_singleton.instance.mt');
 
 
 
@@ -71,15 +71,28 @@
 @:external_getInput      = getExternalFunction(name:'external_getInput');
 
 
-@:windowEvent = import(module:'singleton.windowevent.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 
 
 
 @currentCanvas;
 @canvasChanged = false;
-canvas.onCommit = ::(lines){
+
+@rerender = :: {
+    @:lines = currentCanvas;
+    external_onStartCommit();
+    lines->foreach(do:::(index, line) {
+        external_onCommitText(a:line);
+    });    
+    external_onEndCommit();
+    canvasChanged = false;    
+};
+
+canvas.onCommit = ::(lines, renderNow){
     currentCanvas = lines;
     canvasChanged = true;
+    if (renderNow != empty)
+        rerender();
 };
 
 
@@ -116,15 +129,7 @@ return ::{
     windowEvent.commitInput(input:val);
     
     if (canvasChanged) ::<= {
-        @:lines = currentCanvas;
-        external_onStartCommit();
-        lines->foreach(do:::(index, line) {
-            line->foreach(do:::(i, iter) {
-                external_onCommitText(a:iter.text);
-            });
-        });    
-        external_onEndCommit();
-        canvasChanged = false;    
+        rerender();
     };
 
 };

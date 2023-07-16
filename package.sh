@@ -1,6 +1,7 @@
 #!/bin/sh
 for f in `ls -1`; do 
 	if [[ $f == *"mt" ]]; then 
+		echo ../matte/cli/matte compile "$f" "./export-web/$f"
 		../matte/cli/matte compile "$f" "./export-web/$f"
 	fi
 done
