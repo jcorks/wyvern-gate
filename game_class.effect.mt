@@ -3576,10 +3576,202 @@ Effect.database = Database.new(
                 }
             }
         ),        
+        Effect.new(
+            data : {
+                name : 'Poison Rune',
+                description: 'Damage every turn to holder.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:'Glowing purple runes were imprinted on ' + holder.name + "!");
+                
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:'The poison rune fades from ' + holder.name + '.');
+                },                
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                    windowEvent.queueMessage(text:holder.name + " was hurt by the poison rune!");
+                    
+                    holder.damage(
+                        from: holder,
+                        damage: Damage.new(
+                            amount:random.integer(from:1, to:3),
+                            damageType : Damage.TYPE.POISON,
+                            damageClass: Damage.CLASS.HP
+                        ),dodgeable: false 
+                    );
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+
+        Effect.new(
+            data : {
+                name : 'Destruction Rune',
+                description: 'Causes INT-based damage when rune is released.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:'Glowing orange runes were imprinted on ' + holder.name + "!");
+                
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:'The destruction rune fades from ' + holder.name + '.');
+                },                
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),
+        Effect.new(
+            data : {
+                name : 'Regeneration Rune',
+                description: 'Heals holder every turn.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:'Glowing cyan runes were imprinted on ' + holder.name + "!");
+                
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:'The regeneration rune fades from ' + holder.name + '.');
+                },                
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+                    windowEvent.queueMessage(text:holder.name + " was healed by the regeneration rune.");
+                    holder.heal(amount:holder.stats.HP * 0.03);
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),        
+        Effect.new(
+            data : {
+                name : 'Shield Rune',
+                description: '+100% DEF while active.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                    DEF: 100
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:'Glowing deep-blue runes were imprinted on ' + holder.name + "!");
+                
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:'The shield rune fades from ' + holder.name + '.');
+                },                
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),        
 
 
-        
-        
+        Effect.new(
+            data : {
+                name : 'Cure Rune',
+                description: 'Cures the holder when the rune is released.',
+                battleOnly : true,
+                skipTurn : false,
+                stats: StatSet.new(
+                ),
+                onAffliction : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:'Glowing green runes were imprinted on ' + holder.name + "!");
+                
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                    windowEvent.queueMessage(text:'The cure rune fades from ' + holder.name + '.');
+                },                
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+
+                onDamage : ::(user, item, holder, from, damage) {
+                    
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ), 
         
         //////////////////////////////
         /// STATUS AILMENTS

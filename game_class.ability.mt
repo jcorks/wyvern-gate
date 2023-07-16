@@ -105,7 +105,7 @@ Ability.database = Database.new(
                     description: "Damages a target based on the user's ATK and DEX.",
                     durationTurns: 0,
                     hpCost : 0,
-                    apCost : 0,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -132,7 +132,7 @@ Ability.database = Database.new(
                     description: "Damages a target based on the user's DEX with a 45% chance to paralyze.",
                     durationTurns: 0,
                     hpCost : 0,
-                    apCost : 0,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
@@ -975,6 +975,190 @@ Ability.database = Database.new(
                 }
             ),
             
+            Ability.new(
+                data: {
+                    name: 'Poison Rune',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Places a poison rune on a target, which causes damage to the target each turn.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' casts Poison Rune on ' + targets[0].name + '!'
+                        );
+                        targets[0].addEffect(from:user, name: 'Poison Rune', durationTurns: 10);                        
+                    }
+                }
+            ),            
+            Ability.new(
+                data: {
+                    name: 'Rune Release',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Release all runes.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' releases all the runes on ' + targets[0].name + '!'
+                        );
+                        
+                        @:effects = [...targets[0].effects->filter(by:::(value) <- 
+                            match(value.effect.name) {
+                              (
+                                'Poison Rune',
+                                'Destruction Rune',
+                                'Regeneration Rune',
+                                'Cure Rune',
+                                'Shield Rune'                             
+                              ): true,
+                              default: false
+                            }
+                        )]->map(to:::(value) <- value.effect);
+                        
+                        @toRemove = [];
+                        breakpoint();
+                        effects->foreach(do:::(i, effect) {
+                            toRemove->push(value:effect);
+                            match(effect.name) {                              
+                              ('Destruction Rune'): ::<= {
+                                windowEvent.queueMessage(text:'The release of the Destruction Rune causes it to explode on ' + targets[0].name + '!');
+                                targets[0].damage(from:user, damage:Damage.new(
+                                    amount:user.stats.INT * (1.2),
+                                    damageType:Damage.TYPE.PHYS,
+                                    damageClass:Damage.CLASS.HP
+                                ),dodgeable: false);                
+                              },
+
+                              ('Cure Rune'): ::<= {
+                                windowEvent.queueMessage(text:'The release of the Cure Rune causes it to heal ' + targets[0].name + '!');
+                                targets[0].heal(
+                                    amount: targets[0].stats.HP * 0.3
+                                );                
+                              }
+                            };                      
+                        });
+                        
+                        targets[0].removeEffects(effectBases:toRemove);                        
+                    }
+                }
+            ),            
+            Ability.new(
+                data: {
+                    name: 'Destruction Rune',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Places a destruction rune on a target, which causes INT-based damaged upon release.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' casts Destruction Rune on ' + targets[0].name + '!'
+                        );
+                        targets[0].addEffect(from:user, name: 'Destruction Rune', durationTurns: 10);                        
+                    }
+                }
+            ),       
+
+
+            Ability.new(
+                data: {
+                    name: 'Regeneration Rune',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Places a regeneration rune on a target, which slightly heals a target every turn.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.HEAL,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' casts Regeneration Rune on ' + targets[0].name + '!'
+                        );
+                        targets[0].addEffect(from:user, name: 'Regeneration Rune', durationTurns: 10);                        
+                    }
+                }
+            ),
+            Ability.new(
+                data: {
+                    name: 'Shield Rune',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Places a shield rune on a target, which gives +100% DEF while active.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.HEAL,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' casts Shield Rune on ' + targets[0].name + '!'
+                        );
+                        targets[0].addEffect(from:user, name: 'Shield Rune', durationTurns: 10);                        
+                    }
+                }
+            ),  
+            Ability.new(
+                data: {
+                    name: 'Cure Rune',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Places a cure rune on a target, which heals the target when the rune is released.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 1,
+                    usageHintAI : USAGE_HINT.HEAL,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' casts Cure Rune on ' + targets[0].name + '!'
+                        );
+                        targets[0].addEffect(from:user, name: 'Cure Rune', durationTurns: 10);                        
+                    }
+                }
+            ),             
+
+            Ability.new(
+                data: {
+                    name: 'Multiply Runes',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Doubles all current runes on a target.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 3,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' casts Multiply Runes on ' + targets[0].name + '!'
+                        );
+                        
+                        @:effects = targets[0].effects->filter(by:::(value) <- 
+                            match(value.effect.name) {
+                              (
+                                'Poison Rune',
+                                'Destruction Rune',
+                                'Regeneration Rune',
+                                'Cure Rune',
+                                'Shield Rune'                             
+                              ): true,
+                              default: false
+                            }
+                        );
+                        
+                        effects->foreach(do:::(i, effect) {
+                            targets[0].addEffect(from:user, name:effect.effect.name, durationTurns:10);
+                        });
+                    }
+                }
+            ),  
+
+                             
             Ability.new(
                 data: {
                     name: 'Poison Attack',

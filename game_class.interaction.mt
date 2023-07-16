@@ -713,8 +713,8 @@ Interaction.database = Database.new(
                             onChoice::(choice) {
                                 when(choice == 0) empty;
                                 @:hammer = smiths[choice-1].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
-                                when (hammer == empty || hammer.base.name != 'Hammer')
-                                    windowEvent.queueMessage(text:'Smithing requires a Hammer to be equipped.');
+                                when (hammer == empty || hammer.base.name != 'Smithing Hammer')
+                                    windowEvent.queueMessage(text:'Smithing requires a Smithing Hammer to be equipped.');
 
 
                                 smith = smiths[choice-1];

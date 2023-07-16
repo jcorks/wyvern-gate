@@ -96,6 +96,8 @@
         @islandLevelHint;
         @islandNameHint;
         @islandTierHint;
+        @improvementsLeft;
+        @improvementsStart;
         @equipEffects = [];
         @useEffects = [];
         @ability;
@@ -116,6 +118,7 @@
             else 
                 customName = base_.name
             ;
+            
                 
             @enchantName = match(enchants->keycount) {
               (0) :'',
@@ -136,6 +139,10 @@
                 quality.name + ' ' + baseName + enchantName 
             else
                 baseName + enchantName;
+
+            if (improvementsLeft != improvementsStart) ::<= {
+                customName = customName +  '+'+(improvementsStart - improvementsLeft);
+            };
 
 
         };
@@ -205,6 +212,8 @@
             stats.add(stats:base.equipMod);
             price = base.basePrice;
             price *= 1.05 * base_.weight;
+            improvementsLeft = random.integer(from:10, to:25);
+            improvementsStart = improvementsLeft;
             description = base.description + (if (ability == empty) ' ' else ' If equipped, grants the ability: "' + ability + '". ');
             base.equipEffects->foreach(do:::(i, effect) {
                 equipEffects->push(value:effect);
@@ -268,7 +277,7 @@
                 };
 
                 
-                if (rngEnchantHint != empty && Number.random() < 0.5) ::<= {
+                if (rngEnchantHint != empty && random.try(percentSuccess:30)) ::<= {
                     @enchantCount = random.integer(from:1, to:1+match(story.tier) {
                         (4):    4,
                         (3):    3,
@@ -393,6 +402,10 @@
                 set ::(value) <- price = value
             },
             
+            material : {
+                get ::<- material
+            },
+            
             addEnchant::(mod) {
     
                 enchants->push(value:mod);
@@ -419,6 +432,14 @@
                 enchants->foreach(do:::(i, enchant) {
                     enchant.onTurnCheck(wielder, item:this, battle);
                 });
+            },
+            
+            improvementsLeft : {
+                get::<- improvementsLeft,
+                set::(value) {
+                    improvementsLeft = value;
+                    recalculateName();
+                }
             },
             
             describe ::(by) {
@@ -1199,7 +1220,49 @@ Item.Base.database = Database.new(items: [
 
     }),
 
-    
+    Item.Base.new(data : {
+        name : "Bludgeon",
+        description: 'A basic blunt weapon. The hilt has a $color$ trim.',
+        examine : 'Clubs and bludgeons seem primitive, but are quite effective.',
+        equipType: TYPE.HAND,
+        rarity : 300,
+        canBeColored : true,
+        keyItem : false,
+        weight : 4,
+        basePrice: 40,
+        levelMinimum : 1,
+        tier: 0,
+        hasSize : true,
+        canHaveEnchants : true,
+        hasQuality : true,
+        hasMaterial : true,
+        isUnique : false,
+        useTargetHint : USE_TARGET_HINT.ONE,
+
+        // fatigued
+        equipMod : StatSet.new(
+            ATK: 20,
+            DEF: 15,
+            SPD: -10
+        ),
+        useEffects : [
+            'Fling',
+        ],
+        possibleAbilities : [
+            "Stab",
+            "Doublestrike",
+            "Triplestrike",
+            "Stun"
+        ],
+
+        equipEffects : [],
+        attributes : [
+            ATTRIBUTE.METAL,
+            ATTRIBUTE.WEAPON
+        ],
+        onCreate ::(item, user, creationHint) {}
+
+    }),    
     
     Item.Base.new(data : {
         name : "Shortsword",
@@ -1246,6 +1309,49 @@ Item.Base.database = Database.new(items: [
 
     }),
     
+
+    Item.Base.new(data : {
+        name : "Longsword",
+        description: 'A basic sword. The hilt has a $color$ trim.',
+        examine : 'Swords like these are quite common and are of adequate quality even if simple.',
+        equipType: TYPE.TWOHANDED,
+        rarity : 300,
+        canBeColored : true,
+        keyItem : false,
+        weight : 4,
+        basePrice: 50,
+        levelMinimum : 1,
+        tier: 0,
+        hasSize : true,
+        canHaveEnchants : true,
+        hasQuality : true,
+        hasMaterial : true,
+        isUnique : false,
+        useTargetHint : USE_TARGET_HINT.ONE,
+
+        // fatigued
+        equipMod : StatSet.new(
+            ATK: 35,
+            DEF: 15,
+            SPD: -10
+        ),
+        useEffects : [
+            'Fling',
+        ],
+        possibleAbilities : [
+            "Stab",
+            "Stun"
+        ],
+
+        equipEffects : [],
+        attributes : [
+            ATTRIBUTE.SHARP,
+            ATTRIBUTE.METAL,
+            ATTRIBUTE.WEAPON
+        ],
+        onCreate ::(item, user, creationHint) {}
+
+    }),
     
     Item.Base.new(data : {
         name : "Chakram",
@@ -1336,6 +1442,51 @@ Item.Base.database = Database.new(items: [
         onCreate ::(item, user, creationHint) {}
 
     }),    
+    
+    
+    Item.Base.new(data : {
+        name : "Mace",
+        description: 'A spiked weapon. The hilt has a $color$ trim.',
+        examine : 'Swords like these are quite common and are of adequate quality even if simple.',
+        equipType: TYPE.HAND,
+        rarity : 300,
+        canBeColored : true,
+        keyItem : false,
+        weight : 4,
+        basePrice: 150,
+        levelMinimum : 1,
+        tier: 1,
+        hasSize : true,
+        canHaveEnchants : true,
+        hasQuality : true,
+        hasMaterial : true,
+        isUnique : false,
+        useTargetHint : USE_TARGET_HINT.ONE,
+        possibleAbilities : [
+            "Stab",
+            "Stun",
+            "Counter",
+            "Big Sweep"
+        ],
+
+        // fatigued
+        equipMod : StatSet.new(
+            ATK: 30,
+            DEF: 20,
+            SPD: -10
+        ),
+        useEffects : [
+            'Fling',
+        ],
+        equipEffects : [],
+        attributes : [
+            ATTRIBUTE.SHARP,
+            ATTRIBUTE.METAL,
+            ATTRIBUTE.WEAPON
+        ],
+        onCreate ::(item, user, creationHint) {}
+
+    }),     
 
     Item.Base.new(data : {
         name : "Scimitar",
@@ -1562,9 +1713,9 @@ Item.Base.database = Database.new(items: [
     }),    
     
     Item.Base.new(data : {
-        name : "Hammer",
-        description: 'A basic hammer.',
-        examine : 'Easily available, the hammer is common as a general tool for metalworking.',
+        name : "Smithing Hammer",
+        description: 'A basic hammer meant for smithing.',
+        examine : 'Easily available, this hammer is common as a general tool for metalworking.',
         equipType: TYPE.TWOHANDED,
         rarity : 100,
         weight : 8,

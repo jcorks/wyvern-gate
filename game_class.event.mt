@@ -25,6 +25,7 @@
 @:Entity = import(module:'game_class.entity.mt');
 @:Scene = import(module:'game_class.scene.mt');
 @:correctA = import(module:'game_function.correcta.mt');
+@:story = import(module:'game_singleton.story.mt');
 @:Event = class(
     statics : {
         Base : empty
@@ -418,7 +419,7 @@ Event.Base.database = Database.new(
                         windowEvent.queueMessage(text:'The chest contained ' + itemCount + ' items!'); 
                         [0, itemCount]->for(do:::(index) {
                             @:item = Item.Base.database.getRandomFiltered(
-                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants
+                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= story.tier
                             ).new(rngEnchantHint:true, from:opener);
                             @message = 'The party found ' + correctA(word:item.name);
                             windowEvent.queueMessage(text: message);

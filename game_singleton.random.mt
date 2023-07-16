@@ -175,7 +175,7 @@ return class(
                                 send(message:index);
                             
                         });
-                        return weightTable->keycount-1;
+                        return list->keycount-1;
                     } 
                 ];
             }

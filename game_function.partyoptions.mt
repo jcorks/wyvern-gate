@@ -117,6 +117,7 @@ return ::{
                         when(choice == 0) empty;
                         
                         itemmenu(
+                            inBattle: false,
                             user:world.party.members[choice-1], 
                             party:world.party, 
                             enemies:[],

@@ -826,7 +826,7 @@ Location.Base.database = Database.new(
                     name: 'Pickaxe'
                 ).new(from:location.ownedBy));                
                 location.inventory.add(item:Item.Base.database.find(
-                    name: 'Hammer'
+                    name: 'Smithing Hammer'
                 ).new(from:location.ownedBy));                
             },
             onInteract ::(location) {

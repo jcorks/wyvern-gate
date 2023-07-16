@@ -546,7 +546,7 @@ Landmark.Base.database = Database.new(
                 maxLocations : 5,
                 peaceful : true,
                 guarded : false,
-                dungeonMap : false,
+                dungeonMap : true,
                 possibleLocations : [
                     {name:'ore vein', rarity: 1},
                     //{name:'inn', rarity: 3},
@@ -581,7 +581,7 @@ Landmark.Base.database = Database.new(
                 maxLocations : 10,
                 peaceful : true,
                 guarded : false,
-                dungeonMap : false,
+                dungeonMap : true,
                 possibleLocations : [
 
                 ],
@@ -698,7 +698,7 @@ Landmark.Base.database = Database.new(
                 maxLocations : 5,
                 guarded : false,
                 peaceful: true,
-                dungeonMap : false,
+                dungeonMap : true,
                 possibleLocations : [
                     {name: 'Small Chest', rarity:5},
                 ],
@@ -734,7 +734,7 @@ Landmark.Base.database = Database.new(
                 maxLocations : 2,
                 guarded : false,
                 peaceful: true,
-                dungeonMap : false,
+                dungeonMap : true,
                 possibleLocations : [
                 ],
                 requiredLocations : [

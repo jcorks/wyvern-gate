@@ -106,7 +106,7 @@
         @personality = Personality.database.getRandom();
         @emotionalState;
         @favoritePlace = Location.Base.database.getRandom();
-        @favoriteItem = Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false);
+        @favoriteItem = Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false && value.tier <= story.tier);
         @growth = StatSet.new();
         @enemies_ = [];
         @allies_ = [];
@@ -349,6 +349,10 @@
                     when(index == EQUIP_SLOTS.HAND_R) empty;
                     stats.modRate(stats:equip.equipMod);
                 });
+            },
+            
+            personality : {
+                get ::<- personality
             },
             
             endTurn ::(battle) {

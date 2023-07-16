@@ -349,7 +349,7 @@ Profession.Base.database = Database.new(
 
             Profession.Base.new(data:{
                 name: 'Blacksmith',
-                weaponAffinity: 'Hammer',
+                weaponAffinity: 'Smithing Hammer',
                 description : 'Skilled with metalworking, their skills are revered.', 
                 growth: StatSet.new(
                     HP:  14,
@@ -523,17 +523,15 @@ Profession.Base.database = Database.new(
                 maxKarma : 1000,
                 learnable : true,
                 
-                // runes fade after 5 turns
+                // runes fade after 10 turns
                 abilities : [
-                    /*
                     'Poison Rune', // weak DoT until released
                     'Rune Release', // releases all runes on target
                     'Destruction Rune', // damage when released.
                     'Regeneration Rune', // HoT until released
-                    'Cure Rune', // heal when released
                     'Shield Rune', // DEF + 100% until released
-                    'Multiply Rune' // ddoubles targets Rune charges
-                    */
+                    'Cure Rune', // heal when released
+                    'Multiply Runes' // ddoubles targets Rune charges
                 ],
                 passives : [
                 ]

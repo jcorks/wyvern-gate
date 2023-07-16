@@ -35,11 +35,12 @@ return class(
             add::(member => Entity.type) {
                 // no repeats, please
                 when(members->any(condition::(value) <- value == member)) empty;                
+                /*
                 member.inventory.items->foreach(do:::(index, item) {
                     inventory.add(item);                    
                 });
                 member.inventory.clear();
-
+                */
 
                 members->push(value:member);
                 

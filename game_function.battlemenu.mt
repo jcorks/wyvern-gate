@@ -282,7 +282,7 @@ return ::(
               
               // Item
               (4): ::<= {
-                itemmenu(user, party, enemies, onAct::(action){
+                itemmenu(inBattle:true, user, party, enemies, onAct::(action){
                     commitAction(action);
                 });
               }

@@ -26,7 +26,8 @@
     CHAT : 2,
     GREET : 3,
     ADVENTURE_ACCEPT: 4,
-    ADVENTURE_DENY: 5
+    ADVENTURE_DENY: 5,
+    INAPPROPRIATE_TIME: 6
 };
 
 @:Personality = class(
@@ -104,7 +105,12 @@ Personality.database = Database.new(items: [
             SPEECH_EVENT.ADVENTURE_DENY : [
                 "Mmm, no thanks.",
                 "Sounds nice, but no thanks."
-            ]  
+            ],
+            
+            SPEECH_EVENT.INAPPROPRIATE_TIME : [
+                "I don't think nows the right time for that...",
+                "Maybe later would be better for this."
+            ],
 
 
         }
@@ -157,7 +163,13 @@ Personality.database = Database.new(items: [
             SPEECH_EVENT.ADVENTURE_ACCEPT : [
                "Fine, whatever.",
                "Sure okay, just stop talking."
-            ]  
+            ],
+
+            SPEECH_EVENT.INAPPROPRIATE_TIME : [
+                "What are you doing this now for??",
+                "We don't have time for this!"
+            ],
+
               
         }
     
@@ -206,7 +218,10 @@ Personality.database = Database.new(items: [
             SPEECH_EVENT.ADVENTURE_DENY : [
                 "...I'm sorry..",
                 "...N-no..."
-            ]  
+            ], 
+            SPEECH_EVENT.INAPPROPRIATE_TIME : [
+                "... I don't think we should do this now.."
+            ],
             
         }
     
@@ -254,7 +269,11 @@ Personality.database = Database.new(items: [
             SPEECH_EVENT.ADVENTURE_DENY : [
                 "Mmm, no thanks.",
                 "Sounds nice, but no thanks."
-            ]  
+            ],
+            SPEECH_EVENT.INAPPROPRIATE_TIME : [
+                "If you could find another time to do that, that would be great...",
+                "Why now, of all times?!"
+            ],
             
         }
     
@@ -298,7 +317,10 @@ Personality.database = Database.new(items: [
 
             SPEECH_EVENT.ADVENTURE_DENY : [
                 "Mmm, thanks for the offer but I got plenty to tend to here. Sorry, hon."
-            ]  
+            ],  
+            SPEECH_EVENT.INAPPROPRIATE_TIME : [
+                "I don't think we should do this right now."
+            ],
             
                
         }
@@ -345,7 +367,11 @@ Personality.database = Database.new(items: [
             SPEECH_EVENT.ADVENTURE_ACCEPT : [
                "Fine, whatever.",
                "Sure okay, just stop talking."
-            ]              
+            ],
+            SPEECH_EVENT.INAPPROPRIATE_TIME : [
+                "What are you doing this now for??",
+                "We don't have time for this!"
+            ],
         }
     
     }),
@@ -385,11 +411,15 @@ Personality.database = Database.new(items: [
 
             SPEECH_EVENT.ADVENTURE_ACCEPT : [
                "...Yes."
-            ]              
+            ],
+            SPEECH_EVENT.INAPPROPRIATE_TIME : [
+               "...Not now."
+            ],
+                         
         }
     
     }),
-
+    /*
     Personality.new(data:{
         name: 'Unpredictable',
         growth : StatSet.new(
@@ -429,11 +459,17 @@ Personality.database = Database.new(items: [
 
             SPEECH_EVENT.ADVENTURE_ACCEPT : [
                "YEAH LETS GO"
-            ]                  
+            ],
+            
+            SPEECH_EVENT.INAPPROPRIATE_TIME : [
+                "What are you doing this now for??",
+                "We don't have time for this!"
+            ],
+            
         }
     
     }),
-    
+    */
     
     Personality.new(data:{
         name: 'Inquisitive',
@@ -471,7 +507,12 @@ Personality.database = Database.new(items: [
 
             SPEECH_EVENT.ADVENTURE_ACCEPT : [
                "Could be a good time!"
-            ]                   
+            ],
+            
+            SPEECH_EVENT.INAPPROPRIATE_TIME : [
+                "Why now, of all times?"
+            ],
+                             
         }
     
     }),
@@ -511,7 +552,10 @@ Personality.database = Database.new(items: [
 
             SPEECH_EVENT.ADVENTURE_ACCEPT : [
                "Could be a good time!"
-            ]                 
+            ],            
+            SPEECH_EVENT.INAPPROPRIATE_TIME : [
+                "Why now, of all times?"
+            ],
         }
     
     })

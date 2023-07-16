@@ -136,7 +136,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 350,
-                tier : 2,
+                tier : 0,
                 
                 triggerConditionEffects : [
                     'Trigger Protect' // 1 HP
@@ -180,7 +180,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 350,
-                tier : 2,
+                tier : 0,
                 
                 triggerConditionEffects : [
                     'Trigger Regen'
@@ -201,7 +201,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 350,
-                tier : 1,
+                tier : 0,
                 
                 triggerConditionEffects : [
                     'Trigger Spikes'
@@ -245,7 +245,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 250,
-                tier : 1,
+                tier : 0,
                 
                 triggerConditionEffects : [
                     'Trigger Shield' 
@@ -373,7 +373,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 200,
-                tier : 0,
+                tier : 1,
                 
                 triggerConditionEffects : [
                 ],
@@ -394,7 +394,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 200,
-                tier : 0,
+                tier : 1,
                 
                 triggerConditionEffects : [
                 ],
@@ -415,7 +415,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 200,
-                tier : 0,
+                tier : 1,
                 
                 triggerConditionEffects : [
                 ],
@@ -436,7 +436,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 200,
-                tier : 0,
+                tier : 1,
                 
                 triggerConditionEffects : [
                 ],
@@ -457,7 +457,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 200,
-                tier : 0,
+                tier : 1,
                 
                 triggerConditionEffects : [
                 ],
@@ -478,7 +478,7 @@ ItemEnchant.Base.database = Database.new(
                 ),
                 levelMinimum : 1,
                 priceMod: 200,
-                tier : 0,
+                tier : 1,
                 
                 triggerConditionEffects : [
                 ],

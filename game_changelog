@@ -83,4 +83,6 @@
 - New structure map featuring visitable buildings
 - Added Queens and Kings quality items. Added rarity to quality.
 - Added custom RNG for future world seed integration.
+- Added item improvement mechanic 
+- Implemented skills for Runologist
 
