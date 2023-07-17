@@ -633,18 +633,18 @@ Landmark.Base.database = Database.new(
                 symbol : 'O',
                 rarity : 100000,      
                 isUnique : true,
-                minLocations : 2,
+                minLocations : 1,
                 maxLocations : 2,
                 peaceful: false,
                 guarded : false,
                 dungeonMap : true,
                 possibleLocations : [
-                    {name: 'Stairs Down', rarity:1},
+//                    {name: 'Stairs Down', rarity:1},
                     {name: 'Small Chest', rarity:3},
                 ],
                 requiredLocations : [
 
-
+                    'Stairs Down',
                     'Stairs Down',
                     'Small Chest'
                 ],

@@ -175,12 +175,7 @@
                 );
             });
             
-            if (profession.base.weaponAffinity == equips[EQUIP_SLOTS.HAND_L].base.name)
-                this.addEffect(
-                    from:this,
-                    name:'Weapon Affinity',
-                    durationTurns: -1 
-                );      
+      
         };
 
 
@@ -798,10 +793,22 @@
             
             addEffect::(from => Entity.type, name => String, durationTurns => Number, item) {
                 if (durationTurns == empty) durationTurns = -1;
+                
+                @:effect = Effect.database.find(name);
+                @:existingEffectIndex = effects->findIndex(query::(value) <- value.effect.name == name);               
+                when (effect.stackable == false && existingEffectIndex != -1) ::<= {
+                    // reset duration of effect and source.
+                    @einst = effects[existingEffectIndex];
+                    einst.duration = durationTurns;
+                    einst.turnIndex = 0;
+                    einst.item = item;
+                    einst.from = from;
+                };
+                
                 @einst = {
                     from: from,
                     item : item,
-                    effect: Effect.database.find(name),
+                    effect : effect,
                     duration: durationTurns,
                     turnIndex: 0
                 };
@@ -906,7 +913,6 @@
             },
             
             equip ::(item => none->type, slot => Number, silent, inventory => Inventory.type) {
-                breakpoint();
                 this.recalculateStats();
                 @:oldstats = StatSet.new();
                 oldstats.add(stats: this.stats);
@@ -918,6 +924,8 @@
 
 
                 @:old = this.unequip(slot, silent:true);                
+
+
                 if (old != empty)
                     inventory.add(item:old);
 
@@ -936,6 +944,15 @@
                         durationTurns: -1
                     );
                 });
+
+                if (profession.base.weaponAffinity == equips[EQUIP_SLOTS.HAND_L].base.name)
+                    this.addEffect(
+                        from:this,
+                        name:'Weapon Affinity',
+                        durationTurns: -1 
+                    );
+
+
 
                 inventory.remove(item);
                 
@@ -983,6 +1000,11 @@
                 } else ::<={
                     equips[slot] = none;                
                 };
+                if (profession.base.weaponAffinity == current.base.name)
+                    effects->remove(key:effects->findIndex(query::(value) <- value.effect.name == 'Weapon Affinity'));
+                
+
+
                 
                 current.equipEffects->foreach(do:::(i, effect) {
                     @:effectObj = effects->filter(by:::(value) <- value.effect.name == effect)[0];
@@ -994,6 +1016,7 @@
                     
                     effects->remove(key:effects->findIndex(value:effectObj));
                 });
+                
                 
                 this.recalculateStats();
                 return current;

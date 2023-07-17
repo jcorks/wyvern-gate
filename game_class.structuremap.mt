@@ -392,13 +392,14 @@
                                 else  
                                     y1 -= 1;                              
                               }
-                            };
-                            
+                            };                            
                             when(slots[x0][y0] != false) empty;
                             //when(slots[x1][y1] != false) empty;
 
                             @:space0 = getSpaceBySlot(x:x0, y:y0);
                             //@:space1 = getSpaceBySlot(x:x1, y:y1);
+
+
                             
                             slots[x0][y0] = true;
                             //slots[x1][y1] = true;

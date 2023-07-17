@@ -478,13 +478,13 @@ return class(
 
                     
 
-                    
+                    /*
                     [0, 20]->for(do:::(i) {
                         party.inventory.add(item:Item.Base.database.getRandomFiltered(
                             filter:::(value) <- value.isUnique == false && value.tier <= story.tier
                         ).new(from:island.newInhabitant(),rngEnchantHint:true));
                     });
-                    
+                    */
                     
                     
 
@@ -492,6 +492,20 @@ return class(
                     @:crystal = Item.Base.database.find(name:'Skill Crystal').new(from:p0);
                     party.inventory.add(item:crystal);
                 });
+                @:sword = Item.Base.database.find(name:'Shortsword').new(
+                    from:p0,
+                    materialHint: 'Hardstone',
+                    rngEnchantHint: false
+                );
+
+                @:tome = Item.Base.database.find(name:'Tome').new(
+                    from:p0,
+                    materialHint: 'Hardstone',
+                    rngEnchantHint: false,
+                    abilityHint: 'Cure'
+                );
+                party.inventory.add(item:sword);
+                party.inventory.add(item:tome);
 
 
 

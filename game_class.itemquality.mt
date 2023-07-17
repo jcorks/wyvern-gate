@@ -196,6 +196,28 @@ ItemQuality.database = Database.new(
 
         ItemQuality.new(
             data : {
+                name : 'Apprentice\'s',
+                description : "This seems to be the work of a master's apprentice.",
+                levelMinimum: 1,
+                equipMod : StatSet.new(
+                    DEF: 10,
+                    ATK: 10,
+                    SPD: 10,
+                    DEX: 10,
+                    INT: 10
+                ),
+                pricePercentMod: 110,
+                equipEffects : [
+                ],
+                rarity: 25,
+                
+                useEffects : []
+            }
+        ),
+
+
+        ItemQuality.new(
+            data : {
                 name : 'Standard',
                 description : 'The quality of this seems to meet some sort of standard stock, perhaps of military grade.',
                 equipMod : StatSet.new(

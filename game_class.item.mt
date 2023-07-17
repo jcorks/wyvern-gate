@@ -201,20 +201,24 @@
             ])();
         };
         
-        this.constructor = ::(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint) {
+        this.constructor = ::(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint, abilityHint) {
             when(state != empty) ::<= {
                 this.state = state;
                 return this;
             };
             
-            ability = random.pickArrayItem(list:base.possibleAbilities);
+            ability = if (abilityHint) abilityHint else random.pickArrayItem(list:base.possibleAbilities);
             base_ = base;
             stats.add(stats:base.equipMod);
             price = base.basePrice;
             price *= 1.05 * base_.weight;
             improvementsLeft = random.integer(from:10, to:25);
             improvementsStart = improvementsLeft;
-            description = base.description + (if (ability == empty) ' ' else ' If equipped, grants the ability: "' + ability + '". ');
+            
+            description = base.description + ' ';
+            if (base.hasSize)   
+                assignSize();
+            description = description + (if (ability == empty) '' else 'If equipped, grants the ability: "' + ability + '". ');
             base.equipEffects->foreach(do:::(i, effect) {
                 equipEffects->push(value:effect);
             });
@@ -228,7 +232,7 @@
             if (base.hasQuality) ::<= {
                 // random chance to have a maker's emblem on it, indicating 
                 // made with love and care
-                if (Number.random() < 0.3) ::<= {
+                if (random.try(percentSuccess:15)) ::<= {
                     description = description + 'The maker\'s emblem is engraved on it. ';
                     stats.add(stats:StatSet.new(
                         ATK:10,
@@ -293,9 +297,6 @@
                     });
                 };
             };
-            
-            if (base.hasSize)   
-                assignSize();
 
 
             if (base.canBeColored) ::<= {
@@ -614,8 +615,8 @@ Item.Base = class(
             }
         );
         this.interface = {
-            new ::(from, creationHint, enchantHint, materialHint, rngEnchantHint, qualityHint, state, colorHint) {
-                return Item.new(base:this, from, creationHint, enchantHint, materialHint, rngEnchantHint, qualityHint, state, colorHint);
+            new ::(from, creationHint, enchantHint, materialHint, rngEnchantHint, qualityHint, state, colorHint, abilityHint) {
+                return Item.new(base:this, from, creationHint, enchantHint, materialHint, rngEnchantHint, qualityHint, state, colorHint, abilityHint);
             },
             
 
@@ -1445,9 +1446,9 @@ Item.Base.database = Database.new(items: [
     
     
     Item.Base.new(data : {
-        name : "Mace",
+        name : "Morning Star",
         description: 'A spiked weapon. The hilt has a $color$ trim.',
-        examine : 'Swords like these are quite common and are of adequate quality even if simple.',
+        examine : '',
         equipType: TYPE.HAND,
         rarity : 300,
         canBeColored : true,

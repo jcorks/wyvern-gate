@@ -43,7 +43,8 @@
                 onRemoveEffect : Function, //Called once when removed. All effects will be removed at some point.
                 onDamage : Function, // when the holder of the effect is hurt
                 onNextTurn : Function, //< on end phase of turn once added as an effect. Not called if duration is 0
-                onStatRecalculate : Function // on start of a turn. Not called if duration is 0
+                onStatRecalculate : Function, // on start of a turn. Not called if duration is 0
+                stackable : Boolean // whether multiple of the same effect can coexist
             }   
         );
     }
@@ -64,6 +65,7 @@ Effect.database = Database.new(
                 description: '',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -90,7 +92,7 @@ Effect.database = Database.new(
                 },
                 onStatRecalculate : ::(user, item, holder, stats) {
                     
-                }
+                },
             }
         ),
         
@@ -108,6 +110,7 @@ Effect.database = Database.new(
                 description: 'Reduces damage by 40%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(
@@ -153,6 +156,7 @@ Effect.database = Database.new(
                 description: 'Reduces damage by 90%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(
@@ -193,6 +197,7 @@ Effect.database = Database.new(
                 description: 'ATK -50%, DEF +75%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(ATK:-50, DEF:75),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(
@@ -232,6 +237,7 @@ Effect.database = Database.new(
                 description: 'DEF -50%, ATK +75%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(DEF:-50, ATK:75),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(
@@ -270,6 +276,7 @@ Effect.database = Database.new(
                 description: 'ATK -50%, SPD +75%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(ATK:-50, SPD:75),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(
@@ -308,6 +315,7 @@ Effect.database = Database.new(
                 description: 'SPD -50%, DEF +75%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(SPD:-50, DEF:75),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(
@@ -347,6 +355,7 @@ Effect.database = Database.new(
                 description: 'SPD -50%, INT +75%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(SPD:-50, INT:75),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(
@@ -386,6 +395,7 @@ Effect.database = Database.new(
                 description: 'SPD -30%, DEF -30%, ATK +100%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(SPD:-30, DEF:-30, ATK:100),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(
@@ -424,6 +434,7 @@ Effect.database = Database.new(
                 description: 'Attack retaliation',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(
@@ -477,6 +488,7 @@ Effect.database = Database.new(
                 description: 'Dodges attacks and retaliates.',
                 battleOnly : true,
                 skipTurn : true,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(
@@ -529,6 +541,7 @@ Effect.database = Database.new(
                 description: '%50 chance damage nullify when from others.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(
@@ -575,6 +588,7 @@ Effect.database = Database.new(
                 description: 'Guarantees next damage from user is x3',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(text:user.name + " snuck behind " + holder.name + '!');
@@ -617,6 +631,7 @@ Effect.database = Database.new(
                 description: 'INT +100%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                     INT: 100
                 ),
@@ -655,6 +670,7 @@ Effect.database = Database.new(
                 description: 'DEF +100%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                     DEF: 100
                 ),
@@ -692,6 +708,7 @@ Effect.database = Database.new(
                 description: 'DEF +10%, 30% chance to block',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                     DEF: 10
                 ),
@@ -733,6 +750,7 @@ Effect.database = Database.new(
                 description: 'Casts Protect',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -772,6 +790,7 @@ Effect.database = Database.new(
                 description: 'Allows the user to evade all attacks for the next turn.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -810,6 +829,7 @@ Effect.database = Database.new(
                 description: 'Allows the user to evade all attacks.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -847,6 +867,7 @@ Effect.database = Database.new(
                 description: 'Slightly heals wounds.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -885,6 +906,7 @@ Effect.database = Database.new(
                 description: 'Casts Spikes',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -924,6 +946,7 @@ Effect.database = Database.new(
                 description: 'DEF +10%, light damage when attacked.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                     DEF: 10
                 ),
@@ -966,6 +989,7 @@ Effect.database = Database.new(
                 description: 'Slightly recovers AP.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -1004,6 +1028,7 @@ Effect.database = Database.new(
                 description: 'Casts Shield',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -1044,6 +1069,7 @@ Effect.database = Database.new(
                 description: 'Triggers a boost in strength.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -1082,6 +1108,7 @@ Effect.database = Database.new(
                 description: 'ATK +70%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(
                     ATK:70
                 ),
@@ -1119,6 +1146,7 @@ Effect.database = Database.new(
                 description: 'Triggers a boost in defense.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -1157,6 +1185,7 @@ Effect.database = Database.new(
                 description: 'DEF +70%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(
                     DEF:70
                 ),
@@ -1194,6 +1223,7 @@ Effect.database = Database.new(
                 description: 'Triggers a boost in mental acuity.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -1232,6 +1262,7 @@ Effect.database = Database.new(
                 description: 'INT +70%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(
                     INT:70
                 ),
@@ -1269,6 +1300,7 @@ Effect.database = Database.new(
                 description: 'Triggers a boost in dexterity.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -1307,6 +1339,7 @@ Effect.database = Database.new(
                 description: 'DEX +70%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(
                     DEX:70
                 ),
@@ -1344,6 +1377,7 @@ Effect.database = Database.new(
                 description: 'Triggers a boost in speed.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -1382,6 +1416,7 @@ Effect.database = Database.new(
                 description: 'SPD +70%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(
                     SPD:70
                 ),
@@ -1421,6 +1456,7 @@ Effect.database = Database.new(
                 description: 'User has their profession\'s ideal weapon. ATK,DEF,SPD,INT,DEX +60%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                     ATK: 60,
                     DEF: 60,
@@ -1460,6 +1496,7 @@ Effect.database = Database.new(
                 description: 'DEF +40%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                     DEF: 50
                 ),
@@ -1496,6 +1533,7 @@ Effect.database = Database.new(
                 description: 'DEF +40%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                     DEF: 50
                 ),
@@ -1532,8 +1570,9 @@ Effect.database = Database.new(
                 description: 'ATK +40%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
-                    DEF: 50
+                    ATK: 40
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -1569,6 +1608,7 @@ Effect.database = Database.new(
                 description: 'Skips turn and, instead, attacks a random enemy. ATK,DEF +70%.',
                 battleOnly : true,
                 skipTurn : true,
+                stackable: false,
                 stats: StatSet.new(
                     DEF: 70,
                     ATK: 70
@@ -1615,8 +1655,9 @@ Effect.database = Database.new(
                 description: 'ATK +100%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
-                    DEF: 100
+                    ATK: 100
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -1651,6 +1692,7 @@ Effect.database = Database.new(
                 description: 'DEF +100%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                     DEF: 100
                 ),
@@ -1688,6 +1730,7 @@ Effect.database = Database.new(
                 description: 'DEF +100%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                     DEF: 100
                 ),
@@ -1724,6 +1767,7 @@ Effect.database = Database.new(
                 description: 'Heals 5% HP every turn',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -1759,6 +1803,7 @@ Effect.database = Database.new(
                 description: 'Heals 5% HP every turn',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -1794,6 +1839,7 @@ Effect.database = Database.new(
                 description: 'Heals 15% HP every turn',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -1829,6 +1875,7 @@ Effect.database = Database.new(
                 description: 'Heals 15% HP every turn',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -1864,6 +1911,7 @@ Effect.database = Database.new(
                 description: 'If hurt while HP is 0, the damage is nullified and this effect disappears.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -1911,6 +1959,7 @@ Effect.database = Database.new(
                 description: 'The item is destroyed in the process of its effects',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(
@@ -1948,6 +1997,7 @@ Effect.database = Database.new(
                 description: 'The item is destroyed in the process of misuse or strain',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     if (Number.random() > 0.5) ::<= {
@@ -1987,6 +2037,7 @@ Effect.database = Database.new(
                 description: 'The item is violently lunged at a target, likely causing damage. The target may catch the item.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(
@@ -2046,6 +2097,7 @@ Effect.database = Database.new(
                 description: 'Heals 100% of HP.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     holder.heal(amount:holder.stats.HP);
@@ -2080,6 +2132,7 @@ Effect.database = Database.new(
                 description: 'Heals 100% of AP.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     holder.healAP(amount:holder.stats.AP);
@@ -2114,6 +2167,7 @@ Effect.database = Database.new(
                 description: 'Opening gives a fair number of G.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     @:world = import(module:'game_singleton.world.mt');
@@ -2151,6 +2205,7 @@ Effect.database = Database.new(
                 description: 'Chance to cook a meal after battle.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2200,6 +2255,7 @@ Effect.database = Database.new(
                 description: 'Looks on the ground for G after battle.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2248,6 +2304,7 @@ Effect.database = Database.new(
                 description: 'Scavenges for alchemist ingredients.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2302,6 +2359,7 @@ Effect.database = Database.new(
                 description: 'ATK +30%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(ATK:30),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2337,6 +2395,7 @@ Effect.database = Database.new(
                 description: 'ATK +30%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(ATK:30),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2370,6 +2429,7 @@ Effect.database = Database.new(
                 description: 'ATK +25%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(ATK:25),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2403,6 +2463,7 @@ Effect.database = Database.new(
                 description: 'Vines grow on target. SPD -10%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,                
                 stats: StatSet.new(SPD:-10),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2438,6 +2499,7 @@ Effect.database = Database.new(
                 description: 'Every turn takes poison damage. SPD -10%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(SPD:-10),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2477,6 +2539,7 @@ Effect.database = Database.new(
                 description: 'Vines grow on target. SPD -10%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(SPD:-10),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2512,6 +2575,7 @@ Effect.database = Database.new(
                 description: 'Every turn 40% chance to trip. SPD -10%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(SPD:-10),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2550,6 +2614,7 @@ Effect.database = Database.new(
                 description: 'Vines grow on target. SPD -10%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(SPD:-10),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2585,6 +2650,7 @@ Effect.database = Database.new(
                 description: 'Every turn heal 5% HP. SPD -10%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(SPD:-10),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2622,6 +2688,7 @@ Effect.database = Database.new(
                 description: 'Takes hits for another.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2670,6 +2737,7 @@ Effect.database = Database.new(
                 description: 'All damage is nullified.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + ' is strongly guarding themself');
@@ -2708,6 +2776,7 @@ Effect.database = Database.new(
                 description: 'Unable to act.',
                 battleOnly : true,
                 skipTurn : true,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2744,6 +2813,7 @@ Effect.database = Database.new(
                 description: 'Unable to act.',
                 battleOnly : true,
                 skipTurn : true,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2780,6 +2850,7 @@ Effect.database = Database.new(
                 description: 'Unable to act.',
                 battleOnly : true,
                 skipTurn : true,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2813,6 +2884,7 @@ Effect.database = Database.new(
                 description: 'Unable to act.',
                 battleOnly : true,
                 skipTurn : true,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(
@@ -2850,6 +2922,7 @@ Effect.database = Database.new(
                 description: 'Unable to act.',
                 battleOnly : true,
                 skipTurn : true,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2883,6 +2956,7 @@ Effect.database = Database.new(
                 description: 'Unable to act.',
                 battleOnly : true,
                 skipTurn : true,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + ' was stunned!');
@@ -2914,11 +2988,12 @@ Effect.database = Database.new(
         Effect.new(
             data : {
                 name : 'Sharpen',
-                description: 'ATK +5%',
+                description: 'ATK +20%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(
-                    ATK: 5
+                    ATK: 20
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2948,11 +3023,12 @@ Effect.database = Database.new(
         Effect.new(
             data : {
                 name : 'Weaken Armor',
-                description: 'DEF -5%',
+                description: 'DEF -20%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(
-                    DEF: -5
+                    DEF: -20
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -2982,11 +3058,12 @@ Effect.database = Database.new(
         Effect.new(
             data : {
                 name : 'Dull Weapon',
-                description: 'ATK -5%',
+                description: 'ATK -20%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(
-                    ATK: -5
+                    ATK: -20
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -3016,11 +3093,12 @@ Effect.database = Database.new(
         Effect.new(
             data : {
                 name : 'Strengthen Armor',
-                description: 'DEF +5%',
+                description: 'DEF +20%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(
-                    DEF: 5
+                    DEF: 20
                 ),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -3054,6 +3132,7 @@ Effect.database = Database.new(
                 description: 'INT,DEF,ATK +40% if night time.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                     
                 ),
@@ -3097,6 +3176,7 @@ Effect.database = Database.new(
                 description: 'SPD,DEF,ATK +35%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                     ATK:35,
                     DEF:35,
@@ -3133,6 +3213,7 @@ Effect.database = Database.new(
                 description: 'DEF + 50%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                     
                 ),
@@ -3170,6 +3251,7 @@ Effect.database = Database.new(
                 description: 'INT,DEF,ATK +40% if day time.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(
                     
                 ),
@@ -3214,6 +3296,7 @@ Effect.database = Database.new(
                 description: '20% chance to deflect attack then break weapon.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -3252,9 +3335,10 @@ Effect.database = Database.new(
         Effect.new(
             data : {
                 name : 'Flight',
-                description: '20% chance to deflect attack then break weapon.',
+                description: 'Dodges attacks.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -3292,6 +3376,7 @@ Effect.database = Database.new(
                 description: 'SPD, ATK +25% for each slain.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -3330,6 +3415,7 @@ Effect.database = Database.new(
                 description: 'SPD, ATK +25%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(
                     ATK:25,
                     SPD:25
@@ -3369,6 +3455,7 @@ Effect.database = Database.new(
                 description: 'If attacked by user, 1.5x damage.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -3404,6 +3491,7 @@ Effect.database = Database.new(
                 description: 'The item has a chance of being used up',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     if (Number.random() > 0.7) ::<={
@@ -3447,6 +3535,7 @@ Effect.database = Database.new(
                 description: 'Damage every turn to holder. ATK,DEF,SPD -20%.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(
                     ATK: -20,
                     DEF: -20,
@@ -3497,6 +3586,7 @@ Effect.database = Database.new(
                 description: 'Acquire a new skill',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(
                     
                 ),
@@ -3539,6 +3629,7 @@ Effect.database = Database.new(
                 description: 'Damage to holder.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(text:"The " + item.name + " explodes on " + user.name + "!");
@@ -3582,6 +3673,7 @@ Effect.database = Database.new(
                 description: 'Damage every turn to holder.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(text:'Glowing purple runes were imprinted on ' + holder.name + "!");
@@ -3628,6 +3720,7 @@ Effect.database = Database.new(
                 description: 'Causes INT-based damage when rune is released.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(text:'Glowing orange runes were imprinted on ' + holder.name + "!");
@@ -3664,6 +3757,7 @@ Effect.database = Database.new(
                 description: 'Heals holder every turn.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(text:'Glowing cyan runes were imprinted on ' + holder.name + "!");
@@ -3701,6 +3795,7 @@ Effect.database = Database.new(
                 description: '+100% DEF while active.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(
                     DEF: 100
                 ),
@@ -3741,6 +3836,7 @@ Effect.database = Database.new(
                 description: 'Cures the holder when the rune is released.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(
                 ),
                 onAffliction : ::(user, item, holder) {
@@ -3782,6 +3878,7 @@ Effect.database = Database.new(
                 description: 'Damage every turn to holder.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + " was poisoned!");
@@ -3828,6 +3925,7 @@ Effect.database = Database.new(
                 description: '50% chance to miss attacks.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + " was blinded!");
@@ -3869,6 +3967,7 @@ Effect.database = Database.new(
                 description: '50% chance to get damage each turn.',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + " was burned!");
@@ -3914,6 +4013,7 @@ Effect.database = Database.new(
                 description: 'Unable to act.',
                 battleOnly : true,
                 skipTurn : true,
+                stackable: false,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                     windowEvent.queueMessage(text:holder.name + " was frozen");
@@ -3950,6 +4050,7 @@ Effect.database = Database.new(
                 description: 'SPD,ATK -100%',
                 battleOnly : true,
                 skipTurn : true,
+                stackable: false,
                 stats: StatSet.new(
                     SPD: -100,
                     ATK: -100
@@ -3989,6 +4090,7 @@ Effect.database = Database.new(
                 description: 'Unable to act. DEF -50%',
                 battleOnly : true,
                 skipTurn : true,
+                stackable: false,
                 stats: StatSet.new(
                     DEF: -50
                 ),
@@ -4027,6 +4129,7 @@ Effect.database = Database.new(
                 description: 'Weakness to Fire, Ice, and Thunder damage by 100%',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -4071,6 +4174,7 @@ Effect.database = Database.new(
                 battleOnly : true,
                 skipTurn : false,
                 stats: StatSet.new(),
+                stackable: false,
                 onAffliction : ::(user, item, holder) {
                 },
                 
@@ -4119,6 +4223,7 @@ Effect.database = Database.new(
                 description: 'Gives fire damage and gives 50% ice resist',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -4160,6 +4265,7 @@ Effect.database = Database.new(
                 description: 'Gives ice damage and gives 50% fire resist',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -4201,6 +4307,7 @@ Effect.database = Database.new(
                 description: 'Gives thunder damage and gives 50% thunder resist',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -4242,6 +4349,7 @@ Effect.database = Database.new(
                 description: 'Gives poison damage and gives 50% poison resist',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -4285,6 +4393,7 @@ Effect.database = Database.new(
                 description: 'Gives light damage and gives 50% dark resist',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
@@ -4325,6 +4434,7 @@ Effect.database = Database.new(
                 description: 'Gives dark damage and gives 50% light resist',
                 battleOnly : true,
                 skipTurn : false,
+                stackable: true,
                 stats: StatSet.new(),
                 onAffliction : ::(user, item, holder) {
                 },
