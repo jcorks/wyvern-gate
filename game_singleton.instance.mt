@@ -450,10 +450,6 @@ return class(
                     landmark.discover(); 
                 });
                 
-                island.map.setPointer(
-                    x: island.sizeW * Number.random(),
-                    y: island.sizeH * Number.random()
-                );               
                 
                 
                 @:Species = import(module:'game_class.species.mt');
@@ -558,6 +554,11 @@ return class(
                 island.map.title = "(Map of " + island.name + ')';
 
 
+                @somewhere = island.map.getAPosition();
+                island.map.setPointer(
+                    x: somewhere.x,
+                    y: somewhere.y
+                );               
 
 
                 windowEvent.queueChoices(

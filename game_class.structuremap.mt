@@ -46,6 +46,7 @@
 @:STRUCTURE_MAP_SIZE = 200;
 @:ZONE_CONTENT_PADDING = 2;
 @:STRUCTURE_MAP_FILLER_MINIMUM_RATE = 0.8;
+@:STRUCTURE_MAP_PADDING = 20;
 
 
 @Zone = class(
@@ -140,6 +141,9 @@
             @windowEvent = import(module:'game_singleton.windowevent.mt');
             
             @:interact = ::{
+                windowEvent.queueMessage(
+                    text: 'Arrived at the ' + location.name + '.'
+                );
                 location.interact();
             };
             
@@ -158,6 +162,9 @@
 
 
             @:interact = ::{
+                windowEvent.queueMessage(
+                    text: 'Arrived at the ' + location.name + '.'
+                );
                 location.interact();
             };
             
@@ -231,6 +238,9 @@
             */
 
             @:interact = ::{
+                windowEvent.queueMessage(
+                    text: 'Arrived at the ' + location.name + '.'
+                );
                 location.interact();
             };
 
@@ -297,6 +307,9 @@
             });
 
             @:interact = ::{
+                windowEvent.queueMessage(
+                    text: 'Arrived at the ' + location.name + '.'
+                );
                 location.interact();
             };
 
@@ -554,8 +567,8 @@ return class(
             if (mapHint.hasZoningWalls != empty) hasZoningWalls = mapHint.hasZoningWalls;
             if (mapHint.hasFillerBuildings != empty) hasFillerBuildings = mapHint.hasFillerBuildings;
 
-            this.width = STRUCTURE_MAP_SIZE;
-            this.height = STRUCTURE_MAP_SIZE;
+            this.width = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
+            this.height = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
 
             return this;
         };   
@@ -573,10 +586,10 @@ return class(
         
         @:isZoneAllowed::(top, left, zone) {
             when (
-                top < 0 ||
-                left < 0 ||
-                left + zone.width  > this.width ||
-                top + zone.height > this.height
+                top < STRUCTURE_MAP_PADDING ||
+                left < STRUCTURE_MAP_PADDING ||
+                left + zone.width  > this.width - STRUCTURE_MAP_PADDING ||
+                top + zone.height > this.height - STRUCTURE_MAP_PADDING
                 
             ) false;
 
@@ -624,28 +637,28 @@ return class(
                 // fallback
                 match(zone.gateSide) {
                   (NORTH):::<= {
-                    top = 0;
-                    left = (this.width / 2)->floor;
+                    top = STRUCTURE_MAP_PADDING;
+                    left = ((this.width - STRUCTURE_MAP_PADDING) / 2)->floor;
                   },
 
                   (EAST):::<= {
-                    top = (this.height / 2)->floor;
-                    left = this.width - zone.width;
+                    top = ((this.height - STRUCTURE_MAP_PADDING) / 2)->floor;
+                    left = (this.width - STRUCTURE_MAP_PADDING) - zone.width;
                   },
                   
                   (WEST):::<= {
-                    top = (this.height / 2)->floor;
-                    left = 0;
+                    top = ((this.height - STRUCTURE_MAP_PADDING) / 2)->floor;
+                    left = STRUCTURE_MAP_PADDING;
                   },
                   
                   (SOUTH):::<= {
-                    top = this.height - zone.height;
-                    left = (this.width / 2)->floor;
+                    top = (this.height - STRUCTURE_MAP_PADDING) - zone.height;
+                    left = ((this.width - STRUCTURE_MAP_PADDING) / 2)->floor;
                   },
 
                   default: ::<= {
-                    top  = STRUCTURE_MAP_STARTING_Y;
-                    left = STRUCTURE_MAP_STARTING_X;                                  
+                    top  = STRUCTURE_MAP_STARTING_Y + STRUCTURE_MAP_PADDING;
+                    left = STRUCTURE_MAP_STARTING_X + STRUCTURE_MAP_PADDING;                                  
                   }
                 };
             } else ::<= {

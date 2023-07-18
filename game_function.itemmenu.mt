@@ -258,7 +258,7 @@ return ::(
                                                     when(which == false) empty;                     
                                                     
                                                     @:tryImprove::{
-                                                        when(random.flipCoin() == false) ::<= {
+                                                        when(random.try(percentSuccess:85)) ::<= {
                                                             windowEvent.queueMessage(
                                                                 text:'Looks like it needs more work...'
                                                             );
@@ -274,7 +274,7 @@ return ::(
                                                         party.inventory.remove(item:other);
                                                         
                                                         
-                                                        if (random.flipCoin()) ::<= {
+                                                        if (random.try(percentSuccess:90)) ::<= {
                                                             // success
                                                             windowEvent.queueMessage(
                                                                 text: 'The improvement was successful!'
@@ -283,8 +283,8 @@ return ::(
                                                             @:oldStats = item.equipMod;
                                                             @:newStats = StatSet.new();
                                                             @:state = oldStats.state;
-                                                            state[stat] += 5;
-                                                            state[random.pickArrayItem(list:statChoices)] -= 2;
+                                                            state[stat] += 8;
+                                                            state[random.pickArrayItem(list:statChoices)] -= 4;
                                                             
                                                             newStats.state = state;
                                                             item.improvementsLeft-=1;

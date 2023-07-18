@@ -282,10 +282,10 @@
 
                 
                 if (rngEnchantHint != empty && random.try(percentSuccess:30)) ::<= {
-                    @enchantCount = random.integer(from:1, to:1+match(story.tier) {
-                        (4):    4,
-                        (3):    3,
-                        (1):    2,
+                    @enchantCount = random.integer(from:1, to:match(story.tier) {
+                        (4):    5,
+                        (3):    4,
+                        (1):    3,
                         default: 1
                     });
                     
@@ -639,7 +639,7 @@ Item.Base.database = Database.new(items: [
             examine : '',
             equipType : TYPE.HAND,
             equipMod : StatSet.new(),
-            isUnique : false,
+            isUnique : true,
             weight: 0,
             rarity: 100,
             levelMinimum : 1,

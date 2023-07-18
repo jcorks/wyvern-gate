@@ -74,7 +74,7 @@ return class(
         @ROOM_AREA_VARIANCE = 0.2;
         @ROOM_SIZE = 50;
         @ROOM_EMPTY_AREA_COUNT = 13;
-
+        @GEN_OFFSET = 20;
         
         
 
@@ -92,10 +92,10 @@ return class(
             
 
 
-            if (left < 0) left = 0;
-            if (left + width +2 >= ROOM_SIZE-1) left = ROOM_SIZE - width - 3;
-            if (top < 0) top = 0;
-            if (top + height +2 >= ROOM_SIZE-1) top = ROOM_SIZE - height - 3;
+            if (left < 0) left = GEN_OFFSET;
+            if (left + width +2 >= (ROOM_SIZE+GEN_OFFSET)-1) left = (ROOM_SIZE+GEN_OFFSET) - width - 3;
+            if (top < 0) top = GEN_OFFSET;
+            if (top + height +2 >= (ROOM_SIZE+GEN_OFFSET)-1) top = (ROOM_SIZE+GEN_OFFSET) - height - 3;
             
 
             areas->push(value: Area.new(
@@ -220,15 +220,16 @@ return class(
 
                 next = b;
                 
+                /*
                 if(fromx <= 0) fromx = 1;
-                if(fromx >= ROOM_SIZE-1) fromx = ROOM_SIZE-2;
+                if(fromx >= (ROOM_SIZE+GEN_OFFSET)-1) fromx = (ROOM_SIZE+GEN_OFFSET)-2;
                 if(fromy <= 0) fromy = 1;
                 if(fromy >= ROOM_SIZE-1) fromy = ROOM_SIZE-2;
                 if(tox <= 0) tox = 1;
                 if(tox >= ROOM_SIZE-1) tox = ROOM_SIZE-2;
                 if(toy <= 0) toy = 1;
                 if(toy >= ROOM_SIZE-1) toy = ROOM_SIZE-2;
-
+                */
 
 
                 [fromx-1, tox+1]->for(do:::(i) {
@@ -263,8 +264,8 @@ return class(
             [0, ROOM_EMPTY_AREA_COUNT]->for(do:::(i) {
                 generateArea(
                     item:{
-                        x:(Number.random()*ROOM_SIZE)->floor, 
-                        y:(Number.random()*ROOM_SIZE)->floor
+                        x:(Number.random()*ROOM_SIZE)->floor + GEN_OFFSET, 
+                        y:(Number.random()*ROOM_SIZE)->floor + GEN_OFFSET
                     }
                 );                
             });
@@ -286,8 +287,8 @@ return class(
 
 
             this.paged = false;
-            this.width = ROOM_SIZE;
-            this.height = ROOM_SIZE;
+            this.width = ROOM_SIZE + GEN_OFFSET*2;
+            this.height = ROOM_SIZE + GEN_OFFSET*2;
             this.renderOutOfBounds = true;
             this.outOfBoundsCharacter = '`';
 

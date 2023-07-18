@@ -23,6 +23,8 @@
 @:mapSizeW  = 38;
 @:mapSizeH  = 16;
 
+@:BUFFER_SPACE = 30;
+
 @:EPSILON = 0.000001;
 
 @:distance::(x0, y0, x1, y1) {
@@ -45,8 +47,8 @@
     @:out = {};
     [0, 20]->for(do:::(i) {
         out->push(value:{
-            x: (Number.random() * width)->floor,
-            y: (Number.random() * height)->floor,
+            x: (Number.random() * width)->floor + BUFFER_SPACE,
+            y: (Number.random() * height)->floor + BUFFER_SPACE,
             symbol: symbolList[random.integer(from:1, to:symbolList->keycount-1)]
         });
     });
@@ -54,32 +56,32 @@
 
     [0, 20]->for(do:::(i) {
         out->push(value:{
-            x: 0,
-            y: (Number.random() * height)->floor,
+            x: 0 + BUFFER_SPACE,
+            y: (Number.random() * height)->floor + BUFFER_SPACE,
             symbol: symbolList[0]
         });
     });
 
     [0, 20]->for(do:::(i) {
         out->push(value:{
-            x: width,
-            y: (Number.random() * height)->floor,
+            x: width + BUFFER_SPACE,
+            y: (Number.random() * height)->floor + BUFFER_SPACE,
             symbol: symbolList[0]
         });
     });
 
     [0, 20]->for(do:::(i) {
         out->push(value:{
-            x: (Number.random()*width)->floor,
-            y: 0,
+            x: (Number.random()*width)->floor + BUFFER_SPACE,
+            y: 0 + BUFFER_SPACE,
             symbol: symbolList[0]
         });
     });
 
     [0, 20]->for(do:::(i) {
         out->push(value:{
-            x: (Number.random()*width)->floor,
-            y: height,
+            x: (Number.random()*width)->floor + BUFFER_SPACE,
+            y: height + BUFFER_SPACE,
             symbol: symbolList[0]
         });
     });
@@ -122,14 +124,26 @@ return class(
                 return this;
             };
             
-            this.width = sizeW;
-            this.height = sizeH;
+            this.width = sizeW + BUFFER_SPACE*2;
+            this.height = sizeH + BUFFER_SPACE*2;
+
+            @index = this.addScenerySymbol(character:'▓');
+
+            [0, this.height]->for(do:::(y) {
+                [0, this.width]->for(do:::(x) {
+                    when(y > BUFFER_SPACE && x > BUFFER_SPACE &&
+                         x < sizeW + BUFFER_SPACE && y < sizeH + BUFFER_SPACE) empty;
+                    this.enableWall(x, y);
+                    this.setSceneryIndex(x, y, symbol:index);
+                });            
+            });
+            
             this.offsetX = 100;
             this.offsetY = 100;
             this.paged = true;
             this.drawLegend = true;
             
-            generateTerrain(map:this, width:this.width, height:this.height)->foreach(do::(index, value) {
+            generateTerrain(map:this, width:this.width - BUFFER_SPACE*2, height:this.height - BUFFER_SPACE*2)->foreach(do::(index, value) {
                 //when(value.x < 0 || value.x >= this.width || value.y < 0 || value.y >= this.height)
                     //empty;
                 this.setSceneryIndex(
@@ -140,6 +154,27 @@ return class(
             });
             return this;
                     
+        };
+        
+        this.interface = {
+             addLandmark::(island, base) { 
+                @landmark = base.new(
+                    island,             
+                    x:random.integer(from:BUFFER_SPACE + (0.2*(this.width  - BUFFER_SPACE*2))->floor, to:(this.width  - BUFFER_SPACE)-(0.2*(this.width  - BUFFER_SPACE*2))->floor),
+                    y:random.integer(from:BUFFER_SPACE + (0.2*(this.height - BUFFER_SPACE*2))->floor, to:(this.height - BUFFER_SPACE)-(0.2*(this.height - BUFFER_SPACE*2))->floor)
+                );
+                this.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.name);
+                return landmark;
+            },
+            
+            getAPosition ::{
+                return {
+                    x:random.integer(from:BUFFER_SPACE + (0.2*(this.width  - BUFFER_SPACE*2))->floor, to:(this.width  - BUFFER_SPACE)-(0.2*(this.width  - BUFFER_SPACE*2))->floor),
+                    y:random.integer(from:BUFFER_SPACE + (0.2*(this.height - BUFFER_SPACE*2))->floor, to:(this.height - BUFFER_SPACE)-(0.2*(this.height - BUFFER_SPACE*2))->floor)
+                };
+            }
+            
+            
         };
     }
 );

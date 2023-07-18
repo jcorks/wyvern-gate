@@ -319,68 +319,63 @@
             @locationCount = (1 + (Number.random()*4)->floor); 
             if (locationCount < 1) locationCount = 1;
             [0, locationCount]->for(do:::(i) {
-                @:landmark = Landmark.Base.database.getRandomWeightedFiltered(
-                    filter:::(value) <- value.isUnique == false
-                ).new(
-                    island:this,
-                    x: Number.random()*(sizeW - 0.2) + 0.2,
-                    y: Number.random()*(sizeH - 0.2) + 0.2
+                significantLandmarks->push(value:
+                    map.addLandmark(
+                        base:Landmark.Base.database.getRandomWeightedFiltered(
+                            filter:::(value) <- value.isUnique == false
+                        ),
+                        island:this
+                    )
                 );
-
-                map.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.name);
-
-                significantLandmarks->push(value:landmark);
             });
             
             // guaranteed gate
-            @:gate = Landmark.Base.database.find(name:'Wyvern Gate').new(
-                island:this,
-                x: Number.random()*(sizeW - 0.2) + 0.2,
-                y: Number.random()*(sizeH - 0.2) + 0.2
+            significantLandmarks->push(value:
+                map.addLandmark(
+                    base:Landmark.Base.database.find(name:'Wyvern Gate'),
+                    island:this
+                )
             );
-
-            map.setItem(data:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol, name:gate.base.name);
-
-            significantLandmarks->push(value:gate);
+            
 
 
             // guaranteed town
-            @:gate = Landmark.Base.database.find(name:'Shrine').new(
-                island:this,
-                x: 30, //Number.random()*(sizeW - 0.2) + 0.2,
-                y: 30  //Number.random()*(sizeH - 0.2) + 0.2
+            significantLandmarks->push(value:
+                map.addLandmark(
+                    base:Landmark.Base.database.find(name:'Shrine'),
+                    island:this
+                )
             );
-            map.setItem(data:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol, name:gate.base.name);
-            significantLandmarks->push(value:gate);
+
             
-            @:gate = Landmark.Base.database.find(name:'town').new(
-                island:this,
-                x: Number.random()*(sizeW - 0.2) + 0.2,
-                y: Number.random()*(sizeH - 0.2) + 0.2
+            significantLandmarks->push(value:
+                map.addLandmark(
+                    base:Landmark.Base.database.find(name:'town'),
+                    island:this
+                )
             );
-            map.setItem(data:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol, name:gate.base.name);
-            significantLandmarks->push(value:gate);
+
 
 
 
 
             // free treasure!
-            @:gate = Landmark.Base.database.find(name:'forest').new(
-                island:this,
-                x: Number.random()*(sizeW - 0.2) + 0.2,
-                y: Number.random()*(sizeH - 0.2) + 0.2
+            significantLandmarks->push(value:
+                map.addLandmark(
+                    base:Landmark.Base.database.find(name:'forest'),
+                    island:this
+                )
             );
-            map.setItem(data:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol, name:gate.base.name);
-            significantLandmarks->push(value:gate);
 
 
-            @:gate = Landmark.Base.database.find(name:'city').new(
-                island:this,
-                x: Number.random()*(sizeW - 0.2) + 0.2,
-                y: Number.random()*(sizeH - 0.2) + 0.2
+
+            significantLandmarks->push(value:
+                map.addLandmark(
+                    base:Landmark.Base.database.find(name:'city'),
+                    island:this
+                )
             );
-            map.setItem(data:gate, x:gate.x, y:gate.y, symbol:gate.base.symbol, name:gate.base.name);
-            significantLandmarks->push(value:gate);
+
 
             
 

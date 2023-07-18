@@ -919,8 +919,11 @@
 
                 @olditem = equips[slot];
         
-                when (this.getSlotsForItem(item)->findIndex(value:slot) == -1)
+                when (this.getSlotsForItem(item)->findIndex(value:slot) == -1) ::<= {
+                    when(silent) empty;
                     error(detail:'Item does not enter the given slot.');
+                };
+
 
 
                 @:old = this.unequip(slot, silent:true);                
@@ -945,12 +948,19 @@
                     );
                 });
 
-                if (profession.base.weaponAffinity == equips[EQUIP_SLOTS.HAND_L].base.name)
+                if (profession.base.weaponAffinity == equips[EQUIP_SLOTS.HAND_L].base.name) ::<= {
+                    if (silent != true) ::<= {
+                        windowEvent.queueMessage(
+                            speaker: this.name,
+                            text: '"This ' + item.base.name + ' really works for me as ' + correctA(word:profession.base.name) + '"'
+                        );
+                    };
                     this.addEffect(
                         from:this,
                         name:'Weapon Affinity',
                         durationTurns: -1 
                     );
+                };
 
 
 

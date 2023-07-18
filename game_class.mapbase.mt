@@ -37,11 +37,13 @@
 @:THE_BIG_ONE = 100000000;
 @:mapSizeW  = 50;
 @:mapSizeH  = 16;
-@:UNPAGED_ROOM_SIZE_LIMIT = 70;
 @:SIGHT_RAY_LIMIT = 6;
 @:SIGHT_RAY_EPSILON = 0.4;
-@:OOB_RANGE = 32;
 
+
+@:SETTINGS_MASK    = 0x110000;
+@:IS_WALLED_MASK   = 0x010000;
+@:IS_OBSCURED_MASK = 0x100000;
 
 
 @:distance = import(module:'game_function.distance.mt');
@@ -80,12 +82,11 @@ return class(
         @sceneryValues = [];
         @stepAction = [];
         
-        @obscured = []; 
 
         
         @:isWalled ::(x, y) {
-            @at = x+OOB_RANGE + (y+OOB_RANGE) * (OOB_RANGE*2 + width);
-            return (scenery[at] & 0x10000) != 0;
+            @at = x+y*width;
+            return (scenery[at] & IS_WALLED_MASK) != 0;
         };
         
         @renderOutOfBounds = true;
@@ -138,7 +139,7 @@ return class(
 
         @:aStarNewNode::(x, y) {
             when (!isWalled(x, y) && x >= 0 && y >= 0 && x < width && y < height)
-                {x:x, y:y, id:x + y*UNPAGED_ROOM_SIZE_LIMIT};
+                {x:x, y:y, id:x + y*width};
         };
 
         @:aStarGetNeighbors::(current) {
@@ -370,6 +371,8 @@ return class(
                     @itemX = (x) + regionX*mapSizeW - mapSizeW*0.5;
                     @itemY = (y) + regionY*mapSizeH - mapSizeH*0.5;
                     
+                    when(itemX < 0 || itemY < 0 || itemX >= width || itemY >= height) empty;
+                    
                     @symbol = this.sceneryAt(x:itemX, y:itemY);
 
                     canvas.movePen(x:left + x, y:top + y);  
@@ -445,7 +448,7 @@ return class(
                         when((x < offsetX || y < offsetY || x >= width+offsetX || y >= height+offsetY)) send();
 
                         when(distance(x0:pointer.x, y0:pointer.y, x1:x, y1:y) > SIGHT_RAY_LIMIT) send();
-                        obscured[x->floor+y->floor*UNPAGED_ROOM_SIZE_LIMIT] = empty;                        
+                        scenery[x->floor+y->floor*width] &= ~IS_OBSCURED_MASK;                        
                         if (isWalled(x:x->floor, y:y->floor))
                             send();
                     });
@@ -501,7 +504,7 @@ return class(
                     //    if (distance(x0:pointer.x, y0:pointer.y, x1:itemX, y1:itemY) < 5)
                     //        obscured[itemX][itemY] = false;
                     
-                    when(obscured[itemX+itemY*UNPAGED_ROOM_SIZE_LIMIT] == true) ::<= {
+                    when(scenery[itemX+itemY*width] & IS_OBSCURED_MASK) ::<= {
                         canvas.drawChar(text:outOfBoundsCharacter);                        
                     };
 
@@ -557,8 +560,8 @@ return class(
                 get ::<- width,
                 set ::(value) {
                     width = value;
-                    scenery.size = (width + OOB_RANGE*2) * (height + OOB_RANGE*2);
-                    [0, scenery.size]->for(do:::(i) {
+                    @:size = (width*height);
+                    [0, size]->for(do:::(i) {
                         scenery[i] = 0;
                     });
                 }
@@ -568,10 +571,10 @@ return class(
                 get ::<- height,
                 set ::(value) {
                     height = value;
-                    scenery.size = (width + OOB_RANGE*2) * (height + OOB_RANGE*2);
-                    [0, scenery.size]->for(do:::(i) {
+                    @:size = (width*height);
+                    [0, size]->for(do:::(i) {
                         scenery[i] = 0;
-                    });                
+                    });               
                 }
             },
             
@@ -581,16 +584,11 @@ return class(
             },
             
             enableWall ::(x, y) {
-                x += OOB_RANGE;
-                y += OOB_RANGE;
-                scenery[x + y*(OOB_RANGE*2+width)] |= 0x10000;                
+                scenery[x + y*(width)] |= IS_WALLED_MASK;                
             },
             
             disableWall ::(x, y) {        
-                x += OOB_RANGE;
-                y += OOB_RANGE;
-                if (scenery[x + y*(OOB_RANGE*2+width)] & 0x10000)
-                    scenery[x + y*(OOB_RANGE*2+width)] &= (~0x10000);
+                scenery[x + y*(width)] &= (~IS_WALLED_MASK);
             },
             
             addScenerySymbol ::(character) {
@@ -607,17 +605,23 @@ return class(
                 y =>Number,
                 symbol => Number
             ) {
-                x += OOB_RANGE;
-                y += OOB_RANGE;
-                @index = x + y*(OOB_RANGE*2+width);
+                @index = x + y*(width);
                 
-                if (scenery[index] & 0x10000)
-                    scenery[index] = 0x10000 | (1+symbol)
-                else
-                    scenery[index] = (1+symbol)
-                ;
+                scenery[index] = (scenery[index] & SETTINGS_MASK) | (1+symbol);
             },
             
+            
+            fillSceneryIndex ::(
+                symbol => Number
+            ) {
+                [0, height]->for(do:::(y) {
+                    [0, width]->for(do:::(x) {
+                        @index = x + y*(width);
+                    
+                        scenery[index] = (scenery[index] & SETTINGS_MASK) | (1+symbol);
+                    });                
+                });
+            },            
             setStepAction ::(
                 x => Number,
                 y => Number,
@@ -630,21 +634,14 @@ return class(
                 x =>Number,
                 y =>Number
             ) {
-                x += OOB_RANGE;
-                y += OOB_RANGE;
-
-                @index = x + y*(OOB_RANGE*2+width);
+                @index = x + y*(width);
                 
-                if (scenery[index] & 0x10000)
-                    scenery[index] = 0x10000
-                else
-                    scenery[index] = 0;
-                ;
+                scenery[index] = SETTINGS_MASK & scenery[index];
             },
             
             sceneryAt::(x, y) {
-                @at = x+OOB_RANGE + (y+OOB_RANGE) * (OOB_RANGE*2 + width);
-                @:index = scenery[at] & (~0x10000);
+                @at = x+(y*width);
+                @:index = scenery[at] & (~SETTINGS_MASK);
                 when(index == 0) empty;
                 return sceneryValues[index-1];
             },
@@ -693,9 +690,10 @@ return class(
             },
             
             obscure::{
-                [0, UNPAGED_ROOM_SIZE_LIMIT]->for(do:::(x) {
-                    [0, UNPAGED_ROOM_SIZE_LIMIT]->for(do:::(y) {
-                        obscured[x+y*UNPAGED_ROOM_SIZE_LIMIT] = true;
+            
+                [0, width]->for(do:::(x) {
+                    [0, height]->for(do:::(y) {
+                        scenery[x+y*width] |= IS_OBSCURED_MASK;
                     });
                 });
                             
@@ -848,24 +846,58 @@ return class(
             ) {
                 x = x->floor;
                 y = y->floor;
-                
-                @:oldX = pointer.x;
-                @:oldY = pointer.y;
-                
-                
 
-                x += pointer.x;
-                y += pointer.y;
+                @:changeX = x != 0;
+                @:changeY = y != 0;
 
-                if (x < 0) x  = 0;
-                if (y < 0) y  = 0;
-                if (x >= width) x  = width-1;
-                if (y >= height) y  = height-1;
+                if (changeX &&
+                    changeY) empty;
 
-                if (isWalled(x, y)) ::<= {
-                    x = oldX;
-                    y = oldY;
-                };     
+                if(changeX) ::<= {
+                    @offset = x;
+                    @old = pointer.x;
+                    @new = offset + old;
+                    y = pointer.y;
+
+                    if (new < 0) new = 0;
+                    if (new >= width) new = width-1;
+
+                    @greater = new > old;
+
+                    [::] {
+                        forever(do:::{
+                            when (isWalled(x:new, y)) ::<= {
+                                new = new + (if (greater) -1 else 1);
+                            }; 
+                            send();   
+                        });
+                    };
+                    x = new;
+                } else ::<= {
+                    @offset = y;
+                    @old = pointer.y;
+                    @new = offset + old;
+                    x = pointer.x;
+
+                    if (new < 0) new = 0;
+                    if (new >= width) new = width-1;
+
+                    @greater = new > old;
+
+                    [::] {
+                        forever(do:::{
+                            breakpoint();
+                            when (isWalled(x, y:new)) ::<= {
+                                new = new + (if (greater) -1 else 1);
+                            }; 
+                            send();   
+                        });
+                    };
+                    y = new;
+                
+                };
+
+
                 this.setPointer(x, y);
             
             },

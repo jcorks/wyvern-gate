@@ -80,17 +80,82 @@ return ::{
                 party.members->foreach(do:::(i, member) {
                     names->push(value:member.name);
                 });
+
                 
-                @:choice = windowEvent.queueChoices(
+                windowEvent.queueChoices(
                     leftWeight: 1,
                     topWeight: 1,
                     choices: names,
-                    prompt: 'Check whom?',
+                    prompt: 'Whom?',
                     keep: true,
                     canCancel: true,
                     onChoice ::(choice) {
                         when(choice == 0) empty;
-                        party.members[choice-1].describe();                    
+                        @member = party.members[choice-1];
+                        
+                        
+                        windowEvent.queueChoices(
+                            leftWeight: 1,
+                            topWeight: 1,
+                            choices: [
+                                'Describe',
+                                'Unequip...'
+                            ],
+                            prompt: names[choice-1],
+                            keep: true,
+                            canCancel: true,
+                            onChoice ::(choice) {
+                                when(choice == 0) empty;
+                                
+                                
+                                match(choice) {
+
+                                  // describe
+                                  (1): member.describe(),
+
+
+
+
+                                  // unequip
+                                  (2):::<= {
+                                    @equips = {};
+                                    @Entity = import(module:'game_class.entity.mt');
+                                    Entity.EQUIP_SLOTS->foreach(do:::(i, val) {
+                                        @:item = member.getEquipped(slot:val);
+                                        when(item.name == 'None') empty;
+                                        equips[item] = true;
+                                    });
+                                    equips = equips->keys;
+                                    
+                                    when (equips->keycount == 0)
+                                        windowEvent.queueMessage(
+                                            text: member.name + ' has nothing equipped.'
+                                        ); 
+                                    
+                                    
+                                    @equipNames = [...equips]->map(to::(value) <- value.name);
+                                    
+                                    windowEvent.queueChoices(
+                                        leftWeight: 1,
+                                        topWeight: 1,
+                                        choices: equipNames,
+                                        prompt: member.name + ': Unequip',
+                                        canCancel: true,
+                                        onChoice:::(choice) {
+                                            windowEvent.queueMessage(
+                                                text: member.name + ' has unequipped the ' + equips[choice-1].name
+                                            );
+                                            
+                                            
+                                            member.unequipItem(item:equips[choice-1]);
+                                            party.inventory.add(item:equips[choice-1]);
+                                        }
+                                    );                                   
+                                  }
+                                };
+                            }
+                        );                        
+                        
                     }
                 );
                 
