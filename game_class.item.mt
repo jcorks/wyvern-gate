@@ -1602,7 +1602,7 @@ Item.Base.database = Database.new(items: [
         possibleAbilities : [
             "Doublestrike",
             "Triplestrike",
-            "Sharpshoot",
+            "Precise Strike",
             "Tranquilizer"
         ],
 

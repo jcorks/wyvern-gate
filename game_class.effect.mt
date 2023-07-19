@@ -2843,6 +2843,43 @@ Effect.database = Database.new(
                 }
             }
         ),   
+
+        Effect.new(
+            data : {
+                name : 'Ensnared',
+                description: 'Unable to act.',
+                battleOnly : true,
+                skipTurn : true,
+                stackable: false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
+                    if (turnIndex >= turnCount)
+                        windowEvent.queueMessage(text:holder.name + ' broke free from the snare!')
+                    else                    
+                        windowEvent.queueMessage(text:holder.name + ' is ensnared and is unable to move!');
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),  
         
         Effect.new(
             data : {
@@ -2876,7 +2913,41 @@ Effect.database = Database.new(
                 
                 }
             }
-        ),                
+        ),
+        
+        Effect.new(
+            data : {
+                name : 'Ensnaring',
+                description: 'Unable to act.',
+                battleOnly : true,
+                skipTurn : true,
+                stackable: false,
+                stats: StatSet.new(),
+                onAffliction : ::(user, item, holder) {
+                },
+                
+                onRemoveEffect : ::(user, item, holder) {
+                },                
+                onPostAttackOther : ::(user, item, holder, to) {
+                },
+
+                onPreAttackOther : ::(user, item, holder, to, damage) {
+                },
+                onAttacked : ::(user, item, holder, by, damage) {
+                
+                },
+                
+                onDamage : ::(user, item, holder, from, damage) {
+                },
+                
+                onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
+                    windowEvent.queueMessage(text:holder.name + ' is busy keeping someone ensared and cannot move!');
+                },
+                onStatRecalculate : ::(user, item, holder, stats) {
+                
+                }
+            }
+        ),                        
         
         Effect.new(
             data : {

@@ -1022,56 +1022,58 @@ Interaction.database = Database.new(
                         names->push(value:member.name);
                     });
                     
-                    @choice = windowEvent.queueChoicesNow(
+                    windowEvent.queueChoices(
                         leftWeight: 1,
                         topWeight: 1,
                         choices: names,
                         prompt: 'Whom?',
-                        canCancel: false
+                        canCancel: false,
+                        onChoice:::(choice) {
+
+                            when(choice == 0) empty;
+                            
+                            @:whom = party.members[choice-1];
+                            @cost = ((whom.level + whom.stats.sum/30)*10)->ceil;
+
+                            when(whom.profession.base.name == location.ownedBy.profession.base.name)
+                                windowEvent.queueMessage(
+                                    text: whom.name + ' is already ' + correctA(word:location.ownedBy.profession.base.name) + '.'
+                                );
+                            
+                            windowEvent.queueMessage(
+                                text:
+                                    'Profession: ' + location.ownedBy.profession.base.name + '\n\n' +
+                                    location.ownedBy.profession.base.description + '\n' +
+                                    'Weapon affinity: ' + location.ownedBy.profession.base.weaponAffinity
+                            );
+
+
+                            windowEvent.queueMessage(
+                                text: 'Changing ' + whom.name + "'s profession from " + whom.profession.base.name + ' to ' + location.ownedBy.profession.base.name + ' will cost ' + cost + 'G.'
+
+                            );
+
+                            when(party.inventory.gold < cost)
+                                windowEvent.queueMessage(
+                                    text: 'The party cannot afford this.'
+                                );
+
+
+                            windowEvent.queueAskBoolean(
+                                prompt: 'Continue?',
+                                onChoice:::(which) {
+                                    when(which == false) empty;
+                                    party.inventory.subtractGold(amount:cost);       
+                                    whom.profession = Profession.Base.database.find(name: location.ownedBy.profession.base.name).new();
+
+                                    windowEvent.queueMessage(
+                                        text: '' + whom.name + " is now " + correctA(word:whom.profession.base.name) + '.'
+
+                                    );
+                                }
+                            );
+                        }
                     );
-                    
-                    when(choice == 0) empty;
-                    
-                    @:whom = party.members[choice-1];
-                    @cost = ((whom.level + whom.stats.sum/30)*10)->ceil;
-
-                    when(whom.profession.base.name == location.ownedBy.profession.base.name)
-                        windowEvent.queueMessage(
-                            text: whom.name + ' is already ' + correctA(word:location.ownedBy.profession.base.name) + '.'
-                        );
-                    
-                    windowEvent.queueMessage(
-                        text:
-                            'Profession: ' + location.ownedBy.profession.base.name + '\n\n' +
-                            location.ownedBy.profession.base.description + '\n' +
-                            'Weapon affinity: ' + location.ownedBy.profession.base.weaponAffinity
-                    );
-
-
-                    windowEvent.queueMessage(
-                        text: 'Changing ' + whom.name + "'s profession from " + whom.profession.base.name + ' to ' + location.ownedBy.profession.base.name + ' will cost ' + cost + 'G.'
-
-                    );
-
-                    when(party.inventory.gold < cost)
-                        windowEvent.queueMessage(
-                            text: 'The party cannot afford this.'
-                        );
-
-
-                    when (windowEvent.queueAskBoolean(
-                        prompt: 'Continue?'
-                    ) == false) empty;
-
-                    party.inventory.subtractGold(amount:cost);       
-                    whom.profession = Profession.Base.database.find(name: location.ownedBy.profession.base.name).new();
-
-                    windowEvent.queueMessage(
-                        text: '' + whom.name + " is now " + correctA(word:whom.profession.base.name) + '.'
-
-                    );
-                                                  
-
                 },
             }
         ),        
@@ -1194,7 +1196,6 @@ Interaction.database = Database.new(
                                                 @betOnA = choice == 1;
                                               
                                                 @:world = import(module:'game_singleton.world.mt');
-                                                windowEvent.resolveNext();
                                               
                                                 world.battle.start(
                                                     party,                            
@@ -1221,7 +1222,6 @@ Interaction.database = Database.new(
                                                     npcBattle: true,
                                                     onEnd::(result) {
                                                         @aWon = result == Battle.RESULTS.ALLIES_WIN;
-                                                        windowEvent.jumpToTag(name:'Bet', goBeforeTag:true);
                                                         if (aWon) ::<= {
                                                             windowEvent.queueMessage(
                                                                 text: teamAname + ' wins!'
@@ -1246,7 +1246,7 @@ Interaction.database = Database.new(
                                                             );                                    
                                                             party.inventory.subtractGold(amount:bet);
                                                         };  
-                                                        windowEvent.resolveNext();
+                                                        windowEvent.jumpToTag(name:'Bet', goBeforeTag:true, doResolveNext:true);
                                                         
                                                     }  
                                                 );                                           

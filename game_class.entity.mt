@@ -110,6 +110,7 @@
         @growth = StatSet.new();
         @enemies_ = [];
         @allies_ = [];
+        @battle_;
         @qualityDescription = empty;
         @abilitiesUsedBattle = empty;
         @adventurous = Number.random() <= 0.5;
@@ -303,7 +304,8 @@
             },
             
             // called to signal that a battle has started involving this entity
-            battleStart ::(allies, enemies) {
+            battleStart ::(battle, allies, enemies) {
+                battle_ = battle;
                 battleAI.reset(
                     enemies: enemies,
                     allies: allies
@@ -318,6 +320,7 @@
 
             // called to signal that a battle has started involving this entity
             battleEnd :: {
+                battle_ = empty;
                 effects->foreach(do:::(index, effect) {
 
                     effect.effect.onRemoveEffect(

@@ -152,6 +152,150 @@
                 
 
         };  
+        
+        
+        
+        // adds a non-functioning decoration
+        @:addDecoration ::(left, top, symbol, location) {
+            random.pickArrayItem(list:[
+                    /*   
+                        xxxx
+                        xxxx
+                        xxxx
+                    
+                    */
+
+
+                ::{
+                    addBuildingBlock(x:left + 1, y: top + 1);
+                    addBuildingBlock(x:left + 2, y: top + 1);
+                    addBuildingBlock(x:left + 3, y: top + 1);
+                    addBuildingBlock(x:left + 4, y: top + 1);
+
+                    addBuildingBlock(x:left + 1, y: top + 2);
+                    addBuildingBlock(x:left + 2, y: top + 2);
+                    addBuildingBlock(x:left + 3, y: top + 2);
+                    addBuildingBlock(x:left + 4, y: top + 2);
+
+                    addBuildingBlock(x:left + 1, y: top + 3);
+                    addBuildingBlock(x:left + 4, y: top + 3);
+                    addBuildingBlock(x:left + 2, y: top + 3);
+                    addBuildingBlock(x:left + 3, y: top + 3);
+                },
+                
+                
+                    /*   
+                       .,.,.
+                       ,.,.,
+                       .,.,.
+                       ,.,.,
+                    
+                    */
+
+
+                ::{
+                    @:off = _map.addScenerySymbol(character:'.');
+                    @:on  = _map.addScenerySymbol(character:',');
+                    
+                    @iter = false;
+                    [0, ZONE_BUILDING_MINIMUM_WIDTH]->for(do:::(x) {
+                        [0, ZONE_BUILDING_MINIMUM_HEIGHT]->for(do:::(y) {
+                            _map.setSceneryIndex(x:left+x, y:top+y, symbol: if(iter) on else off);
+                            iter = !iter;
+                        });
+                    });                    
+                },
+
+                    /*   
+                       . . .
+                        . . 
+                       . . .
+                        . . 
+                    
+                    */
+
+
+                ::{
+                    @:off = _map.addScenerySymbol(character:'.');
+                    @:on  = _map.addScenerySymbol(character:' ');
+                    
+                    @iter = false;
+                    [0, ZONE_BUILDING_MINIMUM_WIDTH]->for(do:::(x) {
+                        [0, ZONE_BUILDING_MINIMUM_HEIGHT]->for(do:::(y) {
+                            _map.setSceneryIndex(x:left+x, y:top+y, symbol: if(iter) on else off);
+                            iter = !iter;
+                        });
+                    });                    
+                },
+                
+
+                    /*   
+                       .,.,
+                       ,^^.
+                       .^^,
+                       ,.,.
+                    
+                    */
+
+
+                ::{
+                    @:off   = _map.addScenerySymbol(character:'.');
+                    @:on    = _map.addScenerySymbol(character:',');
+                    @:bush  = _map.addScenerySymbol(character:'^');
+                    
+                    @iter = false;
+                    [0, ZONE_BUILDING_MINIMUM_WIDTH]->for(do:::(x) {
+                        [0, ZONE_BUILDING_MINIMUM_HEIGHT]->for(do:::(y) {
+                            _map.setSceneryIndex(x:left+x, y:top+y, symbol: if(iter) on else off);
+                            iter = !iter;
+                        });
+                    });                    
+                    
+                    _map.setSceneryIndex(x:left+1, y:top+1, symbol: bush);
+                    _map.setSceneryIndex(x:left+2, y:top+1, symbol: bush);
+                    _map.setSceneryIndex(x:left+1, y:top+2, symbol: bush);
+                    _map.setSceneryIndex(x:left+2, y:top+2, symbol: bush);
+                    
+                    
+                },
+
+                    /*   
+                       .,.,
+                       ,╿╿.
+                       .╿╿,
+                       ,.,.
+                    
+                    */
+                
+                ::{
+                    @:off   = _map.addScenerySymbol(character:'.');
+                    @:on    = _map.addScenerySymbol(character:',');
+                    @:tree  = _map.addScenerySymbol(character:'╿');
+                    
+                    @iter = false;
+                    [0, ZONE_BUILDING_MINIMUM_WIDTH]->for(do:::(x) {
+                        [0, ZONE_BUILDING_MINIMUM_HEIGHT]->for(do:::(y) {
+                            _map.setSceneryIndex(x:left+x, y:top+y, symbol: if(iter) on else off);
+                            iter = !iter;
+                        });
+                    });                    
+                    
+                    _map.setSceneryIndex(x:left+1, y:top+1, symbol: tree);
+                    _map.setSceneryIndex(x:left+2, y:top+1, symbol: tree);
+                    _map.setSceneryIndex(x:left+1, y:top+2, symbol: tree);
+                    _map.setSceneryIndex(x:left+2, y:top+2, symbol: tree);
+                    
+                    _map.enableWall(x:left+1, y:top+1);
+                    _map.enableWall(x:left+2, y:top+1);
+                    _map.enableWall(x:left+1, y:top+2);
+                    _map.enableWall(x:left+2, y:top+2);
+                    
+                },                
+                
+                
+            ])();
+
+        };         
 
 
 
@@ -360,6 +504,26 @@
             width : {get::<-_w},        
             height : {get::<-_h},
             category : {get::<- _category},
+            
+            fillDecoration ::{
+            
+            
+                [0, unitsWide]->for(do::(x) {
+                    [0, unitsHigh]->for(do::(y) {
+                        when(slots[x][y] == true) empty;
+                        
+                        when(random.flipCoin()) empty;
+                        
+                            
+                        slots[x][y] = true;
+                        freeSpaces->remove(key:freeSpaces->findIndex(query:::(value) <- value.x == x && value.y == y));
+                        addDecoration(
+                            left:x * ZONE_BUILDING_MINIMUM_WIDTH + _x+ZONE_CONTENT_PADDING,
+                            top:y * ZONE_BUILDING_MINIMUM_HEIGHT + _y+ZONE_CONTENT_PADDING
+                        );                        
+                    });               
+                });                            
+            },
             
             // only for zones that have gates, gets the 
             // side that the gate is hugging. This is primarily used for 
@@ -770,6 +934,11 @@ return class(
             // buildings.
             finalize::{
 
+                zones->foreach(do:::(i, zone) {
+                    zone.fillDecoration();
+                });
+                
+                
                 
                 paired->foreach(do:::(i, data) {
                     @:base = zones[data.first];

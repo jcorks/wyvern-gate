@@ -525,13 +525,13 @@ Profession.Base.database = Database.new(
                 
                 // runes fade after 10 turns
                 abilities : [
-                    'Poison Rune', // weak DoT until released
-                    'Rune Release', // releases all runes on target
-                    'Destruction Rune', // damage when released.
-                    'Regeneration Rune', // HoT until released
-                    'Shield Rune', // DEF + 100% until released
-                    'Cure Rune', // heal when released
-                    'Multiply Runes' // ddoubles targets Rune charges
+                    'Poison Rune',       // X weak DoT until released
+                    'Rune Release',      // X releases all runes on target
+                    'Destruction Rune',  // X damage when released.
+                    'Regeneration Rune', // X HoT until released
+                    'Shield Rune',       // X DEF + 100% until released
+                    'Cure Rune',         // X heal when released
+                    'Multiply Runes'     // X ddoubles targets Rune charges
                 ],
                 passives : [
                 ]
@@ -631,7 +631,7 @@ Profession.Base.database = Database.new(
                     'Alchemist\'s Scavenging' // find 1 Ingredient Pack
                 ]
             }),
-
+            /*
             Profession.Base.new(data:{
                 name: 'Cook',
                 weaponAffinity: 'Butcher\'s Knife',
@@ -660,7 +660,7 @@ Profession.Base.database = Database.new(
                     'Field Cook'
                 ]
             }),
-
+            */
 
             Profession.Base.new(data:{
                 name: 'Ranger',
@@ -682,22 +682,22 @@ Profession.Base.database = Database.new(
                 levelMinimum : 1,
 
                 abilities : [
-                    /*
-                    'Sharpshoot',   // dex-based attack 
-                    'Tranquilizer', // Paralysis + DEX attack,
-                    'Hunter',       // +100% damage to Creatures
-                    'Ensnare',      // both user and target cannot use an action for one turn
-                    'Call',         // calls a creature to help (join team for single battle)
-                    'Tame',         // chance to convince creature to join party.
-                    */
+                    
+                    'Precise Strike',// X dex-based attack 
+                    'Tranquilizer',  // X Paralysis + DEX attack,
+                    'Ensnare',       // X damages both user and target cannot use an action for one turn
+                    'Call',          // X calls a creature to help (join team for single battle)
+                    'Tame',          // X chance to convince creature to join party.
+                    'Headhunter'     // X deals 1 HP. 5% chance to one-hit KO                    
                 ],
                 passives : [
                 ]
             }),
 
+            /*
             Profession.Base.new(data:{
-                name: 'Cultist',
-                weaponAffinity: 'Dagger',
+                name: 'Blood Mage',
+                weaponAffinity: 'Tome',
                 description : "", 
                 growth: StatSet.new(
                     HP:  7,
@@ -716,21 +716,22 @@ Profession.Base.database = Database.new(
                 maxKarma : 50,
                 
                 abilities : [
-                    /*
-                    'Curse',       // - 50% HP, -ATK 100% one enemy 10 turns
-                    'Blood Rite',  // - 50% HP, HoT (+5% each turn)
-                    'Blind Faith', // - 50% HP, ATK + 100%
+                    
+                    'Curse',       // - 50% HP, -ATK 100% -DEF 50% one enemy 10 turns
+                    'Blood Rite',  // - 50% HP, HoT (+10% each turn)
+                    'Blind Faith', // - 50% HP, ATK + 200%
                     'Soulbound',   // - 50% HP, any damage to self is caused to target
-                    'Wither',      // - 50% HP, DEF - 100%, SPD - 100%
+                    'Wither',      // - 50% HP, DEF - 200%, SPD - 100%
                     'Divine Gift', // - 50% HP, +25% AP target
-                    'Sacrifice',   // - 99% HP, heal party + 75% hp
-                    */
+                    'Sacrifice',   // - 99% HP, heal party + 99% hp
+                    
                 ],
                 passives : [
                 ]
             }), 
+            */
 
-
+            /*
             Profession.Base.new(data:{
                 name: 'Thief',
                 weaponAffinity: 'Dagger',
@@ -751,7 +752,7 @@ Profession.Base.database = Database.new(
                 learnable : true,
 
                 abilities : [
-                    /*
+                    
                     'Steal',       // steal 
                     'Lightfooted', // +50% speed for 5 turns  
                     'Backstab',    // hi damage attack
@@ -759,11 +760,12 @@ Profession.Base.database = Database.new(
                     'Conceal',   // dodge next attack
                     'Reflexes', // %25 chance to avoid damage for 4 turns
                     'Multistrike' // 2-5 hits single target
-                    */
+                    
                 ],
                 passives : [
                 ]
-            }),            
+            }), 
+            */           
 
 
 
@@ -792,8 +794,8 @@ Profession.Base.database = Database.new(
                     'Tripwire',       //X ONCE PER BATTLE: attack that pushes ppl into a tripwire you set up before battle (cant act for a turn)
                     'Trip Explosive', //X ONCE PER BATTLE: attach that push ppl into a trip explosive u set up before battle (enemy party damage)
                     'Petrify',        //X atk + petrify
-                    //'Dire Precision', // if damage from this user were to knock out a character, it kills them instead
-                    //'Spike Pit'       //Once per battle: all enemy fall in pit dmg + disable
+                    'Headhunter',     //X
+                    'Spike Pit'       //X Once per battle: all enemy fall in pit dmg + disable
                 ],
                 passives : [
                     'Assassin\'s Pride', // Each kill in battle gives a 25% buff to attack and speed
@@ -802,7 +804,7 @@ Profession.Base.database = Database.new(
 
 
 
-
+            /*
             Profession.Base.new(data:{
                 name: 'Mercenary',
                 weaponAffinity: 'Shortsword',                
@@ -828,7 +830,8 @@ Profession.Base.database = Database.new(
                 passives : [
                 ]
             }), 
-
+            */
+            /*
             Profession.Base.new(data:{
                 name: 'Bounty Hunter',
                 weaponAffinity: 'Shortsword',
@@ -854,7 +857,8 @@ Profession.Base.database = Database.new(
                 passives : [
                 ]
             }), 
-
+            */
+            /*
             Profession.Base.new(data:{
                 name: 'Necromancer',
                 weaponAffinity: 'Mage-rod',                
@@ -880,7 +884,9 @@ Profession.Base.database = Database.new(
                 passives : [
                 ]
             }), 
+            */
             
+            /*
             Profession.Base.new(data:{
                 name: 'Pyromancer',
                 weaponAffinity: 'Shortsword',                
@@ -905,8 +911,9 @@ Profession.Base.database = Database.new(
                 ],
                 passives : [
                 ]
-            }),            
-            
+            }),  
+            */          
+            /*
             Profession.Base.new(data:{
                 name: 'Witch',
                 weaponAffinity: 'Tome',                
@@ -932,37 +939,8 @@ Profession.Base.database = Database.new(
                 passives : [
                 ]
             }),             
-            
+            */
 
-            
-            Profession.Base.new(data:{
-                name: 'Disciple',
-                weaponAffinity: 'Glaive',                
-                description : "", 
-                levelMinimum : 100,
-
-                growth: StatSet.new(
-                    HP:  7,
-                    AP:  7,
-                    ATK: 7,
-                    INT: 7,
-                    DEF: 7,
-                    SPD: 7,
-                    LUK: 10,
-                    DEX: 7
-                ),
-                minKarma : 0,
-                maxKarma : 50,
-                learnable : false,
-                
-                abilities : [
-                    'Mug',   // attack and steal gold 
-                    'Unarm', // attack + 50% chance to unarm
-                    'Swipe', // trip enemy, skipping their turn
-                ],
-                passives : [
-                ]
-            }),
 
             Profession.Base.new(data:{
                 name: 'Keeper',

@@ -695,6 +695,10 @@ return class(
             onLoadState : {
                 set ::(value) <- onLoadState = value
             },
+            
+            currentIsland : {
+                get::<-island
+            },
             state : {
                 set::(value) {
 

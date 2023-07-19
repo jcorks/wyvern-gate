@@ -97,10 +97,44 @@ Ability.database = Database.new(
                     }
                 }
             ),
-
             Ability.new(
                 data: {
-                    name: 'Sharpshoot',
+                    name: 'Headhunter',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Deals 1 HP. 5% chance to 1hit KO.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 3,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' attempts to defeat ' + targets[0].name + ' in one attack!'
+                        );
+                        
+                        if (user.attack(
+                            target:targets[0],
+                            amount:1,
+                            damageType : Damage.TYPE.PHYS,
+                            damageClass: Damage.CLASS.HP
+                        ) == true)
+                            if (random.try(percentSuccess:5)) ::<= {
+                                windowEvent.queueMessage(
+                                    text: user.name + ' does a connecting blow, finishing ' + targets[0].name +'!'
+                                );                            
+                                targets[0].damage(from:user, damage:Damage.new(
+                                    amount:999999,
+                                    damageType:Damage.TYPE.PHYS,
+                                    damageClass:Damage.CLASS.HP
+                                ),dodgeable: false);                                
+                            };   
+                                                
+                    }
+                }
+            ),
+            Ability.new(
+                data: {
+                    name: 'Precise Strike',
                     targetMode : TARGET_MODE.ONE,
                     description: "Damages a target based on the user's ATK and DEX.",
                     durationTurns: 0,
@@ -140,15 +174,14 @@ Ability.database = Database.new(
                             text: user.name + ' attempts to tranquilize ' + targets[0].name + '!'
                         );
                         
-                        user.attack(
+                        if (user.attack(
                             target:targets[0],
                             amount:user.stats.DEX * (0.5),
                             damageType : Damage.TYPE.PHYS,
                             damageClass: Damage.CLASS.HP
-                        );                        
-
-                        if (Number.random() < 0.45)
-                            targets[0].addEffect(from:user, name:'Paralyzed', durationTurns:5);
+                        ) == true)                      
+                            if (Number.random() < 0.45)
+                                targets[0].addEffect(from:user, name:'Paralyzed', durationTurns:5);
 
 
                     }
@@ -699,6 +732,121 @@ Ability.database = Database.new(
 
             Ability.new(
                 data: {
+                    name: 'Ensnare',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Damages a target and immobilizes both the user and the target for 3 turns. 80% success rate.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 2,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' tries to ensnare ' + targets[0].name + '!'
+                        );
+                        
+                        
+                        if (user.attack(
+                            target:targets[0],
+                            amount:user.stats.ATK * (0.3),
+                            damageType : Damage.TYPE.PHYS,
+                            damageClass: Damage.CLASS.HP
+                        ) == true)                        
+                            if (random.try(percentSuccess:80)) ::<= {
+                                targets[0].addEffect(from:user, name: 'Ensnared', durationTurns: 3);                        
+                                user.addEffect(from:user, name: 'Ensnaring', durationTurns: 3);                        
+                            };
+                            
+                    }
+                }
+            ), 
+
+
+            Ability.new(
+                data: {
+                    name: 'Call',
+                    targetMode : TARGET_MODE.NONE,
+                    description: "Calls a creature to come and join the fight.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 2,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' makes an eerie call!'
+                        );
+                        
+                        if (random.flipCoin()) ::<= {
+                            @:instance = import(module:'game_singleton.instance.mt');
+                        
+                            @help = instance.island.newHostileCreature();
+                            @battle = user.battle;
+                            if (battle.allies->findIndex(value:user) == -1) ::<= {
+                                battle.join(enemy:help);
+                            } else ::<= {
+                                battle.join(ally:help);
+                            };
+                            
+                        } else ::<= {
+                            windowEvent.queueMessage(
+                                text: '...but nothing happened!'
+                            );                        
+                        };
+                                                    
+                    }
+                }
+            ), 
+
+
+
+            Ability.new(
+                data: {
+                    name: 'Tame',
+                    targetMode : TARGET_MODE.ONE,
+                    description: "Attempts to tame a creature, making it a party member if successful.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 2,
+                    usageHintAI : USAGE_HINT.DONTUSE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' attempts to tame ' + targets[0].name + '!'
+                        );
+
+                        when(targets[0].species.name != 'Creature') ::<= {
+                            windowEvent.queueMessage(
+                                text: targets[0].name + ' was not receptive to being tamed!'
+                            );                            
+                        };
+                        @:party = import(module:'game_singleton.party.mt');
+
+                        when(party.isMember(entity:targets[0])) ::<= {
+                            windowEvent.queueMessage(
+                                text: targets[0].name + ' is already tamed!'
+                            );
+                            
+                        };
+
+                        
+                        if (random.flipCoin()) ::<= {
+                            windowEvent.queueMessage(
+                                text: '' + targets[0].name + ' was tamed!'
+                            );                        
+                            party.add(member:targets[0]);
+                        } else ::<= {
+                            windowEvent.queueMessage(
+                                text: '...but ' + targets[0].name + ' continued to be untamed!'
+                            );                        
+                        };
+                                                    
+                    }
+                }
+            ), 
+
+            Ability.new(
+                data: {
                     name: 'Leg Sweep',
                     targetMode : TARGET_MODE.ALLENEMY,
                     description: "Swings, aiming for all enemies legs in hopes of stunning them.",
@@ -1215,9 +1363,9 @@ Ability.database = Database.new(
                     description: "Activates a tripwire set up prior to battle, causing the target to be stunned for 3 turns. Only works once per battle.",
                     durationTurns: 0,
                     hpCost : 0,
-                    apCost : 0,
+                    apCost : 1,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
-                    oncePerBattle : false,
+                    oncePerBattle : true,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         windowEvent.queueMessage(
                             text: user.name + ' activates the tripwire right under ' + targets[0].name + '!'
@@ -1235,22 +1383,59 @@ Ability.database = Database.new(
                     description: "Activates a tripwire-activated explosive set up prior to battle, causing the target to be damaged. Only works once per battle.",
                     durationTurns: 0,
                     hpCost : 0,
-                    apCost : 0,
+                    apCost : 2,
                     usageHintAI : USAGE_HINT.OFFENSIVE,
-                    oncePerBattle : false,
+                    oncePerBattle : true,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         windowEvent.queueMessage(
                             text: user.name + ' activates the tripwire explosive right under ' + targets[0].name + '!'
                         );
-                        user.attack(
-                            target: targets[0],
-                            amount:100, // always 100
-                            damageType : Damage.TYPE.FIRE,
-                            damageClass: Damage.CLASS.HP
-                        );
+                        when(random.try(percentSuccess:70)) ::<= {
+                            windowEvent.queueMessage(
+                                text: targets[0].name + ' avoided the trap!'
+                            );                                
+                        };
+                        targets[0].damage(from:user, damage:Damage.new(
+                            amount:50,
+                            damageType:Damage.TYPE.FIRE,
+                            damageClass:Damage.CLASS.HP
+                        ),dodgeable: false);  
                     }
                 }
             ),
+            
+            
+            Ability.new(
+                data: {
+                    name: 'Spike Pit',
+                    targetMode : TARGET_MODE.ALLENEMY,
+                    description: "Activates a floor trap leading to a spike pit. Only works once per battle.",
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 3,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : true,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' activates a floor trap, revealing a spike pit under the enemies!'
+                        );
+                        
+                        targets->foreach(do:::(i, target) {
+                            when(random.try(percentSuccess:70)) ::<= {
+                                windowEvent.queueMessage(
+                                    text: target.name + ' avoided the trap!'
+                                );                                
+                            };
+                            target.damage(from:user, damage:Damage.new(
+                                amount:50,
+                                damageType:Damage.TYPE.PHYS,
+                                damageClass:Damage.CLASS.HP
+                            ),dodgeable: false);   
+                            target.addEffect(from:user, name: 'Stunned', durationTurns: 2);                        
+                        });
+                    }
+                }
+            ),            
             
             Ability.new(
                 data: {
