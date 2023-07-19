@@ -49,7 +49,6 @@ return ::(
             jumpTag: 'Item',
             choices: [
                 'Use',
-                'Equip',
                 'Check',
                 'Compare',
                 'Improve',
@@ -146,21 +145,9 @@ return ::(
                     };
                   
                   },
-                  // item equip
-                  (1)::<={
-                    commitAction(action:BattleAction.new(state:{
-                        ability: Ability.database.find(name:'Equip Item'),
-                        targets: [user],
-                        extraData : [item, party.inventory]
-                    }));           
-                    if (windowEvent.canJumpToTag(name:'Item'))
-                        windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
-
-
-                  },
 
                   
-                  (2): ::<={ // inventory
+                  (1): ::<={ // inventory
                     item.describe(
                         by:user
                     );
@@ -168,7 +155,7 @@ return ::(
                   },
                   
                   // compare
-                  (3)::<= {
+                  (2)::<= {
                     @slot = user.getSlotsForItem(item)[0];
                     @currentEquip = user.getEquipped(slot);
                     
@@ -177,7 +164,7 @@ return ::(
                         other:item.equipMod
                     ); 
                   },
-                  (4)::<= {
+                  (3)::<= {
                     when(item.material == empty) ::<= {
                         windowEvent.queueMessage(
                             text: 'Only items with a specified material can be improved.'
@@ -317,7 +304,7 @@ return ::(
                     );
                   },                  
                   // Toss
-                  (5)::<= {
+                  (4)::<= {
                     windowEvent.queueAskBoolean(
                         prompt:'Are you sure you wish to throw away the ' + item.name + '?',
                         onChoice::(which) {

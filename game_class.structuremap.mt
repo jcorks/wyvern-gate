@@ -18,6 +18,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
+@windowEvent = import(module:'game_singleton.windowevent.mt');
 
 
 
@@ -138,7 +139,6 @@
                 _map.setSceneryIndex(x:left + 3, y: top + 2, symbol:index);
             };
             
-            @windowEvent = import(module:'game_singleton.windowevent.mt');
             
             @:interact = ::{
                 windowEvent.queueMessage(

@@ -99,7 +99,7 @@ return ::{
                             topWeight: 1,
                             choices: [
                                 'Describe',
-                                'Unequip...'
+                                'Equip'
                             ],
                             prompt: names[choice-1],
                             keep: true,
@@ -116,39 +116,85 @@ return ::{
 
 
 
-                                  // unequip
+                                  // Equip / unequip
                                   (2):::<= {
-                                    @equips = {};
                                     @Entity = import(module:'game_class.entity.mt');
-                                    Entity.EQUIP_SLOTS->foreach(do:::(i, val) {
-                                        @:item = member.getEquipped(slot:val);
-                                        when(item.name == 'None') empty;
-                                        equips[item] = true;
-                                    });
-                                    equips = equips->keys;
+
+                                    @slotToName::(slot) {
+                                        return match(slot) {
+                                          (Entity.EQUIP_SLOTS.HAND_L)  : 'L.Hand  ',
+                                          (Entity.EQUIP_SLOTS.HAND_R)  : 'R.Hand  ',
+                                          (Entity.EQUIP_SLOTS.ARMOR)   : 'Armor   ',
+                                          (Entity.EQUIP_SLOTS.AMULET)  : 'Amulet  ',
+                                          (Entity.EQUIP_SLOTS.RING_L)  : 'L.Ring  ',
+                                          (Entity.EQUIP_SLOTS.RING_R)  : 'R.Ring  ',
+                                          (Entity.EQUIP_SLOTS.TRINKET) : 'Trinket '
+                                        };                                    
+                                    };
+
+
                                     
-                                    when (equips->keycount == 0)
-                                        windowEvent.queueMessage(
-                                            text: member.name + ' has nothing equipped.'
-                                        ); 
                                     
                                     
-                                    @equipNames = [...equips]->map(to::(value) <- value.name);
                                     
+     
                                     windowEvent.queueChoices(
                                         leftWeight: 1,
                                         topWeight: 1,
-                                        choices: equipNames,
-                                        prompt: member.name + ': Unequip',
+                                        prompt: member.name + ': Equips',
+                                        keep:true,
                                         canCancel: true,
+                                        onGetChoices:: {
+                                            @:choices = [];
+                                            [0, Entity.EQUIP_SLOTS.TRINKET+1]->for(do:::(i) {
+                                                @str = slotToName(slot:i);
+                                                @:item = member.getEquipped(slot:i);
+                                                str = str +  if (item.name == 'None') (if (i == Entity.EQUIP_SLOTS.HAND_R) '' else '------') else item.name;
+                                                
+                                                choices->push(value:str);
+                                            });
+                                            return choices;
+                                        },
                                         onChoice:::(choice) {
-                                            windowEvent.queueMessage(
-                                                text: member.name + ' has unequipped the ' + equips[choice-1].name
+                                            when(choice == 0) empty;
+                                        
+                                            @slot = choice-1;
+                                            @:items = party.inventory.items->filter(by:::(value) <- member.getSlotsForItem(item:value)[0] == slot);
+                                            @:itemNames = [...items]->map(to:::(value) <- value.name);
+                                            itemNames->push(value:'[Nothing]');
+                                        
+                                            windowEvent.queueChoices(
+                                                leftWeight: 1,
+                                                topWeight: 1,
+                                                choices:itemNames,
+                                                prompt: member.name + ': ' + slotToName(slot),
+                                                canCancel: true,
+                                                
+                                                onChoice:::(choice) {
+                                                    @:index = choice -1;
+
+                                                    // unequip
+                                                    when (index == items->keycount) ::<= {
+                                                        @item = member.getEquipped(slot);
+                                                        if (item != empty && item.base.name != 'None') ::<= {
+                                                            windowEvent.queueMessage(
+                                                                text: member.name + ' has unequipped the ' + item.name
+                                                            );
+                                                            member.unequipItem(item);
+                                                            party.inventory.add(item);
+                                                        };
+                                                    };
+                                                    
+                                                    @item = items[index];
+                                                    
+                                                    // equip 
+                                                    member.equip(
+                                                        item, 
+                                                        slot:member.getSlotsForItem(item)[0], 
+                                                        inventory:party.inventory
+                                                    );
+                                                }
                                             );
-                                            
-                                            
-                                            member.unequipItem(item:equips[choice-1]);
-                                            party.inventory.add(item:equips[choice-1]);
                                         }
                                     );                                   
                                   }
