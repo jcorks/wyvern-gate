@@ -189,6 +189,12 @@ Scene.database = Database.new(
                                 text: 'Rrohziil, Please keep it safe. It breaks my heart to give these away to Chosen who already should have one...'
                             );
                         };
+
+                        windowEvent.queueMessage(
+                            renderable:{render::{canvas.blackout();}},
+                            text: 'You are wisped away to a new island...'
+                        );
+
                         
                         @:story = import(module:'game_singleton.story.mt');
                         if (story.tier < 1)
@@ -334,6 +340,10 @@ Scene.database = Database.new(
                                 });
                             };
                         };
+                        windowEvent.queueMessage(
+                            renderable:{render::{canvas.blackout();}},
+                            text: 'You are wisped away to the island of Ice...'
+                        );
 
                         @:instance = import(module:'game_singleton.instance.mt');
                         instance.visitIsland(where:key.islandEntry);

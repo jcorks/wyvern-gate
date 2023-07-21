@@ -98,6 +98,7 @@ return class(
                 terminal.print(line:'tOS shell');
                 terminal.print(line:'type "start" and enter to run the default program');
                 terminal.print(line:'Enter "help" for commands.');
+                terminal.print(line:'Pads connected: ' + Topaz.Input.queryPads()->keycount);
                 terminal.print(line:'');
                 terminal.print(line:'');
                 printPrompt();
@@ -117,6 +118,47 @@ return class(
                         @:ch = ' '->setCharCodeAt(index:0, value:unicode);
                         currentCommand = currentCommand + ch;
                         printPrompt();
+                    }
+                );
+
+
+                Topaz.Input.addPadListener(
+                    pad: 0,
+                    onPress::(input) {
+                        when(this.programActive)
+                            match(input) {
+                              (Topaz.Input.PAD.A): ::<={
+                                onProgramKeyboard(input:Topaz.Input.KEY.Z, value:1);
+                              },
+
+                              (Topaz.Input.PAD.B): ::<={
+                                onProgramKeyboard(input:Topaz.Input.KEY.X, value:1);
+                              },
+
+
+                              (Topaz.Input.PAD.D_UP):::<= {
+                                onProgramKeyboard(input:Topaz.Input.KEY.UP, value:1);
+                              },
+                              (Topaz.Input.PAD.D_DOWN):::<= {
+                                onProgramKeyboard(input:Topaz.Input.KEY.DOWN, value:1);
+                              },
+                              (Topaz.Input.PAD.D_LEFT):::<= {
+                                onProgramKeyboard(input:Topaz.Input.KEY.LEFT, value:1);
+                              },
+                              (Topaz.Input.PAD.D_RIGHT):::<= {
+                                onProgramKeyboard(input:Topaz.Input.KEY.RIGHT, value:1);
+                              }
+                            }
+                        ;                                
+
+                        match(input) {
+                            (Topaz.Input.PAD.A,
+                             Topaz.Input.PAD.START): ::<={
+                                currentCommand = 'start';
+                                printPrompt();                                
+                                runCommand(command:'start', arg:'');
+                            }
+                        };
                     }
                 );
 

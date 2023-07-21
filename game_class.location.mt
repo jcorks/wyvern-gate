@@ -655,9 +655,9 @@ Location.Base.database = Database.new(
                 location.ownedBy.stats.state = StatSet.new(
                     HP:   110,
                     AP:   999,
-                    ATK:  5,
+                    ATK:  9,
                     INT:  5,
-                    DEF:  9,
+                    DEF:  11,
                     LUK:  8,
                     SPD:  16,
                     DEX:  8
