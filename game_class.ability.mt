@@ -1775,6 +1775,39 @@ Ability.database = Database.new(
                 }
             ),
 
+
+            Ability.new(
+                data: {
+                    name: 'Backdraft',
+                    targetMode : TARGET_MODE.ALLENEMY,
+                    description: 'Using great amount of heat, gives targets burns.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 3,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' generates a great amount of heat!'
+                        );
+                        
+                        targets->foreach(do:::(i, target) {
+                            if (user.attack(
+                                target:target,
+                                amount:user.stats.INT * (0.6),
+                                damageType : Damage.TYPE.FIRE,
+                                damageClass: Damage.CLASS.HP
+                            ))
+                                targets[0].addEffect(from:user, name:'Burned', durationTurns:5);
+                                                      
+                        });
+                    }
+                }
+            ),
+
+
+
+
             Ability.new(
                 data: {
                     name: 'Flare',
@@ -1953,7 +1986,12 @@ Ability.database = Database.new(
                             text: user.name + ' casts Flash!'
                         );
                         user.enemies->foreach(do:::(index, enemy) {
-                            enemy.addEffect(from:user, name: 'Blind', durationTurns: 5);
+                            if (random.flipCoin())
+                                enemy.addEffect(from:user, name: 'Blind', durationTurns: 5)
+                            else 
+                                windowEvent.queueMessage(
+                                    text: enemy.name + ' covered their eyes!'
+                                );                                
                         });
                     }
                 }

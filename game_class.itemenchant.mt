@@ -619,6 +619,285 @@ ItemEnchant.Base.database = Database.new(
         ),
 
 
+
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Inlet: Teal Crystal',
+                description : 'Set with an simple, enchanted teal crystal of alchemical origin.',
+                equipMod : StatSet.new(
+                    SPD: 15,
+                    DEX: 15,
+                    ATK: -5,
+                    DEF: -5,
+                    INT: -5
+                ),
+                priceMod: 140,
+                tier : 0,
+                levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+        
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Inlet: Lavender Crystal',
+                description : 'Set with an simple, enchanted lavender crystal of alchemical origin.',
+                equipMod : StatSet.new(
+                    SPD: -5,
+                    DEX: 15,
+                    ATK: 15,
+                    DEF: -5,
+                    INT: -5
+                ),
+                priceMod: 140,
+                tier : 0,
+                levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Inlet: Orange Crystal',
+                description : 'Set with an simple, enchanted orange crystal of alchemical origin.',
+                equipMod : StatSet.new(
+                    SPD: -5,
+                    DEX: -5,
+                    ATK: 15,
+                    DEF: 15,
+                    INT: -5
+                ),
+                priceMod: 140,
+                tier : 0,
+                levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Inlet: Indigo Crystal',
+                description : 'Set with an simple, enchanted indigo crystal of alchemical origin.',
+                equipMod : StatSet.new(
+                    SPD: -5,
+                    DEX: -5,
+                    ATK: -5,
+                    DEF: 15,
+                    INT: 15
+                ),
+                priceMod: 140,
+                tier : 0,
+                levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Inlet: Rose Crystal',
+                description : 'Set with an simple, enchanted rose crystal of alchemical origin.',
+                equipMod : StatSet.new(
+                    SPD: 15,
+                    DEX: -5,
+                    ATK: -5,
+                    DEF: -5,
+                    INT: 15
+                ),
+                priceMod: 140,
+                tier : 0,
+                levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Inlet: Cyan Crystal',
+                description : 'Set with an simple, enchanted cyan crystal of alchemical origin.',
+                equipMod : StatSet.new(
+                    SPD: 15,
+                    DEX: -5,
+                    ATK: 15,
+                    DEF: -5,
+                    INT: -5
+                ),
+                priceMod: 140,
+                tier : 0,
+                levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Inlet: White Crystal',
+                description : 'Set with an simple, enchanted white crystal of alchemical origin.',
+                equipMod : StatSet.new(
+                    SPD: 15,
+                    DEX: -5,
+                    ATK: -5,
+                    DEF: 15,
+                    INT: -5
+                ),
+                priceMod: 140,
+                tier : 0,
+                levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+        
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Inlet: Violet Crystal',
+                description : 'Set with an simple, enchanted violet crystal of alchemical origin.',
+                equipMod : StatSet.new(
+                    SPD: -5,
+                    DEX: 15,
+                    ATK: -5,
+                    DEF: 15,
+                    INT: -5
+                ),
+                priceMod: 140,
+                tier : 0,
+                levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Inlet: Scarlet Crystal',
+                description : 'Set with an simple, enchanted scarlet crystal of alchemical origin.',
+                equipMod : StatSet.new(
+                    SPD: -5,
+                    DEX: 15,
+                    ATK: -5,
+                    DEF: -5,
+                    INT: 15
+                ),
+                priceMod: 140,
+                tier : 0,
+                levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Inlet: Maroon Crystal',
+                description : 'Set with an simple, enchanted maroon crystal of alchemical origin.',
+                equipMod : StatSet.new(
+                    SPD: 15,
+                    DEX: -5,
+                    ATK: 15,
+                    DEF: -5,
+                    INT: -5
+                ),
+                priceMod: 140,
+                tier : 0,
+                levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+        ItemEnchant.Base.new(
+            data : {
+                name : 'Inlet: Crimson Crystal',
+                description : 'Set with an simple, enchanted crimson crystal of alchemical origin.',
+                equipMod : StatSet.new(
+                    SPD: -5,
+                    DEX: -5,
+                    ATK: 15,
+                    DEF: -5,
+                    INT: 15
+                ),
+                priceMod: 140,
+                tier : 0,
+                levelMinimum : 1,
+                
+                triggerConditionEffects : [
+                ],
+                equipEffects : [
+                ],
+                
+                useEffects : []
+            }
+        ),
+
+
+
+
+
+
+
+
+
+
+
+
+
         ItemEnchant.Base.new(
             data : {
                 name : 'Inlet: Morion',

@@ -592,6 +592,7 @@ Event.Base.database = Database.new(
                                         
                                 )
                             );
+                            @StatSet = import(module:'game_class.statset.mt');
                             
                             windowEvent.queueNoDisplay(
                                 onLeave::{
@@ -599,12 +600,20 @@ Event.Base.database = Database.new(
                                     [0, 5*3]->for(do:::(i) {
                                         world.stepTime();
                                     });
-
+                    
                                     event.party.members->foreach(do:::(index, member) {
+                                        @oldStats = StatSet.new();
+                                        oldStats.state = member.stats.state;
+                                        member.stats.add(stats:StatSet.new(HP:(oldStats.HP*0.1)->ceil, AP:(oldStats.AP*0.1)->ceil));
+                                        oldStats.printDiff(other:member.stats, prompt:member.name + ': I feel refreshed!');
+
+
                                         member.heal(amount:member.stats.HP * 0.3);
                                         member.healAP(amount:member.stats.AP * 0.3);
                                     });
-                                }
+                                },
+                                
+                                onEnter::{}
                             );
 
 

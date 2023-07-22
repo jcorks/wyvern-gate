@@ -19,7 +19,7 @@
 @:BattleAction = import(module:'game_struct.battleaction.mt');
 @:class  = import(module:'Matte.Core.Class');
 @:Ability = import(module:'game_class.ability.mt');
-
+@:random = import(module:'game_singleton.random.mt');
 return class(
     name: 'Wyvern.BattleAI',
     define:::(this) {
@@ -80,7 +80,7 @@ return class(
             
             
                 // default: just attack if all you have is defend and attack
-                when(user_.abilitiesAvailable->keycount <= 2 || Number.random() < 0.6)
+                when(user_.abilitiesAvailable->keycount <= 2 || random.try(percentSuccess:40))
                     defaultAttack();          
 
                 // else pick a non-defend ability

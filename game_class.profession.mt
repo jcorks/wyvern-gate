@@ -1172,12 +1172,12 @@ Profession.Base.database = Database.new(
                 
                 abilities : [
                     'Triplestrike',
-                    'Sunbeam',
-                    'Sunburst',
+                    'Backdraft',
                     'Big Swing',
                     'Stun',
                     'Fire',
-                    'Wild Swing'
+                    'Wild Swing',
+                    'Summon: Fire Sprite'
                 ],
                 passives : [
                 ]
