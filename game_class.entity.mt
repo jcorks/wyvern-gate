@@ -956,7 +956,7 @@
                     );
                 });
 
-                if (profession.base.weaponAffinity == equips[EQUIP_SLOTS.HAND_L].base.name) ::<= {
+                if ((slot == EQUIP_SLOTS.HAND_L || slot == EQUIP_SLOTS.HAND_R) && profession.base.weaponAffinity == equips[EQUIP_SLOTS.HAND_L].base.name) ::<= {
                     if (silent != true) ::<= {
                         windowEvent.queueMessage(
                             speaker: this.name,

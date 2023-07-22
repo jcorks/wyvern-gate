@@ -653,13 +653,13 @@ Location.Base.database = Database.new(
                     };
                 };
                 location.ownedBy.stats.state = StatSet.new(
-                    HP:   110,
+                    HP:   150,
                     AP:   999,
-                    ATK:  9,
+                    ATK:  12,
                     INT:  5,
                     DEF:  11,
                     LUK:  8,
-                    SPD:  16,
+                    SPD:  20,
                     DEX:  8
                 ).state;
                 location.ownedBy.heal(amount:9999, silent:true); 
@@ -735,9 +735,9 @@ Location.Base.database = Database.new(
                     };
                 };
                 location.ownedBy.stats.state = StatSet.new(
-                    HP:   190,
+                    HP:   270,
                     AP:   999,
-                    ATK:  6,
+                    ATK:  12,
                     INT:  4,
                     DEF:  7,
                     LUK:  6,

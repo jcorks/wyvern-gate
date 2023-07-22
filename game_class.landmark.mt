@@ -672,6 +672,7 @@ Landmark.Base.database = Database.new(
                 ],
                 requiredLocations : [
                     '?????',
+                    '?????',
                     'Small Chest'
                 ],
                 mapHint:{},
