@@ -651,6 +651,103 @@ Species.database = Database.new(items: [
         passives : [
         ]
     }),
+
+
+
+    Species.new(data:{
+        name : 'Fire Sprite',
+        rarity : 2000000000000,
+        description: 'Hot n\' spicy!',
+        growth : StatSet.new(
+            HP : 3,
+            AP : 1,
+            ATK: 7,
+            DEF: 4,
+            INT: 7,
+            LUK: 1,
+            SPD: 2,
+            DEX: 4
+        ),
+        qualities : [
+
+        ],
+        
+        special : true,
+        passives : [
+        ]
+    }),
+
+    Species.new(data:{
+        name : 'Ice Elemental',
+        rarity : 2000000000000,
+        description: 'Brrr that\'s cold!',
+        growth : StatSet.new(
+            HP : 7,
+            AP : 4,
+            ATK: 7,
+            DEF: 4,
+            INT: 7,
+            LUK: 1,
+            SPD: 6,
+            DEX: 4
+        ),
+        qualities : [
+
+        ],
+        
+        special : true,
+        passives : [
+        ]
+    }),
+    
+    Species.new(data:{
+        name : 'Thunder Spawn',
+        rarity : 2000000000000,
+        description: 'Shocking!',
+        growth : StatSet.new(
+            HP : 7,
+            AP : 6,
+            ATK: 10,
+            DEF: 4,
+            INT: 7,
+            LUK: 1,
+            SPD: 6,
+            DEX: 4
+        ),
+        qualities : [
+
+        ],
+        
+        special : true,
+        passives : [
+        ]
+    }),    
+
+
+    Species.new(data:{
+        name : 'Guiding Light',
+        rarity : 2000000000000,
+        description: 'Oh!',
+        growth : StatSet.new(
+            HP : 7,
+            AP : 12,
+            ATK: 2,
+            DEF: 4,
+            INT: 7,
+            LUK: 1,
+            SPD: 6,
+            DEX: 8
+        ),
+        qualities : [
+
+        ],
+        
+        special : true,
+        passives : [
+        ]
+    }),    
+    
+
     
     Species.new(data:{
         name : 'Wyvern',
@@ -718,6 +815,7 @@ Species.database = Database.new(items: [
             'Icy'
         ]
     }),
+
 
     
 ]);

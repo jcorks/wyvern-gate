@@ -189,10 +189,11 @@ Scene.database = Database.new(
                                 text: 'Rrohziil, Please keep it safe. It breaks my heart to give these away to Chosen who already should have one...'
                             );
                         };
+                        @:canvas = import(module:'game_singleton.canvas.mt');
 
                         windowEvent.queueMessage(
                             renderable:{render::{canvas.blackout();}},
-                            text: 'You are wisped away to a new island...'
+                            text: 'You are whisked away to a new island...'
                         );
 
                         
@@ -340,9 +341,10 @@ Scene.database = Database.new(
                                 });
                             };
                         };
+                        @:canvas = import(module:'game_singleton.canvas.mt');
                         windowEvent.queueMessage(
                             renderable:{render::{canvas.blackout();}},
-                            text: 'You are wisped away to the island of Ice...'
+                            text: 'You are whisked away to the island of Ice...'
                         );
 
                         @:instance = import(module:'game_singleton.instance.mt');
@@ -360,7 +362,7 @@ Scene.database = Database.new(
                 script: [
                     ['???',      '...'],
                     ['???', '... Another Chosen, or so you would be called.'],
-                    ['???', 'WHy my sibling wastes our time with some of these karrjuhzaalii to us is a mystery to me.'],
+                    ['???', 'Why my sibling wastes our time with some of these karrjuhzaalii to us is a mystery to me.'],
                     ['???', 'But with me, your journey may end here. I will not let you pass unless you earn it.'],
                     ['???', 'I will not be as easy-going as Kaedjaal.'],
                     ['???', 'Through the unforgiving cold and ice, you will understand the power which you challenge.'],

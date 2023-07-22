@@ -1543,6 +1543,213 @@ Ability.database = Database.new(
                     }
                 }
             ),
+
+
+            Ability.new(
+                data: {
+                    name: 'Summon: Fire Sprite',
+                    targetMode : TARGET_MODE.NONE,
+                    description: 'Summons a fire sprite to fight on your side.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 2,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' summons a Fire Sprite!'
+                        );
+                        
+                        @:Entity = import(module:'game_class.entity.mt');
+                        @:Species = import(module:'game_class.species.mt');
+                        @:sprite = Entity.new(
+                            speciesHint: Species.database.find(name: 'Fire Sprite'),
+                            professionHint: 'Fire Sprite',
+                            levelHint:5
+                        );
+                        sprite.name = 'the Fire Sprite';
+                        
+                        [0, 10]->for(do:::(i) {
+                            sprite.learnNextAbility();
+                        });
+                        
+                        @:battle = user.battle;
+                        if (battle.allies->findIndex(value:user) != -1)
+                            battle.join(
+                                ally: sprite                               
+                            )
+                        else
+                            battle.join(
+                                enemy: sprite                                                                                       
+                            )
+                        ;
+                    }
+                }
+            ),
+            
+            Ability.new(
+                data: {
+                    name: 'Summon: Ice Elemental',
+                    targetMode : TARGET_MODE.NONE,
+                    description: 'Summons an ice elemental to fight on your side.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 2,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' summons an Ice Elemental!'
+                        );
+                        
+                        @:Entity = import(module:'game_class.entity.mt');
+                        @:Species = import(module:'game_class.species.mt');
+                        @:sprite = Entity.new(
+                            speciesHint: Species.database.find(name: 'Ice Elemental'),
+                            professionHint: 'Ice Elemental',
+                            levelHint:5
+                        );
+                        sprite.name = 'the Ice Elemental';
+                        
+                        [0, 10]->for(do:::(i) {
+                            sprite.learnNextAbility();
+                        });
+                        
+                        @:battle = user.battle;
+                        if (battle.allies->findIndex(value:user) != -1)
+                            battle.join(
+                                ally: sprite                               
+                            )
+                        else
+                            battle.join(
+                                enemy: sprite                                                                                       
+                            )
+                        ;
+                    }
+                }
+            ),            
+            
+            Ability.new(
+                data: {
+                    name: 'Summon: Thunder Spawn',
+                    targetMode : TARGET_MODE.NONE,
+                    description: 'Summons a thunder spawn to fight on your side.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 2,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' summons a Thunder Spawn!'
+                        );
+                        
+                        @:Entity = import(module:'game_class.entity.mt');
+                        @:Species = import(module:'game_class.species.mt');
+                        @:sprite = Entity.new(
+                            speciesHint: Species.database.find(name: 'Thunder Spawn'),
+                            professionHint: 'Thunder Spawn',
+                            levelHint:5
+                        );
+                        sprite.name = 'the Thunder Spawn';
+                        
+                        [0, 10]->for(do:::(i) {
+                            sprite.learnNextAbility();
+                        });
+                        
+                        @:battle = user.battle;
+                        if (battle.allies->findIndex(value:user) != -1)
+                            battle.join(
+                                ally: sprite                               
+                            )
+                        else
+                            battle.join(
+                                enemy: sprite                                                                                       
+                            )
+                        ;
+                    }
+                }
+            ),       
+            
+            Ability.new(
+                data: {
+                    name: 'Summon: Guiding Light',
+                    targetMode : TARGET_MODE.NONE,
+                    description: 'Summons a guiding light to fight on your side.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 3,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' summons a Guiding Light!'
+                        );
+                        
+                        @:Entity = import(module:'game_class.entity.mt');
+                        @:Species = import(module:'game_class.species.mt');
+                        @:sprite = Entity.new(
+                            speciesHint: Species.database.find(name: 'Guiding Light'),
+                            professionHint: 'Guiding Light',
+                            levelHint:5
+                        );
+                        sprite.name = 'the Guiding Light';
+                        
+                        [0, 10]->for(do:::(i) {
+                            sprite.learnNextAbility();
+                        });
+                        
+                        @:battle = user.battle;
+                        if (battle.allies->findIndex(value:user) != -1)
+                            battle.join(
+                                ally: sprite                               
+                            )
+                        else
+                            battle.join(
+                                enemy: sprite                                                                                       
+                            )
+                        ;
+                    }
+                }
+            ),                   
+
+            Ability.new(
+                data: {
+                    name: 'Unsummon',
+                    targetMode : TARGET_MODE.ONE,
+                    description: 'Magick that removes a summoned entity.',
+                    durationTurns: 0,
+                    hpCost : 0,
+                    apCost : 2,
+                    usageHintAI : USAGE_HINT.OFFENSIVE,
+                    oncePerBattle : false,
+                    onAction: ::(user, targets, turnIndex, extraData) {
+                        windowEvent.queueMessage(
+                            text: user.name + ' casts Unsummon on ' + targets[0].name + '!'
+                        );
+
+                        if (match(targets[0].name) {
+                            ('the Fire Sprite',
+                             'the Ice Elemental',
+                             'the Thunder Spawn',
+                             'the Guiding Light'): true,
+                            default: false
+                        }) ::<= {
+                            windowEvent.queueMessage(
+                                text: targets[0].name + ' faded into nothingness!'
+                            );                            
+                            targets[0].kill(silent:true);  
+                        } else ::<= {
+                            windowEvent.queueMessage(
+                                text: targets[0].name + ' was unaffected!'
+                            );                                                        
+                        };
+                        
+                            
+
+                    }
+                }
+            ),                        
             
             Ability.new(
                 data: {

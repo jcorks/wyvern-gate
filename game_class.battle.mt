@@ -304,6 +304,7 @@
                 });
                 allies->foreach(do:::(index, ally) {
                     ally.battleStart(
+                        battle: this,
                         enemies: enemies,
                         allies: allies
                     );
@@ -545,6 +546,11 @@
                 if (enemy != empty) ::<= {
                     when (enemies_->findIndex(value:enemy) != -1) empty;
                     windowEvent.queueMessage(text:enemy.name + ' joins the fray!');
+                    enemy.battleStart(
+                        battle: this,
+                        allies: enemies_,
+                        enemies: allies_
+                    );
                     enemies_->push(value:enemy);
                     turn->push(value:{
                         isAlly: false,
@@ -555,6 +561,11 @@
                     when (allies_->findIndex(value:ally) != -1) empty;
                     windowEvent.queueMessage(text:ally.name + ' joins the fray!');
                     allies_->push(value:ally);
+                    ally.battleStart(
+                        battle: this,
+                        enemies: enemies_,
+                        allies: allies_
+                    );
                     turn->push(value:{
                         isAlly: true,
                         entity: ally

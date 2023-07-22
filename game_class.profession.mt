@@ -470,6 +470,39 @@ Profession.Base.database = Database.new(
                 ]
             }), 
 
+            Profession.Base.new(data:{
+                name: 'Summoner',
+                weaponAffinity: 'Tome',
+                description : "A", 
+                growth: StatSet.new(
+                    HP:  5,
+                    AP:  15,
+                    ATK: 7,
+                    INT: 11,
+                    DEF: 3,
+                    SPD: 7,
+                    LUK: 4,
+                    DEX: 4
+                ),
+                levelMinimum : 1,
+
+                minKarma : 0,
+                maxKarma : 1000,
+                learnable : true,
+                
+                abilities : [
+                    'Summon: Fire Sprite',    //X
+                    'Summon: Ice Elemental',  //X
+                    'Unsummon',               //X removes equip
+                    'Summon: Thunder Spawn',  //X use random ability of target
+                    'Summon: Guiding Light',  //X make target fly
+                    
+                ],
+                passives : [
+                ]
+            }), 
+
+
 
             Profession.Base.new(data:{
                 name: 'Arcanist',
@@ -1000,6 +1033,124 @@ Profession.Base.database = Database.new(
             }),
 
             Profession.Base.new(data:{
+                name: 'Fire Sprite',
+                weaponAffinity: 'Shortsword',
+                description : "", 
+                levelMinimum : 100,
+
+                growth: StatSet.new(
+                    HP:  7,
+                    AP:  7,
+                    ATK: 2,
+                    INT: 7,
+                    DEF: 7,
+                    SPD: 7,
+                    LUK: 10,
+                    DEX: 7
+                ),
+                minKarma : 0,
+                maxKarma : 50,
+                learnable : false,
+                
+                abilities : [
+                    'Fire',   // calls for backup, DQ style
+                ],
+                passives : [
+                    'Burning'
+                ]
+            }),
+            
+            Profession.Base.new(data:{
+                name: 'Ice Elemental',
+                weaponAffinity: 'Shortsword',
+                description : "", 
+                levelMinimum : 100,
+
+                growth: StatSet.new(
+                    HP:  7,
+                    AP:  7,
+                    ATK: 2,
+                    INT: 7,
+                    DEF: 7,
+                    SPD: 7,
+                    LUK: 10,
+                    DEX: 7
+                ),
+                minKarma : 0,
+                maxKarma : 50,
+                learnable : false,
+                
+                abilities : [
+                    'Ice',   // calls for backup, DQ style
+                    'Frozen Flame'
+                ],
+                passives : [
+                    'Icy'
+                ]
+            }),            
+
+            Profession.Base.new(data:{
+                name: 'Thunder Spawn',
+                weaponAffinity: 'Shortsword',
+                description : "", 
+                levelMinimum : 100,
+
+                growth: StatSet.new(
+                    HP:  7,
+                    AP:  7,
+                    ATK: 2,
+                    INT: 7,
+                    DEF: 7,
+                    SPD: 7,
+                    LUK: 10,
+                    DEX: 7
+                ),
+                minKarma : 0,
+                maxKarma : 50,
+                learnable : false,
+                
+                abilities : [
+                    'Thunder',
+                    'Triplestrike',
+                    'Ensnare'
+                ],
+                passives : [
+                    'Shocking'
+                ]
+            }),
+            
+            Profession.Base.new(data:{
+                name: 'Guiding Light',
+                weaponAffinity: 'Shortsword',
+                description : "", 
+                levelMinimum : 100,
+
+                growth: StatSet.new(
+                    HP:  7,
+                    AP:  7,
+                    ATK: 2,
+                    INT: 7,
+                    DEF: 7,
+                    SPD: 7,
+                    LUK: 10,
+                    DEX: 7
+                ),
+                minKarma : 0,
+                maxKarma : 50,
+                learnable : false,
+                
+                abilities : [
+                    'Cure',
+                    'Greater Cure',
+                    'Protect',
+                    'Explosion'
+                ],
+                passives : [
+                    'Shimmering'
+                ]
+            }),            
+
+            Profession.Base.new(data:{
                 name: 'Wyvern of Fire',
                 weaponAffinity: 'None',
                 description : "", 
@@ -1054,6 +1205,7 @@ Profession.Base.database = Database.new(
                 
                 abilities : [
                     'Frozen Flame',
+                    'Summon: Ice Elemental',
                     'Ice',
                     'Magic Mist', // remove all effects
                     'Wild Swing',

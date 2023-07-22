@@ -453,7 +453,7 @@ return class(
                 
                 
                 @:Species = import(module:'game_class.species.mt');
-                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
+                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:100);
                 @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
                 // debug
                     //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
@@ -462,8 +462,8 @@ return class(
                     @:story = import(module:'game_singleton.story.mt');
                     //story.defeatedWyvernFire = true;
                     
-                    //party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
-                    //).new(from:island.newInhabitant()));
+                    party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
+                    ).new(from:island.newInhabitant()));
 
                     //party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Ice'
                     //).new(from:island.newInhabitant()));

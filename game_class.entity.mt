@@ -317,6 +317,10 @@
                 resetEffects();              
             },
             
+            battle : {
+                get ::<- battle_
+            },
+            
 
             // called to signal that a battle has started involving this entity
             battleEnd :: {
@@ -787,9 +791,10 @@
                 }
             },
             
-            kill :: {
+            kill ::(silent) {
                 hp = 0;
-                windowEvent.queueMessage(text: '' + this.name + ' has died!');                
+                if (silent == empty)
+                    windowEvent.queueMessage(text: '' + this.name + ' has died!');                
                 flags.add(flag:StateFlags.DIED);
                 isDead = true;                
             },
