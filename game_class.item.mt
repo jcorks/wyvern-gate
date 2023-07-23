@@ -281,7 +281,7 @@
                 };
 
                 
-                if (rngEnchantHint != empty && random.try(percentSuccess:30)) ::<= {
+                if (rngEnchantHint != empty && random.try(percentSuccess:45)) ::<= {
                     @enchantCount = random.integer(from:1, to:match(story.tier) {
                         (4):    7,
                         (3):    5,
@@ -1286,7 +1286,6 @@ Item.Base.database = Database.new(items: [
             'Fling',
         ],
         possibleAbilities : [
-            "Stab",
             "Doublestrike",
             "Triplestrike",
             "Stun"

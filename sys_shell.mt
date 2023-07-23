@@ -122,8 +122,45 @@ return class(
                 );
 
 
+                @lastLeftStickX = 0;
+                @lastLeftStickY = 0;
+                @:stickDeadzone = 0.35;
                 Topaz.Input.addPadListener(
                     pad: 0,
+
+                    onUpdate::(input, value) {
+                        when(this.programActive == false) empty;
+
+
+                        match(input) {
+
+
+                          (Topaz.Input.PAD.AXIS_X): ::<= {
+                            if (value->abs > stickDeadzone && lastLeftStickX->abs < stickDeadzone) ::<= {
+                                if (value < 0)
+                                    onProgramKeyboard(input:Topaz.Input.KEY.LEFT, value:1)
+                                else
+                                    onProgramKeyboard(input:Topaz.Input.KEY.RIGHT, value:1);
+                            };
+                            lastLeftStickX = value;
+                          },
+
+
+                          (Topaz.Input.PAD.AXIS_Y): ::<= {
+                            if (value->abs > stickDeadzone && lastLeftStickY->abs < stickDeadzone) ::<= {
+                                if (value < 0)
+                                    onProgramKeyboard(input:Topaz.Input.KEY.UP, value:1)
+                                else
+                                    onProgramKeyboard(input:Topaz.Input.KEY.DOWN, value:1);
+                            };
+                            lastLeftStickY = value;
+                          }
+
+
+
+                        };
+                    },
+
                     onPress::(input) {
                         when(this.programActive)
                             match(input) {
@@ -134,6 +171,7 @@ return class(
                               (Topaz.Input.PAD.B): ::<={
                                 onProgramKeyboard(input:Topaz.Input.KEY.X, value:1);
                               },
+
 
 
                               (Topaz.Input.PAD.D_UP):::<= {

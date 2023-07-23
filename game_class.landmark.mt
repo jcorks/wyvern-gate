@@ -643,7 +643,6 @@ Landmark.Base.database = Database.new(
                     {name: 'Small Chest', rarity:3},
                 ],
                 requiredLocations : [
-
                     'Stairs Down',
                     'Stairs Down',
                     'Small Chest'
@@ -746,7 +745,8 @@ Landmark.Base.database = Database.new(
                     roomSize: 20,
                     roomAreaSize: 15,
                     roomAreaSizeLarge: 15,
-                    emptyAreaCount: 1
+                    emptyAreaCount: 1,
+                    wallCharacter: ' '
                     
                 },
                 onCreate ::(landmark, island){},
@@ -765,7 +765,7 @@ Landmark.Base.database = Database.new(
                 maxLocations : 2,
                 guarded : false,
                 peaceful: true,
-                dungeonMap : false,
+                dungeonMap : true,
                 possibleLocations : [
                 ],
                 requiredLocations : [
@@ -776,7 +776,8 @@ Landmark.Base.database = Database.new(
                     roomSize: 20,
                     roomAreaSize: 15,
                     roomAreaSizeLarge: 15,
-                    emptyAreaCount: 1
+                    emptyAreaCount: 1,
+                    wallCharacter: ' '
                     
                 },
                 onCreate ::(landmark, island){},
@@ -898,7 +899,7 @@ Landmark.Base.database = Database.new(
                 name : 'forest',
                 symbol : 'T',
                 rarity : 40,                
-                peaceful: false,
+                peaceful: true,
                 isUnique : false,
                 dungeonMap : true,
                 minLocations : 3,

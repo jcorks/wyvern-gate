@@ -91,6 +91,9 @@ return class(
                     defaultAttack();
                     
                 @:ability = Random.pickArrayItem(list);
+
+
+
                 when (ability.usageHintAI == Ability.USAGE_HINT.HEAL &&                
                     user_.hp == user_.stats.HP)
                     defaultAttack();

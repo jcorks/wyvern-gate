@@ -157,7 +157,7 @@ return class(
                 
                 
                 // add additional entities out of spawn points (stairs)
-                if (entities->keycount < (floorHint/3)->ceil && Number.random() < 0.1) ::<= {
+                if ((entities->keycount < (if (floorHint == 0) 0 else (1+(floorHint/4)->ceil))) && Number.random() < 0.1 && landmark_.base.peaceful == false) ::<= {
                     addEntity();
                 };
             

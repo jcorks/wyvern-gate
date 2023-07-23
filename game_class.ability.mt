@@ -181,7 +181,7 @@ Ability.database = Database.new(
                             damageClass: Damage.CLASS.HP
                         ) == true)                      
                             if (Number.random() < 0.45)
-                                targets[0].addEffect(from:user, name:'Paralyzed', durationTurns:5);
+                                targets[0].addEffect(from:user, name:'Paralyzed', durationTurns:2);
 
 
                     }
@@ -1352,7 +1352,7 @@ Ability.database = Database.new(
                             damageType : Damage.TYPE.PHYS,
                             damageClass: Damage.CLASS.HP
                         );
-                        targets[0].addEffect(from:user, name: 'Petrified', durationTurns: 5);                        
+                        targets[0].addEffect(from:user, name: 'Petrified', durationTurns: 2);                        
                     }
                 }
             ),            
@@ -1559,7 +1559,25 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' summons a Fire Sprite!'
                         );
-                        
+
+                        // limit 2 summons at a time.
+                        @count = 0;
+                        user.allies->foreach(do:::(i, ally) {
+                            match(ally.name) {
+                                ('the Fire Sprite',
+                                'the Ice Elemental',
+                                'the Thunder Spawn',
+                                'the Guiding Light'): ::<= {
+                                    count += 1;
+                                }
+                            };
+                        });
+                        when (count >= 2) 
+                            windowEvent.queueMessage(
+                                text: '...but the summoning fizzled!'
+                            );
+
+
                         @:Entity = import(module:'game_class.entity.mt');
                         @:Species = import(module:'game_class.species.mt');
                         @:sprite = Entity.new(
@@ -1601,6 +1619,21 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' summons an Ice Elemental!'
                         );
+                        @count = 0;
+                        user.allies->foreach(do:::(i, ally) {
+                            match(ally.name) {
+                                ('the Fire Sprite',
+                                'the Ice Elemental',
+                                'the Thunder Spawn',
+                                'the Guiding Light'): ::<= {
+                                    count += 1;
+                                }
+                            };
+                        });
+                        when (count >= 2) 
+                            windowEvent.queueMessage(
+                                text: '...but the summoning fizzled!'
+                            );
                         
                         @:Entity = import(module:'game_class.entity.mt');
                         @:Species = import(module:'game_class.species.mt');
@@ -1643,6 +1676,21 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' summons a Thunder Spawn!'
                         );
+                        @count = 0;
+                        user.allies->foreach(do:::(i, ally) {
+                            match(ally.name) {
+                                ('the Fire Sprite',
+                                'the Ice Elemental',
+                                'the Thunder Spawn',
+                                'the Guiding Light'): ::<= {
+                                    count += 1;
+                                }
+                            };
+                        });
+                        when (count >= 2) 
+                            windowEvent.queueMessage(
+                                text: '...but the summoning fizzled!'
+                            );
                         
                         @:Entity = import(module:'game_class.entity.mt');
                         @:Species = import(module:'game_class.species.mt');
@@ -1685,6 +1733,21 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' summons a Guiding Light!'
                         );
+                        @count = 0;
+                        user.allies->foreach(do:::(i, ally) {
+                            match(ally.name) {
+                                ('the Fire Sprite',
+                                'the Ice Elemental',
+                                'the Thunder Spawn',
+                                'the Guiding Light'): ::<= {
+                                    count += 1;
+                                }
+                            };
+                        });
+                        when (count >= 2) 
+                            windowEvent.queueMessage(
+                                text: '...but the summoning fizzled!'
+                            );
                         
                         @:Entity = import(module:'game_class.entity.mt');
                         @:Species = import(module:'game_class.species.mt');
@@ -1937,8 +2000,12 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' casts Telekinesis!'
                         );
-                        targets[0].addEffect(from:user, name: 'Stunned', durationTurns: 2);                            
-
+                        if (random.flipCoin())
+                            targets[0].addEffect(from:user, name: 'Stunned', durationTurns: 1)                       
+                        else 
+                            windowEvent.queueMessage(
+                                text: '...but it missed!'
+                            );
 
                     }
                 }
@@ -3425,19 +3492,19 @@ Ability.database = Database.new(
                             // NPC -> party
                             (world.party.isMember(entity:targets[0])) ::<= {
                                 windowEvent.queueMessage(text: user.name + ' has offered ' + cost + 'G for ' + targets[0].name + ' to stop acting for the rest of the battle.');
-                                when(
-                                    windowEvent.queueAskBoolean(
-                                        prompt: 'Accept offer for ' + cost + 'G?'
-                                    ) == false
-                                ) empty;              
-                                              
-                                windowEvent.queueMessage(text: user.name + ' bribes ' + targets[0].name + '!');
-                                targets[0].addEffect(
-                                    from:user, name: 'Bribed', durationTurns: -1
-                                );    
-                
-        
-                                world.party.inventory.addGold(amount:cost);
+                                windowEvent.queueAskBoolean(
+                                    prompt: 'Accept offer for ' + cost + 'G?',
+                                    onChoice::(which) {
+                                        when(which == false) empty;
+
+                                        windowEvent.queueMessage(text: user.name + ' bribes ' + targets[0].name + '!');
+                                        targets[0].addEffect(
+                                            from:user, name: 'Bribed', durationTurns: -1
+                                        );    
+                        
+                                        world.party.inventory.addGold(amount:cost);
+                                    }
+                                );                                              
                             },
                             
                             // NPC -> NPC

@@ -132,10 +132,6 @@ return ::{
                                         };                                    
                                     };
 
-
-                                    
-                                    
-                                    
                                     
      
                                     windowEvent.queueChoices(
@@ -157,43 +153,89 @@ return ::{
                                         },
                                         onChoice:::(choice) {
                                             when(choice == 0) empty;
-                                        
+
+
                                             @slot = choice-1;
-                                            @:items = party.inventory.items->filter(by:::(value) <- member.getSlotsForItem(item:value)[0] == slot);
-                                            @:itemNames = [...items]->map(to:::(value) <- value.name);
-                                            itemNames->push(value:'[Nothing]');
-                                        
+
+
+
+                                            @equip = ::{
+
+                                                @:items = party.inventory.items->filter(by:::(value) <- member.getSlotsForItem(item:value)[0] == slot);
+                                                @:itemNames = [...items]->map(to:::(value) <- value.name);
+                                                itemNames->push(value:'[Nothing]');
+                                            
+                                                windowEvent.queueChoices(
+                                                    leftWeight: 1,
+                                                    topWeight: 1,
+                                                    choices:itemNames,
+                                                    prompt: member.name + ': ' + slotToName(slot),
+                                                    canCancel: true,
+                                                    
+                                                    onChoice:::(choice) {
+                                                        @:index = choice -1;
+                                                        // unequip
+                                                        when (index == items->keycount) ::<= {
+                                                            @item = member.getEquipped(slot);
+                                                            if (item != empty && item.base.name != 'None') ::<= {
+                                                                windowEvent.queueMessage(
+                                                                    text: member.name + ' has unequipped the ' + item.name
+                                                                );
+                                                                member.unequipItem(item);
+                                                                party.inventory.add(item);
+                                                            };
+                                                        };
+                                                        
+                                                        @item = items[index];
+
+                                                        // equip 
+                                                        member.equip(
+                                                            item, 
+                                                            slot:member.getSlotsForItem(item)[0], 
+                                                            inventory:party.inventory
+                                                        );
+                                                    }
+                                                );
+                                            };
+
+                                            // force equip when nothing equipped yet.
+                                            // slightly less confusing
+                                            when(member.getEquipped(slot).name == 'None')
+                                                equip();
+
                                             windowEvent.queueChoices(
                                                 leftWeight: 1,
                                                 topWeight: 1,
-                                                choices:itemNames,
-                                                prompt: member.name + ': ' + slotToName(slot),
-                                                canCancel: true,
-                                                
-                                                onChoice:::(choice) {
-                                                    @:index = choice -1;
-
-                                                    // unequip
-                                                    when (index == items->keycount) ::<= {
-                                                        @item = member.getEquipped(slot);
-                                                        if (item != empty && item.base.name != 'None') ::<= {
-                                                            windowEvent.queueMessage(
-                                                                text: member.name + ' has unequipped the ' + item.name
-                                                            );
-                                                            member.unequipItem(item);
-                                                            party.inventory.add(item);
-                                                        };
+                                                onGetChoices:: {
+                                                    @choices = ['Equip'];
+                                                    if (member.getEquipped(slot).name != 'None') ::<= {
+                                                        choices->push(value:'Check');
+                                                        choices->push(value:'Improve');
                                                     };
-                                                    
-                                                    @item = items[index];
-                                                    
-                                                    // equip 
-                                                    member.equip(
-                                                        item, 
-                                                        slot:member.getSlotsForItem(item)[0], 
-                                                        inventory:party.inventory
-                                                    );
-                                                }
+                                                    return choices;
+                                                },
+                                                onGetPrompt::{
+                                                    return member.name + ': ' + member.getEquipped(slot).name + '';
+                                                },
+                                                canCancel: true,
+                                                keep: true,
+                                                onChoice:::(choice) {
+                                                    when (choice == 0) empty;
+                                                    match(choice) {
+                                                        // Equip
+                                                        (1):::<= {
+                                                            equip();
+                                                        },
+                                                        // Check
+                                                        (2):::<= {
+                                                            member.getEquipped(slot).describe();                                                       
+                                                        },
+                                                        // improve
+                                                        (3):::<= {
+                                                            (import(module:'game_function.itemimprove.mt'))(inBattle: false, user:member, item:member.getEquipped(slot));
+                                                        }
+                                                    };
+                                                }                                                            
                                             );
                                         }
                                     );                                   

@@ -172,7 +172,7 @@ Event.Base.database = Database.new(
                         
                         
                     };
-                    return 5+(Number.random()*10)->floor; // number of timesteps active
+                    return 14+(Number.random()*20)->floor; // number of timesteps active
                 },
                 
                 onEventUpdate ::(event) {
@@ -326,16 +326,28 @@ Event.Base.database = Database.new(
                     @chance = Number.random(); 
                     @:island = event.island;   
                     @:party = event.party;
-                    @enemies = [
-                        island.newHostileCreature(),
-                        island.newHostileCreature(),
-                        island.newHostileCreature()                        
-                    ];
+                    @enemies = [];
                     
+                    
+                    [0, 3]->for(do:::(i) {
+                        @:enemy = island.newAggressor();
+                        enemy.inventory.clear();
+                        enemy.anonymize();
+                        enemies->push(value:enemy);
+                    });
                     
                     @:boss = enemies[1];
 
-                    
+                    windowEvent.queueMessage(
+                        speaker: '???',
+                        text: random.pickArrayItem(list:[
+                            'Well, well, well. Look who else is after the key. It\' ours!',
+                            'Get out of here, the key is ours!',
+                            'Wait, no! The key is ours! Get out of here!',
+                            'We will fight for that key to the death!',
+                            'The key is ours! We are the real Chosen!'
+                        ])
+                    );
 
                     @:world = import(module:'game_singleton.world.mt');
                     

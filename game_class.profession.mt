@@ -473,7 +473,7 @@ Profession.Base.database = Database.new(
             Profession.Base.new(data:{
                 name: 'Summoner',
                 weaponAffinity: 'Tome',
-                description : "A", 
+                description : "Amagick-user who is able to temporarily materialize allies.", 
                 growth: StatSet.new(
                     HP:  5,
                     AP:  15,

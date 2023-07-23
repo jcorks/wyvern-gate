@@ -659,8 +659,8 @@ Location.Base.database = Database.new(
                     INT:  5,
                     DEF:  11,
                     LUK:  8,
-                    SPD:  20,
-                    DEX:  8
+                    SPD:  25,
+                    DEX:  10
                 ).state;
                 location.ownedBy.heal(amount:9999, silent:true); 
                 location.ownedBy.healAP(amount:9999, silent:true); 
@@ -738,11 +738,11 @@ Location.Base.database = Database.new(
                     HP:   270,
                     AP:   999,
                     ATK:  12,
-                    INT:  4,
+                    INT:  8,
                     DEF:  7,
                     LUK:  6,
                     SPD:  20,
-                    DEX:  7
+                    DEX:  12
                 ).state;
                 location.ownedBy.heal(amount:9999, silent:true); 
                 location.ownedBy.healAP(amount:9999, silent:true); 

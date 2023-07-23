@@ -524,7 +524,16 @@
                     target.kill();                
                 };
 
-                when(!target.damage(from:this, damage:dmg, dodgeable:true)) empty;
+                @critChance = 0.999 - (this.stats.LUK - level) / 100;
+                @isCrit = false;
+                if (critChance < 0.90) critChance = 0.9;
+                if (Number.random() > critChance) ::<={
+                    dmg.amount += this.stats.DEX * 2.5;
+                    isCrit = true;
+                };
+
+                when(!target.damage(from:this, damage:dmg, dodgeable:true, critical:isCrit)) empty;
+
 
                 this.flags.add(flag:StateFlags.ATTACKED);
 
@@ -536,7 +545,7 @@
                 return true;
             },
             
-            damage ::(from => this.type, damage => Damage.type, dodgeable => Boolean) {
+            damage ::(from => this.type, damage => Damage.type, dodgeable => Boolean, critical) {
                 when(isDead) empty;
 
                 @whiff = false;
@@ -564,6 +573,7 @@
                 };
 
 
+
                 if (from.stats.DEX > this.stats.DEX)               
                     // as DEX increases: randomness decreases 
                     // amount of reliable damage increases
@@ -574,12 +584,7 @@
                 ; 
                 
                 
-                @critChance = 0.999 - (this.stats.LUK - level) / 100;
-                if (critChance < 0.90) critChance = 0.9;
-                if (Number.random() > critChance) ::<={
-                    damage.amount += from.stats.DEX * 2.5;
-                    windowEvent.queueMessage(text: 'Critical damage!');
-                };
+
 
                 damage.amount -= stats.DEF/4;
                 if (damage.amount <= 0) damage.amount = 1;
@@ -592,6 +597,11 @@
 
                 when (damage.amount == 0) false;
                 when(hp == 0) false;
+
+                
+                if (critical == true)
+                    windowEvent.queueMessage(text: 'Critical damage!');
+
 
                 @damageTypeName ::{
                     return match(damage.damageType) {
@@ -630,17 +640,17 @@
                 if (damage.damageType == Damage.TYPE.FIRE && Number.random() > 0.9)
                     this.addEffect(from, name:'Burned',durationTurns:5);
                 if (damage.damageType == Damage.TYPE.ICE && Number.random() > 0.9)
-                    this.addEffect(from, name:'Frozen',durationTurns:5);
+                    this.addEffect(from, name:'Frozen',durationTurns:2);
                 if (damage.damageType == Damage.TYPE.THUNDER && Number.random() > 0.9)
-                    this.addEffect(from, name:'Paralyzed',durationTurns:5);
+                    this.addEffect(from, name:'Paralyzed',durationTurns:2);
                 if (damage.damageType == Damage.TYPE.PHYS && Number.random() > 0.99) 
                     this.addEffect(from, name:'Bleeding',durationTurns:5);
                 if (damage.damageType == Damage.TYPE.POISON && Number.random() > 0.9) 
                     this.addEffect(from, name:'Poisoned',durationTurns:5);
                 if (damage.damageType == Damage.TYPE.DARK && Number.random() > 0.9)
-                    this.addEffect(from, name:'Blind',durationTurns:5);
+                    this.addEffect(from, name:'Blind',durationTurns:2);
                 if (damage.damageType == Damage.TYPE.LIGHT && Number.random() > 0.9)
-                    this.addEffect(from, name:'Petrified',durationTurns:5);
+                    this.addEffect(from, name:'Petrified',durationTurns:2);
                 
                 
                 if (world.party.isMember(entity:this) && hp == 0 && Number.random() > 0.7) ::<= {
@@ -992,6 +1002,10 @@
             
             getEquipped::(slot => Number) {
                 return equips[slot];
+            },
+
+            isEquipped::(item) {
+                return equips->any(func::(value) <- value == item);
             },
             
             resetEffects : resetEffects,
