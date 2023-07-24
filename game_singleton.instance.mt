@@ -298,7 +298,9 @@ return class(
             ) {
                 this.onSaveState = onSaveState;
                 this.onLoadState = onLoadState;
-                                
+                
+                (import(module:'game_function.generala.mt'))(onFinish::{});
+                return empty;                
                 windowEvent.queueMessage(
                     text: ' Wyvern Gate ' + VERSION + ' '
                 );

@@ -184,6 +184,9 @@
             //    choicesModified->push(value:'(Cancel)');
             //};
             @exitEmpty = false;
+
+            
+            
             if (data.rendered == empty || choice != empty) ::<= {
                 @:choices = if (data.onGetChoices) data.onGetChoices() else data.choices;
                 // no choices
@@ -289,6 +292,7 @@
             
             when(choice == CURSOR_ACTIONS.CONFIRM) ::<= {
                 onChoice(choice:cursorPos + 1);
+                data.rendered = empty;
                 return true;
             };
                 

@@ -1451,13 +1451,13 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' attacks ' + targets[0].name + '!'
                         );
-                        user.attack(
+                        if (user.attack(
                             target: targets[0],
                             amount:user.stats.ATK * (0.3),
                             damageType : Damage.TYPE.PHYS,
                             damageClass: Damage.CLASS.HP
-                        );
-                        targets[0].addEffect(from:user, name: 'Bleeding', durationTurns: 4);                        
+                        ) == true)
+                            targets[0].addEffect(from:user, name: 'Bleeding', durationTurns: 4);                        
                     }
                 }
             ),
