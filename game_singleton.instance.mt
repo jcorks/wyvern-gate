@@ -299,6 +299,9 @@ return class(
                 this.onSaveState = onSaveState;
                 this.onLoadState = onLoadState;
                 
+                import(module:'game_function.dice.mt')(onFinish::{});
+                return empty;
+                
                 (import(module:'game_function.generala.mt'))(onFinish::{});
                 return empty;                
                 windowEvent.queueMessage(

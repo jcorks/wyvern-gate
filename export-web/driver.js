@@ -69,6 +69,7 @@
         'game_function.itemmenu.mt',
         'game_function.partyoptions.mt',
         'game_function.pickitem.mt',
+	'game_function.dice.mt',
         'main.external.mt',
         'game_singleton.canvas.mt',
         'game_singleton.windowevent.mt',
