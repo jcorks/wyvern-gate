@@ -245,7 +245,7 @@
                 };
                 
                 
-                if (random.try(percentSuccess:30)) ::<= {
+                if (random.try(percentSuccess:30) || (qualityHint != empty)) ::<= {
                     quality = if (qualityHint == empty)
                         ItemQuality.database.getRandomWeighted()
                     else 

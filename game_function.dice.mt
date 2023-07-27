@@ -913,8 +913,9 @@ return ::(onFinish => Function) {
         keep:true,
         jumpTag: 'Dice',
         onEnter::{},
-        onLeave::{
-            onFinish();
+        onLeave::{        
+            @:partyWins = party.score() > wyvern.score();
+            onFinish(partyWins);
         }
     );
 
@@ -1056,17 +1057,7 @@ return ::(onFinish => Function) {
     @:takeTurn ::(player){
         when (party.isScoreTableComplete() &&
               wyvern.isScoreTableComplete()) ::<= {
-            @stuck ::{
-                windowEvent.queueMessage(
-                    text: 'That\'s all i got! later.',
-                    onLeave: stuck
-                );                
-            };
-            windowEvent.queueMessage(
-                text:(if (party.score() > wyvern.score()) 'The party' else 'Ziikkaettaal') + ' wins!',
-                onLeave:stuck
-            );     
-            onFinish();
+            windowEvent.jumpToTag(name:'Dice', goBeforeTag:true);
         };
 
 

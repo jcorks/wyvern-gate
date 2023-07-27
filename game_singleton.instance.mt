@@ -299,11 +299,7 @@ return class(
                 this.onSaveState = onSaveState;
                 this.onLoadState = onLoadState;
                 
-                import(module:'game_function.dice.mt')(onFinish::{});
-                return empty;
                 
-                (import(module:'game_function.generala.mt'))(onFinish::{});
-                return empty;                
                 windowEvent.queueMessage(
                     text: ' Wyvern Gate ' + VERSION + ' '
                 );
@@ -464,8 +460,12 @@ return class(
                     //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
                     //).new(from:island.newInhabitant(),rngEnchantHint:true));
 
-                    @:story = import(module:'game_singleton.story.mt');
-                    //story.defeatedWyvernFire = true;
+                    //@:story = import(module:'game_singleton.story.mt');
+                    //story.foundFireKey = true;
+                    //story.foundIceKey = true;
+                    //story.tier = 2;
+                    
+                    //party.inventory.addGold(amount:2000);
                     
                     //party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
                     //).new(from:island.newInhabitant()));

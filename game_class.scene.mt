@@ -234,7 +234,8 @@ Scene.database = Database.new(
                                 when(which == false) ::<= {
                                     windowEvent.queueMessage(speaker:'Kaedjaal', text:'Ah I see. That is understandable. I will still be here if you change your mind.');
                                     windowEvent.queueNoDisplay(
-                                        onStart::{doNext();}                                    
+                                        onEnter::{},
+                                        onLeave::{doNext();}                                    
                                     );
                                 };
 
@@ -242,7 +243,8 @@ Scene.database = Database.new(
                                 when(world.party.inventory.items->keycount < 3) ::<= {
                                     windowEvent.queueMessage(speaker:'Kaedjaal', text:'Djiiroshuhzolii, Chosen. You have not enough items to complete a trade.');
                                     windowEvent.queueNoDisplay(
-                                        onStart::{doNext();}                                    
+                                        onEnter::{},
+                                        onLeave::{doNext();}                                    
                                     );
                                 };
 
@@ -259,7 +261,8 @@ Scene.database = Database.new(
                                         // cancelled by user
                                         windowEvent.queueMessage(speaker:'Kaedjaal', text:'Having second thoughts? No matter. I will still be here if you change your mind.');    
                                         windowEvent.queueNoDisplay(
-                                            onStart::{doNext();}                                    
+                                            onEnter::{},
+                                            onLeave::{doNext();}                                    
                                         );
                                                         
                                     };
@@ -476,7 +479,116 @@ Scene.database = Database.new(
             }
         ), 
         
-            
+        Scene.new(
+            data : {
+                name : 'scene_wyvernice1',
+                script: [
+                    ['Ziikkaettaal', 'You.. You have returned.'],
+                    ['Ziikkaettaal', 'Seeing as you have so much time on your hands, how about a little game.'],
+                    ['Ziikkaettaal', 'You see, I have a bit of a penchant for... gambling.'],
+                    ['Ziikkaettaal', 'Wager against me. If you lose, you hand me 1000G. If you win, you get a weapon from my hoard.'],
+                    ['Ziikkaettaal', 'I assure you, my weapons are well worth it.'],
+                    ::(location, landmark, doNext) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @:party = world.party;
+                        windowEvent.queueAskBoolean(
+                            prompt: 'Play dice with Ziikkaettaal?',
+                            onChoice::(which) {
+                                when(which == false) doNext();
+                                
+                                when (party.inventory.gold < 1000) ::<= {
+                                    windowEvent.queueMessage(
+                                        speaker: 'Ziikkaettaal',
+                                        text: 'You do not have enough to bet with me. Come back when you are... blessed with more riches.',
+                                        onLeave:doNext
+                                    );
+                                };
+                                
+                                
+                                windowEvent.queueMessage(
+                                    speaker: 'Ziikkaettaal',
+                                    text: 'Prepare yourself.',
+                                    onLeave::{
+                                        @:dice = import(module:'game_function.dice.mt');
+                                        dice(
+                                            onFinish::(partyWins) {
+                                            
+                                                windowEvent.queueMessage(
+                                                    text:(if (partyWins) 'The party' else 'Ziikkaettaal') + ' wins!'
+                                                );
+                                            
+                                                if (partyWins) ::<= {
+                                                    windowEvent.queueMessage(
+                                                        speaker: 'Ziikkaettaal',
+                                                             //Curse       earth    you       -> **** you
+                                                        text: 'Kkiikkohluh zaashael kaajiin...'
+                                                    );                                                
+                                                    windowEvent.queueMessage(
+                                                        speaker: 'Ziikkaettaal',
+                                                        text: 'You win. Well played.'
+                                                    );                              
+                                                    
+                                                    @:prize = Item.Base.database.getRandomFiltered(
+                                                        filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial && value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
+                                                    ).new(rngEnchantHint:true, from:location.landmark.island.newInhabitant(), colorHint:'Blue', materialHint: 'Mythril', qualityHint: 'Masterwork');
+                                                    @:ItemEnchant = import(module:'game_class.itemenchant.mt');
+                                                    prize.addEnchant(mod:ItemEnchant.Base.database.find(name:'Icy').new());
+
+                                                    party.inventory.add(item:prize);
+                                                    windowEvent.queueMessage(text:'The party was given a ' + prize.name + '.',
+                                                        onLeave:doNext
+                                                    );
+                                                    
+                                                } else ::<= {
+                                                    windowEvent.queueMessage(
+                                                        speaker: 'Ziikkaettaal',
+                                                        text: 'Too bad! Maybe another time.'
+                                                    );                              
+                                                    party.inventory.subtractGold(amount:1000);
+                                                    windowEvent.queueMessage(text:'The party lost 1000G.',
+                                                        onLeave:doNext
+                                                    );
+                                                };
+                                                
+                                            }
+                                        );   
+                                    }
+                                );                  
+                                
+                                
+                            }
+                        );
+                        
+                    },
+                    ['Ziikkaettaal', 'I\'ll take you back to your world.'],                     
+                    ::(location, landmark, doNext) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Ice');
+                        if (key != empty) key = key[0];
+                        // could be equipped by hooligans and jokesters
+                        if (key == empty) ::<= {
+                            key = [::] {
+                                world.party.members->foreach(do:::(i, member) {
+                                    @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_L);
+                                    if (wep.name == 'Wyvern Key of Ice') ::<= {
+                                        send(message:key);
+                                    };
+                                });
+                            };
+                        };
+                        @:canvas = import(module:'game_singleton.canvas.mt');
+                        windowEvent.queueMessage(
+                            renderable:{render::{canvas.blackout();}},
+                            text: 'You are whisked away to the island of Thunder...'
+                        );
+
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        instance.visitIsland(where:key.islandEntry);
+                        doNext();                    
+                    }
+                ]
+            }
+        ),            
 
         
         
