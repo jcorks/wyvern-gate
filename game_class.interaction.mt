@@ -236,7 +236,7 @@ Interaction.database = Database.new(
                         @:chance = Number.random();
                         match(true) {
                           // normal
-                          (chance < 0.8)::<= {
+                          (chance < 0.6)::<= {
                             windowEvent.queueMessage(
                                 text:'Someone sits next to you.'
                             );   
@@ -250,9 +250,61 @@ Interaction.database = Database.new(
                                 }
                             );
                           },
+                          
+
+                          // gamblist
+                          (chance < 0.8)::<= {
+                            windowEvent.queueMessage(
+                                text:'Someone sits next to you...'
+                            );   
+                            
+                            @:story = import(module:'game_singleton.story.mt');
+                            if (story.gamblistEncountered) ::<= {
+                                windowEvent.queueMessage(
+                                    text:'... wait it\'s.. huh.'
+                                );                               
+
+                                windowEvent.queueMessage(
+                                    speaker: 'Wandering Gamblist',
+                                    text:'Hello again, stranger.'
+                                );                               
+
+                                windowEvent.queueMessage(
+                                    speaker: 'Wandering Gamblist',
+                                    text:'Care to try your luck again? All it costs is an item of yours. Any will do.'
+                                );                               
+                            } else ::<= {
+                                windowEvent.queueMessage(
+                                    speaker: '???',
+                                    text:'Hello, stranger.'
+                                );                               
+
+                                windowEvent.queueMessage(
+                                    speaker: 'Wandering Gamblist',
+                                    text:'May I interest you in some... Entertainment? All it costs is an item of yours. Any will do.'
+                                );                               
+                            };
+                            
+                            
+                            windowEvent.queueAskBoolean(
+                                prompt:'Play a game?',
+                                onChoice::(which) {
+                                    when(false) ::<= {
+                                        windowEvent.queueMessage(
+                                            speaker: 'Wandering Gamblist',
+                                            text:'Suit yourself. Perhaps another time.'
+                                        );                               
+                                    
+                                    };       
+                                }
+                            );
+                          },
+
+
+                          
 
                           // drunkard
-                          (chance < 0.9)::<= {                            
+                          (chance < 1)::<= {                            
                             @:talkee = location.landmark.island.newInhabitant();
                             talkee.anonymize();
                             windowEvent.queueMessage(

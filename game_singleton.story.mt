@@ -38,7 +38,8 @@ return struct(
         hasDarkKey : Boolean,
         
         
-        
+        // whether the player has seen the wandering gamblist
+        gamblistEncountered : Boolean,
         
         
         // progression of defeated wyverns
@@ -66,6 +67,7 @@ return struct(
     tier : 0,
     
     hasDarkKey : false,
+    gamblistEncountered : false,
     
     data_locationsDiscovered : 0,
     data_locationsNeeded : 25
