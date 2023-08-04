@@ -9,9 +9,9 @@ return class(
         @term;
         @currentCommand = '';
         @currentDirectory = '';
-        @onProgramCycle = ::{};
-        @onProgramUnicode = ::(unicode){};
-        @onProgramKeyboard = ::(input, value){};
+        @onProgramCycle = ::{}
+        @onProgramUnicode = ::(unicode){}
+        @onProgramKeyboard = ::(input, value){}
         @programActive = false;
 
 
@@ -19,41 +19,41 @@ return class(
             @:path = location->reduce(to:::(value, previous) <- if (previous == empty) '/'+value else previous+value);
             @:line = '/'+currentDirectory+':: > ' + currentCommand + '▓';
             term.reprint(line);
-        };
+        }
 
 
         @:endProgramError::(message) {
             term.clear();
             term.print(line:'An error occurred:');
-            message.summary->split(token:'\n')->foreach(do:::(i, line) {
+            foreach(message.summary->split(token:'\n'))::(i, line) {
                 term.print(line);
                 printPrompt();
                 programActive = false;
-                onProgramCycle = ::{};
-                onProgramUnicode = ::(unicode){};
-                onProgramKeyboard = ::(input, value){};
+                onProgramCycle = ::{}
+                onProgramUnicode = ::(unicode){}
+                onProgramKeyboard = ::(input, value){}
 
-            });
+            }
 
-        };
+        }
 
         @:runCommand = ::(command, arg) {
             @:mod = import(module:'sys_'+command+'.mt');
             programActive = true;
-            [::] {
+            {:::} {
                 mod(terminal:term, arg, onDone::(message){
                     printPrompt();
                     programActive = false;
-                    onProgramCycle = ::{};
-                    onProgramUnicode = ::(unicode){};
-                    onProgramKeyboard = ::(input, value){};
+                    onProgramCycle = ::{}
+                    onProgramUnicode = ::(unicode){}
+                    onProgramKeyboard = ::(input, value){}
                 });
             } : {
                 onError:::(message) {
                     endProgramError(message);
                 }
-            };
-        };
+            }
+        }
 
 
         this.interface = {
@@ -106,15 +106,15 @@ return class(
                 @:shell = Topaz.Entity.new();
                 Topaz.Input.addUnicodeListener(
                     onNewUnicode::(unicode) {
-                        when(this.programActive) ::<= {
-                            [::] {
+                        when(programActive) ::<= {
+                            {:::} {
                                 onProgramUnicode(unicode);
                             } : {
                                 onError::(message) {
                                     endProgramError(message);
                                 }
-                            };
-                        };
+                            }
+                        }
                         @:ch = ' '->setCharCodeAt(index:0, value:unicode);
                         currentCommand = currentCommand + ch;
                         printPrompt();
@@ -129,7 +129,7 @@ return class(
                     pad: 0,
 
                     onUpdate::(input, value) {
-                        when(this.programActive == false) empty;
+                        when(programActive == false) empty;
 
 
                         match(input) {
@@ -141,7 +141,7 @@ return class(
                                     onProgramKeyboard(input:Topaz.Input.KEY.LEFT, value:1)
                                 else
                                     onProgramKeyboard(input:Topaz.Input.KEY.RIGHT, value:1);
-                            };
+                            }
                             lastLeftStickX = value;
                           },
 
@@ -152,17 +152,17 @@ return class(
                                     onProgramKeyboard(input:Topaz.Input.KEY.UP, value:1)
                                 else
                                     onProgramKeyboard(input:Topaz.Input.KEY.DOWN, value:1);
-                            };
+                            }
                             lastLeftStickY = value;
                           }
 
 
 
-                        };
+                        }
                     },
 
                     onPress::(input) {
-                        when(this.programActive)
+                        when(programActive)
                             match(input) {
                               (Topaz.Input.PAD.A): ::<={
                                 onProgramKeyboard(input:Topaz.Input.KEY.Z, value:1);
@@ -196,39 +196,39 @@ return class(
                                 printPrompt();                                
                                 runCommand(command:'start', arg:'');
                             }
-                        };
+                        }
                     }
                 );
 
 
                 terminal.onStep = ::{
-                    [::] {
+                    {:::} {
                         onProgramCycle();
                     } : {
                         onError::(message) {
                             endProgramError(message);
                         }
-                    };
-                };
+                    }
+                }
 
                 Topaz.Input.addKeyboardListener(
                     onUpdate::(input, value) {
                         when(programActive) ::<= {
-                            [::] {
+                            {:::} {
                                 onProgramKeyboard(input, value);
                             } : {
                                 onError::(message) {
                                     endProgramError(message);
                                 }
-                            };
-                        };
+                            }
+                        }
 
                         when(value < 1) empty;
 
                         match(input) {
                             (Topaz.Input.KEY.ENTER):::<= {
                                 @:args = currentCommand->split(token:' ');
-                                @:command = this.commands->findIndex(value:args[0]);
+                                @:command = this.instance.commands->findIndex(value:args[0]);
                                 terminal.backspace(); // remove cursor
                                 terminal.nextLine();
                                 if (command == -1) ::<= {
@@ -236,7 +236,7 @@ return class(
                                         terminal.print(line:'Unknown command: ' + args[0]);
                                 } else ::<= {
                                     runCommand(command:args[0], arg:args[1]);
-                                };
+                                }
                                 currentCommand = '';
                                 if (!programActive)
                                     printPrompt();
@@ -246,17 +246,17 @@ return class(
                                 when (currentCommand->length <= 1) ::<= {
                                     currentCommand = '';
                                     printPrompt();
-                                };
+                                }
                                 currentCommand = currentCommand->substr(from:0, to:currentCommand->length-2);
                                 printPrompt();
                             }
-                        };
+                        }
                     }
                 );
 
                 terminal.attach(entity:shell);
 
             }            
-        };
+        }
     }
 ).new();

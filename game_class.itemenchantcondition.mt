@@ -25,7 +25,14 @@
 @:ItemEnchantCondition = class(
     name : 'Wyvern.ItemEnchantCondition',
     statics : {
-        database : empty
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
+
     },
     define:::(this) {
         Database.setup(

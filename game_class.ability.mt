@@ -25,23 +25,32 @@
 
 @:Ability = class(
     name : 'Wyvern.Ability',    
-    statics : {
-        database : empty,
-        TARGET_MODE : {
+    statics : ::<= {
+        @database;
+        @TARGET_MODE = {
             ONE     : 0,    
             ALLALLY : 1,    
             RANDOM  : 2,    
             NONE    : 3,
             ALLENEMY: 4
-        },
+        }
         
-        USAGE_HINT : {
+        @USAGE_HINT = {
             OFFENSIVE : 0,
             HEAL    : 1,
             BUFF    : 2,
             DEBUFF  : 3,
             DONTUSE : 4,
-        }        
+        } 
+        
+        return {
+            database : {
+                get ::<- database,
+                set ::(value) <- database = value
+            },
+            TARGET_MODE : {get::<- TARGET_MODE},
+            USAGE_HINT : {get::<- USAGE_HINT}  
+        }       
     },
     define:::(this) {
         Database.setup(
@@ -127,7 +136,7 @@ Ability.database = Database.new(
                                     damageType:Damage.TYPE.PHYS,
                                     damageClass:Damage.CLASS.HP
                                 ),dodgeable: false);                                
-                            };   
+                            }   
                                                 
                     }
                 }
@@ -205,15 +214,15 @@ Ability.database = Database.new(
                             text: user.name + ' coordinates with others!'
                         );
                         
-                        targets->foreach(do:::(i, ent) {
+                        foreach(targets)::(i, ent) {
                             when(ent == user) empty;
                             if (ent.profession.name == user.profession.name) ::<= {
                                 // skip if already has Coordinated effect.
                                 when(ent.effects->any(condition::(value) <- value.name == user.profession.name)) empty;
 
                                 targets[0].addEffect(from:user, name: 'Coordinated', durationTurns: 1000000);
-                            };
-                        });
+                            }
+                        }
                     }
                 }
             ),            
@@ -368,10 +377,10 @@ Ability.database = Database.new(
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         windowEvent.queueMessage(text:user.name + ' cheers for the party!');
-                        user.allies->foreach(do:::(index, ally) {
+                        foreach(user.allies)::(index, ally) {
                             ally.addEffect(from:user, name: 'Cheered', durationTurns: 5);                        
                         
-                        });
+                        }
                     }
                 }
             ),
@@ -389,13 +398,13 @@ Ability.database = Database.new(
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:world = import(module:'game_singleton.world.mt');
-                        [::] {
-                            forever(do:::{
+                        {:::} {
+                            forever ::{
                                 world.stepTime();
                                 if (world.time == world.TIME.EVENING)
                                     send();                        
-                            });
-                        };
+                            }
+                        }
                         windowEvent.queueMessage(text:user.name + '\'s Lunar Blessing made it night time!');
                         
                     }
@@ -414,13 +423,13 @@ Ability.database = Database.new(
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:world = import(module:'game_singleton.world.mt');
-                        [::] {
-                            forever(do:::{
+                        {:::} {
+                            forever ::{
                                 world.stepTime();
                                 if (world.time == world.TIME.MORNING)
                                     send();                        
-                            });
-                        };
+                            }
+                        }
                         windowEvent.queueMessage(text:user.name + '\'s Solar Blessing made it day time!');
                         
                     }
@@ -447,7 +456,7 @@ Ability.database = Database.new(
                             windowEvent.queueMessage(
                                 text: 'The beam shines brightly!'
                             );                                  
-                        };
+                        }
                         
                         @:world = import(module:'game_singleton.world.mt');
                         
@@ -482,7 +491,7 @@ Ability.database = Database.new(
                             windowEvent.queueMessage(
                                 text: 'The beam shines brightly!'
                             );                                  
-                        };
+                        }
                         
                         @:world = import(module:'game_singleton.world.mt');
                         
@@ -517,11 +526,11 @@ Ability.database = Database.new(
                             windowEvent.queueMessage(
                                 text: 'The blast shines brightly!'
                             );                                  
-                        };
+                        }
                         
                         @:world = import(module:'game_singleton.world.mt');
                         
-                        user.enemies->foreach(do:::(index, enemy) {
+                        foreach(user.enemies)::(index, enemy) {
                             user.attack(
                                 target: enemy,
                                 amount:user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.7 else 0.4),
@@ -529,7 +538,7 @@ Ability.database = Database.new(
                                 damageClass: Damage.CLASS.HP
                             );
                         
-                        });
+                        }
 
                     }
                 }
@@ -755,7 +764,7 @@ Ability.database = Database.new(
                             if (random.try(percentSuccess:80)) ::<= {
                                 targets[0].addEffect(from:user, name: 'Ensnared', durationTurns: 3);                        
                                 user.addEffect(from:user, name: 'Ensnaring', durationTurns: 3);                        
-                            };
+                            }
                             
                     }
                 }
@@ -786,13 +795,13 @@ Ability.database = Database.new(
                                 battle.join(enemy:help);
                             } else ::<= {
                                 battle.join(ally:help);
-                            };
+                            }
                             
                         } else ::<= {
                             windowEvent.queueMessage(
                                 text: '...but nothing happened!'
                             );                        
-                        };
+                        }
                                                     
                     }
                 }
@@ -819,7 +828,7 @@ Ability.database = Database.new(
                             windowEvent.queueMessage(
                                 text: targets[0].name + ' was not receptive to being tamed!'
                             );                            
-                        };
+                        }
                         @:party = import(module:'game_singleton.party.mt');
 
                         when(party.isMember(entity:targets[0])) ::<= {
@@ -827,7 +836,7 @@ Ability.database = Database.new(
                                 text: targets[0].name + ' is already tamed!'
                             );
                             
-                        };
+                        }
 
                         
                         if (random.flipCoin()) ::<= {
@@ -839,7 +848,7 @@ Ability.database = Database.new(
                             windowEvent.queueMessage(
                                 text: '...but ' + targets[0].name + ' continued to be untamed!'
                             );                        
-                        };
+                        }
                                                     
                     }
                 }
@@ -859,7 +868,7 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' tries to sweep everyone\'s legs!'
                         );
-                        user.enemies->foreach(do:::(i, enemy) {
+                        foreach(user.enemies)::(i, enemy) {
                             if (user.attack(
                                 target:enemy,
                                 amount:user.stats.ATK * (0.3),
@@ -868,7 +877,7 @@ Ability.database = Database.new(
                             ) == true)
                                 if (Number.random() > 0.5)
                                     enemy.addEffect(from:user, name: 'Stunned', durationTurns: 1);    
-                        });
+                        }
                     }
                 }
             ),
@@ -888,14 +897,14 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' does a big swing!'
                         );      
-                        targets->foreach(do:::(index, target) {
+                        foreach(targets)::(index, target) {
                             user.attack(
                                 target,
                                 amount:user.stats.ATK * (0.35),
                                 damageType : Damage.TYPE.PHYS,
                                 damageClass: Damage.CLASS.HP
                             );
-                        });
+                        }
                     }
                 }
             ),
@@ -1042,7 +1051,7 @@ Ability.database = Database.new(
                                 turnIndex,
                                 extraData
                             );
-                        };
+                        }
                         
                         windowEvent.queueMessage(
                             text: user.name + ' couldn\'t find any offensive abilities to use!'
@@ -1088,7 +1097,7 @@ Ability.database = Database.new(
                         if (Number.random() > 0.3) ::<= {
                             targets[0].addEffect(from:user, name: 'Grappled', durationTurns: 3);                        
                             user.addEffect(from:user, name: 'Grappling', durationTurns: 3);                        
-                        };
+                        }
                             
                     }
                 }
@@ -1171,7 +1180,7 @@ Ability.database = Database.new(
                         
                         @toRemove = [];
                         breakpoint();
-                        effects->foreach(do:::(i, effect) {
+                        foreach(effects)::(i, effect) {
                             toRemove->push(value:effect);
                             match(effect.name) {                              
                               ('Destruction Rune'): ::<= {
@@ -1189,8 +1198,8 @@ Ability.database = Database.new(
                                     amount: targets[0].stats.HP * 0.3
                                 );                
                               }
-                            };                      
-                        });
+                            }                      
+                        }
                         
                         targets[0].removeEffects(effectBases:toRemove);                        
                     }
@@ -1299,9 +1308,9 @@ Ability.database = Database.new(
                             }
                         );
                         
-                        effects->foreach(do:::(i, effect) {
+                        foreach(effects)::(i, effect) {
                             targets[0].addEffect(from:user, name:effect.effect.name, durationTurns:10);
-                        });
+                        }
                     }
                 }
             ),  
@@ -1394,7 +1403,7 @@ Ability.database = Database.new(
                             windowEvent.queueMessage(
                                 text: targets[0].name + ' avoided the trap!'
                             );                                
-                        };
+                        }
                         targets[0].damage(from:user, damage:Damage.new(
                             amount:50,
                             damageType:Damage.TYPE.FIRE,
@@ -1420,19 +1429,19 @@ Ability.database = Database.new(
                             text: user.name + ' activates a floor trap, revealing a spike pit under the enemies!'
                         );
                         
-                        targets->foreach(do:::(i, target) {
+                        foreach(targets)::(i, target) {
                             when(random.try(percentSuccess:70)) ::<= {
                                 windowEvent.queueMessage(
                                     text: target.name + ' avoided the trap!'
                                 );                                
-                            };
+                            }
                             target.damage(from:user, damage:Damage.new(
                                 amount:50,
                                 damageType:Damage.TYPE.PHYS,
                                 damageClass:Damage.CLASS.HP
                             ),dodgeable: false);   
                             target.addEffect(from:user, name: 'Stunned', durationTurns: 2);                        
-                        });
+                        }
                     }
                 }
             ),            
@@ -1539,7 +1548,7 @@ Ability.database = Database.new(
                           }
                           
 
-                        };
+                        }
                     }
                 }
             ),
@@ -1562,7 +1571,7 @@ Ability.database = Database.new(
 
                         // limit 2 summons at a time.
                         @count = 0;
-                        user.allies->foreach(do:::(i, ally) {
+                        foreach(user.allies)::(i, ally) {
                             match(ally.name) {
                                 ('the Fire Sprite',
                                 'the Ice Elemental',
@@ -1570,8 +1579,8 @@ Ability.database = Database.new(
                                 'the Guiding Light'): ::<= {
                                     count += 1;
                                 }
-                            };
-                        });
+                            }
+                        }
                         when (count >= 2) 
                             windowEvent.queueMessage(
                                 text: '...but the summoning fizzled!'
@@ -1587,9 +1596,9 @@ Ability.database = Database.new(
                         );
                         sprite.name = 'the Fire Sprite';
                         
-                        [0, 10]->for(do:::(i) {
+                        for(0, 10)::(i) {
                             sprite.learnNextAbility();
-                        });
+                        }
                         
                         @:battle = user.battle;
                         if (battle.allies->findIndex(value:user) != -1)
@@ -1620,7 +1629,7 @@ Ability.database = Database.new(
                             text: user.name + ' summons an Ice Elemental!'
                         );
                         @count = 0;
-                        user.allies->foreach(do:::(i, ally) {
+                        foreach(user.allies)::(i, ally) {
                             match(ally.name) {
                                 ('the Fire Sprite',
                                 'the Ice Elemental',
@@ -1628,8 +1637,8 @@ Ability.database = Database.new(
                                 'the Guiding Light'): ::<= {
                                     count += 1;
                                 }
-                            };
-                        });
+                            }
+                        }
                         when (count >= 2) 
                             windowEvent.queueMessage(
                                 text: '...but the summoning fizzled!'
@@ -1644,9 +1653,9 @@ Ability.database = Database.new(
                         );
                         sprite.name = 'the Ice Elemental';
                         
-                        [0, 10]->for(do:::(i) {
+                        for(0, 10)::(i) {
                             sprite.learnNextAbility();
-                        });
+                        }
                         
                         @:battle = user.battle;
                         if (battle.allies->findIndex(value:user) != -1)
@@ -1677,7 +1686,7 @@ Ability.database = Database.new(
                             text: user.name + ' summons a Thunder Spawn!'
                         );
                         @count = 0;
-                        user.allies->foreach(do:::(i, ally) {
+                        foreach(user.allies)::(i, ally) {
                             match(ally.name) {
                                 ('the Fire Sprite',
                                 'the Ice Elemental',
@@ -1685,8 +1694,8 @@ Ability.database = Database.new(
                                 'the Guiding Light'): ::<= {
                                     count += 1;
                                 }
-                            };
-                        });
+                            }
+                        }
                         when (count >= 2) 
                             windowEvent.queueMessage(
                                 text: '...but the summoning fizzled!'
@@ -1701,9 +1710,9 @@ Ability.database = Database.new(
                         );
                         sprite.name = 'the Thunder Spawn';
                         
-                        [0, 10]->for(do:::(i) {
+                        for(0, 10)::(i) {
                             sprite.learnNextAbility();
-                        });
+                        }
                         
                         @:battle = user.battle;
                         if (battle.allies->findIndex(value:user) != -1)
@@ -1734,7 +1743,7 @@ Ability.database = Database.new(
                             text: user.name + ' summons a Guiding Light!'
                         );
                         @count = 0;
-                        user.allies->foreach(do:::(i, ally) {
+                        foreach(user.allies)::(i, ally) {
                             match(ally.name) {
                                 ('the Fire Sprite',
                                 'the Ice Elemental',
@@ -1742,8 +1751,8 @@ Ability.database = Database.new(
                                 'the Guiding Light'): ::<= {
                                     count += 1;
                                 }
-                            };
-                        });
+                            }
+                        }
                         when (count >= 2) 
                             windowEvent.queueMessage(
                                 text: '...but the summoning fizzled!'
@@ -1758,9 +1767,9 @@ Ability.database = Database.new(
                         );
                         sprite.name = 'the Guiding Light';
                         
-                        [0, 10]->for(do:::(i) {
+                        for(0, 10)::(i) {
                             sprite.learnNextAbility();
-                        });
+                        }
                         
                         @:battle = user.battle;
                         if (battle.allies->findIndex(value:user) != -1)
@@ -1806,7 +1815,7 @@ Ability.database = Database.new(
                             windowEvent.queueMessage(
                                 text: targets[0].name + ' was unaffected!'
                             );                                                        
-                        };
+                        }
                         
                             
 
@@ -1854,7 +1863,7 @@ Ability.database = Database.new(
                             text: user.name + ' generates a great amount of heat!'
                         );
                         
-                        targets->foreach(do:::(i, target) {
+                        foreach(targets)::(i, target) {
                             if (user.attack(
                                 target:target,
                                 amount:user.stats.INT * (0.6),
@@ -1863,7 +1872,7 @@ Ability.database = Database.new(
                             ))
                                 targets[0].addEffect(from:user, name:'Burned', durationTurns:5);
                                                       
-                        });
+                        }
                     }
                 }
             ),
@@ -1914,13 +1923,13 @@ Ability.database = Database.new(
                         @:Random = import(module:'game_singleton.random.mt');
                         @:item = ::<= {
                             @:list = [];
-                            Entity.EQUIP_SLOTS->foreach(do:::(i, slot) {
+                            foreach(Entity.EQUIP_SLOTS)::(i, slot) {
                                 @out = targets[0].getEquipped(slot);
                                 if (out)
                                     list->push(value:out);
-                            });
+                            }
                             return Random.pickArrayItem(list);
-                        };
+                        }
                         targets[0].unequipItem(item);
                         windowEvent.queueMessage(
                             text: targets[0].name + '\'s ' + item.name + ' gets unequipped!'
@@ -1945,14 +1954,14 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' casts Ice!'
                         );
-                        user.enemies->foreach(do:::(index, enemy) {
+                        foreach(user.enemies)::(index, enemy) {
                             user.attack(
                                 target:enemy,
                                 amount:user.stats.INT * (0.8),
                                 damageType : Damage.TYPE.ICE,
                                 damageClass: Damage.CLASS.HP
                             );
-                        });
+                        }
                     }
                 }
             ),
@@ -1971,14 +1980,14 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' casts Frozen Flame!'
                         );
-                        user.enemies->foreach(do:::(index, enemy) {
+                        foreach(user.enemies)::(index, enemy) {
                             user.attack(
                                 target:enemy,
                                 amount:user.stats.INT * (0.75),
                                 damageType : Damage.TYPE.ICE,
                                 damageClass: Damage.CLASS.HP
                             );
-                        });
+                        }
 
 
                     }
@@ -2026,14 +2035,14 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' casts Explosion!'
                         );
-                        user.enemies->foreach(do:::(index, enemy) {
+                        foreach(user.enemies)::(index, enemy) {
                             user.attack(
                                 target:enemy,
                                 amount:user.stats.INT * (1.2),
                                 damageType : Damage.TYPE.FIRE,
                                 damageClass: Damage.CLASS.HP
                             );
-                        });
+                        }
                     }
                 }
             ),            
@@ -2052,14 +2061,14 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' casts Flash!'
                         );
-                        user.enemies->foreach(do:::(index, enemy) {
+                        foreach(user.enemies)::(index, enemy) {
                             if (random.flipCoin())
                                 enemy.addEffect(from:user, name: 'Blind', durationTurns: 5)
                             else 
                                 windowEvent.queueMessage(
                                     text: enemy.name + ' covered their eyes!'
                                 );                                
-                        });
+                        }
                     }
                 }
             ),            
@@ -2078,7 +2087,7 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' casts Thunder!'
                         );
-                        [0, 4]->for(do:::(index) {
+                        for(0, 4)::(index) {
                             @:target = random.pickArrayItem(list:user.enemies);
                             user.attack(
                                 target,
@@ -2087,7 +2096,7 @@ Ability.database = Database.new(
                                 damageClass: Damage.CLASS.HP
                             );
                         
-                        });
+                        }
                     }
                 }
             ),
@@ -2106,7 +2115,7 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' wildly swings!'
                         );
-                        [0, 4]->for(do:::(index) {
+                        for(0, 4)::(index) {
                             @:target = random.pickArrayItem(list:user.enemies);
                             user.attack(
                                 target,
@@ -2115,7 +2124,7 @@ Ability.database = Database.new(
                                 damageClass: Damage.CLASS.HP
                             );
                         
-                        });
+                        }
                     }
                 }
             ),
@@ -2182,12 +2191,12 @@ Ability.database = Database.new(
                     usageHintAI : USAGE_HINT.DEBUFF,
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
-                        targets->foreach(do:::(i, target) {
+                        foreach(targets)::(i, target) {
                             windowEvent.queueMessage(
                                 text: user.name + ' casts Magic Mist on ' + target.name + '!'
                             );
                             user.resetEffects();
-                        });
+                        }
                     }
                 }
             ),
@@ -2338,9 +2347,9 @@ Ability.database = Database.new(
                         windowEvent.queueMessage(
                             text: user.name + ' casts Protect All!'
                         );
-                        user.allies->foreach(do:::(index, ally) {
+                        foreach(user.allies)::(index, ally) {
                             ally.addEffect(from:user, name: 'Protect', durationTurns: 5);
-                        });
+                        }
                     }
                 }
             ),
@@ -2415,12 +2424,12 @@ Ability.database = Database.new(
                                 world.party.inventory.add(item);
                             } else ::<= {
                                 targets[0].inventory.add(item);
-                            };
+                            }
                             
                             windowEvent.queueMessage(text:user.name + ' stole a ' + item.name + '!');
                         } else ::<= {
                             windowEvent.queueMessage(text:user.name + " couldn't steal!");                        
-                        };
+                        }
 
                     }
                 }
@@ -2481,7 +2490,7 @@ Ability.database = Database.new(
                             );
 
 
-                        };
+                        }
 
                     }
                 }
@@ -2520,10 +2529,10 @@ Ability.database = Database.new(
                                 world.party.inventory.addGold(amount);
                             } else ::<= {
                                 targets[0].inventory.addGold(amount);
-                            };
+                            }
                             
                             windowEvent.queueMessage(text:user.name + ' stole ' + amount + 'G!');
-                        };
+                        }
 
                     }
                 }
@@ -2866,12 +2875,12 @@ Ability.database = Database.new(
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:effects = targets[0].effects;
                         @:toRemove = [];
-                        effects->foreach(do:::(i, effect) {
+                        foreach(effects)::(i, effect) {
                             if (effect.name == 'Healroot Growing' ||
                                 effect.name == 'Triproot Growing' ||
                                 effect.name == 'Poisonroot Growing')
                                 toRemove->push(value:effect.base);
-                        });
+                        }
                         
                         when(toRemove->keycount == 0)
                             windowEvent.queueMessage(text:'Nothing happened!');
@@ -3003,11 +3012,11 @@ Ability.database = Database.new(
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @:item = extraData[0];
-                        item.base.useEffects->foreach(do:::(index, effect) {    
-                            targets->foreach(do:::(t, target) {
+                        foreach(item.base.useEffects)::(index, effect) {    
+                            foreach(targets)::(t, target) {
                                 target.addEffect(from:user, name:effect, item:item, durationTurns:0);                            
-                            });
-                        });
+                            }
+                        }
                     }
                 }
             ),        
@@ -3024,18 +3033,18 @@ Ability.database = Database.new(
                     oncePerBattle : false,
                     onAction: ::(user, targets, turnIndex, extraData) {
                         @item = extraData[0];
-                        item.base.useEffects->foreach(do:::(index, effect) {    
-                            targets->foreach(do:::(t, target) {
+                        foreach(item.base.useEffects)::(index, effect) {    
+                            foreach(targets)::(t, target) {
                                 target.addEffect(from:user, name:effect, item:item, durationTurns:0);                            
-                            });
-                        });
+                            }
+                        }
 
                         item = extraData[1];
-                        item.base.useEffects->foreach(do:::(index, effect) {    
-                            targets->foreach(do:::(t, target) {
+                        foreach(item.base.useEffects)::(index, effect) {    
+                            foreach(targets)::(t, target) {
                                 target.addEffect(from:user, name:effect, item:item, durationTurns:0);                            
-                            });
-                        });
+                            }
+                        }
                     }
                 }
             ),
@@ -3244,14 +3253,14 @@ Ability.database = Database.new(
                             inventory = world.party.inventory;
                         } else ::<= {
                             inventory = user.inventory;
-                        };
+                        }
                         
                         @count = 0;
-                        inventory.items->foreach(do:::(i, item) {
+                        foreach(inventory.items)::(i, item) {
                             if (item.name == 'Ingredient') ::<= {
                                 count += 1;
-                            };
-                        });
+                            }
+                        }
                         
                         windowEvent.queueMessage(text: user.name + ' tried to make a Pink Brew...');
                         when(count < 1)
@@ -3281,14 +3290,14 @@ Ability.database = Database.new(
                             inventory = world.party.inventory;
                         } else ::<= {
                             inventory = user.inventory;
-                        };
+                        }
                         
                         @count = 0;
-                        inventory.items->foreach(do:::(i, item) {
+                        foreach(inventory.items)::(i, item) {
                             if (item.name == 'Ingredient') ::<= {
                                 count += 1;
-                            };
-                        });
+                            }
+                        }
                         
                         windowEvent.queueMessage(text: user.name + ' tried to make a Cyan Brew...');
                         when(count < 1)
@@ -3319,14 +3328,14 @@ Ability.database = Database.new(
                             inventory = world.party.inventory;
                         } else ::<= {
                             inventory = user.inventory;
-                        };
+                        }
                         
                         @count = 0;
-                        inventory.items->foreach(do:::(i, item) {
+                        foreach(inventory.items)::(i, item) {
                             if (item.name == 'Ingredient') ::<= {
                                 count += 1;
-                            };
-                        });
+                            }
+                        }
                         
                         windowEvent.queueMessage(text: user.name + ' tried to make a Green Brew...');
                         when(count < 1)
@@ -3358,14 +3367,14 @@ Ability.database = Database.new(
                             inventory = world.party.inventory;
                         } else ::<= {
                             inventory = user.inventory;
-                        };
+                        }
                         
                         @count = 0;
-                        inventory.items->foreach(do:::(i, item) {
+                        foreach(inventory.items)::(i, item) {
                             if (item.name == 'Ingredient') ::<= {
                                 count += 1;
-                            };
-                        });
+                            }
+                        }
                         
                         windowEvent.queueMessage(text: user.name + ' tried to make an Orange Brew...');
                         when(count < 1)
@@ -3395,14 +3404,14 @@ Ability.database = Database.new(
                             inventory = world.party.inventory;
                         } else ::<= {
                             inventory = user.inventory;
-                        };
+                        }
                         
                         @count = 0;
-                        inventory.items->foreach(do:::(i, item) {
+                        foreach(inventory.items)::(i, item) {
                             if (item.name == 'Ingredient') ::<= {
                                 count += 1;
-                            };
-                        });
+                            }
+                        }
                         
                         windowEvent.queueMessage(text: user.name + ' tried to make a Purple Brew...');
                         when(count < 1)
@@ -3433,14 +3442,14 @@ Ability.database = Database.new(
                             inventory = world.party.inventory;
                         } else ::<= {
                             inventory = user.inventory;
-                        };
+                        }
                         
                         @count = 0;
-                        inventory.items->foreach(do:::(i, item) {
+                        foreach(inventory.items)::(i, item) {
                             if (item.name == 'Ingredient') ::<= {
                                 count += 1;
-                            };
-                        });
+                            }
+                        }
                         
                         windowEvent.queueMessage(text: user.name + ' tried to make a Black Brew...');
                         when(count < 1)
@@ -3513,7 +3522,7 @@ Ability.database = Database.new(
                                     from:user, name: 'Bribed', durationTurns: -1
                                 );                                         
                             }
-                        };
+                        }
                     }
                 }
             )

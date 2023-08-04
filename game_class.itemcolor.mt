@@ -23,7 +23,14 @@
 @:ItemColor = class(
     name : 'Wyvern.ItemColor',
     statics : {
-        database : empty
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
+
     },
     define:::(this) {
         Database.setup(

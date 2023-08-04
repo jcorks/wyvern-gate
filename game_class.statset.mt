@@ -40,8 +40,9 @@ return class(
         @SPDmod = 0;
         @LUKmod = 0;
         @DEXmod = 0;
-        
+        @self;
         this.constructor = ::(HP, AP, ATK, INT, DEF, LUK, SPD, DEX) {
+            self = this.instance;
             if (HP != empty) HP_  = HP;
             if (AP != empty) MP_  = AP;
             if (ATK != empty)ATK_ = ATK;
@@ -50,8 +51,8 @@ return class(
             if (LUK != empty) LUK_ = LUK;
             if (SPD != empty) SPD_ = SPD;
             if (DEX != empty) DEX_ = DEX;   
-            return this;
-        };
+            return this.instance;
+        }
         
         this.interface = {
             state : {
@@ -96,7 +97,7 @@ return class(
                         SPDmod : SPDmod,
                         LUKmod : LUKmod,
                         DEXmod : DEXmod
-                    };                
+                    }                
                 }
             },
         
@@ -211,14 +212,14 @@ return class(
                         ],
                         
                         [
-                            ''+this.HP,
-                            ''+this.AP,
-                            ''+this.ATK,
-                            ''+this.DEF,
-                            ''+this.INT,
-                            ''+this.SPD,
-                            ''+this.LUK,
-                            ''+this.DEX                        
+                            ''+self.HP,
+                            ''+self.AP,
+                            ''+self.ATK,
+                            ''+self.DEF,
+                            ''+self.INT,
+                            ''+self.SPD,
+                            ''+self.LUK,
+                            ''+self.DEX                        
                         ],
                         
                         [
@@ -244,14 +245,14 @@ return class(
                         ],
                         
                         [
-                            (if (other.HP - this.HP  != 0) (if (other.HP > this.HP) '(+' else '(') + (other.HP  - this.HP)  + ')' else ''),
-                            (if (other.AP - this.AP  != 0) (if (other.AP > this.AP) '(+' else '(') + (other.AP  - this.AP)  + ')' else ''),
-                            (if (other.ATK - this.ATK  != 0) (if (other.ATK > this.ATK) '(+' else '(') + (other.ATK  - this.ATK)  + ')' else ''),
-                            (if (other.DEF - this.DEF  != 0) (if (other.DEF > this.DEF)'(+' else '(') + (other.DEF  - this.DEF)  + ')' else ''),
-                            (if (other.INT - this.INT  != 0) (if (other.INT > this.INT)'(+' else '(') + (other.INT  - this.INT)  + ')' else ''),
-                            (if (other.SPD - this.SPD  != 0) (if (other.SPD > this.SPD)'(+' else '(') + (other.SPD  - this.SPD)  + ')' else ''),
-                            (if (other.LUK - this.LUK  != 0) (if (other.LUK > this.LUK)'(+' else '(') + (other.LUK  - this.LUK)  + ')' else ''),
-                            (if (other.DEX - this.DEX  != 0) (if (other.DEX > this.DEX)'(+' else '(') + (other.DEX  - this.DEX)  + ')' else ''),
+                            (if (other.HP - self.HP  != 0) (if (other.HP > self.HP) '(+' else '(') + (other.HP  - self.HP)  + ')' else ''),
+                            (if (other.AP - self.AP  != 0) (if (other.AP > self.AP) '(+' else '(') + (other.AP  - self.AP)  + ')' else ''),
+                            (if (other.ATK - self.ATK  != 0) (if (other.ATK > self.ATK) '(+' else '(') + (other.ATK  - self.ATK)  + ')' else ''),
+                            (if (other.DEF - self.DEF  != 0) (if (other.DEF > self.DEF)'(+' else '(') + (other.DEF  - self.DEF)  + ')' else ''),
+                            (if (other.INT - self.INT  != 0) (if (other.INT > self.INT)'(+' else '(') + (other.INT  - self.INT)  + ')' else ''),
+                            (if (other.SPD - self.SPD  != 0) (if (other.SPD > self.SPD)'(+' else '(') + (other.SPD  - self.SPD)  + ')' else ''),
+                            (if (other.LUK - self.LUK  != 0) (if (other.LUK > self.LUK)'(+' else '(') + (other.LUK  - self.LUK)  + ')' else ''),
+                            (if (other.DEX - self.DEX  != 0) (if (other.DEX > self.DEX)'(+' else '(') + (other.DEX  - self.DEX)  + ')' else ''),
 
                         ]                        
                     ]
@@ -276,14 +277,14 @@ return class(
                         ],
                         
                         [
-                            ''+this.HP+'%',
-                            ''+this.AP+'%',
-                            ''+this.ATK+'%',
-                            ''+this.DEF+'%',
-                            ''+this.INT+'%',
-                            ''+this.SPD+'%',
-                            ''+this.LUK+'%',
-                            ''+this.DEX+'%'                        
+                            ''+self.HP+'%',
+                            ''+self.AP+'%',
+                            ''+self.ATK+'%',
+                            ''+self.DEF+'%',
+                            ''+self.INT+'%',
+                            ''+self.SPD+'%',
+                            ''+self.LUK+'%',
+                            ''+self.DEX+'%'                        
                         ],
                         
                         [
@@ -309,14 +310,14 @@ return class(
                         ],
                         
                         [
-                            (if (other.HP - this.HP  != 0) (if (other.HP > this.HP) '(+' else '(') + (other.HP  - this.HP)  + ')' else ''),
-                            (if (other.AP - this.AP  != 0) (if (other.AP > this.AP) '(+' else '(') + (other.AP  - this.AP)  + ')' else ''),
-                            (if (other.ATK - this.ATK  != 0) (if (other.ATK > this.ATK) '(+' else '(') + (other.ATK  - this.ATK)  + ')' else ''),
-                            (if (other.DEF - this.DEF  != 0) (if (other.DEF > this.DEF)'(+' else '(') + (other.DEF  - this.DEF)  + ')' else ''),
-                            (if (other.INT - this.INT  != 0) (if (other.INT > this.INT)'(+' else '(') + (other.INT  - this.INT)  + ')' else ''),
-                            (if (other.SPD - this.SPD  != 0) (if (other.SPD > this.SPD)'(+' else '(') + (other.SPD  - this.SPD)  + ')' else ''),
-                            (if (other.LUK - this.LUK  != 0) (if (other.LUK > this.LUK)'(+' else '(') + (other.LUK  - this.LUK)  + ')' else ''),
-                            (if (other.DEX - this.DEX  != 0) (if (other.DEX > this.DEX)'(+' else '(') + (other.DEX  - this.DEX)  + ')' else ''),
+                            (if (other.HP - self.HP  != 0) (if (other.HP > self.HP) '(+' else '(') + (other.HP  - self.HP)  + ')' else ''),
+                            (if (other.AP - self.AP  != 0) (if (other.AP > self.AP) '(+' else '(') + (other.AP  - self.AP)  + ')' else ''),
+                            (if (other.ATK - self.ATK  != 0) (if (other.ATK > self.ATK) '(+' else '(') + (other.ATK  - self.ATK)  + ')' else ''),
+                            (if (other.DEF - self.DEF  != 0) (if (other.DEF > self.DEF)'(+' else '(') + (other.DEF  - self.DEF)  + ')' else ''),
+                            (if (other.INT - self.INT  != 0) (if (other.INT > self.INT)'(+' else '(') + (other.INT  - self.INT)  + ')' else ''),
+                            (if (other.SPD - self.SPD  != 0) (if (other.SPD > self.SPD)'(+' else '(') + (other.SPD  - self.SPD)  + ')' else ''),
+                            (if (other.LUK - self.LUK  != 0) (if (other.LUK > self.LUK)'(+' else '(') + (other.LUK  - self.LUK)  + ')' else ''),
+                            (if (other.DEX - self.DEX  != 0) (if (other.DEX > self.DEX)'(+' else '(') + (other.DEX  - self.DEX)  + ')' else ''),
 
                         ]                        
                     ]
@@ -352,6 +353,6 @@ return class(
                     'DEX: ' + (if (DEX_ > 0) '+' else '') +DEX_ + '%\n'
                 ;
             }
-        };
+        }
     }
 );

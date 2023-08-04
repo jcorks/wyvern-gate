@@ -10,7 +10,7 @@ return ::(user, item, inBattle) {
         windowEvent.queueMessage(
             text: 'Only items with a specified material can be improved.'
         );                                                                                            
-    };
+    }
     
     
     @:StatSet = import(module:'game_class.statset.mt'); 
@@ -18,7 +18,7 @@ return ::(user, item, inBattle) {
         windowEvent.queueMessage(
             text: item.name + ' can only be improved if they\'re in the party.'
         );                                                                        
-    };
+    }
     if (inBattle == true) ::<= {
         @:complainer = random.pickArrayItem(list:party.members->filter(by::(value) <- value != user));
         @:Personality = import(module:'game_class.personality.mt');
@@ -27,13 +27,13 @@ return ::(user, item, inBattle) {
             speaker: complainer.name,
             text: '"' + random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.INAPPROPRIATE_TIME]) + '"'
         );                        
-    };
+    }
     
     when(item.improvementsLeft == 0) ::<= {
         windowEvent.queueMessage(
             text: item.name + ' cannot be improved any further.'
         );                                                
-    };
+    }
     
     windowEvent.queueMessage(
         text: item.name + ' can be improved by attempting to combine it with another item of the same material. Once the process is complete, the other item is lost, and this item is improved.'
@@ -49,7 +49,7 @@ return ::(user, item, inBattle) {
                 windowEvent.queueMessage(
                     text: 'The party has no other items that are of the material ' + item.material.name
                 );
-            };
+            }
                             
             @:statChoices = [
                 'HP',
@@ -97,7 +97,7 @@ return ::(user, item, inBattle) {
                                                     tryImprove();
                                                 }
                                             );
-                                        };
+                                        }
                                         
                                         party.inventory.remove(item:other);
                                         
@@ -128,9 +128,9 @@ return ::(user, item, inBattle) {
                                             windowEvent.queueMessage(
                                                 text: 'The improvement was unsuccessful...'
                                             );                                                
-                                        };
+                                        }
                                         
-                                    };
+                                    }
                                     
                                     
                                     tryImprove();
@@ -143,4 +143,4 @@ return ::(user, item, inBattle) {
             );
         }
     );
-};
+}

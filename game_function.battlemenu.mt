@@ -34,7 +34,7 @@ return ::(
     @:commitAction ::(action) {
         battle.entityCommitAction(action:action);    
         windowEvent.jumpToTag(name:'BattleMenu', goBeforeTag:true, doResolveNext:true);
-    };
+    }
 
 
     windowEvent.queueChoiceColumns(
@@ -59,7 +59,7 @@ return ::(
               (0): ::<={ // fight
 
                 @:abilities = [];
-                user.abilitiesAvailable->foreach(do:::(index, ability) {
+                foreach(user.abilitiesAvailable)::(index, ability) {
                     abilities->push(value:
                         if (ability.apCost > 0 || ability.hpCost > 0)
                             if (ability.apCost > 0) 
@@ -69,7 +69,7 @@ return ::(
                         else
                             ability.name
                     );
-                });
+                }
                 
                 windowEvent.queueChoices(
                     leftWeight: 1,
@@ -88,18 +88,18 @@ return ::(
                         match(ability.targetMode) {
                           (Ability.TARGET_MODE.ONE): ::<={
                             @:all = [];
-                            allies->foreach(do:::(index, ally) {
+                            foreach(allies)::(index, ally) {
                                 all->push(value:ally);
-                            });
-                            enemies->foreach(do:::(index, enemy) {
+                            }
+                            foreach(enemies)::(index, enemy) {
                                 all->push(value:enemy);
-                            });
+                            }
                             
                             
                             @:allNames = [];
-                            all->foreach(do:::(index, person) {
+                            foreach(all)::(index, person) {
                                 allNames->push(value:person.name);
-                            });
+                            }
                           
                           
                             windowEvent.queueChoices(
@@ -163,12 +163,12 @@ return ::(
 
                           (Ability.TARGET_MODE.RANDOM): ::<={
                             @all = [];
-                            allies->foreach(do:::(index, ally) {
+                            foreach(allies)::(index, ally) {
                                 all->push(value:ally);
-                            });
-                            enemies->foreach(do:::(index, enemy) {
+                            }
+                            foreach(enemies)::(index, enemy) {
                                 all->push(value:enemy);
-                            });
+                            }
                 
                             commitAction(action:
                                 BattleAction.new(
@@ -183,7 +183,7 @@ return ::(
                           
                           
 
-                        };                    
+                        }                    
                     }
                 );
               },
@@ -246,7 +246,7 @@ return ::(
                         );
                       }
                     
-                    };                  
+                    }                  
                   }
                 );
                 
@@ -286,7 +286,7 @@ return ::(
                     commitAction(action);
                 });
               }
-            };          
+            }          
         }
     );    
-};
+}

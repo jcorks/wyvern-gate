@@ -33,12 +33,12 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
                     @g = value.price * goldMultiplier;
                     g = g->ceil;
                     return value.name + '(' + g + 'G)';
-                };
+                }
                 return value.name;
             });
             when(names->keycount == 0) ::<={
                 windowEvent.queueMessage(text: "The inventory is empty.");
-            };
+            }
             return names;
         },
         keep:true,
@@ -47,4 +47,4 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
             onPick(item:inventory.items[choice-1]);
         }
     );
-};
+}

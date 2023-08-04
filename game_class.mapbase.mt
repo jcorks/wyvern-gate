@@ -67,7 +67,7 @@ return class(
             discovered : true,
             symbol: 'P',
             name: "(Party)"
-        };
+        }
 
         @width = 1;
         @height = 1;
@@ -87,7 +87,7 @@ return class(
         @:isWalled ::(x, y) {
             @at = x+y*width;
             return (scenery[at] & IS_WALLED_MASK) != 0;
-        };
+        }
         
         @renderOutOfBounds = true;
         @isDark = false;
@@ -100,47 +100,47 @@ return class(
             //when(map.index[key.id] != empty) empty;
             map.index[String(from:key.id)] = value;
             //map.list->push(value:value);
-        };
+        }
         @:aStarMapFind::(map, key) {
             return map.index[String(from:key.id)];
-        };
+        }
         @:aStarMapRemove::(map, key) {
             map.index->remove(key:String(from:key.id));
             //map.list->remove(key:map->findIndex(value:key));
-        };
+        }
         @:aStarMapNew :: {
             return {
                 //list: [],
                 index: []
-            };
-        };
+            }
+        }
         
         @:aStarPQNew :: {
             return [];
-        };
+        }
 
 
         @:aStarReconstructPath::(cameFrom, current, start) {
             @last = current;
             
-            return [::] {
-                forever(do:::{
+            return {:::} {
+                forever ::{
                     @:contains = aStarMapFind(map:cameFrom, key:current);
                     when(contains.id == start.id) send(message:current);
                     current = contains;
-                });
-            };
-        };
+                }
+            }
+        }
 
 
         @:aStarFindLowestFscore::(fScore, openSet) {
             return aStarPQGetFirst(pq:openSet);
-        };
+        }
 
         @:aStarNewNode::(x, y) {
             when (!isWalled(x, y) && x >= 0 && y >= 0 && x < width && y < height)
-                {x:x, y:y, id:x + y*width};
-        };
+                {x:x, y:y, id:x + y*width}
+        }
 
         @:aStarGetNeighbors::(current) {
             return [
@@ -153,7 +153,7 @@ return class(
                 aStarNewNode(x:current.x  , y:current.y+1),
                 aStarNewNode(x:current.x  , y:current.y-1)
             ]->filter(by::(value) <- value != empty);
-        };
+        }
         
         @:aStarGetScore::(value) <- if (value == empty) THE_BIG_ONE else value;
         
@@ -167,7 +167,7 @@ return class(
             when(as < bs) -1;
             when(as > bs)  1;
             return 0;
-        };
+        }
         
         // returns the placement of the value within the 
         // priority queue. The  
@@ -175,17 +175,17 @@ return class(
             aStarPQCompareTable = fScore;
             @m = 0;
             @n = pq->keycount - 1;
-            return [::] {
-                forever (do:::{
+            return {:::} {
+                forever ::{
                     when(m > n) send(message:pq->keycount+m);
                     @k = ((n + m) / 2)->floor;
                     @cmp = aStarPQCompare(a:value, b:pq[k]);
                     when(cmp > 0) m = k + 1;
                     when(cmp < 0) n = k - 1;
                     send(message:k);
-                });
-            };
-        };
+                }
+            }
+        }
         
         @:aStarPQGetFirst::(pq) <- pq[0];
         
@@ -193,13 +193,13 @@ return class(
             @:in = aStarPQBinarySearch(pq, value, fScore);
             if (in < pq->keycount) empty; // already in 
             pq->insert(at:in-pq->keycount, value);
-        };
+        }
 
         @:aStarPQRemove::(pq, value, fScore) {
             @:in = aStarPQBinarySearch(pq, value, fScore);
             if (in >= pq->keycount) empty; // not in 
             pq->remove(key:in);            
-        };
+        }
 
         
         
@@ -232,8 +232,8 @@ return class(
             @path;
             @iter = 0;
             
-            return [::] {
-                forever(do:::{
+            return {:::} {
+                forever ::{
                     // return empty: open set is empty but goal was never reached
                     when(openSet->keycount == 0) send();
                 
@@ -244,9 +244,9 @@ return class(
                         @out = aStarReconstructPath(cameFrom, current, start);
                         send(message:out);
                         
-                    };
+                    }
                     openSet->remove(key:0);
-                    aStarGetNeighbors(current)->foreach(do:::(i, neighbor) {
+                    foreach(aStarGetNeighbors(current))::(i, neighbor) {
                         // d(current,neighbor) is the weight of the edge from current to neighbor
                         // tentative_gScore is the distance from start to the neighbor through current
                         @:tentative_gScore = aStarMapFind(map:gScore, key:current) + 1;//d(current, neighbor)
@@ -256,11 +256,11 @@ return class(
                             aStarMapEmplace(map:gScore, key:neighbor, value:tentative_gScore);
                             aStarMapEmplace(map:fScore, key:neighbor, value:tentative_gScore + aStarHeuristicH(from:neighbor, to:goal));
                             aStarPQAdd(pq:openSet, value:neighbor, fScore);
-                        };
-                    });
-                });
-            };
-        };
+                        }
+                    }
+                }
+            }
+        }
         
         
         @:bfsPathNext::(start, goal) {
@@ -269,12 +269,12 @@ return class(
             
             when(start.id == goal.id) empty;
             @:q = [];
-            @:visited = {};
+            @:visited = {}
             visited[start.id] = true;
             q->push(value:start);
             
-            return [::] {
-                forever(do:::{
+            return {:::} {
+                forever ::{
                     when(q->keycount == 0) empty;
                     
                     @v = q[0];
@@ -283,34 +283,34 @@ return class(
 
                     when(v.id == goal.id) ::<= {
                         // build path
-                        send(message: (::{
-                            return [::] {
+                        send(message: ::<={
+                            return {:::} {
                                 @a = v;
                                 @last;
-                                forever(do:::{
+                                forever ::{
                                     when(a.parent.id == start.id) ::<= {
                                         
                                         
                                         send(message:a);                
-                                    };                
+                                    }                
                                     a = a.parent; 
-                                });
-                            };
-                        })());
-                    };
+                                }
+                            }
+                        })
+                    }
 
-                    aStarGetNeighbors(current:v)->foreach(do:::(i, w) {
+                    foreach(aStarGetNeighbors(current:v))::(i, w) {
                         when(visited[w.id] == true) empty;
                         
                         visited[w.id] = true;
                         w.parent = v;
                         q->push(value:w);
-                    });
+                    }
 
                 
-                });
-            };
-        };
+                }
+            }
+        }
         
         
         @:renderPaged ::{
@@ -365,21 +365,21 @@ return class(
             */
             
             
-            
-            [0, mapSizeH+1]->for(do:::(y) {
-                [0, mapSizeW+1]->for(do:::(x) {
+            @self = this.instance;
+            for(0, mapSizeH+1)::(y) {
+                for(0, mapSizeW+1)::(x) {
                     @itemX = (x) + regionX*mapSizeW - mapSizeW*0.5;
                     @itemY = (y) + regionY*mapSizeH - mapSizeH*0.5;
                     
                     when(itemX < 0 || itemY < 0 || itemX >= width || itemY >= height) empty;
                     
-                    @symbol = this.sceneryAt(x:itemX, y:itemY);
+                    @symbol = self.sceneryAt(x:itemX, y:itemY);
 
                     canvas.movePen(x:left + x, y:top + y);  
 
                     when(symbol == 1) ::<= {
                         canvas.drawChar(text:wallCharacter);
-                    };
+                    }
                     
 
                     when(itemX < 0 || itemY < 0 || itemX >= width+0 || itemY >= height+0) ::<= {
@@ -388,22 +388,22 @@ return class(
 
                         when(!renderOutOfBounds) empty;
                         canvas.drawChar(text:outOfBoundsCharacter);
-                    };
+                    }
 
 
-                    @:items = this.itemsAt(x:itemX, y:itemY);
+                    @:items = self.itemsAt(x:itemX, y:itemY);
                     when(items != empty) ::<= {
                         canvas.drawChar(text:if (items[items->keycount-1].discovered) items[items->keycount-1].symbol else '?');
-                    };
+                    }
 
                     when (symbol != empty) ::<= {
                         canvas.drawChar(text:symbol);
-                    };
+                    }
 
 
                     canvas.drawChar(text:' ');
-                });                
-            });                
+                }                
+            }              
                             
 
             
@@ -415,7 +415,7 @@ return class(
             
             canvas.drawText(text:'P');
                     
-        };
+        }
         
         @:renderUnpaged ::{
             //@:Time = import(module:'Matte.System.Time');
@@ -439,8 +439,8 @@ return class(
                 @x = pointer.x + 0.5;
                 @y = pointer.y + 0.5;
                 @:rads = (Number.PI() / 180)*degrees;
-                [::] {
-                    forever(do:::{
+                {:::} {
+                    forever ::{
                         x += rads->cos * SIGHT_RAY_EPSILON;
                         y += rads->sin * SIGHT_RAY_EPSILON;
                         
@@ -451,14 +451,19 @@ return class(
                         scenery[x->floor+y->floor*width] &= ~IS_OBSCURED_MASK;                        
                         if (isWalled(x:x->floor, y:y->floor))
                             send();
-                    });
-                };
-            };
+                    }
+                }
+            }
             
-            
-            [0, 360, 10]->for(do:::(i) {
-                sightRay(degrees:i);
-            });
+
+            {:::} {
+                @i = 0;
+                forever ::{
+                    when (i >= 360) send();
+                    sightRay(degrees:i);
+                    i += 10;                    
+                }
+            }            
             
             /*
             [0, mapSizeH+1]->for(do:::(y) {
@@ -475,15 +480,15 @@ return class(
                 });
             }); 
             */           
-            
-            [0, mapSizeH+1]->for(do:::(y) {
-                [0, mapSizeW+1]->for(do:::(x) {
+            @self = this.instance;
+            for(0, mapSizeH+1)::(y) {
+                for(0, mapSizeW+1)::(x) {
                     @itemX = ((x + pointer.x - mapSizeW/2))->floor;
                     @itemY = ((y + pointer.y - mapSizeH/2))->floor;
 
-                    @symbol = this.sceneryAt(x:itemX, y:itemY);
+                    @symbol = self.sceneryAt(x:itemX, y:itemY);
 
-                    @:items = this.itemsAt(x:itemX, y:itemY);
+                    @:items = self.itemsAt(x:itemX, y:itemY);
                     canvas.movePen(x:left + x, y:top + y);  
 
 
@@ -491,12 +496,12 @@ return class(
                     when((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY)) ::<= {
                         when (symbol != empty) ::<= {
                             canvas.drawChar(text:symbol);
-                        };
+                        }
 
                         when(renderOutOfBounds) ::<= {
                             canvas.drawChar(text:outOfBoundsCharacter);
-                        };
-                    };
+                        }
+                    }
 
                     
                     
@@ -506,23 +511,23 @@ return class(
                     
                     when(scenery[itemX+itemY*width] & IS_OBSCURED_MASK) ::<= {
                         canvas.drawChar(text:outOfBoundsCharacter);                        
-                    };
+                    }
 
 
                     when(symbol == empty && isWalled(x:itemX, y:itemY)) ::<= {
                         canvas.drawChar(text:wallCharacter);
-                    };
+                    }
 
                     when(items != empty && items->keycount > 0) ::<= {
                         canvas.drawChar(text:if (items[0].discovered) items[0].symbol else '?');
-                    };                    
+                    }                    
 
 
                     when (symbol != empty) ::<= {
                         canvas.drawChar(text:symbol);
-                    };
-                });                
-            });               
+                    }
+                }             
+            }             
             
             
             // TODO: walls
@@ -547,11 +552,11 @@ return class(
             canvas.drawText(text:'P');
             //canvas.debugLine = 'Frame took ' + (Time.getTicks() - ticks) + 'ms';
                     
-        };
+        }
 
         @:retrieveItem = ::(data) {
             return items->filter(by:::(value) <- value.data == data)[0];
-        };
+        }
 
 
         this.interface = {
@@ -561,9 +566,9 @@ return class(
                 set ::(value) {
                     width = value;
                     @:size = (width*height);
-                    [0, size]->for(do:::(i) {
+                    for(0, size)::(i) {
                         scenery[i] = 0;
-                    });
+                    }
                 }
             },
 
@@ -572,9 +577,9 @@ return class(
                 set ::(value) {
                     height = value;
                     @:size = (width*height);
-                    [0, size]->for(do:::(i) {
+                    for(0, size)::(i) {
                         scenery[i] = 0;
-                    });               
+                    }      
                 }
             },
             
@@ -614,13 +619,13 @@ return class(
             fillSceneryIndex ::(
                 symbol => Number
             ) {
-                [0, height]->for(do:::(y) {
-                    [0, width]->for(do:::(x) {
+                for(0, height)::(y) {
+                    for(0, width)::(x) {
                         @index = x + y*(width);
                     
                         scenery[index] = (scenery[index] & SETTINGS_MASK) | (1+symbol);
-                    });                
-                });
+                    }      
+                }
             },            
             setStepAction ::(
                 x => Number,
@@ -666,7 +671,7 @@ return class(
                 if (loc == empty) ::<= {
                     loc = [];
                     itemIndex[x + y*(width)] = loc;
-                };
+                }
                 @:val = {
                     x: x,
                     y: y,
@@ -674,7 +679,7 @@ return class(
                     discovered : discovered,
                     data: data,
                     name: name
-                };
+                }
                 loc->push(value:val);
                 items->push(value:val);
                 if (name != empty)
@@ -691,11 +696,11 @@ return class(
             
             obscure::{
             
-                [0, width]->for(do:::(x) {
-                    [0, height]->for(do:::(y) {
+                for(0, width)::(x) {
+                    for(0, height)::(y) {
                         scenery[x+y*width] |= IS_OBSCURED_MASK;
-                    });
-                });
+                    }
+                }
                             
             },
             
@@ -710,24 +715,24 @@ return class(
             
                 @items = itemIndex[item.x + (item.y)*(width)];
                 when(items == empty) empty;
-                [::] {
-                    items->foreach(do:::(key, v) {
+                {:::} {
+                    foreach(items)::(key, v) {
                         when(v.data == data) ::<= {
                             items->remove(key);
                             send();
-                        };
-                    });
-                };
+                        }
+                    }
+                }
                 if (item.name != empty) ::<= {
-                    [::] {
-                        legendEntries->foreach(do:::(key, v) {
+                    {:::} {
+                        foreach(legendEntries)::(key, v) {
                             when(v.data == data) ::<= {
                                 legendEntries->remove(key);
                                 send();
-                            };
-                        });
-                    };
-                };
+                            }
+                        }
+                    }
+                }
 
 
                 if(items->keycount == 0)
@@ -777,7 +782,7 @@ return class(
                 @:path = aStarPathNext(start:pointer, goal:{x:x, y:y});                
                 when(path == empty) empty;
                 
-                this.setPointer(
+                this.instance.setPointer(
                     x: path.x,
                     y: path.y                
                 );
@@ -785,7 +790,7 @@ return class(
             },
 
             moveTowardPointer::(data) {
-                this.moveTowardPoint(data, x:pointer.x, y:pointer.y);
+                this.instance.moveTowardPoint(data, x:pointer.x, y:pointer.y);
             },
 
             moveTowardPoint::(data, x, y) {
@@ -805,7 +810,7 @@ return class(
                 if (loc == empty) ::<= {
                     loc = [];
                     itemIndex[ent.x + (ent.y)*(width)] = loc;
-                };
+                }
                 loc->push(value:ent);
 
             },
@@ -834,7 +839,7 @@ return class(
                 x,
                 y
             ) {
-                this.movePointerFree(
+                this.instance.movePointerFree(
                     x:if (x > 0) 1 else if (x < 0) -1 else 0,
                     y:if (y > 0) 1 else if (y < 0) -1 else 0
                 );
@@ -864,14 +869,14 @@ return class(
 
                     @greater = new > old;
 
-                    [::] {
-                        forever(do:::{
+                    {:::} {
+                        forever ::{
                             when (isWalled(x:new, y)) ::<= {
                                 new = new + (if (greater) -1 else 1);
-                            }; 
+                            } 
                             send();   
-                        });
-                    };
+                        }
+                    }
                     x = new;
                 } else ::<= {
                     @offset = y;
@@ -884,21 +889,21 @@ return class(
 
                     @greater = new > old;
 
-                    [::] {
-                        forever(do:::{
+                    {:::} {
+                        forever ::{
                             breakpoint();
                             when (isWalled(x, y:new)) ::<= {
                                 new = new + (if (greater) -1 else 1);
-                            }; 
+                            } 
                             send();   
-                        });
-                    };
+                        }
+                    }
                     y = new;
                 
-                };
+                }
 
 
-                this.setPointer(x, y);
+                this.instance.setPointer(x, y);
             
             },
             
@@ -910,32 +915,33 @@ return class(
             
             
             getItemsUnderPointer :: {
-                return this.itemsAt(x:pointer.x, y:pointer.y);
+                return this.instance.itemsAt(x:pointer.x, y:pointer.y);
             },
 
             getItemsUnderPointerRadius ::(radius) {
                 @out = [];
-                [pointer.x - (radius / 2)->floor, pointer.x + (radius / 2)->ceil]->for(do:::(x) {
-                    [pointer.y - (radius / 2)->floor, pointer.y + (radius / 2)->ceil]->for(do:::(y) {
-                        @:at = this.itemsAt(x, y);
+                @self = this.instance;
+                for(pointer.x - (radius / 2)->floor, pointer.x + (radius / 2)->ceil)::(x) {
+                    for(pointer.y - (radius / 2)->floor, pointer.y + (radius / 2)->ceil)::(y) {
+                        @:at = self.itemsAt(x, y);
                         when(at == empty) empty;
-                        at->foreach(do:::(key, value) {
+                        foreach(at)::(key, value) {
                             out->push(value);
-                        });
-                    });
-                });
+                        }
+                    }
+                }
                 
                 return out;     
             },
 
             getNamedItemsUnderPointer :: {
-                @:out = this.itemsAt(x:pointer.x, y:pointer.y);
+                @:out = this.instance.itemsAt(x:pointer.x, y:pointer.y);
                 when(out == empty) empty;
                 return out->filter(by:::(value) <- value.name != empty);
             },
 
             getNamedItemsUnderPointerRadius ::(radius) {
-                @:out = this.getItemsUnderPointerRadius(radius);    
+                @:out = this.instance.getItemsUnderPointerRadius(radius);    
                 when(out == empty) empty;
                 return out->filter(by:::(value) <- value.name != empty);
             },
@@ -959,7 +965,7 @@ return class(
                     @camBottom = camY + mapSizeH/2;
                     
                     return x >= camLeft && x <= camRight && y >= camTop && y <= camBottom;
-                };
+                }
 
             },
             
@@ -1003,7 +1009,7 @@ return class(
                 if (drawLegend) ::<= {
                     @width = 0;
                     @:itemList = [];
-                    legendEntries->foreach(do:::(index, item) {
+                    foreach(legendEntries)::(index, item) {
                         
                         @:val = if(item.discovered) 
                             '' + item.symbol + ' ' + if (item.name == '') item.name else item.name
@@ -1013,7 +1019,7 @@ return class(
                         itemList->push(value:val);
                         if (width < val->length)
                             width = val->length;
-                    }); 
+                    }
                     itemList->push(value:'');
                     itemList->push(value:'P (Party)');
                     if (width < 'P (Party)'->length)
@@ -1029,12 +1035,12 @@ return class(
                     
                     canvas.movePen(x:0, y:0);
                     canvas.drawText(text:'Legend');
-                    itemList->foreach(do:::(index, item) {
+                    foreach(itemList)::(index, item) {
                         canvas.movePen(x:2, y:index+2);
                         canvas.drawText(text:item);
-                    });
+                    }
                         
-                };
+                }
 
 
 
@@ -1045,6 +1051,6 @@ return class(
                 
             
             }
-        };    
+        }    
     }
 );

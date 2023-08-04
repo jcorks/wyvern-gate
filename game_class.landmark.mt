@@ -35,10 +35,17 @@
 @:Landmark = class(  
     name : 'Wyvern.Landmark',
     statics : {
-        Base : empty
+        Base  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     define :::(this) {
         if (Location == empty) Location = import(module:'game_class.location.mt');
+        @self;
         @name;
         @landmark;
         @x_;
@@ -88,27 +95,27 @@
                 @area = {
                     x: (ar.x + ar.width/2 + offset[0]*2)->floor,
                     y: (ar.y + ar.height/2 + offset[1]*2)->floor
-                };                
+                }                
                 
                 @:already = map.itemsAt(x:area.x, y:area.y);
                 when(already != empty && already->keycount) empty;
                 return area;
-            };
+            }
         
         
             return ::{
                 @ar = map.getRandomArea();
                 
-                return [::] {
+                return {:::} {
                     @iter = 0;
-                    forever(do::{
+                    forever ::{
                         @:try = tryArea(ar, offset:tryMap[iter]);
                         when(try != empty) send(message:try);
                         iter += 1;
-                    });
-                };
-            }; 
-        };
+                    }
+                }
+            } 
+        }
         
         
         
@@ -117,18 +124,19 @@
 
 
         this.constructor = ::(base, island, x, y, state, floorHint){
+            self = this.instance;
             island_ = island;
             when(state != empty) ::<= {
-                this.state = state;
-                return this;
-            };
+                self.state = state;
+                return self;
+            }
 
             if (base.dungeonMap) ::<= {
                 map = DungeonMap.new(mapHint: base.mapHint);
-                dungeonLogic = DungeonController.new(map, island, landmark:this);
+                dungeonLogic = DungeonController.new(map, island, landmark:self);
             } else ::<= {
                 map = StructureMap.new(mapHint:base.mapHint);//Map.new(mapHint: base.mapHint);
-            };
+            }
 
             sizeW = map.width;
             sizeH = map.height;
@@ -137,7 +145,7 @@
                 @area = map.getRandomArea();                
 
                 gate = Location.Base.database.find(name:'Entrance').new(
-                    landmark:this, 
+                    landmark:self, 
                     xHint:area.x + (area.width/2)->floor,
                     yHint:area.y + (area.height/2)->floor
                 );  
@@ -148,10 +156,10 @@
             } else ::<= {
             
                 gate = Location.Base.database.find(name:'Entrance').new(
-                    landmark:this
+                    landmark:self
                 );            
                 map.addLocation(location:gate);
-            };
+            }
             
             if (base.isUnique)
                 name = base.name
@@ -187,22 +195,22 @@
 
 
 
-            base.requiredLocations->foreach(do:::(i, loc) {
-                this.addLocation(
+            foreach(base.requiredLocations)::(i, loc) {
+                self.addLocation(
                     name:loc
                 );
             
                 mapIndex += 1;
-            });
+            }
             
-            [0, random.integer(from:base.minLocations, to:base.maxLocations)]->for(do:::(i) {
+            for(0, random.integer(from:base.minLocations, to:base.maxLocations))::(i) {
                 when(base.possibleLocations->keycount == 0) empty;
                 @:which = random.pickArrayItemWeighted(list:base.possibleLocations);
-                this.addLocation(
+                self.addLocation(
                     name:which.name
                 );
                 mapIndex += 1;
-            });
+            }
             
             
             if (base.dungeonMap) ::<= {
@@ -218,20 +226,20 @@
                 );
 
                 map.finalize();            
-            };
+            }
 
             if (floorHint != empty) ::<= {
                 floor = floorHint;
                 floor => Number;
                 if (landmark.dungeonMap)
                     dungeonLogic.floorHint = floor;
-            };
+            }
 
             
-            this.base.onCreate(landmark:this, island);
+            self.base.onCreate(landmark:self, island);
             
-            return this;
-        };    
+            return self;
+        }    
 
         this.interface =  {
             state : {
@@ -248,8 +256,8 @@
                     locations = [];
                     map = Map.new();
                     gate = empty;
-                    value.locations->foreach(do:::(index, location) {
-                        @loc = Location.Base.database.find(name:location.baseName).new(landmark:this, state:location);
+                    foreach(value.locations)::(index, location) {
+                        @loc = Location.Base.database.find(name:location.baseName).new(landmark:self, state:location);
                         if (loc.base.name == 'Entrance')
                             gate = loc;
 
@@ -261,7 +269,7 @@
                             discovered: true
                         );
                         locations->push(value:loc);
-                    });
+                    }
                     if (gate == empty)
                         error(detail: 'landmark state is missing an Entrance.');
 
@@ -282,7 +290,7 @@
                         locations : [...locations]->map(to:::(value) <- value.state),
                         discovered : discovered
                         
-                    };
+                    }
                 }
             },
         
@@ -294,7 +302,7 @@
                         //foreach(in:locations, do:::(index, inhabitant) {
                         //    out = out + '   ' + inhabitant.name + ', a ' + inhabitant.species.name + ' ' + inhabitant.profession.base.name +'\n';
                         //});
-                    };
+                    }
                     return out;
                 }
             },
@@ -360,7 +368,7 @@
                         world.storyFlags.data_locationsDiscovered += 1;
                         windowEvent.queueMessage(text:'Location found! ' + world.storyFlags.data_locationsDiscovered + ' / ' 
                                                                  + world.storyFlags.data_locationsNeeded + ' locations.');               
-                    };
+                    }
                 discovered = true;
             },
             
@@ -379,15 +387,15 @@
                         @xy = getLocationXY();
                         x = xy.x;
                         y = xy.y;
-                    };
-                    loc = Location.Base.database.find(name:name).new(landmark:this, ownedByHint, xHint:x, yHint:y);
+                    }
+                    loc = Location.Base.database.find(name:name).new(landmark:self, ownedByHint, xHint:x, yHint:y);
                     map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
                         
                 } else ::<= {
-                    loc = Location.Base.database.find(name:name).new(landmark:this, ownedByHint);
+                    loc = Location.Base.database.find(name:name).new(landmark:self, ownedByHint);
                     map.addLocation(location:loc);
                 
-                };
+                }
                 locations->push(value:loc);                
             },
 
@@ -411,7 +419,7 @@
                     return locations;
                 }
             }
-        };
+        }
     }
 );
 
@@ -419,7 +427,13 @@
 Landmark.Base = class(
     name : 'Wyvern.Landmark.Base',
     statics : {
-        database : empty
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     define:::(this) {
         @kind;
@@ -447,9 +461,9 @@ Landmark.Base = class(
         
         this.interface = {
             new :: (island => Object, x => Number, y => Number, floorHint, state) {
-                return Landmark.new(base:this, island, x, y, floorHint, state);
+                return Landmark.new(base:this.instance, island, x, y, floorHint, state);
             }
-        };
+        }
     }
 );
 

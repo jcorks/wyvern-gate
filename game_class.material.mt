@@ -23,7 +23,13 @@
 @:Material = class(
     name : 'Wyvern.Material',
     statics : {
-        database : empty
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     define:::(this) {
         Database.setup(

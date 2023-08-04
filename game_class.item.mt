@@ -52,7 +52,7 @@
     RING       : 3,    
     TRINKET    : 4,
     TWOHANDED  : 5
-};
+}
     
 @:ATTRIBUTE = {
     BLUNT   : 0,
@@ -63,13 +63,13 @@
     FRAGILE : 5,
     WEAPON  : 7,
     RAW_METAL     : 8
-};
+}
 
 @:USE_TARGET_HINT = {
     ONE     : 0,    
     GROUP   : 1,
     ALL     : 2
-};
+}
 
 
 
@@ -77,12 +77,19 @@
 @:Item = class(
     name : 'Wyvern.Item',
     statics : {
-        Base : empty,
-        TYPE : TYPE,
-        ATTRIBUTE : ATTRIBUTE,
-        USE_TARGET_HINT : USE_TARGET_HINT
+        Base  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        },
+        TYPE :{get::<- TYPE},
+        ATTRIBUTE : {get::<-ATTRIBUTE},
+        USE_TARGET_HINT : {get::<-USE_TARGET_HINT}
     },
     define:::(this) {
+        @self;
         @base_;
         @enchants = []; // ItemMod
         @quality;
@@ -133,7 +140,7 @@
               (9) :' (IX)',
               (10) :' (X)',
               default: ' (~)'         
-            };
+            }
             
             customName = if (base_.hasQuality && quality != empty)
                 quality.name + ' ' + baseName + enchantName 
@@ -142,10 +149,10 @@
 
             if (improvementsLeft != improvementsStart) ::<= {
                 customName = customName +  '+'+(improvementsStart - improvementsLeft);
-            };
+            }
 
 
-        };
+        }
         
         @:assignSize = ::{
             random.pickArrayItem(list:[
@@ -199,13 +206,14 @@
 
             
             ])();
-        };
+        }
         
         this.constructor = ::(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint, abilityHint) {
+            self = this.instance;
             when(state != empty) ::<= {
-                this.state = state;
-                return this;
-            };
+                self.state = state;
+                return this.instance;
+            }
             
             ability = if (abilityHint) abilityHint else random.pickArrayItem(list:base.possibleAbilities);
             base_ = base;
@@ -219,13 +227,13 @@
             if (base.hasSize)   
                 assignSize();
             description = description + (if (ability == empty) '' else 'If equipped, grants the ability: "' + ability + '". ');
-            base.equipEffects->foreach(do:::(i, effect) {
+            foreach(base.equipEffects)::(i, effect) {
                 equipEffects->push(value:effect);
-            });
+            }
 
-            base.useEffects->foreach(do:::(i, effect) {
+            foreach(base.useEffects)::(i, effect) {
                 useEffects->push(value:effect);
-            });
+            }
             
             
             
@@ -242,7 +250,7 @@
                         DEX:10                    
                     ));
                     price *= 1.05;
-                };
+                }
                 
                 
                 if (random.try(percentSuccess:30) || (qualityHint != empty)) ::<= {
@@ -254,9 +262,9 @@
                     price += (price * (quality.pricePercentMod/100));
                     description = description + quality.description + ' ';
                     
-                };
+                }
                 recalculateName();
-            };
+            }
             
             @:story = import(module:'game_singleton.story.mt');
 
@@ -267,18 +275,18 @@
                     );
                 } else ::<= {
                     material = Material.database.find(name:materialHint);                
-                };
+                }
                 description = description + material.description + ' ';
                 stats.add(stats:material.statMod);
                 recalculateName();
-            };
+            }
             
 
             
             if (base.canHaveEnchants) ::<= {
                 if (enchantHint != empty) ::<= {
-                    this.addEnchant(name:enchantHint);
-                };
+                    self.addEnchant(name:enchantHint);
+                }
 
                 
                 if (rngEnchantHint != empty && random.try(percentSuccess:45)) ::<= {
@@ -291,21 +299,21 @@
                     
                     
                     
-                    [0, enchantCount]->for(do:::(i) {
+                    for(0, enchantCount)::(i) {
                         @mod = ItemEnchant.Base.database.getRandomFiltered(
                             filter::(value) <- value.tier <= story.tier && (if (base.canHaveTriggerEnchants == false) value.triggerConditionEffects->keycount == 0 else true)
                         ).new();
-                        this.addEnchant(mod);
-                    });
-                };
-            };
+                        self.addEnchant(mod);
+                    }
+                }
+            }
 
 
             if (base.canBeColored) ::<= {
                 color = if (colorHint) ItemColor.database.find(name:colorHint) else ItemColor.database.getRandom();
                 stats.add(stats:color.equipMod);
                 description = description->replace(key:'$color$', with:color.name);
-            };
+            }
                         
             
             
@@ -315,12 +323,12 @@
                 
             price = (price)->ceil;
             
-            base.onCreate(item:this, user:from, creationHint);
+            base.onCreate(item:self, user:from, creationHint);
             
             
-            return this;
+            return this.instance;
             
-        };
+        }
         @:Island = import(module:'game_class.island.mt');
         @:world = import(module:'game_singleton.world.mt');
         
@@ -396,7 +404,7 @@
                         
             throwOut :: {
                 when(container == empty) empty;
-                container.remove(item:this);
+                container.remove(item:self);
             },
             
             
@@ -412,9 +420,9 @@
             addEnchant::(mod) {
                 when (enchants->keycount >= base_.enchantLimit) empty;
                 enchants->push(value:mod);
-                mod.base.equipEffects->foreach(do:::(i, effect) {
+                foreach(mod.base.equipEffects)::(i, effect) {
                     equipEffects->push(value:effect);
-                });
+                }
                 stats.add(stats:mod.base.equipMod);
                 if (description->contains(key:mod.description) == false)
                     description = description + mod.description + ' ';
@@ -432,9 +440,9 @@
             },
             
             onTurnEnd ::(wielder, battle){
-                enchants->foreach(do:::(i, enchant) {
-                    enchant.onTurnCheck(wielder, item:this, battle);
-                });
+                foreach(enchants)::(i, enchant) {
+                    enchant.onTurnCheck(wielder, item:self, battle);
+                }
             },
             
             improvementsLeft : {
@@ -448,37 +456,37 @@
             describe ::(by) {
                 @:Effect = import(module:'game_class.effect.mt');
                 windowEvent.queueMessage(
-                    speaker:this.name,
+                    speaker:self.name,
                     text:description,
                     pageAfter:canvas.height-4
                 );
                 windowEvent.queueMessage(
-                    speaker:this.name + ' - Equip Stats',
+                    speaker:self.name + ' - Equip Stats',
                     text:stats.description,
                     pageAfter:canvas.height-4
                 );
 
                 windowEvent.queueMessage(
-                    speaker:this.name + ' - Equip Effects',
+                    speaker:self.name + ' - Equip Effects',
                     pageAfter:canvas.height-4,
                     text:::<={
                         @out = '';
                         when (equipEffects->keycount == 0) 'None.';
-                        equipEffects->foreach(do:::(i, effect) {
+                        foreach(equipEffects)::(i, effect) {
                             out = out + '. ' + Effect.database.find(name:effect).description + '\n';
-                        });
+                        }
                         return out;
                     }
                 );                
                 windowEvent.queueMessage(
-                    speaker:this.name + ' - Use Effects',
+                    speaker:self.name + ' - Use Effects',
                     pageAfter:canvas.height-4,
                     text:::<={
                         @out = '';
                         when (useEffects->keycount == 0) 'None.';
-                        useEffects->foreach(do:::(i, effect) {
+                        foreach(useEffects)::(i, effect) {
                             out = out + '. ' + Effect.database.find(name:effect).description + '\n';
-                        });
+                        }
                         return out;
                     }
                 );  
@@ -491,7 +499,7 @@
                         pageAfter:canvas.height-4,
                         text:'Oh! This weapon type really works for me as ' + correctA(word:by.profession.base.name) + '.'
                     );  
-                };
+                }
 
             },
             
@@ -513,11 +521,11 @@
                     ));
                     
                     if (silent == empty && base_.name != 'None') ::<= {
-                        windowEvent.queueMessage(text:'The party get\'s more used to using the ' + this.name + '.');
-                        oldStats.printDiffRate(other:stats, prompt:this.name);
-                    };
+                        windowEvent.queueMessage(text:'The party get\'s more used to using the ' + self.name + '.');
+                        oldStats.printDiffRate(other:stats, prompt:self.name);
+                    }
                 
-                };
+                }
             },
             
             state : {
@@ -541,15 +549,15 @@
                     description = value.description;
                     stats.state = value.stats;
                     equipEffects = [];
-                    value.equipEffects->foreach(do:::(index, effectName) {
+                    foreach(value.equipEffects)::(index, effectName) {
                         equipEffects->push(value:effectName);
-                    });
+                    }
 
                     enchants = [];
-                    value.enchantNames->foreach(do:::(index, modName) {
+                    foreach(value.enchantNames)::(index, modName) {
                         @:mod = ItemEnchant.database.find(name:modName);
                         enchants->push(value:mod);
-                    });
+                    }
                     
                     quality = ItemQuality.database.find(name:value.quality);
                 },
@@ -568,13 +576,13 @@
                         enchantNames : [...enchants]->map(to:::(value) <- value.name),
                         equipEffects : [...equipEffects],
                         quality : quality.name
-                    };
+                    }
                 }
             }
             
             
             
-        };
+        }
     
     }
 );
@@ -583,8 +591,13 @@
 Item.Base = class(
     name : 'Wyvern.Item.Base',
     statics : {
-        database : empty
-
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        },
     },
     define:::(this) {
         Database.setup(
@@ -620,15 +633,15 @@ Item.Base = class(
         );
         this.interface = {
             new ::(from, creationHint, enchantHint, materialHint, rngEnchantHint, qualityHint, state, colorHint, abilityHint) {
-                return Item.new(base:this, from, creationHint, enchantHint, materialHint, rngEnchantHint, qualityHint, state, colorHint, abilityHint);
+                return Item.new(base:this.instance, from, creationHint, enchantHint, materialHint, rngEnchantHint, qualityHint, state, colorHint, abilityHint);
             },
             
 
             
             hasAttribute :: (attribute) {
-                return this.attributes->any(condition::(value) <- value == attribute);
+                return this.instance.attributes->any(condition::(value) <- value == attribute);
             }
-        };
+        }
 
     }
 );
@@ -3344,7 +3357,7 @@ Item.Base.database = Database.new(items: [
             @:nameGen = import(module:'game_singleton.namegen.mt');
             @:island = {
                 island : empty
-            };
+            }
 
             item.setIslandGenAttributes(
                 levelHint:  6,//user.level => Number,
@@ -3403,7 +3416,7 @@ Item.Base.database = Database.new(items: [
             @:nameGen = import(module:'game_singleton.namegen.mt');
             @:island = {
                 island : empty
-            };
+            }
 
             item.setIslandGenAttributes(
                 levelHint:  7,
@@ -3461,7 +3474,7 @@ Item.Base.database = Database.new(items: [
             @:nameGen = import(module:'game_singleton.namegen.mt');
             @:island = {
                 island : empty
-            };
+            }
 
             item.setIslandGenAttributes(
                 levelHint:  8,
@@ -3519,7 +3532,7 @@ Item.Base.database = Database.new(items: [
             @:nameGen = import(module:'game_singleton.namegen.mt');
             @:island = {
                 island : empty
-            };
+            }
 
             item.setIslandGenAttributes(
                 levelHint:  9,
@@ -3578,14 +3591,14 @@ Item.Base.database = Database.new(items: [
                     levelHint:  (creationHint.levelHint) => Number,
                     nameHint:   (creationHint.nameHint)  => String,
                     island : empty
-                };
+                }
             } else ::<= {
                 return {
                     nameHint: nameGen.island(),
                     levelHint: user.level+1,
                     island : empty
-                };
-            };
+                }
+            }
             
             @:levelToStratum = ::(level) {
                 return match((level / 5)->floor) {
@@ -3594,8 +3607,8 @@ Item.Base.database = Database.new(items: [
                   (2): 'II',
                   (3): 'I',
                   default: 'Unknown'
-                };
-            };
+                }
+            }
             
             item.setIslandGenAttributes(
                 levelHint: island.levelHint,

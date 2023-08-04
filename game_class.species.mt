@@ -20,7 +20,13 @@
 @:StatSet = import(module:'game_class.statset.mt');
 @:Species = class(
     statics : {
-        database : empty
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     name: 'Wyvern.Species',
     define:::(this) {

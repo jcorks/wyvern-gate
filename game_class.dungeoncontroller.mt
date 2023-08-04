@@ -24,8 +24,8 @@ return class(
             map_ = map;
             island_ = island;
             landmark_ = landmark;
-            return this;
-        };
+            return this.instance;
+        }
     
         @:addEntity ::{
             @:windowEvent = import(module:'game_singleton.windowevent.mt');
@@ -45,13 +45,13 @@ return class(
                 targetX:tileX, 
                 targetY:tileY, 
                 ref:landmark_.island.newInhabitant()
-            };
+            }
 
             ::<={
                 @story = import(module:'game_singleton.story.mt');
                 @:Item = import(module:'game_class.item.mt');
                 ent.ref.inventory.clear();
-                [0, 1+(Number.random()*3)->floor]->for(do:::(i) {
+                for(0, 1+(Number.random()*3)->floor)::(i) {
                     @:item = Item.Base.database.getRandomWeightedFiltered(
                         filter:::(value) <- value.isUnique == false && value.tier <= story.tier
                         
@@ -59,9 +59,9 @@ return class(
                     if (item.name != 'None') ::<={
                         @:itemInstance = item.new(from:ent.ref);
                         ent.ref.inventory.add(item:itemInstance);
-                    };
-                });
-            };
+                    }
+                }
+            }
             ent.ref.anonymize();
             entities->push(value:ent);
             map_.setItem(data:ent, x:tileX, y:tileY, discovered:true, symbol:'*');
@@ -74,7 +74,7 @@ return class(
                         'What? Footsteps?'
                     ])
                 );
-        };
+        }
     
         this.interface = {
             floorHint : {
@@ -84,7 +84,7 @@ return class(
                 // update movement of entity
                 Object.freezeGC();
 
-                entities->foreach(do:::(i, ent) {
+                foreach(entities)::(i, ent) {
                     @:item = map_.getItem(data:ent);
                     if (map_.getDistanceFromItem(data:ent) < 2) ::<= {
                         @:world = import(module:'game_singleton.world.mt');
@@ -92,7 +92,7 @@ return class(
                         
                         when (world.battle.isActive) ::<= {
                             world.battle.join(enemy:ent.ref);
-                        };
+                        }
                         Object.thawGC();
 
                         world.battle.start(
@@ -102,7 +102,7 @@ return class(
                             landmark: this,
                             noLoot: true,
                             onTurn ::{
-                                this.step();
+                                this.instance.step();
                             },
                             
                             onEnd::(result) {
@@ -133,15 +133,15 @@ return class(
                                         }
                                     );
                                   }
-                                };
+                                }
                             }
                         ); 
                         Object.freezeGC();
-                    };
+                    }
 
                     when (map_.getDistanceFromItem(data:ent) < AGGRESSIVE_DISTANCE + floorHint/2) ::<= {
                         map_.moveTowardPointer(data:ent);                    
-                    };
+                    }
 
                     
                     map_.moveTowardPoint(data:ent, x:ent.targetX, y:ent.targetY);
@@ -151,17 +151,17 @@ return class(
                         @:ar = map_.getRandomArea();
                         ent.targetX = (ar.x + ar.width/2)->floor;
                         ent.targetY = (ar.y + ar.height/2)->floor; 
-                    };
-                });
+                    }
+                }
                 Object.thawGC();
                 
                 
                 // add additional entities out of spawn points (stairs)
                 if ((entities->keycount < (if (floorHint == 0) 0 else (1+(floorHint/4)->ceil))) && Number.random() < 0.1 && landmark_.base.peaceful == false) ::<= {
                     addEntity();
-                };
+                }
             
             }
-        };
+        }
     }
 );

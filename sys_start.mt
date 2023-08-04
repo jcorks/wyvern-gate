@@ -18,19 +18,19 @@ return ::(terminal, arg, onDone) {
             windowEvent.commitInput(input:lastInput);
             if (canvasChanged) ::<= {
                 @:lines = currentCanvas;
-                lines->foreach(do:::(index, line) {
+                foreach(lines)::(index, line) {
                     terminal.updateLine(index, text:line);
-                }); 
+                }
                 canvasChanged = false;    
-            };
-        };
+            }
+        }
 
         canvas.onCommit = ::(lines, renderNow) {
             currentCanvas = lines;
             canvasChanged = true;
             if (renderNow != empty)
                 rerender();
-        };
+        }
 
         Shell.onProgramKeyboard = ::(input, value) {
             when(value < 1) empty;
@@ -58,16 +58,16 @@ return ::(terminal, arg, onDone) {
                     windowEvent.commitInput(input:3);
                 }
 
-            };
+            }
             
-        };
+        }
 
 
         @lastInput;
         Shell.onProgramCycle = ::{
             rerender();
 
-        };
+        }
 
         instance.mainMenu(
             onSaveState :::(
@@ -85,5 +85,5 @@ return ::(terminal, arg, onDone) {
         ); 
 
 
-    };
-};
+    }
+}

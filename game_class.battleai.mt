@@ -33,8 +33,8 @@ return class(
             user => Object
         ) {
             user_ = user;
-            return this;
-        };
+            return this.instance;
+        }
     
         this.interface = {
             state : {
@@ -42,7 +42,7 @@ return class(
                 
                 },
                 get :: {
-                    return {};                
+                    return {}                
                 }
             },
             reset ::(
@@ -67,7 +67,7 @@ return class(
                             extraData: {}                        
                         }
                     ));                  
-                };
+                }
             
                 when(enemies_->keycount == 0)
                     battle.entityCommitAction(action:BattleAction.new(
@@ -131,7 +131,7 @@ return class(
                     ;                    
                   }
 
-                };
+                }
                 
                 
                 battle.entityCommitAction(action:BattleAction.new(
@@ -142,7 +142,7 @@ return class(
                     }
                 ));
             }
-        };   
+        }   
     }  
 
 );

@@ -7,13 +7,13 @@ return ::(terminal, arg, onDone) {
     @:path = Topaz.Filesystem.Path.new(fromNode:Topaz.Filesystem.DEFAULT_NODE.TOPAZ);
 
 
-    @:dirs = {};
+    @:dirs = {}
     @:files = path.children;
 
 
     @:output = [];        
 
-    path.children->foreach(do:::(i, next) {
+    foreach(path.children)::(i, next) {
         @:next = files->pop;
         when (next == empty) empty; // shouldnt happen
         when (next.children != empty && next.children->keycount) empty;
@@ -26,8 +26,8 @@ return ::(terminal, arg, onDone) {
             @split = next.name->split(token:'_');
             if (split->keycount >= 2) ::<= {
                 dirs[(split[0])] = true;
-            };
-        };
+            }
+        }
 
         @name;
         if (filter != empty) ::<= {
@@ -35,18 +35,18 @@ return ::(terminal, arg, onDone) {
                 name = next.name;
         } else ::<= {
             name = next.name;
-        };
+        }
         when(name == empty) empty;
         // nothing in the toplevel directory.
         if (Shell.currentDirectory->length) ::<= {
             name = name->replace(key:Shell.currentDirectory+'_', with:'');
             output->push(value:name);
-        };
-    });
+        }
+    }
 
-    dirs->foreach(do:::(name, val) {
+    foreach(dirs)::(name, val) {
         output->push(value:name + '/');
-    });
+    }
 
 
 
@@ -54,9 +54,9 @@ return ::(terminal, arg, onDone) {
     Shell.onProgramCycle = ::{
         when (output->keycount == 0) ::<= {
             onDone();
-        };
+        }
         terminal.print(line:' ' + output->pop);
-    };
+    }
 
 
-};
+}

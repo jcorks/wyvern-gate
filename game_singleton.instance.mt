@@ -32,7 +32,7 @@
     @xd = x1 - x0;
     @yd = y1 - y0;
     return (xd**2 + yd**2)**0.5;
-};
+}
 @:JSON = import(module:'Matte.Core.JSON');
 @:VERSION = '0.1.4b';
 @world = import(module:'game_singleton.world.mt');
@@ -46,7 +46,12 @@ return class(
         @onSaveState;
         @onLoadState;
         @stepsSinceLast = 0;
-
+        @self;
+        
+        this.constructor = ::{
+            self = this.instance;
+            return self;
+        }
         
         
         
@@ -78,7 +83,7 @@ return class(
                                 when(choice == 0) empty;
                                 
                                 
-                                onSaveState(slot:choice, data:JSON.encode(object:this.state));        
+                                onSaveState(slot:choice, data:JSON.encode(object:self.state));        
                                 windowEvent.queueMessage(text:'Saved successfully to slot ' + choice);
                             }
                         );
@@ -99,7 +104,7 @@ return class(
                         );
                                         
                       }
-                    };                
+                    }                
                 }
             );
 
@@ -107,7 +112,7 @@ return class(
 
 
             
-        };
+        }
         
         
         
@@ -146,10 +151,10 @@ return class(
                         
                         @locationAt = landmark.map.getNamedItemsUnderPointer();
                         if (locationAt != empty) ::<= {
-                            locationAt->foreach(do:::(i, loc) {
+                            foreach(locationAt)::(i, loc) {
                                 choices->push(value:'Check ' + loc.name);
-                            });
-                        };
+                            }
+                        }
 
                         return choices;                
                     },
@@ -168,9 +173,9 @@ return class(
                             if (false) ::<= {
 
                                 @choices = [];
-                                landmark.locations->foreach(do:::(index, location) {
+                                foreach(landmark.locations)::(index, location) {
                                     choices->push(value:location.name);
-                                });
+                                }
                                 
                                 windowEvent.queueChoices(
                                     leftWeight: 1,
@@ -192,20 +197,20 @@ return class(
                                                     )
                                                 );
                                                 stepsSinceLast = 0;
-                                            };
-                                        };
+                                            }
+                                        }
                                         when(party.isIncapacitated()) send();
 
 
 
                                         @:arrival = landmark.map.getNamedItemsUnderPointer();
                                         if (arrival != empty) ::<= {
-                                            arrival->foreach(do:::(index, arr) {
+                                            foreach(arrival)::(index, arr) {
                                                 windowEvent.queueMessage(
                                                     text:"The party has arrived at " + arr.name
                                                 );
-                                            });
-                                        };                                
+                                            }
+                                        }                                
                                     }
                                 );                 
                                 
@@ -229,9 +234,9 @@ return class(
 
 
                                         // every 5 steps, heal 1% HP
-                                        if (stepCount % 15 == 0) 
-                                            party.members->foreach(do:::(i, member) <- member.heal(amount:(member.stats.HP * 0.01)->ceil));
-
+                                        if (stepCount % 15 == 0) ::<= {
+                                            foreach(party.members)::(i, member) <- member.heal(amount:(member.stats.HP * 0.01)->ceil);
+                                        }
 
                                         stepsSinceLast += 1;
                                         if (landmark.peaceful == false) ::<= {
@@ -242,31 +247,31 @@ return class(
                                                     )
                                                 );
                                                 stepsSinceLast = 0;
-                                            };
-                                        };
+                                            }
+                                        }
 
 
                                         
                                         // cancel if we've arrived somewhere
                                         @:arrival = landmark.map.getNamedItemsUnderPointer();
                                         if (arrival != empty && arrival->keycount > 0) ::<= {
-                                            arrival->foreach(do:::(index, arr) {
+                                            foreach(arrival)::(index, arr) {
                                                 windowEvent.queueMessage(
                                                     text:"The party has arrived at the " + arr.name
                                                 );
-                                            });
+                                            }
                                             landmark.map.setPointer(
                                                 x: arrival[0].x,
                                                 y: arrival[0].y
                                             );
                                             
-                                        };                            
+                                        }                            
 
                                     }
                                 
                                 );
                         
-                            };
+                            }
                           },
                           
                           (1): ::<={
@@ -286,7 +291,7 @@ return class(
 
                           }
                         
-                        };
+                        }
                     }
                 );
             },
@@ -296,8 +301,8 @@ return class(
                 onSaveState => Function, // for saving,
                 onLoadState => Function,
             ) {
-                this.onSaveState = onSaveState;
-                this.onLoadState = onLoadState;
+                self.onSaveState = onSaveState;
+                self.onLoadState = onLoadState;
                 
                 
                 windowEvent.queueMessage(
@@ -334,8 +339,8 @@ return class(
                             when(data == empty)
                                 windowEvent.queueMessage(text:'There is no data in this slot');
                                 
-                            this.state = JSON.decode(string:data);
-                            this.startInstance();
+                            self.state = JSON.decode(string:data);
+                            self.startInstance();
                           },
                           
                           (1)::<= {
@@ -348,14 +353,14 @@ return class(
                             );
                             canvas.drawText(text:message);
                             canvas.commit(renderNow:true);
-                            this.startNew();
-                            //this.startInstance();
+                            self.startNew();
+                            //self.startInstance();
                           },
                           
                           (2)::<= {
                             windowEvent.popChoice();
                           }
-                        };                            
+                        }                            
                     }
                 );
             },
@@ -397,7 +402,7 @@ return class(
                       }
                       
                       
-                    };
+                    }
 
                     destination = empty;
                 } else ::<= {
@@ -405,13 +410,13 @@ return class(
                     // need to go back where we came before back to island                        
                     if (landmarkChain->keycount > 0) ::<={
                         landmark = landmarkChain->pop;
-                    };
-                };
+                    }
+                }
             
                 when(landmark != empty) ::<= {
                     destination = visitLandmark();
                     breakpoint();
-                };
+                }
 
 
                 // fallback op                        
@@ -422,7 +427,7 @@ return class(
                     windowEvent.queueMessage(text: 'Perhaps fate has entrusted someone else with the future...');                            
                     party.clear();
                     send();
-                };
+                }
                 */
             },
         
@@ -447,9 +452,9 @@ return class(
                 
                 // since both the party members are from this island, 
                 // they will already know all its locations
-                island.landmarks->foreach(do:::(index, landmark) {
+                foreach(island.landmarks)::(index, landmark) {
                     landmark.discover(); 
-                });
+                }
                 
                 
                 
@@ -489,10 +494,10 @@ return class(
                     
                     
 
-                [0, 3]->for(do:::(i) {
+                for(0, 3)::(i) {
                     @:crystal = Item.Base.database.find(name:'Skill Crystal').new(from:p0);
                     party.inventory.add(item:crystal);
-                });
+                }
                 @:sword = Item.Base.database.find(name:'Shortsword').new(
                     from:p0,
                     materialHint: 'Hardstone',
@@ -536,7 +541,7 @@ return class(
                 
                 @:Scene = import(module:'game_class.scene.mt');
                 Scene.database.find(name:'scene_intro').act(onDone::{
-                    this.visitIsland();
+                    self.visitIsland();
                     
                     
                     /*island.addEvent(
@@ -553,7 +558,7 @@ return class(
                 if (where != empty) ::<= {
                     island = where;
                     world.island = island;
-                };
+                }
                 
                 // check if we're AT a location.
                 island.map.title = "(Map of " + island.name + ')';
@@ -584,10 +589,10 @@ return class(
                         @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
 
                         if (visitable != empty) ::<= {
-                            visitable->foreach(do:::(i, vis) {
+                            foreach(visitable)::(i, vis) {
                                 choices->push(value:'Visit ' + vis.name);                
-                            });
-                        };
+                            }
+                        }
                         return choices;
                     },
                     onChoice::(choice) {
@@ -621,7 +626,7 @@ return class(
                                     // cancel if we've arrived somewhere
                                     @:arrival = island.map.getNamedItemsUnderPointerRadius(radius:5);
                                     if (arrival != empty) ::<= {
-                                        arrival->foreach(do:::(i, arr) {
+                                        foreach(arrival)::(i, arr) {
                                             windowEvent.queueMessage(
                                                 text:"The party has arrived at the " + arr.data.name
                                             );
@@ -636,9 +641,9 @@ return class(
                                             //    y: arr.y
                                             //);
                                         
-                                        });
+                                        }
                                         
-                                    };                            
+                                    }                            
 
                                 }
                             
@@ -659,7 +664,7 @@ return class(
                                 onChoice::(choice){
                                     match(choice-1) {
                                       (0): windowEvent.queueMessage(speaker: 'About ' + island.name, text: island.description)
-                                    };                                                        
+                                    }                                                        
                                 }
                             );
                           
@@ -680,9 +685,9 @@ return class(
                           // visit landmark
                           default: ::<= {
                             //breakpoint();
-                            this.visitLandmark(landmark:visitable[choice-6].data);
+                            self.visitLandmark(landmark:visitable[choice-6].data);
                           }
-                        };
+                        }
 
 
                     
@@ -717,9 +722,9 @@ return class(
                     return {
                         landmarkIndex : if (landmark == empty) -1 else island.getLandmarkIndex(landmark),
                         world : world.state
-                    };
+                    }
                 }   
             }
-        };
+        }
     }
 ).new();

@@ -28,7 +28,13 @@
 @:story = import(module:'game_singleton.story.mt');
 @:Event = class(
     statics : {
-        Base : empty
+        Base  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     
     
@@ -40,21 +46,23 @@
         @island_;
         @startAt;
         @landmark_;
+        @self;
 
         this.constructor = ::(base, party, island, landmark, currentTime, state) {
+            self = this.instance;
             island_ = island;
             party_ = party;
             when (state != empty) ::<= {
                 this.state = state;
-                return this;
-            }; 
+                return this.instance;
+            } 
             base_ = base; 
             startAt = currentTime;
             landmark_ = landmark;
-            duration = base.onEventStart(event:this);
+            duration = base.onEventStart(event:self);
             timeLeft = duration;
-            return this;
-        };
+            return this.instance;
+        }
 
         this.interface = {
             state : {
@@ -70,7 +78,7 @@
                         timeLeft : timeLeft,
                         duration : duration,
                         startAt : startAt
-                    };    
+                    }    
                 }
             },
         
@@ -79,7 +87,7 @@
             },
             
             stepTime :: {
-                base_.onEventUpdate(event:this);
+                base_.onEventUpdate(event:self);
                 if (timeLeft > 0) timeLeft -= 1;
             },
             
@@ -103,7 +111,7 @@
                 get :: <- base_
             }
             
-        };
+        }
     }
 
 );
@@ -112,7 +120,13 @@
 Event.Base = class(
     name : 'Wyvern.Event.Base',
     statics : {
-        database : empty
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     define:::(this) {
         @kind;
@@ -131,9 +145,9 @@ Event.Base = class(
         
         this.interface = {
             new :: (island, party, currentTime, landmark, state) {
-                return Event.new(base:this, island, party, currentTime, landmark, state);
+                return Event.new(base:this.instance, island, party, currentTime, landmark, state);
             }
-        };
+        }
     }
 
 );
@@ -171,7 +185,7 @@ Event.Base.database = Database.new(
 
                         
                         
-                    };
+                    }
                     return 14+(Number.random()*20)->floor; // number of timesteps active
                 },
                 
@@ -231,18 +245,18 @@ Event.Base.database = Database.new(
                     ];
                     
                     
-                    [::] {
-                        forever(do:::{
+                    {:::} {
+                        forever ::{
                             boss.autoLevel();
                             if (boss.level >= island.levelMax)
                                 send();                                    
-                        });
-                    };
+                        }
+                    }
 
 
-                    enemies->foreach(do:::(index, e) {
+                    foreach(enemies)::(index, e) {
                         e.anonymize();
-                    });
+                    }
                     @:world = import(module:'game_singleton.world.mt');
                     
                     
@@ -281,7 +295,7 @@ Event.Base.database = Database.new(
                                     when(world.party.inventory.isFull) ::<= {
                                         windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
                                         send();
-                                    };
+                                    }
                                     
                                     party.inventory.add(item);
 
@@ -297,10 +311,10 @@ Event.Base.database = Database.new(
                                     windowEvent.queueMessage(speaker: '???', text:'Judgement shall be brought forth.');                              
                                     battleStart();
                                   }         
-                                };                      
+                                }                      
                             }
                         );
-                    };
+                    }
                     
                     battleStart();
                     
@@ -329,12 +343,12 @@ Event.Base.database = Database.new(
                     @enemies = [];
                     
                     
-                    [0, 3]->for(do:::(i) {
+                    for(0, 3)::(i) {
                         @:enemy = island.newAggressor();
                         enemy.inventory.clear();
                         enemy.anonymize();
                         enemies->push(value:enemy);
-                    });
+                    }
                     
                     @:boss = enemies[1];
 
@@ -381,10 +395,10 @@ Event.Base.database = Database.new(
                                     windowEvent.queueMessage(text:'The ' + boss.name + ' corners you!');                              
                                     battleStart();
                                   }
-                                };
+                                }
                                }
                           );
-                    };
+                    }
                     battleStart();
                     return 0;  
                 },
@@ -422,14 +436,14 @@ Event.Base.database = Database.new(
                                     ),
                                     dodgeable: false
                                 );
-                            };
-                        }; 
+                            }
+                        } 
                         
                         
                         @:itemCount = (2+Number.random()*3)->floor;
                         
                         windowEvent.queueMessage(text:'The chest contained ' + itemCount + ' items!'); 
-                        [0, itemCount]->for(do:::(index) {
+                        for(0, itemCount)::(index) {
                             @:item = Item.Base.database.getRandomFiltered(
                                 filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= story.tier
                             ).new(rngEnchantHint:true, from:opener);
@@ -438,13 +452,13 @@ Event.Base.database = Database.new(
 
                             when(party.inventory.isFull) ::<= {
                                 windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
-                            };
+                            }
 
                             party.inventory.add(item);
                             
-                        });    
+                        }
 
-                    };
+                    }
 
 
                     
@@ -503,7 +517,7 @@ Event.Base.database = Database.new(
                             @StatSet = import(module:'game_class.statset.mt');
                             if (Number.random() < 0.8) ::<= {
                                 windowEvent.queueMessage(text:'The food is delicious.');
-                                event.party.members->foreach(do:::(index, member) {
+                                foreach(event.party.members)::(index, member) {
                                     @oldStats = StatSet.new();
                                     oldStats.state = member.stats.state;
                                     member.stats.add(stats:StatSet.new(HP:(oldStats.HP*0.1)->ceil, AP:(oldStats.AP*0.1)->ceil));
@@ -511,12 +525,12 @@ Event.Base.database = Database.new(
 
                                     member.heal(amount:member.stats.HP * 0.1);
                                     member.healAP(amount:member.stats.AP * 0.1);
-                                });
+                                }
                                 
                             } else ::<= {
                                 windowEvent.queueMessage(text:'The food tastes terrible. The party feels ill.');
                                 @:Damage = import(module:'game_class.damage.mt');
-                                event.party.members->foreach(do:::(index, member) {
+                                foreach(event.party.members)::(index, member) {
                                     @oldStats = StatSet.new();
                                     oldStats.state = member.stats.state;
                                     member.stats.add(stats:StatSet.new(HP:-(oldStats.HP*0.1)->ceil, AP:-(oldStats.AP*0.1)->ceil));
@@ -532,9 +546,9 @@ Event.Base.database = Database.new(
                                         ),
                                         dodgeable:false
                                     );
-                                });
+                                }
                             
-                            };
+                            }
 
                             @:nicePerson = event.island.newInhabitant();
                             nicePerson.interactPerson(
@@ -542,7 +556,7 @@ Event.Base.database = Database.new(
                                 onDone ::{
                                     if (!party.isMember(entity:nicePerson)) ::<= {
                                         windowEvent.queueMessage(text:'You thank the person and continue on your way.');  
-                                    };
+                                    }
                                 }
                             );
 
@@ -578,7 +592,7 @@ Event.Base.database = Database.new(
                             speaker:party.members[1].name,
                             text:'"Can we take a break for a bit?"'
                         );
-                    };
+                    }
 
                     windowEvent.queueAskBoolean(
                         prompt:'Rest?',
@@ -609,11 +623,11 @@ Event.Base.database = Database.new(
                             windowEvent.queueNoDisplay(
                                 onLeave::{
                                     @:world = import(module:'game_singleton.world.mt');
-                                    [0, 5*3]->for(do:::(i) {
+                                    for(0, 5*3)::(i) {
                                         world.stepTime();
-                                    });
+                                    }
                     
-                                    event.party.members->foreach(do:::(index, member) {
+                                    foreach(event.party.members)::(index, member) {
                                         @oldStats = StatSet.new();
                                         oldStats.state = member.stats.state;
                                         member.stats.add(stats:StatSet.new(HP:(oldStats.HP*0.1)->ceil, AP:(oldStats.AP*0.1)->ceil));
@@ -622,7 +636,7 @@ Event.Base.database = Database.new(
 
                                         member.heal(amount:member.stats.HP * 0.3);
                                         member.healAP(amount:member.stats.AP * 0.3);
-                                    });
+                                    }
                                 },
                                 
                                 onEnter::{}
@@ -671,13 +685,13 @@ Event.Base.database = Database.new(
                                 
                                 (chance < 0.9):::<= {
                                     @:only = island.newAggressor();                                                
-                                    [::] {
-                                        forever(do:::{
+                                    {:::} {
+                                        forever ::{
                                             only.autoLevel();
                                             if (only.level >= island.levelMax)
                                                 send();                                    
-                                        });
-                                    };
+                                        }
+                                    }
                                     only.autoLevel();
                                     return [only];
                                 },
@@ -698,13 +712,13 @@ Event.Base.database = Database.new(
                                 
                                 (chance < 0.95):::<= {
                                     @:only = island.newAggressor();                                                
-                                    [::] {
-                                        forever(do:::{
+                                    {:::} {
+                                        forever ::{
                                             only.autoLevel();
                                             if (only.level >= island.levelMax)
                                                 send();                                    
-                                        });
-                                    };
+                                        }
+                                    }
 
                                     return [
                                         island.newAggressor(),
@@ -722,9 +736,9 @@ Event.Base.database = Database.new(
                             }
                     ;
 
-                    enemies->foreach(do:::(index, e) {
+                    foreach(enemies)::(index, e) {
                         e.anonymize();
-                    });
+                    }
                     
                     world.battle.start(
                         party,
@@ -770,7 +784,7 @@ Event.Base.database = Database.new(
                             island.newAggressor(),
                             island.newAggressor()                        
                         ];
-                        out->foreach(do:::(i, e) <- e.anonymize());
+                        foreach(out) ::(i, e) <- e.anonymize();
                         return out;
                     } else (if (event.landmark.base.guarded) ::<= {
                             
@@ -785,7 +799,7 @@ Event.Base.database = Database.new(
                                 island.newInhabitant(professionHint:'Guard')                        
                             ];
                             
-                            e->foreach(do:::(index, guard) {
+                            foreach(e)::(index, guard) {
                                 guard.equip(
                                     item:Item.Base.database.find(
                                         name:'Halberd'
@@ -814,7 +828,7 @@ Event.Base.database = Database.new(
                                     inventory:guard.inventory
                                 );
                                 guard.anonymize();
-                            });
+                            }
                             
                             windowEvent.queueMessage(speaker:e.name, text:'There they are!');
                             
@@ -859,7 +873,7 @@ Event.Base.database = Database.new(
                             if (Battle.RESULTS.ENEMIES_WIN)::<= {
                                 breakpoint();
                                 windowEvent.jumpToTag(name:'MainMenu', clearResolve:true);
-                            };
+                            }
 
                         }
                     );

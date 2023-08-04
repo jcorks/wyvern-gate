@@ -26,13 +26,24 @@
 
 @:Location = class(
     statics : {
-        Base : empty,
-        CATEGORY : {
-            ENTRANCE : 0,
-            RESIDENTIAL : 1,
-            BUSINESS : 2,
-            UTILITY : 3,
-            EXIT : 4
+        Base  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        },
+        CATEGORY ::<= { 
+            @:ct = {
+                ENTRANCE : 0,
+                RESIDENTIAL : 1,
+                BUSINESS : 2,
+                UTILITY : 3,
+                EXIT : 4
+            }
+            return {
+                get ::<- ct
+            }
         }
     },
     define:::(this) {
@@ -49,13 +60,15 @@
         @name;
         @data = {}; // simple table
         @visited = false;
+        @self;
         this.constructor = ::(base, landmark, xHint, yHint, state, targetLandmarkHint, ownedByHint) {
+            self = this.instance;
             landmark_ = landmark;     
 
             when(state != empty) ::<={
-                this.state = state;
-                return this;
-            };
+                self.state = state;
+                return self;
+            }
             base_ = base;
             x = if (xHint == empty) (Number.random() * landmark.width ) else xHint;  
             y = if (yHint == empty) (Number.random() * landmark.height) else yHint;
@@ -63,9 +76,9 @@
                 ownedBy = ownedByHint;
                    
             description = random.pickArrayItem(list:base.descriptions);            
-            base.onCreate(location:this);
-            return this;
-        };
+            base.onCreate(location:self);
+            return self;
+        }
         
         
         this.interface = {
@@ -79,9 +92,9 @@
                     description = description;
                     ownedBy = if (value.ownedBy == empty) empty else Entity.new(levelHint: 0, state: value.ownedBy);
                     occupants = [];
-                    value.occupants->foreach(do:::(index, occupantData) {
+                    foreach(value.occupants)::(index, occupantData) {
                         occupants->push(value:Entity.new(levelHint: 0, state: occupantData));
-                    });
+                    }
                     inventory.state = value.inventory;
                     x = value.x;
                     y = value.y;
@@ -91,7 +104,7 @@
                         targetLandmark = Landmark.new(state:value.targetLandmark);
                         
                         
-                    if (data == empty) data = {};
+                    if (data == empty) data = {}
                 },
                 get :: {
                     return {
@@ -107,7 +120,7 @@
                         name : name,
                         data : data
                     
-                    };
+                    }
                 }
             },
             
@@ -197,7 +210,7 @@
                             
                             when (!location.landmark.peaceful) ::<= {
                                 interaction.onInteract(location, party);                    
-                            };
+                            }
                                 
                             
                             windowEvent.queueAskBoolean(
@@ -209,42 +222,42 @@
                                     if (location.landmark.peaceful) ::<= {
                                         location.landmark.peaceful = false;
                                         windowEvent.queueMessage(text:'The people here are now aware of your aggression.');
-                                    };                
+                                    }                
                                                             
                                 }
                             );
                         }
                     );
-                };            
+                }            
             
             
                 // initial interaction 
                 // Initial interaction triggers an event.
                 
                 if (visited == false) ::<= {
-                    [0, random.integer(from:base_.minOccupants, to:base_.maxOccupants)]->for(do:::(i) {
+                    for(0, random.integer(from:base_.minOccupants, to:base_.maxOccupants))::(i) {
                         occupants->push(value:landmark_.island.newInhabitant());
-                    });
+                    }
                 
                 
                     visited = true;
-                    this.base.onFirstInteract(location:this);
-                };
+                    self.base.onFirstInteract(location:self);
+                }
                     
                 
-                @canInteract = [::] {
-                    return this.base.onInteract(location:this);
-                };
+                @canInteract = {:::} {
+                    return self.base.onInteract(location:self);
+                }
                     
                 when(canInteract == false) empty;
               
-                @:interactionNames = [...this.base.interactions]->map(to:::(value) {
+                @:interactionNames = [...self.base.interactions]->map(to:::(value) {
                     return Interaction.database.find(name:value).displayName;
                 });
                     
                 @:choices = [...interactionNames];
 
-                if (this.base.aggressiveInteractions->keycount)
+                if (self.base.aggressiveInteractions->keycount)
                     choices->push(value: 'Aggress...');
                     
                 windowEvent.queueChoices(
@@ -257,25 +270,31 @@
                         when(choice == 0) empty;
 
                         // aggress
-                        when(this.base.aggressiveInteractions->keycount > 0 && choice-1 == this.base.interactions->keycount) ::<= {
-                            aggress(location:this, party);
-                        };
+                        when(self.base.aggressiveInteractions->keycount > 0 && choice-1 == self.base.interactions->keycount) ::<= {
+                            aggress(location:self, party);
+                        }
                         
-                        Interaction.database.find(name:this.base.interactions[choice-1]).onInteract(
+                        Interaction.database.find(name:self.base.interactions[choice-1]).onInteract(
                             location: this,
                             party
                         );
-                        this.landmark.step();                            
+                        self.landmark.step();                            
                     }
                 );            
             }
-        };
+        }
     }
 );
 
 Location.Base = class(
     statics : {
-        database : empty
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     define:::(this) {
         Database.setup(
@@ -322,8 +341,8 @@ Location.Base = class(
         );
         
         this.interface = {
-            new ::(landmark => Landmark.type, xHint, yHint, state, ownedByHint) <- Location.new(base:this, landmark, xHint, yHint, state, ownedByHint) 
-        };
+            new ::(landmark => Landmark.type, xHint, yHint, state, ownedByHint) <- Location.new(base:this.instance, landmark, xHint, yHint, state, ownedByHint) 
+        }
     }
 
 );
@@ -375,7 +394,7 @@ Location.Base.database = Database.new(
                     
                 //} else ::<={
                 
-                //};
+                //}
             }
         }),
 
@@ -411,14 +430,14 @@ Location.Base.database = Database.new(
                 location.ownedBy.profession = Profession.Base.database.find(name:'Farmer').new();                
                 @:story = import(module:'game_singleton.story.mt');
                 
-                [0, 2+(Number.random()*4)->ceil]->for(do:::(i) {
+                for(0, 2+(Number.random()*4)->ceil)::(i) {
                     // no weight, as the value scales
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false
                                             && value.tier <= story.tier
                     
                     )
                     .new(from:location.ownedBy, rngEnchantHint:true));
-                });
+                }
             },
             
             onInteract ::(location) {
@@ -434,7 +453,7 @@ Location.Base.database = Database.new(
                     
                 //} else ::<={
                 
-                //};
+                //}
             }
             
         
@@ -474,14 +493,14 @@ Location.Base.database = Database.new(
                 location.ownedBy = location.landmark.island.newInhabitant();
                 @:story = import(module:'game_singleton.story.mt');
             
-                [0, 2+(Number.random()*4)->ceil]->for(do:::(i) {
+                for(0, 2+(Number.random()*4)->ceil)::(i) {
                     // no weight, as the value scales
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false
                                             && value.tier <= story.tier
                     
                     )
                     .new(from:location.ownedBy, rngEnchantHint:true));
-                });            
+                }
             },            
             onInteract ::(location) {            
                 return true;
@@ -498,7 +517,7 @@ Location.Base.database = Database.new(
                     
                 //} else ::<={
                 
-                //};
+                //}
             }
             
         
@@ -588,7 +607,7 @@ Location.Base.database = Database.new(
                     
                 //} else ::<={
                 
-                //};
+                //}
             }
             
         
@@ -639,9 +658,9 @@ Location.Base.database = Database.new(
                 location.ownedBy.species = Species.database.find(name:'Wyvern of Fire');
                 location.ownedBy.profession = Profession.Base.database.find(name:'Wyvern of Fire').new();               
                 location.ownedBy.clearAbilities();
-                location.ownedBy.profession.gainSP(amount:10)->foreach(do:::(i, ability) {
+                foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
                     location.ownedBy.learnAbility(name:ability);
-                });
+                }
 
                 
                 location.ownedBy.onInteract = ::(party, location, onDone) {
@@ -650,8 +669,8 @@ Location.Base.database = Database.new(
                     } else ::<= {
                         // just visiting!
                         Scene.database.find(name:'scene_wyvernfire1').act(onDone::{}, location, landmark:location.landmark);                        
-                    };
-                };
+                    }
+                }
                 location.ownedBy.stats.state = StatSet.new(
                     HP:   150,
                     AP:   999,
@@ -721,9 +740,9 @@ Location.Base.database = Database.new(
                 location.ownedBy.species = Species.database.find(name:'Wyvern of Ice');
                 location.ownedBy.profession = Profession.Base.database.find(name:'Wyvern of Ice').new();               
                 location.ownedBy.clearAbilities();
-                location.ownedBy.profession.gainSP(amount:10)->foreach(do:::(i, ability) {
+                foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
                     location.ownedBy.learnAbility(name:ability);
-                });
+                }
 
                 
                 location.ownedBy.onInteract = ::(party, location, onDone) {
@@ -732,8 +751,8 @@ Location.Base.database = Database.new(
                     } else ::<= {
                         // just visiting!
                         Scene.database.find(name:'scene_wyvernice1').act(onDone::{}, location, landmark:location.landmark);                        
-                    };
-                };
+                    }
+                }
                 location.ownedBy.stats.state = StatSet.new(
                     HP:   270,
                     AP:   999,
@@ -796,14 +815,14 @@ Location.Base.database = Database.new(
                 @:nameGen = import(module:'game_singleton.namegen.mt');
                 @:story = import(module:'game_singleton.story.mt');
 
-                [0, 30 + (location.ownedBy.level / 4)->ceil]->for(do:::(i) {
+                for(0, 30 + (location.ownedBy.level / 4)->ceil)::(i) {
                     // no weight, as the value scales
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false &&
                                             location.ownedBy.level >= value.levelMinimum
                                             && value.tier <= story.tier
                     ).new(from:location.ownedBy, rngEnchantHint:true));
-                });
+                }
 
 
 
@@ -884,17 +903,17 @@ Location.Base.database = Database.new(
                     ItemEnchant.database.getRandom().name
                 ];
 
-                [0, location.data.enchants->keycount]->for(do:::(i) {
+                for(0, location.data.enchants->keycount)::(i) {
                     when (i > location.data.enchants->keycount) empty;
-                    [0, location.data.enchants->keycount]->for(do:::(n) {
+                    for(0, location.data.enchants->keycount)::(n) {
                         when (i == n) empty;
                         when (n > location.data.enchants->keycount) empty;
                     
                         if (location.data.enchants[i] ==
                             location.data.enchants[n])
                             location.data.enchants->remove(key:n);
-                    });
-                });
+                    }
+                }
             },            
             onInteract ::(location) {
                 return true;
@@ -945,7 +964,7 @@ Location.Base.database = Database.new(
                 location.ownedBy.profession = Profession.Base.database.find(name:'Blacksmith').new();
                 location.name = 'Blacksmith';
                 @:story = import(module:'game_singleton.story.mt');
-                [0, 1 + (location.ownedBy.level / 4)->ceil]->for(do:::(i) {
+                for(0, 1 + (location.ownedBy.level / 4)->ceil)::(i) {
 
                     location.inventory.add(
                         item:Item.Base.database.getRandomFiltered(
@@ -958,7 +977,7 @@ Location.Base.database = Database.new(
                         ).new(from:location.ownedBy)
                     );
 
-                });
+                }
             },            
             onInteract ::(location) {
                 
@@ -1446,14 +1465,14 @@ Location.Base.database = Database.new(
                             location.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Light').new(from:location.ownedBy));
                         Story.foundLightKey = true;
                     }
-                };
+                }
                 @:story = import(module:'game_singleton.story.mt');
-                [0, 3+(Number.random()*2)->ceil]->for(do:::(i) {
+                for(0, 3+(Number.random()*2)->ceil)::(i) {
                     location.inventory.add(item:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false
                                             && value.tier <= story.tier
                     ).new(from:location.landmark.island.newInhabitant(),rngEnchantHint:true));
-                });            
+                }
             },
             onInteract ::(location) {
             },
@@ -1494,9 +1513,9 @@ Location.Base.database = Database.new(
             },
             
             onCreate ::(location) {
-                location.ownedBy.inventory.items->foreach(do:::(i, item) {
+                foreach(location.ownedBy.inventory.items)::(i, item) {
                     location.inventory.add(item);
-                });
+                }
                 location.ownedBy.inventory.clear();
             },
             
@@ -1535,11 +1554,11 @@ Location.Base.database = Database.new(
                 if (world.storyFlags.action_interactedSylviaLibrary == false) ::<= {
                     Scene.database.find(name:'scene1_0_sylvialibraryfirst').act(location);
                     world.storyFlags.action_interactedSylviaLibrary = true;
-                };
+                }
                 
                 if (world.party.inventory.items->all(condition:::(value) <- !value.name->contains(key:'Key to'))) ::<= {
                     Scene.database.find(name:'scene2_0_sylviakeyout').act(location);
-                };
+                }
             },
             
             onCreate ::(location) {

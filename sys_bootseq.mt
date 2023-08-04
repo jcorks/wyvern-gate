@@ -32,18 +32,18 @@ return ::(terminal, onBoot => Function) {
                 @:next = preflight[0];
                 preflight->remove(key:0);
                 terminal.print(line:next);
-            };
+            }
         } else ::<= {
             if (Number.random() < 0.06) ::<= {
                 @:next = messages[0];
                 messages->remove(key:0);
                 terminal.print(line:next);
-            };
+            }
             if (messages->keycount == 0) ::<= {
                 terminal.clear();
                 printer.remove();
                 onBoot();
-            };
-        };
-    };
-};
+            }
+        }
+    }
+}

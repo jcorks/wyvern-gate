@@ -75,7 +75,7 @@ return class(
                 next::{
                     if (index == SEED_COUNT) ::<= {
                         interface.twist();
-                    };
+                    }
                     @i = index;
                     index += 1;
                     
@@ -91,17 +91,17 @@ return class(
                 
                 // reorients the RNG
                 twist ::{
-                    [0, (SEED_COUNT - END)]->for(do:::(i) {
+                    for(0, (SEED_COUNT - END))::(i) {
                         state[i] = (state[i+END]) ^
                                    (state[i] >> 1) ^
                                    (a[state[i]->abs%2]);
-                    });
+                    }
                     
-                    [SEED_COUNT - END, SEED_COUNT]->for(do:::(i) {
+                    for(SEED_COUNT - END, SEED_COUNT)::(i) {
                         state[i] = (state[i + (END - SEED_COUNT)]) ^
                                    (state[i] >> 1) ^
                                    (a[state[i]->abs%2]);
-                    });
+                    }
                     
                     index = 0;
                 },
@@ -109,21 +109,21 @@ return class(
                 seed::(string) {
                     interface.init();
                     @offset = 0;
-                    [0, string->length]->for(do:::(i) {
+                    for(0, string->length)::(i) {
                         offset = (offset + (string->charCodeAt(index:i) << (2*(i%8)))) % 0xffffffff;       
-                    });
+                    }
                     
                     
-                    [0, state->keycount]->for(do:::(ind) {            
+                    for(0, state->keycount)::(ind) {            
                         state[ind] += offset;
-                    });
+                    }
                     
                     interface.twist();
                 }
-            };
+            }
             
             return interface;
-        };
+        }
         
         // use normal rng to seed the regular rng
         tt800.init();
@@ -145,11 +145,11 @@ return class(
             },
         
             pickArrayItem::(list) {
-                return list[this.integer(from:0, to:list->keycount-1)];
+                return list[this.instance.integer(from:0, to:list->keycount-1)];
             },
 
             pickTableItem::(table) {
-                return table[this.pickArrayItem(list:table->keys)];
+                return table[this.instance.pickArrayItem(list:table->keys)];
             },
             
             flipCoin:: <- tt800.next() < 0.5,
@@ -159,28 +159,28 @@ return class(
             pickArrayItemWeighted::(list) {
                 @:weightTable = [];
                 @totalWeight = 0;
-                list->foreach(do:::(index, item) {
+                foreach(list)::(index, item) {
                     weightTable[index] = totalWeight;
                     totalWeight += 1 / item.rarity;
-                });
+                }
                 weightTable[list->keycount] = totalWeight;
                 
                 @:which = tt800.next()*totalWeight;
 
                 return list[ 
-                    [::]{
-                        [0, weightTable->keycount-1]->for(do:::(index) {
+                    {:::}{
+                        for(0, weightTable->keycount-1)::(index) {
                             when(which > weightTable[index] &&
                                  which < weightTable[index+1])
                                 send(message:index);
                             
-                        });
+                        }
                         return list->keycount-1;
                     } 
                 ];
             }
             
 
-        };
+        }
     }
 ).new();

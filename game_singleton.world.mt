@@ -35,14 +35,14 @@
     MIDNIGHT: 11,
     DEAD_HOUR: 12,
     DEAD_NIGHT: 13
-};
+}
 
 @:SEASON = {
     SPRING : 0,
     SUMMER : 1,
     AUTUMN : 2,
     WINTER : 3
-};
+}
 
 
 return class(
@@ -60,6 +60,7 @@ return class(
         @battle = Battle.new();
         @island = empty;
         @story = import(module:'game_singleton.story.mt');
+        @self;
         
         @:getDayString = ::{
             return match(time) {
@@ -77,17 +78,23 @@ return class(
               (TIME.MIDNIGHT): 'It is midnight.',
               (TIME.DEAD_HOUR): 'It is the dead hour.',
               (TIME.DEAD_NIGHT): 'It is the dead of the night.'
-            };
-        };
+            }
+        }
         
         @:getSeasonString = ::{
-            return match(this.season) {
+            return match(self.season) {
               (SEASON.SPRING): 'Spring',           
               (SEASON.SUMMER): 'Summer',           
               (SEASON.AUTUMN): 'Autumn',           
               (SEASON.WINTER): 'Winter'         
-           };
-        };
+           }
+        }
+        
+        
+        this.constructor = ::{
+            self = this.instance;
+            return self;
+        }
         
         this.interface = {
             TIME : {
@@ -106,7 +113,7 @@ return class(
             
             
             discoverIsland ::(levelHint => Number, tierHint => Number, nameHint) {
-                @:out = Island.new(world:this, levelHint, party, nameHint, tierHint);
+                @:out = Island.new(world:self, levelHint, party, nameHint, tierHint);
                 return out;
             },
             
@@ -121,7 +128,7 @@ return class(
                       (day > 50): SEASON.AUTUMN,
                       (day > 25): SEASON.SUMMER,
                       default: SEASON.SPRING
-                    };
+                    }
                 }
             },
 
@@ -148,17 +155,17 @@ return class(
                 if (turn > 5) ::<={
                     turn = 0;
                     time += 1;
-                };
+                }
                     
                 if (time > 13) ::<={
                     time = 0;
                     day += 1;
-                };
+                }
                 
                 if (day > 99) ::<={
                     day = 0;
                     year += 1;
-                };                
+                }                
                 
             },
             
@@ -169,18 +176,18 @@ return class(
                     day = value.day;
                     year = value.year;
                     
-                    island = Island.new(levelHint: 0, world: this, party : this.party, state:value.island);                        
+                    island = Island.new(levelHint: 0, world: self, party : self.party, state:value.island);                        
                     party.state = value.party;
                     
-                    value.storyFlags->foreach(do:::(key, value) {
+                    foreach(value.storyFlags)::(key, value) {
                         story[key] = value;
-                    });
+                    }
                 },
                 get :: {
-                    @:storyFlags = {};
-                    story->foreach(do:::(key, value) {
+                    @:storyFlags = {}
+                    foreach(story)::(key, value) {
                         storyFlags[key] = value;
-                    });
+                    }
                     return { 
                         turn : turn,
                         time: time,
@@ -189,10 +196,10 @@ return class(
                         island : island.state, // always valid.
                         party : party.state,
                         storyFlags : storyFlags
-                    };
+                    }
                 }
             }
             
-        };
+        }
     }
 ).new();

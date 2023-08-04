@@ -23,11 +23,17 @@
 @: nextSPLevel ::(spLevel) {
     return 1;
     //return (((spLevel+1)*0.75 * 10) + (spLevel+1) * 5)->ceil;
-};
+}
 
 @:Profession = class(
     statics : {
-        Base : empty
+        Base  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     name : 'Wyvern.Profession.Instance',
     define :::(this) {
@@ -35,14 +41,16 @@
         @sp = 0;
         @spNext = 1;
         @spLevel = 0;
+        @self;
         this.constructor = ::(base, state){
+            self = this.instance;
             when(state != empty) ::<= {
                 this.state = state;
-                return this;
-            };
+                return self;
+            }
             base_ = base;
-            return this;
-        };
+            return self;
+        }
         
         this.interface = {
             state : {   
@@ -58,7 +66,7 @@
                         sp : sp,
                         spNext : spNext,
                         spLevel : spLevel,
-                    };
+                    }
                 }
             },
             base : {
@@ -77,8 +85,8 @@
             gainSP ::(amount) {
                 spNext -= amount;
                 @learned = [];
-                [::] {
-                    forever(do:::{
+                {:::} {
+                    forever ::{
                         when(spNext > 0) send();
                         @:next = base_.abilities[spLevel];
 
@@ -87,18 +95,24 @@
                         when(next == empty) empty; 
                         learned->push(value:next);
                     
-                    });
-                };
+                    }
+                }
                 return learned;
             }
-        };
+        }
     }
 );
 
 Profession.Base = class(
     name : 'Wyvern.Profession',   
     statics : {
-        database : empty
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
        
     }, 
     define:::(this) {
@@ -121,9 +135,9 @@ Profession.Base = class(
 
         this.interface = {
             new ::(state){
-                return Profession.new(base:this, state);
+                return Profession.new(base:this.instance, state);
             }
-        };
+        }
 
         
     }

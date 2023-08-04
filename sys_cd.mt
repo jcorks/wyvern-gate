@@ -6,19 +6,19 @@ return ::(terminal, arg, onDone) {
     when(which == '..' && Shell.currentDirectory->length > 0) ::<= {
         Shell.currentDirectory = '';
         onDone();
-    };
+    }
 
 
     @:path = Topaz.Filesystem.Path.new(fromNode:Topaz.Filesystem.DEFAULT_NODE.TOPAZ);
 
 
-    @:dirs = {};
+    @:dirs = {}
     @:files = path.children;
 
 
     @:output = [];        
 
-    path.children->foreach(do:::(i, next) {
+    foreach(path.children)::(i, next) {
         @:next = files->pop;
         when (next == empty) empty; // shouldnt happen
         when (next.children != empty && next.children->keycount) empty;
@@ -28,22 +28,22 @@ return ::(terminal, arg, onDone) {
             @split = next.name->split(token:'_');
             if (split->keycount >= 2) ::<= {
                 dirs[(split[0])] = true;
-            };
-        };
-    });
+            }
+        }
+    }
 
-    @ok = [::] {
-        dirs->foreach(do:::(name, val) {
+    @ok = {:::} {
+        foreach(dirs)::(name, val) {
             if (name == which) ::<= {
                 Shell.currentDirectory = which;
                 send(message:true);
-            };
-        });
+            }
+        }
 
         return false;
-    };
+    }
 
     if (!ok)
         terminal.print(line:'Could not find directory "'+which +'"');
     onDone();
-};
+}

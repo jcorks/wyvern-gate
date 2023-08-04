@@ -10,4 +10,4 @@ return ::(terminal, arg, onDone) {
     terminal.print(line:' shutdown            powers off the machine');
 
     onDone();
-};
+}

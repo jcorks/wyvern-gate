@@ -28,7 +28,7 @@
     @xd = x1 - x0;
     @yd = y1 - y0;
     return (xd**2 + yd**2)**0.5;
-};
+}
 
 @:BIG = 100000000;
 
@@ -66,13 +66,15 @@
         @slots = [];
         @freeSpaces = [];
         @blockSceneryIndex;
+        @self;
         
         @:addBuildingBlock::(x, y) {
             _map.enableWall(x, y);
             _map.setSceneryIndex(x, y, symbol:blockSceneryIndex);
-        };
+        }
         
         this.constructor = ::(map, category => Number) {
+            self = this.instance;
             unitsWide = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
             unitsHigh = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
 
@@ -86,31 +88,31 @@
             if (category == Location.CATEGORY.ENTRANCE) ::<= {
                 unitsWide = 1;
                 unitsHigh = 1;
-            };
+            }
 
             _map = map;
             _category = category;
             _w = unitsWide * ZONE_BUILDING_MINIMUM_WIDTH +ZONE_CONTENT_PADDING*2;
             _h = unitsHigh * ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING*2;
             
-            [0, unitsWide]->for(do::(x) {
+            for(0, unitsWide)::(x) {
                 slots[x] = [];
-                [0, unitsHigh]->for(do::(y) {
+                for(0, unitsHigh)::(y) {
                     slots[x][y] = false;
                     freeSpaces->push(value:{x:x, y:y});
-                });               
-            });
+                } 
+            }
             
             
             
-            return this;
-        };
+            return this.instance;
+        }
         
         @locations = [];  
         
         @:getSpaceBySlot::(x, y) {
             return freeSpaces[freeSpaces->findIndex(query::(value) <- value.x == x && value.y == y)];
-        };   
+        }   
         
         // adds a minimally-sized building
         @:addMinimalBuilding ::(left, top, symbol, location) {
@@ -137,7 +139,7 @@
                 @:index = _map.addScenerySymbol(character:symbol);
                 _map.setSceneryIndex(x:left + 2, y: top + 2, symbol:index);
                 _map.setSceneryIndex(x:left + 3, y: top + 2, symbol:index);
-            };
+            }
             
             
             @:interact = ::{
@@ -145,13 +147,13 @@
                     text: 'Arrived at the ' + location.name + '.'
                 );
                 location.interact();
-            };
+            }
             
             _map.setStepAction(x:left + 2, y: top + 3, action:interact);
             _map.setStepAction(x:left + 3, y: top + 3, action:interact);
                 
 
-        };  
+        }  
         
         
         
@@ -198,12 +200,12 @@
                     @:on  = _map.addScenerySymbol(character:',');
                     
                     @iter = false;
-                    [0, ZONE_BUILDING_MINIMUM_WIDTH]->for(do:::(x) {
-                        [0, ZONE_BUILDING_MINIMUM_HEIGHT]->for(do:::(y) {
+                    for(0, ZONE_BUILDING_MINIMUM_WIDTH)::(x) {
+                        for(0, ZONE_BUILDING_MINIMUM_HEIGHT)::(y) {
                             _map.setSceneryIndex(x:left+x, y:top+y, symbol: if(iter) on else off);
                             iter = !iter;
-                        });
-                    });                    
+                        }
+                    }                  
                 },
 
                     /*   
@@ -220,12 +222,12 @@
                     @:on  = _map.addScenerySymbol(character:' ');
                     
                     @iter = false;
-                    [0, ZONE_BUILDING_MINIMUM_WIDTH]->for(do:::(x) {
-                        [0, ZONE_BUILDING_MINIMUM_HEIGHT]->for(do:::(y) {
+                    for(0, ZONE_BUILDING_MINIMUM_WIDTH)::(x) {
+                        for(0, ZONE_BUILDING_MINIMUM_HEIGHT)::(y) {
                             _map.setSceneryIndex(x:left+x, y:top+y, symbol: if(iter) on else off);
                             iter = !iter;
-                        });
-                    });                    
+                        }
+                    }                  
                 },
                 
 
@@ -244,12 +246,12 @@
                     @:bush  = _map.addScenerySymbol(character:'^');
                     
                     @iter = false;
-                    [0, ZONE_BUILDING_MINIMUM_WIDTH]->for(do:::(x) {
-                        [0, ZONE_BUILDING_MINIMUM_HEIGHT]->for(do:::(y) {
+                    for(0, ZONE_BUILDING_MINIMUM_WIDTH)::(x) {
+                        for(0, ZONE_BUILDING_MINIMUM_HEIGHT)::(y) {
                             _map.setSceneryIndex(x:left+x, y:top+y, symbol: if(iter) on else off);
                             iter = !iter;
-                        });
-                    });                    
+                        }
+                    }
                     
                     _map.setSceneryIndex(x:left+1, y:top+1, symbol: bush);
                     _map.setSceneryIndex(x:left+2, y:top+1, symbol: bush);
@@ -273,12 +275,12 @@
                     @:tree  = _map.addScenerySymbol(character:'╿');
                     
                     @iter = false;
-                    [0, ZONE_BUILDING_MINIMUM_WIDTH]->for(do:::(x) {
-                        [0, ZONE_BUILDING_MINIMUM_HEIGHT]->for(do:::(y) {
+                    for(0, ZONE_BUILDING_MINIMUM_WIDTH)::(x) {
+                        for(0, ZONE_BUILDING_MINIMUM_HEIGHT)::(y) {
                             _map.setSceneryIndex(x:left+x, y:top+y, symbol: if(iter) on else off);
                             iter = !iter;
-                        });
-                    });                    
+                        }
+                    }                  
                     
                     _map.setSceneryIndex(x:left+1, y:top+1, symbol: tree);
                     _map.setSceneryIndex(x:left+2, y:top+1, symbol: tree);
@@ -295,7 +297,7 @@
                 
             ])();
 
-        };         
+        }         
 
 
 
@@ -310,27 +312,27 @@
                     text: 'Arrived at the ' + location.name + '.'
                 );
                 location.interact();
-            };
+            }
             
             @:index = _map.addScenerySymbol(character:'#');
 
             match(which) {
               // North             
               (NORTH):::<={
-                [-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING+1]->for(do:::(i) {
+                for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING+1)::(i) {
                     _map.setStepAction(x:left+i,   y:top-ZONE_CONTENT_PADDING+1, action:interact);
                     _map.setSceneryIndex(x:left+i,   y:top-ZONE_CONTENT_PADDING+1, symbol:index);
-                });
+                }
                 
 
               },
 
               // East             
               (EAST):::<={
-                [-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING+1]->for(do:::(i) {
+                for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING+1)::(i) {
                     _map.setStepAction(x:left+ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING-1, y:top+i, action:interact);
                     _map.setSceneryIndex(x:left+ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING-1, y:top+i, symbol:index);
-                });
+                }
 
 
                 
@@ -338,30 +340,30 @@
 
               // West             
               (WEST):::<={
-                [-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING+1]->for(do:::(i) {
+                for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING+1)::(i) {
                     _map.setStepAction(x:left-ZONE_CONTENT_PADDING+1, y:top+i, action:interact);
                     _map.setSceneryIndex(x:left-ZONE_CONTENT_PADDING+1, y:top+i, symbol:index);
-                });
+                }
               },
 
 
 
               // South
               (SOUTH):::<={
-                [-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING+1]->for(do:::(i) {
+                for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING+1)::(i) {
                     _map.setStepAction(x:left+i,   y:top+ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING-1, action:interact);
                     _map.setSceneryIndex(x:left+i,   y:top+ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING-1, symbol:index);
-                });
+                }
 
               }
               
               
-            };
+            }
 
             
             return which;
 
-        };  
+        }  
 
 
 
@@ -386,14 +388,14 @@
                     text: 'Arrived at the ' + location.name + '.'
                 );
                 location.interact();
-            };
+            }
 
 
-            [0, 3]->for(do:::(y) {
-                [0, 10]->for(do:::(x) {
+            for(0, 3)::(y) {
+                for(0, 10)::(x) {
                     addBuildingBlock(x:left+x + 1, y:top+y+1);
-                });
-            });
+                }
+            }
 
 
             if (random.flipCoin() == true) ::<= {
@@ -409,7 +411,7 @@
                     @:index = _map.addScenerySymbol(character:symbol);
                     _map.setSceneryIndex(x:left + 8, y: top + 2, symbol:index);
                     _map.setSceneryIndex(x:left + 9, y: top + 2, symbol:index);
-                };
+                }
 
 
             } else ::<= {            
@@ -424,12 +426,12 @@
                     @:index = _map.addScenerySymbol(character:symbol);
                     _map.setSceneryIndex(x:left + 2, y: top + 2, symbol:index);
                     _map.setSceneryIndex(x:left + 3, y: top + 2, symbol:index);
-                };
+                }
 
-            };
+            }
 
 
-        }; 
+        } 
 
 
         // adds a minimally-sized wide building
@@ -444,18 +446,18 @@
                 x  x
             
             */
-            [0, 7]->for(do:::(y) {
-                [0, 4]->for(do:::(x) {
+            for(0, 7)::(y) {
+                for(0, 4)::(x) {
                     addBuildingBlock(x:left+x + 1, y:top+y+1);
-                });
-            });
+                }
+            }
 
             @:interact = ::{
                 windowEvent.queueMessage(
                     text: 'Arrived at the ' + location.name + '.'
                 );
                 location.interact();
-            };
+            }
 
 
             _map.disableWall(x:left + 2, y: top + 7);
@@ -470,10 +472,10 @@
                 @:index = _map.addScenerySymbol(character:symbol);
                 _map.setSceneryIndex(x:left + 2, y: top + 4, symbol:index);
                 _map.setSceneryIndex(x:left + 3, y: top + 4, symbol:index);
-            };
+            }
             
 
-        };
+        }
         
 
         @:Location = import(module:'game_class.location.mt');
@@ -489,15 +491,15 @@
                 _y = top;
                 
                 
-                [0, _w]->for(do::(i) {
+                for(0, _w)::(i) {
                     _map.enableWall(x:i+_x, y:_y);
                     _map.enableWall(x:i+_x, y:_y+_h);
-                });            
+                }     
 
-                [0, _h]->for(do::(i) {
+                for(0, _h)::(i) {
                     _map.enableWall(x:_x, y:_y+i);
                     _map.enableWall(x:_x+_w, y:_y+i);
-                });
+                }
                    
             },
                   
@@ -508,8 +510,8 @@
             fillDecoration ::{
             
             
-                [0, unitsWide]->for(do::(x) {
-                    [0, unitsHigh]->for(do::(y) {
+                for(0, unitsWide)::(x) {
+                    for(0, unitsHigh)::(y) {
                         when(slots[x][y] == true) empty;
                         
                         when(random.flipCoin()) empty;
@@ -521,8 +523,8 @@
                             left:x * ZONE_BUILDING_MINIMUM_WIDTH + _x+ZONE_CONTENT_PADDING,
                             top:y * ZONE_BUILDING_MINIMUM_HEIGHT + _y+ZONE_CONTENT_PADDING
                         );                        
-                    });               
-                });                            
+                    } 
+                }                          
             },
             
             // only for zones that have gates, gets the 
@@ -536,8 +538,8 @@
             addLocation::(location) {
                 // entrances take up 2 slots.
                 when(location.base.category == Location.CATEGORY.ENTRANCE) ::<= {                    
-                    [::] {
-                        [0, 20]->for(do:::(i) {
+                    {:::} {
+                        for(0, 20)::(i) {
                             @x0;
                             @y0;
                             @x1;
@@ -569,7 +571,7 @@
                                 else  
                                     y1 -= 1;                              
                               }
-                            };                            
+                            }                            
                             when(slots[x0][y0] != false) empty;
                             //when(slots[x1][y1] != false) empty;
 
@@ -590,9 +592,9 @@
                                 which:gateSide
                             );
                             send();
-                        });
-                    };
-                };
+                        }
+                    }
+                }
             
             
                 @:size = location.base.minStructureSize;
@@ -609,14 +611,14 @@
                         top:space.y * ZONE_BUILDING_MINIMUM_HEIGHT + _y+ZONE_CONTENT_PADDING
                     );
                     return true;
-                };
+                }
                 
                 
                 when(true) ::<= {
                     @:wide = random.flipCoin();
                     
-                    return [::] {
-                        [0, 10]->for(do:::(i) {
+                    return {:::} {
+                        for(0, 10)::(i) {
                             @:space0 = random.pickArrayItem(list:freeSpaces);
                             @space1;
                             
@@ -628,7 +630,7 @@
                                 space1 = (freeSpaces->filter(by::(value) <- value.x == space0.x && value.y == space0.y+1))[0];
                                 if (space1 == empty)
                                     space1 = (freeSpaces->filter(by::(value) <- value.x == space0.x && value.y == space0.y-1))[0];                            
-                            };
+                            }
                             // this attempt failed
                             when(space1 == empty) empty;
 
@@ -655,20 +657,20 @@
                                     left:_x + space0.x * ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING,
                                     top: _y + top * ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING
                                 );                            
-                            };
+                            }
                             
                             send(message:true);
-                        });
+                        }
                         return false;
-                    };
-                };
+                    }
+                }
                 
                 
                 error(detail:'Dunno what to do here.');
             },
     
 
-        };
+        }
     }
 );
 
@@ -693,10 +695,10 @@ return class(
                 temp = i;
                 i = n;
                 n = temp;
-            };
+            }
             
             return paired['' + i + '-' + n]!=empty;
-        };
+        }
         
         
         @setPaired = ::(i, n, alongIcoord, alongIside, alongIcenter) {
@@ -705,7 +707,7 @@ return class(
                 temp = i;
                 i = n;
                 n = temp;
-            };
+            }
             
             paired['' + i + '-' + n] = {
                 first: i,
@@ -713,29 +715,29 @@ return class(
                 coord: alongIcoord,
                 side: alongIside,
                 center:alongIcenter
-            };
-        };        
+            }
+        }        
 
 
-
+        @self;
         this.constructor = ::(mapHint => Object) {
+            self = this.instance;
 
-
-            this.paged = false;
-            this.renderOutOfBounds = true;
-            this.outOfBoundsCharacter = ' ';
+            self.paged = false;
+            self.renderOutOfBounds = true;
+            self.outOfBoundsCharacter = ' ';
             
 
-            if (mapHint.wallCharacter != empty) this.wallCharacter = mapHint.wallCharacter;
-            if (mapHint.outOfBoundsCharacter != empty) this.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
+            if (mapHint.wallCharacter != empty) self.wallCharacter = mapHint.wallCharacter;
+            if (mapHint.outOfBoundsCharacter != empty) self.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
             if (mapHint.hasZoningWalls != empty) hasZoningWalls = mapHint.hasZoningWalls;
             if (mapHint.hasFillerBuildings != empty) hasFillerBuildings = mapHint.hasFillerBuildings;
 
-            this.width = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
-            this.height = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
+            self.width = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
+            self.height = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
 
-            return this;
-        };   
+            return self;
+        }   
         
         // returns whether 2 line segments overlap
         // l0 is less than m0,
@@ -752,14 +754,14 @@ return class(
             when (
                 top < STRUCTURE_MAP_PADDING ||
                 left < STRUCTURE_MAP_PADDING ||
-                left + zone.width  > this.width - STRUCTURE_MAP_PADDING ||
-                top + zone.height > this.height - STRUCTURE_MAP_PADDING
+                left + zone.width  > self.width - STRUCTURE_MAP_PADDING ||
+                top + zone.height > self.height - STRUCTURE_MAP_PADDING
                 
             ) false;
 
         
-            return [::] {
-                zones->foreach(do::(i, z) {
+            return {:::} {
+                foreach(zones)::(i, z) {
                     // intersects with existing zones
                     @xOverlap = is1DlineOverlap(
                         l0:   z.left, m0:   z.left +    z.width,
@@ -779,18 +781,18 @@ return class(
 
 
 
-                });  
+                }
                 
                 return true;
-            };
-        };
+            }
+        }
         
         // adds a new zone.
         // if no zones exist, then the zone is placed somewhere 
         // out in the open. Else, it must be touching an existing zone 
         // on its side
         @:addZone ::(category) {
-            @zone = Zone.new(map:this, category);
+            @zone = Zone.new(map:self, category);
             @top;
             @left;
             @alongIcoord;
@@ -802,32 +804,32 @@ return class(
                 match(zone.gateSide) {
                   (NORTH):::<= {
                     top = STRUCTURE_MAP_PADDING;
-                    left = ((this.width - STRUCTURE_MAP_PADDING) / 2)->floor;
+                    left = ((self.width - STRUCTURE_MAP_PADDING) / 2)->floor;
                   },
 
                   (EAST):::<= {
-                    top = ((this.height - STRUCTURE_MAP_PADDING) / 2)->floor;
-                    left = (this.width - STRUCTURE_MAP_PADDING) - zone.width;
+                    top = ((self.height - STRUCTURE_MAP_PADDING) / 2)->floor;
+                    left = (self.width - STRUCTURE_MAP_PADDING) - zone.width;
                   },
                   
                   (WEST):::<= {
-                    top = ((this.height - STRUCTURE_MAP_PADDING) / 2)->floor;
+                    top = ((self.height - STRUCTURE_MAP_PADDING) / 2)->floor;
                     left = STRUCTURE_MAP_PADDING;
                   },
                   
                   (SOUTH):::<= {
-                    top = (this.height - STRUCTURE_MAP_PADDING) - zone.height;
-                    left = ((this.width - STRUCTURE_MAP_PADDING) / 2)->floor;
+                    top = (self.height - STRUCTURE_MAP_PADDING) - zone.height;
+                    left = ((self.width - STRUCTURE_MAP_PADDING) / 2)->floor;
                   },
 
                   default: ::<= {
                     top  = STRUCTURE_MAP_STARTING_Y + STRUCTURE_MAP_PADDING;
                     left = STRUCTURE_MAP_STARTING_X + STRUCTURE_MAP_PADDING;                                  
                   }
-                };
+                }
             } else ::<= {
-                [::] {
-                    forever(do:::{
+                {:::} {
+                    forever ::{
                         // pick a random zone and extend it 
                         preZone = random.pickArrayItem(list:zones);
                         match(random.integer(from:0, to:3)) {
@@ -886,13 +888,13 @@ return class(
                           }
 
                           
-                        };
+                        }
                         
                         when (!isZoneAllowed(top, left, zone)) empty;                      
                         send();
-                    });
-                };
-            };
+                    }
+                }
+            }
             
             zone.setPosition(top, left);            
             zones->push(value:zone);
@@ -908,7 +910,7 @@ return class(
             
             
             return zone;
-        };
+        }
         
         @Location = import(module:'game_class.location.mt');
         this.interface = {
@@ -925,7 +927,7 @@ return class(
                 if (zone.addLocation(location) == false) ::<= {
                     zone = addZone(category:location.base.category);
                     zone.addLocation(location);
-                };
+                }
             },
             
             // indicates that no other locations will be added 
@@ -934,35 +936,35 @@ return class(
             // buildings.
             finalize::{
 
-                zones->foreach(do:::(i, zone) {
+                foreach(zones)::(i, zone) {
                     zone.fillDecoration();
-                });
+                }
                 
                 
                 
-                paired->foreach(do:::(i, data) {
+                foreach(paired)::(i, data) {
                     @:base = zones[data.first];
                     @:other = zones[data.second];
                     match(data.side) {
                       (NORTH, SOUTH):::<= {
-                        [data.center-1, data.center+2]->for(do::(x) {
-                            this.disableWall(x, y: data.coord);
-                            this.clearScenery(x, y: data.coord);                        
-                        });
+                        for(data.center-1, data.center+2)::(x) {
+                            self.disableWall(x, y: data.coord);
+                            self.clearScenery(x, y: data.coord);                        
+                        }
                       },
 
                       (EAST, WEST):::<= {
-                        [data.center-1, data.center+2]->for(do::(y) {
-                            this.disableWall(x:data.coord, y);
-                            this.clearScenery(x:data.coord, y);                        
-                        });
+                        for(data.center-1, data.center+2)::(y) {
+                            self.disableWall(x:data.coord, y);
+                            self.clearScenery(x:data.coord, y);                        
+                        }
                       }
 
-                    };
-                });
+                    }
+                }
 
 
             }
-        }; 
+        } 
     }
 );

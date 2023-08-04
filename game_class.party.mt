@@ -55,15 +55,15 @@ return class(
             },
             
             remove::(member => Entity.type) {
-                [::]{
-                    members->foreach(do:::(index, m) {
+                {:::}{
+                    foreach(members)::(index, m) {
                         if (m == member)::<={
                             members->remove(key:index);
                             windowEvent.queueMessage(text:m.name + ' has been removed from the party.');
                             send();
-                        };                        
-                    });
-                };
+                        }                        
+                    }
+                }
             },
             
             isIncapacitated :: {
@@ -85,19 +85,19 @@ return class(
                 set ::(value) {
                     inventory.state = value.inventory;
                     members = [];
-                    value.members->foreach(do:::(index, memberData) {
+                    foreach(value.members)::(index, memberData) {
                         @member = Entity.new(levelHint: 0, state:memberData);
                         members->push(value:member);
-                    });
+                    }
                 },
             
                 get :: {
                     return {
                         inventory : inventory.state,
                         members: [...members]->map(to:::(value) <- value.state)
-                    };
+                    }
                 }   
             }
-        };
+        }
     }
 );

@@ -30,20 +30,20 @@
         return {
             suit : suit,
             value: value
-        };
-    };
+        }
+    }
     
     @:makeDeck = ::{
         @:deck = [];
-        [0, SUITS->keycount]->for(do:::(suit) {
-            [0, VALUES->keycount]->for(do:::(value) {
+        for(0, SUITS->keycount)::(suit) {
+            for(0, VALUES->keycount)::(value) {
                 deck->push(value:makeCard(
                     suit, value 
                 ));
             }
-        });  
+        }
         return deck;
-    };
+    }
 
     return ::(onFinish) {
 
@@ -53,15 +53,15 @@
             @:CARD_WIDTH = 8;
             @:CARD_HEIGHT = 8'
             @:renderCard = ::(x, y, card => Object){
-                [0, CARD_WIDTH]->for(do:::(i) {
+                for(0, CARD_WIDTH)::(i) {
                     canvas->movePen(x:x+i, y:0);             canvas.drawChar(text:'-');
                     canvas->movePen(x:x+i, y:CARD_HEIGHT-1); canvas.drawChar(text:'-');
-                });
+                }
 
-                [0, CARD_HEIGHT]->for(do:::(i) {
+                for(0, CARD_HEIGHT)::(i) {
                     canvas->movePen(x:0,            y:y+i); canvas.drawChar(text:'|');
                     canvas->movePen(x:CARD_WIDTH-1, y:y+i); canvas.drawChar(text:'|');
-                });
+                }
 
                 if (cardLeft == empty) ::<= {
                 } else ::<= {
@@ -70,8 +70,8 @@
                 
                     canvas->movePen(x:1, y:2); canvas.drawText(text:SUITS[card.suit]);
                     canvas->movePen(x:CARD_WIDTH-1, y:CARD_HEIGHT-2); canvas.drawText(text:SUITS[card.suit]);                
-                };
-            };
+                }
+            }
         
             /*
                 --------
@@ -128,7 +128,7 @@
                 card:cardRight
             );
 
-        };
+        }
 
 
         windowEvent.queueDisplay(
@@ -145,8 +145,8 @@
         
         
         
-    };
-};
+    }
+}
 
 @:Gamblist = class(
     define::(this) {
@@ -167,5 +167,5 @@
                 
             }
         }
-    };
+    }
 );

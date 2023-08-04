@@ -23,13 +23,13 @@ return class(
     name : 'Wyvern.Database',
     statics : {
         setup ::(item => Object, attributes => Object) {
-            @:core = {};
+            @:core = {}
             
             // default constructor that requires all 
             // entries to be specified and with the correct 
             // type.
             item.constructor = ::(data) {
-                data->foreach(do:::(name, entry) {
+                foreach(data)::(name, entry) {
                     when(attributes[name] == empty) 
                         error(detail: 'Unknown attribute ' + name + ' given to new instance.');
 
@@ -37,39 +37,39 @@ return class(
                     // yell at user for not adhering to the constructor types
                     ::(value => attributes[name]){}(value:entry);
                     core[name] = entry;
-                });
+                }
 
                 
-                attributes->foreach(do:::(name, entry) {
+                foreach(attributes)::(name, entry) {
                     when(core[name] == empty)
                         error(detail: 'Attribute ' + name + ' missing. Please check your constructor.');
 
-                });
+                }
                 
-                return item;
-            };
+                return item.instance;
+            }
             
             // add getters
-            @getters = {};
-            attributes->foreach(do:::(name => String, entry) {
+            @getters = {}
+            foreach(attributes)::(name => String, entry) {
                 getters[name] = {
                     get :: {
                         return core[name];
                     }
-                };
-            });
+                }
+            }
             item.interface = getters;
         }    
     },
 
     define:::(this) {
-        @:items_ = {};
+        @:items_ = {}
         this.constructor = ::(items) {
-            items->foreach(do:::(index, item) {
+            foreach(items)::(index, item) {
                 items_[item.name] = item;            
-            });
-            return this;
-        };
+            }
+            return this.instance;
+        }
         this.interface = {
             find ::(name) {
                 @:item = items_[name];
@@ -95,15 +95,15 @@ return class(
             
             getRandomSet ::(count, filter => Function) {
                 @:l = [];
-                [0, count]->for(do:::(i) {
-                    l->push(value:[::] {
-                        forever(do:::{
-                            @:choice = this.getRandomFiltered(filter);
+                for(0, count)::(i) {
+                    l->push(value:{:::} {
+                        forever ::{
+                            @:choice = this.instance.getRandomFiltered(filter);
                             if (l->all(condition:::(value) <- value != choice))                            
                                 send(message:choice);
-                        });
+                        }
                     });
-                });
+                }
                 return l;            
             },
 
@@ -121,6 +121,6 @@ return class(
             }
             
             
-        };
+        }
     }
 );

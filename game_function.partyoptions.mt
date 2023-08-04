@@ -42,7 +42,7 @@ return ::{
                 @top = 1;
                 @:height = 7;
                 @:width = canvas.width*(2/3);
-                party.members->foreach(do:::(index, member) {
+                foreach(party.members)::(index, member) {
                     @x = (canvas.width - width) / 2;
                     canvas.renderFrame(top, left: (canvas.width - width) / 2, width, height);
                     
@@ -55,7 +55,7 @@ return ::{
                     
                     top += height;
                     
-                });
+                }
                 canvas.movePen(x: ((canvas.width - width) / 2)+1, y: 1);    
                 canvas.drawText(text:'Party: (' + party.inventory.gold + 'G, ' + party.inventory.items->keycount + ' items)');     
             
@@ -77,9 +77,9 @@ return ::{
               (0)::<= {
                 @:names = [];
                 @:party = world.party;
-                party.members->foreach(do:::(i, member) {
+                foreach(party.members)::(i, member) {
                     names->push(value:member.name);
-                });
+                }
 
                 
                 windowEvent.queueChoices(
@@ -129,8 +129,8 @@ return ::{
                                           (Entity.EQUIP_SLOTS.RING_L)  : 'L.Ring  ',
                                           (Entity.EQUIP_SLOTS.RING_R)  : 'R.Ring  ',
                                           (Entity.EQUIP_SLOTS.TRINKET) : 'Trinket '
-                                        };                                    
-                                    };
+                                        }                                    
+                                    }
 
                                     
      
@@ -142,13 +142,13 @@ return ::{
                                         canCancel: true,
                                         onGetChoices:: {
                                             @:choices = [];
-                                            [0, Entity.EQUIP_SLOTS.TRINKET+1]->for(do:::(i) {
+                                            for(0, Entity.EQUIP_SLOTS.TRINKET+1)::(i) {
                                                 @str = slotToName(slot:i);
                                                 @:item = member.getEquipped(slot:i);
                                                 str = str +  if (item.name == 'None') (if (i == Entity.EQUIP_SLOTS.HAND_R) '' else '------') else item.name;
                                                 
                                                 choices->push(value:str);
-                                            });
+                                            }
                                             return choices;
                                         },
                                         onChoice:::(choice) {
@@ -183,8 +183,8 @@ return ::{
                                                                 );
                                                                 member.unequipItem(item);
                                                                 party.inventory.add(item);
-                                                            };
-                                                        };
+                                                            }
+                                                        }
                                                         
                                                         @item = items[index];
 
@@ -196,7 +196,7 @@ return ::{
                                                         );
                                                     }
                                                 );
-                                            };
+                                            }
 
                                             // force equip when nothing equipped yet.
                                             // slightly less confusing
@@ -211,7 +211,7 @@ return ::{
                                                     if (member.getEquipped(slot).name != 'None') ::<= {
                                                         choices->push(value:'Check');
                                                         choices->push(value:'Improve');
-                                                    };
+                                                    }
                                                     return choices;
                                                 },
                                                 onGetPrompt::{
@@ -234,13 +234,13 @@ return ::{
                                                         (3):::<= {
                                                             (import(module:'game_function.itemimprove.mt'))(inBattle: false, user:member, item:member.getEquipped(slot));
                                                         }
-                                                    };
+                                                    }
                                                 }                                                            
                                             );
                                         }
                                     );                                   
                                   }
-                                };
+                                }
                             }
                         );                        
                         
@@ -256,9 +256,9 @@ return ::{
               // Inventory
               (1)::<= {
                 @:names = [];
-                world.party.members->foreach(do:::(index, member) {
+                foreach(world.party.members)::(index, member) {
                     names->push(value:member.name);
-                });
+                }
                 windowEvent.queueChoices(
                     leftWeight: 1,
                     topWeight: 1,
@@ -290,7 +290,7 @@ return ::{
                     }
                 );
               }
-            };        
+            }        
         }
     );                  
-};  
+}  

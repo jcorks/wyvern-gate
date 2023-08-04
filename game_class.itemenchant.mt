@@ -24,28 +24,36 @@
 @:ItemEnchant = class(
     name : 'Wyvern.ItemEnchant',
     statics : {
-        Base : empty
+        Base  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     define:::(this) {
+        @self;
         @base_;
         @condition;
         
         this.constructor = ::(base, conditionHint, state) {
+            self = this.instance;
             base_ = base;
             when(state != empty) ::<= {
-                this.state = state;
+                self.state = state;
                 return this;
-            };
+            }
             
             if (base.triggerConditionEffects->keycount > 0) ::<= {
                 if (conditionHint != empty) ::<= {
                     condition = ItemEnchantCondition.database.find(name:conditionHint);
                 } else ::<= {
                     condition = ItemEnchantCondition.database.getRandom();
-                };
-            };
-            return this;
-        };
+                }
+            }
+            return self;
+        }
         
         this.interface = {
             description : {
@@ -71,12 +79,12 @@
             onTurnCheck ::(wielder, item, battle) {
                 when(condition == empty) empty;
                 if (condition.onTurnCheck(wielder, item, battle) == true) ::<= {
-                    base_.triggerConditionEffects->foreach(do:::(i, effectName) {
+                    foreach(base_.triggerConditionEffects)::(i, effectName) {
                         wielder.addEffect(
                             from:wielder, name: effectName, durationTurns: 1, item
                         );                        
-                    });
-                };
+                    }
+                }
             },
             
             state : {
@@ -88,7 +96,7 @@
                 
                 }
             }
-        };
+        }
     }
 
 );
@@ -97,7 +105,13 @@
 ItemEnchant.Base = class(
     name : 'Wyvern.ItemEnchant.Base',
     statics : {
-        database : empty
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     define:::(this) {
         Database.setup(
@@ -117,9 +131,9 @@ ItemEnchant.Base = class(
         
         this.interface = {
             new::(conditionHint) {
-                return ItemEnchant.new(base:this, conditionHint);
+                return ItemEnchant.new(base:this.instance, conditionHint);
             }
-        };
+        }
     }
 );
 

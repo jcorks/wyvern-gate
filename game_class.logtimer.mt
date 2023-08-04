@@ -8,7 +8,7 @@ return class(
     
         this.interface = {
             start:: {
-                currentTrial = {delta : time.getTicks()};
+                currentTrial = {delta : time.getTicks()}
             },
             
             end::(note => String) {
@@ -25,13 +25,13 @@ return class(
             trials : {
                 get :: {
                     @out = [];
-                    trials->foreach(do:::(i, trial) {
+                    foreach(trials)::(i, trial) {
                         out->push(value:'{['+trial.note+'] -> ' + trial.delta + '}');
-                    });
+                    }
                     return out;
                 }
             }
 
-        };    
+        }    
     }
 );

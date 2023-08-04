@@ -28,13 +28,19 @@
     ADVENTURE_ACCEPT: 4,
     ADVENTURE_DENY: 5,
     INAPPROPRIATE_TIME: 6
-};
+}
 
 @:Personality = class(
     name : 'Wyvern.Personality',
     statics : {
-        database : empty,
-        SPEECH_EVENT : SPEECH_EVENT
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        },
+        SPEECH_EVENT : {get::<-SPEECH_EVENT}
     },
     define:::(this) {
         Database.setup(
@@ -48,9 +54,9 @@
         
         this.interface = {
             getPhrase ::(kind => Number) {
-                return Random.pickArrayItem(list:this.phrases[kind]);
+                return Random.pickArrayItem(list:this.instance.phrases[kind]);
             }
-        };
+        }
     }
 );
 

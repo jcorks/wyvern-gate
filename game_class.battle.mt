@@ -29,11 +29,11 @@
     ALLIES_WIN: 0,
     ENEMIES_WIN: 1,
     NOONE_WIN: 2, // not everyone incapacitated
-};
+}
 
 @:Battle = class(
     statics : {
-        RESULTS : RESULTS
+        RESULTS : {get::<-RESULTS}
     },
     
     define:::(this) {
@@ -47,10 +47,17 @@
         @alliesWin = false;
         @entityTurn;
         @onTurn_;
+        @self;
+        
+        this.constructor = :: {
+            self = this.instance;
+            return self;
+        }
+        
     
         // some actions last multiple turns.
         // indexed by Entity.
-        @actions = {}; 
+        @actions = {} 
         @turn = [];
         @turnIndex = 0;
         @redraw;
@@ -63,7 +70,7 @@
         
         @:checkRemove :: {
             // see if anyone died
-            turn->foreach(do:::(index, obj) {                    
+            foreach(turn)::(index, obj) {                    
                 when(obj.entity.isDead == false && obj.entity.requestsRemove == false) empty;
                 if (obj.isAlly && obj.entity.isDead) party_.remove(member:obj.entity);
                 
@@ -72,24 +79,24 @@
                 index = enemies_->findIndex(value:obj.entity);
                 if (index != -1) enemies_->remove(key:index);
                 turn = [
-                    ...([...allies_]->map(to:::(value) {return {isAlly:true, entity:value};})), 
-                    ...([...enemies_]->map(to:::(value){return {isAlly:false, entity:value};}))
+                    ...([...allies_]->map(to:::(value)<- {isAlly:true, entity:value})), 
+                    ...([...enemies_]->map(to:::(value)<- {isAlly:false, entity:value}))
                 ];
                 
                 index = turnPoppable->findIndex(value:obj);
                 if (index != -1) turnPoppable->remove(key:index);
 
                 
-            });
-        };
+            }
+        }
         
         @:endTurn ::{
             checkRemove();  
             turnIndex+=1;
             if (turnPoppable->keycount == 0) ::<= {      
-                turn->foreach(do:::(index, obj) {
-                    obj.entity.endTurn(battle:this);
-                });
+                foreach(turn)::(index, obj) {
+                    obj.entity.endTurn(battle:self);
+                }
 
                 if (onTurn_ != empty)
                     onTurn_();            
@@ -97,15 +104,15 @@
                     return value.isIncapacitated();
                 })) ::<= {
                     battleEnd();
-                };
+                }
                 when((enemies_->keycount == 0) || enemies_->all(condition:::(value) {
                     return value.isIncapacitated();
                 })) ::<={
                     alliesWin = true;
                     battleEnd();
-                };
-            };
-        };
+                }
+            }
+        }
         
         @:nextTurn ::{
             when (turnPoppable->keycount == 0) empty;
@@ -117,13 +124,13 @@
             // act turn can signal to not act
             when(!ent.actTurn()) ::<={
                 endTurn();
-            };
+            }
 
 
             // may have died this turn.
             when (ent.isIncapacitated()) ::<={
                 endTurn();
-            };
+            }
             
             // multi turn actions
             if (actions[ent]) ::<= {
@@ -144,7 +151,7 @@
                 
                 if (action.turnIndex >= action.ability.durationTurns) ::<= {
                     actions[ent] = empty;
-                };
+                }
                 endTurn();
             } else ::<= {
 
@@ -153,23 +160,23 @@
                 // given by the caller
                 @:act = if (obj.isAlly) onAllyTurn_ else onEnemyTurn_;
                 act(
-                    battle:this,
+                    battle:self,
                     user:ent,
                     landmark:landmark_,
                     allies:allies_,
                     enemies:enemies_
                 );
                 
-            };
+            }
 
-        };
+        }
         
         @:initTurn ::{
             
             // first reset stats according to current effects 
-            turn->foreach(do:::(index, obj) {
+            foreach(turn)::(index, obj) {
                 obj.entity.startTurn();
-            });
+            }
             
             // then resort based on speed
             turn->sort(
@@ -185,7 +192,7 @@
             // Every turn returns a BattleAction:
             // includes an ability and targetset
             turnIndex = 0;
-        };
+        }
     
 
         
@@ -193,12 +200,12 @@
         @:renderTurnOrder  :: {
             @:lines = [];
             @width = 0;
-            turn->foreach(do:::(index, obj) {
+            foreach(turn)::(index, obj) {
                 @line = (if(turnIndex == index) '--> ' else '    ') + obj.entity.name + (if(obj.entity.isIncapacitated()) ' (down)' else '');
                 lines->push(value:line);                
                 if (width < line->length)
                     width = line->length;
-            });                
+            }      
             width+= 4;
             @:top = 0;
             @:left = canvas.width - (width);
@@ -211,38 +218,38 @@
             canvas.movePen(y:top, x:left+2);
             canvas.drawText(text:'Turn Order');
             
-            lines->foreach(do:::(index, line) {
+            foreach(lines)::(index, line) {
                 canvas.movePen(y:top+index+2, x:left+2);
                 canvas.drawText(text:line);
-            });
-        };
+            }
+        }
                 
         
         @:renderStatusBox::{
             
                 
             @lines = [];
-            allies_->foreach(do:::(index, ally) {
+            foreach(allies_)::(index, ally) {
                 lines->push(value:ally.renderHP() + '  ' + ally.name);// + ' - Lv ' + ally.level);
                 lines->push(value:'HP: ' + ally.hp + ' / ' + ally.stats.HP + '    AP: ' + ally.ap + ' / ' + ally.stats.AP);
-            });
+            }
             lines->push(value:'');
             lines->push(value:'  - vs -   ');
             lines->push(value:'');
 
-            enemies_->foreach(do:::(index, enemy) {
+            foreach(enemies_)::(index, enemy) {
                 lines->push(value:enemy.renderHP() + '  ' + enemy.name);// + ' - Lv ' + enemy.level);
                 lines->push(value:'HP: ' + enemy.hp + ' / ' + enemy.stats.HP);
-            });
+            }
 
 
             @:height = lines->keycount+4;
             @width = 0;
             @top = canvas.height/2 - height/2;     
-            lines->foreach(do:::(index, text) <-
+            foreach(lines)::(index, text) <-
                 if (text->length > width) 
                     width = text->length
-            );
+            ;
             
             
             
@@ -253,12 +260,12 @@
                 height:height
             );
             
-            lines->foreach(do:::(index, line) {
+            foreach(lines)::(index, line) {
                 canvas.movePen(x:2, y:top+index+2);
                 canvas.drawText(text:line);
-            });
+            }
             
-        };
+        }
         
 
 
@@ -295,20 +302,20 @@
                 @:isPlayerParty = party.isMember(entity:allies[0]);
             
                 party_ = party;
-                enemies->foreach(do:::(index, enemy) {
+                foreach(enemies)::(index, enemy) {
                     enemy.battleStart(
                         battle: this,
                         allies: enemies,
                         enemies: allies
                     );
-                });
-                allies->foreach(do:::(index, ally) {
+                }
+                foreach(allies)::(index, ally) {
                     ally.battleStart(
                         battle: this,
                         enemies: enemies,
                         allies: allies
                     );
-                });
+                }
 
                 @:onAllyTurn = ::(battle, user, landmark, allies, enemies) {
                     if (party.isMember(entity:user))
@@ -323,12 +330,12 @@
                     else 
                         user.battleAI.takeTurn(battle)
                     ;
-                };
+                }
                 
                 
                 @:onEnemyTurn = ::(battle, user, landmark, allies, enemies) {
                     user.battleAI.takeTurn(battle);
-                };
+                }
 
                 if (npcBattle == empty) ::<= {
                     windowEvent.queueMessage(
@@ -338,46 +345,46 @@
                             "You're confronted by " + enemies->keycount + ' enemies!'
                     );    
                     
-                    enemies->foreach(do:::(index, enemy) {
+                    foreach(enemies)::(index, enemy) {
                         windowEvent.queueMessage(
                             text: enemy.name + '(' + enemy.stats.HP + ' HP) blocks your path!'
                         );                    
-                    });
-                };
+                    }
+                }
                 allies_ = allies;
                 enemies_ = enemies;
                 onAllyTurn_ = onAllyTurn;
                 onEnemyTurn_ = onEnemyTurn;
                 landmark_ = landmark;
                 
-                allies->foreach(do:::(k, v) {
+                foreach(allies)::(k, v) {
                     turn->push(value:{
                         isAlly: true,
                         entity: v
                     });
-                });
+                }
 
-                enemies->foreach(do:::(k, v) {
+                foreach(enemies)::(k, v) {
                     turn->push(value:{
                         isAlly: false,
                         entity: v
                     });
-                });
+                }
                 
 
                 battleEnd = ::{
                     result = match(true) {
                       (alliesWin):      RESULTS.ALLIES_WIN,
                       default:          RESULTS.ENEMIES_WIN
-                    };
+                    }
                     
-                    allies->foreach(do:::(k, v) {
+                    foreach(allies)::(k, v) {
                         v.battleEnd();
-                    });
+                    }
 
-                    enemies->foreach(do:::(k, v) {
+                    foreach(enemies)::(k, v) {
                         v.battleEnd();
-                    });
+                    }
                                 
                     
                     when (npcBattle != empty) ::<= {
@@ -390,21 +397,21 @@
                         onEnd(result);                    
                         if (windowEvent.canJumpToTag(name:'Battle'))                                            
                             windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);
-                    }; 
+                    } 
 
 
                     if (alliesWin == true) ::<= {            
 
                         @exp = 0;
-                        enemies_->foreach(do:::(index, enemy) {
+                        foreach(enemies_)::(index, enemy) {
                             exp += enemy.dropExp();
-                        });                
+                        }  
                         exp /= allies_->keycount;
                         exp = exp->ceil;
                         if (exp == true)
                             windowEvent.queueMessage(text: 'Each party member gains ' + exp + ' EXP.');
                             
-                        allies_->foreach(do:::(index, ally) {
+                        foreach(allies_)::(index, ally) {
                             ally.stats.resetMod();
                             
 
@@ -442,36 +449,36 @@
                                     stats.printDiff(other:ally.stats, prompt:'(Level:  ' + level  + ' -> ' + (ally.level+1) + ': Focus)');                        
                                 
                                 });
-                            };
+                            }
                             @:Entity = import(module:'game_class.entity.mt');
                             @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
                             if (wep != empty) ::<= {
                                 wep.addVictory();
-                            };
+                            }
                             ally.recalculateStats();
                             
          
-                        }); 
+                        }
                         if (noLoot == empty) ::<= {
                             @:loot = [];
-                            enemies->foreach(do:::(index, enemy) {
-                                enemy.inventory.items->foreach(do:::(index, item) {
+                            foreach(enemies)::(index, enemy) {
+                                foreach(enemy.inventory.items)::(index, item) {
                                     if (Number.random() > 0.7 && loot->keycount == 0) ::<= {
                                         loot->push(value:enemy.inventory.remove(item));
-                                    };
-                                });
-                            });
+                                    }
+                                }
+                            }
                             
                             if (loot->keycount > 0) ::<= {
                                 windowEvent.queueMessage(text: 'It looks like they dropped some items during the fight...');
                                 @message = 'The party found:\n\n';
-                                loot->foreach(do:::(index, item) {
+                                foreach(loot)::(index, item) {
                                     @message = 'The party found ' + correctA(word:item.name);
                                     windowEvent.queueMessage(text: message);
                                     party.inventory.add(item);
-                                });
-                            };
-                        };
+                                }
+                            }
+                        }
                         
                         windowEvent.queueMessage(text: 'The battle is won.');
                         windowEvent.queueNoDisplay(onEnter::{
@@ -491,12 +498,12 @@
                                     windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);
                             });                       
                             
-                        };
-                    };
+                        }
+                    }
                     allies_ = [];
                     enemies_ = [];
                     active = false;
-                };
+                }
 
 
                 @started = false;
@@ -505,7 +512,7 @@
                         render::{
                             if (externalRenderable)
                                 externalRenderable.render();
-                            this.render();
+                            self.render();
                             return windowEvent.RENDER_AGAIN;
                         }
                     },
@@ -515,7 +522,7 @@
                         if (!started && onStart) ::<= {
                             onStart();
                             started = true;
-                        };
+                        }
                         
                         if (turnPoppable->keycount == 0)
                             initTurn();  
@@ -556,7 +563,7 @@
                         isAlly: false,
                         entity: enemy
                     });
-                };
+                }
                 if (ally != empty) ::<= {
                     when (allies_->findIndex(value:ally) != -1) empty;
                     windowEvent.queueMessage(text:ally.name + ' joins the fray!');
@@ -570,7 +577,7 @@
                         isAlly: true,
                         entity: ally
                     });
-                };
+                }
                     
             },
             
@@ -595,7 +602,7 @@
                 if (action.ability.durationTurns > 0) ::<= {
                     action.turnIndex = 0;
                     actions[entityTurn] = action;
-                };  
+                }  
                 
                 windowEvent.queueNoDisplay(
                     onEnter ::{
@@ -605,7 +612,7 @@
             },
             
 
-        };
+        }
     }
 );
 

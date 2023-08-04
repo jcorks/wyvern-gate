@@ -35,7 +35,7 @@
     FOUR_OF_A_KIND : 9,
     FIVE_OF_A_KIND : 10,
     SUM : 11
-};
+}
 
 
 @:SCORING_NAMES = [
@@ -57,167 +57,167 @@
 
 SCORING_FN[SCORE_TYPE.ONES] = ::(rolls) {
     @val = 0;
-    [0, 5]->for(do::(i) {
+    for(0, 5)::(i) {
         if (rolls[i] == 1)
             val += 1;
-    });
+    }
     return val;
-};
+}
         
 SCORING_FN[SCORE_TYPE.TWOS] = ::(rolls) {
     @val = 0;
-    [0, 5]->for(do::(i) {
+    for(0, 5)::(i) {
         if (rolls[i] == 2)
             val += 2;
-    });
+    }
     return val;
-};
+}
 
 
 SCORING_FN[SCORE_TYPE.THREES] = ::(rolls) {
     @val = 0;
-    [0, 5]->for(do::(i) {
+    for(0, 5)::(i) {
         if (rolls[i] == 3)
             val += 3;
-    });
+    }
     return val;
-};
+}
 
 SCORING_FN[SCORE_TYPE.FOURS] = ::(rolls) {
     @val = 0;
-    [0, 5]->for(do::(i) {
+    for(0, 5)::(i) {
         if (rolls[i] == 4)
             val += 4;
-    });
+    }
     return val;
-};
+}
 
 SCORING_FN[SCORE_TYPE.FIVES] = ::(rolls) {
     @val = 0;
-    [0, 5]->for(do::(i) {
+    for(0, 5)::(i) {
         if (rolls[i] == 5)
             val += 5;
-    });
+    }
     return val;
-};
+}
 
 
 SCORING_FN[SCORE_TYPE.SIXES] = ::(rolls) {
     @val = 0;
-    [0, 5]->for(do::(i) {
+    for(0, 5)::(i) {
         if (rolls[i] == 6)
             val += 6;
-    });
+    }
     return val;
-};
+}
 
 
 SCORING_FN[SCORE_TYPE.STRAIGHT] = ::(rolls) {
     @:slots = [];
-    return [::] {
-        [0, 5]->for(do::(i) {
+    return {:::} {
+        for(0, 5)::(i) {
             if (slots[rolls[i]] == true) send(message:0);
             slots[rolls[i]] = true;
-        });
+        }
         return 20;
-    };
-};
+    }
+}
 
 
 SCORING_FN[SCORE_TYPE.FULL_HOUSE] = ::(rolls) {
     @:slots = [0, 0, 0, 0, 0, 0];
-    [0, 5]->for(do::(i) {
+    for(0, 5)::(i) {
         slots[rolls[i]-1] += 1;
-    });
+    }
     @has2 = false;
     @has3 = false;
-    [0, 6]->for(do::(i) {
+    for(0, 6)::(i) {
         if (slots[i] == 2) ::<= {
             has2 = true;
-        };
+        }
 
         if (slots[i] == 3) ::<= {
             has3 = true;
-        };
-    });
+        }
+    }
     
     return (if(has3 && has2) 30 else 0);
-};
+}
 
 
 
 SCORING_FN[SCORE_TYPE.THREE_OF_A_KIND] = ::(rolls) {
     @:slots = [0, 0, 0, 0, 0, 0, 0];
-    [0, 5]->for(do::(i) {
+    for(0, 5)::(i) {
         slots[rolls[i]-1] += 1;
-    });
+    }
     @val = 0;
-    [0, 6]->for(do::(i) {
+    for(0, 6)::(i) {
         if (slots[i] >= 3) ::<= {
             val = 25;        
-        };
-    });
+        }
+    }
     return val;
-};
+}
 
 SCORING_FN[SCORE_TYPE.FOUR_OF_A_KIND] = ::(rolls) {
     @:slots = [0, 0, 0, 0, 0, 0, 0];
-    [0, 5]->for(do::(i) {
+    for(0, 5)::(i) {
         slots[rolls[i]-1] += 1;
-    });
+    }
     @val = 0;
-    [0, 6]->for(do::(i) {
+    for(0, 6)::(i) {
         if (slots[i] >= 4) ::<= {
             val = 40;        
-        };
-    });
+        }
+    }
     return val;
-};
+}
 
 SCORING_FN[SCORE_TYPE.FIVE_OF_A_KIND] = ::(rolls) {
     @:slots = [0, 0, 0, 0, 0, 0, 0];
-    [0, 5]->for(do::(i) {
+    for(0, 5)::(i) {
         slots[rolls[i]-1] += 1;
-    });
+    }
     @val = 0;
-    [0, 6]->for(do::(i) {
+    for(0, 6)::(i) {
         if (slots[i] == 5) ::<= {
             val = 60;        
-        };
-    });
+        }
+    }
     return val;
-};
+}
 
 
 SCORING_FN[SCORE_TYPE.SUM] = ::(rolls) {
     @val = 0;
-    [0, 5]->for(do::(i) {
+    for(0, 5)::(i) {
         val += rolls[i];
-    });
+    }
     return val;
-};
+}
 
 
 
 @:getPossibleScores::(player, rolls, scores, pts, kind){
-    SCORING_FN->foreach(do:::(i, fn) {
+    foreach(SCORING_FN)::(i, fn) {
         @:val = fn(rolls);
         when(val == 0) empty;
         when(player.scoringTable[i].hasScore) empty;
         pts->push(value:val);
         scores->push(value: SCORING_NAMES[i] + ': ' + val + ' pts'); 
         kind->push(value:i);
-    });
-};
+    }
+}
 
 
 @:PlayerAction = class(
     statics : {
         // Player requests to reroll
-        REROLL : 0,
+        REROLL : {get::<-0},
         
         // Player requests to score immediately
-        SCORE : 1
+        SCORE : {get::<-1}
     },
     define:::(this) {
 
@@ -231,8 +231,8 @@ SCORING_FN[SCORE_TYPE.SUM] = ::(rolls) {
             _scoreType = scoreType;
             _scratchType = scratchType;
             _keepWhich = keepWhich;
-            return this;
-        };
+            return this.instance;
+        }
         
         this.interface = {
             action : {
@@ -247,7 +247,7 @@ SCORING_FN[SCORE_TYPE.SUM] = ::(rolls) {
             keepWhich : {
                 get::<- _keepWhich
             }
-        };
+        }
     }
 );
 
@@ -264,21 +264,21 @@ SCORING_FN[SCORE_TYPE.SUM] = ::(rolls) {
         @_decider;
         @scoringTable = [];
 
-        SCORING_NAMES->foreach(do:::(i, val) {
+        foreach(SCORING_NAMES)::(i, val) {
             scoringTable->push(value:{
                 hasScore: false,
                 value: 0,
                 kind: i
             });
-        });
+        }
         
         
         
         this.constructor = ::(name => String, decider => Function) {
             _name = name;
             _decider = decider;
-            return this;
-        };
+            return this.instance;
+        }
         
         
         this.interface = {
@@ -291,12 +291,12 @@ SCORING_FN[SCORE_TYPE.SUM] = ::(rolls) {
             reportScores ::(new) {
                 @lines = [];
                 @total = 0;
-                scoringTable->foreach(do:::(i, value) {
+                foreach(scoringTable)::(i, value) {
                     @line = (if(new == i) '-> ' else '   ') + (if (value.hasScore == false) '--' else (if (value.value < 10) (' ' + value.value) else ('' + value.value)));
                     line = line + ' pts | ' + SCORING_NAMES[i];
                     total += value.value;
                     lines->push(value:line);
-                });
+                }
                 
                 lines->push(value:'_______________________');
                 lines->push(value:'   ' + total + ' pts total');    
@@ -309,20 +309,20 @@ SCORING_FN[SCORE_TYPE.SUM] = ::(rolls) {
             
             isScoreTableComplete::{
                 @out = true;
-                scoringTable->foreach(do:::(i, val) <- if (val.hasScore != true) out = false);
+                foreach(scoringTable)::(i, val) <- if (val.hasScore != true) out = false;
                 return out;            
             },
             
             score:: {
                 @total = 0;
-                scoringTable->foreach(do:::(i, val) <- total += val.value);
+                foreach(scoringTable)::(i, val) <- total += val.value;
                 return total;
             },
             
             decideAction::(onDecide, rolls, rollIndex) {
-                _decider(player:this, onDecide, rolls, rollIndex);
+                _decider(player:this.instance, onDecide, rolls, rollIndex);
             }      
-        };
+        }
     }
 
 );
@@ -357,11 +357,11 @@ return ::(onFinish => Function) {
                         when(choice-1 == scores->keycount-1) ::<= {
                             @scratchable = [];
                             @kind = [];
-                            SCORING_NAMES->foreach(do:::(i, name) {
+                            foreach(SCORING_NAMES)::(i, name) {
                                 when(player.scoringTable[i].hasScore) empty;
                                 scratchable->push(value: name);
                                 kind->push(value:i);
-                            });
+                            }
                             
                             
                             windowEvent.queueChoices(
@@ -382,7 +382,7 @@ return ::(onFinish => Function) {
                                 }
                             );
                             
-                        };
+                        }
                     
 
                         onDecide(
@@ -396,7 +396,7 @@ return ::(onFinish => Function) {
 
                     }
                 );
-            };    
+            }    
             
             when(rollIndex >= 2)
                 scoreParty();    
@@ -437,7 +437,7 @@ return ::(onFinish => Function) {
                             renderable: diceRenderable,
                             onGetChoices::{
                                 @list = [];
-                                [0, 5]->for(do:::(i){
+                                for(0, 5)::(i){
                                     list->push(value: (
                                         if(keep[i] == true) '[x] ' else '[ ] ') + 
                                         (match(i) {
@@ -448,7 +448,7 @@ return ::(onFinish => Function) {
                                             (4): 'Fifth  '
                                         }) + '(' + rolls[i] + ')'
                                     );
-                                });
+                                }
                                 
                                 list->push(value: 'Done.');
                                 return list;
@@ -463,14 +463,14 @@ return ::(onFinish => Function) {
                                   
                                   (6) :::<= {
                                     @isDone = true;
-                                    keep->foreach(do::(i, val) {
+                                    foreach(keep)::(i, val) {
                                         if (val != true)
                                             isDone = false;
-                                    });                         
+                                    }               
                                     when(isDone) ::<= {
                                         scoreParty();
                                         windowEvent.jumpToTag(name:'PlayerTurn', goBeforeTag:true, doResolveNext:true);                                        
-                                    };
+                                    }
 
                                     onDecide(
                                         action: PlayerAction.new(
@@ -482,7 +482,7 @@ return ::(onFinish => Function) {
                                     );                                   
                                     windowEvent.jumpToTag(name:'PlayerTurn', goBeforeTag:true, doResolveNext:true);                                        
                                   }
-                                };
+                                }
                             }
                         );
                       },
@@ -499,7 +499,7 @@ return ::(onFinish => Function) {
                         windowEvent.jumpToTag(name:'PlayerTurn', goBeforeTag:true, doResolveNext:true);                                        
                       }
                       
-                    };                      
+                    }                      
                 }
             );        
         
@@ -513,264 +513,264 @@ return ::(onFinish => Function) {
             SCORE_HUNT_AI[SCORE_TYPE.ONES] = {
                 isReasonableToConsider::(rolls){
                     @okChance = 0;
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         if (rolls[i] == 1)
                             okChance+=1; 
-                    });
+                    }
                     return okChance >= 2;
                 },
                 maxPotential: 5,
                 keepWhich::(rolls, keep) {
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         keep[i] = rolls[i] == 1; 
-                    });
+                    }
                 }
-            };
+            }
 
 
 
             SCORE_HUNT_AI[SCORE_TYPE.TWOS] = {
                 isReasonableToConsider::(rolls){
                     @okChance = 0;
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         if (rolls[i] == 2)
                             okChance+=1; 
-                    });
+                    }
                     return okChance >= 2;
                 },
                 maxPotential: 10,
                 keepWhich::(rolls, keep) {
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         keep[i] = rolls[i] == 2; 
-                    });
+                    }
                 }
-            };
+            }
 
             SCORE_HUNT_AI[SCORE_TYPE.THREES] = {
                 isReasonableToConsider::(rolls){
                     @okChance = 0;
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         if (rolls[i] == 3)
                             okChance+=1; 
-                    });
+                    }
                     return okChance >= 2;
                 },
                 maxPotential: 15,
                 keepWhich::(rolls, keep) {
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         keep[i] = rolls[i] == 3; 
-                    });
+                    }
                 }
-            };
+            }
 
             SCORE_HUNT_AI[SCORE_TYPE.FOURS] = {
                 isReasonableToConsider::(rolls){
                     @okChance = 0;
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         if (rolls[i] == 4)
                             okChance+=1; 
-                    });
+                    }
                     return okChance >= 2;
                 },
                 maxPotential: 20,
                 keepWhich::(rolls, keep) {
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         keep[i] = rolls[i] == 4; 
-                    });
+                    }
                 }
-            };
+            }
 
 
             SCORE_HUNT_AI[SCORE_TYPE.FIVES] = {
                 isReasonableToConsider::(rolls){
                     @okChance = 0;
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         if (rolls[i] == 5)
                             okChance+=1; 
-                    });
+                    }
                     return okChance >= 2;
                 },
                 maxPotential: 25,
                 keepWhich::(rolls, keep) {
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         keep[i] = rolls[i] == 5; 
-                    });
+                    }
                 }
-            };
+            }
 
             SCORE_HUNT_AI[SCORE_TYPE.SIXES] = {
                 isReasonableToConsider::(rolls){
                     @okChance = 0;
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         if (rolls[i] == 6)
                             okChance+=1; 
-                    });
+                    }
                     return okChance >= 2;
                 },
                 maxPotential: 30,
                 keepWhich::(rolls, keep) {
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         keep[i] = rolls[i] == 6; 
-                    });
+                    }
                 }
-            };        
+            }        
             
             SCORE_HUNT_AI[SCORE_TYPE.STRAIGHT] = {
                 isReasonableToConsider::(rolls){
                     @uniqueCount = 0;
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         gotAlready[rolls[i]-1] += 1;
-                    });
-                    gotAlready->foreach(do:::(i, val) {
+                    }
+                    foreach(gotAlready)::(i, val) {
                         if (val == 1)
                             uniqueCount += 1;
-                    });
+                    }
                     return uniqueCount >= 3;
                 },
                 maxPotential: 20,
                 keepWhich::(rolls, keep) {
                     // get rid of duplicates
                     @:gotAlready = [];
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         keep[i] = gotAlready[rolls[i]-1] != true; 
                         gotAlready[rolls[i]-1] = true;
-                    });
+                    }
                 }
-            };             
+            }             
 
             SCORE_HUNT_AI[SCORE_TYPE.FULL_HOUSE] = {
                 isReasonableToConsider::(rolls){
                     @uniqueCount = 0;
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         gotAlready[rolls[i]-1] += 1;
-                    });
-                    gotAlready->foreach(do:::(i, val) {
+                    }
+                    foreach(gotAlready)::(i, val) {
                         if (val == 1)
                             uniqueCount += 1;
-                    });
+                    }
                     return uniqueCount <= 3;
                 },
                 maxPotential: 30,
                 keepWhich::(rolls, keep) {
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         gotAlready[rolls[i]-1]+=1;
-                    });
-                    [0, 5]->for(do:::(i) {
+                    }
+                    for(0, 5)::(i) {
                         keep[i] = gotAlready[rolls[i]-1] >= 2 && gotAlready[rolls[i]-1] < 4;
-                    });
+                    }
                 }
-            };             
+            }             
 
             SCORE_HUNT_AI[SCORE_TYPE.THREE_OF_A_KIND] = {
                 isReasonableToConsider::(rolls){
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         gotAlready[rolls[i]-1] += 1;
-                    });
+                    }
                     @viable = false;
-                    gotAlready->foreach(do:::(i, val) {
+                    foreach(gotAlready)::(i, val) {
                         if (val >= 2)
                             viable = true;
-                    });
+                    }
                     return viable;
                 },
                 maxPotential: 25,
                 keepWhich::(rolls, keep) {
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         gotAlready[rolls[i]-1]+=1;
-                    });
+                    }
 
                     @max = 0;
                     @maxRoll = 0;                    
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         if (gotAlready[rolls[i]-1] > max) ::<= {
                             max = gotAlready[rolls[i]-1];
                             maxRoll = rolls[i];
-                        };
-                    });
+                        }
+                    }
 
 
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         keep[i] = rolls[i] == maxRoll;
-                    });
+                    }
                 }
-            };   
+            }   
 
             SCORE_HUNT_AI[SCORE_TYPE.FOUR_OF_A_KIND] = {
                 isReasonableToConsider::(rolls){
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         gotAlready[rolls[i]-1] += 1;
-                    });
+                    }
                     @viable = false;
-                    gotAlready->foreach(do:::(i, val) {
+                    foreach(gotAlready)::(i, val) {
                         if (val >= 2)
                             viable = true;
-                    });
+                    }
                     return viable;
                 },
                 maxPotential: 40,
                 keepWhich::(rolls, keep) {
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         gotAlready[rolls[i]-1]+=1;
-                    });
+                    }
 
                     @max = 0;
                     @maxRoll = 0;                    
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         if (gotAlready[rolls[i]-1] > max) ::<= {
                             max = gotAlready[rolls[i]-1];
                             maxRoll = rolls[i];
-                        };
-                    });
+                        }
+                    }
 
 
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         keep[i] = rolls[i] == maxRoll;
-                    });
+                    }
                 }
-            };   
+            }   
 
             SCORE_HUNT_AI[SCORE_TYPE.FIVE_OF_A_KIND] = {
                 isReasonableToConsider::(rolls){
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         gotAlready[rolls[i]-1] += 1;
-                    });
+                    }
                     @viable = false;
-                    gotAlready->foreach(do:::(i, val) {
+                    foreach(gotAlready)::(i, val) {
                         if (val >= 3)
                             viable = true;
-                    });
+                    }
                     return viable;
                 },
                 maxPotential: 60,
                 keepWhich::(rolls, keep) {
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         gotAlready[rolls[i]-1]+=1;
-                    });
+                    }
 
                     @max = 0;
                     @maxRoll = 0;                    
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         if (gotAlready[rolls[i]-1] > max) ::<= {
                             max = gotAlready[rolls[i]-1];
                             maxRoll = rolls[i];
-                        };
-                    });
+                        }
+                    }
 
 
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         keep[i] = rolls[i] == maxRoll;
-                    });
+                    }
                 }
-            }; 
+            } 
 
 
             SCORE_HUNT_AI[SCORE_TYPE.SUM] = {
@@ -779,11 +779,11 @@ return ::(onFinish => Function) {
                 },
                 maxPotential: 30,
                 keepWhich::(rolls, keep) {
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         keep[i] = rolls[i] > 3;
-                    });
+                    }
                 }
-            }; 
+            } 
 
 
             return ::(player, rolls, rollIndex, onDecide) {
@@ -832,7 +832,7 @@ return ::(onFinish => Function) {
                         
                     if (scratchType == empty)
                         scratchType = random.pickArrayItem(list:typesAvail);
-                };
+                }
                 
                 
                 // in the case its not our last roll, we need to decide what to 
@@ -869,8 +869,8 @@ return ::(onFinish => Function) {
                             rolls,
                             keep:keepWhich
                         );                        
-                    };
-                };
+                    }
+                }
                 
                 
                 @action = PlayerAction.REROLL;
@@ -885,7 +885,7 @@ return ::(onFinish => Function) {
                     )
                         action = PlayerAction.SCORE;
                         
-                };
+                }
                 onDecide(
                     action: PlayerAction.new(
                         keepWhich,
@@ -894,7 +894,7 @@ return ::(onFinish => Function) {
                         action
                     )
                 );
-            };
+            }
         }
     );
     @currentPlayer;
@@ -903,7 +903,7 @@ return ::(onFinish => Function) {
     @:reportScores = :: {
         party.reportScores();
         wyvern.reportScores();
-    };
+    }
 
 
     windowEvent.queueNoDisplay(
@@ -933,22 +933,22 @@ return ::(onFinish => Function) {
                 canvas.drawText(text:'Current player: ' +currentPlayer.name);
             
                 // render base 
-                [1, DICE_WIDTH-1]->for(do::(i) {
+                for(1, DICE_WIDTH-1)::(i) {
                     canvas.movePen(x:x+i, y); canvas.drawChar(text:'_');
-                });
+                }
 
 
-                [1, DICE_WIDTH-1]->for(do::(i) {
+                for(1, DICE_WIDTH-1)::(i) {
                     canvas.movePen(x:x+i, y:y+DICE_HEIGHT-1); canvas.drawChar(text:'_');
-                });
+                }
 
-                [1, DICE_HEIGHT]->for(do::(i) {
+                for(1, DICE_HEIGHT)::(i) {
                     canvas.movePen(x, y:y+i); canvas.drawChar(text:'|');
-                });
+                }
 
-                [1, DICE_HEIGHT]->for(do::(i) {
+                for(1, DICE_HEIGHT)::(i) {
                     canvas.movePen(x:x+DICE_WIDTH-1, y:y+i); canvas.drawChar(text:'|');
-                });
+                }
 
 
                 match(number) {
@@ -992,16 +992,16 @@ return ::(onFinish => Function) {
                     canvas.movePen(x:x + 6, y:y + 2); canvas.drawChar(text:'o');
                   }
                   
-                };
+                }
 
 
 
-            };
+            }
 
             @:space = ((canvas.width - (DICE_WIDTH * 5)) / 5)->floor;
-            [0, 5]->for(do::(i) {
+            for(0, 5)::(i) {
                 renderDie(x:DICE_BUFFER + i*(DICE_WIDTH+space) , y:DICE_BUFFER, number:rolls[i]);
-            });
+            }
 
             //renderDie(x:DICE_BUFFER, y:DICE_BUFFER, number:rolls[0]);
             //renderDie(x:canvas.width - (DICE_WIDTH + DICE_WIDTH), y:DICE_BUFFER, number:rolls[1]);
@@ -1011,7 +1011,7 @@ return ::(onFinish => Function) {
 
                     
         }
-    };
+    }
 
 
     @rollDice::(rolls, onRolled => Function) {
@@ -1029,16 +1029,16 @@ return ::(onFinish => Function) {
                 onLeave::{
                     when (index == 6) ::<= {
                         onRolled();
-                    };
+                    }
                     
                     rollNext();
                 }
             );
-        };
+        }
         
         @:rollNext ::{
-            [::] {
-                forever(do:::{
+            {:::} {
+                forever ::{
                     when(index == 6) send();
                     when(rolls[index] != empty)
                         index += 1;
@@ -1046,19 +1046,19 @@ return ::(onFinish => Function) {
                     rolls[index] = number;
                     index += 1;
                     send();                    
-                });
-            };
+                }
+            }
             renderRolls();
-        };
+        }
         rollNext();
-    };
+    }
 
 
     @:takeTurn ::(player){
         when (party.isScoreTableComplete() &&
               wyvern.isScoreTableComplete()) ::<= {
             windowEvent.jumpToTag(name:'Dice', goBeforeTag:true);
-        };
+        }
 
 
         currentPlayer = player;
@@ -1101,7 +1101,7 @@ return ::(onFinish => Function) {
                                     player.scoringTable[action.scoreType].hasScore = true;
                                     player.scoringTable[action.scoreType].value = pts[kind->findIndex(value:action.scoreType)];
                                     player.reportScores(new:action.scoreType);
-                                };
+                                }
                                 
                                 if (player == wyvern)
                                     takeTurn(player:party)
@@ -1112,18 +1112,18 @@ return ::(onFinish => Function) {
                         ); 
                         
                     rollIndex += 1;
-                    [0, 5]->for(do:::(i) {
+                    for(0, 5)::(i) {
                         if (action.keepWhich[i] == false) ::<= {
                             rolls[i] = empty;
-                        };
-                    });
+                        }
+                    }
                     // reroll.
                     doRoll();
                                            
                 }
             );
         
-        };
+        }
 
             
             
@@ -1144,7 +1144,7 @@ return ::(onFinish => Function) {
                 }
             );
             
-        };
+        }
         
         @:initialChoices = ::{
             when(player == wyvern)
@@ -1170,12 +1170,12 @@ return ::(onFinish => Function) {
                         reportScores();
                         initialChoices();        
                       }
-                    };
+                    }
                 }
             );
-        };
+        }
         initialChoices();        
-    };
+    }
 
     /*
     @rolls = [];
@@ -1185,8 +1185,8 @@ return ::(onFinish => Function) {
         rolls[0] = random.integer(from:1, to:6);
         rolls[3] = random.integer(from:1, to:6);
         rollDice(rolls, onRolled:reroll);    
-    };
+    }
     rollDice(rolls, onRolled:reroll);
     */
     takeTurn(player:party);
-};
+}

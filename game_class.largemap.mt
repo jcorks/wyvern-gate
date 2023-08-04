@@ -31,7 +31,7 @@
     @xd = x1 - x0;
     @yd = y1 - y0;
     return (xd**2 + yd**2)**0.5;
-};
+}
 
 
 
@@ -44,47 +44,47 @@
         map.addScenerySymbol(character:'^'),
         map.addScenerySymbol(character:'░')
     ];
-    @:out = {};
-    [0, 20]->for(do:::(i) {
+    @:out = {}
+    for(0, 20)::(i) {
         out->push(value:{
             x: (Number.random() * width)->floor + BUFFER_SPACE,
             y: (Number.random() * height)->floor + BUFFER_SPACE,
             symbol: symbolList[random.integer(from:1, to:symbolList->keycount-1)]
         });
-    });
+    }
 
 
-    [0, 20]->for(do:::(i) {
+    for(0, 20)::(i) {
         out->push(value:{
             x: 0 + BUFFER_SPACE,
             y: (Number.random() * height)->floor + BUFFER_SPACE,
             symbol: symbolList[0]
         });
-    });
+    }
 
-    [0, 20]->for(do:::(i) {
+    for(0, 20)::(i) {
         out->push(value:{
             x: width + BUFFER_SPACE,
             y: (Number.random() * height)->floor + BUFFER_SPACE,
             symbol: symbolList[0]
         });
-    });
+    }
 
-    [0, 20]->for(do:::(i) {
+    for(0, 20)::(i) {
         out->push(value:{
             x: (Number.random()*width)->floor + BUFFER_SPACE,
             y: 0 + BUFFER_SPACE,
             symbol: symbolList[0]
         });
-    });
+    }
 
-    [0, 20]->for(do:::(i) {
+    for(0, 20)::(i) {
         out->push(value:{
             x: (Number.random()*width)->floor + BUFFER_SPACE,
             y: height + BUFFER_SPACE,
             symbol: symbolList[0]
         });
-    });
+    }
 
 
 
@@ -92,9 +92,9 @@
     @xIncr = 1;
     @yIncr = 1;
     
-    [0, 10]->for(do:::(i) {
-        @nextset = {};
-        out->foreach(do:::(n, val) {
+    for(0, 10)::(i) {
+        @nextset = {}
+        foreach(out)::(n, val) {
             when(Number.random() < 0.5) empty;
             @:choice = (Number.random() * 4)->floor;
             
@@ -103,12 +103,12 @@
                 y: if (choice == 3) val.y+yIncr else if (choice == 0) val.y-yIncr else val.y,
                 symbol: val.symbol
             });
-        });
+        }
         
-        nextset->foreach(do:::(n, val) <- out->push(value:val));
-    });
+        foreach(nextset)::(n, val) <- out->push(value:val);
+    }
     return out;
-};
+}
 
 return class(
     name: 'Wyvern.LargeMap',
@@ -117,64 +117,65 @@ return class(
 
   
     define:::(this) {
-
+        @self;
         this.constructor = ::(state, sizeW, sizeH) {
+            self = this.instance;
             when (state) ::<= {
-                this.state = state;
-                return this;
-            };
+                self.state = state;
+                return this.instance;
+            }
             
-            this.width = sizeW + BUFFER_SPACE*2;
-            this.height = sizeH + BUFFER_SPACE*2;
+            self.width = sizeW + BUFFER_SPACE*2;
+            self.height = sizeH + BUFFER_SPACE*2;
 
-            @index = this.addScenerySymbol(character:'▓');
+            @index = self.addScenerySymbol(character:'▓');
 
-            [0, this.height]->for(do:::(y) {
-                [0, this.width]->for(do:::(x) {
+            for(0, self.height)::(y) {
+                for(0, self.width)::(x) {
                     when(y > BUFFER_SPACE && x > BUFFER_SPACE &&
                          x < sizeW + BUFFER_SPACE && y < sizeH + BUFFER_SPACE) empty;
-                    this.enableWall(x, y);
-                    this.setSceneryIndex(x, y, symbol:index);
-                });            
-            });
+                    self.enableWall(x, y);
+                    self.setSceneryIndex(x, y, symbol:index);
+                }
+            }
             
-            this.offsetX = 100;
-            this.offsetY = 100;
-            this.paged = true;
-            this.drawLegend = true;
+            self.offsetX = 100;
+            self.offsetY = 100;
+            self.paged = true;
+            self.drawLegend = true;
             
-            generateTerrain(map:this, width:this.width - BUFFER_SPACE*2, height:this.height - BUFFER_SPACE*2)->foreach(do::(index, value) {
-                //when(value.x < 0 || value.x >= this.width || value.y < 0 || value.y >= this.height)
+            foreach(generateTerrain(map:self, width:self.width - BUFFER_SPACE*2, height:self.height - BUFFER_SPACE*2))::(index, value) {
+                //when(value.x < 0 || value.x >= self.width || value.y < 0 || value.y >= self.height)
                     //empty;
-                this.setSceneryIndex(
+                self.setSceneryIndex(
                     x:value.x,
                     y:value.y,
                     symbol:value.symbol
                 );
-            });
-            return this;
+            }
+            return this.instance;
                     
-        };
+        }
         
         this.interface = {
              addLandmark::(island, base) { 
                 @landmark = base.new(
                     island,             
-                    x:random.integer(from:BUFFER_SPACE + (0.2*(this.width  - BUFFER_SPACE*2))->floor, to:(this.width  - BUFFER_SPACE)-(0.2*(this.width  - BUFFER_SPACE*2))->floor),
-                    y:random.integer(from:BUFFER_SPACE + (0.2*(this.height - BUFFER_SPACE*2))->floor, to:(this.height - BUFFER_SPACE)-(0.2*(this.height - BUFFER_SPACE*2))->floor)
+                    x:random.integer(from:BUFFER_SPACE + (0.2*(self.width  - BUFFER_SPACE*2))->floor, to:(self.width  - BUFFER_SPACE)-(0.2*(self.width  - BUFFER_SPACE*2))->floor),
+                    y:random.integer(from:BUFFER_SPACE + (0.2*(self.height - BUFFER_SPACE*2))->floor, to:(self.height - BUFFER_SPACE)-(0.2*(self.height - BUFFER_SPACE*2))->floor)
                 );
-                this.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.name);
+                self.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.name);
                 return landmark;
             },
             
             getAPosition ::{
                 return {
-                    x:random.integer(from:BUFFER_SPACE + (0.2*(this.width  - BUFFER_SPACE*2))->floor, to:(this.width  - BUFFER_SPACE)-(0.2*(this.width  - BUFFER_SPACE*2))->floor),
-                    y:random.integer(from:BUFFER_SPACE + (0.2*(this.height - BUFFER_SPACE*2))->floor, to:(this.height - BUFFER_SPACE)-(0.2*(this.height - BUFFER_SPACE*2))->floor)
-                };
+                    x:random.integer(from:BUFFER_SPACE + (0.2*(self.width  - BUFFER_SPACE*2))->floor, to:(self.width  - BUFFER_SPACE)-(0.2*(self.width  - BUFFER_SPACE*2))->floor),
+                    y:random.integer(from:BUFFER_SPACE + (0.2*(self.height - BUFFER_SPACE*2))->floor, to:(self.height - BUFFER_SPACE)-(0.2*(self.height - BUFFER_SPACE*2))->floor)
+                }
             }
             
             
-        };
+        }
     }
 );

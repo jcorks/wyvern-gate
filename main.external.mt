@@ -81,19 +81,19 @@
 @rerender = :: {
     @:lines = currentCanvas;
     external_onStartCommit();
-    lines->foreach(do:::(index, line) {
+    foreach(lines)::(index, line) {
         external_onCommitText(a:line);
-    });    
+    }
     external_onEndCommit();
     canvasChanged = false;    
-};
+}
 
 canvas.onCommit = ::(lines, renderNow){
     currentCanvas = lines;
     canvasChanged = true;
     if (renderNow != empty)
         rerender();
-};
+}
 
 
 instance.mainMenu(
@@ -108,13 +108,13 @@ instance.mainMenu(
     onLoadState :::(
         slot
     ) {
-        return [::] {
+        return {:::} {
             return external_onLoadState(a:slot);
         } : {
             onError:::(detail) {
                 return empty;
             }
-        };
+        }
     }
 );
 
@@ -130,9 +130,9 @@ return ::{
     
     if (canvasChanged) ::<= {
         rerender();
-    };
+    }
 
-};
+}
 
 
 

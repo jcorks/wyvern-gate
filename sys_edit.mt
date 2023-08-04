@@ -5,7 +5,7 @@ return ::(terminal, arg, onDone) {
     when (Shell.currentDirectory->length == 0 && name->contains(key:'/') == false) ::<={
         terminal.print(line:'Cannot edit view in toplevel directory. "cd" into a directory first.');
         onDone();
-    };
+    }
 
     name = Shell.currentDirectory + '_' + name;
 
@@ -35,7 +35,7 @@ return ::(terminal, arg, onDone) {
         lines = data->split(token:'\n');  
         if (lines[0] == empty)
             lines[0] = '';      
-    };
+    }
 
 
 
@@ -56,11 +56,11 @@ return ::(terminal, arg, onDone) {
             lastStatusCounter -= 1;
             if (lastStatusCounter == 0) ::<= {
                 lastStatus = empty;
-            };
-        };
+            }
+        }
         terminal.print(line:'____________________________________________________________________');
         
-        [0, VIEWSPACE_HEIGHT]->for(do:::(i) {
+        for(0, VIEWSPACE_HEIGHT)::(i) {
             @lineNumber = ''+(if (i+viewLine == cursorLine) '   ->' else (viewLine+i+1));
             lineNumber = lineNumber + (
                 match(lineNumber->length) {
@@ -85,17 +85,17 @@ return ::(terminal, arg, onDone) {
                 when(header->length + cursorPos - viewPos < 0 ||
                         header->length + cursorPos - viewPos > line->length) empty;
                 line = line->setCharAt(index:header->length + cursorPos - viewPos, value:cursorCharacter);
-            };
+            }
 
 
             
             terminal.print(line);
-        });
+        }
 
         terminal.print(line:'____________________________________________________________________');
         terminal.print(line:'Ctrl+x to quit, Ctrl+s to save');
 
-    };
+    }
 
     @:checkCursorInBounds = ::{
         viewLine = (cursorLine - VIEWSPACE_HEIGHT / 2)->floor;
@@ -111,23 +111,23 @@ return ::(terminal, arg, onDone) {
         if (viewPos < 0) viewPos = 0;
 
 
-    };
+    }
 
 
     @:getCurrentLine ::{
         return lines[cursorLine];
-    };
+    }
 
     @:moveCursorUp = ::{
         cursorLine -= 1;
         if (cursorLine < 0) ::<= {
             cursorLine = 0;
             cursorPos = 0;
-        };
+        }
         if (cursorPos > getCurrentLine()->length)
             cursorPos = getCurrentLine()->length;
         checkCursorInBounds();
-    };
+    }
 
 
     @:moveCursorDown = ::{
@@ -136,11 +136,11 @@ return ::(terminal, arg, onDone) {
             cursorLine = lines->keycount-1;
             cursorPos = getCurrentLine()->length;
             checkCursorInBounds();
-        };
+        }
         if (cursorPos > getCurrentLine()->length)
             cursorPos = getCurrentLine()->length;
         checkCursorInBounds();
-    };
+    }
 
 
     @:moveCursorRight = ::{
@@ -148,10 +148,10 @@ return ::(terminal, arg, onDone) {
         if (cursorPos > getCurrentLine()->length) ::<= {
             cursorPos = 0;
             moveCursorDown();
-        };
+        }
 
         checkCursorInBounds();
-    };
+    }
 
     @:moveCursorLeft = ::{
         cursorPos -= 1;
@@ -160,10 +160,10 @@ return ::(terminal, arg, onDone) {
             moveCursorUp();
             if (!isStart)
                 cursorPos = getCurrentLine()->length;
-        };
+        }
 
         checkCursorInBounds();
-    };
+    }
 
 
     @controlHeld = 0;
@@ -173,13 +173,13 @@ return ::(terminal, arg, onDone) {
             lines[cursorLine] = getCurrentLine() + ch;
             moveCursorRight();
             renderTerminal();
-        };
+        }
 
         when(cursorPos == getCurrentLine()->length) ::<= {
             lines[cursorLine] = getCurrentLine() + ch;
             moveCursorRight();
             renderTerminal();
-        };
+        }
 
 
 
@@ -190,7 +190,7 @@ return ::(terminal, arg, onDone) {
         ;
         moveCursorRight();
         renderTerminal();                    
-    };
+    }
 
     Shell.onProgramKeyboard = ::(input, value) {
         match(input) {
@@ -203,7 +203,7 @@ return ::(terminal, arg, onDone) {
                 if (controlHeld > 0) ::<= {
                     terminal.clear();
                     onDone();            
-                };
+                }
             },
 
             (Topaz.Input.KEY.S):::<= {
@@ -213,7 +213,7 @@ return ::(terminal, arg, onDone) {
                     item.string = lines->reduce(to:::(previous, value) <- if (previous == empty) value else (previous + '\n' + value)); 
                     Topaz.Resources.writeAsset(asset:item, extension:'', path:nameFiltered);
                     renderTerminal();
-                };
+                }
             },
 
 
@@ -227,7 +227,7 @@ return ::(terminal, arg, onDone) {
                     cursorPos = 0;
                     checkCursorInBounds();
                     renderTerminal();
-                };
+                }
 
                 when(cursorPos == getCurrentLine()->length) ::<= {
                     lines->insert(at:cursorLine+1, value:'');
@@ -235,7 +235,7 @@ return ::(terminal, arg, onDone) {
                     cursorPos = 0;
                     checkCursorInBounds();
                     renderTerminal();
-                };
+                }
 
                 // normal case
                 @:str = getCurrentLine();
@@ -259,7 +259,7 @@ return ::(terminal, arg, onDone) {
                     moveCursorLeft(); // prev line;
                     cursorPos = oldPos;
                     renderTerminal();
-                };
+                }
 
                 // trim end
                 when(cursorPos == getCurrentLine()->length) ::<= {
@@ -267,18 +267,18 @@ return ::(terminal, arg, onDone) {
                         lines[cursorLine] = '';
                         moveCursorLeft();
                         renderTerminal();
-                    };
+                    }
                     lines[cursorLine] = getCurrentLine()->substr(from:0, to:getCurrentLine()->length-2);
                     moveCursorLeft();
                     renderTerminal();
-                };
+                }
 
 
                 when(cursorPos == 1) ::<= {
                     lines[cursorLine] = getCurrentLine()->substr(from:1, to:getCurrentLine()->length-1);
                     moveCursorLeft();
                     renderTerminal();  
-                };
+                }
 
                 // normal case
                 lines[cursorLine] = 
@@ -313,7 +313,7 @@ return ::(terminal, arg, onDone) {
                 moveCursorLeft();
                 renderTerminal();
             }
-        };
-    };
+        }
+    }
     renderTerminal();
-};
+}

@@ -27,18 +27,18 @@
     PHYS       : 6,
     POISON     : 7
 
-};
+}
 
 @:CLASS = {
     HP : 0,
     AP : 1
-};
+}
 
 return class(
     name: 'Wyvern.Damage',
     statics : {
-        TYPE : TYPE,
-        CLASS : CLASS
+        TYPE : {get::<-TYPE},
+        CLASS : {get::<-CLASS}
     },
     define:::(this) {
         @type_;
@@ -49,8 +49,8 @@ return class(
             if (amount_ <= 0) amount_ = 1;// minimum of 1 damage
             type_ = damageType;
             dclass = damageClass;
-            return this;
-        };
+            return this.instance;
+        }
         this.interface = {
             reduce ::(byRatio) {
                 amount_ *= byRatio;
@@ -88,6 +88,6 @@ return class(
             
             }
         
-        };    
+        }    
     }
 );

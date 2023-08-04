@@ -28,7 +28,13 @@
 @:EntityQuality = class(
     name : 'Wyvern.EntityQuality',
     statics : {
-        Base : empty
+        Base  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     define:::(this) {
         @base_;
@@ -40,8 +46,8 @@
         this.constructor = ::(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint, state) {
             when(state != empty) ::<= {
                 this.state = state;
-                return this;
-            };
+                return this.instance;
+            }
             base_ = base;            
             
             if (trait0Hint != empty) 
@@ -65,9 +71,9 @@
             else 
                 descIndex = random.integer(from:0, to:base_.descriptions->keycount-1);
             
-            return this;
+            return this.instance;
             
-        };
+        }
         
         this.interface = {
             base : {
@@ -118,10 +124,10 @@
                         trait0: trait0,
                         trait1: trait1,
                         trait2: trait2                        
-                    };
+                    }
                 }
             }
-        };
+        }
     
     }
 );
@@ -133,7 +139,14 @@
 EntityQuality.Base = class(
     name : 'Wyvern.EntityQuality.Base',
     statics : {
-        database : empty
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
+
     },
     define:::(this) {
         Database.setup(
@@ -151,9 +164,9 @@ EntityQuality.Base = class(
         
         this.interface = {
             new ::(descriptionHint, trait0Hint, trait1Hint, trait2Hint) {
-                return EntityQuality.new(base:this, descriptionHint, trait0Hint, trait1Hint, trait2Hint);
+                return EntityQuality.new(base:this.instance, descriptionHint, trait0Hint, trait1Hint, trait2Hint);
             } 
-        };
+        }
     }
 );
 

@@ -23,7 +23,13 @@
 @:ItemQuality = class(
     name : 'Wyvern.ItemQuality',
     statics : {
-        database : empty
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     define:::(this) {
         Database.setup(

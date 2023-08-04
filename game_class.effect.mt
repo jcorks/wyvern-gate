@@ -25,7 +25,13 @@
 
 @:Effect = class(
     statics : {
-        database : empty
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     define:::(this) {
         Database.setup(
@@ -121,7 +127,7 @@ Effect.database = Database.new(
                             text: holder.name + ' catches their breath while defending!'
                         );
                         holder.heal(amount:holder.stats.HP * 0.1);
-                    };
+                    }
                 },
 
                 onRemoveEffect : ::(user, item, holder) {
@@ -611,7 +617,7 @@ Effect.database = Database.new(
                     if (from == user) ::<= {
                         windowEvent.queueMessage(text:user.name + "'s sneaking takes " + holder.name + ' by surprise!');
                         damage.amount *= 3;
-                    };
+                    }
                     
                 },
                 
@@ -731,7 +737,7 @@ Effect.database = Database.new(
                     if (Number.random() < 0.3) ::<= {
                         windowEvent.queueMessage(text:holder.name + '\'s shield of light blocks the attack!');
                         damage.amount = 0;
-                    };                
+                    }                
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -1939,7 +1945,7 @@ Effect.database = Database.new(
                                 Effect.database.find(name:'Grace')
                             ]
                         );
-                    };
+                    }
                        
                 },
                 
@@ -2005,7 +2011,7 @@ Effect.database = Database.new(
                             text: "The " + item.name + ' broke.'
                         );
                         item.throwOut();                
-                    };
+                    }
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
@@ -2061,7 +2067,7 @@ Effect.database = Database.new(
                                     ),
                                     dodgeable: true                                    
                                 );
-                            };                        
+                            }                        
                         }
                     );
 
@@ -2222,10 +2228,10 @@ Effect.database = Database.new(
                     windowEvent.queueMessage(
                         text: 'After the battle, ' + holder.name + ' found some food and cooked a meal for the party.'
                     );
-                    world.party.members->foreach(do:::(index, member) {
+                    foreach(world.party.members)::(index, member) {
                         member.heal(amount:member.stats.HP * 0.1);
                         member.healAP(amount:member.stats.AP * 0.1);
-                    });
+                    }
                     
                 },                
                 onPostAttackOther : ::(user, item, holder, to) {
@@ -2326,9 +2332,9 @@ Effect.database = Database.new(
                         text: holder.name + ' found ' + amt + ' ingredient(s).'
                     );
 
-                    [0, amt]->for(do:::(i) {                    
+                    for(0, amt)::(i) {                    
                         world.party.inventory.add(item:Item.Base.database.find(name:'Ingredient').new(from:holder));
-                    });
+                    }
                     
                 },                
                 onPostAttackOther : ::(user, item, holder, to) {
@@ -2599,7 +2605,7 @@ Effect.database = Database.new(
                     if (Number.random() < 0.4) ::<= {
                         windowEvent.queueMessage(text:'The triproot trips ' + holder.name + '!');
                         holder.addEffect(from:holder, name:'Stunned', durationTurns:1);                                                
-                    };
+                    }
                 },
                 onStatRecalculate : ::(user, item, holder, stats) {
                 
@@ -2758,7 +2764,7 @@ Effect.database = Database.new(
                     if (from != holder) ::<= {
                         windowEvent.queueMessage(text:holder.name + ' is protected from the damage!');
                         damage.amount = 0;                        
-                    };
+                    }
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -3212,7 +3218,7 @@ Effect.database = Database.new(
 
                     if (world.time > world.TIME.EVENING) ::<= {
                         windowEvent.queueMessage(text:'The moon shimmers... ' + holder.name +' softly glows');                    
-                    };
+                    }
                 },
                 onPostAttackOther : ::(user, item, holder, to) {
                 },
@@ -3236,7 +3242,7 @@ Effect.database = Database.new(
 
                     if (world.time > world.TIME.EVENING) ::<= {
                         stats.modRate(stats:StatSet.new(INT:40, DEF:40, ATK:40));
-                    };                    
+                    }                    
                 }
             }
         ),
@@ -3331,7 +3337,7 @@ Effect.database = Database.new(
 
                     if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
                         windowEvent.queueMessage(text:'The sun intensifies... ' + holder.name +' softly glows');                    
-                    };
+                    }
                 },
                 onPostAttackOther : ::(user, item, holder, to) {
                 },
@@ -3355,7 +3361,7 @@ Effect.database = Database.new(
 
                     if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
                         stats.modRate(stats:StatSet.new(INT:40, DEF:40, ATK:40));
-                    };                    
+                    }                    
                 }
             }
         ),
@@ -3392,7 +3398,7 @@ Effect.database = Database.new(
                         @:item = holder.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
                         holder.unequip(slot:Entity.EQUIP_SLOTS.HAND_L, silent:true);
                         item.throwOut();                      
-                    };
+                    }
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
@@ -3430,7 +3436,7 @@ Effect.database = Database.new(
                         @:Entity = import(module:'game_class.entity.mt');                    
                         windowEvent.queueMessage(text:holder.name + " dodges the damage from Flight!");
                         damage.amount = 0;
-                    };
+                    }
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
@@ -3459,7 +3465,7 @@ Effect.database = Database.new(
                     if (to.isIncapacitated()) ::<= {
                         windowEvent.queueMessage(text:holder.name + "'s ending blow to " + to.name + " increases "+ holder.name + "'s abilities due to their Assassin's Pride.");                        
                         user.addEffect(from:holder, name: 'Pride', durationTurns: 10);                        
-                    };
+                    }
                 },
 
                 onPreAttackOther : ::(user, item, holder, to, damage) {
@@ -3546,7 +3552,7 @@ Effect.database = Database.new(
                     if (user == from) ::<= {
                         windowEvent.queueMessage(text: user.name + '\'s duel challenge focuses damage!');
                         damage.amount *= 2.25;
-                    };
+                    }
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
@@ -3574,7 +3580,7 @@ Effect.database = Database.new(
                         windowEvent.queueMessage(
                             text: "A bit of the " + item.name + ' is used.'
                         );                    
-                    };
+                    }
                 },
                 
                 onRemoveEffect : ::(user, item, holder) {
@@ -3664,10 +3670,10 @@ Effect.database = Database.new(
                 onAffliction : ::(user, item, holder) {
 
                     @:learned = holder.profession.gainSP(amount:1);
-                    learned->foreach(do:::(index, ability) {
+                    foreach(learned)::(index, ability) {
                         holder.learnAbility(name:ability);
                         windowEvent.queueMessage(text: holder.name + ' learned the ability: ' + ability);                        
-                    });
+                    }
                 
                 },
                 
@@ -4219,13 +4225,13 @@ Effect.database = Database.new(
                 onDamage : ::(user, item, holder, from, damage) {
                     if (damage.damageType == Damage.TYPE.FIRE) ::<= {
                         damage.amount *= 2;
-                    };
+                    }
                     if (damage.damageType == Damage.TYPE.ICE) ::<= {
                         damage.amount *= 2;
-                    };
+                    }
                     if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
                         damage.amount *= 2;
-                    };
+                    }
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -4269,13 +4275,13 @@ Effect.database = Database.new(
                     
                     if (fire && holder.damage.damageType == Damage.TYPE.FIRE) ::<= {
                         damage.amount *= 0;
-                    };
+                    }
                     if (ice && damage.damageType == Damage.TYPE.ICE) ::<= {
                         damage.amount *= 0;
-                    };
+                    }
                     if (thunder && damage.damageType == Damage.TYPE.THUNDER) ::<= {
                         damage.amount *= 0;
-                    };
+                    }
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -4318,7 +4324,7 @@ Effect.database = Database.new(
                 onDamage : ::(user, item, holder, from, damage) {
                     if (damage.damageType == Damage.TYPE.ICE) ::<= {
                         damage.amount *= 0.5;
-                    };
+                    }
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -4360,7 +4366,7 @@ Effect.database = Database.new(
                 onDamage : ::(user, item, holder, from, damage) {
                     if (damage.damageType == Damage.TYPE.FIRE) ::<= {
                         damage.amount *= 0.5;
-                    };
+                    }
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -4402,7 +4408,7 @@ Effect.database = Database.new(
                 onDamage : ::(user, item, holder, from, damage) {
                     if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
                         damage.amount *= 0.5;
-                    };
+                    }
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -4446,7 +4452,7 @@ Effect.database = Database.new(
                 onDamage : ::(user, item, holder, from, damage) {
                     if (damage.damageType == Damage.TYPE.POISON) ::<= {
                         damage.amount *= 0.5;
-                    };
+                    }
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -4488,7 +4494,7 @@ Effect.database = Database.new(
                 onDamage : ::(user, item, holder, from, damage) {
                     if (damage.damageType == Damage.TYPE.DARK) ::<= {
                         damage.amount *= 0.5;
-                    };
+                    }
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -4529,7 +4535,7 @@ Effect.database = Database.new(
                 onDamage : ::(user, item, holder, from, damage) {
                     if (damage.damageType == Damage.TYPE.LIGHT) ::<= {
                         damage.amount *= 0.5;
-                    };
+                    }
                 },
                 
                 onNextTurn : ::(user, item, holder, turnIndex, turnCount) {

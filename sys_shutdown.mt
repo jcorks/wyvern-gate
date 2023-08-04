@@ -9,5 +9,5 @@ return ::(terminal, arg, onDone) {
         counter -= 1;
         if (counter <= 0 && Number.random() > 0.9)
             Topaz.quit();
-    };
-};
+    }
+}

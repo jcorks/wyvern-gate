@@ -31,17 +31,17 @@
 @:rerender = ::{
     console.clear();
     @:lines = currentCanvas;
-    lines->foreach(do:::(index, line) {
+    foreach(lines) ::(index, line) {
         console.println(message:line);
-    }); 
+    }
     canvasChanged = false;   
-};
+}
 canvas.onCommit = ::(lines, renderNow){
     currentCanvas = lines;
     canvasChanged = true;
     if (renderNow != empty)
         rerender();
-};
+}
 
 
 
@@ -56,7 +56,7 @@ canvas.onCommit = ::(lines, renderNow){
         @:ch = console.getch(unbuffered:true);
         when (ch == empty || ch == '') '';
         return ch->charCodeAt(index:0);
-    };
+    }
     
     command = '' + getPiece() + getPiece() + getPiece();
     
@@ -75,24 +75,24 @@ canvas.onCommit = ::(lines, renderNow){
         '122': 4, // confirm,
         '120': 5, // cancel
         
-    };
+    }
     @val = CURSOR_ACTIONS[command];
     if (val == empty)
         Time.sleep(milliseconds:30);
     return val;   
-};
+}
 
 @:mainLoop = ::{
     // standard event loop
-    forever(do::{
+    forever ::{
         @val = pollInput();
         windowEvent.commitInput(input:val);
         
         if (canvasChanged) ::<= {
             rerender();  
-        };
-    });            
-};
+        }
+    }       
+}
 
 
 
@@ -114,7 +114,7 @@ instance.mainMenu(
     ) {
         @:Filesystem = import(module:'Matte.System.Filesystem');
         Filesystem.cwd = '/usr/share/Wyvern_SAVES';
-        return [::] {
+        return {:::} {
             return Filesystem.readString(
                 path: 'saveslot' + slot
             );
@@ -123,7 +123,7 @@ instance.mainMenu(
             onError:::(detail) {
                 return empty;
             }
-        };
+        }
     }
 
 );

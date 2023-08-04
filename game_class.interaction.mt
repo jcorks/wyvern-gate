@@ -29,7 +29,13 @@
 @:Interaction = class(
     name : 'Wyvern.Interaction',
     statics : {
-        database : empty
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     define:::(this) {
         Database.setup(
@@ -76,8 +82,8 @@ Interaction.database = Database.new(
                             windowEvent.jumpToTag(name:'MainMenu');
                           }
                         
-                        }; 
-                    };
+                        } 
+                    }
 
                     // jumps to the prev menu lock
                     windowEvent.jumpToTag(name:'VisitLandmark', goBeforeTag:true, clearResolve:true);
@@ -127,9 +133,9 @@ Interaction.database = Database.new(
                     @choices = [];
                     if (location.ownedBy != empty)
                         choices->push(value:location.ownedBy);
-                    location.occupants->foreach(do:::(index, person) {
+                    foreach(location.occupants)::(index, person) {
                         choices->push(value:person);
-                    });
+                    }
                     
                     when (choices->keycount == 0)
                         windowEvent.queueMessage(text:'No one is within the ' + location.base.name);             
@@ -174,13 +180,13 @@ Interaction.database = Database.new(
                                             location.ownedBy = empty;                                                                        
                                         }
                                     );                                
-                                };
+                                }
                             } else ::<= {
                                 talkee.interactPerson(
                                     party,
                                     location
                                 );
-                            };
+                            }
 
                         }
                     );
@@ -202,7 +208,7 @@ Interaction.database = Database.new(
                             speaker: 'Bartender',
                             text: "Nope. Not servin' ya. Get out."
                         );
-                    };
+                    }
                     
                     windowEvent.queueAskBoolean(
                         prompt: 'Buy a drink? (1G)',
@@ -225,10 +231,10 @@ Interaction.database = Database.new(
 
 
                         
-                        party.members->foreach(do:::(index, member) {
+                        foreach(party.members)::(index, member) {
                             if (member.ap < member.stats.AP)
                                 member.healAP(amount:member.stats.AP * 0.1);
-                        });
+                        }
 
 
 
@@ -283,7 +289,7 @@ Interaction.database = Database.new(
                                     speaker: 'Wandering Gamblist',
                                     text:'May I interest you in some... Entertainment? All it costs is an item of yours. Any will do.'
                                 );                               
-                            };
+                            }
                             
                             
                             windowEvent.queueAskBoolean(
@@ -295,7 +301,7 @@ Interaction.database = Database.new(
                                             text:'Suit yourself. Perhaps another time.'
                                         );                               
                                     
-                                    };       
+                                    }       
                                 }
                             );
                           },
@@ -351,7 +357,7 @@ Interaction.database = Database.new(
                                             speaker: 'Bartender',
                                             text:'Gah, what a drunk. Sorry \'bout that.'
                                         );                            
-                                    };
+                                    }
                                                                 
                                 }
                             );                            
@@ -364,7 +370,7 @@ Interaction.database = Database.new(
                                 text:'The drink is enjoyed in solitude.'
                             )
                           
-                        };
+                        }
                                                                               
                                                     
                         }
@@ -410,7 +416,7 @@ Interaction.database = Database.new(
                             when (party.inventory.isFull) ::<= {
                                 windowEvent.queueMessage(text:'The party\'s inventory is full...');     
                                 send();
-                            };
+                            }
                             party.inventory.add(item);
 
 
@@ -419,12 +425,12 @@ Interaction.database = Database.new(
                             when (location.data.charges <= 0) ::<= {
                                 windowEvent.queueMessage(text:'The ore vein is depleted...');
                                 send();
-                            };
+                            }
                             
                         } else ::<= {
                             windowEvent.queueMessage(text:'Nothing yet...');
 
-                        };
+                        }
                         windowEvent.queueAskBoolean(
                             prompt:'Continue?',
                             onChoice::(which) {
@@ -432,7 +438,7 @@ Interaction.database = Database.new(
                                     mining(miner);
                             }
                         );                    
-                    };
+                    }
                     
                     
                     windowEvent.queueChoices(
@@ -500,10 +506,10 @@ Interaction.database = Database.new(
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
                                     windowEvent.jumpToTag(name:'MainMenu');
                                   }
-                                };
+                                }
                             }
                         );
-                    };
+                    }
 
                     @:world = import(module:'game_singleton.world.mt');
                     when (world.time < world.TIME.MORNING || world.time > world.TIME.EVENING)
@@ -565,10 +571,10 @@ Interaction.database = Database.new(
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
                                     windowEvent.jumpToTag(name:'MainMenu');
                                   }
-                                };
+                                }
                             }
                         );
-                    };
+                    }
                     @:world = import(module:'game_singleton.world.mt');
                     @:pickItem = import(module:'game_function.pickitem.mt');
                     
@@ -602,7 +608,7 @@ Interaction.database = Database.new(
                                       (0)::<= {
                                         when(world.party.inventory.isFull) ::<= {
                                             windowEvent.queueMessage(text: 'The party\'s inventory is full.');
-                                        };
+                                        }
                                             
                                         
                                         when(!party.inventory.subtractGold(amount:price)) windowEvent.queueMessage(text:'The party cannot afford this.');
@@ -619,7 +625,7 @@ Interaction.database = Database.new(
                                                 text: 'Though, can\'t say I\'m not curious what lies at the top...'
                                             );
 
-                                        };
+                                        }
                                         
                                         
                                         windowEvent.queueMessage(text: 'Bought ' + correctA(word:item.name));
@@ -647,7 +653,7 @@ Interaction.database = Database.new(
                                             }
                                         );
                                       }  
-                                    };   
+                                    }   
                                 }
                             );
                         
@@ -729,7 +735,7 @@ Interaction.database = Database.new(
                                 );
                             }
                         );         
-                    };
+                    }
 
                 
                     @:smiths = party.members->filter(by:::(value) <- value.profession.base.name == 'Blacksmith');
@@ -774,7 +780,7 @@ Interaction.database = Database.new(
                             
                             }
                         );         
-                    };
+                    }
 
                     
                 },
@@ -792,13 +798,13 @@ Interaction.database = Database.new(
 
                     @:keys = [];
                     @:keynames = [];
-                    party.inventory.items->foreach(do:::(index, item) {
+                    foreach(party.inventory.items)::(index, item) {
                         if (item.base.name->contains(key:'Wyvern Key')) ::<= {
                             keys->push(value: item);
                             keynames->push(value: item.name);
-                        };
+                        }
                             
-                    });
+                    }
                     when(keys->keycount == 0)
                         windowEvent.queueMessage(text:'Entering a gate requires a key. The party has none.');
                         
@@ -881,8 +887,8 @@ Interaction.database = Database.new(
                             ;
                             
                             location.targetLandmark.name = 'Shrine ('+location.targetLandmark.floor+'F)';
-                        };
-                    };
+                        }
+                    }
 
                     canvas.clear();
                     windowEvent.queueMessage(text:'The party travels to the next floor.', renderable:{render::{canvas.blackout();}});
@@ -940,13 +946,13 @@ Interaction.database = Database.new(
                                 )
                             ;
                             
-                        };
+                        }
                         @:instance = import(module:'game_singleton.instance.mt');
                         instance.visitLandmark(landmark:location.targetLandmark);
 
 
                         canvas.clear();
-                    };
+                    }
                 },
             }
         ),          
@@ -962,14 +968,14 @@ Interaction.database = Database.new(
                     //
                     when (location.inventory.items->keycount == 0) ::<= {
                         windowEvent.queueMessage(text: "There was nothing to steal.");                            
-                    };
+                    }
                     
                     @:item = random.pickArrayItem(list:location.inventory.items);
                     windowEvent.queueMessage(text:'Stole ' + item.name);
 
                     when(party.inventory.isFull) ::<= {
                         windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
-                    };
+                    }
 
 
                     if (location.ownedBy != empty) ::<= {
@@ -993,11 +999,11 @@ Interaction.database = Database.new(
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
                                     windowEvent.jumpToTag(name:'MainMenu');
                                   }
-                              };
+                              }
                             }
                         );
                         
-                    };
+                    }
                     
 
 
@@ -1041,21 +1047,21 @@ Interaction.database = Database.new(
 
                             // get those refreshing 7 hours!
                             @:world = import(module:'game_singleton.world.mt');
-                            [::] {
-                                forever(do:::{
+                            {:::} {
+                                forever ::{
                                     world.stepTime();
                                     if (world.time == world.TIME.MORNING)
                                         send();                        
-                                });
-                            };
+                                }
+                            }
 
                             windowEvent.queueMessage(
                                 text: 'The party is refreshed.'
                             );
 
-                            party.members->foreach(do:::(i, member) {
+                            foreach(party.members)::(i, member) {
                                 member.rest();
-                            });      
+                            }
 
 
                         }
@@ -1070,9 +1076,9 @@ Interaction.database = Database.new(
                 name : 'change profession',
                 onInteract ::(location, party) {
                     @:names = [];
-                    party.members->foreach(do:::(i, member) {
+                    foreach(party.members)::(i, member) {
                         names->push(value:member.name);
-                    });
+                    }
                     
                     windowEvent.queueChoices(
                         leftWeight: 1,
@@ -1151,21 +1157,21 @@ Interaction.database = Database.new(
                     @:teamBname = 'The ' + Material.database.getRandom().name + ' ' + getAWeapon().name + 's';
                     @:teamB = [];
 
-                    [0, count]->for(do:::(i) {
+                    for(0, count)::(i) {
                         @:combatant = location.landmark.island.newInhabitant();
                         @:weapon = getAWeapon().new(from:combatant);
                         combatant.equip(item:weapon, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true, inventory: combatant.inventory);
 
                         teamA->push(value:combatant);
-                    });
+                    }
 
-                    [0, count]->for(do:::(i) {
+                    for(0, count)::(i) {
                         @:combatant = location.landmark.island.newInhabitant();
                         @:weapon = getAWeapon().new(from:combatant);                        
                         combatant.equip(item:weapon, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true, inventory: combatant.inventory);
 
                         teamB->push(value:combatant);
-                    });
+                    }
 
 
                     windowEvent.queueMessage(
@@ -1194,18 +1200,18 @@ Interaction.database = Database.new(
                             match(choice-1) {
                               // team A examine
                               (0): ::<= {
-                                [0, 3]->for(do:::(i) {
+                                for(0, 3)::(i) {
                                     windowEvent.queueMessage(text:teamAname + ' - Member ' + (i+1));
                                     teamA[i].describe();
-                                });
+                                }
                               },
 
                               // team B examine
                               (1): ::<= {
-                                [0, 3]->for(do:::(i) {
+                                for(0, 3)::(i) {
                                     windowEvent.queueMessage(text:teamBname + ' - Member ' + (i+1));
                                     teamB[i].describe();
-                                });
+                                }
                               },
                               
                               // bet
@@ -1269,7 +1275,7 @@ Interaction.database = Database.new(
                                                                 'The crowd murmurs restlessly.',
                                                                 'The crowd gasps.'
                                                             ]));
-                                                        };
+                                                        }
                                                     },
                                                     npcBattle: true,
                                                     onEnd::(result) {
@@ -1283,7 +1289,7 @@ Interaction.database = Database.new(
                                                             windowEvent.queueMessage(
                                                                 text: teamBname + ' wins!'
                                                             );                                    
-                                                        };
+                                                        }
                                                         
                                                         
                                                         // payout
@@ -1297,7 +1303,7 @@ Interaction.database = Database.new(
                                                                 text:'The party lost ' + bet + 'G.'
                                                             );                                    
                                                             party.inventory.subtractGold(amount:bet);
-                                                        };  
+                                                        }  
                                                         windowEvent.jumpToTag(name:'Bet', goBeforeTag:true, doResolveNext:true);
                                                         
                                                     }  
@@ -1307,7 +1313,7 @@ Interaction.database = Database.new(
                                     }
                                 );
                               }
-                            };                        
+                            }                        
                         }
                     );
 
@@ -1339,15 +1345,15 @@ Interaction.database = Database.new(
                     
                     when(world.party.inventory.isFull) ::<= {
                         windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
-                    };
+                    }
                     
-                    location.inventory.items->foreach(do:::(i, item) {
+                    foreach(location.inventory.items)::(i, item) {
                         windowEvent.queueMessage(text:'The party found ' + correctA(word:item.name) + '.');
-                    });
+                    }
                     
-                    location.inventory.items->foreach(do:::(i, item) {
+                    foreach(location.inventory.items)::(i, item) {
                         world.party.inventory.add(item);
-                    });                   
+                    }
                     location.inventory.clear();
 
                 
@@ -1372,15 +1378,15 @@ Interaction.database = Database.new(
                     
                     when(world.party.inventory.isFull) ::<= {
                         windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
-                    };
+                    }
                     
-                    location.inventory.items->foreach(do:::(i, item) {
+                    foreach(location.inventory.items)::(i, item) {
                         windowEvent.queueMessage(text:'The party found ' + correctA(word:item.name) + '.');
-                    });
+                    }
                     
-                    location.inventory.items->foreach(do:::(i, item) {
+                    foreach(location.inventory.items)::(i, item) {
                         world.party.inventory.add(item);
-                    });                   
+                    }
                     location.inventory.clear();
 
 
@@ -1410,7 +1416,7 @@ Interaction.database = Database.new(
                             windowEvent.queueMessage(speaker:'Sylvia', text: '"Don\'t forget to visit new locations with the runestone!"');
 
                         windowEvent.queueMessage(speaker:'Sylvia', text: '"Hmmm according to the stone, I still need ' + (world.storyFlags.data_locationsNeeded - world.storyFlags.data_locationsDiscovered) + ' rune samples."');
-                    };
+                    }
                 }
             }
         ),        
@@ -1424,7 +1430,7 @@ Interaction.database = Database.new(
                     
                     when (tablets->keycount == 0) ::<= {
                         windowEvent.queueMessage(speaker: 'Sylvia', text: '"No tablets, eh? They are pretty hard to come across. I\'ll be here for you when you have any though!"');
-                    };
+                    }
                     
                     @:tabletNames = [...tablets]->map(to:::(value) <- value.name);
                     @choice = windowEvent.queueChoicesNow(
@@ -1494,7 +1500,7 @@ Interaction.database = Database.new(
                         );
                       }                        
                     
-                    };
+                    }
 
                     item = item.new(from:location.ownedBy);                    
                     world.party.inventory.add(item);

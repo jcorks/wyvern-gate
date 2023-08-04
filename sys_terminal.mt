@@ -45,7 +45,7 @@ Topaz.FontManager.registerFont(asset:font);
 
 if (ret != empty) ::<= {
     error(detail:ret);
-};
+}
 
 
 
@@ -72,7 +72,11 @@ if (ret != empty) ::<= {
                 textRenderer.font = font;
                 textRenderer.size = FONT_SIZE; 
 
-                this.components = [textRenderer];
+                this.constructor = ::{
+                    this.baseConstructor[Topaz.Entity]();
+                    this.instance.components = [textRenderer];
+                }
+
                 this.interface = {
                     // the displayed line
                     line : {
@@ -81,22 +85,35 @@ if (ret != empty) ::<= {
                         },
                         get ::<- textRenderer.text
                     }
-                };
+                }
             }
         );
+
+
+        
         @:bg = Topaz.Shape2D.new();
-        bg.formRectangle(width:640, height:480);
-        bg.color = '#242424';
-        this.components = [bg];
-        bg.position = {x:0, y:-480 + LINE_SPACING*2};
 
         @:lines = [];
-        [0, RENDERER_HEIGHT]->for(do:::(i) {
-            lines[i] = TextLine.new();
-            lines[i].position = {x:0, y:-LINE_SPACING*i};
-            this.attach(entity:lines[i]);
-        });
 
+
+        
+        this.constructor = ::{
+            
+
+            @self = this.instance;
+            bg.formRectangle(width:640, height:480);
+            bg.color = '#242424';
+            self.components = [bg];
+            bg.position = {x:0, y:-480 + LINE_SPACING*2}
+            for(0, RENDERER_HEIGHT)::(i) {
+                lines[i] = TextLine.new();
+                lines[i].position = {x:0, y:-LINE_SPACING*i}
+                self.attach(entity:lines[i]);
+            }
+
+
+            return this.instance;
+        }
         
 
         this.interface = {
@@ -110,9 +127,9 @@ if (ret != empty) ::<= {
 
             clear ::{
                 cursor = 0;
-                [0, RENDERER_HEIGHT]->for(do:::(i) {
+                for(0, RENDERER_HEIGHT)::(i) {
                     lines[i].line = '';
-                });
+                }
             },
 
             printch::(value => String) {
@@ -141,11 +158,11 @@ if (ret != empty) ::<= {
             nextLine :: {
                 // delete last line in queue.
                 if (cursor >= RENDERER_HEIGHT-1) ::<= {
-                    [1, RENDERER_HEIGHT]->for(do:::(i) {
+                    for(1, RENDERER_HEIGHT)::(i) {
                         lines[i-1].line = lines[i].line;
-                    });
+                    }
                     cursor = RENDERER_HEIGHT-1;
-                };
+                }
                 cursor+=1;            
             },
 
@@ -160,15 +177,15 @@ if (ret != empty) ::<= {
             'print'::(line => String) {
                 // delete last line in queue.
                 if (cursor >= RENDERER_HEIGHT-1) ::<= {
-                    [1, RENDERER_HEIGHT]->for(do:::(i) {
+                    for(1, RENDERER_HEIGHT)::(i) {
                         lines[i-1].line = lines[i].line;
-                    });
+                    }
                     cursor = RENDERER_HEIGHT-1;
-                };
+                }
                 lines[cursor].line = line;
                 cursor+=1;
             }
-        };
+        }
 
     }
 );

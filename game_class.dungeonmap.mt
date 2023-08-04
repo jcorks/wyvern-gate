@@ -27,7 +27,7 @@
     @xd = x1 - x0;
     @yd = y1 - y0;
     return (xd**2 + yd**2)**0.5;
-};
+}
 
 @:BIG = 100000000;
 
@@ -45,15 +45,15 @@
             _y = y => Number;
             _w = width => Number;
             _h = height => Number;
-            return this;
-        };
+            return this.instance;
+        }
         
         this.interface = {
             x : {get::<-_x},        
             y : {get::<-_y},        
             width : {get::<-_w},        
             height : {get::<-_h}        
-        };
+        }
     }
 );
 
@@ -75,7 +75,7 @@ return class(
         @ROOM_SIZE = 50;
         @ROOM_EMPTY_AREA_COUNT = 13;
         @GEN_OFFSET = 20;
-        
+        @self;
         
 
         @:generateArea ::(item) {
@@ -105,95 +105,95 @@ return class(
                 height: height
             ));
                     
-            [0, width+1]->for(do:::(i) {
-                this.enableWall(
+            for(0, width+1)::(i) {
+                self.enableWall(
                     x:left + i,
                     y:top
                 );
 
-                this.enableWall(
+                self.enableWall(
                     x:left + i,
                     y:top + height
                 );
-            });
+            }
 
-            [0, height+1]->for(do:::(i) {
-                this.enableWall(
+            for(0, height+1)::(i) {
+                self.enableWall(
                     x:left,
                     y:top + i
                 );
 
-                this.enableWall(
+                self.enableWall(
                     x:left + width,
                     y:top + i
                 );
-            });
+            }
 
-        };
+        }
         
         @:applyCavities::{
-            cavities->foreach(do:::(i, cav) {
-                this.enableWall(
+            foreach(cavities)::(i, cav) {
+                self.enableWall(
                     x:cav.x+1,
                     y:cav.y
                 );
-                this.enableWall(
+                self.enableWall(
                     x:cav.x-1,
                     y:cav.y
                 );
-                this.enableWall(
+                self.enableWall(
                     x:cav.x,
                     y:cav.y+1
                 );
-                this.enableWall(
+                self.enableWall(
                     x:cav.x,
                     y:cav.y-1
                 );
                 
-                this.enableWall(
+                self.enableWall(
                     x:cav.x-1,
                     y:cav.y-1
                 );
-                this.enableWall(
+                self.enableWall(
                     x:cav.x+1,
                     y:cav.y+1
                 );
-                this.enableWall(
+                self.enableWall(
                     x:cav.x+1,
                     y:cav.y-1
                 );
-                this.enableWall(
+                self.enableWall(
                     x:cav.x-1,
                     y:cav.y+1
                 );
 
-            });
-        };
+            }
+        }
 
         @:cleanupAreas::{
-            areas->foreach(do:::(i, area) {
-                [area.x+1, area.x + area.width]->for(do:::(x) {
-                    [area.y+1, area.y + area.height]->for(do:::(y) {
-                        this.disableWall(x, y);
-                    });
-                });
-            });
+            foreach(areas)::(i, area) {
+                for(area.x+1, area.x + area.width)::(x) {
+                    for(area.y+1, area.y + area.height)::(y) {
+                        self.disableWall(x, y);
+                    }
+                }
+            }
             
-            cavities->foreach(do:::(i, cav) {
-                this.disableWall(x:cav.x, y:cav.y);
-            });            
+            foreach(cavities)::(i, cav) {
+                self.disableWall(x:cav.x, y:cav.y);
+            }
             cavities = [];
-        };
+        }
 
         
         @:addCavity ::(x, y) {
             cavities->push(value:{x:x, y:y});
-        };
+        }
         
         @:networkAreas ::{
             @remaining = [...areas];
             @next = remaining->pop;
-            [0, areas->keycount-1]->for(do:::(i) {
+            for(0, areas->keycount-1)::(i) {
                 @:a = next;
                 @:b = remaining->pop;              
 
@@ -232,24 +232,24 @@ return class(
                 */
 
 
-                [fromx-1, tox+1]->for(do:::(i) {
+                for(fromx-1, tox+1)::(i) {
                     addCavity(
                         x:i,
                         y:fromx_y
                     );                    
-                });
+                }
 
 
-                [fromy-1, toy+1]->for(do:::(i) {
+                for(fromy-1, toy+1)::(i) {
                     addCavity(
                         x:tox,
                         y:i
                     );                    
-                });
+                }
 
                 
-            });
-        };
+            }
+        }
     
         @:generateLayout :: {
             /*[0, 200]->for(do:::(i) {
@@ -261,24 +261,24 @@ return class(
                     
         
             
-            [0, ROOM_EMPTY_AREA_COUNT]->for(do:::(i) {
+            for(0, ROOM_EMPTY_AREA_COUNT)::(i) {
                 generateArea(
                     item:{
                         x:(Number.random()*ROOM_SIZE)->floor + GEN_OFFSET, 
                         y:(Number.random()*ROOM_SIZE)->floor + GEN_OFFSET
                     }
                 );                
-            });
+            }
             
             networkAreas();
             applyCavities();
             cleanupAreas();
-        };
+        }
 
 
 
         this.constructor = ::(mapHint => Object) {
-
+            self = this.instance;
 
             if (mapHint.roomAreaSize != empty) ROOM_AREA_SIZE = mapHint.roomAreaSize;
             if (mapHint.roomAreaSizeLarge != empty) ROOM_AREA_SIZE_LARGE = mapHint.roomAreaSize;
@@ -286,20 +286,20 @@ return class(
             if (mapHint.roomSize != empty) ROOM_SIZE = mapHint.roomSize;
 
 
-            this.paged = false;
-            this.width = ROOM_SIZE + GEN_OFFSET*2;
-            this.height = ROOM_SIZE + GEN_OFFSET*2;
-            this.renderOutOfBounds = true;
-            this.outOfBoundsCharacter = '`';
+            self.paged = false;
+            self.width = ROOM_SIZE + GEN_OFFSET*2;
+            self.height = ROOM_SIZE + GEN_OFFSET*2;
+            self.renderOutOfBounds = true;
+            self.outOfBoundsCharacter = '`';
 
-            if (mapHint.wallCharacter != empty) this.wallCharacter = mapHint.wallCharacter;
-            if (mapHint.outOfBoundsCharacter != empty) this.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
+            if (mapHint.wallCharacter != empty) self.wallCharacter = mapHint.wallCharacter;
+            if (mapHint.outOfBoundsCharacter != empty) self.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
 
 
-            this.obscure();
+            self.obscure();
             generateLayout();
-            return this;
-        };   
+            return self;
+        }   
         
         this.interface = {
             areas : {
@@ -310,6 +310,6 @@ return class(
                 return random.pickArrayItem(list:areas);
             }
         
-        }; 
+        } 
     }
 );

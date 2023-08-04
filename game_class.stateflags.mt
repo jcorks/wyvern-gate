@@ -20,18 +20,21 @@
 
 return class(
     name : 'Wyvern.StateFlag',
-    statics : {
-        HURT : 0,
-        WENT : 1,
-        HEALED : 2,
-        FALLEN : 3, // HP = 0
-        DIED : 4, // was hit with HP == 0
-        SKIPPED : 5,
-        DEFENDED : 6, // defended,
-        DEFEATED_ENEMY : 7,
-        DODGED_ATTACK : 8,
-        ATTACKED : 9,
-        ABILITY : 10,
+    statics :::<= {
+        @:s = {
+            HURT : 0,
+            WENT : 1,
+            HEALED : 2,
+            FALLEN : 3, // HP = 0
+            DIED : 4, // was hit with HP == 0
+            SKIPPED : 5,
+            DEFENDED : 6, // defended,
+            DEFEATED_ENEMY : 7,
+            DODGED_ATTACK : 8,
+            ATTACKED : 9,
+            ABILITY : 10
+        };
+        return {get::<- s}
     },
     define :::(this) {
         @set = [];
@@ -40,21 +43,21 @@ return class(
             add::(flag, flags) {
                 when(flags == empty) ::<= {
                     set[flag] = true;
-                };
+                }
                 
-                flags->foreach(do:::(index, flag) {
+                foreach(flags)::(index, flag) {
                     set[flag] = true;
-                });
+                }
             },
             
             unset::(flag, flags) {
                 when(flag) ::<= {
                     set[flag] = empty;
-                };
+                }
                 
-                flags->foreach(do:::(index, flag) {
+                foreach(flags)::(index, flag) {
                     set[flag] = empty;
-                });
+                }
             },
             
             has::(flag) {
@@ -64,7 +67,7 @@ return class(
             reset:: {
                 set = [];
             }            
-        };
+        }
     
     }
 );

@@ -51,27 +51,27 @@
     ));
     
     return (50 + (level*level * 0.1056) * 1000)->floor;
-};	
+}	
 
 @:statUp ::(level, growth => Number) {
 
     @:stat :: (potential, level) {
         when(potential <= 0) potential = 1;
         return 1 + ((level**0.65) + (Number.random()*4))->floor;
-    };
+    }
     return stat(potential:growth,  level:level+1);
 
 
-};
+}
 
 
 @:removeDuplicates ::(list) {
-    @:temp = {};
-    list->foreach(do:::(index, val) {
+    @:temp = {}
+    foreach(list)::(index, val) {
         temp[val] = val;
-    });
+    }
     return temp->keys;
-};
+}
 
 
 @:EQUIP_SLOTS = {
@@ -82,12 +82,12 @@
     RING_L : 4,
     RING_R : 5,
     TRINKET : 6
-};
+}
 
 @:Entity = class(
     name : 'Wyvern.Entity', 
     statics : {
-        EQUIP_SLOTS : EQUIP_SLOTS
+        EQUIP_SLOTS : {get::<- EQUIP_SLOTS}
    
     },
     
@@ -111,12 +111,11 @@
         @enemies_ = [];
         @allies_ = [];
         @battle_;
+        @self;
         @qualityDescription = empty;
         @abilitiesUsedBattle = empty;
         @adventurous = Number.random() <= 0.5;
-        @battleAI = BattleAI.new(
-            user: this
-        );
+        @battleAI;
         // requests removal from battle
         @requestsRemove = false;
         
@@ -142,12 +141,12 @@
         @:inventory = Inventory.new(size:10);
         inventory.addGold(amount:(Number.random() * 100)->ceil);
         
-        [0, 3]->for(do::(i) {
+        for(0, 3)::(i) {
             inventory.add(item:Item.Base.database.getRandomFiltered(
                     filter:::(value) <- value.isUnique == false && value.canHaveEnchants
                                             && value.tier <= story.tier
-                ).new(rngEnchantHint:true, from:this));
-        });
+                ).new(rngEnchantHint:true, from:self));
+        }
         @expNext = 10;
         @level = 0;
         @onInteract = empty;
@@ -156,35 +155,41 @@
         @:resetEffects :: {
             effects = [];
             
-            [0, EQUIP_SLOTS.RING_R+1]->for(do:::(slot) {
+            for(0, EQUIP_SLOTS.RING_R+1)::(slot) {
                 when(slot == EQUIP_SLOTS.HAND_R) empty;
-                equips[slot].equipEffects->foreach(do:::(index, effect) {
-                    this.addEffect(
-                        from:this, 
+                foreach(equips[slot].equipEffects)::(index, effect) {
+                    self.addEffect(
+                        from:self, 
                         name:effect, 
                         durationTurns: -1
                     );
-                });
-            });
+                }
+            }
             
             
-            profession.base.passives->foreach(do:::(index, passiveName) {
-                this.addEffect(
-                    from:this, 
+            foreach(profession.base.passives)::(index, passiveName) {
+                self.addEffect(
+                    from:self, 
                     name:passiveName, 
                     durationTurns: -1
                 );
-            });
+            }
             
       
-        };
+        }
 
 
         this.constructor = ::(speciesHint, professionHint, levelHint => Number, state) {
+            self = this.instance;
+               
+            battleAI = BattleAI.new(
+                user: self
+            );            
+            
             when(state != empty) ::<= {
-                this.state = state;
-                return this;
-            };
+                self.state = state;
+                return self;
+            }
             profession = if (professionHint == empty) 
                 Profession.Base.database.getRandomFiltered(
                     filter:::(value) <- levelHint >= value.levelMinimum
@@ -195,15 +200,15 @@
             professions->push(value:profession);
             if (speciesHint != empty) ::<= {
                 species = speciesHint;
-            };
+            }
             
             
             growth.mod(stats:species.growth);
             growth.mod(stats:personality.growth);
             growth.mod(stats:profession.base.growth);
-            [0, levelHint]->for(do:::(i) {
-                this.autoLevel();                
-            });
+            for(0, levelHint)::(i) {
+                self.autoLevel();                
+            }
 
             /*
             ::<={
@@ -214,19 +219,19 @@
                         
                     );
                     if (item.name != 'None') ::<={
-                        @:itemInstance = item.new(from:this);
+                        @:itemInstance = item.new(from:self);
                         if (itemInstance.enchantsCount == 0) 
                             inventory.add(item:itemInstance);
-                    };
+                    }
                     
                     
                 });
                 
-            };
+            }
             */
 
-            return this;
-        };
+            return self;
+        }
         
         this.interface = {
             state : {
@@ -238,10 +243,10 @@
                     nickname = value.nickname;
                     species = Species.database.find(name:value.speciesName);
                     professions = [];
-                    value.professions->foreach(do:::(index, profState) {
+                    foreach(value.professions)::(index, profState) {
                         @:p = Profession.Base.database.find(name:profState.baseName).new(state:profState);
                         professions->push(value:p);
-                    });                
+                    }
                     profession = professions[value.professionIndex];
                     personality = Personality.database.find(name:value.personalityName);
                     favoritePlace = Location.Base.database.find(name:value.favoritePlace);
@@ -250,22 +255,22 @@
                     battleAI.state = value.battleAI;
                     level = value.level;
                     expNext = value.expNext;
-                    equips->foreach(do:::(index, eq) {
+                    foreach(equips)::(index, eq) {
                         @:data = value.equips[index];
                         when(index == EQUIP_SLOTS.HAND_R) empty;
                         when(data.baseName == 'None') empty;
-                        this.equip(slot:index, silent:true, inventory:inventory, item:Item.Base.database.find(name:data.baseName).new(state:data));
-                    });
+                        self.equip(slot:index, silent:true, inventory:inventory, item:Item.Base.database.find(name:data.baseName).new(state:data));
+                    }
                     
                     inventory.state = value.inventory;
                     abilitiesLearned = [];
-                    value.abilitiesLearned->foreach(do:::(index, name) {
+                    foreach(value.abilitiesLearned)::(index, name) {
                         abilitiesLearned->push(value:Ability.database.find(name));
-                    });
+                    }
                     abilitiesAvailable = [];
-                    value.abilitiesAvailable->foreach(do:::(index, name) {
+                    foreach(value.abilitiesAvailable)::(index, name) {
                         abilitiesAvailable->push(value:Ability.database.find(name));
-                    });
+                    }
                     
                 },
             
@@ -290,7 +295,7 @@
                         inventory : inventory.state,
                         abilitiesLearned : [...abilitiesLearned]->map(to:::(value) <- value.name),
                         abilitiesAvailable : [...abilitiesAvailable]->map(to:::(value) <- value.name),
-                    };
+                    }
                 }
             },
         
@@ -299,8 +304,8 @@
             // This does things like reset stats according to 
             // effects and such.
             startTurn :: {
-                this.recalculateStats();             
-                this.flags.reset();
+                self.recalculateStats();             
+                self.flags.reset();
             },
             
             // called to signal that a battle has started involving this entity
@@ -313,7 +318,7 @@
                 enemies_ = enemies;
                 allies_ = allies;
                 requestsRemove = false;
-                abilitiesUsedBattle = {};
+                abilitiesUsedBattle = {}
                 resetEffects();              
             },
             
@@ -325,14 +330,14 @@
             // called to signal that a battle has started involving this entity
             battleEnd :: {
                 battle_ = empty;
-                effects->foreach(do:::(index, effect) {
+                foreach(effects)::(index, effect) {
 
                     effect.effect.onRemoveEffect(
                         user:effect.from, 
-                        holder:this,
+                        holder:self,
                         item:effect.item
                     );
-                });
+                }
                 allies_ = [];
                 enemies_ = [];
                 abilitiesUsedBattle = empty;                
@@ -342,15 +347,15 @@
             
             recalculateStats :: {
                 stats.resetMod();
-                effects->foreach(do:::(index, effect) {
-                    effect.effect.onStatRecalculate(user:effect.from, stats, holder:this, item:effect.item);
+                foreach(effects)::(index, effect) {
+                    effect.effect.onStatRecalculate(user:effect.from, stats, holder:self, item:effect.item);
                     stats.modRate(stats:effect.effect.stats);
-                });
+                }
 
-                equips->foreach(do:::(index, equip) {
+                foreach(equips)::(index, equip) {
                     when(index == EQUIP_SLOTS.HAND_R) empty;
                     stats.modRate(stats:equip.equipMod);
-                });
+                }
             },
             
             personality : {
@@ -358,43 +363,43 @@
             },
             
             endTurn ::(battle) {
-                EQUIP_SLOTS->foreach(do:::(str, i) {
+                foreach(EQUIP_SLOTS)::(str, i) {
                     when(i == 0 && equips[0] == equips[1]) empty;
-                    equips[i].onTurnEnd(wielder:this, battle);
-                });
+                    equips[i].onTurnEnd(wielder:self, battle);
+                }
             },
 
             // lets the entity know that their turn has come.            
             actTurn ::() => Boolean {
                 @act = true;
-                effects->foreach(do:::(index, effect) {                        
+                foreach(effects)::(index, effect) {                        
                     if (effect.duration != -1 && effect.turnIndex >= effect.duration) ::<= {
                         effect.effect.onRemoveEffect(
                             user:effect.from, 
-                            holder:this,
+                            holder:self,
                             item:effect.item
                         );
                         effects->remove(key:index);
                     } else ::<= {
                         if (effect.effect.skipTurn == true)
                             act = false;
-                        effect.effect.onNextTurn(user:effect.from, turnIndex:effect.turnIndex, turnCount: effect.duration, holder:this, item:effect.item);                    
+                        effect.effect.onNextTurn(user:effect.from, turnIndex:effect.turnIndex, turnCount: effect.duration, holder:self, item:effect.item);                    
                         effect.turnIndex += 1;
-                    };
-                });
+                    }
+                }
                 
-                if (this.stats.SPD < 0) ::<= {
-                    windowEvent.queueMessage(text:this.name + ' cannot move due to negative speed!');
+                if (self.stats.SPD < 0) ::<= {
+                    windowEvent.queueMessage(text:self.name + ' cannot move due to negative speed!');
                     act = false;
-                };
+                }
 
-                if (this.stats.DEX < 0) ::<= {
-                    windowEvent.queueMessage(text:this.name + ' fumbles about due to negative dexterity!');
+                if (self.stats.DEX < 0) ::<= {
+                    windowEvent.queueMessage(text:self.name + ' fumbles about due to negative dexterity!');
                     act = false;
-                };
+                }
 
                 if (act == false)
-                    this.flags.add(flag:StateFlags.SKIPPED);
+                    self.flags.add(flag:StateFlags.SKIPPED);
                 return act;
             },
 
@@ -437,15 +442,15 @@
                 },
                 
                 set ::(value => Profession.type) {
-                    profession = [::]{
-                        professions->foreach(do:::(index, prof) {
+                    profession = {:::}{
+                        foreach(professions)::(index, prof) {
                             if (value.base.name == prof.base.name) ::<= {
                                 send(message:prof);
-                            };
-                        });
+                            }
+                        }
                         professions->push(value);
                         return value;
-                    };            
+                    }            
                     
                                         
                     growth.resetMod();
@@ -469,12 +474,12 @@
                 @:numFilled = ((length - 2) * (hp / stats.HP))->floor;
                 
                 @out = ' ';
-                [0, numFilled]->for(do:::(i) {
+                for(0, numFilled)::(i) {
                     out = out+'▓';
-                });
-                [0, length - numFilled - 2]->for(do:::(i) {
+                }
+                for(0, length - numFilled - 2)::(i) {
                     out = out+'▁';
-                });
+                }
                 return out + ' ';
                 
             },
@@ -494,7 +499,7 @@
                 amount => Number,
                 damageType => Number,
                 damageClass => Number,
-                target => this.type
+                target => Entity.type
             ){
                 @:dmg = Damage.new(
                     amount,
@@ -505,52 +510,52 @@
                 @:damaged = [];
                 // TODO: add weapon affinities if phys and equip weapon
                 // phys is always assumed to be with equipped weapon
-                effects->foreach(do:::(index, effect) {
+                foreach(effects)::(index, effect) {
                     when (dmg.amount <= 0) empty;
-                    effect.effect.onPreAttackOther(user:effect.from, item:effect.item, holder:this, to:target, damage:dmg);
-                });
+                    effect.effect.onPreAttackOther(user:effect.from, item:effect.item, holder:self, to:target, damage:dmg);
+                }
                 
                 when(dmg.amount <= 0) empty;
-                target.effects->foreach(do:::(index, effect) {
+                foreach(target.effects)::(index, effect) {
                     when (dmg.amount <= 0) empty;
-                    effect.effect.onAttacked(user:target, item:effect.item, holder:target, by:this, damage:dmg);                
-                });
+                    effect.effect.onAttacked(user:target, item:effect.item, holder:target, by:self, damage:dmg);                
+                }
                 
 
                 when(dmg.amount <= 0) empty;
                 when(target.hp == 0) ::<= {
-                    this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
+                    self.flags.add(flag:StateFlags.DEFEATED_ENEMY);
                     target.flags.add(flag:StateFlags.DIED);
                     target.kill();                
-                };
+                }
 
-                @critChance = 0.999 - (this.stats.LUK - level) / 100;
+                @critChance = 0.999 - (self.stats.LUK - level) / 100;
                 @isCrit = false;
                 if (critChance < 0.90) critChance = 0.9;
                 if (Number.random() > critChance) ::<={
-                    dmg.amount += this.stats.DEX * 2.5;
+                    dmg.amount += self.stats.DEX * 2.5;
                     isCrit = true;
-                };
+                }
 
-                when(!target.damage(from:this, damage:dmg, dodgeable:true, critical:isCrit)) empty;
+                when(!target.damage(from:self, damage:dmg, dodgeable:true, critical:isCrit)) empty;
 
 
-                this.flags.add(flag:StateFlags.ATTACKED);
+                self.flags.add(flag:StateFlags.ATTACKED);
 
 
                 
-                effects->foreach(do:::(index, effect) {
-                    effect.effect.onPostAttackOther(user:effect.from, item:effect.item, holder:this, to:target);
-                });
+                foreach(effects)::(index, effect) {
+                    effect.effect.onPostAttackOther(user:effect.from, item:effect.item, holder:self, to:target);
+                }
                 return true;
             },
             
-            damage ::(from => this.type, damage => Damage.type, dodgeable => Boolean, critical) {
+            damage ::(from => Entity.type, damage => Damage.type, dodgeable => Boolean, critical) {
                 when(isDead) empty;
 
                 @whiff = false;
                 if (dodgeable) ::<= {
-                    @diffpercent = (from.stats.DEX - this.stats.DEX) / this.stats.DEX;
+                    @diffpercent = (from.stats.DEX - self.stats.DEX) / self.stats.DEX;
                     // if attacker dex is above target dex, hit always connects
                     when(diffpercent > 0) empty;
                     
@@ -559,26 +564,26 @@
                     if (diffpercent < 0.5) diffpercent = 0.5;
                     if (Number.random() > diffpercent)
                         whiff = true;
-                };
+                }
                 
                 when(whiff) ::<= {
                     windowEvent.queueMessage(text:random.pickArrayItem(list:[
-                        this.name + ' lithely dodges ' + from.name + '\'s attack!',                 
-                        this.name + ' narrowly dodges ' + from.name + '\'s attack!',                 
-                        this.name + ' dances around ' + from.name + '\'s attack!',                 
-                        from.name + '\'s attack completely misses ' + this.name + '!'
+                        self.name + ' lithely dodges ' + from.name + '\'s attack!',                 
+                        self.name + ' narrowly dodges ' + from.name + '\'s attack!',                 
+                        self.name + ' dances around ' + from.name + '\'s attack!',                 
+                        from.name + '\'s attack completely misses ' + self.name + '!'
                     ]));
-                    this.flags.add(flag:StateFlags.DODGED_ATTACK);
+                    self.flags.add(flag:StateFlags.DODGED_ATTACK);
                     return false;
-                };
+                }
 
 
 
-                if (from.stats.DEX > this.stats.DEX)               
+                if (from.stats.DEX > self.stats.DEX)               
                     // as DEX increases: randomness decreases 
                     // amount of reliable damage increases
                     // This models user skill vs receiver skill
-                    damage.amount = damage.amount + damage.amount * ((Number.random() - 0.5) * (this.stats.DEX / from.stats.DEX) + (1 -  this.stats.DEX / from.stats.DEX))
+                    damage.amount = damage.amount + damage.amount * ((Number.random() - 0.5) * (self.stats.DEX / from.stats.DEX) + (1 -  self.stats.DEX / from.stats.DEX))
                 else
                     damage.amount = damage.amount + damage.amount * (Number.random() - 0.5)
                 ; 
@@ -590,9 +595,9 @@
                 if (damage.amount <= 0) damage.amount = 1;
 
 
-                effects->foreach(do:::(index, effect) {
-                    effect.effect.onDamage(user:effect.from, holder:this, from, damage);
-                });
+                foreach(effects)::(index, effect) {
+                    effect.effect.onDamage(user:effect.from, holder:self, from, damage);
+                }
 
 
                 when (damage.amount == 0) false;
@@ -613,24 +618,24 @@
                       (Damage.TYPE.PHYS): 'physical ',
                       (Damage.TYPE.POISON): 'poison ',
                       (Damage.TYPE.NEUTRAL): ''
-                    };
-                };
+                    }
+                }
                 
                 if (damage.damageClass == Damage.CLASS.HP) ::<= {
                     hp -= damage.amount;
                     if (hp < 0) hp = 0;
-                    windowEvent.queueMessage(text: '' + this.name + ' received ' + damage.amount + ' '+damageTypeName() + 'damage (HP:' + this.renderHP() + ')' );
+                    windowEvent.queueMessage(text: '' + self.name + ' received ' + damage.amount + ' '+damageTypeName() + 'damage (HP:' + self.renderHP() + ')' );
                 } else ::<= {
                     ap -= damage.amount;
                     if (ap < 0) ap = 0;                
-                    windowEvent.queueMessage(text: '' + this.name + ' received ' + damage.amount + ' AP damage (AP:' + ap + '/' + stats.AP + ')' );
+                    windowEvent.queueMessage(text: '' + self.name + ' received ' + damage.amount + ' AP damage (AP:' + ap + '/' + stats.AP + ')' );
 
-                };
+                }
                 @:world = import(module:'game_singleton.world.mt');
 
-                if (world.party.isMember(entity:this) && damage.amount > stats.HP * 0.2 && Number.random() > 0.7)
+                if (world.party.isMember(entity:self) && damage.amount > stats.HP * 0.2 && Number.random() > 0.7)
                     windowEvent.queueMessage(
-                        speaker: this.name,
+                        speaker: self.name,
                         text: '"' + random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.HURT]) + '"'
                     );
                     
@@ -638,33 +643,33 @@
                 flags.add(flag:StateFlags.HURT);
                 
                 if (damage.damageType == Damage.TYPE.FIRE && Number.random() > 0.9)
-                    this.addEffect(from, name:'Burned',durationTurns:5);
+                    self.addEffect(from, name:'Burned',durationTurns:5);
                 if (damage.damageType == Damage.TYPE.ICE && Number.random() > 0.9)
-                    this.addEffect(from, name:'Frozen',durationTurns:2);
+                    self.addEffect(from, name:'Frozen',durationTurns:2);
                 if (damage.damageType == Damage.TYPE.THUNDER && Number.random() > 0.9)
-                    this.addEffect(from, name:'Paralyzed',durationTurns:2);
+                    self.addEffect(from, name:'Paralyzed',durationTurns:2);
                 if (damage.damageType == Damage.TYPE.PHYS && Number.random() > 0.99) 
-                    this.addEffect(from, name:'Bleeding',durationTurns:5);
+                    self.addEffect(from, name:'Bleeding',durationTurns:5);
                 if (damage.damageType == Damage.TYPE.POISON && Number.random() > 0.9) 
-                    this.addEffect(from, name:'Poisoned',durationTurns:5);
+                    self.addEffect(from, name:'Poisoned',durationTurns:5);
                 if (damage.damageType == Damage.TYPE.DARK && Number.random() > 0.9)
-                    this.addEffect(from, name:'Blind',durationTurns:2);
+                    self.addEffect(from, name:'Blind',durationTurns:2);
                 if (damage.damageType == Damage.TYPE.LIGHT && Number.random() > 0.9)
-                    this.addEffect(from, name:'Petrified',durationTurns:2);
+                    self.addEffect(from, name:'Petrified',durationTurns:2);
                 
                 
-                if (world.party.isMember(entity:this) && hp == 0 && Number.random() > 0.7) ::<= {
+                if (world.party.isMember(entity:self) && hp == 0 && Number.random() > 0.7) ::<= {
                     windowEvent.queueMessage(
-                        speaker: this.name,
+                        speaker: self.name,
                         text: '"' + random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.DEATH]) + '"'
                     );
-                };
+                }
                 
                 if (hp == 0) ::<= {
-                    windowEvent.queueMessage(text: '' + this.name + ' has been knocked out.');                                
-                    this.flags.add(flag:StateFlags.FALLEN);
+                    windowEvent.queueMessage(text: '' + self.name + ' has been knocked out.');                                
+                    self.flags.add(flag:StateFlags.FALLEN);
                     from.flags.add(flag:StateFlags.DEFEATED_ENEMY);
-                };
+                }
 
                 return true;
             },
@@ -678,10 +683,10 @@
                 when(hp >= stats.HP) empty;
                 amount = amount->ceil;
                 hp += amount;
-                this.flags.add(flag:StateFlags.HEALED);
+                self.flags.add(flag:StateFlags.HEALED);
                 if (hp > stats.HP) hp = stats.HP;
                 if (silent == empty)
-                    windowEvent.queueMessage(text: '' + this.name + ' heals ' + amount + ' HP (HP:' + this.renderHP() + ')');
+                    windowEvent.queueMessage(text: '' + self.name + ' heals ' + amount + ' HP (HP:' + self.renderHP() + ')');
             },
             
             healAP ::(amount => Number, silent) {
@@ -689,7 +694,7 @@
                 ap += amount;
                 if (ap > stats.AP) ap = stats.AP;
                 if (silent == empty)
-                    windowEvent.queueMessage(text: '' + this.name + ' heals ' + amount + ' AP (AP:' + ap + '/' + stats.AP + ')');
+                    windowEvent.queueMessage(text: '' + self.name + ' heals ' + amount + ' AP (AP:' + ap + '/' + stats.AP + ')');
                 
                 
             },
@@ -706,13 +711,13 @@
             },
             
             gainExp ::(amount => Number, chooseStat, afterLevel) {
-                [::] {
-                    forever(do:::{
+                {:::} {
+                    forever ::{
                         when(amount <= 0) send();
                         when(amount < expNext) ::<={
                             expNext -= amount;
                             send();
-                        };
+                        }
                         
                         amount -= expNext;
                         expNext = levelUp(
@@ -761,14 +766,14 @@
                             
                             
                         
-                        };
+                        }
                         if (afterLevel != empty) afterLevel();
                         hp = stats.HP;
                         ap = stats.AP;
                         level += 1;
-                    });
-                };
-                this.recalculateStats();                
+                    }
+                }
+                self.recalculateStats();                
             },
             
             stats : {
@@ -778,7 +783,7 @@
             },
             
             autoLevel :: {
-                this.gainExp(amount:expNext);  
+                self.gainExp(amount:expNext);  
             },
             
             dropExp :: {
@@ -804,7 +809,7 @@
             kill ::(silent) {
                 hp = 0;
                 if (silent == empty)
-                    windowEvent.queueMessage(text: '' + this.name + ' has died!');                
+                    windowEvent.queueMessage(text: '' + self.name + ' has died!');                
                 flags.add(flag:StateFlags.DIED);
                 isDead = true;                
             },
@@ -821,7 +826,7 @@
                     einst.turnIndex = 0;
                     einst.item = item;
                     einst.from = from;
-                };
+                }
                 
                 @einst = {
                     from: from,
@@ -829,7 +834,7 @@
                     effect : effect,
                     duration: durationTurns,
                     turnIndex: 0
-                };
+                }
                 if (einst.effect == empty || einst.duration->type != Number) error(detail:'Bad addEffect() call: effect or duration was invalid.');                
                 if (durationTurns != 0)
                     effects->push(value:einst);
@@ -837,10 +842,10 @@
 
                 einst.effect.onAffliction(
                     user:from, 
-                    holder:this,
+                    holder:self,
                     item
                 );
-                this.recalculateStats();
+                self.recalculateStats();
 
             },
             
@@ -856,23 +861,23 @@
                     
                         value.effect.onRemoveEffect(
                             user:value.from, 
-                            holder:this,
+                            holder:self,
                             item:value.item
                         );
-                    };
+                    }
                 });
             },
             
             abilitiesAvailable : {
                 get :: {
                     @out = [...abilitiesAvailable];
-                    EQUIP_SLOTS->foreach(do::(i, val) {
+                    foreach(EQUIP_SLOTS)::(i, val) {
                         if (equips[val] != empty && equips[val].ability != empty) ::<= {
                             @:ab = Ability.database.find(name:equips[val].ability);
                             when(out->findIndex(value:ab) != -1) empty;
                             out->push(value:ab);
-                        };
-                    });
+                        }
+                    }
                     return out;
                 }
             },
@@ -888,11 +893,11 @@
             },
             
             learnNextAbility::{
-                @:skills = this.profession.gainSP(amount:1);
+                @:skills = self.profession.gainSP(amount:1);
                 when(skills == empty) empty;
-                skills->foreach(do:::(i, skill) {
-                    this.learnAbility(name:skill);
-                });
+                foreach(skills)::(i, skill) {
+                    self.learnAbility(name:skill);
+                }
             },
             
             clearAbilities::{
@@ -931,20 +936,20 @@
             },
             
             equip ::(item => none->type, slot => Number, silent, inventory => Inventory.type) {
-                this.recalculateStats();
+                self.recalculateStats();
                 @:oldstats = StatSet.new();
-                oldstats.add(stats: this.stats);
+                oldstats.add(stats: self.stats);
 
                 @olditem = equips[slot];
         
-                when (this.getSlotsForItem(item)->findIndex(value:slot) == -1) ::<= {
+                when (self.getSlotsForItem(item)->findIndex(value:slot) == -1) ::<= {
                     when(silent) empty;
                     error(detail:'Item does not enter the given slot.');
-                };
+                }
 
 
 
-                @:old = this.unequip(slot, silent:true);                
+                @:old = self.unequip(slot, silent:true);                
 
 
                 if (old != empty)
@@ -955,49 +960,49 @@
                     equips[EQUIP_SLOTS.HAND_R] = item;
                 } else ::<= {
                     equips[slot] = item;
-                };
+                }
                 
                 
-                item.equipEffects->foreach(do:::(index, effect) {
-                    this.addEffect(
-                        from:this, 
+                foreach(item.equipEffects)::(index, effect) {
+                    self.addEffect(
+                        from:self, 
                         name:effect, 
                         durationTurns: -1
                     );
-                });
+                }
 
                 if ((slot == EQUIP_SLOTS.HAND_L || slot == EQUIP_SLOTS.HAND_R) && profession.base.weaponAffinity == equips[EQUIP_SLOTS.HAND_L].base.name) ::<= {
                     if (silent != true) ::<= {
                         windowEvent.queueMessage(
-                            speaker: this.name,
+                            speaker: self.name,
                             text: '"This ' + item.base.name + ' really works for me as ' + correctA(word:profession.base.name) + '"'
                         );
-                    };
-                    this.addEffect(
-                        from:this,
+                    }
+                    self.addEffect(
+                        from:self,
                         name:'Weapon Affinity',
                         durationTurns: -1 
                     );
-                };
+                }
 
 
 
                 inventory.remove(item);
                 
-                this.recalculateStats();
+                self.recalculateStats();
 
                 
                 if (silent != true) ::<={
                     if (olditem.name == 'None') ::<= {
-                        windowEvent.queueMessage(text:this.name + ' has equipped the ' + item.name + '.');                    
+                        windowEvent.queueMessage(text:self.name + ' has equipped the ' + item.name + '.');                    
                     } else ::<= {
-                        windowEvent.queueMessage(text:this.name + ' unequipped the ' + olditem.name + ' and equipped the ' + item.name + '.');                    
-                    };
-                    oldstats.printDiff(prompt: '(Equipped: ' + item.name + ')', other:this.stats);
-                };
+                        windowEvent.queueMessage(text:self.name + ' unequipped the ' + olditem.name + ' and equipped the ' + item.name + '.');                    
+                    }
+                    oldstats.printDiff(prompt: '(Equipped: ' + item.name + ')', other:self.stats);
+                }
             },
             anonymize :: {
-                this.nickname = 'the ' + this.species.name + (if(this.profession.base.name == 'None') '' else ' ' + this.profession.base.name);            
+                self.nickname = 'the ' + self.species.name + (if(self.profession.base.name == 'None') '' else ' ' + self.profession.base.name);            
             },
             
             getEquipped::(slot => Number) {
@@ -1020,7 +1025,7 @@
                     (Item.TYPE.TRINKET)  :  [EQUIP_SLOTS.TRINKET],
                     (Item.TYPE.TWOHANDED):  [EQUIP_SLOTS.HAND_L, EQUIP_SLOTS.HAND_R],
                     default: error(detail:'Item has an invalid equiptype?')      
-                };
+                }
             },
             
             
@@ -1031,52 +1036,52 @@
                     equips[EQUIP_SLOTS.HAND_R] = none;                                
                 } else ::<={
                     equips[slot] = none;                
-                };
+                }
                 if (profession.base.weaponAffinity == current.base.name)
                     effects->remove(key:effects->findIndex(query::(value) <- value.effect.name == 'Weapon Affinity'));
                 
 
 
                 
-                current.equipEffects->foreach(do:::(i, effect) {
+                foreach(current.equipEffects)::(i, effect) {
                     @:effectObj = effects->filter(by:::(value) <- value.effect.name == effect)[0];
                     effectObj.effect.onRemoveEffect(
                         user:effectObj.from, 
-                        holder:this,
+                        holder:self,
                         item:effectObj.item
                     );
                     
                     effects->remove(key:effects->findIndex(value:effectObj));
-                });
+                }
                 
                 
-                this.recalculateStats();
+                self.recalculateStats();
                 return current;
             },
             unequipItem ::(item, silent) {
-                equips->foreach(do:::(slot, equip) {
+                foreach(equips)::(slot, equip) {
                     if (equip == item)
-                        this.unequip(slot, silent);
-                });
+                        self.unequip(slot, silent);
+                }
             },
             
             useAbility::(ability, targets, turnIndex, extraData) {
                 when(ap < ability.apCost) windowEvent.queueMessage(
-                    text: this.name + " tried to use " + ability.name + ", but couldn\'t muster the mental strength!"
+                    text: self.name + " tried to use " + ability.name + ", but couldn\'t muster the mental strength!"
                 );
                 when(hp < ability.hpCost) windowEvent.queueMessage(
-                    text: this.name + " tried to use " + ability.name + ", but couldn't muster the strength!"
+                    text: self.name + " tried to use " + ability.name + ", but couldn't muster the strength!"
                 );
                 
                 when (abilitiesUsedBattle != empty && ability.oncePerBattle && abilitiesUsedBattle[ability.name] == true) windowEvent.queueMessage(
-                    text: this.name + " tried to use " + ability.name + ", but it worked the first time!"
+                    text: self.name + " tried to use " + ability.name + ", but it worked the first time!"
                 );
                 if (abilitiesUsedBattle) abilitiesUsedBattle[ability.name] = true;
                 
                 ap -= ability.apCost;
                 hp -= ability.hpCost;
                 ability.onAction(
-                    user:this,
+                    user:self,
                     targets, turnIndex, extraData                 
                 );
             
@@ -1089,7 +1094,7 @@
                 @:finish ::{
                     onDone();
                     windowEvent.jumpToTag(name:'InteractPerson', goBeforeTag:true, doResolveNext:true);
-                };
+                }
                 
                 windowEvent.queueMessage(
                     speaker: name,
@@ -1123,7 +1128,7 @@
                           
                           // hire 
                           (1): ::<= {
-                            when(party.isMember(entity:this))
+                            when(party.isMember(entity:self))
                                 windowEvent.queueMessage(
                                     text: name + ' is already a party member.'
                                 );                
@@ -1142,7 +1147,7 @@
                             @:cost = 50+((stats.sum/3 + level)*2.5)->ceil;
 
 
-                            this.describe();
+                            self.describe();
 
                             windowEvent.queueAskBoolean(
                                 prompt: 'Hire for ' + cost + 'G?',
@@ -1154,7 +1159,7 @@
                                         );                
                                         
                                     party.inventory.subtractGold(amount:cost);
-                                    party.add(member:this);
+                                    party.add(member:self);
                                         windowEvent.queueMessage(
                                             text: name + ' joins the party!'
                                         );                
@@ -1169,7 +1174,7 @@
                                 windowEvent.queueMessage(
                                     text: name + ' has nothing to barter with.'
                                 );                
-                            };
+                            }
                             @:item = inventory.items[0];
 
                             windowEvent.queueMessage(
@@ -1183,7 +1188,7 @@
                                 windowEvent.queueMessage(
                                     text: 'You have no such items to trade, sadly.'
                                 );                                                 
-                            };
+                            }
                             
 
 
@@ -1207,7 +1212,7 @@
                                                 
                                                 @:chosenItem = tradeItems[choice-1];
                                                 party.inventory.remove(item:chosenItem);
-                                                this.inventory.remove(item);
+                                                self.inventory.remove(item);
                                                 party.inventory.add(item);
                                                 
                                                 windowEvent.queueMessage(
@@ -1240,7 +1245,7 @@
                                             }
                                         );
                                       }  
-                                    };   
+                                    }   
                                 }
                             );
 
@@ -1249,7 +1254,7 @@
                             
                           }
                         
-                        };                    
+                        }                    
                     }
                 );  
 
@@ -1289,14 +1294,14 @@
                 when (qualityDescription) qualityDescription;
                 
                 @qualities = [];
-                species.qualities->foreach(do:::(i, qual) {
+                foreach(species.qualities)::(i, qual) {
                     @:q = EntityQuality.Base.database.find(name:qual);
                     if (q.appearanceChance == 1 || Number.random() < q.appearanceChance)
                         qualities->push(value:q.new());
-                });
+                }
 
             
-                @out = this.name + ' is ' + correctA(word:species.name) + '. ';
+                @out = self.name + ' is ' + correctA(word:species.name) + '. ';
                 @:quals = [...qualities];
 
                 // inefficient, but idc                
@@ -1309,18 +1314,18 @@
                                 (if (qual1.plural) ' are ' else ' is ') 
                             + qual1.description + '. ',
                             
-                        this.name + '\'s ' + qual0.name + 
+                        self.name + '\'s ' + qual0.name + 
                                 (if (qual0.plural) ' are ' else ' is ') 
                             + qual0.description + ', and they have '
                             + qual1.name + 
                                 (if (qual1.plural) ' which are ' else ' which is ') 
                             + qual1.description + '. ',
                     ])[index];
-                };
+                }
 
                 @:describeSingle::(qual, index) {
                     return ([
-                        this.name + '\'s ' + qual.name + 
+                        self.name + '\'s ' + qual.name + 
                                 (if (qual.plural) ' are ' else ' is ') 
                             + qual.description + '. ',
 
@@ -1341,7 +1346,7 @@
                                 (if (qual.plural) ' are fairly ' else ' is fairly ') 
                             + qual.description + '. '
                     ])[index];
-                };
+                }
                 
                 @:singleChoices = [0, 1, 2, 3, 4];
                 @:dualChoices = [0, 1];
@@ -1351,13 +1356,13 @@
                     @:out = list[index];
                     list->remove(key:index);
                     return out;
-                };
+                }
                 
                 // when we pick descriptive sentences, we dont want to 
                 // reuse structures more than once except for the unflourished 
                 // one.
-                [::] {
-                    forever(do::{
+                {:::} {
+                    forever ::{
                         when(quals->keycount == 0) send();
                         
                         @single = if (quals->keycount >= 2) (Number.random() < 0.5) else true;
@@ -1379,10 +1384,10 @@
                             else                                
                                 pickDescriptionChoice(list:singleChoices);                                
                             out = out + describeSingle(qual, index);                        
-                        };
-                    });
+                        }
+                    }
                     
-                };
+                }
                 qualityDescription = out;
                 return out;
             },
@@ -1391,36 +1396,36 @@
                 @:plainStats = StatSet.new();
                 stats.resetMod();
                 plainStats.add(stats);
-                this.recalculateStats();
+                self.recalculateStats();
 
                 @:modRate = StatSet.new();
-                effects->foreach(do:::(index, effect) {
-                    effect.effect.onStatRecalculate(user:effect.from, stats, holder:this, item:effect.item);
+                foreach(effects)::(index, effect) {
+                    effect.effect.onStatRecalculate(user:effect.from, stats, holder:self, item:effect.item);
                     modRate.add(stats:effect.effect.stats);
-                });
+                }
 
-                equips->foreach(do:::(index, equip) {
+                foreach(equips)::(index, equip) {
                     when(index == EQUIP_SLOTS.HAND_R) empty;
                     modRate.add(stats:equip.equipMod);
-                });
+                }
                 
 
                 plainStats.printDiff(other:stats, 
-                    prompt:this.name + '(Base -> w/Mods.)'
+                    prompt:self.name + '(Base -> w/Mods.)'
                 );
                 
                 windowEvent.queueMessageSet(
-                    speaker: this.name,
+                    speaker: self.name,
                     pageAfter:canvas.height-4,
                     set: [ 
                           '       Name: ' + name + '\n\n' +
-                          '         HP: ' + this.hp + ' / ' + this.stats.HP + '\n' + 
-                          '         AP: ' + this.ap + ' / ' + this.stats.AP + '\n\n' + 
+                          '         HP: ' + self.hp + ' / ' + self.stats.HP + '\n' + 
+                          '         AP: ' + self.ap + ' / ' + self.stats.AP + '\n\n' + 
                           '    species: ' + species.name + '\n' +
                           ' profession: ' + profession.base.name + '\n' +
                           'personality: ' + personality.name + '\n\n'
                          ,
-                         this.describeQualities()
+                         self.describeQualities()
                          ,
                          
                           ' -Equipment-  \n'                
@@ -1439,9 +1444,9 @@
                          ,
                           ::<= {
                             @out = ' - Effects - \n\n';
-                            effects->foreach(do:::(index, effect) {
+                            foreach(effects)::(index, effect) {
                                 out = out + effect.effect.name + ': ' + effect.effect.description + '\n';
-                            });
+                            }
                             return out;
                          }
                      ]                                   
@@ -1455,7 +1460,7 @@
             }
             
 
-        };
+        }
         
         
     }

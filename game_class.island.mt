@@ -35,7 +35,7 @@
     HUMID : 4,
     SNOWY : 5,
     COLD : 6
-};
+}
 
 @:hexKey = [
     '0',
@@ -59,17 +59,17 @@
 @:genID :: {
     @:genHex :: {
         return hexKey[(Number.random()*16)->floor];
-    };
+    }
     
     @:genBlock :: {
         return genHex() + genHex() + genHex() + genHex();
-    };
+    }
     
     return genBlock() + '-' +
            genBlock() + '-' +
            genBlock() + '-' +
            genBlock();
-};
+}
 
 
 // todo: database.
@@ -78,7 +78,7 @@
 @:Island = class(
     name: 'Wyvern.Island',
     statics : {
-        CLIMATE : CLIMATE,
+        CLIMATE : {get::<-CLIMATE},
         
         climateToString::(climate) {
             return match(climate) {
@@ -89,7 +89,7 @@
                 (4): 'humid',
                 (5): 'snowy',
                 (6): 'cold'         
-            };
+            }
         },
         
         
@@ -100,7 +100,7 @@
               (rate < 0.6): 'It is relatively peaceful',
               (rate < 0.8): 'It is slightly chaotic.',
               default: 'It is very chaotic.'
-            };
+            }
         }
     },
     define:::(this) {
@@ -133,8 +133,8 @@
 
         
         @climate = random.integer(
-            from:this.class.CLIMATE.WARM, 
-            to  :this.class.CLIMATE.COLD
+            from:Island.CLIMATE.WARM, 
+            to  :Island.CLIMATE.COLD
         );
         
         @events = []; //array of Events
@@ -172,14 +172,14 @@
                     rarity: rarity *= 1.4
                 }
             );
-        };
+        }
 
 
 
         // Islands have a set number of landmarks.
 
 
-        @significantLandmarks = {};
+        @significantLandmarks = {}
 
         // augments an entity based on the current tier
         @augmentTiered = ::(entity) {
@@ -223,9 +223,9 @@
 
               // tier 3: learn 1 to 2 skills and get equips
               (3):::<= {
-                [0, 10]->for(do:::(i) {
+                for(0, 10)::(i) {
                     entity.learnNextAbility();                
-                });
+                }
 
               
                 @:Item = import(module:'game_class.item.mt');
@@ -249,9 +249,9 @@
               
               // tier 2: learn 1 to 2 skills and get equips
               (4):::<= {
-                [0, 10]->for(do:::(i) {
+                for(0, 10)::(i) {
                     entity.learnNextAbility();                
-                });
+                }
 
               
                 @:Item = import(module:'game_class.item.mt');
@@ -291,19 +291,20 @@
               }             
               
               
-            };        
-        };
+            }        
+        }
 
-
+        @self;
         this.constructor = ::(world => Object, levelHint => Number, party => Party.type, nameHint, state, tierHint => Number) {
+            self = this.instance;
             world_ = world;            
             party_ = party;
             tier_ = tierHint;
 
             when (state != empty) ::<= {
-                this.state = state;
-                return this;            
-            };
+                this.instance.state = state;
+                return this.instance;            
+            }
             levelMin = (levelHint - Number.random() * (levelHint * 0.4))->ceil;
             levelMax = (levelHint + Number.random() * (levelHint * 0.4))->floor;
             if (levelMin < 1) levelMin = 1;
@@ -318,22 +319,22 @@
 
             @locationCount = (1 + (Number.random()*4)->floor); 
             if (locationCount < 1) locationCount = 1;
-            [0, locationCount]->for(do:::(i) {
+            for(0, locationCount)::(i) {
                 significantLandmarks->push(value:
                     map.addLandmark(
                         base:Landmark.Base.database.getRandomWeightedFiltered(
                             filter:::(value) <- value.isUnique == false
                         ),
-                        island:this
+                        island:self
                     )
                 );
-            });
+            }
             
             // guaranteed gate
             significantLandmarks->push(value:
                 map.addLandmark(
                     base:Landmark.Base.database.find(name:'Wyvern Gate'),
-                    island:this
+                    island:self
                 )
             );
             
@@ -343,7 +344,7 @@
             significantLandmarks->push(value:
                 map.addLandmark(
                     base:Landmark.Base.database.find(name:'Shrine'),
-                    island:this
+                    island:self
                 )
             );
 
@@ -351,7 +352,7 @@
             significantLandmarks->push(value:
                 map.addLandmark(
                     base:Landmark.Base.database.find(name:'town'),
-                    island:this
+                    island:self
                 )
             );
 
@@ -363,7 +364,7 @@
             significantLandmarks->push(value:
                 map.addLandmark(
                     base:Landmark.Base.database.find(name:'forest'),
-                    island:this
+                    island:self
                 )
             );
 
@@ -372,15 +373,15 @@
             significantLandmarks->push(value:
                 map.addLandmark(
                     base:Landmark.Base.database.find(name:'city'),
-                    island:this
+                    island:self
                 )
             );
 
 
             
 
-            return this;
-        };
+            return this.instance;
+        }
 
         
         this.interface = {
@@ -396,28 +397,28 @@
                     stepsSinceLastEvent = value.stepsSinceLastEvent;
                     climate = value.climate;
                     species = [];
-                    value.species->foreach(do:::(index, speciesData) {
+                    foreach(value.species)::(index, speciesData) {
                         species->push(value:{
                             rarity: speciesData.rarity,
                             species: Species.database.find(name:speciesData.name)
                         });
-                    });
+                    }
 
                     significantLandmarks = [];
                     map = LargeMap.new(state:value.map);
 
-                    value.significantLandmarks->foreach(do:::(index, landmarkData) {
-                        @:landmark = Landmark.Base.database.find(name:landmarkData.baseName).new(x:0, y:0, state:landmarkData, island:this);
+                    foreach(value.significantLandmarks)::(index, landmarkData) {
+                        @:landmark = Landmark.Base.database.find(name:landmarkData.baseName).new(x:0, y:0, state:landmarkData, island:self);
                         map.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.name);
                         significantLandmarks->push(value:landmark);
-                    });
+                    }
                     
                     events = [];
                     @:world = import(module:'game_singleton.world.mt');
-                    value.events->foreach(do:::(index, eventData) {
-                        @:event = Event.new(state:eventData, island:this, party:world.party);
+                    foreach(value.events)::(index, eventData) {
+                        @:event = Event.new(state:eventData, island:self, party:world.party);
                         events->push(value:event);
-                    });
+                    }
 
 
 
@@ -441,7 +442,7 @@
                         significantLandmarks : [...significantLandmarks]->map(to:::(value) <- value.state),
                         events : [...events]->map(to:::(value) <- value.state),
                     
-                    };
+                    }
                 }
             },
             
@@ -453,18 +454,18 @@
             
             description : {
                 get :: {
-                    @out = 'A ' + this.class.climateToString(climate) + ' island, ' + name + ' is mostly populated by people of ' + species[0].species.name + ' and ' + species[1].species.name + ' descent. ';//The island is known for its ' + professions[0].profession.name + 's and ' + professions[1].profession.name + 's.\n';
+                    @out = 'A ' + Island.climateToString(climate) + ' island, ' + name + ' is mostly populated by people of ' + species[0].species.name + ' and ' + species[1].species.name + ' descent. ';//The island is known for its ' + professions[0].profession.name + 's and ' + professions[1].profession.name + 's.\n';
                     //out = out + this.class.describeEncounterRate(rate:encounterRate) + '\n';
                     //out = out + '(Level range: ' + levelMin + ' - ' + levelMax + ')' + '\n\n';
                     
                     out = out + 'It has ' + significantLandmarks->keycount + ' landmark(s): \n';
 
-                    significantLandmarks->foreach(do:::(index, landmark) {
+                    foreach(significantLandmarks)::(index, landmark) {
                         if (landmark.discovered)
                             out = out + landmark.description + '\n'
                         else
                             out = out + 'An undiscovered ' + landmark.base.name + '\n';
-                    });
+                    }
                     
                     return out;
                 }
@@ -496,36 +497,36 @@
                     if (Number.random() > 13 - (stepsSinceLastEvent-5) / 5) ::<={
                         // mostly its encounters. 0.1% chance of encounter 
                         if (Number.random() < 0.001) ::<= {
-                            this.addEvent(
+                            this.instance.addEvent(
                                 event:Event.Base.database.find(name:'Encounter:Normal').new(
-                                    island:this, 
+                                    island:self, 
                                     party:world_.party //, currentTime
                                 )
                             );
                         } else ::<= {
-                            this.addEvent(
+                            this.instance.addEvent(
                                 event:Event.Base.database.getRandomFiltered(
                                     filter:::(value) <- !value.name->contains(key:'Encounter')
                                 ).new(
-                                    island:this, 
+                                    island:self, 
                                     party:world_.party //, currentTime
                                 )
                             );                        
-                        };
+                        }
                         stepsSinceLastEvent = 0;
-                    };
-                };    
+                    }
+                }    
                 stepsSinceLastEvent += 1;        
             
-                events->foreach(do:::(index, event) {
+                foreach(events)::(index, event) {
                     event.stepTime();
-                });
-                events->foreach(do:::(index, event) {
+                }
+                foreach(events)::(index, event) {
                     if (event.expired) ::<= {
                         event.base.onEventEnd(event);                    
                         events->remove(key:events->findIndex(value:event));
-                    };
-                });
+                    }
+                }
             },
             
             addEvent::(event) {
@@ -600,7 +601,7 @@
                 }
             }
 
-        };
+        }
         
 
     }

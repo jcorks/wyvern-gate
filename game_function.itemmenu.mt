@@ -35,7 +35,7 @@ return ::(
     
     @:commitAction ::(action) {
         onAct(action);    
-    };
+    }
     
 
     pickItem(inventory:party.inventory, canCancel:true, onPick::(item) {
@@ -64,18 +64,18 @@ return ::(
                     match(item.base.useTargetHint) {
                       (Item.USE_TARGET_HINT.ONE): ::<={
                         @:all = [];
-                        party.members->foreach(do:::(index, ally) {
+                        foreach(party.members)::(index, ally) {
                             all->push(value:ally);
-                        });
-                        enemies->foreach(do:::(index, enemy) {
+                        }
+                        foreach(enemies)::(index, enemy) {
                             all->push(value:enemy);
-                        });
+                        }
                         
                         
                         @:allNames = [];
-                        all->foreach(do:::(index, person) {
+                        foreach(all)::(index, person) {
                             allNames->push(value:person.name);
-                        });
+                        }
                       
                       
                         choice = windowEvent.queueChoices(
@@ -143,7 +143,7 @@ return ::(
 
 
 
-                    };
+                    }
                   
                   },
 
@@ -192,9 +192,9 @@ return ::(
                         }
                     );
                   }
-                };              
+                }              
             
             }
         );
     });    
-};
+}

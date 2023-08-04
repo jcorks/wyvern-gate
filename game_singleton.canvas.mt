@@ -56,29 +56,29 @@
     // To indicate to the IO system to clear the currently 
     // displayed output for clarity
     CLEAR: 9
-};
+}
 
 
 
 // converts a string into an array of characters.
 @:splay ::(string => String) {
     @:out = [];
-    [0, string->length]->for(
-        do:::(i) <- out->push(
+    for(0, string->length)
+        ::(i) <- out->push(
             value:string->charAt(
                 index:i
             )
         )
-    );
+    
     
     return out;
-};
+}
 
 
 @:min ::(a => Number, b => Number) {
     when(a < b) a;
     return b;
-};
+}
 
 @:TextIter = struct(
     name: 'Wyvern.Canvas.TextIter',
@@ -108,16 +108,22 @@ return class(
         @:lines_output = [];
         
         @savestates = [];
+        @self;
+        
+        this.constructor = ::{
+            self = this.instance;
+            return self;
+        }
         
         ::<= {
             @iter = 0;
-            [0, CANVAS_HEIGHT]->for(do:::(index) {
-                [0, CANVAS_WIDTH]->for(do:::(ch) {
+            for(0, CANVAS_HEIGHT)::(index) {
+                for(0, CANVAS_WIDTH)::(ch) {
                     canvas[iter] = ' ';
                     iter += 1;
-                });
-            });
-        };
+                }
+            }
+        }
         
         this.interface = {
             movePen ::(x => Number, y => Number) {
@@ -164,49 +170,49 @@ return class(
             renderFrame ::(top, left, width, height) {
 
                 // TOP LINE
-                this.movePen(
+                self.movePen(
                     x: left,
                     y: top 
                 );
                 
-                this.drawChar(text:CHAR__CORNER_TOPLEFT);
-                this.penX += 1;
-                [2, width]->for(do:::(x) {
-                    this.drawChar(text:CHAR__TOP);    
-                    this.penX += 1;
+                self.drawChar(text:CHAR__CORNER_TOPLEFT);
+                self.penX += 1;
+                for(2, width)::(x) {
+                    self.drawChar(text:CHAR__TOP);    
+                    self.penX += 1;
                             
-                });
-                this.drawChar(text:CHAR__CORNER_TOPRIGHT);
+                }
+                self.drawChar(text:CHAR__CORNER_TOPRIGHT);
 
                 
                 // NLINES
-                [1, height - 1]->for(do:::(y) {
-                    this.movePen(x: left, y: top+y);
-                    this.drawChar(text:CHAR__SIDE);
-                    this.penX += 1;
+                for(1, height - 1)::(y) {
+                    self.movePen(x: left, y: top+y);
+                    self.drawChar(text:CHAR__SIDE);
+                    self.penX += 1;
 
-                    [2, width]->for(do:::(x) {
-                        this.erase();        
-                        this.penX += 1;
-                    });
-                    this.drawChar(text:CHAR__SIDE);
-                }); 
+                    for(2, width)::(x) {
+                        self.erase();        
+                        self.penX += 1;
+                    }
+                    self.drawChar(text:CHAR__SIDE);
+                }
 
 
                 // BOTTOM LINE
-                this.movePen(
+                self.movePen(
                     x: left,
                     y: top+(height-1)
                 );
                 
-                this.drawChar(text:CHAR__CORNER_BOTTOMLEFT);
-                this.penX += 1;
-                [2, width]->for(do:::(x) {
-                    this.drawChar(text:CHAR__BOTTOM);    
-                    this.penX += 1;
+                self.drawChar(text:CHAR__CORNER_BOTTOMLEFT);
+                self.penX += 1;
+                for(2, width)::(x) {
+                    self.drawChar(text:CHAR__BOTTOM);    
+                    self.penX += 1;
                             
-                });
-                this.drawChar(text:CHAR__CORNER_BOTTOMRIGHT);
+                }
+                self.drawChar(text:CHAR__CORNER_BOTTOMRIGHT);
 
 
 
@@ -231,11 +237,11 @@ return class(
                         
             drawText ::(text => String) {
                 when (penx < 0 || penx >= CANVAS_WIDTH || peny < 0 || peny >= CANVAS_HEIGHT) empty;              
-                [penx, penx+min(a:text->length, b:CANVAS_WIDTH-penx)]->for(do:::(i) {
+                for(penx, penx+min(a:text->length, b:CANVAS_WIDTH-penx))::(i) {
                     @ch = text->charAt(index:i-penx);
                     if (ch == '\n') ch = ' ';
                     canvas[i+peny*CANVAS_WIDTH] = ch;
-                });
+                }
             },
             
             drawChar ::(text => String) {  
@@ -245,20 +251,20 @@ return class(
             },
             
             erase :: {
-                this.penColor = hints.NEUTRAL;
-                this.drawChar(text:' ');
+                self.penColor = hints.NEUTRAL;
+                self.drawChar(text:' ');
             },
             
             // like penText, but moves the pen position
             writeText ::(text => String) {
-                splay(string:text)->foreach(do:::(index, ch) {
-                    this.drawChar(text:ch);
+                foreach(splay(string:text))::(index, ch) {
+                    self.drawChar(text:ch);
                     if (penx >= CANVAS_WIDTH)
-                        this.movePen(x:0, y:peny+1)
+                        self.movePen(x:0, y:peny+1)
                     else
-                        this.movePen(x:penx+1, y:peny)
+                        self.movePen(x:penx+1, y:peny)
                     ;
-                });            
+                }
             },
             
             drawTextCentered ::(text => String, y => Number) {
@@ -269,30 +275,30 @@ return class(
                 when (savestates->keycount) ::<= {
                     @prevCanvas = savestates[savestates->keycount-1].text;
                     canvas = [...prevCanvas];
-                };
-                this.blackout();
+                }
+                self.blackout();
             },
             
             blackout ::{
                 @iter = 0;
-                [0, CANVAS_HEIGHT]->for(do:::(i) {
-                    [0, CANVAS_WIDTH]->for(do:::(ch) {
+                for(0, CANVAS_HEIGHT)::(i) {
+                    for(0, CANVAS_WIDTH)::(ch) {
                         canvas[iter] = ' ';
                         iter += 1;
-                    });
-                });            
+                    }
+                }          
             },
             
             commit ::(renderNow) {
                 // debug lines happen as the LAST possible thing 
                 // the canvas does to ensure that its always on top.
                 if (debugLines[0] != empty) ::<= {
-                    this.movePen(x:0, y:0);
-                    this.drawText(text: debugLines[0]);
-                };
+                    self.movePen(x:0, y:0);
+                    self.drawText(text: debugLines[0]);
+                }
                 
 
-                [0, CANVAS_HEIGHT]->for(do:::(row) {
+                for(0, CANVAS_HEIGHT)::(row) {
                     lines_output[row] = String.combine(strings:canvas->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1));
                     /*
                     @:line = canvas[row];
@@ -319,13 +325,13 @@ return class(
                                     color : lineColors[x]
                                 }
                             );
-                        };
+                        }
                     });
                     iter.text = String.combine(strings:line->subset(from:last, to:CANVAS_WIDTH-1));
                     iters->push(value:iter);                    
                     lines->push(value:iters);
                     */
-                });
+                }
                 
                 
                 onCommit(
@@ -333,6 +339,6 @@ return class(
                     renderNow              
                 );                
             }
-        };    
+        }    
     }
 ).new();

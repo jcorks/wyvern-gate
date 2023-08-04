@@ -27,15 +27,15 @@ return class(
         @maxItems;
         this.constructor = ::(size) {
             maxItems = size;
-            return this;
-        };
+            return this.instance;
+        }
     
         this.interface = {
             add::(item) {
                 when (item.base.name == 'None') false; // never accept None as a real item
                 when (items->keycount == maxItems) false;
                 items->push(value:item);
-                item.container = this;
+                item.container = this.instance;
                 return true;
             },
             
@@ -49,14 +49,14 @@ return class(
             },
             
             removeByName::(name) {
-                [::] {
-                    items->foreach(do:::(i, item) {
+                {:::} {
+                    foreach(items)::(i, item) {
                         if (item.base.name == name) ::<= {
                             items->remove(key:i);
                             send();
-                        };
-                    });
-                };
+                        }
+                    }
+                }
             },
             
             maxItems : {
@@ -103,10 +103,10 @@ return class(
                 
                     gold = value.gold;
                     items = [];
-                    value.items->foreach(do:::(i, itemData) {
+                    foreach(value.items)::(i, itemData) {
                         @:item = Item.Base.database.find(name:itemData.baseName).new(state:itemData);
-                        this.add(item);
-                    });
+                        this.instance.add(item);
+                    }
                 },
             
                 get :: {
@@ -114,10 +114,10 @@ return class(
                     return {
                         items: [...items]->map(to:::(value) <- value.state),
                         gold : gold
-                    };
+                    }
                 }
             }
             
-        };
+        }
     }
 );

@@ -24,20 +24,20 @@ return ::(
 ) {
     @:type = Object.newType(name);
     @:itemNames = items->keys;
-    @:itemTypes = {...items};
+    @:itemTypes = {...items}
 
     return class(
         name: 'Wyvern.Struct',
         define:::(this){
             this.interface = {
                 new ::(state => Object) {
-                    @:initialized = {};
-                    itemNames->foreach(do:::(index, value) {
+                    @:initialized = {}
+                    foreach(itemNames)::(index, value) {
                         initialized[value] = false;
-                    });
+                    }
                     
-                    @:data = {};
-                    state->foreach(do:::(name, value) {
+                    @:data = {}
+                    foreach(state)::(name, value) {
                         when (initialized[name] == empty)
                             error(detail:'"' + name + '" is not a member of the structure ' + String(from:type));
 
@@ -50,7 +50,7 @@ return ::(
                             );
                         data[name] = value;
                         initialized[name] = true;
-                    });
+                    }
                        
                     /*
                     foreach(in:initialized, do:::(name, initialized) {
@@ -80,7 +80,7 @@ return ::(
                                     
                                         data[key] = value;
                                     }
-                    };
+                    }
                     
                     out->setAttributes(
                         attributes : {
@@ -95,9 +95,9 @@ return ::(
                     
                     return out;
                 }
-            };
+            }
         }
     ).new();
     
 
-};
+}

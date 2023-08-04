@@ -25,7 +25,13 @@
 @:Scene = class(
     name : 'Wyvern.Scene',
     statics : {
-        database : empty
+        database  :::<= {
+            @db;
+            return {
+                get ::<- db,
+                set ::(value) <- db = value
+            }
+        }
     },
     define:::(this) {
         Database.setup(
@@ -39,7 +45,7 @@
         this.interface = {
         
             act::(onDone => Function, location, landmark) {
-                @:left = [...this.script];
+                @:left = [...this.instance.script];
                 
                 @:doNext ::{
                     when(left->keycount == 0) onDone();
@@ -55,12 +61,12 @@
                       },
                       default:
                         error(detail:'Scene scripts only accept arrays or functions')
-                    };
-                };
+                    }
+                }
                 
                 doNext();
             }
-        };
+        }
     }
 );
 
@@ -114,7 +120,7 @@ Scene.database = Database.new(
                                         windowEvent.jumpToTag(name:'MainMenu');                                    
                                     }
                                 );
-                            };
+                            }
                             
                         
                             when (!location.ownedBy.isIncapacitated()) ::<= {
@@ -128,10 +134,10 @@ Scene.database = Database.new(
                                         end(result);
                                     }
                                 );                                
-                            }; 
+                            } 
                             
                             doNext();
-                        };
+                        }
                         world.battle.start(
                             party:world.party,                            
                             allies: world.party.members,
@@ -157,15 +163,15 @@ Scene.database = Database.new(
                         if (key != empty) key = key[0];
                         // could be equipped by hooligans and jokesters
                         if (key == empty) ::<= {
-                            key = [::] {
-                                world.party.members->foreach(do:::(i, member) {
+                            key = {:::} {
+                                foreach(world.party.members)::(i, member) {
                                     @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_L);
                                     if (wep.name == 'Wyvern Key of Fire') ::<= {
                                         send(message:key);
-                                    };
-                                });
-                            };
-                        };
+                                    }
+                                }
+                            }
+                        }
                         // you can technically throw it out or Literally Throw It.
                         when(key == empty) ::<= {
                             windowEvent.queueMessage(
@@ -188,7 +194,7 @@ Scene.database = Database.new(
                                 speaker: 'Kaedjaal',
                                 text: 'Rrohziil, Please keep it safe. It breaks my heart to give these away to Chosen who already should have one...'
                             );
-                        };
+                        }
                         @:canvas = import(module:'game_singleton.canvas.mt');
 
                         windowEvent.queueMessage(
@@ -206,7 +212,7 @@ Scene.database = Database.new(
                         instance.visitIsland(where:key.islandEntry);
                         if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
                             windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
-                        };
+                        }
 
                         breakpoint();
                         doNext();
@@ -237,7 +243,7 @@ Scene.database = Database.new(
                                         onEnter::{},
                                         onLeave::{doNext();}                                    
                                     );
-                                };
+                                }
 
 
                                 when(world.party.inventory.items->keycount < 3) ::<= {
@@ -246,7 +252,7 @@ Scene.database = Database.new(
                                         onEnter::{},
                                         onLeave::{doNext();}                                    
                                     );
-                                };
+                                }
 
                                 
                                 
@@ -255,9 +261,9 @@ Scene.database = Database.new(
                                 @chooseItem = ::(item) {
                                     when (item == empty && runOnce) ::<= {
                                         // re-add the items
-                                        items->foreach(do:::(i, item) {
+                                        foreach(items)::(i, item) {
                                             world.party.inventory.add(item);
-                                        });
+                                        }
                                         // cancelled by user
                                         windowEvent.queueMessage(speaker:'Kaedjaal', text:'Having second thoughts? No matter. I will still be here if you change your mind.');    
                                         windowEvent.queueNoDisplay(
@@ -265,15 +271,15 @@ Scene.database = Database.new(
                                             onLeave::{doNext();}                                    
                                         );
                                                         
-                                    };
+                                    }
                                     if (item != empty) ::<= {
                                         if (item.name == 'Wyvern Key of Fire') ::<= {
                                             windowEvent.queueMessage(speaker:'Kaedjaal', text:'Rrohziil, you... cannot trade me with the Key of Fire. You need that to leave here.');
                                         } else ::<= {
                                             items->push(value:item);
                                             world.party.inventory.remove(item);                                    
-                                        };
-                                    };
+                                        }
+                                    }
                                     
                                     when(items->keycount == 3) ::<= {
                                         windowEvent.queueMessage(speaker:'Kaedjaal', text:'Excellent. Let me, in exchange, give you this.');   
@@ -296,11 +302,11 @@ Scene.database = Database.new(
                                                     runOnce = false;
                                                     items = [];
                                                     chooseItem();
-                                                };
+                                                }
                                                 doNext();
                                             }
                                         );
-                                    };
+                                    }
                                     
                                     
                                     
@@ -320,7 +326,7 @@ Scene.database = Database.new(
                                             chooseItem(item);
                                         }
                                     );
-                                };
+                                }
                                 chooseItem();
                             }
                         );
@@ -335,15 +341,15 @@ Scene.database = Database.new(
                         if (key != empty) key = key[0];
                         // could be equipped by hooligans and jokesters
                         if (key == empty) ::<= {
-                            key = [::] {
-                                world.party.members->foreach(do:::(i, member) {
+                            key = {:::} {
+                                foreach(world.party.members)::(i, member) {
                                     @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_L);
                                     if (wep.name == 'Wyvern Key of Fire') ::<= {
                                         send(message:key);
-                                    };
-                                });
-                            };
-                        };
+                                    }
+                                }
+                            }
+                        }
                         @:canvas = import(module:'game_singleton.canvas.mt');
                         windowEvent.queueMessage(
                             renderable:{render::{canvas.blackout();}},
@@ -388,7 +394,7 @@ Scene.database = Database.new(
                                         windowEvent.jumpToTag(name:'MainMenu');                                    
                                     }
                                 );
-                            };
+                            }
                             
                         
                             when (!location.ownedBy.isIncapacitated()) ::<= {
@@ -402,10 +408,10 @@ Scene.database = Database.new(
                                         end(result);
                                     }
                                 );                                
-                            }; 
+                            } 
                             
                             doNext();
-                        };
+                        }
                         world.battle.start(
                             party:world.party,                            
                             allies: world.party.members,
@@ -429,15 +435,15 @@ Scene.database = Database.new(
                         if (key != empty) key = key[0];
                         // could be equipped by hooligans and jokesters
                         if (key == empty) ::<= {
-                            key = [::] {
-                                world.party.members->foreach(do:::(i, member) {
+                            key = {:::} {
+                                foreach(world.party.members)::(i, member) {
                                     @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_L);
                                     if (wep.name == 'Wyvern Key of Ice') ::<= {
                                         send(message:key);
-                                    };
-                                });
-                            };
-                        };
+                                    }
+                                }
+                            }
+                        }
                         // you can technically throw it out or Literally Throw It.
                         when(key == empty) ::<= {
                             windowEvent.queueMessage(
@@ -456,7 +462,7 @@ Scene.database = Database.new(
                                 speaker: 'Ziikkaettaal',
                                 text: '*hisses*'
                             );
-                        };
+                        }
                         
                         @:story = import(module:'game_singleton.story.mt');
                         if (story.tier < 2)
@@ -467,7 +473,7 @@ Scene.database = Database.new(
                         instance.visitIsland(where:key.islandEntry);
                         if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
                             windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
-                        };
+                        }
 
                         breakpoint();
                         doNext();
@@ -502,7 +508,7 @@ Scene.database = Database.new(
                                         text: 'You do not have enough to bet with me. Come back when you are... blessed with more riches.',
                                         onLeave:doNext
                                     );
-                                };
+                                }
                                 
                                 
                                 windowEvent.queueMessage(
@@ -548,7 +554,7 @@ Scene.database = Database.new(
                                                     windowEvent.queueMessage(text:'The party lost 1000G.',
                                                         onLeave:doNext
                                                     );
-                                                };
+                                                }
                                                 
                                             }
                                         );   
@@ -567,15 +573,15 @@ Scene.database = Database.new(
                         if (key != empty) key = key[0];
                         // could be equipped by hooligans and jokesters
                         if (key == empty) ::<= {
-                            key = [::] {
-                                world.party.members->foreach(do:::(i, member) {
+                            key = {:::} {
+                                foreach(world.party.members)::(i, member) {
                                     @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_L);
                                     if (wep.name == 'Wyvern Key of Ice') ::<= {
                                         send(message:key);
-                                    };
-                                });
-                            };
-                        };
+                                    }
+                                }
+                            }
+                        }
                         @:canvas = import(module:'game_singleton.canvas.mt');
                         windowEvent.queueMessage(
                             renderable:{render::{canvas.blackout();}},
