@@ -275,7 +275,7 @@
                         }
                         
                         Interaction.database.find(name:self.base.interactions[choice-1]).onInteract(
-                            location: this,
+                            location: self,
                             party
                         );
                         self.landmark.step();                            

@@ -20,21 +20,18 @@
 
 return class(
     name : 'Wyvern.StateFlag',
-    statics :::<= {
-        @:s = {
-            HURT : 0,
-            WENT : 1,
-            HEALED : 2,
-            FALLEN : 3, // HP = 0
-            DIED : 4, // was hit with HP == 0
-            SKIPPED : 5,
-            DEFENDED : 6, // defended,
-            DEFEATED_ENEMY : 7,
-            DODGED_ATTACK : 8,
-            ATTACKED : 9,
-            ABILITY : 10
-        };
-        return {get::<- s}
+    statics : {
+        HURT : {get::<-0},
+        WENT : {get::<-1},
+        HEALED : {get::<-2},
+        FALLEN : {get::<-3}, // HP = 0
+        DIED : {get::<-4}, // was hit with HP == 0
+        SKIPPED : {get::<-5},
+        DEFENDED : {get::<-6}, // defended,
+        DEFEATED_ENEMY : {get::<-7},
+        DODGED_ATTACK : {get::<-8},
+        ATTACKED : {get::<-9},
+        ABILITY : {get::<-10}
     },
     define :::(this) {
         @set = [];
