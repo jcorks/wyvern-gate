@@ -1,3 +1,20 @@
+/*
+    Wyvern Gate, a procedural, console-based RPG
+    Copyright (C) 2023, Johnathan Corkery (jcorkery@umich.edu)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:random = import(module:'game_singleton.random.mt');
@@ -5,22 +22,13 @@
 @:Ability = import(module:'game_class.ability.mt');
 @:pickItem = import(module:'game_function.pickitem.mt');
 @:class = import(module:'Matte.Core.Class');
+@:Die = import(module:'game_class.die.mt');
 
 
-@:DICE_WIDTH = 9;
-@:DICE_HEIGHT = 6;
+
 @:DICE_BUFFER = 4;
 
-/*
-     _______
-    |       |    |
-    | o   o |    |
-    |   o   |    |
-    | o   o |    |
-    |_______|    |
 
-
-*/
 
 @:SCORE_TYPE = {
     ONES : 0,
@@ -58,7 +66,7 @@
 SCORING_FN[SCORE_TYPE.ONES] = ::(rolls) {
     @val = 0;
     for(0, 5)::(i) {
-        if (rolls[i] == 1)
+        if (rolls[i].value == 1)
             val += 1;
     }
     return val;
@@ -67,7 +75,7 @@ SCORING_FN[SCORE_TYPE.ONES] = ::(rolls) {
 SCORING_FN[SCORE_TYPE.TWOS] = ::(rolls) {
     @val = 0;
     for(0, 5)::(i) {
-        if (rolls[i] == 2)
+        if (rolls[i].value == 2)
             val += 2;
     }
     return val;
@@ -77,7 +85,7 @@ SCORING_FN[SCORE_TYPE.TWOS] = ::(rolls) {
 SCORING_FN[SCORE_TYPE.THREES] = ::(rolls) {
     @val = 0;
     for(0, 5)::(i) {
-        if (rolls[i] == 3)
+        if (rolls[i].value == 3)
             val += 3;
     }
     return val;
@@ -86,7 +94,7 @@ SCORING_FN[SCORE_TYPE.THREES] = ::(rolls) {
 SCORING_FN[SCORE_TYPE.FOURS] = ::(rolls) {
     @val = 0;
     for(0, 5)::(i) {
-        if (rolls[i] == 4)
+        if (rolls[i].value == 4)
             val += 4;
     }
     return val;
@@ -95,7 +103,7 @@ SCORING_FN[SCORE_TYPE.FOURS] = ::(rolls) {
 SCORING_FN[SCORE_TYPE.FIVES] = ::(rolls) {
     @val = 0;
     for(0, 5)::(i) {
-        if (rolls[i] == 5)
+        if (rolls[i].value == 5)
             val += 5;
     }
     return val;
@@ -105,7 +113,7 @@ SCORING_FN[SCORE_TYPE.FIVES] = ::(rolls) {
 SCORING_FN[SCORE_TYPE.SIXES] = ::(rolls) {
     @val = 0;
     for(0, 5)::(i) {
-        if (rolls[i] == 6)
+        if (rolls[i].value == 6)
             val += 6;
     }
     return val;
@@ -116,8 +124,8 @@ SCORING_FN[SCORE_TYPE.STRAIGHT] = ::(rolls) {
     @:slots = [];
     return {:::} {
         for(0, 5)::(i) {
-            if (slots[rolls[i]] == true) send(message:0);
-            slots[rolls[i]] = true;
+            if (slots[rolls[i].value] == true) send(message:0);
+            slots[rolls[i].value] = true;
         }
         return 20;
     }
@@ -127,7 +135,7 @@ SCORING_FN[SCORE_TYPE.STRAIGHT] = ::(rolls) {
 SCORING_FN[SCORE_TYPE.FULL_HOUSE] = ::(rolls) {
     @:slots = [0, 0, 0, 0, 0, 0];
     for(0, 5)::(i) {
-        slots[rolls[i]-1] += 1;
+        slots[rolls[i].value-1] += 1;
     }
     @has2 = false;
     @has3 = false;
@@ -149,7 +157,7 @@ SCORING_FN[SCORE_TYPE.FULL_HOUSE] = ::(rolls) {
 SCORING_FN[SCORE_TYPE.THREE_OF_A_KIND] = ::(rolls) {
     @:slots = [0, 0, 0, 0, 0, 0, 0];
     for(0, 5)::(i) {
-        slots[rolls[i]-1] += 1;
+        slots[rolls[i].value-1] += 1;
     }
     @val = 0;
     for(0, 6)::(i) {
@@ -163,7 +171,7 @@ SCORING_FN[SCORE_TYPE.THREE_OF_A_KIND] = ::(rolls) {
 SCORING_FN[SCORE_TYPE.FOUR_OF_A_KIND] = ::(rolls) {
     @:slots = [0, 0, 0, 0, 0, 0, 0];
     for(0, 5)::(i) {
-        slots[rolls[i]-1] += 1;
+        slots[rolls[i].value-1] += 1;
     }
     @val = 0;
     for(0, 6)::(i) {
@@ -177,7 +185,7 @@ SCORING_FN[SCORE_TYPE.FOUR_OF_A_KIND] = ::(rolls) {
 SCORING_FN[SCORE_TYPE.FIVE_OF_A_KIND] = ::(rolls) {
     @:slots = [0, 0, 0, 0, 0, 0, 0];
     for(0, 5)::(i) {
-        slots[rolls[i]-1] += 1;
+        slots[rolls[i].value-1] += 1;
     }
     @val = 0;
     for(0, 6)::(i) {
@@ -192,7 +200,7 @@ SCORING_FN[SCORE_TYPE.FIVE_OF_A_KIND] = ::(rolls) {
 SCORING_FN[SCORE_TYPE.SUM] = ::(rolls) {
     @val = 0;
     for(0, 5)::(i) {
-        val += rolls[i];
+        val += rolls[i].value;
     }
     return val;
 }
@@ -347,7 +355,7 @@ return ::(onFinish => Function) {
                 
                 
                 windowEvent.queueChoices(
-                    prompt:'Score for: ' + rolls[0] + '-' + rolls[1] + '-' + rolls[2] + '-' + rolls[3] + '-' + rolls[4],
+                    prompt:'Score for: ' + rolls[0].value + '-' + rolls[1].value + '-' + rolls[2].value + '-' + rolls[3].value + '-' + rolls[4].value,
                     choices: scores,
                     canCancel: false,
                     keep:true,
@@ -446,7 +454,7 @@ return ::(onFinish => Function) {
                                             (2): 'Third  ',
                                             (3): 'Fourth ',
                                             (4): 'Fifth  '
-                                        }) + '(' + rolls[i] + ')'
+                                        }) + '(' + rolls[i].value + ')'
                                     );
                                 }
                                 
@@ -514,7 +522,7 @@ return ::(onFinish => Function) {
                 isReasonableToConsider::(rolls){
                     @okChance = 0;
                     for(0, 5)::(i) {
-                        if (rolls[i] == 1)
+                        if (rolls[i].value == 1)
                             okChance+=1; 
                     }
                     return okChance >= 2;
@@ -522,7 +530,7 @@ return ::(onFinish => Function) {
                 maxPotential: 5,
                 keepWhich::(rolls, keep) {
                     for(0, 5)::(i) {
-                        keep[i] = rolls[i] == 1; 
+                        keep[i] = rolls[i].value == 1; 
                     }
                 }
             }
@@ -533,7 +541,7 @@ return ::(onFinish => Function) {
                 isReasonableToConsider::(rolls){
                     @okChance = 0;
                     for(0, 5)::(i) {
-                        if (rolls[i] == 2)
+                        if (rolls[i].value == 2)
                             okChance+=1; 
                     }
                     return okChance >= 2;
@@ -541,7 +549,7 @@ return ::(onFinish => Function) {
                 maxPotential: 10,
                 keepWhich::(rolls, keep) {
                     for(0, 5)::(i) {
-                        keep[i] = rolls[i] == 2; 
+                        keep[i] = rolls[i].value == 2; 
                     }
                 }
             }
@@ -550,7 +558,7 @@ return ::(onFinish => Function) {
                 isReasonableToConsider::(rolls){
                     @okChance = 0;
                     for(0, 5)::(i) {
-                        if (rolls[i] == 3)
+                        if (rolls[i].value == 3)
                             okChance+=1; 
                     }
                     return okChance >= 2;
@@ -558,7 +566,7 @@ return ::(onFinish => Function) {
                 maxPotential: 15,
                 keepWhich::(rolls, keep) {
                     for(0, 5)::(i) {
-                        keep[i] = rolls[i] == 3; 
+                        keep[i] = rolls[i].value == 3; 
                     }
                 }
             }
@@ -567,7 +575,7 @@ return ::(onFinish => Function) {
                 isReasonableToConsider::(rolls){
                     @okChance = 0;
                     for(0, 5)::(i) {
-                        if (rolls[i] == 4)
+                        if (rolls[i].value == 4)
                             okChance+=1; 
                     }
                     return okChance >= 2;
@@ -575,7 +583,7 @@ return ::(onFinish => Function) {
                 maxPotential: 20,
                 keepWhich::(rolls, keep) {
                     for(0, 5)::(i) {
-                        keep[i] = rolls[i] == 4; 
+                        keep[i] = rolls[i].value == 4; 
                     }
                 }
             }
@@ -585,7 +593,7 @@ return ::(onFinish => Function) {
                 isReasonableToConsider::(rolls){
                     @okChance = 0;
                     for(0, 5)::(i) {
-                        if (rolls[i] == 5)
+                        if (rolls[i].value == 5)
                             okChance+=1; 
                     }
                     return okChance >= 2;
@@ -593,7 +601,7 @@ return ::(onFinish => Function) {
                 maxPotential: 25,
                 keepWhich::(rolls, keep) {
                     for(0, 5)::(i) {
-                        keep[i] = rolls[i] == 5; 
+                        keep[i] = rolls[i].value == 5; 
                     }
                 }
             }
@@ -602,7 +610,7 @@ return ::(onFinish => Function) {
                 isReasonableToConsider::(rolls){
                     @okChance = 0;
                     for(0, 5)::(i) {
-                        if (rolls[i] == 6)
+                        if (rolls[i].value == 6)
                             okChance+=1; 
                     }
                     return okChance >= 2;
@@ -610,7 +618,7 @@ return ::(onFinish => Function) {
                 maxPotential: 30,
                 keepWhich::(rolls, keep) {
                     for(0, 5)::(i) {
-                        keep[i] = rolls[i] == 6; 
+                        keep[i] = rolls[i].value == 6; 
                     }
                 }
             }        
@@ -620,7 +628,7 @@ return ::(onFinish => Function) {
                     @uniqueCount = 0;
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
                     for(0, 5)::(i) {
-                        gotAlready[rolls[i]-1] += 1;
+                        gotAlready[rolls[i].value-1] += 1;
                     }
                     foreach(gotAlready)::(i, val) {
                         if (val == 1)
@@ -633,8 +641,8 @@ return ::(onFinish => Function) {
                     // get rid of duplicates
                     @:gotAlready = [];
                     for(0, 5)::(i) {
-                        keep[i] = gotAlready[rolls[i]-1] != true; 
-                        gotAlready[rolls[i]-1] = true;
+                        keep[i] = gotAlready[rolls[i].value-1] != true; 
+                        gotAlready[rolls[i].value-1] = true;
                     }
                 }
             }             
@@ -644,7 +652,7 @@ return ::(onFinish => Function) {
                     @uniqueCount = 0;
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
                     for(0, 5)::(i) {
-                        gotAlready[rolls[i]-1] += 1;
+                        gotAlready[rolls[i].value-1] += 1;
                     }
                     foreach(gotAlready)::(i, val) {
                         if (val == 1)
@@ -656,10 +664,10 @@ return ::(onFinish => Function) {
                 keepWhich::(rolls, keep) {
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
                     for(0, 5)::(i) {
-                        gotAlready[rolls[i]-1]+=1;
+                        gotAlready[rolls[i].value-1]+=1;
                     }
                     for(0, 5)::(i) {
-                        keep[i] = gotAlready[rolls[i]-1] >= 2 && gotAlready[rolls[i]-1] < 4;
+                        keep[i] = gotAlready[rolls[i].value-1] >= 2 && gotAlready[rolls[i].value-1] < 4;
                     }
                 }
             }             
@@ -668,7 +676,7 @@ return ::(onFinish => Function) {
                 isReasonableToConsider::(rolls){
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
                     for(0, 5)::(i) {
-                        gotAlready[rolls[i]-1] += 1;
+                        gotAlready[rolls[i].value-1] += 1;
                     }
                     @viable = false;
                     foreach(gotAlready)::(i, val) {
@@ -681,21 +689,21 @@ return ::(onFinish => Function) {
                 keepWhich::(rolls, keep) {
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
                     for(0, 5)::(i) {
-                        gotAlready[rolls[i]-1]+=1;
+                        gotAlready[rolls[i].value-1]+=1;
                     }
 
                     @max = 0;
                     @maxRoll = 0;                    
                     for(0, 5)::(i) {
-                        if (gotAlready[rolls[i]-1] > max) ::<= {
-                            max = gotAlready[rolls[i]-1];
-                            maxRoll = rolls[i];
+                        if (gotAlready[rolls[i].value-1] > max) ::<= {
+                            max = gotAlready[rolls[i].value-1];
+                            maxRoll = rolls[i].value;
                         }
                     }
 
 
                     for(0, 5)::(i) {
-                        keep[i] = rolls[i] == maxRoll;
+                        keep[i] = rolls[i].value == maxRoll;
                     }
                 }
             }   
@@ -704,7 +712,7 @@ return ::(onFinish => Function) {
                 isReasonableToConsider::(rolls){
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
                     for(0, 5)::(i) {
-                        gotAlready[rolls[i]-1] += 1;
+                        gotAlready[rolls[i].value-1] += 1;
                     }
                     @viable = false;
                     foreach(gotAlready)::(i, val) {
@@ -717,21 +725,21 @@ return ::(onFinish => Function) {
                 keepWhich::(rolls, keep) {
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
                     for(0, 5)::(i) {
-                        gotAlready[rolls[i]-1]+=1;
+                        gotAlready[rolls[i].value-1]+=1;
                     }
 
                     @max = 0;
                     @maxRoll = 0;                    
                     for(0, 5)::(i) {
-                        if (gotAlready[rolls[i]-1] > max) ::<= {
-                            max = gotAlready[rolls[i]-1];
-                            maxRoll = rolls[i];
+                        if (gotAlready[rolls[i].value-1] > max) ::<= {
+                            max = gotAlready[rolls[i].value-1];
+                            maxRoll = rolls[i].value;
                         }
                     }
 
 
                     for(0, 5)::(i) {
-                        keep[i] = rolls[i] == maxRoll;
+                        keep[i] = rolls[i].value == maxRoll;
                     }
                 }
             }   
@@ -740,7 +748,7 @@ return ::(onFinish => Function) {
                 isReasonableToConsider::(rolls){
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
                     for(0, 5)::(i) {
-                        gotAlready[rolls[i]-1] += 1;
+                        gotAlready[rolls[i].value-1] += 1;
                     }
                     @viable = false;
                     foreach(gotAlready)::(i, val) {
@@ -753,21 +761,21 @@ return ::(onFinish => Function) {
                 keepWhich::(rolls, keep) {
                     @:gotAlready = [0, 0, 0, 0, 0, 0];
                     for(0, 5)::(i) {
-                        gotAlready[rolls[i]-1]+=1;
+                        gotAlready[rolls[i].value-1]+=1;
                     }
 
                     @max = 0;
                     @maxRoll = 0;                    
                     for(0, 5)::(i) {
-                        if (gotAlready[rolls[i]-1] > max) ::<= {
-                            max = gotAlready[rolls[i]-1];
-                            maxRoll = rolls[i];
+                        if (gotAlready[rolls[i].value-1] > max) ::<= {
+                            max = gotAlready[rolls[i].value-1];
+                            maxRoll = rolls[i].value;
                         }
                     }
 
 
                     for(0, 5)::(i) {
-                        keep[i] = rolls[i] == maxRoll;
+                        keep[i] = rolls[i].value == maxRoll;
                     }
                 }
             } 
@@ -780,7 +788,7 @@ return ::(onFinish => Function) {
                 maxPotential: 30,
                 keepWhich::(rolls, keep) {
                     for(0, 5)::(i) {
-                        keep[i] = rolls[i] > 3;
+                        keep[i] = rolls[i].value > 3;
                     }
                 }
             } 
@@ -926,89 +934,13 @@ return ::(onFinish => Function) {
         render::{
             canvas.blackout();
             @:rolls = diceRenderable.rolls;
-            // renders a single die at x,y
-            @:renderDie::(x, y, number) {
-            
-                canvas.movePen(x:0, y:0);
-                canvas.drawText(text:'Current player: ' +currentPlayer.name);
-            
-                // render base 
-                for(1, DICE_WIDTH-1)::(i) {
-                    canvas.movePen(x:x+i, y); canvas.drawChar(text:'_');
-                }
 
-
-                for(1, DICE_WIDTH-1)::(i) {
-                    canvas.movePen(x:x+i, y:y+DICE_HEIGHT-1); canvas.drawChar(text:'_');
-                }
-
-                for(1, DICE_HEIGHT)::(i) {
-                    canvas.movePen(x, y:y+i); canvas.drawChar(text:'|');
-                }
-
-                for(1, DICE_HEIGHT)::(i) {
-                    canvas.movePen(x:x+DICE_WIDTH-1, y:y+i); canvas.drawChar(text:'|');
-                }
-
-
-                match(number) {
-                  (1):::<= {
-                    canvas.movePen(x:x + 4, y:y + 3); canvas.drawChar(text:'o');
-                  },
-                  
-                  (2):::<= {
-                    canvas.movePen(x:x + 2, y:y + 2); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 6, y:y + 4); canvas.drawChar(text:'o');
-                  },
-
-
-                  (3):::<= {
-                    canvas.movePen(x:x + 2, y:y + 2); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 4, y:y + 3); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 6, y:y + 4); canvas.drawChar(text:'o');
-                  },
-                  
-                  (4):::<= {
-                    canvas.movePen(x:x + 2, y:y + 2); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 2, y:y + 4); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 6, y:y + 4); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 6, y:y + 2); canvas.drawChar(text:'o');
-                  },
-
-                  (5):::<= {
-                    canvas.movePen(x:x + 2, y:y + 2); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 2, y:y + 4); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 6, y:y + 4); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 6, y:y + 2); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 4, y:y + 3); canvas.drawChar(text:'o');
-                  },
-
-                  (6):::<= {
-                    canvas.movePen(x:x + 2, y:y + 2); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 2, y:y + 4); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 4, y:y + 4); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 4, y:y + 2); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 6, y:y + 4); canvas.drawChar(text:'o');
-                    canvas.movePen(x:x + 6, y:y + 2); canvas.drawChar(text:'o');
-                  }
-                  
-                }
-
-
-
-            }
-
-            @:space = ((canvas.width - (DICE_WIDTH * 5)) / 5)->floor;
+            @:space = ((canvas.width - (Die.WIDTH * 5)) / 5)->floor;
+            canvas.movePen(x:0, y:0);
+            canvas.drawText(text:'Current player: ' +currentPlayer.name);
             for(0, 5)::(i) {
-                renderDie(x:DICE_BUFFER + i*(DICE_WIDTH+space) , y:DICE_BUFFER, number:rolls[i]);
+                rolls[i].render(x:DICE_BUFFER + i*(Die.WIDTH+space) , y:DICE_BUFFER);
             }
-
-            //renderDie(x:DICE_BUFFER, y:DICE_BUFFER, number:rolls[0]);
-            //renderDie(x:canvas.width - (DICE_WIDTH + DICE_WIDTH), y:DICE_BUFFER, number:rolls[1]);
-            //renderDie(x:canvas.width / 2 - DICE_WIDTH/2, y:DICE_BUFFER*2 + DICE_HEIGHT, number:rolls[2]);
-            //renderDie(x:DICE_BUFFER, y:DICE_BUFFER*3 + DICE_HEIGHT*2, number:rolls[3]);
-            //renderDie(x:canvas.width - (DICE_WIDTH + DICE_WIDTH), y:DICE_BUFFER*3 + DICE_HEIGHT*2, number:rolls[4]);
-
                     
         }
     }
@@ -1039,11 +971,13 @@ return ::(onFinish => Function) {
         @:rollNext ::{
             {:::} {
                 forever ::{
-                    when(index == 6) send();
-                    when(rolls[index] != empty)
+                    when(index == 5) ::<= {
                         index += 1;
-                    @:number = random.integer(from:1, to:6);
-                    rolls[index] = number;
+                        send();
+                    }
+                    when(rolls[index].value != empty)
+                        index += 1;
+                    rolls[index].roll();
                     index += 1;
                     send();                    
                 }
@@ -1062,7 +996,13 @@ return ::(onFinish => Function) {
 
 
         currentPlayer = player;
-        @:rolls = [];
+        @:rolls = [
+            Die.new(),
+            Die.new(),
+            Die.new(),
+            Die.new(),
+            Die.new()        
+        ];
         @rollIndex = 0;  
         diceRenderable.rolls = rolls;  
 
@@ -1114,7 +1054,7 @@ return ::(onFinish => Function) {
                     rollIndex += 1;
                     for(0, 5)::(i) {
                         if (action.keepWhich[i] == false) ::<= {
-                            rolls[i] = empty;
+                            rolls[i].value = empty;
                         }
                     }
                     // reroll.
