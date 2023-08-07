@@ -40,15 +40,16 @@
         @_y;
         @_w;
         @_h;
-        this.constructor = ::(x, y, width, height) {
-            _x = x => Number;
-            _y = y => Number;
-            _w = width => Number;
-            _h = height => Number;
-            return this.instance;
-        }
         
         this.interface = {
+            setup::(x, y, width, height) {
+                _x = x => Number;
+                _y = y => Number;
+                _w = width => Number;
+                _h = height => Number;
+                return this;
+            },
+            
             x : {get::<-_x},        
             y : {get::<-_y},        
             width : {get::<-_w},        
@@ -75,7 +76,7 @@ return class(
         @ROOM_SIZE = 50;
         @ROOM_EMPTY_AREA_COUNT = 13;
         @GEN_OFFSET = 20;
-        @self;
+        @this;
         
 
         @:generateArea ::(item) {
@@ -98,7 +99,7 @@ return class(
             if (top + height +2 >= (ROOM_SIZE+GEN_OFFSET)-1) top = (ROOM_SIZE+GEN_OFFSET) - height - 3;
             
 
-            areas->push(value: Area.new(
+            areas->push(value: Area.new().setup(
                 x: left,
                 y: top,
                 width: width,
@@ -106,24 +107,24 @@ return class(
             ));
                     
             for(0, width+1)::(i) {
-                self.enableWall(
+                this.enableWall(
                     x:left + i,
                     y:top
                 );
 
-                self.enableWall(
+                this.enableWall(
                     x:left + i,
                     y:top + height
                 );
             }
 
             for(0, height+1)::(i) {
-                self.enableWall(
+                this.enableWall(
                     x:left,
                     y:top + i
                 );
 
-                self.enableWall(
+                this.enableWall(
                     x:left + width,
                     y:top + i
                 );
@@ -133,36 +134,36 @@ return class(
         
         @:applyCavities::{
             foreach(cavities)::(i, cav) {
-                self.enableWall(
+                this.enableWall(
                     x:cav.x+1,
                     y:cav.y
                 );
-                self.enableWall(
+                this.enableWall(
                     x:cav.x-1,
                     y:cav.y
                 );
-                self.enableWall(
+                this.enableWall(
                     x:cav.x,
                     y:cav.y+1
                 );
-                self.enableWall(
+                this.enableWall(
                     x:cav.x,
                     y:cav.y-1
                 );
                 
-                self.enableWall(
+                this.enableWall(
                     x:cav.x-1,
                     y:cav.y-1
                 );
-                self.enableWall(
+                this.enableWall(
                     x:cav.x+1,
                     y:cav.y+1
                 );
-                self.enableWall(
+                this.enableWall(
                     x:cav.x+1,
                     y:cav.y-1
                 );
-                self.enableWall(
+                this.enableWall(
                     x:cav.x-1,
                     y:cav.y+1
                 );
@@ -174,13 +175,13 @@ return class(
             foreach(areas)::(i, area) {
                 for(area.x+1, area.x + area.width)::(x) {
                     for(area.y+1, area.y + area.height)::(y) {
-                        self.disableWall(x, y);
+                        this.disableWall(x, y);
                     }
                 }
             }
             
             foreach(cavities)::(i, cav) {
-                self.disableWall(x:cav.x, y:cav.y);
+                this.disableWall(x:cav.x, y:cav.y);
             }
             cavities = [];
         }
@@ -277,31 +278,32 @@ return class(
 
 
 
-        this.constructor = ::(mapHint => Object) {
-            self = this.instance;
-
-            if (mapHint.roomAreaSize != empty) ROOM_AREA_SIZE = mapHint.roomAreaSize;
-            if (mapHint.roomAreaSizeLarge != empty) ROOM_AREA_SIZE_LARGE = mapHint.roomAreaSize;
-            if (mapHint.emptyAreaCount != empty) ROOM_EMPTY_AREA_COUNT = mapHint.emptyAreaCount;
-            if (mapHint.roomSize != empty) ROOM_SIZE = mapHint.roomSize;
-
-
-            self.paged = false;
-            self.width = ROOM_SIZE + GEN_OFFSET*2;
-            self.height = ROOM_SIZE + GEN_OFFSET*2;
-            self.renderOutOfBounds = true;
-            self.outOfBoundsCharacter = '`';
-
-            if (mapHint.wallCharacter != empty) self.wallCharacter = mapHint.wallCharacter;
-            if (mapHint.outOfBoundsCharacter != empty) self.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
-
-
-            self.obscure();
-            generateLayout();
-            return self;
-        }   
         
         this.interface = {
+            setup ::(mapHint => Object) {
+                this = this;
+
+                if (mapHint.roomAreaSize != empty) ROOM_AREA_SIZE = mapHint.roomAreaSize;
+                if (mapHint.roomAreaSizeLarge != empty) ROOM_AREA_SIZE_LARGE = mapHint.roomAreaSize;
+                if (mapHint.emptyAreaCount != empty) ROOM_EMPTY_AREA_COUNT = mapHint.emptyAreaCount;
+                if (mapHint.roomSize != empty) ROOM_SIZE = mapHint.roomSize;
+
+
+                this.paged = false;
+                this.width = ROOM_SIZE + GEN_OFFSET*2;
+                this.height = ROOM_SIZE + GEN_OFFSET*2;
+                this.renderOutOfBounds = true;
+                this.outOfBoundsCharacter = '`';
+
+                if (mapHint.wallCharacter != empty) this.wallCharacter = mapHint.wallCharacter;
+                if (mapHint.outOfBoundsCharacter != empty) this.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
+
+
+                this.obscure();
+                generateLayout();
+                return this;
+            },
+        
             areas : {
                 get ::<- areas
             },

@@ -64,13 +64,14 @@ return class(
 
     define:::(this) {
         @:items_ = {}
-        this.constructor = ::(items) {
-            foreach(items)::(index, item) {
-                items_[item.name] = item;            
-            }
-            return this.instance;
-        }
         this.interface = {
+            initialize::(items) {
+                foreach(items)::(index, item) {
+                    items_[item.name] = item;            
+                }    
+                return this;        
+            },
+        
             find ::(name) {
                 @:item = items_[name];
                 when(item == empty) error(detail: 'Unknown database item ' + name);

@@ -59,7 +59,7 @@
 
 
 
-Effect.database = Database.new(
+Effect.database = Database.new().initialize(
     items : [
     
     

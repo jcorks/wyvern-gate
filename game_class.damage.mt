@@ -44,14 +44,15 @@ return class(
         @type_;
         @amount_;
         @dclass;
-        this.constructor = ::(amount => Number, damageType => Number, damageClass => Number) {
-            amount_ = (amount)->ceil;
-            if (amount_ <= 0) amount_ = 1;// minimum of 1 damage
-            type_ = damageType;
-            dclass = damageClass;
-            return this.instance;
-        }
         this.interface = {
+            setup ::(amount => Number, damageType => Number, damageClass => Number) {
+                amount_ = (amount)->ceil;
+                if (amount_ <= 0) amount_ = 1;// minimum of 1 damage
+                type_ = damageType;
+                dclass = damageClass;
+                return this;
+            },
+        
             reduce ::(byRatio) {
                 amount_ *= byRatio;
             },

@@ -41,22 +41,23 @@
         @suit_;
         @value_;
         
-        this.constructor = ::(suit => Number, value => Number) {
-            if (suit < 0 || suit >= SUITS_TEXT->keycount)
-                error(message:'Card was made with invalid suit.');
-
-            if (value < 0 || value >= VALUES_TEXT->keycount )
-                error(message:'Card was made with invalid value.');
-
-
-            suit_ = suit;
-            value_ = value;
-            return this.instance;
-        }
         
         this.interface = {
             suit : {get ::<- suit_},
             value : {get ::<- value_},
+            
+            define::(suit => Number, value => Number) {
+                if (suit < 0 || suit >= SUITS_TEXT->keycount)
+                    error(message:'Card was made with invalid suit.');
+
+                if (value < 0 || value >= VALUES_TEXT->keycount )
+                    error(message:'Card was made with invalid value.');
+
+
+                suit_ = suit;
+                value_ = value;
+                return this;
+            },
 
             /*
                 ┌──────┐
@@ -116,7 +117,7 @@
             addStandard52 ::{
                 for(0, SUITS_TEXT->keycount)::(suit) {
                     for(0, VALUES_TEXT->keycount)::(value) {
-                        set->push(value:Card.new(
+                        set->push(value:Card.new().define(
                             suit, value 
                         ));
                     }

@@ -78,7 +78,7 @@
 
 
 
-Ability.database = Database.new(
+Ability.database = Database.new().initialize(
     items: 
         [
             Ability.new(

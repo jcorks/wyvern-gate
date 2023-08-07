@@ -111,7 +111,6 @@
         @enemies_ = [];
         @allies_ = [];
         @battle_;
-        @self;
         @qualityDescription = empty;
         @abilitiesUsedBattle = empty;
         @adventurous = Number.random() <= 0.5;
@@ -145,7 +144,7 @@
             inventory.add(item:Item.Base.database.getRandomFiltered(
                     filter:::(value) <- value.isUnique == false && value.canHaveEnchants
                                             && value.tier <= story.tier
-                ).new(rngEnchantHint:true, from:self));
+                ).new(rngEnchantHint:true, from:this));
         }
         @expNext = 10;
         @level = 0;
@@ -158,8 +157,8 @@
             for(0, EQUIP_SLOTS.RING_R+1)::(slot) {
                 when(slot == EQUIP_SLOTS.HAND_R) empty;
                 foreach(equips[slot].equipEffects)::(index, effect) {
-                    self.addEffect(
-                        from:self, 
+                    this.addEffect(
+                        from:this, 
                         name:effect, 
                         durationTurns: -1
                     );
@@ -168,8 +167,8 @@
             
             
             foreach(profession.base.passives)::(index, passiveName) {
-                self.addEffect(
-                    from:self, 
+                this.addEffect(
+                    from:this, 
                     name:passiveName, 
                     durationTurns: -1
                 );
@@ -179,61 +178,61 @@
         }
 
 
-        this.constructor = ::(speciesHint, professionHint, levelHint => Number, state) {
-            self = this.instance;
-               
-            battleAI = BattleAI.new(
-                user: self
-            );            
-            
-            when(state != empty) ::<= {
-                self.state = state;
-                return self;
-            }
-            profession = if (professionHint == empty) 
-                Profession.Base.database.getRandomFiltered(
-                    filter:::(value) <- levelHint >= value.levelMinimum
-                ).new() 
-            else 
-                    Profession.Base.database.find(name:professionHint).new()
-            ;
-            professions->push(value:profession);
-            if (speciesHint != empty) ::<= {
-                species = speciesHint;
-            }
-            
-            
-            growth.mod(stats:species.growth);
-            growth.mod(stats:personality.growth);
-            growth.mod(stats:profession.base.growth);
-            for(0, levelHint)::(i) {
-                self.autoLevel();                
-            }
-
-            /*
-            ::<={
-                [0, 1+(Number.random()*3)->floor]->for(do:::(i) {
-                    @:item = Item.Base.database.getRandomWeightedFiltered(
-                        filter:::(value) <- level >= value.levelMinimum &&
-                                            value.isUnique == false
-                        
-                    );
-                    if (item.name != 'None') ::<={
-                        @:itemInstance = item.new(from:self);
-                        if (itemInstance.enchantsCount == 0) 
-                            inventory.add(item:itemInstance);
-                    }
-                    
-                    
-                });
-                
-            }
-            */
-
-            return self;
-        }
         
         this.interface = {
+            setup::(speciesHint, professionHint, levelHint => Number, state) {
+                   
+                battleAI = BattleAI.new(
+                    user: this
+                );            
+                
+                when(state != empty) ::<= {
+                    this.state = state;
+                    return this;
+                }
+                profession = if (professionHint == empty) 
+                    Profession.Base.database.getRandomFiltered(
+                        filter:::(value) <- levelHint >= value.levelMinimum
+                    ).new() 
+                else 
+                        Profession.Base.database.find(name:professionHint).new()
+                ;
+                professions->push(value:profession);
+                if (speciesHint != empty) ::<= {
+                    species = speciesHint;
+                }
+                
+                
+                growth.mod(stats:species.growth);
+                growth.mod(stats:personality.growth);
+                growth.mod(stats:profession.base.growth);
+                for(0, levelHint)::(i) {
+                    this.autoLevel();                
+                }
+
+                /*
+                ::<={
+                    [0, 1+(Number.random()*3)->floor]->for(do:::(i) {
+                        @:item = Item.Base.database.getRandomWeightedFiltered(
+                            filter:::(value) <- level >= value.levelMinimum &&
+                                                value.isUnique == false
+                            
+                        );
+                        if (item.name != 'None') ::<={
+                            @:itemInstance = item.new(from:this);
+                            if (itemInstance.enchantsCount == 0) 
+                                inventory.add(item:itemInstance);
+                        }
+                        
+                        
+                    });
+                    
+                }
+                */
+
+                return this;
+            },     
+        
             state : {
                 set ::(value) {
                     hp = value.hp;
@@ -259,7 +258,7 @@
                         @:data = value.equips[index];
                         when(index == EQUIP_SLOTS.HAND_R) empty;
                         when(data.baseName == 'None') empty;
-                        self.equip(slot:index, silent:true, inventory:inventory, item:Item.Base.database.find(name:data.baseName).new(state:data));
+                        this.equip(slot:index, silent:true, inventory:inventory, item:Item.Base.database.find(name:data.baseName).new(state:data));
                     }
                     
                     inventory.state = value.inventory;
@@ -304,8 +303,8 @@
             // This does things like reset stats according to 
             // effects and such.
             startTurn :: {
-                self.recalculateStats();             
-                self.flags.reset();
+                this.recalculateStats();             
+                this.flags.reset();
             },
             
             // called to signal that a battle has started involving this entity
@@ -334,7 +333,7 @@
 
                     effect.effect.onRemoveEffect(
                         user:effect.from, 
-                        holder:self,
+                        holder:this,
                         item:effect.item
                     );
                 }
@@ -348,7 +347,7 @@
             recalculateStats :: {
                 stats.resetMod();
                 foreach(effects)::(index, effect) {
-                    effect.effect.onStatRecalculate(user:effect.from, stats, holder:self, item:effect.item);
+                    effect.effect.onStatRecalculate(user:effect.from, stats, holder:this, item:effect.item);
                     stats.modRate(stats:effect.effect.stats);
                 }
 
@@ -365,7 +364,7 @@
             endTurn ::(battle) {
                 foreach(EQUIP_SLOTS)::(str, i) {
                     when(i == 0 && equips[0] == equips[1]) empty;
-                    equips[i].onTurnEnd(wielder:self, battle);
+                    equips[i].onTurnEnd(wielder:this, battle);
                 }
             },
 
@@ -376,30 +375,30 @@
                     if (effect.duration != -1 && effect.turnIndex >= effect.duration) ::<= {
                         effect.effect.onRemoveEffect(
                             user:effect.from, 
-                            holder:self,
+                            holder:this,
                             item:effect.item
                         );
                         effects->remove(key:index);
                     } else ::<= {
                         if (effect.effect.skipTurn == true)
                             act = false;
-                        effect.effect.onNextTurn(user:effect.from, turnIndex:effect.turnIndex, turnCount: effect.duration, holder:self, item:effect.item);                    
+                        effect.effect.onNextTurn(user:effect.from, turnIndex:effect.turnIndex, turnCount: effect.duration, holder:this, item:effect.item);                    
                         effect.turnIndex += 1;
                     }
                 }
                 
-                if (self.stats.SPD < 0) ::<= {
-                    windowEvent.queueMessage(text:self.name + ' cannot move due to negative speed!');
+                if (this.stats.SPD < 0) ::<= {
+                    windowEvent.queueMessage(text:this.name + ' cannot move due to negative speed!');
                     act = false;
                 }
 
-                if (self.stats.DEX < 0) ::<= {
-                    windowEvent.queueMessage(text:self.name + ' fumbles about due to negative dexterity!');
+                if (this.stats.DEX < 0) ::<= {
+                    windowEvent.queueMessage(text:this.name + ' fumbles about due to negative dexterity!');
                     act = false;
                 }
 
                 if (act == false)
-                    self.flags.add(flag:StateFlags.SKIPPED);
+                    this.flags.add(flag:StateFlags.SKIPPED);
                 return act;
             },
 
@@ -512,40 +511,40 @@
                 // phys is always assumed to be with equipped weapon
                 foreach(effects)::(index, effect) {
                     when (dmg.amount <= 0) empty;
-                    effect.effect.onPreAttackOther(user:effect.from, item:effect.item, holder:self, to:target, damage:dmg);
+                    effect.effect.onPreAttackOther(user:effect.from, item:effect.item, holder:this, to:target, damage:dmg);
                 }
                 
                 when(dmg.amount <= 0) empty;
                 foreach(target.effects)::(index, effect) {
                     when (dmg.amount <= 0) empty;
-                    effect.effect.onAttacked(user:target, item:effect.item, holder:target, by:self, damage:dmg);                
+                    effect.effect.onAttacked(user:target, item:effect.item, holder:target, by:this, damage:dmg);                
                 }
                 
 
                 when(dmg.amount <= 0) empty;
                 when(target.hp == 0) ::<= {
-                    self.flags.add(flag:StateFlags.DEFEATED_ENEMY);
+                    this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
                     target.flags.add(flag:StateFlags.DIED);
                     target.kill();                
                 }
 
-                @critChance = 0.999 - (self.stats.LUK - level) / 100;
+                @critChance = 0.999 - (this.stats.LUK - level) / 100;
                 @isCrit = false;
                 if (critChance < 0.90) critChance = 0.9;
                 if (Number.random() > critChance) ::<={
-                    dmg.amount += self.stats.DEX * 2.5;
+                    dmg.amount += this.stats.DEX * 2.5;
                     isCrit = true;
                 }
 
-                when(!target.damage(from:self, damage:dmg, dodgeable:true, critical:isCrit)) empty;
+                when(!target.damage(from:this, damage:dmg, dodgeable:true, critical:isCrit)) empty;
 
 
-                self.flags.add(flag:StateFlags.ATTACKED);
+                this.flags.add(flag:StateFlags.ATTACKED);
 
 
                 
                 foreach(effects)::(index, effect) {
-                    effect.effect.onPostAttackOther(user:effect.from, item:effect.item, holder:self, to:target);
+                    effect.effect.onPostAttackOther(user:effect.from, item:effect.item, holder:this, to:target);
                 }
                 return true;
             },
@@ -555,7 +554,7 @@
 
                 @whiff = false;
                 if (dodgeable) ::<= {
-                    @diffpercent = (from.stats.DEX - self.stats.DEX) / self.stats.DEX;
+                    @diffpercent = (from.stats.DEX - this.stats.DEX) / this.stats.DEX;
                     // if attacker dex is above target dex, hit always connects
                     when(diffpercent > 0) empty;
                     
@@ -568,22 +567,22 @@
                 
                 when(whiff) ::<= {
                     windowEvent.queueMessage(text:random.pickArrayItem(list:[
-                        self.name + ' lithely dodges ' + from.name + '\'s attack!',                 
-                        self.name + ' narrowly dodges ' + from.name + '\'s attack!',                 
-                        self.name + ' dances around ' + from.name + '\'s attack!',                 
-                        from.name + '\'s attack completely misses ' + self.name + '!'
+                        this.name + ' lithely dodges ' + from.name + '\'s attack!',                 
+                        this.name + ' narrowly dodges ' + from.name + '\'s attack!',                 
+                        this.name + ' dances around ' + from.name + '\'s attack!',                 
+                        from.name + '\'s attack completely misses ' + this.name + '!'
                     ]));
-                    self.flags.add(flag:StateFlags.DODGED_ATTACK);
+                    this.flags.add(flag:StateFlags.DODGED_ATTACK);
                     return false;
                 }
 
 
 
-                if (from.stats.DEX > self.stats.DEX)               
+                if (from.stats.DEX > this.stats.DEX)               
                     // as DEX increases: randomness decreases 
                     // amount of reliable damage increases
                     // This models user skill vs receiver skill
-                    damage.amount = damage.amount + damage.amount * ((Number.random() - 0.5) * (self.stats.DEX / from.stats.DEX) + (1 -  self.stats.DEX / from.stats.DEX))
+                    damage.amount = damage.amount + damage.amount * ((Number.random() - 0.5) * (this.stats.DEX / from.stats.DEX) + (1 -  this.stats.DEX / from.stats.DEX))
                 else
                     damage.amount = damage.amount + damage.amount * (Number.random() - 0.5)
                 ; 
@@ -596,7 +595,7 @@
 
 
                 foreach(effects)::(index, effect) {
-                    effect.effect.onDamage(user:effect.from, holder:self, from, damage);
+                    effect.effect.onDamage(user:effect.from, holder:this, from, damage);
                 }
 
 
@@ -624,18 +623,18 @@
                 if (damage.damageClass == Damage.CLASS.HP) ::<= {
                     hp -= damage.amount;
                     if (hp < 0) hp = 0;
-                    windowEvent.queueMessage(text: '' + self.name + ' received ' + damage.amount + ' '+damageTypeName() + 'damage (HP:' + self.renderHP() + ')' );
+                    windowEvent.queueMessage(text: '' + this.name + ' received ' + damage.amount + ' '+damageTypeName() + 'damage (HP:' + this.renderHP() + ')' );
                 } else ::<= {
                     ap -= damage.amount;
                     if (ap < 0) ap = 0;                
-                    windowEvent.queueMessage(text: '' + self.name + ' received ' + damage.amount + ' AP damage (AP:' + ap + '/' + stats.AP + ')' );
+                    windowEvent.queueMessage(text: '' + this.name + ' received ' + damage.amount + ' AP damage (AP:' + ap + '/' + stats.AP + ')' );
 
                 }
                 @:world = import(module:'game_singleton.world.mt');
 
-                if (world.party.isMember(entity:self) && damage.amount > stats.HP * 0.2 && Number.random() > 0.7)
+                if (world.party.isMember(entity:this) && damage.amount > stats.HP * 0.2 && Number.random() > 0.7)
                     windowEvent.queueMessage(
-                        speaker: self.name,
+                        speaker: this.name,
                         text: '"' + random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.HURT]) + '"'
                     );
                     
@@ -643,31 +642,31 @@
                 flags.add(flag:StateFlags.HURT);
                 
                 if (damage.damageType == Damage.TYPE.FIRE && Number.random() > 0.9)
-                    self.addEffect(from, name:'Burned',durationTurns:5);
+                    this.addEffect(from, name:'Burned',durationTurns:5);
                 if (damage.damageType == Damage.TYPE.ICE && Number.random() > 0.9)
-                    self.addEffect(from, name:'Frozen',durationTurns:2);
+                    this.addEffect(from, name:'Frozen',durationTurns:2);
                 if (damage.damageType == Damage.TYPE.THUNDER && Number.random() > 0.9)
-                    self.addEffect(from, name:'Paralyzed',durationTurns:2);
+                    this.addEffect(from, name:'Paralyzed',durationTurns:2);
                 if (damage.damageType == Damage.TYPE.PHYS && Number.random() > 0.99) 
-                    self.addEffect(from, name:'Bleeding',durationTurns:5);
+                    this.addEffect(from, name:'Bleeding',durationTurns:5);
                 if (damage.damageType == Damage.TYPE.POISON && Number.random() > 0.9) 
-                    self.addEffect(from, name:'Poisoned',durationTurns:5);
+                    this.addEffect(from, name:'Poisoned',durationTurns:5);
                 if (damage.damageType == Damage.TYPE.DARK && Number.random() > 0.9)
-                    self.addEffect(from, name:'Blind',durationTurns:2);
+                    this.addEffect(from, name:'Blind',durationTurns:2);
                 if (damage.damageType == Damage.TYPE.LIGHT && Number.random() > 0.9)
-                    self.addEffect(from, name:'Petrified',durationTurns:2);
+                    this.addEffect(from, name:'Petrified',durationTurns:2);
                 
                 
-                if (world.party.isMember(entity:self) && hp == 0 && Number.random() > 0.7) ::<= {
+                if (world.party.isMember(entity:this) && hp == 0 && Number.random() > 0.7) ::<= {
                     windowEvent.queueMessage(
-                        speaker: self.name,
+                        speaker: this.name,
                         text: '"' + random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.DEATH]) + '"'
                     );
                 }
                 
                 if (hp == 0) ::<= {
-                    windowEvent.queueMessage(text: '' + self.name + ' has been knocked out.');                                
-                    self.flags.add(flag:StateFlags.FALLEN);
+                    windowEvent.queueMessage(text: '' + this.name + ' has been knocked out.');                                
+                    this.flags.add(flag:StateFlags.FALLEN);
                     from.flags.add(flag:StateFlags.DEFEATED_ENEMY);
                 }
 
@@ -683,10 +682,10 @@
                 when(hp >= stats.HP) empty;
                 amount = amount->ceil;
                 hp += amount;
-                self.flags.add(flag:StateFlags.HEALED);
+                this.flags.add(flag:StateFlags.HEALED);
                 if (hp > stats.HP) hp = stats.HP;
                 if (silent == empty)
-                    windowEvent.queueMessage(text: '' + self.name + ' heals ' + amount + ' HP (HP:' + self.renderHP() + ')');
+                    windowEvent.queueMessage(text: '' + this.name + ' heals ' + amount + ' HP (HP:' + this.renderHP() + ')');
             },
             
             healAP ::(amount => Number, silent) {
@@ -694,7 +693,7 @@
                 ap += amount;
                 if (ap > stats.AP) ap = stats.AP;
                 if (silent == empty)
-                    windowEvent.queueMessage(text: '' + self.name + ' heals ' + amount + ' AP (AP:' + ap + '/' + stats.AP + ')');
+                    windowEvent.queueMessage(text: '' + this.name + ' heals ' + amount + ' AP (AP:' + ap + '/' + stats.AP + ')');
                 
                 
             },
@@ -773,7 +772,7 @@
                         level += 1;
                     }
                 }
-                self.recalculateStats();                
+                this.recalculateStats();                
             },
             
             stats : {
@@ -783,7 +782,7 @@
             },
             
             autoLevel :: {
-                self.gainExp(amount:expNext);  
+                this.gainExp(amount:expNext);  
             },
             
             dropExp :: {
@@ -809,7 +808,7 @@
             kill ::(silent) {
                 hp = 0;
                 if (silent == empty)
-                    windowEvent.queueMessage(text: '' + self.name + ' has died!');                
+                    windowEvent.queueMessage(text: '' + this.name + ' has died!');                
                 flags.add(flag:StateFlags.DIED);
                 isDead = true;                
             },
@@ -842,10 +841,10 @@
 
                 einst.effect.onAffliction(
                     user:from, 
-                    holder:self,
+                    holder:this,
                     item
                 );
-                self.recalculateStats();
+                this.recalculateStats();
 
             },
             
@@ -861,7 +860,7 @@
                     
                         value.effect.onRemoveEffect(
                             user:value.from, 
-                            holder:self,
+                            holder:this,
                             item:value.item
                         );
                     }
@@ -893,10 +892,10 @@
             },
             
             learnNextAbility::{
-                @:skills = self.profession.gainSP(amount:1);
+                @:skills = this.profession.gainSP(amount:1);
                 when(skills == empty) empty;
                 foreach(skills)::(i, skill) {
-                    self.learnAbility(name:skill);
+                    this.learnAbility(name:skill);
                 }
             },
             
@@ -936,20 +935,20 @@
             },
             
             equip ::(item => none->type, slot => Number, silent, inventory => Inventory.type) {
-                self.recalculateStats();
+                this.recalculateStats();
                 @:oldstats = StatSet.new();
-                oldstats.add(stats: self.stats);
+                oldstats.add(stats: this.stats);
 
                 @olditem = equips[slot];
         
-                when (self.getSlotsForItem(item)->findIndex(value:slot) == -1) ::<= {
+                when (this.getSlotsForItem(item)->findIndex(value:slot) == -1) ::<= {
                     when(silent) empty;
                     error(detail:'Item does not enter the given slot.');
                 }
 
 
 
-                @:old = self.unequip(slot, silent:true);                
+                @:old = this.unequip(slot, silent:true);                
 
 
                 if (old != empty)
@@ -964,8 +963,8 @@
                 
                 
                 foreach(item.equipEffects)::(index, effect) {
-                    self.addEffect(
-                        from:self, 
+                    this.addEffect(
+                        from:this, 
                         name:effect, 
                         durationTurns: -1
                     );
@@ -974,12 +973,12 @@
                 if ((slot == EQUIP_SLOTS.HAND_L || slot == EQUIP_SLOTS.HAND_R) && profession.base.weaponAffinity == equips[EQUIP_SLOTS.HAND_L].base.name) ::<= {
                     if (silent != true) ::<= {
                         windowEvent.queueMessage(
-                            speaker: self.name,
+                            speaker: this.name,
                             text: '"This ' + item.base.name + ' really works for me as ' + correctA(word:profession.base.name) + '"'
                         );
                     }
-                    self.addEffect(
-                        from:self,
+                    this.addEffect(
+                        from:this,
                         name:'Weapon Affinity',
                         durationTurns: -1 
                     );
@@ -989,20 +988,20 @@
 
                 inventory.remove(item);
                 
-                self.recalculateStats();
+                this.recalculateStats();
 
                 
                 if (silent != true) ::<={
                     if (olditem.name == 'None') ::<= {
-                        windowEvent.queueMessage(text:self.name + ' has equipped the ' + item.name + '.');                    
+                        windowEvent.queueMessage(text:this.name + ' has equipped the ' + item.name + '.');                    
                     } else ::<= {
-                        windowEvent.queueMessage(text:self.name + ' unequipped the ' + olditem.name + ' and equipped the ' + item.name + '.');                    
+                        windowEvent.queueMessage(text:this.name + ' unequipped the ' + olditem.name + ' and equipped the ' + item.name + '.');                    
                     }
-                    oldstats.printDiff(prompt: '(Equipped: ' + item.name + ')', other:self.stats);
+                    oldstats.printDiff(prompt: '(Equipped: ' + item.name + ')', other:this.stats);
                 }
             },
             anonymize :: {
-                self.nickname = 'the ' + self.species.name + (if(self.profession.base.name == 'None') '' else ' ' + self.profession.base.name);            
+                this.nickname = 'the ' + this.species.name + (if(this.profession.base.name == 'None') '' else ' ' + this.profession.base.name);            
             },
             
             getEquipped::(slot => Number) {
@@ -1047,7 +1046,7 @@
                     @:effectObj = effects->filter(by:::(value) <- value.effect.name == effect)[0];
                     effectObj.effect.onRemoveEffect(
                         user:effectObj.from, 
-                        holder:self,
+                        holder:this,
                         item:effectObj.item
                     );
                     
@@ -1055,33 +1054,33 @@
                 }
                 
                 
-                self.recalculateStats();
+                this.recalculateStats();
                 return current;
             },
             unequipItem ::(item, silent) {
                 foreach(equips)::(slot, equip) {
                     if (equip == item)
-                        self.unequip(slot, silent);
+                        this.unequip(slot, silent);
                 }
             },
             
             useAbility::(ability, targets, turnIndex, extraData) {
                 when(ap < ability.apCost) windowEvent.queueMessage(
-                    text: self.name + " tried to use " + ability.name + ", but couldn\'t muster the mental strength!"
+                    text: this.name + " tried to use " + ability.name + ", but couldn\'t muster the mental strength!"
                 );
                 when(hp < ability.hpCost) windowEvent.queueMessage(
-                    text: self.name + " tried to use " + ability.name + ", but couldn't muster the strength!"
+                    text: this.name + " tried to use " + ability.name + ", but couldn't muster the strength!"
                 );
                 
                 when (abilitiesUsedBattle != empty && ability.oncePerBattle && abilitiesUsedBattle[ability.name] == true) windowEvent.queueMessage(
-                    text: self.name + " tried to use " + ability.name + ", but it worked the first time!"
+                    text: this.name + " tried to use " + ability.name + ", but it worked the first time!"
                 );
                 if (abilitiesUsedBattle) abilitiesUsedBattle[ability.name] = true;
                 
                 ap -= ability.apCost;
                 hp -= ability.hpCost;
                 ability.onAction(
-                    user:self,
+                    user:this,
                     targets, turnIndex, extraData                 
                 );
             
@@ -1128,7 +1127,7 @@
                           
                           // hire 
                           (1): ::<= {
-                            when(party.isMember(entity:self))
+                            when(party.isMember(entity:this))
                                 windowEvent.queueMessage(
                                     text: name + ' is already a party member.'
                                 );                
@@ -1147,7 +1146,7 @@
                             @:cost = 50+((stats.sum/3 + level)*2.5)->ceil;
 
 
-                            self.describe();
+                            this.describe();
 
                             windowEvent.queueAskBoolean(
                                 prompt: 'Hire for ' + cost + 'G?',
@@ -1159,7 +1158,7 @@
                                         );                
                                         
                                     party.inventory.subtractGold(amount:cost);
-                                    party.add(member:self);
+                                    party.add(member:this);
                                         windowEvent.queueMessage(
                                             text: name + ' joins the party!'
                                         );                
@@ -1212,7 +1211,7 @@
                                                 
                                                 @:chosenItem = tradeItems[choice-1];
                                                 party.inventory.remove(item:chosenItem);
-                                                self.inventory.remove(item);
+                                                this.inventory.remove(item);
                                                 party.inventory.add(item);
                                                 
                                                 windowEvent.queueMessage(
@@ -1301,7 +1300,7 @@
                 }
 
             
-                @out = self.name + ' is ' + correctA(word:species.name) + '. ';
+                @out = this.name + ' is ' + correctA(word:species.name) + '. ';
                 @:quals = [...qualities];
 
                 // inefficient, but idc                
@@ -1314,7 +1313,7 @@
                                 (if (qual1.plural) ' are ' else ' is ') 
                             + qual1.description + '. ',
                             
-                        self.name + '\'s ' + qual0.name + 
+                        this.name + '\'s ' + qual0.name + 
                                 (if (qual0.plural) ' are ' else ' is ') 
                             + qual0.description + ', and they have '
                             + qual1.name + 
@@ -1325,7 +1324,7 @@
 
                 @:describeSingle::(qual, index) {
                     return ([
-                        self.name + '\'s ' + qual.name + 
+                        this.name + '\'s ' + qual.name + 
                                 (if (qual.plural) ' are ' else ' is ') 
                             + qual.description + '. ',
 
@@ -1396,11 +1395,11 @@
                 @:plainStats = StatSet.new();
                 stats.resetMod();
                 plainStats.add(stats);
-                self.recalculateStats();
+                this.recalculateStats();
 
                 @:modRate = StatSet.new();
                 foreach(effects)::(index, effect) {
-                    effect.effect.onStatRecalculate(user:effect.from, stats, holder:self, item:effect.item);
+                    effect.effect.onStatRecalculate(user:effect.from, stats, holder:this, item:effect.item);
                     modRate.add(stats:effect.effect.stats);
                 }
 
@@ -1411,21 +1410,21 @@
                 
 
                 plainStats.printDiff(other:stats, 
-                    prompt:self.name + '(Base -> w/Mods.)'
+                    prompt:this.name + '(Base -> w/Mods.)'
                 );
                 
                 windowEvent.queueMessageSet(
-                    speaker: self.name,
+                    speaker: this.name,
                     pageAfter:canvas.height-4,
                     set: [ 
                           '       Name: ' + name + '\n\n' +
-                          '         HP: ' + self.hp + ' / ' + self.stats.HP + '\n' + 
-                          '         AP: ' + self.ap + ' / ' + self.stats.AP + '\n\n' + 
+                          '         HP: ' + this.hp + ' / ' + this.stats.HP + '\n' + 
+                          '         AP: ' + this.ap + ' / ' + this.stats.AP + '\n\n' + 
                           '    species: ' + species.name + '\n' +
                           ' profession: ' + profession.base.name + '\n' +
                           'personality: ' + personality.name + '\n\n'
                          ,
-                         self.describeQualities()
+                         this.describeQualities()
                          ,
                          
                           ' -Equipment-  \n'                

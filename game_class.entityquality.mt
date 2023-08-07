@@ -43,39 +43,40 @@
         @trait1;
         @trait2;
 
-        this.constructor = ::(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint, state) {
-            when(state != empty) ::<= {
-                this.state = state;
-                return this.instance;
-            }
-            base_ = base;            
-            
-            if (trait0Hint != empty) 
-                trait0 = trait0Hint
-            else 
-                trait0 = random.integer(from:0, to:base_.trait0->keycount-1);
-
-
-            if (trait1Hint != empty) 
-                trait1 = trait1Hint
-            else 
-                trait1 = random.integer(from:0, to:base_.trait1->keycount-1);
-
-            if (trait2Hint != empty) 
-                trait2 = trait2Hint
-            else 
-                trait2 = random.integer(from:0, to:base_.trait2->keycount-1);
-            
-            if (descriptionHint != empty) 
-                descIndex = descriptionHint
-            else 
-                descIndex = random.integer(from:0, to:base_.descriptions->keycount-1);
-            
-            return this.instance;
-            
-        }
         
         this.interface = {
+            setup ::(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint, state) {
+                when(state != empty) ::<= {
+                    this.state = state;
+                    return this.instance;
+                }
+                base_ = base;            
+                
+                if (trait0Hint != empty) 
+                    trait0 = trait0Hint
+                else 
+                    trait0 = random.integer(from:0, to:base_.trait0->keycount-1);
+
+
+                if (trait1Hint != empty) 
+                    trait1 = trait1Hint
+                else 
+                    trait1 = random.integer(from:0, to:base_.trait1->keycount-1);
+
+                if (trait2Hint != empty) 
+                    trait2 = trait2Hint
+                else 
+                    trait2 = random.integer(from:0, to:base_.trait2->keycount-1);
+                
+                if (descriptionHint != empty) 
+                    descIndex = descriptionHint
+                else 
+                    descIndex = random.integer(from:0, to:base_.descriptions->keycount-1);
+                
+                return this.instance;
+                
+            },
+        
             base : {
                 get :: {
                     return base_;
@@ -171,7 +172,7 @@ EntityQuality.Base = class(
 );
 
 
-EntityQuality.Base.database = Database.new(
+EntityQuality.Base.database = Database.new().initialize(
     items : [
         EntityQuality.Base.new(
             data : {

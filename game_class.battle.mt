@@ -47,12 +47,6 @@
         @alliesWin = false;
         @entityTurn;
         @onTurn_;
-        @self;
-        
-        this.constructor = :: {
-            self = this.instance;
-            return self;
-        }
         
     
         // some actions last multiple turns.
@@ -95,7 +89,7 @@
             turnIndex+=1;
             if (turnPoppable->keycount == 0) ::<= {      
                 foreach(turn)::(index, obj) {
-                    obj.entity.endTurn(battle:self);
+                    obj.entity.endTurn(battle:this);
                 }
 
                 if (onTurn_ != empty)
@@ -160,7 +154,7 @@
                 // given by the caller
                 @:act = if (obj.isAlly) onAllyTurn_ else onEnemyTurn_;
                 act(
-                    battle:self,
+                    battle:this,
                     user:ent,
                     landmark:landmark_,
                     allies:allies_,
@@ -512,7 +506,7 @@
                         render::{
                             if (externalRenderable)
                                 externalRenderable.render();
-                            self.render();
+                            this.render();
                             return windowEvent.RENDER_AGAIN;
                         }
                     },

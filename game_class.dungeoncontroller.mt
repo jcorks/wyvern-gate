@@ -20,12 +20,6 @@ return class(
         @:Location = import(module:'game_class.location.mt');
 
     
-        this.constructor = ::(map => Object, island => Object, landmark => Object) {
-            map_ = map;
-            island_ = island;
-            landmark_ = landmark;
-            return this.instance;
-        }
     
         @:addEntity ::{
             @:windowEvent = import(module:'game_singleton.windowevent.mt');
@@ -80,6 +74,14 @@ return class(
             floorHint : {
                 set ::(value) <- floorHint = value
             },
+            
+            setup::(map => Object, island => Object, landmark => Object) {
+                map_ = map;
+                island_ = island;
+                landmark_ = landmark;
+                return this;
+            },
+            
             step::{
                 // update movement of entity
                 Object.freezeGC();
@@ -102,7 +104,7 @@ return class(
                             landmark: this,
                             noLoot: true,
                             onTurn ::{
-                                this.instance.step();
+                                this.step();
                             },
                             
                             onEnd::(result) {
