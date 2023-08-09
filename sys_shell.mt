@@ -228,7 +228,7 @@ return class(
                         match(input) {
                             (Topaz.Input.KEY.ENTER):::<= {
                                 @:args = currentCommand->split(token:' ');
-                                @:command = this.instance.commands->findIndex(value:args[0]);
+                                @:command = this.commands->findIndex(value:args[0]);
                                 terminal.backspace(); // remove cursor
                                 terminal.nextLine();
                                 if (command == -1) ::<= {

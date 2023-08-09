@@ -365,7 +365,6 @@ return class(
             */
             
             
-            @self = this.instance;
             for(0, mapSizeH+1)::(y) {
                 for(0, mapSizeW+1)::(x) {
                     @itemX = (x) + regionX*mapSizeW - mapSizeW*0.5;
@@ -373,7 +372,7 @@ return class(
                     
                     when(itemX < 0 || itemY < 0 || itemX >= width || itemY >= height) empty;
                     
-                    @symbol = self.sceneryAt(x:itemX, y:itemY);
+                    @symbol = this.sceneryAt(x:itemX, y:itemY);
 
                     canvas.movePen(x:left + x, y:top + y);  
 
@@ -391,7 +390,7 @@ return class(
                     }
 
 
-                    @:items = self.itemsAt(x:itemX, y:itemY);
+                    @:items = this.itemsAt(x:itemX, y:itemY);
                     when(items != empty) ::<= {
                         canvas.drawChar(text:if (items[items->keycount-1].discovered) items[items->keycount-1].symbol else '?');
                     }
@@ -480,15 +479,14 @@ return class(
                 });
             }); 
             */           
-            @self = this.instance;
             for(0, mapSizeH+1)::(y) {
                 for(0, mapSizeW+1)::(x) {
                     @itemX = ((x + pointer.x - mapSizeW/2))->floor;
                     @itemY = ((y + pointer.y - mapSizeH/2))->floor;
 
-                    @symbol = self.sceneryAt(x:itemX, y:itemY);
+                    @symbol = this.sceneryAt(x:itemX, y:itemY);
 
-                    @:items = self.itemsAt(x:itemX, y:itemY);
+                    @:items = this.itemsAt(x:itemX, y:itemY);
                     canvas.movePen(x:left + x, y:top + y);  
 
 
@@ -782,7 +780,7 @@ return class(
                 @:path = aStarPathNext(start:pointer, goal:{x:x, y:y});                
                 when(path == empty) empty;
                 
-                this.instance.setPointer(
+                this.setPointer(
                     x: path.x,
                     y: path.y                
                 );
@@ -790,7 +788,7 @@ return class(
             },
 
             moveTowardPointer::(data) {
-                this.instance.moveTowardPoint(data, x:pointer.x, y:pointer.y);
+                this.moveTowardPoint(data, x:pointer.x, y:pointer.y);
             },
 
             moveTowardPoint::(data, x, y) {
@@ -839,7 +837,7 @@ return class(
                 x,
                 y
             ) {
-                this.instance.movePointerFree(
+                this.movePointerFree(
                     x:if (x > 0) 1 else if (x < 0) -1 else 0,
                     y:if (y > 0) 1 else if (y < 0) -1 else 0
                 );
@@ -903,7 +901,7 @@ return class(
                 }
 
 
-                this.instance.setPointer(x, y);
+                this.setPointer(x, y);
             
             },
             
@@ -915,15 +913,14 @@ return class(
             
             
             getItemsUnderPointer :: {
-                return this.instance.itemsAt(x:pointer.x, y:pointer.y);
+                return this.itemsAt(x:pointer.x, y:pointer.y);
             },
 
             getItemsUnderPointerRadius ::(radius) {
                 @out = [];
-                @self = this.instance;
                 for(pointer.x - (radius / 2)->floor, pointer.x + (radius / 2)->ceil)::(x) {
                     for(pointer.y - (radius / 2)->floor, pointer.y + (radius / 2)->ceil)::(y) {
-                        @:at = self.itemsAt(x, y);
+                        @:at = this.itemsAt(x, y);
                         when(at == empty) empty;
                         foreach(at)::(key, value) {
                             out->push(value);
@@ -935,13 +932,13 @@ return class(
             },
 
             getNamedItemsUnderPointer :: {
-                @:out = this.instance.itemsAt(x:pointer.x, y:pointer.y);
+                @:out = this.itemsAt(x:pointer.x, y:pointer.y);
                 when(out == empty) empty;
                 return out->filter(by:::(value) <- value.name != empty);
             },
 
             getNamedItemsUnderPointerRadius ::(radius) {
-                @:out = this.instance.getItemsUnderPointerRadius(radius);    
+                @:out = this.getItemsUnderPointerRadius(radius);    
                 when(out == empty) empty;
                 return out->filter(by:::(value) <- value.name != empty);
             },

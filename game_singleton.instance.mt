@@ -46,14 +46,7 @@ return class(
         @onSaveState;
         @onLoadState;
         @stepsSinceLast = 0;
-        @self;
-        
-        this.constructor = ::{
-            self = this.instance;
-            return self;
-        }
-        
-        
+
         
         
 
@@ -83,7 +76,7 @@ return class(
                                 when(choice == 0) empty;
                                 
                                 
-                                onSaveState(slot:choice, data:JSON.encode(object:self.state));        
+                                onSaveState(slot:choice, data:JSON.encode(object:this.state));        
                                 windowEvent.queueMessage(text:'Saved successfully to slot ' + choice);
                             }
                         );
@@ -301,12 +294,10 @@ return class(
                 onSaveState => Function, // for saving,
                 onLoadState => Function,
             ) {
-                self.onSaveState = onSaveState;
-                self.onLoadState = onLoadState;
+                this.onSaveState = onSaveState;
+                this.onLoadState = onLoadState;
                 
                 
-                import(module:'game_singleton.gamblist.mt').playGame(onFinish::{});
-                return empty;
                 
                 
                 windowEvent.queueMessage(
@@ -343,8 +334,8 @@ return class(
                             when(data == empty)
                                 windowEvent.queueMessage(text:'There is no data in this slot');
                                 
-                            self.state = JSON.decode(string:data);
-                            self.startInstance();
+                            this.state = JSON.decode(string:data);
+                            this.startInstance();
                           },
                           
                           (1)::<= {
@@ -357,8 +348,8 @@ return class(
                             );
                             canvas.drawText(text:message);
                             canvas.commit(renderNow:true);
-                            self.startNew();
-                            //self.startInstance();
+                            this.startNew();
+                            //this.startInstance();
                           },
                           
                           (2)::<= {
@@ -545,7 +536,7 @@ return class(
                 
                 @:Scene = import(module:'game_class.scene.mt');
                 Scene.database.find(name:'scene_intro').act(onDone::{
-                    self.visitIsland();
+                    this.visitIsland();
                     
                     
                     /*island.addEvent(
@@ -689,7 +680,7 @@ return class(
                           // visit landmark
                           default: ::<= {
                             //breakpoint();
-                            self.visitLandmark(landmark:visitable[choice-6].data);
+                            this.visitLandmark(landmark:visitable[choice-6].data);
                           }
                         }
 

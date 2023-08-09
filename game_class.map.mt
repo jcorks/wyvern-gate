@@ -40,15 +40,16 @@
         @_y;
         @_w;
         @_h;
-        this.constructor = ::(x, y, width, height) {
-            _x = x => Number;
-            _y = y => Number;
-            _w = width => Number;
-            _h = height => Number;
-            return this.instance;
-        }
         
         this.interface = {
+            initialize ::(x, y, width, height) {
+                _x = x => Number;
+                _y = y => Number;
+                _w = width => Number;
+                _h = height => Number;
+                return this;
+            },
+
             x : {get::<-_x},        
             y : {get::<-_y},        
             width : {get::<-_w},        
@@ -77,7 +78,7 @@ return class(
         @ROOM_EMPTY_AREA_COUNT = 35;
         @ROOM_SCATTER_CHAR = ',';
         @ROOM_SCATTER_RATE = 0.3;
-        @self;
+        ;
         
 
         @:generateArea ::(item) {
@@ -107,24 +108,24 @@ return class(
             ));
                     
             for(0, width+1)::(i) {
-                self.addWall(
+                this.addWall(
                     x:left + i,
                     y:top
                 );
 
-                self.addWall(
+                this.addWall(
                     x:left + i,
                     y:top + height
                 );
             }
 
             for(0, height+1)::(i) {
-                self.addWall(
+                this.addWall(
                     x:left,
                     y:top + i
                 );
 
-                self.addWall(
+                this.addWall(
                     x:left + width,
                     y:top + i
                 );
@@ -134,36 +135,36 @@ return class(
         
         @:applyCavities::{
             foreach(cavities)::(i, cav) {
-                self.addWall(
+                this.addWall(
                     x:cav.x+1,
                     y:cav.y
                 );
-                self.addWall(
+                this.addWall(
                     x:cav.x-1,
                     y:cav.y
                 );
-                self.addWall(
+                this.addWall(
                     x:cav.x,
                     y:cav.y+1
                 );
-                self.addWall(
+                this.addWall(
                     x:cav.x,
                     y:cav.y-1
                 );
                 
-                self.addWall(
+                this.addWall(
                     x:cav.x-1,
                     y:cav.y-1
                 );
-                self.addWall(
+                this.addWall(
                     x:cav.x+1,
                     y:cav.y+1
                 );
-                self.addWall(
+                this.addWall(
                     x:cav.x+1,
                     y:cav.y-1
                 );
-                self.addWall(
+                this.addWall(
                     x:cav.x-1,
                     y:cav.y+1
                 );
@@ -175,17 +176,17 @@ return class(
             foreach(areas)::(i, area) {
                 for(area.x+1, area.x + area.width)::(x) {
                     for(area.y+1, area.y + area.height)::(y) {
-                        self.removeWall(x, y);
-                        self.clearItems(x, y);
-                        self.clearScenery(x, y);
+                        this.removeWall(x, y);
+                        this.clearItems(x, y);
+                        this.clearScenery(x, y);
                     }
                 }
             }
             
             foreach(cavities)::(i, cav) {
-                self.removeWall(x:cav.x, y:cav.y);
-                self.clearItems(x:cav.x, y:cav.y);
-                self.clearScenery(x:cav.x, y:cav.y);
+                this.removeWall(x:cav.x, y:cav.y);
+                this.clearItems(x:cav.x, y:cav.y);
+                this.clearScenery(x:cav.x, y:cav.y);
             }
             cavities = [];
         }
@@ -252,11 +253,11 @@ return class(
         }
     
         @:generateLayout :: {
-            self.sceneryValues = [ROOM_SCATTER_CHAR];
+            this.sceneryValues = [ROOM_SCATTER_CHAR];
             for(-30, ROOM_SIZE+30)::(y) {
                 for(-30, ROOM_SIZE+30)::(x) {
                     if (Number.random() < ROOM_SCATTER_RATE / 4)
-                        self.setSceneryIndex(
+                        this.setSceneryIndex(
                             x, y, symbol: 0
                         );
                 }
@@ -278,30 +279,28 @@ return class(
             cleanupAreas();
         }
 
-
-
-        this.constructor = ::(mapHint => Object) {
-            self = this.instance;
-            self.paged = false;
-            self.width = if (mapHint.roomSize == empty) ROOM_SIZE else mapHint.roomSize;
-            self.height = if (mapHint.roomSize == empty) ROOM_SIZE else mapHint.roomSize;
-            self.renderOutOfBounds = if (mapHint.renderOutOfBounds == empty) true else mapHint.renderOutOfBounds;
-            self.outOfBoundsCharacter = if (mapHint.outOfBoundsCharacter == empty) ' ' else mapHint.outOfBoundsCharacter;
-            self.wallCharacter = if (mapHint.wallCharacter == empty) '▓' else mapHint.wallCharacter;
-            
-            if (mapHint.roomAreaSize != empty) ROOM_AREA_SIZE = mapHint.roomAreaSize;
-            if (mapHint.roomAreaSizeLarge != empty) ROOM_AREA_SIZE_LARGE = mapHint.roomAreaSizeLarge;
-            if (mapHint.roomAreaVariance != empty) ROOM_AREA_VARIANCE = mapHint.roomAreaVariance;
-            if (mapHint.roomSize != empty) ROOM_SIZE = mapHint.roomSize;
-            if (mapHint.emptyAreaCount != empty) ROOM_EMPTY_AREA_COUNT = mapHint.emptyAreaCount;
-            if (mapHint.scatterChar != empty) ROOM_SCATTER_CHAR = mapHint.scatterChar;
-            if (mapHint.scatterRate != empty) ROOM_SCATTER_RATE = mapHint.scatterRate;
-            
-            generateLayout();
-            return self;
-        }   
         
         this.interface = {
+            initialize ::(mapHint => Object) {
+                this.paged = false;
+                this.width = if (mapHint.roomSize == empty) ROOM_SIZE else mapHint.roomSize;
+                this.height = if (mapHint.roomSize == empty) ROOM_SIZE else mapHint.roomSize;
+                this.renderOutOfBounds = if (mapHint.renderOutOfBounds == empty) true else mapHint.renderOutOfBounds;
+                this.outOfBoundsCharacter = if (mapHint.outOfBoundsCharacter == empty) ' ' else mapHint.outOfBoundsCharacter;
+                this.wallCharacter = if (mapHint.wallCharacter == empty) '▓' else mapHint.wallCharacter;
+                
+                if (mapHint.roomAreaSize != empty) ROOM_AREA_SIZE = mapHint.roomAreaSize;
+                if (mapHint.roomAreaSizeLarge != empty) ROOM_AREA_SIZE_LARGE = mapHint.roomAreaSizeLarge;
+                if (mapHint.roomAreaVariance != empty) ROOM_AREA_VARIANCE = mapHint.roomAreaVariance;
+                if (mapHint.roomSize != empty) ROOM_SIZE = mapHint.roomSize;
+                if (mapHint.emptyAreaCount != empty) ROOM_EMPTY_AREA_COUNT = mapHint.emptyAreaCount;
+                if (mapHint.scatterChar != empty) ROOM_SCATTER_CHAR = mapHint.scatterChar;
+                if (mapHint.scatterRate != empty) ROOM_SCATTER_RATE = mapHint.scatterRate;
+                
+                generateLayout();
+                return this;
+            },
+
             areas : {
                 get ::<- areas
             },

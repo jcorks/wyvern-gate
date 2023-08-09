@@ -14,7 +14,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+*/ 
 @:class = import(module:'Matte.Core.Class');
 
 
@@ -145,11 +145,11 @@ return class(
             },
         
             pickArrayItem::(list) {
-                return list[this.instance.integer(from:0, to:list->keycount-1)];
+                return list[this.integer(from:0, to:list->keycount-1)];
             },
 
             pickTableItem::(table) {
-                return table[this.instance.pickArrayItem(list:table->keys)];
+                return table[this.pickArrayItem(list:table->keys)];
             },
             
             flipCoin:: <- tt800.next() < 0.5,

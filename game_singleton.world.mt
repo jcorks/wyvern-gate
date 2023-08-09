@@ -60,7 +60,6 @@ return class(
         @battle = Battle.new();
         @island = empty;
         @story = import(module:'game_singleton.story.mt');
-        @self;
         
         @:getDayString = ::{
             return match(time) {
@@ -82,7 +81,7 @@ return class(
         }
         
         @:getSeasonString = ::{
-            return match(self.season) {
+            return match(this.season) {
               (SEASON.SPRING): 'Spring',           
               (SEASON.SUMMER): 'Summer',           
               (SEASON.AUTUMN): 'Autumn',           
@@ -90,11 +89,6 @@ return class(
            }
         }
         
-        
-        this.constructor = ::{
-            self = this.instance;
-            return self;
-        }
         
         this.interface = {
             TIME : {
@@ -113,7 +107,7 @@ return class(
             
             
             discoverIsland ::(levelHint => Number, tierHint => Number, nameHint) {
-                @:out = Island.new(world:self, levelHint, party, nameHint, tierHint);
+                @:out = Island.new(world:this, levelHint, party, nameHint, tierHint);
                 return out;
             },
             
@@ -176,7 +170,7 @@ return class(
                     day = value.day;
                     year = value.year;
                     
-                    island = Island.new(levelHint: 0, world: self, party : self.party, state:value.island);                        
+                    island = Island.new(levelHint: 0, world: this, party : this.party, state:value.island);                        
                     party.state = value.party;
                     
                     foreach(value.storyFlags)::(key, value) {

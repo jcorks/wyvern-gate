@@ -45,7 +45,7 @@ return class(
         @amount_;
         @dclass;
         this.interface = {
-            setup ::(amount => Number, damageType => Number, damageClass => Number) {
+            initialize ::(amount => Number, damageType => Number, damageClass => Number) {
                 amount_ = (amount)->ceil;
                 if (amount_ <= 0) amount_ = 1;// minimum of 1 damage
                 type_ = damageType;

@@ -267,12 +267,7 @@
 return class(
     name : 'Wyvern.NameGen',
     define:::(this) {
-    
-        @self;
-        this.constructor = ::{
-            self = this.instance;
-            return self;
-        }
+
     
         this.interface = {
             person :: {
@@ -307,12 +302,12 @@ return class(
 
                 @:val = Number.random();
                 return (match(true) {
-                      (val < 0.2): self.person() + 'lor',
-                      (val < 0.4): self.person() + 'shor',
-                      (val < 0.6): self.person() + 'tir',
-                      (val < 0.8): self.person() + 'shir',
+                      (val < 0.2): this.person() + 'lor',
+                      (val < 0.4): this.person() + 'shor',
+                      (val < 0.6): this.person() + 'tir',
+                      (val < 0.8): this.person() + 'shir',
                       default:
-                        self.person() + 'mir'
+                        this.person() + 'mir'
                     })
                 + (if(Number.random() > 0.8) '' else ' ' + Random.pickArrayItem(list:features));
             
@@ -321,12 +316,12 @@ return class(
             place :: {
                 @:val = Number.random();
                 return match(true) {
-                      (val < 0.2): self.person() + 'neim',
-                      (val < 0.4): self.person() + 'mmin',
-                      (val < 0.6): self.person() + 'grimm',
-                      (val < 0.8): self.person() + 'nemm',
+                      (val < 0.2): this.person() + 'neim',
+                      (val < 0.4): this.person() + 'mmin',
+                      (val < 0.6): this.person() + 'grimm',
+                      (val < 0.8): this.person() + 'nemm',
                       default:
-                        self.person() + 'nim'
+                        this.person() + 'nim'
                     }
                 ;
             

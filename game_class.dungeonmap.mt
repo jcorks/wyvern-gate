@@ -76,7 +76,7 @@ return class(
         @ROOM_SIZE = 50;
         @ROOM_EMPTY_AREA_COUNT = 13;
         @GEN_OFFSET = 20;
-        @this;
+        ;
         
 
         @:generateArea ::(item) {
@@ -280,8 +280,7 @@ return class(
 
         
         this.interface = {
-            setup ::(mapHint => Object) {
-                this = this;
+            initialize ::(mapHint => Object) {
 
                 if (mapHint.roomAreaSize != empty) ROOM_AREA_SIZE = mapHint.roomAreaSize;
                 if (mapHint.roomAreaSizeLarge != empty) ROOM_AREA_SIZE_LARGE = mapHint.roomAreaSize;

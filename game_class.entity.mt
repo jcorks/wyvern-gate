@@ -180,7 +180,7 @@
 
         
         this.interface = {
-            setup::(speciesHint, professionHint, levelHint => Number, state) {
+            initialize::(speciesHint, professionHint, levelHint => Number, state) {
                    
                 battleAI = BattleAI.new(
                     user: this

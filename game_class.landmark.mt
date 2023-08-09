@@ -45,7 +45,7 @@
     },
     define :::(this) {
         if (Location == empty) Location = import(module:'game_class.location.mt');
-        @self;
+        ;
         @name;
         @landmark;
         @x_;
@@ -122,126 +122,126 @@
 
         @:Entity = import(module:'game_class.entity.mt');
 
-
-        this.constructor = ::(base, island, x, y, state, floorHint){
-            self = this.instance;
-            island_ = island;
-            when(state != empty) ::<= {
-                self.state = state;
-                return self;
-            }
-
-            if (base.dungeonMap) ::<= {
-                map = DungeonMap.new(mapHint: base.mapHint);
-                dungeonLogic = DungeonController.new(map, island, landmark:self);
-            } else ::<= {
-                map = StructureMap.new(mapHint:base.mapHint);//Map.new(mapHint: base.mapHint);
-            }
-
-            sizeW = map.width;
-            sizeH = map.height;
-
-            if (base.dungeonMap) ::<= {
-                @area = map.getRandomArea();                
-
-                gate = Location.Base.database.find(name:'Entrance').new(
-                    landmark:self, 
-                    xHint:area.x + (area.width/2)->floor,
-                    yHint:area.y + (area.height/2)->floor
-                );  
-                
-                locations->push(value:gate);
-                map.setItem(data:gate, x:gate.x, y:gate.y, symbol: gate.base.symbol, discovered:true, name:gate.name);
-                     
-            } else ::<= {
-            
-                gate = Location.Base.database.find(name:'Entrance').new(
-                    landmark:self
-                );            
-                map.addLocation(location:gate);
-            }
-            
-            if (base.isUnique)
-                name = base.name
-            else
-                name = base.name + ' of ' + NameGen.place();
-            landmark = base;
-            x_ = x;
-            y_ = y;
-            peaceful = base.peaceful;
-            /*
-            [0, Random.integer(from:base.minLocations, to:base.maxLocations)]->for(do:::(i) {
-                locations->push(value:island.newInhabitant());            
-            });
-            */
-            @mapIndex = 0;
-            map.title = landmark.name + (
-                if (name == '') '' else (' of ' + name)
-            );         
-
-
-
-
-
-
-
-            
-            
-
-
-
-
-
-
-
-
-            foreach(base.requiredLocations)::(i, loc) {
-                self.addLocation(
-                    name:loc
-                );
-            
-                mapIndex += 1;
-            }
-            
-            for(0, random.integer(from:base.minLocations, to:base.maxLocations))::(i) {
-                when(base.possibleLocations->keycount == 0) empty;
-                @:which = random.pickArrayItemWeighted(list:base.possibleLocations);
-                self.addLocation(
-                    name:which.name
-                );
-                mapIndex += 1;
-            }
-            
-            
-            if (base.dungeonMap) ::<= {
-                map.setPointer(
-                    x:gate.x,
-                    y:gate.y
-                );
-            } else ::<= {
-
-                map.setPointer(
-                    x:gate.x,
-                    y:gate.y
-                );
-
-                map.finalize();            
-            }
-
-            if (floorHint != empty) ::<= {
-                floor = floorHint;
-                floor => Number;
-                if (landmark.dungeonMap)
-                    dungeonLogic.floorHint = floor;
-            }
-
-            
-            self.base.onCreate(landmark:self, island);
-            
-            return self;
-        }    
+  
 
         this.interface =  {
+            initialize::(base, island, x, y, state, floorHint){
+                island_ = island;
+                when(state != empty) ::<= {
+                    this.state = state;
+                    return this;
+                }
+
+                if (base.dungeonMap) ::<= {
+                    map = DungeonMap.new(mapHint: base.mapHint);
+                    dungeonLogic = DungeonController.new(map, island, landmark:this);
+                } else ::<= {
+                    map = StructureMap.new(mapHint:base.mapHint);//Map.new(mapHint: base.mapHint);
+                }
+
+                sizeW = map.width;
+                sizeH = map.height;
+
+                if (base.dungeonMap) ::<= {
+                    @area = map.getRandomArea();                
+
+                    gate = Location.Base.database.find(name:'Entrance').new(
+                        landmark:this, 
+                        xHint:area.x + (area.width/2)->floor,
+                        yHint:area.y + (area.height/2)->floor
+                    );  
+                    
+                    locations->push(value:gate);
+                    map.setItem(data:gate, x:gate.x, y:gate.y, symbol: gate.base.symbol, discovered:true, name:gate.name);
+                         
+                } else ::<= {
+                
+                    gate = Location.Base.database.find(name:'Entrance').new(
+                        landmark:this
+                    );            
+                    map.addLocation(location:gate);
+                }
+                
+                if (base.isUnique)
+                    name = base.name
+                else
+                    name = base.name + ' of ' + NameGen.place();
+                landmark = base;
+                x_ = x;
+                y_ = y;
+                peaceful = base.peaceful;
+                /*
+                [0, Random.integer(from:base.minLocations, to:base.maxLocations)]->for(do:::(i) {
+                    locations->push(value:island.newInhabitant());            
+                });
+                */
+                @mapIndex = 0;
+                map.title = landmark.name + (
+                    if (name == '') '' else (' of ' + name)
+                );         
+
+
+
+
+
+
+
+                
+                
+
+
+
+
+
+
+
+
+                foreach(base.requiredLocations)::(i, loc) {
+                    this.addLocation(
+                        name:loc
+                    );
+                
+                    mapIndex += 1;
+                }
+                
+                for(0, random.integer(from:base.minLocations, to:base.maxLocations))::(i) {
+                    when(base.possibleLocations->keycount == 0) empty;
+                    @:which = random.pickArrayItemWeighted(list:base.possibleLocations);
+                    this.addLocation(
+                        name:which.name
+                    );
+                    mapIndex += 1;
+                }
+                
+                
+                if (base.dungeonMap) ::<= {
+                    map.setPointer(
+                        x:gate.x,
+                        y:gate.y
+                    );
+                } else ::<= {
+
+                    map.setPointer(
+                        x:gate.x,
+                        y:gate.y
+                    );
+
+                    map.finalize();            
+                }
+
+                if (floorHint != empty) ::<= {
+                    floor = floorHint;
+                    floor => Number;
+                    if (landmark.dungeonMap)
+                        dungeonLogic.floorHint = floor;
+                }
+
+                
+                this.base.onCreate(landmark:this, island);
+                
+                return this;
+            },
+
             state : {
                 set ::(value) {
                     landmark = Landmark.Base.database.find(name:value.baseName);
@@ -257,7 +257,7 @@
                     map = Map.new();
                     gate = empty;
                     foreach(value.locations)::(index, location) {
-                        @loc = Location.Base.database.find(name:location.baseName).new(landmark:self, state:location);
+                        @loc = Location.Base.database.find(name:location.baseName).new(landmark:this, state:location);
                         if (loc.base.name == 'Entrance')
                             gate = loc;
 
@@ -388,11 +388,11 @@
                         x = xy.x;
                         y = xy.y;
                     }
-                    loc = Location.Base.database.find(name:name).new(landmark:self, ownedByHint, xHint:x, yHint:y);
+                    loc = Location.Base.database.find(name:name).new(landmark:this, ownedByHint, xHint:x, yHint:y);
                     map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
                         
                 } else ::<= {
-                    loc = Location.Base.database.find(name:name).new(landmark:self, ownedByHint);
+                    loc = Location.Base.database.find(name:name).new(landmark:this, ownedByHint);
                     map.addLocation(location:loc);
                 
                 }
@@ -426,588 +426,566 @@
 
 Landmark.Base = class(
     name : 'Wyvern.Landmark.Base',
+    inherits : [Database.Item],
     statics : {
         database  :::<= {
-            @db;
+            @db = Database.new().initialize(
+                attributes : {
+                    name : String,
+                    symbol : String,
+                    rarity: Number,
+                    isUnique : Boolean,
+                    minLocations : Number,
+                    maxLocations : Number,
+                    possibleLocations : Object,
+                    requiredLocations : Object,
+                    peaceful: Boolean,
+                    dungeonMap: Boolean,
+                    mapHint : Object,
+                    onCreate : Function,
+                    onVisit : Function,
+                    guarded : Boolean
+                }
+            );
             return {
                 get ::<- db,
-                set ::(value) <- db = value
             }
         }
     },
     define:::(this) {
-        @kind;
-        Database.setup(
-            item: this,
-            attributes : {
-                name : String,
-                symbol : String,
-                rarity: Number,
-                isUnique : Boolean,
-                minLocations : Number,
-                maxLocations : Number,
-                possibleLocations : Object,
-                requiredLocations : Object,
-                peaceful: Boolean,
-                dungeonMap: Boolean,
-                mapHint : Object,
-                onCreate : Function,
-                onVisit : Function,
-                guarded : Boolean
-            }
-        );
-        
-        
-        
-        this.interface = {
-            new :: (island => Object, x => Number, y => Number, floorHint, state) {
-                return Landmark.new(base:this.instance, island, x, y, floorHint, state);
-            }
+        this.constructor = ::{
+            Landmark.Base.database.bind(item:this);
         }
     }
 );
 
 
+Landmark.Base.new().initialize(
+    data: {
+        name : 'town',
+        symbol : '#',
+        rarity : 100000,
+        minLocations : 3,
+        maxLocations : 5,
+        isUnique : false,
+        peaceful : true,
+        dungeonMap : false,
+        guarded : true,
+        possibleLocations : [
+            {name:'home', rarity: 1},
+            {name:'Tavern', rarity: 3},
+            {name:'Blacksmith', rarity: 3},
+            //{name:'guild', rarity: 25}
+        ],
+        requiredLocations : [
+            'shop',
+            'School',
+            'Inn',
+        ],
+        mapHint : {
+            roomSize: 30,
+            roomAreaSize: 7,
+            roomAreaSizeLarge: 9,
+            emptyAreaCount: 6,
+            wallCharacter: '!',
+            scatterChar: 'Y',
+            scatterRate: 0.3
+        },
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+    }
+)
 
-Landmark.Base.database = Database.new(
-    items: [
-
-        Landmark.Base.new(
-            data: {
-                name : 'town',
-                symbol : '#',
-                rarity : 100000,
-                minLocations : 3,
-                maxLocations : 5,
-                isUnique : false,
-                peaceful : true,
-                dungeonMap : false,
-                guarded : true,
-                possibleLocations : [
-                    {name:'home', rarity: 1},
-                    {name:'Tavern', rarity: 3},
-                    {name:'Blacksmith', rarity: 3},
-                    //{name:'guild', rarity: 25}
-                ],
-                requiredLocations : [
-                    'shop',
-                    'School',
-                    'Inn',
-                ],
-                mapHint : {
-                    roomSize: 30,
-                    roomAreaSize: 7,
-                    roomAreaSizeLarge: 9,
-                    emptyAreaCount: 6,
-                    wallCharacter: '!',
-                    scatterChar: 'Y',
-                    scatterRate: 0.3
-                },
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {}
-            }
-        ),
-
-        Landmark.Base.new(
-            data: {
-                name : 'city',
-                symbol : '|',
-                rarity : 5,
-                minLocations : 3,
-                isUnique : false,
-                maxLocations : 12,
-                peaceful : true,
-                guarded : true,
-                dungeonMap : false,
-                possibleLocations : [
-                    {name:'home', rarity: 1},
-                    //{name:'inn', rarity: 3},
-                    //{name:'guild', rarity: 25}
-                    //{name:'tavern', rarity: 100}
-                    //{name:'school', rarity: 7}
-                ],
-                requiredLocations : [
-                    'shop',
-                    'shop',
-                    'shop',
-                    'Tavern',
-                    'Arena',
-                    'Inn',
-                    'School',
-                    'Blacksmith'            
-                ],
-                mapHint : {
-                    roomSize: 30,
-                    roomAreaSize: 5,
-                    roomAreaSizeLarge: 7,
-                    emptyAreaCount: 18,
-                    wallCharacter : '|'
-                },
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {}
-                
-            }
-        ),
-
-
-        Landmark.Base.new(
-            data: {
-                name : 'Mine',
-                symbol : 'O',
-                rarity : 5,
-                minLocations : 3,
-                isUnique : false,
-                maxLocations : 5,
-                peaceful : true,
-                guarded : false,
-                dungeonMap : true,
-                possibleLocations : [
-                    {name:'ore vein', rarity: 1},
-                    //{name:'inn', rarity: 3},
-                    //{name:'guild', rarity: 25}
-                    //{name:'tavern', rarity: 100}
-                    //{name:'school', rarity: 7}
-                ],
-                requiredLocations : [
-                    'ore vein',
-                    'smelter',
-                ],
-                mapHint : {
-                    roomSize: 15,
-                    roomAreaSize: 5,
-                    roomAreaSizeLarge: 10,
-                    emptyAreaCount: 5
-                },
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {}
-                
-            }
-        ),
-
+Landmark.Base.new().initialize(
+    data: {
+        name : 'city',
+        symbol : '|',
+        rarity : 5,
+        minLocations : 3,
+        isUnique : false,
+        maxLocations : 12,
+        peaceful : true,
+        guarded : true,
+        dungeonMap : false,
+        possibleLocations : [
+            {name:'home', rarity: 1},
+            //{name:'inn', rarity: 3},
+            //{name:'guild', rarity: 25}
+            //{name:'tavern', rarity: 100}
+            //{name:'school', rarity: 7}
+        ],
+        requiredLocations : [
+            'shop',
+            'shop',
+            'shop',
+            'Tavern',
+            'Arena',
+            'Inn',
+            'School',
+            'Blacksmith'            
+        ],
+        mapHint : {
+            roomSize: 30,
+            roomAreaSize: 5,
+            roomAreaSizeLarge: 7,
+            emptyAreaCount: 18,
+            wallCharacter : '|'
+        },
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
         
-        Landmark.Base.new(
-            data: {
-                name : 'Wyvern Gate',
-                symbol : '@',
-                rarity : 10,
-                isUnique : true,
-                minLocations : 4,
-                maxLocations : 10,
-                peaceful : true,
-                guarded : false,
-                dungeonMap : true,
-                possibleLocations : [
-
-                ],
-                requiredLocations : [
-                    'Gate'
-                ],
-                
-                mapHint : {
-                    roomSize: 25,
-                    wallCharacter: 'Y',
-                    roomAreaSize: 5,
-                    roomAreaSizeLarge: 7,
-                    emptyAreaCount: 30
-                },
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {}
-                
-            }
-        ),
-
-        Landmark.Base.new(
-            data: {
-                name : 'Wyvern Temple',
-                symbol : '{}',
-                rarity : 10000000,
-                isUnique : true,
-                minLocations : 4,
-                maxLocations : 10,
-                peaceful : true,
-                guarded : false,
-                dungeonMap : true,
-                possibleLocations : [                    
-                ],
-                requiredLocations : [
-                    'Stairs Up',
-                ],
-                mapHint: {},
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {}
-                
-            }
-        ),
+    }
+)
 
 
+Landmark.Base.new().initialize(
+    data: {
+        name : 'Mine',
+        symbol : 'O',
+        rarity : 5,
+        minLocations : 3,
+        isUnique : false,
+        maxLocations : 5,
+        peaceful : true,
+        guarded : false,
+        dungeonMap : true,
+        possibleLocations : [
+            {name:'ore vein', rarity: 1},
+            //{name:'inn', rarity: 3},
+            //{name:'guild', rarity: 25}
+            //{name:'tavern', rarity: 100}
+            //{name:'school', rarity: 7}
+        ],
+        requiredLocations : [
+            'ore vein',
+            'smelter',
+        ],
+        mapHint : {
+            roomSize: 15,
+            roomAreaSize: 5,
+            roomAreaSizeLarge: 10,
+            emptyAreaCount: 5
+        },
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+        
+    }
+)
 
-        Landmark.Base.new(
-            data: {
-                name : 'Shrine',
-                symbol : 'O',
-                rarity : 100000,      
-                isUnique : true,
-                minLocations : 1,
-                maxLocations : 2,
-                peaceful: false,
-                guarded : false,
-                dungeonMap : true,
-                possibleLocations : [
+
+Landmark.Base.new().initialize(
+    data: {
+        name : 'Wyvern Gate',
+        symbol : '@',
+        rarity : 10,
+        isUnique : true,
+        minLocations : 4,
+        maxLocations : 10,
+        peaceful : true,
+        guarded : false,
+        dungeonMap : true,
+        possibleLocations : [
+
+        ],
+        requiredLocations : [
+            'Gate'
+        ],
+        
+        mapHint : {
+            roomSize: 25,
+            wallCharacter: 'Y',
+            roomAreaSize: 5,
+            roomAreaSizeLarge: 7,
+            emptyAreaCount: 30
+        },
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+        
+    }
+)
+
+Landmark.Base.new().initialize(
+    data: {
+        name : 'Wyvern Temple',
+        symbol : '{}',
+        rarity : 10000000,
+        isUnique : true,
+        minLocations : 4,
+        maxLocations : 10,
+        peaceful : true,
+        guarded : false,
+        dungeonMap : true,
+        possibleLocations : [                    
+        ],
+        requiredLocations : [
+            'Stairs Up',
+        ],
+        mapHint: {},
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+        
+    }
+)
+
+
+
+Landmark.Base.new().initialize(
+    data: {
+        name : 'Shrine',
+        symbol : 'O',
+        rarity : 100000,      
+        isUnique : true,
+        minLocations : 1,
+        maxLocations : 2,
+        peaceful: false,
+        guarded : false,
+        dungeonMap : true,
+        possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
-                    {name: 'Small Chest', rarity:3},
-                ],
-                requiredLocations : [
-                    'Stairs Down',
-                    'Stairs Down',
-                    'Small Chest'
-                ],
-                mapHint:{},
-                onCreate ::(landmark, island){
-                },
-                onVisit ::(landmark, island) {}
-                
-            }
-        ),
-
-        Landmark.Base.new(
-            data: {
-                name : 'Shrine: Lost Floor',
-                symbol : 'O',
-                rarity : 100000,      
-                isUnique : true,
-                minLocations : 2,
-                maxLocations : 2,
-                peaceful: true,
-                guarded : false,
-                dungeonMap : true,
-                possibleLocations : [
-                    {name: 'Small Chest', rarity:3},
-                ],
-                requiredLocations : [
-                    '?????',
-                    '?????',
-                    'Small Chest'
-                ],
-                mapHint:{},
-                onCreate ::(landmark, island){
-                },
-                
-                onVisit ::(landmark, island) {
-                    @:canvas = import(module:'game_singleton.canvas.mt');
-                    @:windowEvent = import(module:'game_singleton.windowevent.mt');
-                    windowEvent.queueMessage(text:'It seems this area has been long forgotten...', renderable:{render::<-canvas.blackout()});
-                }
-                
-            }
-        ),
-
-
-        Landmark.Base.new(
-            data: {
-                name : 'Treasure Room',
-                symbol : 'O',
-                rarity : 5,      
-                isUnique : true,
-                minLocations : 1,
-                maxLocations : 5,
-                guarded : false,
-                peaceful: true,
-                dungeonMap : true,
-                possibleLocations : [
-                    {name: 'Small Chest', rarity:5},
-                ],
-                requiredLocations : [
-                    'Large Chest',
-                    'Ladder'
-                ],
-                
-                mapHint : {
-                    roomSize: 15,
-                    roomAreaSize: 7,
-                    roomAreaSizeLarge: 9,
-                    emptyAreaCount: 2
-                },
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {
-                    @:windowEvent = import(module:'game_singleton.windowevent.mt');
-                    windowEvent.queueMessage(text:'The party enters the pit full of treasure.');
-               
-                }
-                
-                
-            }
-        ),
+            {name: 'Small Chest', rarity:3},
+        ],
+        requiredLocations : [
+            'Stairs Down',
+            'Stairs Down',
+            'Small Chest'
+        ],
+        mapHint:{},
+        onCreate ::(landmark, island){
+        },
+        onVisit ::(landmark, island) {}
         
-        Landmark.Base.new(
-            data: {
-                name : 'Fire Wyvern Dimension',
-                symbol : 'M',
-                rarity : 1,      
-                isUnique : true,
-                minLocations : 2,
-                maxLocations : 2,
-                guarded : false,
-                peaceful: true,
-                dungeonMap : true,
-                possibleLocations : [
-                ],
-                requiredLocations : [
-                    'Wyvern Throne of Fire',
-                ],
-                
-                mapHint : {
-                    roomSize: 20,
-                    roomAreaSize: 15,
-                    roomAreaSizeLarge: 15,
-                    emptyAreaCount: 1,
-                    wallCharacter: ' '
-                    
-                },
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {}
-                
-            }
-        ),        
+    }
+)
 
-        Landmark.Base.new(
-            data: {
-                name : 'Ice Wyvern Dimension',
-                symbol : 'M',
-                rarity : 1,      
-                isUnique : true,
-                minLocations : 2,
-                maxLocations : 2,
-                guarded : false,
-                peaceful: true,
-                dungeonMap : true,
-                possibleLocations : [
-                ],
-                requiredLocations : [
-                    'Wyvern Throne of Ice',
-                ],
-                
-                mapHint : {
-                    roomSize: 20,
-                    roomAreaSize: 15,
-                    roomAreaSizeLarge: 15,
-                    emptyAreaCount: 1,
-                    wallCharacter: ' '
-                    
-                },
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {}
-                
-            }
-        ), 
-
-
+Landmark.Base.new().initialize(
+    data: {
+        name : 'Shrine: Lost Floor',
+        symbol : 'O',
+        rarity : 100000,      
+        isUnique : true,
+        minLocations : 2,
+        maxLocations : 2,
+        peaceful: true,
+        guarded : false,
+        dungeonMap : true,
+        possibleLocations : [
+            {name: 'Small Chest', rarity:3},
+        ],
+        requiredLocations : [
+            '?????',
+            '?????',
+            'Small Chest'
+        ],
+        mapHint:{},
+        onCreate ::(landmark, island){
+        },
         
-
-        Landmark.Base.new(
-            data: {
-                name : 'port',
-                rarity : 30,                
-                symbol : '~',
-                minLocations : 3,
-                maxLocations : 10,
-                peaceful: true,
-                isUnique : false,
-                dungeonMap : false,
-                guarded : true,
-                possibleLocations : [
-                    {name:'home', rarity:5},
-                    {name:'shop', rarity:40}
-                    //'guild',
-                    //'guardpost',
-                ],
-                requiredLocations : [
-                    'Tavern'
-                    //'shipyard'
-                ],
-                mapHint : {
-                    roomSize: 25,
-                    roomAreaSize: 5,
-                    roomAreaSizeLarge: 14,
-                    emptyAreaCount: 7
-                },
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {}
-                
-            }
-        ),
-
-        Landmark.Base.new(
-            data: {
-                name : 'village',
-                rarity : 5,                
-                symbol : '*',
-                peaceful: true,
-                minLocations : 3,
-                maxLocations : 7,
-                isUnique : false,
-                dungeonMap : false,
-                guarded : false,
-                possibleLocations : [
-                    {name:'home', rarity:1},
-                    {name:'Tavern', rarity:7},
-                    {name:'shop', rarity:7},
-                    {name:'farm', rarity:4}
-                ],
-                requiredLocations : [],
-                mapHint : {
-                    roomSize: 25,
-                    roomAreaSize: 7,
-                    roomAreaSizeLarge: 14,
-                    emptyAreaCount: 4
-                },        
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {}
-            }
-        ),
-
-        Landmark.Base.new(
-            data: {
-                name : 'villa',
-                symbol : '=',
-                rarity : 20,
-                peaceful: true,                
-                isUnique : false,
-                dungeonMap : false,
-                minLocations : 5,
-                maxLocations : 10,
-                guarded : false,
-                possibleLocations : [
-                    {name:'home', rarity:1},
-                    {name:'Tavern', rarity:7},
-                    {name:'farm', rarity:4}
-                ],
-                requiredLocations : [],
-                mapHint : {
-                    roomSize: 25,
-                    wallCharacter: ',',
-                    roomAreaSize: 7,
-                    roomAreaSizeLarge: 14,
-                    emptyAreaCount: 4
-                },
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {}
-            }
-        ),
-
-        /*Landmark.Base.new(
-            data: {
-                name : 'Outpost',
-                symbol : '[]',
-                rarity : 500,                
-                minLocations : 0,
-                maxLocations : 0,
-                possibleLocations : [
-                    //'barracks'                
-                ],
-                requiredLocations : []
-            }
-        ),*/
-
-        Landmark.Base.new(
-            data: {
-                name : 'forest',
-                symbol : 'T',
-                rarity : 40,                
-                peaceful: true,
-                isUnique : false,
-                dungeonMap : true,
-                minLocations : 3,
-                maxLocations : 5,
-                guarded : false,
-                possibleLocations : [
-                    {name: 'Small Chest', rarity:1},
-                ],
-                requiredLocations : [
-                    'Small Chest'
-                ],
-                mapHint: {
-                    roomSize: 60,
-                    wallCharacter: 'Y',
-                    roomAreaSize: 7,
-                    roomAreaSizeLarge: 14,
-                    emptyAreaCount: 25,
-                    outOfBoundsCharacter: '~'
-                },
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {}
-                
-            }
-        ),
-
-        Landmark.Base.new(
-            data: {
-                name : 'cave',
-                symbol : 'O',
-                rarity : 200,                
-                peaceful: true,
-                isUnique : false,
-                dungeonMap : true,
-                minLocations : 0,
-                maxLocations : 0,
-                guarded : false,
-                possibleLocations : [],
-                requiredLocations : [],
-                mapHint: {},
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {}
-                
-            }
-        ),
-
-        Landmark.Base.new(
-            data: {
-                name : 'abandoned castle',
-                symbol : 'X',
-                rarity : 10000,
-                peaceful: false,
-                isUnique : false,
-                dungeonMap : true,
-                
-                minLocations : 0,
-                maxLocations : 0,
-                guarded : false,
-                possibleLocations : [],
-                requiredLocations : [],
-                mapHint: {},
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {}
-                
-            }
-        ),
-        Landmark.Base.new(
-            data: {
-                name : 'abandoned town',
-                rarity : 400,                
-                symbol : 'x',
-                peaceful: false,
-                isUnique : false,
-                dungeonMap : true,
-                guarded : false,
-                minLocations : 0,
-                maxLocations : 0,
-                possibleLocations : [],
-                requiredLocations : [],
-                mapHint: {},              
-                onCreate ::(landmark, island){},
-                onVisit ::(landmark, island) {}
-            }
-        ),
+        onVisit ::(landmark, island) {
+            @:canvas = import(module:'game_singleton.canvas.mt');
+            @:windowEvent = import(module:'game_singleton.windowevent.mt');
+            windowEvent.queueMessage(text:'It seems this area has been long forgotten...', renderable:{render::<-canvas.blackout()});
+        }
+        
+    }
+)
 
 
-      
+Landmark.Base.new().initialize(
+    data: {
+        name : 'Treasure Room',
+        symbol : 'O',
+        rarity : 5,      
+        isUnique : true,
+        minLocations : 1,
+        maxLocations : 5,
+        guarded : false,
+        peaceful: true,
+        dungeonMap : true,
+        possibleLocations : [
+            {name: 'Small Chest', rarity:5},
+        ],
+        requiredLocations : [
+            'Large Chest',
+            'Ladder'
+        ],
+        
+        mapHint : {
+            roomSize: 15,
+            roomAreaSize: 7,
+            roomAreaSizeLarge: 9,
+            emptyAreaCount: 2
+        },
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {
+            @:windowEvent = import(module:'game_singleton.windowevent.mt');
+            windowEvent.queueMessage(text:'The party enters the pit full of treasure.');
+       
+        }
         
         
+    }
+)
+
+Landmark.Base.new().initialize(
+    data: {
+        name : 'Fire Wyvern Dimension',
+        symbol : 'M',
+        rarity : 1,      
+        isUnique : true,
+        minLocations : 2,
+        maxLocations : 2,
+        guarded : false,
+        peaceful: true,
+        dungeonMap : true,
+        possibleLocations : [
+        ],
+        requiredLocations : [
+            'Wyvern Throne of Fire',
+        ],
+        
+        mapHint : {
+            roomSize: 20,
+            roomAreaSize: 15,
+            roomAreaSizeLarge: 15,
+            emptyAreaCount: 1,
+            wallCharacter: ' '
+            
+        },
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+        
+    }
+)        
+
+Landmark.Base.new().initialize(
+    data: {
+        name : 'Ice Wyvern Dimension',
+        symbol : 'M',
+        rarity : 1,      
+        isUnique : true,
+        minLocations : 2,
+        maxLocations : 2,
+        guarded : false,
+        peaceful: true,
+        dungeonMap : true,
+        possibleLocations : [
+        ],
+        requiredLocations : [
+            'Wyvern Throne of Ice',
+        ],
+        
+        mapHint : {
+            roomSize: 20,
+            roomAreaSize: 15,
+            roomAreaSizeLarge: 15,
+            emptyAreaCount: 1,
+            wallCharacter: ' '
+            
+        },
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+        
+    }
+) 
 
 
-    
-    ]
 
-);
+
+Landmark.Base.new().initialize(
+    data: {
+        name : 'port',
+        rarity : 30,                
+        symbol : '~',
+        minLocations : 3,
+        maxLocations : 10,
+        peaceful: true,
+        isUnique : false,
+        dungeonMap : false,
+        guarded : true,
+        possibleLocations : [
+            {name:'home', rarity:5},
+            {name:'shop', rarity:40}
+            //'guild',
+            //'guardpost',
+        ],
+        requiredLocations : [
+            'Tavern'
+            //'shipyard'
+        ],
+        mapHint : {
+            roomSize: 25,
+            roomAreaSize: 5,
+            roomAreaSizeLarge: 14,
+            emptyAreaCount: 7
+        },
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+        
+    }
+)
+
+Landmark.Base.new().initialize(
+    data: {
+        name : 'village',
+        rarity : 5,                
+        symbol : '*',
+        peaceful: true,
+        minLocations : 3,
+        maxLocations : 7,
+        isUnique : false,
+        dungeonMap : false,
+        guarded : false,
+        possibleLocations : [
+            {name:'home', rarity:1},
+            {name:'Tavern', rarity:7},
+            {name:'shop', rarity:7},
+            {name:'farm', rarity:4}
+        ],
+        requiredLocations : [],
+        mapHint : {
+            roomSize: 25,
+            roomAreaSize: 7,
+            roomAreaSizeLarge: 14,
+            emptyAreaCount: 4
+        },        
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+    }
+)
+
+Landmark.Base.new().initialize(
+    data: {
+        name : 'villa',
+        symbol : '=',
+        rarity : 20,
+        peaceful: true,                
+        isUnique : false,
+        dungeonMap : false,
+        minLocations : 5,
+        maxLocations : 10,
+        guarded : false,
+        possibleLocations : [
+            {name:'home', rarity:1},
+            {name:'Tavern', rarity:7},
+            {name:'farm', rarity:4}
+        ],
+        requiredLocations : [],
+        mapHint : {
+            roomSize: 25,
+            wallCharacter: ',',
+            roomAreaSize: 7,
+            roomAreaSizeLarge: 14,
+            emptyAreaCount: 4
+        },
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+    }
+)
+
+/*Landmark.Base.new().initialize(
+    data: {
+        name : 'Outpost',
+        symbol : '[]',
+        rarity : 500,                
+        minLocations : 0,
+        maxLocations : 0,
+        possibleLocations : [
+            //'barracks'                
+        ],
+        requiredLocations : []
+    }
+)*/
+
+Landmark.Base.new().initialize(
+    data: {
+        name : 'forest',
+        symbol : 'T',
+        rarity : 40,                
+        peaceful: true,
+        isUnique : false,
+        dungeonMap : true,
+        minLocations : 3,
+        maxLocations : 5,
+        guarded : false,
+        possibleLocations : [
+            {name: 'Small Chest', rarity:1},
+        ],
+        requiredLocations : [
+            'Small Chest'
+        ],
+        mapHint: {
+            roomSize: 60,
+            wallCharacter: 'Y',
+            roomAreaSize: 7,
+            roomAreaSizeLarge: 14,
+            emptyAreaCount: 25,
+            outOfBoundsCharacter: '~'
+        },
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+        
+    }
+)
+
+Landmark.Base.new().initialize(
+    data: {
+        name : 'cave',
+        symbol : 'O',
+        rarity : 200,                
+        peaceful: true,
+        isUnique : false,
+        dungeonMap : true,
+        minLocations : 0,
+        maxLocations : 0,
+        guarded : false,
+        possibleLocations : [],
+        requiredLocations : [],
+        mapHint: {},
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+        
+    }
+)
+
+Landmark.Base.new().initialize(
+    data: {
+        name : 'abandoned castle',
+        symbol : 'X',
+        rarity : 10000,
+        peaceful: false,
+        isUnique : false,
+        dungeonMap : true,
+        
+        minLocations : 0,
+        maxLocations : 0,
+        guarded : false,
+        possibleLocations : [],
+        requiredLocations : [],
+        mapHint: {},
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+        
+    }
+)
+Landmark.Base.new().initialize(
+    data: {
+        name : 'abandoned town',
+        rarity : 400,                
+        symbol : 'x',
+        peaceful: false,
+        isUnique : false,
+        dungeonMap : true,
+        guarded : false,
+        minLocations : 0,
+        maxLocations : 0,
+        possibleLocations : [],
+        requiredLocations : [],
+        mapHint: {},              
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+    }
+)
+
 
 
 return Landmark;

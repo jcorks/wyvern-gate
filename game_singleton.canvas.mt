@@ -108,12 +108,6 @@ return class(
         @:lines_output = [];
         
         @savestates = [];
-        @self;
-        
-        this.constructor = ::{
-            self = this.instance;
-            return self;
-        }
         
         ::<= {
             @iter = 0;
@@ -170,49 +164,49 @@ return class(
             renderFrame ::(top, left, width, height) {
 
                 // TOP LINE
-                self.movePen(
+                this.movePen(
                     x: left,
                     y: top 
                 );
                 
-                self.drawChar(text:CHAR__CORNER_TOPLEFT);
-                self.penX += 1;
+                this.drawChar(text:CHAR__CORNER_TOPLEFT);
+                this.penX += 1;
                 for(2, width)::(x) {
-                    self.drawChar(text:CHAR__TOP);    
-                    self.penX += 1;
+                    this.drawChar(text:CHAR__TOP);    
+                    this.penX += 1;
                             
                 }
-                self.drawChar(text:CHAR__CORNER_TOPRIGHT);
+                this.drawChar(text:CHAR__CORNER_TOPRIGHT);
 
                 
                 // NLINES
                 for(1, height - 1)::(y) {
-                    self.movePen(x: left, y: top+y);
-                    self.drawChar(text:CHAR__SIDE);
-                    self.penX += 1;
+                    this.movePen(x: left, y: top+y);
+                    this.drawChar(text:CHAR__SIDE);
+                    this.penX += 1;
 
                     for(2, width)::(x) {
-                        self.erase();        
-                        self.penX += 1;
+                        this.erase();        
+                        this.penX += 1;
                     }
-                    self.drawChar(text:CHAR__SIDE);
+                    this.drawChar(text:CHAR__SIDE);
                 }
 
 
                 // BOTTOM LINE
-                self.movePen(
+                this.movePen(
                     x: left,
                     y: top+(height-1)
                 );
                 
-                self.drawChar(text:CHAR__CORNER_BOTTOMLEFT);
-                self.penX += 1;
+                this.drawChar(text:CHAR__CORNER_BOTTOMLEFT);
+                this.penX += 1;
                 for(2, width)::(x) {
-                    self.drawChar(text:CHAR__BOTTOM);    
-                    self.penX += 1;
+                    this.drawChar(text:CHAR__BOTTOM);    
+                    this.penX += 1;
                             
                 }
-                self.drawChar(text:CHAR__CORNER_BOTTOMRIGHT);
+                this.drawChar(text:CHAR__CORNER_BOTTOMRIGHT);
 
 
 
@@ -251,18 +245,18 @@ return class(
             },
             
             erase :: {
-                self.penColor = hints.NEUTRAL;
-                self.drawChar(text:' ');
+                this.penColor = hints.NEUTRAL;
+                this.drawChar(text:' ');
             },
             
             // like penText, but moves the pen position
             writeText ::(text => String) {
                 foreach(splay(string:text))::(index, ch) {
-                    self.drawChar(text:ch);
+                    this.drawChar(text:ch);
                     if (penx >= CANVAS_WIDTH)
-                        self.movePen(x:0, y:peny+1)
+                        this.movePen(x:0, y:peny+1)
                     else
-                        self.movePen(x:penx+1, y:peny)
+                        this.movePen(x:penx+1, y:peny)
                     ;
                 }
             },
@@ -276,7 +270,7 @@ return class(
                     @prevCanvas = savestates[savestates->keycount-1].text;
                     canvas = [...prevCanvas];
                 }
-                self.blackout();
+                this.blackout();
             },
             
             blackout ::{
@@ -293,8 +287,8 @@ return class(
                 // debug lines happen as the LAST possible thing 
                 // the canvas does to ensure that its always on top.
                 if (debugLines[0] != empty) ::<= {
-                    self.movePen(x:0, y:0);
-                    self.drawText(text: debugLines[0]);
+                    this.movePen(x:0, y:0);
+                    this.drawText(text: debugLines[0]);
                 }
                 
 

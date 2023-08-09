@@ -234,15 +234,16 @@ SCORING_FN[SCORE_TYPE.SUM] = ::(rolls) {
         @_scratchType;
         @_keepWhich;
 
-        this.constructor = ::(action, scoreType, scratchType, keepWhich) {
-            _action = action;
-            _scoreType = scoreType;
-            _scratchType = scratchType;
-            _keepWhich = keepWhich;
-            return this.instance;
-        }
         
         this.interface = {
+            initialize::(action, scoreType, scratchType, keepWhich) {
+                _action = action;
+                _scoreType = scoreType;
+                _scratchType = scratchType;
+                _keepWhich = keepWhich;
+                return this;
+            },
+
             action : {
                 get::<- _action
             },
@@ -282,14 +283,14 @@ SCORING_FN[SCORE_TYPE.SUM] = ::(rolls) {
         
         
         
-        this.constructor = ::(name => String, decider => Function) {
-            _name = name;
-            _decider = decider;
-            return this.instance;
-        }
         
         
         this.interface = {
+            initialize::(name => String, decider => Function) {
+                _name = name;
+                _decider = decider;
+                return this;
+            },
             scoringTable : {
                 get::<-scoringTable
             },
@@ -328,7 +329,7 @@ SCORING_FN[SCORE_TYPE.SUM] = ::(rolls) {
             },
             
             decideAction::(onDecide, rolls, rollIndex) {
-                _decider(player:this.instance, onDecide, rolls, rollIndex);
+                _decider(player:this, onDecide, rolls, rollIndex);
             }      
         }
     }

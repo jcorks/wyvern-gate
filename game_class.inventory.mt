@@ -25,17 +25,13 @@ return class(
         @items = [];    
         @gold = 0;
         @maxItems;
-        this.constructor = ::(size) {
-            maxItems = size;
-            return this.instance;
-        }
     
         this.interface = {
             add::(item) {
                 when (item.base.name == 'None') false; // never accept None as a real item
                 when (items->keycount == maxItems) false;
                 items->push(value:item);
-                item.container = this.instance;
+                item.container = this;
                 return true;
             },
             
@@ -105,7 +101,7 @@ return class(
                     items = [];
                     foreach(value.items)::(i, itemData) {
                         @:item = Item.Base.database.find(name:itemData.baseName).new(state:itemData);
-                        this.instance.add(item);
+                        this.add(item);
                     }
                 },
             

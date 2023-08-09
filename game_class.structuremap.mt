@@ -66,47 +66,12 @@
         @slots = [];
         @freeSpaces = [];
         @blockSceneryIndex;
-        @self;
         
         @:addBuildingBlock::(x, y) {
             _map.enableWall(x, y);
             _map.setSceneryIndex(x, y, symbol:blockSceneryIndex);
         }
         
-        this.constructor = ::(map, category => Number) {
-            self = this.instance;
-            unitsWide = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
-            unitsHigh = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
-
-            if (unitsWide > ZONE_MAXIMUM_SPAN ||
-                unitsHigh > ZONE_MAXIMUM_SPAN)
-                error(detail:' uhhh RNG brokey.');
-
-            blockSceneryIndex = map.addScenerySymbol(character:'▓');
-
-            // if category is Entrance, the area is 2x2 
-            if (category == Location.CATEGORY.ENTRANCE) ::<= {
-                unitsWide = 1;
-                unitsHigh = 1;
-            }
-
-            _map = map;
-            _category = category;
-            _w = unitsWide * ZONE_BUILDING_MINIMUM_WIDTH +ZONE_CONTENT_PADDING*2;
-            _h = unitsHigh * ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING*2;
-            
-            for(0, unitsWide)::(x) {
-                slots[x] = [];
-                for(0, unitsHigh)::(y) {
-                    slots[x][y] = false;
-                    freeSpaces->push(value:{x:x, y:y});
-                } 
-            }
-            
-            
-            
-            return this.instance;
-        }
         
         @locations = [];  
         
@@ -483,6 +448,41 @@
 
         
         this.interface = {
+            initialize::(map, category => Number) {
+                unitsWide = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
+                unitsHigh = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
+
+                if (unitsWide > ZONE_MAXIMUM_SPAN ||
+                    unitsHigh > ZONE_MAXIMUM_SPAN)
+                    error(detail:' uhhh RNG brokey.');
+
+                blockSceneryIndex = map.addScenerySymbol(character:'▓');
+
+                // if category is Entrance, the area is 2x2 
+                if (category == Location.CATEGORY.ENTRANCE) ::<= {
+                    unitsWide = 1;
+                    unitsHigh = 1;
+                }
+
+                _map = map;
+                _category = category;
+                _w = unitsWide * ZONE_BUILDING_MINIMUM_WIDTH +ZONE_CONTENT_PADDING*2;
+                _h = unitsHigh * ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING*2;
+                
+                for(0, unitsWide)::(x) {
+                    slots[x] = [];
+                    for(0, unitsHigh)::(y) {
+                        slots[x][y] = false;
+                        freeSpaces->push(value:{x:x, y:y});
+                    } 
+                }
+                
+                
+                
+                return this;
+            },      
+        
+        
             left : {get::<-_x},        
             top : {get::<-_y},  
             
@@ -719,25 +719,6 @@ return class(
         }        
 
 
-        @self;
-        this.constructor = ::(mapHint => Object) {
-            self = this.instance;
-
-            self.paged = false;
-            self.renderOutOfBounds = true;
-            self.outOfBoundsCharacter = ' ';
-            
-
-            if (mapHint.wallCharacter != empty) self.wallCharacter = mapHint.wallCharacter;
-            if (mapHint.outOfBoundsCharacter != empty) self.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
-            if (mapHint.hasZoningWalls != empty) hasZoningWalls = mapHint.hasZoningWalls;
-            if (mapHint.hasFillerBuildings != empty) hasFillerBuildings = mapHint.hasFillerBuildings;
-
-            self.width = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
-            self.height = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
-
-            return self;
-        }   
         
         // returns whether 2 line segments overlap
         // l0 is less than m0,
@@ -754,8 +735,8 @@ return class(
             when (
                 top < STRUCTURE_MAP_PADDING ||
                 left < STRUCTURE_MAP_PADDING ||
-                left + zone.width  > self.width - STRUCTURE_MAP_PADDING ||
-                top + zone.height > self.height - STRUCTURE_MAP_PADDING
+                left + zone.width  > this.width - STRUCTURE_MAP_PADDING ||
+                top + zone.height > this.height - STRUCTURE_MAP_PADDING
                 
             ) false;
 
@@ -792,7 +773,7 @@ return class(
         // out in the open. Else, it must be touching an existing zone 
         // on its side
         @:addZone ::(category) {
-            @zone = Zone.new(map:self, category);
+            @zone = Zone.new(map:this, category);
             @top;
             @left;
             @alongIcoord;
@@ -804,22 +785,22 @@ return class(
                 match(zone.gateSide) {
                   (NORTH):::<= {
                     top = STRUCTURE_MAP_PADDING;
-                    left = ((self.width - STRUCTURE_MAP_PADDING) / 2)->floor;
+                    left = ((this.width - STRUCTURE_MAP_PADDING) / 2)->floor;
                   },
 
                   (EAST):::<= {
-                    top = ((self.height - STRUCTURE_MAP_PADDING) / 2)->floor;
-                    left = (self.width - STRUCTURE_MAP_PADDING) - zone.width;
+                    top = ((this.height - STRUCTURE_MAP_PADDING) / 2)->floor;
+                    left = (this.width - STRUCTURE_MAP_PADDING) - zone.width;
                   },
                   
                   (WEST):::<= {
-                    top = ((self.height - STRUCTURE_MAP_PADDING) / 2)->floor;
+                    top = ((this.height - STRUCTURE_MAP_PADDING) / 2)->floor;
                     left = STRUCTURE_MAP_PADDING;
                   },
                   
                   (SOUTH):::<= {
-                    top = (self.height - STRUCTURE_MAP_PADDING) - zone.height;
-                    left = ((self.width - STRUCTURE_MAP_PADDING) / 2)->floor;
+                    top = (this.height - STRUCTURE_MAP_PADDING) - zone.height;
+                    left = ((this.width - STRUCTURE_MAP_PADDING) / 2)->floor;
                   },
 
                   default: ::<= {
@@ -914,6 +895,25 @@ return class(
         
         @Location = import(module:'game_class.location.mt');
         this.interface = {
+            initialize::(mapHint => Object) {
+                this = this;
+
+                this.paged = false;
+                this.renderOutOfBounds = true;
+                this.outOfBoundsCharacter = ' ';
+                
+
+                if (mapHint.wallCharacter != empty) this.wallCharacter = mapHint.wallCharacter;
+                if (mapHint.outOfBoundsCharacter != empty) this.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
+                if (mapHint.hasZoningWalls != empty) hasZoningWalls = mapHint.hasZoningWalls;
+                if (mapHint.hasFillerBuildings != empty) hasFillerBuildings = mapHint.hasFillerBuildings;
+
+                this.width = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
+                this.height = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
+
+                return this;
+            },        
+        
             // special function that adds a location value 
             // to the map in a designated zoning area.
             addLocation::(location => Location.type) {
@@ -948,15 +948,15 @@ return class(
                     match(data.side) {
                       (NORTH, SOUTH):::<= {
                         for(data.center-1, data.center+2)::(x) {
-                            self.disableWall(x, y: data.coord);
-                            self.clearScenery(x, y: data.coord);                        
+                            this.disableWall(x, y: data.coord);
+                            this.clearScenery(x, y: data.coord);                        
                         }
                       },
 
                       (EAST, WEST):::<= {
                         for(data.center-1, data.center+2)::(y) {
-                            self.disableWall(x:data.coord, y);
-                            self.clearScenery(x:data.coord, y);                        
+                            this.disableWall(x:data.coord, y);
+                            this.clearScenery(x:data.coord, y);                        
                         }
                       }
 

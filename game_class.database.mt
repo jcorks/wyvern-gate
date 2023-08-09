@@ -19,57 +19,85 @@
 @:Random = import(module:'game_singleton.random.mt');
 
 
-return class(
+@:Database = class(
     name : 'Wyvern.Database',
     statics : {
-        setup ::(item => Object, attributes => Object) {
-            @:core = {}
-            
-            // default constructor that requires all 
-            // entries to be specified and with the correct 
-            // type.
-            item.constructor = ::(data) {
-                foreach(data)::(name, entry) {
-                    when(attributes[name] == empty) 
-                        error(detail: 'Unknown attribute ' + name + ' given to new instance.');
+        Item : ::<= {
+            @:Item = class(
+                define::(this) {
+                    @data_;
+                    @database_;
+                    @attribs;
+                    this.interface = {
+                        database : {
+                            set ::(value) <- database_ = value
+                        },  
+                    
+                        initialize ::(data, database) {
+                            database.bind(item:this);
+                        
+                            if (database_ == empty)
+                                error(detail:'Internal error: database not bound to item. Maybe didnt call database.bind in item define()?');
 
+                            // preflight                            
+                            foreach(attribs) ::(key, typ) {
 
-                    // yell at user for not adhering to the constructor types
-                    ::(value => attributes[name]){}(value:entry);
-                    core[name] = entry;
-                }
+                                @val = data[key];
+                                when(val == empty)
+                                    error(detail:'Internal error: database item is missing property ' + key);
 
-                
-                foreach(attributes)::(name, entry) {
-                    when(core[name] == empty)
-                        error(detail: 'Attribute ' + name + ' missing. Please check your constructor.');
+                                when(key->type != String)
+                                    error(detail:'Internal error: database attribute property key isnt a string!');
+                                    
+                                when(typ->type != Type)
+                                    error(detail:'Internal error: database attribute property isnt a type!');
 
-                }
-                
-                return item.instance;
-            }
-            
-            // add getters
-            @getters = {}
-            foreach(attributes)::(name => String, entry) {
-                getters[name] = {
-                    get :: {
-                        return core[name];
+                                when(typ != val->type)
+                                    error(detail:'Internal error: database item property should be of type ' + attribs[key] + ', but received item of type ' + val->type);
+                            }                         
+                            data_ = data;
+                        },
+                        
+                        // gathers the expected interface of attributes in the database item,
+                        // setting up the interface with getters for those properties.
+                        bindData ::(database => Database.type) {
+                            database_ = database;
+                            attribs = database.attributes;
+                            
+                            if (this.interface == empty)
+                                this.interface = {};
+
+                            foreach(attribs) ::(key, val) {
+                                this.interface[key] = {
+                                    get ::<- data_[key].val
+                                }
+                            }
+                        }
                     }
                 }
-            }
-            item.interface = getters;
-        }    
+            );
+            return {get::<-Item};
+        },
+    
+   
     },
 
     define:::(this) {
         @:items_ = {}
+        @attributes_;
         this.interface = {
-            initialize::(items) {
-                foreach(items)::(index, item) {
-                    items_[item.name] = item;            
-                }    
-                return this;        
+            initialize::(attributes => Object) {
+                attributes_ = attributes;
+                return this;
+            },
+            
+            attributes : {
+                get::<- attributes_
+            },
+            
+            bind::(item => Database.Item.type) {
+                item.bindData(database:this);
+                items_[item.name] = item;
             },
         
             find ::(name) {
@@ -99,7 +127,7 @@ return class(
                 for(0, count)::(i) {
                     l->push(value:{:::} {
                         forever ::{
-                            @:choice = this.instance.getRandomFiltered(filter);
+                            @:choice = this.getRandomFiltered(filter);
                             if (l->all(condition:::(value) <- value != choice))                            
                                 send(message:choice);
                         }
@@ -125,3 +153,4 @@ return class(
         }
     }
 );
+return Database;

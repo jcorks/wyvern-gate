@@ -89,15 +89,9 @@
         @isCursor = true;
         @choiceStack = [];
         @nextResolve = [];
-        @self;
-        
-        this.constructor = ::{
-            self = this.instance;
-            return self;
-        }
+
     
-    
-        @:renderThis ::(data => Object, selfRender) {
+        @:renderThis ::(data => Object, thisRender) {
             if (data.pushedCanvasState == empty) ::<= {
                 canvas.pushState();      
                 data.pushedCanvasState = true;
@@ -106,10 +100,10 @@
 
             @renderAgain = false;
             if (data.renderable) ::<= {
-                renderAgain = (data.renderable.render()) == self.RENDER_AGAIN;        
+                renderAgain = (data.renderable.render()) == this.RENDER_AGAIN;        
             }
-            if (selfRender)
-                selfRender();
+            if (thisRender)
+                thisRender();
             canvas.commit();
             
             
@@ -132,7 +126,7 @@
             }
             if (dontResolveNext == empty) ::<= {
                 resolveNext();
-                self.commitInput();        
+                this.commitInput();        
             }
         }
         
@@ -275,7 +269,7 @@
                 }
                 renderThis(
                     data,
-                    selfRender::{
+                    thisRender::{
                         renderText(
                             lines: choicesModified,
                             speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
@@ -329,7 +323,7 @@
                     resolveNext();
                 }
                     
-                renderThis(data, selfRender::{
+                renderThis(data, thisRender::{
                     renderText(
                         lines: ['[Cancel to return]'],
                         speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
@@ -475,7 +469,7 @@
                 choicesModified->push(value:choice);
             }
 
-            renderThis(data, selfRender::{
+            renderThis(data, thisRender::{
                 renderText(
                     lines: choicesModified,
                     speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
@@ -502,7 +496,7 @@
         
         @:commitInput_display ::(data, input) {
             if (data.rendered == empty) ::<= {
-                renderThis(data, selfRender::{
+                renderThis(data, thisRender::{
                     renderText(
                         leftWeight: data.leftWeight, 
                         topWeight: data.topWeight, 
@@ -546,7 +540,7 @@
             // messages to display
             queueMessageSet::(speaker, set => Object, leftWeight, topWeight, pageAfter, onLeave) {
                 foreach(set)::(i, text) <- 
-                    self.queueMessage(
+                    this.queueMessage(
                         speaker,
                         text,
                         leftWeight,
@@ -600,7 +594,7 @@
                 lines->push(value:line);
                 
 
-                self.queueDisplay(
+                this.queueDisplay(
                     leftWeight, topWeight,
                     prompt:speaker,
                     renderable,
@@ -644,7 +638,7 @@
                     lines->push(value:line);
                 }   
            
-                self.queueDisplay(
+                this.queueDisplay(
                     prompt, lines, pageAfter, leftWeight, topWeight, onLeave
                 );
             },
@@ -766,7 +760,7 @@
                 }
                 
                     
-                self.commitInput();
+                this.commitInput();
             },
        
             
@@ -817,7 +811,7 @@
 
             // ask yes or no immediately.
             queueAskBoolean::(prompt, onChoice => Function, onLeave) {
-                self.queueChoices(prompt, choices:['Yes', 'No'], canCancel:false, onLeave:onLeave,
+                this.queueChoices(prompt, choices:['Yes', 'No'], canCancel:false, onLeave:onLeave,
                     onChoice::(choice){
                         onChoice(which: choice == 1);
                     }

@@ -101,7 +101,7 @@
               (rate < 0.8): 'It is slightly chaotic.',
               default: 'It is very chaotic.'
             }
-        }
+         }
     },
     define:::(this) {
         @name = NameGen.island();
@@ -294,97 +294,96 @@
             }        
         }
 
-        @self;
-        this.constructor = ::(world => Object, levelHint => Number, party => Party.type, nameHint, state, tierHint => Number) {
-            self = this.instance;
-            world_ = world;            
-            party_ = party;
-            tier_ = tierHint;
-
-            when (state != empty) ::<= {
-                this.instance.state = state;
-                return this.instance;            
-            }
-            levelMin = (levelHint - Number.random() * (levelHint * 0.4))->ceil;
-            levelMax = (levelHint + Number.random() * (levelHint * 0.4))->floor;
-            if (levelMin < 1) levelMin = 1;
-            if (nameHint != empty)
-                name = (nameHint) => String;
-
-            @rarity = 1;
-
-            
-  
-
-
-            @locationCount = (1 + (Number.random()*4)->floor); 
-            if (locationCount < 1) locationCount = 1;
-            for(0, locationCount)::(i) {
-                significantLandmarks->push(value:
-                    map.addLandmark(
-                        base:Landmark.Base.database.getRandomWeightedFiltered(
-                            filter:::(value) <- value.isUnique == false
-                        ),
-                        island:self
-                    )
-                );
-            }
-            
-            // guaranteed gate
-            significantLandmarks->push(value:
-                map.addLandmark(
-                    base:Landmark.Base.database.find(name:'Wyvern Gate'),
-                    island:self
-                )
-            );
-            
-
-
-            // guaranteed town
-            significantLandmarks->push(value:
-                map.addLandmark(
-                    base:Landmark.Base.database.find(name:'Shrine'),
-                    island:self
-                )
-            );
-
-            
-            significantLandmarks->push(value:
-                map.addLandmark(
-                    base:Landmark.Base.database.find(name:'town'),
-                    island:self
-                )
-            );
-
-
-
-
-
-            // free treasure!
-            significantLandmarks->push(value:
-                map.addLandmark(
-                    base:Landmark.Base.database.find(name:'forest'),
-                    island:self
-                )
-            );
-
-
-
-            significantLandmarks->push(value:
-                map.addLandmark(
-                    base:Landmark.Base.database.find(name:'city'),
-                    island:self
-                )
-            );
-
-
-            
-
-            return this.instance;
-        }
 
         
         this.interface = {
+            initialize::(world => Object, levelHint => Number, party => Party.type, nameHint, state, tierHint => Number) {
+                world_ = world;            
+                party_ = party;
+                tier_ = tierHint;
+
+                when (state != empty) ::<= {
+                    this.state = state;
+                    return this;            
+                }
+                levelMin = (levelHint - Number.random() * (levelHint * 0.4))->ceil;
+                levelMax = (levelHint + Number.random() * (levelHint * 0.4))->floor;
+                if (levelMin < 1) levelMin = 1;
+                if (nameHint != empty)
+                    name = (nameHint) => String;
+
+                @rarity = 1;
+
+                
+      
+
+
+                @locationCount = (1 + (Number.random()*4)->floor); 
+                if (locationCount < 1) locationCount = 1;
+                for(0, locationCount)::(i) {
+                    significantLandmarks->push(value:
+                        map.addLandmark(
+                            base:Landmark.Base.database.getRandomWeightedFiltered(
+                                filter:::(value) <- value.isUnique == false
+                            ),
+                            island:this
+                        )
+                    );
+                }
+                
+                // guaranteed gate
+                significantLandmarks->push(value:
+                    map.addLandmark(
+                        base:Landmark.Base.database.find(name:'Wyvern Gate'),
+                        island:this
+                    )
+                );
+                
+
+
+                // guaranteed town
+                significantLandmarks->push(value:
+                    map.addLandmark(
+                        base:Landmark.Base.database.find(name:'Shrine'),
+                        island:this
+                    )
+                );
+
+                
+                significantLandmarks->push(value:
+                    map.addLandmark(
+                        base:Landmark.Base.database.find(name:'town'),
+                        island:this
+                    )
+                );
+
+
+
+
+
+                // free treasure!
+                significantLandmarks->push(value:
+                    map.addLandmark(
+                        base:Landmark.Base.database.find(name:'forest'),
+                        island:this
+                    )
+                );
+
+
+
+                significantLandmarks->push(value:
+                    map.addLandmark(
+                        base:Landmark.Base.database.find(name:'city'),
+                        island:this
+                    )
+                );
+
+
+                
+
+                return this;
+            },
+
             state : {
                 set ::(value) {
                     id = value.id;
@@ -408,7 +407,7 @@
                     map = LargeMap.new(state:value.map);
 
                     foreach(value.significantLandmarks)::(index, landmarkData) {
-                        @:landmark = Landmark.Base.database.find(name:landmarkData.baseName).new(x:0, y:0, state:landmarkData, island:self);
+                        @:landmark = Landmark.Base.database.find(name:landmarkData.baseName).new(x:0, y:0, state:landmarkData, island:this);
                         map.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.name);
                         significantLandmarks->push(value:landmark);
                     }
@@ -416,7 +415,7 @@
                     events = [];
                     @:world = import(module:'game_singleton.world.mt');
                     foreach(value.events)::(index, eventData) {
-                        @:event = Event.new(state:eventData, island:self, party:world.party);
+                        @:event = Event.new(state:eventData, island:this, party:world.party);
                         events->push(value:event);
                     }
 
@@ -497,18 +496,18 @@
                     if (Number.random() > 13 - (stepsSinceLastEvent-5) / 5) ::<={
                         // mostly its encounters. 0.1% chance of encounter 
                         if (Number.random() < 0.001) ::<= {
-                            this.instance.addEvent(
+                            this.addEvent(
                                 event:Event.Base.database.find(name:'Encounter:Normal').new(
-                                    island:self, 
+                                    island:this, 
                                     party:world_.party //, currentTime
                                 )
                             );
                         } else ::<= {
-                            this.instance.addEvent(
+                            this.addEvent(
                                 event:Event.Base.database.getRandomFiltered(
                                     filter:::(value) <- !value.name->contains(key:'Encounter')
                                 ).new(
-                                    island:self, 
+                                    island:this, 
                                     party:world_.party //, currentTime
                                 )
                             );                        

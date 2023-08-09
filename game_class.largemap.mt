@@ -117,61 +117,62 @@ return class(
 
   
     define:::(this) {
-        @self;
-        this.constructor = ::(state, sizeW, sizeH) {
-            self = this.instance;
-            when (state) ::<= {
-                self.state = state;
-                return this.instance;
-            }
-            
-            self.width = sizeW + BUFFER_SPACE*2;
-            self.height = sizeH + BUFFER_SPACE*2;
-
-            @index = self.addScenerySymbol(character:'▓');
-
-            for(0, self.height)::(y) {
-                for(0, self.width)::(x) {
-                    when(y > BUFFER_SPACE && x > BUFFER_SPACE &&
-                         x < sizeW + BUFFER_SPACE && y < sizeH + BUFFER_SPACE) empty;
-                    self.enableWall(x, y);
-                    self.setSceneryIndex(x, y, symbol:index);
-                }
-            }
-            
-            self.offsetX = 100;
-            self.offsetY = 100;
-            self.paged = true;
-            self.drawLegend = true;
-            
-            foreach(generateTerrain(map:self, width:self.width - BUFFER_SPACE*2, height:self.height - BUFFER_SPACE*2))::(index, value) {
-                //when(value.x < 0 || value.x >= self.width || value.y < 0 || value.y >= self.height)
-                    //empty;
-                self.setSceneryIndex(
-                    x:value.x,
-                    y:value.y,
-                    symbol:value.symbol
-                );
-            }
-            return this.instance;
-                    
-        }
         
         this.interface = {
+
+            initialize::(state, sizeW, sizeH) {
+                when (state) ::<= {
+                    this.state = state;
+                    return this;
+                }
+                
+                this.width = sizeW + BUFFER_SPACE*2;
+                this.height = sizeH + BUFFER_SPACE*2;
+
+                @index = this.addScenerySymbol(character:'▓');
+
+                for(0, this.height)::(y) {
+                    for(0, this.width)::(x) {
+                        when(y > BUFFER_SPACE && x > BUFFER_SPACE &&
+                             x < sizeW + BUFFER_SPACE && y < sizeH + BUFFER_SPACE) empty;
+                        this.enableWall(x, y);
+                        this.setSceneryIndex(x, y, symbol:index);
+                    }
+                }
+                
+                this.offsetX = 100;
+                this.offsetY = 100;
+                this.paged = true;
+                this.drawLegend = true;
+                
+                foreach(generateTerrain(map:this, width:this.width - BUFFER_SPACE*2, height:this.height - BUFFER_SPACE*2))::(index, value) {
+                    //when(value.x < 0 || value.x >= this.width || value.y < 0 || value.y >= this.height)
+                        //empty;
+                    this.setSceneryIndex(
+                        x:value.x,
+                        y:value.y,
+                        symbol:value.symbol
+                    );
+                }
+                return this;
+                        
+            },
+
+
              addLandmark::(island, base) { 
                 @landmark = base.new(
                     island,             
-                    x:random.integer(from:BUFFER_SPACE + (0.2*(self.width  - BUFFER_SPACE*2))->floor, to:(self.width  - BUFFER_SPACE)-(0.2*(self.width  - BUFFER_SPACE*2))->floor),
-                    y:random.integer(from:BUFFER_SPACE + (0.2*(self.height - BUFFER_SPACE*2))->floor, to:(self.height - BUFFER_SPACE)-(0.2*(self.height - BUFFER_SPACE*2))->floor)
+                    x:random.integer(from:BUFFER_SPACE + (0.2*(this.width  - BUFFER_SPACE*2))->floor, to:(this.width  - BUFFER_SPACE)-(0.2*(this.width  - BUFFER_SPACE*2))->floor),
+                    y:random.integer(from:BUFFER_SPACE + (0.2*(this.height - BUFFER_SPACE*2))->floor, to:(this.height - BUFFER_SPACE)-(0.2*(this.height - BUFFER_SPACE*2))->floor)
                 );
-                self.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.name);
+                this.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.name);
                 return landmark;
             },
             
             getAPosition ::{
                 return {
-                    x:random.integer(from:BUFFER_SPACE + (0.2*(self.width  - BUFFER_SPACE*2))->floor, to:(self.width  - BUFFER_SPACE)-(0.2*(self.width  - BUFFER_SPACE*2))->floor),
-                    y:random.integer(from:BUFFER_SPACE + (0.2*(self.height - BUFFER_SPACE*2))->floor, to:(self.height - BUFFER_SPACE)-(0.2*(self.height - BUFFER_SPACE*2))->floor)
+                    x:random.integer(from:BUFFER_SPACE + (0.2*(this.width  - BUFFER_SPACE*2))->floor, to:(this.width  - BUFFER_SPACE)-(0.2*(this.width  - BUFFER_SPACE*2))->floor),
+                    y:random.integer(from:BUFFER_SPACE + (0.2*(this.height - BUFFER_SPACE*2))->floor, to:(this.height - BUFFER_SPACE)-(0.2*(this.height - BUFFER_SPACE*2))->floor)
                 }
             }
             

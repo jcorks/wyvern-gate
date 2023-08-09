@@ -46,7 +46,7 @@
             suit : {get ::<- suit_},
             value : {get ::<- value_},
             
-            define::(suit => Number, value => Number) {
+            initialize::(suit => Number, value => Number) {
                 if (suit < 0 || suit >= SUITS_TEXT->keycount)
                     error(message:'Card was made with invalid suit.');
 
@@ -117,7 +117,7 @@
             addStandard52 ::{
                 for(0, SUITS_TEXT->keycount)::(suit) {
                     for(0, VALUES_TEXT->keycount)::(value) {
-                        set->push(value:Card.new().define(
+                        set->push(value:Card.new().initialize(
                             suit, value 
                         ));
                     }

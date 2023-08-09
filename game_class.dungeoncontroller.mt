@@ -75,7 +75,7 @@ return class(
                 set ::(value) <- floorHint = value
             },
             
-            setup::(map => Object, island => Object, landmark => Object) {
+            initialize::(map => Object, island => Object, landmark => Object) {
                 map_ = map;
                 island_ = island;
                 landmark_ = landmark;

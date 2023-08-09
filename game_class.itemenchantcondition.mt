@@ -24,134 +24,129 @@
 // conditions are checked at the end of turns
 @:ItemEnchantCondition = class(
     name : 'Wyvern.ItemEnchantCondition',
+    inherits : [Database.Item],
     statics : {
         database  :::<= {
-            @db;
+            @db = Database.new().initialize(
+                attributes : {
+                    name : String,
+                    description : String,
+                    isState : Boolean,
+                    onTurnCheck : Function
+                }
+            )            
             return {
-                get ::<- db,
-                set ::(value) <- db = value
+                get ::<- db
             }
         }
 
     },
     define:::(this) {
-        Database.setup(
-            item: this,
-            attributes : {
-                name : String,
-                description : String,
-                isState : Boolean,
-                onTurnCheck : Function
-            }
-        );
+        this.constructor = ::{
+            ItemEnchantCondition.database.bind(item:this);
+        }
     }
 );
 
 
-ItemEnchantCondition.database = Database.new(
-    items : [
+ItemEnchantCondition.new().initialize(
+    data : {
+        name : 'On Attack',
+        description : 'After the wielder attacks',
+        isState : false,
+        onTurnCheck ::(wielder, item, battle) {
+            return wielder.flags.has(flag:StateFlags.ATTACKED);
+        }
+    }
+)
+
+ItemEnchantCondition.new().initialize(
+    data : {
+        name : 'On Defend',
+        description : 'After the wielder defends',
+        isState : false,
+        onTurnCheck ::(wielder, item, battle) {
+            return wielder.flags.has(flag:StateFlags.DEFENDED);
+        }                
+    }
+)
 
 
-        ItemEnchantCondition.new(
-            data : {
-                name : 'On Attack',
-                description : 'After the wielder attacks',
-                isState : false,
-                onTurnCheck ::(wielder, item, battle) {
-                    return wielder.flags.has(flag:StateFlags.ATTACKED);
-                }
-            }
-        ),
+ItemEnchantCondition.new().initialize(
+    data : {
+        name : 'On Ability',
+        description : 'After the wielder uses an ability',
+        isState : false,
+        onTurnCheck ::(wielder, item, battle) {
+            return wielder.flags.has(flag:StateFlags.ABILITY);
+        }                                
+    }
+)
 
-        ItemEnchantCondition.new(
-            data : {
-                name : 'On Defend',
-                description : 'After the wielder defends',
-                isState : false,
-                onTurnCheck ::(wielder, item, battle) {
-                    return wielder.flags.has(flag:StateFlags.DEFENDED);
-                }                
-            }
-        ),
+ItemEnchantCondition.new().initialize(
+    data : {
+        name : 'On Heal',
+        description : 'After the wielder heals',                
+        isState : false,
+        onTurnCheck ::(wielder, item, battle) {
+            return wielder.flags.has(flag:StateFlags.HEALED);
+        }                                
+    }
+)
 
+ItemEnchantCondition.new().initialize(
+    data : {
+        name : 'On Hurt',
+        description : 'After the wielder is hurt',                
+        isState : false,
+        onTurnCheck ::(wielder, item, battle) {
+            return wielder.flags.has(flag:StateFlags.HURT);
+        }                                
+    }
+)
 
-        ItemEnchantCondition.new(
-            data : {
-                name : 'On Ability',
-                description : 'After the wielder uses an ability',
-                isState : false,
-                onTurnCheck ::(wielder, item, battle) {
-                    return wielder.flags.has(flag:StateFlags.ABILITY);
-                }                                
-            }
-        ),
+ItemEnchantCondition.new().initialize(
+    data : {
+        name : 'On Defeat Enemy',
+        description : 'After the wielder defeats an enemy',                
+        isState : false,
+        onTurnCheck ::(wielder, item, battle) {
+            return wielder.flags.has(flag:StateFlags.DEFEATED_ENEMY);
+        }                                
+    }
+)        
 
-        ItemEnchantCondition.new(
-            data : {
-                name : 'On Heal',
-                description : 'After the wielder heals',                
-                isState : false,
-                onTurnCheck ::(wielder, item, battle) {
-                    return wielder.flags.has(flag:StateFlags.HEALED);
-                }                                
-            }
-        ),
+ItemEnchantCondition.new().initialize(
+    data : {
+        name : 'On Dodge Attack', // Dex build!
+        description : 'After the wielder dodges an attack',                
+        isState : false,
+        onTurnCheck ::(wielder, item, battle) {
+            return wielder.flags.has(flag:StateFlags.DODGED_ATTACK);
+        }                                
+    }
+)   
 
-        ItemEnchantCondition.new(
-            data : {
-                name : 'On Hurt',
-                description : 'After the wielder is hurt',                
-                isState : false,
-                onTurnCheck ::(wielder, item, battle) {
-                    return wielder.flags.has(flag:StateFlags.HURT);
-                }                                
-            }
-        ),
-        
-        ItemEnchantCondition.new(
-            data : {
-                name : 'On Defeat Enemy',
-                description : 'After the wielder defeats an enemy',                
-                isState : false,
-                onTurnCheck ::(wielder, item, battle) {
-                    return wielder.flags.has(flag:StateFlags.DEFEATED_ENEMY);
-                }                                
-            }
-        ),        
+ItemEnchantCondition.new().initialize(
+    data : {
+        name : '33% Chance',
+        description : 'About 1/3rd of the time',                
+        isState : false,
+        onTurnCheck ::(wielder, item, battle) {
+            return Number.random() < 0.3;
+        }                                
+    }
+)
 
-        ItemEnchantCondition.new(
-            data : {
-                name : 'On Dodge Attack', // Dex build!
-                description : 'After the wielder dodges an attack',                
-                isState : false,
-                onTurnCheck ::(wielder, item, battle) {
-                    return wielder.flags.has(flag:StateFlags.DODGED_ATTACK);
-                }                                
-            }
-        ),   
-
-        ItemEnchantCondition.new(
-            data : {
-                name : '33% Chance',
-                description : 'About 1/3rd of the time',                
-                isState : false,
-                onTurnCheck ::(wielder, item, battle) {
-                    return Number.random() < 0.3;
-                }                                
-            }
-        ),
-
-        ItemEnchantCondition.new(
-            data : {
-                name : '50% Chance',
-                description : 'About 1/2 of the time',                
-                isState : false,
-                onTurnCheck ::(wielder, item, battle) {
-                    return Number.random() < 0.5;
-                }                                
-            }
-        )
-    ]
-);
+ItemEnchantCondition.new().initialize(
+    data : {
+        name : '50% Chance',
+        description : 'About 1/2 of the time',                
+        isState : false,
+        onTurnCheck ::(wielder, item, battle) {
+            return Number.random() < 0.5;
+        }                                
+    }
+)
 
 return ItemEnchantCondition;
