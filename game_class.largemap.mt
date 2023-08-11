@@ -18,7 +18,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
-
+@:Landmark = import(module:'game_class.landmark.mt');
 
 @:mapSizeW  = 38;
 @:mapSizeH  = 16;
@@ -110,11 +110,15 @@
     return out;
 }
 
-return class(
+@:LargeMap = class(
     name: 'Wyvern.LargeMap',
     inherits:[import(module:'game_class.mapbase.mt')],
 
-
+    new::(state, sizeW, sizeH) {
+        @:this = LargeMap.defaultNew();
+        this.initialize(state, sizeW, sizeH);
+        return this;
+    },
   
     define:::(this) {
         
@@ -160,7 +164,8 @@ return class(
 
 
              addLandmark::(island, base) { 
-                @landmark = base.new(
+                @landmark = Landmark.new(
+                    base,
                     island,             
                     x:random.integer(from:BUFFER_SPACE + (0.2*(this.width  - BUFFER_SPACE*2))->floor, to:(this.width  - BUFFER_SPACE)-(0.2*(this.width  - BUFFER_SPACE*2))->floor),
                     y:random.integer(from:BUFFER_SPACE + (0.2*(this.height - BUFFER_SPACE*2))->floor, to:(this.height - BUFFER_SPACE)-(0.2*(this.height - BUFFER_SPACE*2))->floor)
@@ -180,3 +185,4 @@ return class(
         }
     }
 );
+return LargeMap;

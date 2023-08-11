@@ -29,9 +29,14 @@
 @:Interaction = class(
     name : 'Wyvern.Interaction',
     inherits: [Database.Item],
+    new::(data) {
+        @:this = Interaction.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     displayName : String,
@@ -44,13 +49,11 @@
         }
     },
     define:::(this) {
-        this.constructor = ::{
-            Interaction.database.bind(item:this);
-        }
+        Interaction.database.add(item:this);
     }
 );
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         name : 'exit',
         displayName : 'Exit',
@@ -88,7 +91,7 @@ Interaction.new().initialize(
         }
     }
 )
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Examine',
         name : 'examine',
@@ -99,7 +102,7 @@ Interaction.new().initialize(
     }
 )
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Vandalize',
         name : 'vandalize',
@@ -111,7 +114,7 @@ Interaction.new().initialize(
 )
 
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         name : 'Stairs',
         displayName : 'Stairs',
@@ -122,7 +125,7 @@ Interaction.new().initialize(
     }
 )
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         name : 'talk',
         displayName : 'Talk',
@@ -158,7 +161,8 @@ Interaction.new().initialize(
                         if (location.landmark.base.guarded == true) ::<= {
                             windowEvent.queueMessage(speaker:talkee.name, text:'Guards! Guards! Help!');
                             location.landmark.island.addEvent(
-                                event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
+                                event:Event.new(
+                                    base: Event.Base.database.find(name:'Encounter:Non-peaceful'),
                                     island:location.landmark.island, party, landmark:location.landmark //, currentTime
                                 )
                             );
@@ -196,7 +200,7 @@ Interaction.new().initialize(
 
 
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName: 'Buy Drink',
         name : 'drink:tavern',
@@ -377,7 +381,7 @@ Interaction.new().initialize(
     }
 )
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Mine',
         name : 'mine',
@@ -407,7 +411,7 @@ Interaction.new().initialize(
                 if (Number.random() > 0.9) ::<= {
                     windowEvent.queueMessage(speaker:miner.name, text:'Oh...?');
 
-                    @:item = Item.Base.database.find(name:'Ore').new(from:miner);
+                    @:item = Item.new(base:Item.Base.database.find(name:'Ore'), from:miner);
                     
                     windowEvent.queueMessage(text:'The party obtained some Ore!');     
 
@@ -456,7 +460,7 @@ Interaction.new().initialize(
     }
 )
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Smelt Ore',
         name : 'smelt ore',
@@ -469,7 +473,7 @@ Interaction.new().initialize(
             party.inventory.remove(item:ores[0]);
             party.inventory.remove(item:ores[1]);
             
-            @:metal = Item.Base.database.getRandomWeightedFiltered(filter:::(value) <- value.hasAttribute(attribute:Item.ATTRIBUTE.RAW_METAL)).new();                        
+            @:metal = Item.new(base:Item.Base.database.getRandomWeightedFiltered(filter:::(value) <- value.hasAttribute(attribute:Item.ATTRIBUTE.RAW_METAL)));                        
             windowEvent.queueMessage(text: 'Smelted 2 ore chunks into ' + correctA(word:metal.name) + '!');
             party.inventory.add(item:metal);                    
                 
@@ -479,7 +483,7 @@ Interaction.new().initialize(
 )        
 
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Sell',
         name : 'sell:shop',
@@ -544,7 +548,7 @@ Interaction.new().initialize(
 )
 
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Buy',
         name : 'buy:shop',
@@ -665,7 +669,7 @@ Interaction.new().initialize(
     }
 )
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Forge',
         name : 'forge',
@@ -711,7 +715,8 @@ Interaction.new().initialize(
                             party.inventory.subtractGold(amount:300);                            
                         
         
-                        @:output = outputBase.new(
+                        @:output = Item.new(
+                            base:outputBase,
                             materialHint: ore.base.name->split(token:' ')[0],
                             from: smith
                         );
@@ -788,7 +793,7 @@ Interaction.new().initialize(
     }
 )
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Enter Gate',
         name : 'enter gate',
@@ -826,13 +831,14 @@ Interaction.new().initialize(
                         @:world = import(module:'game_singleton.world.mt');
                         @:instance = import(module:'game_singleton.instance.mt');
 
-                        @:d = Landmark.Base.database.find(name:match(keys[choice-1].name) {
-                            ('Wyvern Key of Fire'):    'Fire Wyvern Dimension',
-                            ('Wyvern Key of Ice'):     'Ice Wyvern Dimension',
-                            ('Wyvern Key of Thunder'): 'Thunder Wyvern Dimension',
-                            ('Wyvern Key of Light'):   'Light Wyvern Dimension',
-                            default: 'Unknown Wyvern Dimension'
-                        }).new(
+                        @:d = Landmark.new(
+                            base:Landmark.Base.database.find(name:match(keys[choice-1].name) {
+                                ('Wyvern Key of Fire'):    'Fire Wyvern Dimension',
+                                ('Wyvern Key of Ice'):     'Ice Wyvern Dimension',
+                                ('Wyvern Key of Thunder'): 'Thunder Wyvern Dimension',
+                                ('Wyvern Key of Light'):   'Light Wyvern Dimension',
+                                default: 'Unknown Wyvern Dimension'
+                            }),
                             island:location.landmark.island,
                             x: 0,
                             y: 0
@@ -853,7 +859,7 @@ Interaction.new().initialize(
 )
     
 // specifically for exploring different areas of dungeons.
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Next Floor',
         name : 'next floor',
@@ -865,7 +871,8 @@ Interaction.new().initialize(
                     @:Landmark = import(module:'game_class.landmark.mt');
                     
                     location.targetLandmark = 
-                        Landmark.Base.database.find(name:'Shrine: Lost Floor').new(
+                        Landmark.new(
+                            base:Landmark.Base.database.find(name:'Shrine: Lost Floor'),
                             island:location.landmark.island,
                             x:-1,
                             y:-1
@@ -876,7 +883,8 @@ Interaction.new().initialize(
                     @:Landmark = import(module:'game_class.landmark.mt');
                     
                     location.targetLandmark = 
-                        Landmark.Base.database.find(name:'Shrine').new(
+                        Landmark.new(
+                            base:Landmark.Base.database.find(name:'Shrine'),
                             island:location.landmark.island,
                             x:-1,
                             y:-1,
@@ -901,7 +909,7 @@ Interaction.new().initialize(
 )  
 
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Climb Up',
         name : 'climb up',
@@ -915,7 +923,7 @@ Interaction.new().initialize(
 
 
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Explore Pit',
         name : 'explore pit',
@@ -924,7 +932,8 @@ Interaction.new().initialize(
             @:Event = import(module:'game_class.event.mt');
 
             if (location.contested == true) ::<= {
-                @:event = Event.Base.database.find(name:'Encounter:TreasureBoss').new(
+                @:event = Event.new(
+                    base:Event.Base.database.find(name:'Encounter:TreasureBoss'),
                     island:location.landmark.island,
                     party:world.party,
                     currentTime:0, // TODO,
@@ -937,7 +946,8 @@ Interaction.new().initialize(
                     
 
                     location.targetLandmark = 
-                        Landmark.Base.database.find(name:'Treasure Room').new(
+                        Landmark.new(
+                            base:Landmark.Base.database.find(name:'Treasure Room'),
                             island:location.landmark.island,
                             x:-1,
                             y:-1
@@ -956,7 +966,7 @@ Interaction.new().initialize(
 )          
           
     
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Steal',
         name : 'steal',
@@ -1014,7 +1024,7 @@ Interaction.new().initialize(
 
 
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Rest',
         name : 'rest',
@@ -1068,7 +1078,7 @@ Interaction.new().initialize(
     }
 )
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Change Profession',
         name : 'change profession',
@@ -1120,7 +1130,7 @@ Interaction.new().initialize(
                         onChoice:::(which) {
                             when(which == false) empty;
                             party.inventory.subtractGold(amount:cost);       
-                            whom.profession = Profession.Base.database.find(name: location.ownedBy.profession.base.name).new();
+                            whom.profession = Profession.new(base:Profession.Base.database.find(name: location.ownedBy.profession.base.name));
 
                             windowEvent.queueMessage(
                                 text: '' + whom.name + " is now " + correctA(word:whom.profession.base.name) + '.'
@@ -1134,7 +1144,7 @@ Interaction.new().initialize(
     }
 )        
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Bet',
         name : 'bet',
@@ -1330,7 +1340,7 @@ Interaction.new().initialize(
     
                 
 ) 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Open Chest',
         name : 'open-chest',
@@ -1363,7 +1373,7 @@ Interaction.new().initialize(
     }
 )              
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Loot',
         name : 'loot',
@@ -1393,7 +1403,7 @@ Interaction.new().initialize(
 ) 
 
 
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Compete',
         name : 'compete',
@@ -1401,7 +1411,7 @@ Interaction.new().initialize(
         }
     }
 )
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Rune Research',
         name : 'sylvia-research',
@@ -1418,7 +1428,7 @@ Interaction.new().initialize(
         }
     }
 )        
-Interaction.new().initialize(
+Interaction.new(
     data : {
         displayName : 'Tablet Trading',
         name : 'sylvia-tablet',
@@ -1500,7 +1510,7 @@ Interaction.new().initialize(
             
             }
 
-            item = item.new(from:location.ownedBy);                    
+            item = Item.new(base:item, from:location.ownedBy);                    
             world.party.inventory.add(item);
             windowEvent.queueMessage(speaker:'', text:'The party received ' + correctA(word:item.name) + '!');
             

@@ -20,23 +20,24 @@
 @:class  = import(module:'Matte.Core.Class');
 @:Ability = import(module:'game_class.ability.mt');
 @:random = import(module:'game_singleton.random.mt');
-return class(
+@:BattleAI = class(
     name: 'Wyvern.BattleAI',
+    new::(user) {
+        @:this = BattleAI.defaultNew();
+        this.setUser(user);
+        return this;
+    },
     define:::(this) {
         @user_;
         
         @enemies_;
         @allies_;
     
-        
-        this.constructor = ::(
-            user => Object
-        ) {
-            user_ = user;
-            return this.instance;
-        }
-    
+            
         this.interface = {
+            setUser ::(user) {
+                user_ = user;
+            },
             state : {
                 set ::(value) {
                 
@@ -146,3 +147,4 @@ return class(
     }  
 
 );
+return BattleAI;

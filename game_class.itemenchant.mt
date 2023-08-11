@@ -32,6 +32,11 @@
             }
         }
     },
+    new ::(base, conditionHint, state) { 
+        @:this = ItemEnchant.defaultNew();
+        this.initialize(base, conditionHint, state);
+        return this;
+    },
     define:::(this) {
         @base_;
         @condition;
@@ -104,9 +109,14 @@
 ItemEnchant.Base = class(
     name : 'Wyvern.ItemEnchant.Base',
     inherits : [Database.Item],
+    new ::(data) {
+        @:this = ItemEnchant.Base.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     description : String,
@@ -121,23 +131,20 @@ ItemEnchant.Base = class(
             );
             return {
                 get ::<- db,
-                set ::(value) <- db = value
             }
         }
     },
     define:::(this) {
-        this.constructor = ::{
-            ItemEnchant.Base.database.bind(item:this);        
-        }
+        ItemEnchant.Base.database.add(item:this);
     }
 );
 
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Protect',
         description : ', will cast Protect on the wielder for a while, which greatly increases defense.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 350,
@@ -154,11 +161,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Evade',
         description : ', will allow the wielder to evade attacks the next turn.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 350,
@@ -177,11 +184,11 @@ ItemEnchant.Base.new().initialize(
 
 
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Regen',
         description : ', will slightly recover the users wounds.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 350,
@@ -198,11 +205,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Spikes',
         description : ', will damage an enemy when attacked for a few turns.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 350,
@@ -221,11 +228,11 @@ ItemEnchant.Base.new().initialize(
 
 
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Ease',
         description : ', will recover from mental fatigue.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 350,
@@ -242,11 +249,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Shield',
         description : ', casts Shield for a while, which may block attacks.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 250,
@@ -263,11 +270,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Boost Strength',
         description : ', will boost the wielder\'s power for a while.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 250,
@@ -284,11 +291,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Boost Defense',
         description : ', will boost the wielder\'s defense for a while.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 250,
@@ -305,11 +312,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Boost Mind',
         description : ', will boost the wielder\'s mental acquity for a while.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 250,
@@ -326,11 +333,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Boost Dex',
         description : ', will boost the wielder\'s dexterity for a while.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 250,
@@ -347,11 +354,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Boost Speed',
         description : ', will boost the wielder\'s speed for a while.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 250,
@@ -370,11 +377,11 @@ ItemEnchant.Base.new().initialize(
 
 
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Burning',
         description : 'The material its made of is warm to the touch. Grants a fire aspect to attacks and gives ice resistance when used as armor.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 200,
@@ -391,11 +398,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Icy',
         description : 'The material its made of is cold to the touch. Grants an ice aspect to attacks and gives fire resistance when used as armor.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 200,
@@ -412,11 +419,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Shock',
         description : 'The material its made of gently hums. Grants a thunder aspect to attacks and gives thunder resistance when used as armor.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 200,
@@ -433,11 +440,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Toxic',
         description : 'The material its made has been made poisonous. Grants a poison aspect to attacks and gives poison resistance when used as armor.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 200,
@@ -454,11 +461,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Shimmering',
         description : 'The material its made of glows softly. Grants a light aspect to attacks and gives dark resistance when used as armor.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 200,
@@ -475,11 +482,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Dark',
         description : 'The material its made of is very dark. Grants a dark aspect to attacks and gives light resistance when used as armor.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
         ),
         levelMinimum : 1,
         priceMod: 200,
@@ -498,11 +505,11 @@ ItemEnchant.Base.new().initialize(
 
 
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Rune: Power',
         description : 'Imbued with a potent rune of power.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             ATK: 150,
             DEX: -10,
             SPD: -10,
@@ -523,11 +530,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Rune: Shield',
         description : 'Imbued with a potent rune of shielding.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEF: 150,
             DEX: -10,
             ATK: -10,
@@ -548,11 +555,11 @@ ItemEnchant.Base.new().initialize(
     }
 )        
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Rune: Reflex',
         description : 'Imbued with a potent rune of reflex.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEX: 150,
             DEF: -10,
             ATK: -10,
@@ -573,11 +580,11 @@ ItemEnchant.Base.new().initialize(
     }
 ) 
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Rune: Speed',
         description : 'Imbued with a potent rune of speed.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 150,
             DEF: -10,
             ATK: -10,
@@ -598,11 +605,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Rune: Mind',
         description : 'Imbued with a potent rune of mind.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             INT: 150,
             DEF: -10,
             ATK: -10,
@@ -626,11 +633,11 @@ ItemEnchant.Base.new().initialize(
 
 
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Teal Crystal',
         description : 'Set with an simple, enchanted teal crystal of alchemical origin.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 15,
             DEX: 15,
             ATK: -5,
@@ -650,11 +657,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Lavender Crystal',
         description : 'Set with an simple, enchanted lavender crystal of alchemical origin.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: -5,
             DEX: 15,
             ATK: 15,
@@ -674,11 +681,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Orange Crystal',
         description : 'Set with an simple, enchanted orange crystal of alchemical origin.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: -5,
             DEX: -5,
             ATK: 15,
@@ -698,11 +705,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Indigo Crystal',
         description : 'Set with an simple, enchanted indigo crystal of alchemical origin.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: -5,
             DEX: -5,
             ATK: -5,
@@ -723,11 +730,11 @@ ItemEnchant.Base.new().initialize(
 )
 
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Rose Crystal',
         description : 'Set with an simple, enchanted rose crystal of alchemical origin.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 15,
             DEX: -5,
             ATK: -5,
@@ -747,11 +754,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Cyan Crystal',
         description : 'Set with an simple, enchanted cyan crystal of alchemical origin.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 15,
             DEX: -5,
             ATK: 15,
@@ -771,11 +778,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: White Crystal',
         description : 'Set with an simple, enchanted white crystal of alchemical origin.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 15,
             DEX: -5,
             ATK: -5,
@@ -795,11 +802,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Violet Crystal',
         description : 'Set with an simple, enchanted violet crystal of alchemical origin.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: -5,
             DEX: 15,
             ATK: -5,
@@ -819,11 +826,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Scarlet Crystal',
         description : 'Set with an simple, enchanted scarlet crystal of alchemical origin.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: -5,
             DEX: 15,
             ATK: -5,
@@ -843,11 +850,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Maroon Crystal',
         description : 'Set with an simple, enchanted maroon crystal of alchemical origin.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 15,
             DEX: -5,
             ATK: 15,
@@ -867,11 +874,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Crimson Crystal',
         description : 'Set with an simple, enchanted crimson crystal of alchemical origin.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: -5,
             DEX: -5,
             ATK: 15,
@@ -903,11 +910,11 @@ ItemEnchant.Base.new().initialize(
 
 
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Morion',
         description : 'Set with an enchanted morion stone.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 50,
             DEX: 50,
             ATK: -25,
@@ -927,11 +934,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Amethyst',
         description : 'Set with an enchanted amethyst.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: -25,
             DEX: 50,
             ATK: 50,
@@ -951,11 +958,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Citrine',
         description : 'Set with an enchanted citrine stone.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: -25,
             DEX: -25,
             ATK: 50,
@@ -975,11 +982,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Garnet',
         description : 'Set with an enchanted garnet stone.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: -25,
             DEX: -25,
             ATK: -25,
@@ -1000,11 +1007,11 @@ ItemEnchant.Base.new().initialize(
 )
 
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Praesolite',
         description : 'Set with an enchanted praesolite stone.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 50,
             DEX: -25,
             ATK: -25,
@@ -1024,11 +1031,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Aquamarine',
         description : 'Set with an enchanted aquamarine stone.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 50,
             DEX: -25,
             ATK: 50,
@@ -1048,11 +1055,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Diamond',
         description : 'Set with an enchanted diamond stone.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 50,
             DEX: -25,
             ATK: -25,
@@ -1072,11 +1079,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Pearl',
         description : 'Set with an enchanted pearl.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: -25,
             DEX: 50,
             ATK: -25,
@@ -1096,11 +1103,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Ruby',
         description : 'Set with an enchanted ruby.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: -25,
             DEX: 50,
             ATK: -25,
@@ -1120,11 +1127,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Sapphire',
         description : 'Set with an enchanted sapphire.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 50,
             DEX: -25,
             ATK: 50,
@@ -1144,11 +1151,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Opal',
         description : 'Set with an enchanted opal stone.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: -25,
             DEX: -25,
             ATK: 50,
@@ -1169,11 +1176,11 @@ ItemEnchant.Base.new().initialize(
 )
 
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Cursed',
         description : 'Somehow, cursed magicks have seeped into this.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEF: -70,
             ATK: -70,
             INT: 100,
@@ -1194,11 +1201,11 @@ ItemEnchant.Base.new().initialize(
 )
 
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Bloodstone',
         description : 'Set with a large bloodstone, shining sinisterly',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 30,
             DEX: 30,
             ATK: 30,
@@ -1219,11 +1226,11 @@ ItemEnchant.Base.new().initialize(
     }
 )
 
-ItemEnchant.Base.new().initialize(
+ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Soulstone',
         description : 'Set with a large soulstone, shining sinisterly',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 30,
             DEX: 30,
             ATK: 30,

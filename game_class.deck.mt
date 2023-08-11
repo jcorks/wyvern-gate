@@ -37,6 +37,11 @@
         WIDTH : {get::<- CARD_WIDTH},
         HEIGHT : {get::<- CARD_HEIGHT}
     },
+    new ::(suit => Number, value => Number) {
+        @:this = Card.defaultNew();
+        this.initialize(suit, value);
+        return this;
+    },
     define:::(this) {
         @suit_;
         @value_;
@@ -46,7 +51,7 @@
             suit : {get ::<- suit_},
             value : {get ::<- value_},
             
-            initialize::(suit => Number, value => Number) {
+            initialize::(suit, value) {
                 if (suit < 0 || suit >= SUITS_TEXT->keycount)
                     error(message:'Card was made with invalid suit.');
 
@@ -117,7 +122,7 @@
             addStandard52 ::{
                 for(0, SUITS_TEXT->keycount)::(suit) {
                     for(0, VALUES_TEXT->keycount)::(value) {
-                        set->push(value:Card.new().initialize(
+                        set->push(value:Card.new(
                             suit, value 
                         ));
                     }

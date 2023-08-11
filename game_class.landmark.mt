@@ -43,6 +43,13 @@
             }
         }
     },
+    
+    new::(base, island, x, y, state, floorHint){ 
+        @:this = Landmark.defaultNew();
+        this.initialize(base, island, x, y, state, floorHint);
+        return this;
+    },
+    
     define :::(this) {
         if (Location == empty) Location = import(module:'game_class.location.mt');
         ;
@@ -145,7 +152,8 @@
                 if (base.dungeonMap) ::<= {
                     @area = map.getRandomArea();                
 
-                    gate = Location.Base.database.find(name:'Entrance').new(
+                    gate = Location.new(
+                        base:Location.Base.database.find(name:'Entrance'),
                         landmark:this, 
                         xHint:area.x + (area.width/2)->floor,
                         yHint:area.y + (area.height/2)->floor
@@ -156,7 +164,8 @@
                          
                 } else ::<= {
                 
-                    gate = Location.Base.database.find(name:'Entrance').new(
+                    gate = Location.new(
+                        base:Location.Base.database.find(name:'Entrance'),
                         landmark:this
                     );            
                     map.addLocation(location:gate);
@@ -257,7 +266,10 @@
                     map = Map.new();
                     gate = empty;
                     foreach(value.locations)::(index, location) {
-                        @loc = Location.Base.database.find(name:location.baseName).new(landmark:this, state:location);
+                        @loc = Location.new(
+                            base:Location.Base.database.find(name:location.baseName),
+                            landmark:this, state:location
+                        );
                         if (loc.base.name == 'Entrance')
                             gate = loc;
 
@@ -388,11 +400,17 @@
                         x = xy.x;
                         y = xy.y;
                     }
-                    loc = Location.Base.database.find(name:name).new(landmark:this, ownedByHint, xHint:x, yHint:y);
+                    loc = Location.new(
+                        base:Location.Base.database.find(name:name),
+                        landmark:this, ownedByHint, xHint:x, yHint:y
+                    );
                     map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
                         
                 } else ::<= {
-                    loc = Location.Base.database.find(name:name).new(landmark:this, ownedByHint);
+                    loc = Location.new(
+                        base:Location.Base.database.find(name:name),
+                        landmark:this, ownedByHint
+                    );
                     map.addLocation(location:loc);
                 
                 }
@@ -427,9 +445,14 @@
 Landmark.Base = class(
     name : 'Wyvern.Landmark.Base',
     inherits : [Database.Item],
+    new::(data) {
+        @:this = Landmark.Base.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     symbol : String,
@@ -453,14 +476,12 @@ Landmark.Base = class(
         }
     },
     define:::(this) {
-        this.constructor = ::{
-            Landmark.Base.database.bind(item:this);
-        }
+        Landmark.Base.database.add(item:this);
     }
 );
 
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'town',
         symbol : '#',
@@ -496,7 +517,7 @@ Landmark.Base.new().initialize(
     }
 )
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'city',
         symbol : '|',
@@ -538,7 +559,7 @@ Landmark.Base.new().initialize(
 )
 
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'Mine',
         symbol : 'O',
@@ -573,7 +594,7 @@ Landmark.Base.new().initialize(
 )
 
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'Wyvern Gate',
         symbol : '@',
@@ -604,7 +625,7 @@ Landmark.Base.new().initialize(
     }
 )
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'Wyvern Temple',
         symbol : '{}',
@@ -629,7 +650,7 @@ Landmark.Base.new().initialize(
 
 
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'Shrine',
         symbol : 'O',
@@ -657,7 +678,7 @@ Landmark.Base.new().initialize(
     }
 )
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'Shrine: Lost Floor',
         symbol : 'O',
@@ -690,7 +711,7 @@ Landmark.Base.new().initialize(
 )
 
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'Treasure Room',
         symbol : 'O',
@@ -726,7 +747,7 @@ Landmark.Base.new().initialize(
     }
 )
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'Fire Wyvern Dimension',
         symbol : 'M',
@@ -757,7 +778,7 @@ Landmark.Base.new().initialize(
     }
 )        
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'Ice Wyvern Dimension',
         symbol : 'M',
@@ -791,7 +812,7 @@ Landmark.Base.new().initialize(
 
 
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'port',
         rarity : 30,                
@@ -824,7 +845,7 @@ Landmark.Base.new().initialize(
     }
 )
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'village',
         rarity : 5,                
@@ -853,7 +874,7 @@ Landmark.Base.new().initialize(
     }
 )
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'villa',
         symbol : '=',
@@ -882,7 +903,7 @@ Landmark.Base.new().initialize(
     }
 )
 
-/*Landmark.Base.new().initialize(
+/*Landmark.Base.new(
     data: {
         name : 'Outpost',
         symbol : '[]',
@@ -896,7 +917,7 @@ Landmark.Base.new().initialize(
     }
 )*/
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'forest',
         symbol : 'T',
@@ -927,7 +948,7 @@ Landmark.Base.new().initialize(
     }
 )
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'cave',
         symbol : 'O',
@@ -947,7 +968,7 @@ Landmark.Base.new().initialize(
     }
 )
 
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'abandoned castle',
         symbol : 'X',
@@ -967,7 +988,7 @@ Landmark.Base.new().initialize(
         
     }
 )
-Landmark.Base.new().initialize(
+Landmark.Base.new(
     data: {
         name : 'abandoned town',
         rarity : 400,                

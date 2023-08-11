@@ -20,8 +20,13 @@
 
 
 
-return class(
+@:StatSet = class(
     name : 'Wyvern.Entity.StatSet',
+    new ::(HP, AP, ATK, INT, DEF, LUK, SPD, DEX) {
+        @:this = StatSet.defaultNew();
+        this.initialize(HP, AP, ATK, INT, DEF, LUK, SPD, DEX);
+        return this;
+    },
     define:::(this) {
         @HP_  = 0;
         @MP_  = 0;
@@ -357,3 +362,4 @@ return class(
         }
     }
 );
+return StatSet;

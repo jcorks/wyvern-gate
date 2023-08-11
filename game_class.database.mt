@@ -18,6 +18,8 @@
 @:class = import(module:'Matte.Core.Class');
 @:Random = import(module:'game_singleton.random.mt');
 
+@:Item2Database = {};
+
 
 @:Database = class(
     name : 'Wyvern.Database',
@@ -29,13 +31,8 @@
                     @database_;
                     @attribs;
                     this.interface = {
-                        database : {
-                            set ::(value) <- database_ = value
-                        },  
                     
-                        initialize ::(data, database) {
-                            database.bind(item:this);
-                        
+                        initialize ::(data) {
                             if (database_ == empty)
                                 error(detail:'Internal error: database not bound to item. Maybe didnt call database.bind in item define()?');
 
@@ -56,6 +53,7 @@
                                     error(detail:'Internal error: database item property should be of type ' + attribs[key] + ', but received item of type ' + val->type);
                             }                         
                             data_ = data;
+                            database_.bind(item:this);
                         },
                         
                         // gathers the expected interface of attributes in the database item,
@@ -69,7 +67,7 @@
 
                             foreach(attribs) ::(key, val) {
                                 this.interface[key] = {
-                                    get ::<- data_[key].val
+                                    get ::<- data_[key]
                                 }
                             }
                         }
@@ -81,7 +79,11 @@
     
    
     },
-
+    new ::(attributes) {
+        @this = Database.defaultNew();
+        this.initialize(attributes);
+        return this;
+    },
     define:::(this) {
         @:items_ = {}
         @attributes_;
@@ -95,9 +97,11 @@
                 get::<- attributes_
             },
             
-            bind::(item => Database.Item.type) {
-                item.bindData(database:this);
+            bind::(item) {
                 items_[item.name] = item;
+            },            
+            add::(item) {
+                item.bindData(database:this);
             },
         
             find ::(name) {

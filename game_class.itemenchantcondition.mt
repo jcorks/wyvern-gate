@@ -25,9 +25,14 @@
 @:ItemEnchantCondition = class(
     name : 'Wyvern.ItemEnchantCondition',
     inherits : [Database.Item],
+    new ::(data) {
+        @:this = ItemEnchantCondition.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     description : String,
@@ -42,14 +47,12 @@
 
     },
     define:::(this) {
-        this.constructor = ::{
-            ItemEnchantCondition.database.bind(item:this);
-        }
+        ItemEnchantCondition.database.add(item:this);
     }
 );
 
 
-ItemEnchantCondition.new().initialize(
+ItemEnchantCondition.new(
     data : {
         name : 'On Attack',
         description : 'After the wielder attacks',
@@ -60,7 +63,7 @@ ItemEnchantCondition.new().initialize(
     }
 )
 
-ItemEnchantCondition.new().initialize(
+ItemEnchantCondition.new(
     data : {
         name : 'On Defend',
         description : 'After the wielder defends',
@@ -72,7 +75,7 @@ ItemEnchantCondition.new().initialize(
 )
 
 
-ItemEnchantCondition.new().initialize(
+ItemEnchantCondition.new(
     data : {
         name : 'On Ability',
         description : 'After the wielder uses an ability',
@@ -83,7 +86,7 @@ ItemEnchantCondition.new().initialize(
     }
 )
 
-ItemEnchantCondition.new().initialize(
+ItemEnchantCondition.new(
     data : {
         name : 'On Heal',
         description : 'After the wielder heals',                
@@ -94,7 +97,7 @@ ItemEnchantCondition.new().initialize(
     }
 )
 
-ItemEnchantCondition.new().initialize(
+ItemEnchantCondition.new(
     data : {
         name : 'On Hurt',
         description : 'After the wielder is hurt',                
@@ -105,7 +108,7 @@ ItemEnchantCondition.new().initialize(
     }
 )
 
-ItemEnchantCondition.new().initialize(
+ItemEnchantCondition.new(
     data : {
         name : 'On Defeat Enemy',
         description : 'After the wielder defeats an enemy',                
@@ -116,7 +119,7 @@ ItemEnchantCondition.new().initialize(
     }
 )        
 
-ItemEnchantCondition.new().initialize(
+ItemEnchantCondition.new(
     data : {
         name : 'On Dodge Attack', // Dex build!
         description : 'After the wielder dodges an attack',                
@@ -127,7 +130,7 @@ ItemEnchantCondition.new().initialize(
     }
 )   
 
-ItemEnchantCondition.new().initialize(
+ItemEnchantCondition.new(
     data : {
         name : '33% Chance',
         description : 'About 1/3rd of the time',                
@@ -138,7 +141,7 @@ ItemEnchantCondition.new().initialize(
     }
 )
 
-ItemEnchantCondition.new().initialize(
+ItemEnchantCondition.new(
     data : {
         name : '50% Chance',
         description : 'About 1/2 of the time',                

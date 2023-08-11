@@ -36,6 +36,13 @@
             }
         }
     },
+    
+    new ::(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint, state) {
+        @:this = EntityQuality.defaultNew();
+        this.initialize(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint, state);
+        return this;
+    },
+    
     define:::(this) {
         @base_;
         @descIndex;
@@ -140,9 +147,14 @@
 EntityQuality.Base = class(
     name : 'Wyvern.EntityQuality.Base',
     inherits : [Database.Item],
+    new ::(data) {
+        @:this = EntityQuality.Base.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     plural : Boolean,
@@ -160,14 +172,12 @@ EntityQuality.Base = class(
 
     },
     define:::(this) {
-        this.constructor = ::{
-            EntityQuality.Base.database.bind(item:this);
-        }
+        EntityQuality.Base.database.add(item:this);
     }
 );
 
 
-EntityQuality.Base.new().initialize(
+EntityQuality.Base.new(
     data : {
         name : 'fur',
         appearanceChance : 1,
@@ -209,7 +219,7 @@ EntityQuality.Base.new().initialize(
     }
 )
 
-EntityQuality.Base.new().initialize(
+EntityQuality.Base.new(
     data : {
         name : 'face',
         appearanceChance : 0.3,
@@ -242,7 +252,7 @@ EntityQuality.Base.new().initialize(
 )
 
 
-EntityQuality.Base.new().initialize(
+EntityQuality.Base.new(
     data : {
         name : 'scales',
         appearanceChance : 1,
@@ -281,7 +291,7 @@ EntityQuality.Base.new().initialize(
 )        
 
 
-EntityQuality.Base.new().initialize(
+EntityQuality.Base.new(
     data : {
         name : 'feathers',
         appearanceChance : 1,
@@ -320,7 +330,7 @@ EntityQuality.Base.new().initialize(
     }
 )   
 
-EntityQuality.Base.new().initialize(
+EntityQuality.Base.new(
     data : {
         name : 'eyes',
         appearanceChance : 1,
@@ -360,7 +370,7 @@ EntityQuality.Base.new().initialize(
     }
 )
 
-EntityQuality.Base.new().initialize(
+EntityQuality.Base.new(
     data : {
         name : 'ears',
         plural : true,
@@ -385,7 +395,7 @@ EntityQuality.Base.new().initialize(
     }
 )        
 
-EntityQuality.Base.new().initialize(
+EntityQuality.Base.new(
     data : {
         name : 'snout',
         appearanceChance : 1,
@@ -409,7 +419,7 @@ EntityQuality.Base.new().initialize(
 )        
 
 
-EntityQuality.Base.new().initialize(
+EntityQuality.Base.new(
     data : {
         name : 'body',
         appearanceChance : 1,

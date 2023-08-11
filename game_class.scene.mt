@@ -25,9 +25,14 @@
 @:Scene = class(
     name : 'Wyvern.Scene',
     inherits : [Database.Item],
+    new ::(data) {
+        @:this = Scene.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     script : Object
@@ -67,13 +72,11 @@
             }
         }
         
-        this.constructor = ::{
-            Scene.database.bind(item:this);
-        }
+        Scene.database.add(item:this);
     }
 );
 
-Scene.new().initialize(
+Scene.new(
     data : {
         name : 'scene_intro',
         script: [
@@ -90,7 +93,7 @@ Scene.new().initialize(
 
 
 
-Scene.new().initialize(
+Scene.new(
     data : {
         name : 'scene_wyvernfire0',
         script: [
@@ -185,8 +188,11 @@ Scene.new().initialize(
                         text: 'Well, here: I have a spare.'
                     );
                     
-                    @:item = Item.Base.database.find(name:'Wyvern Key of Fire'
-                                ).new(from:location.ownedBy);
+                    @:item = Item.new(
+                        base:Item.Base.database.find(name:'Wyvern Key of Fire'
+                                ),
+                        from:location.ownedBy
+                    );
                     windowEvent.queueMessage(text:'The party was given a ' + item.name + '.');
                     world.party.inventory.add(item);
                     key = item;
@@ -225,7 +231,7 @@ Scene.new().initialize(
     }
 ) 
 
-Scene.new().initialize(
+Scene.new(
     data : {
         name : 'scene_wyvernfire1',
         script: [
@@ -284,12 +290,18 @@ Scene.new().initialize(
                             
                             when(items->keycount == 3) ::<= {
                                 windowEvent.queueMessage(speaker:'Kaedjaal', text:'Excellent. Let me, in exchange, give you this.');   
-                                @:item = Item.Base.database.getRandomFiltered(
-                                    filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial
-                                ).new(rngEnchantHint:true, from:location.landmark.island.newInhabitant(), colorHint:'Red', materialHint: 'Gold');
+                                @:item = Item.new(
+                                    base:Item.Base.database.getRandomFiltered(
+                                        filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial
+                                    ),
+                                    rngEnchantHint:true, 
+                                    from:location.landmark.island.newInhabitant(), 
+                                    colorHint:'Red', 
+                                    materialHint: 'Gold'
+                                );
                                 @:ItemEnchant = import(module:'game_class.itemenchant.mt');
-                                item.addEnchant(mod:ItemEnchant.Base.database.find(name:'Burning').new());
-                                item.addEnchant(mod:ItemEnchant.Base.database.find(name:'Burning').new());
+                                item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.Base.database.find(name:'Burning')));
+                                item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.Base.database.find(name:'Burning')));
 
 
                                 windowEvent.queueMessage(text:'In exchange, the party was given ' + correctA(word:item.name) + '.');
@@ -366,7 +378,7 @@ Scene.new().initialize(
 )
 
 
-Scene.new().initialize(
+Scene.new(
     data : {
         name : 'scene_wyvernice0',
         script: [
@@ -453,8 +465,8 @@ Scene.new().initialize(
                         text: '*tells you off in dragonish*'
                     );
                     
-                    @:item = Item.Base.database.find(name:'Wyvern Key of Ice'
-                                ).new(from:location.ownedBy);
+                    @:item = Item.new(base:Item.Base.database.find(name:'Wyvern Key of Ice'),
+                             from:location.ownedBy);
                     windowEvent.queueMessage(text:'The party was given a ' + item.name + '.');
                     world.party.inventory.add(item);
                     key = item;
@@ -486,7 +498,7 @@ Scene.new().initialize(
     }
 ) 
 
-Scene.new().initialize(
+Scene.new(
     data : {
         name : 'scene_wyvernice1',
         script: [
@@ -535,11 +547,18 @@ Scene.new().initialize(
                                                 text: 'You win. Well played.'
                                             );                              
                                             
-                                            @:prize = Item.Base.database.getRandomFiltered(
-                                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial && value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
-                                            ).new(rngEnchantHint:true, from:location.landmark.island.newInhabitant(), colorHint:'Blue', materialHint: 'Mythril', qualityHint: 'Masterwork');
+                                            @:prize = Item.new(
+                                                base: Item.Base.database.getRandomFiltered(
+                                                    filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial && value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
+                                                ),
+                                                rngEnchantHint:true, 
+                                                from:location.landmark.island.newInhabitant(), 
+                                                colorHint:'Blue', 
+                                                materialHint: 'Mythril', 
+                                                qualityHint: 'Masterwork'
+                                            );
                                             @:ItemEnchant = import(module:'game_class.itemenchant.mt');
-                                            prize.addEnchant(mod:ItemEnchant.Base.database.find(name:'Icy').new());
+                                            prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.Base.database.find(name:'Icy')));
 
                                             party.inventory.add(item:prize);
                                             windowEvent.queueMessage(text:'The party was given a ' + prize.name + '.',

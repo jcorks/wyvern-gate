@@ -35,6 +35,11 @@
 
 @Area = class(
     name: 'Wyvern.DungeonMap.Area',
+    new::(x, y, width, height) {
+        @:this = Area.defaultNew();
+        this.initialize(x, y, width, height);
+        return this;
+    },
     define::(this) {
         @_x;
         @_y;
@@ -60,11 +65,15 @@
 
 
 
-return class(
+@:Map = class(
     name: 'Wyvern.Map',
     inherits:[import(module:'game_class.mapbase.mt')],
 
-  
+    new::(mapHint => Object) {
+        @:this = Map.defaultNew();
+        this.initialize(mapHint);
+        return this;
+    },
     define:::(this) {
 
         @:areas = [];
@@ -281,7 +290,7 @@ return class(
 
         
         this.interface = {
-            initialize ::(mapHint => Object) {
+            initialize ::(mapHint) {
                 this.paged = false;
                 this.width = if (mapHint.roomSize == empty) ROOM_SIZE else mapHint.roomSize;
                 this.height = if (mapHint.roomSize == empty) ROOM_SIZE else mapHint.roomSize;
@@ -312,3 +321,4 @@ return class(
         } 
     }
 );
+return Map;

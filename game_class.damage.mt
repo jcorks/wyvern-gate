@@ -34,11 +34,16 @@
     AP : 1
 }
 
-return class(
+@:Damage = class(
     name: 'Wyvern.Damage',
     statics : {
         TYPE : {get::<-TYPE},
         CLASS : {get::<-CLASS}
+    },
+    new ::(amount => Number, damageType => Number, damageClass => Number) {
+        @this = Damage.defaultNew();
+        this.initialize(amount, damageType, damageClass);
+        return this;
     },
     define:::(this) {
         @type_;
@@ -92,3 +97,4 @@ return class(
         }    
     }
 );
+return Damage;

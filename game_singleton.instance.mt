@@ -185,7 +185,8 @@ return class(
                                         if (landmark.peaceful == false) ::<= {
                                             if (stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
                                                 island.addEvent(
-                                                    event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
+                                                    event:Event.new(
+                                                        base:Event.Base.database.find(name:'Encounter:Non-peaceful'),
                                                         island, party, landmark //, currentTime
                                                     )
                                                 );
@@ -235,7 +236,8 @@ return class(
                                         if (landmark.peaceful == false) ::<= {
                                             if (stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
                                                 island.addEvent(
-                                                    event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
+                                                    event:Event.new(
+                                                        base:Event.Base.database.find(name:'Encounter:Non-peaceful'),
                                                         island, party, landmark //, currentTime
                                                     )
                                                 );
@@ -427,7 +429,8 @@ return class(
             },
         
             startNew ::{
-                @:keyhome = Item.Base.database.find(name:'Wyvern Key').new(
+                @:keyhome = Item.new(
+                    base: Item.Base.database.find(name:'Wyvern Key'),
                     creationHint: {
                         nameHint:namegen.island(), levelHint:5
                     }
@@ -490,16 +493,18 @@ return class(
                     
 
                 for(0, 3)::(i) {
-                    @:crystal = Item.Base.database.find(name:'Skill Crystal').new(from:p0);
+                    @:crystal = Item.new(base:Item.Base.database.find(name:'Skill Crystal'), from:p0);
                     party.inventory.add(item:crystal);
                 }
-                @:sword = Item.Base.database.find(name:'Shortsword').new(
+                @:sword = Item.new(
+                    base: Item.Base.database.find(name:'Shortsword'),
                     from:p0,
                     materialHint: 'Hardstone',
                     rngEnchantHint: false
                 );
 
-                @:tome = Item.Base.database.find(name:'Tome').new(
+                @:tome = Item.new(
+                    base:Item.Base.database.find(name:'Tome'),
                     from:p0,
                     materialHint: 'Hardstone',
                     rngEnchantHint: false,

@@ -227,6 +227,13 @@ SCORING_FN[SCORE_TYPE.SUM] = ::(rolls) {
         // Player requests to score immediately
         SCORE : {get::<-1}
     },
+    
+    new::(action, scoreType, scratchType, keepWhich) {
+        @:this = PlayerAction.defaultNew();
+        this.initialize(action, scoreType, scratchType, keepWhich);
+        return this;
+    },
+    
     define:::(this) {
 
         @_action;
@@ -268,6 +275,11 @@ SCORING_FN[SCORE_TYPE.SUM] = ::(rolls) {
 
 
 @:Player = class(
+    new::(name => String, decider => Function) {
+        @:this = Player.defaultNew();
+        this.initialize(name, decider);
+        return this;
+    },
     define::(this) {
         @_name;
         @_decider;
@@ -286,7 +298,7 @@ SCORING_FN[SCORE_TYPE.SUM] = ::(rolls) {
         
         
         this.interface = {
-            initialize::(name => String, decider => Function) {
+            initialize::(name, decider) {
                 _name = name;
                 _decider = decider;
                 return this;

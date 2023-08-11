@@ -90,6 +90,12 @@
         EQUIP_SLOTS : {get::<- EQUIP_SLOTS}
    
     },
+        
+    new ::(speciesHint, professionHint, levelHint => Number, state) {
+        @:this = Entity.defaultNew();
+        this.initialize(speciesHint, professionHint, levelHint, state);
+        return this;
+    },
     
     
     define :::(this) {
@@ -119,7 +125,7 @@
         @requestsRemove = false;
         
 
-        @none = Item.Base.database.find(name:'None').new();
+        @none = Item.new(base:Item.Base.database.find(name:'None'));
         @:equips = [
             none, // handl
             none, // handr
@@ -141,10 +147,15 @@
         inventory.addGold(amount:(Number.random() * 100)->ceil);
         
         for(0, 3)::(i) {
-            inventory.add(item:Item.Base.database.getRandomFiltered(
-                    filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                                            && value.tier <= story.tier
-                ).new(rngEnchantHint:true, from:this));
+            inventory.add(item:
+                Item.new(
+                    base: Item.Base.database.getRandomFiltered(
+                        filter:::(value) <- value.isUnique == false && value.canHaveEnchants
+                                                    && value.tier <= story.tier
+                    ),
+                    rngEnchantHint:true, from:this
+                )
+            );
         }
         @expNext = 10;
         @level = 0;
@@ -180,7 +191,7 @@
 
         
         this.interface = {
-            initialize::(speciesHint, professionHint, levelHint => Number, state) {
+            initialize::(speciesHint, professionHint, levelHint, state) {
                    
                 battleAI = BattleAI.new(
                     user: this
@@ -190,13 +201,15 @@
                     this.state = state;
                     return this;
                 }
-                profession = if (professionHint == empty) 
-                    Profession.Base.database.getRandomFiltered(
-                        filter:::(value) <- levelHint >= value.levelMinimum
-                    ).new() 
-                else 
-                        Profession.Base.database.find(name:professionHint).new()
-                ;
+                profession = Profession.new(
+                    base:
+                        if (professionHint == empty) 
+                            Profession.Base.database.getRandomFiltered(
+                                filter:::(value) <- levelHint >= value.levelMinimum
+                            ) 
+                        else 
+                            Profession.Base.database.find(name:professionHint)
+                );
                 professions->push(value:profession);
                 if (speciesHint != empty) ::<= {
                     species = speciesHint;
@@ -258,7 +271,7 @@
                         @:data = value.equips[index];
                         when(index == EQUIP_SLOTS.HAND_R) empty;
                         when(data.baseName == 'None') empty;
-                        this.equip(slot:index, silent:true, inventory:inventory, item:Item.Base.database.find(name:data.baseName).new(state:data));
+                        this.equip(slot:index, silent:true, inventory:inventory, item:Item.new(base:Item.Base.database.find(name:data.baseName), state:data));
                     }
                     
                     inventory.state = value.inventory;
@@ -1296,7 +1309,7 @@
                 foreach(species.qualities)::(i, qual) {
                     @:q = EntityQuality.Base.database.find(name:qual);
                     if (q.appearanceChance == 1 || Number.random() < q.appearanceChance)
-                        qualities->push(value:q.new());
+                        qualities->push(value:EntityQuality.new(base:q));
                 }
 
             

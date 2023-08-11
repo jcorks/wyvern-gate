@@ -20,9 +20,14 @@
 @:StatSet = import(module:'game_class.statset.mt');
 @:Species = class(
     inherits : [Database.Item],
+    new ::(data) {
+        @:this = Species.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     rarity: Number,
@@ -40,16 +45,15 @@
     },
     name: 'Wyvern.Species',
     define:::(this) {
-        this.constructor = ::{
-        }
+        Species.database.add(item:this);
     }
 );
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Wolf',
     rarity : 10,
     description: 'A common canid race.',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 5,
         AP : 2,
         ATK: 3,
@@ -72,11 +76,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Lynx',
     rarity : 10,
     description: 'A felid race.',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 2,
         AP : 6,
         ATK: 2,
@@ -100,11 +104,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Fox',
     rarity : 10,
     description: 'A canid race.',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 3,
         AP : 6,
         ATK: 4,
@@ -128,11 +132,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Kitsune',
     rarity : 10,
     description: 'A canid race.',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 2,
         AP : 5,
         ATK: 2,
@@ -156,11 +160,11 @@ Species.new().initialize(data:{
     ]
 })    
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Tiger',
     description: 'A common felid race.',
     rarity : 45,
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 3,
         AP : 2,
         ATK: 6,
@@ -184,11 +188,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Deer',
     description: 'A common ungulate race.',
     rarity : 10,
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 3,
         AP : 4,
         ATK: 3,
@@ -212,11 +216,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Gazelle',
     description: 'A tall ungulate race.',
     rarity : 40,
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 3,
         AP : 6,
         ATK: 3,
@@ -241,11 +245,11 @@ Species.new().initialize(data:{
 })    
 
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Kobold',
     description: 'A common dragon-like race of small stature.',
     rarity : 30,
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 1,
         AP : 10,
         ATK: 2,
@@ -269,11 +273,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Serval',
     description: 'A felid race of medium stature.',
     rarity : 30,
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 3,
         AP : 2,
         ATK: 4,
@@ -298,11 +302,11 @@ Species.new().initialize(data:{
 })
 
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Jackal',
     rarity : 30,
     description: 'A slender canid race.',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 5,
         AP : 4,
         ATK: 2,
@@ -326,11 +330,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Possum',
     rarity : 40,
     description: 'A marsupial race of medium stature.',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 7,
         AP : 3,
         ATK: 3,
@@ -354,11 +358,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Bear',
     rarity : 100,
     description: 'A large mammal race.',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 10,
         AP : 1,
         ATK: 7,
@@ -382,11 +386,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Kangaroo',
     rarity : 100,
     description: 'A large mammal race.',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 4,
         AP : 3,
         ATK: 8,
@@ -410,11 +414,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Raven',
     rarity : 100,
     description: 'A bird race of medium stature',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 3,
         AP : 8,
         ATK: 3,
@@ -436,11 +440,11 @@ Species.new().initialize(data:{
 })
 
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Pigeon',
     rarity : 100,
     description: 'A bird race of medium stature',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 4,
         AP : 0,
         ATK: 5,
@@ -464,11 +468,11 @@ Species.new().initialize(data:{
 
 
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Rat',
     rarity : 100,
     description: 'A mammal race of medium stature',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 4,
         AP : 3,
         ATK: 3,
@@ -492,11 +496,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Caracal',
     rarity : 40,
     description: 'A felid race of medium stature',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 3,
         AP : 4,
         ATK: 2,
@@ -520,11 +524,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Tanuki',
     rarity : 40,
     description: 'A canid race of medium stature',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 3,
         AP : 4,
         ATK: 2,
@@ -549,11 +553,11 @@ Species.new().initialize(data:{
 })
 
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Werewolf',
     rarity : 200,
     description: 'Canid race thought to be blessed by the moon.',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 8,
         AP : 2,
         ATK: 10,
@@ -577,11 +581,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Hyena',
     rarity: 100,
     description: 'A mammal race of medium stature.',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 4,
         AP : 2,
         ATK: 4,
@@ -606,11 +610,11 @@ Species.new().initialize(data:{
 })
 
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Gnoll',
     rarity : 200,
     description: 'A mammal race of medium stature.',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 6,
         AP : 1,
         ATK: 8,
@@ -635,11 +639,11 @@ Species.new().initialize(data:{
 })
 
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Creature',
     rarity : 200000000000,
     description: '',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 7,
         AP : 1,
         ATK: 4,
@@ -659,11 +663,11 @@ Species.new().initialize(data:{
 
 
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Fire Sprite',
     rarity : 2000000000000,
     description: 'Hot n\' spicy!',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 3,
         AP : 1,
         ATK: 7,
@@ -682,11 +686,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Ice Elemental',
     rarity : 2000000000000,
     description: 'Brrr that\'s cold!',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 7,
         AP : 4,
         ATK: 7,
@@ -705,11 +709,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Thunder Spawn',
     rarity : 2000000000000,
     description: 'Shocking!',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 7,
         AP : 6,
         ATK: 10,
@@ -729,11 +733,11 @@ Species.new().initialize(data:{
 })    
 
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Guiding Light',
     rarity : 2000000000000,
     description: 'Oh!',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 7,
         AP : 12,
         ATK: 2,
@@ -754,11 +758,11 @@ Species.new().initialize(data:{
 
 
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Wyvern',
     rarity : 2000000000000,
     description: 'Keepers of the gates',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 60,
         AP : 10,
         ATK: 10,
@@ -776,11 +780,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Wyvern of Fire',
     rarity : 2000000000000,
     description: 'Keepers of the gates',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 60,
         AP : 10,
         ATK: 10,
@@ -798,11 +802,11 @@ Species.new().initialize(data:{
     ]
 })
 
-Species.new().initialize(data:{
+Species.new(data:{
     name : 'Wyvern of Ice',
     rarity : 2000000000000,
     description: 'Keepers of the gates',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 60,
         AP : 10,
         ATK: 10,

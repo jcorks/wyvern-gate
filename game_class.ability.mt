@@ -26,8 +26,13 @@
 @:Ability = class(
     name : 'Wyvern.Ability',    
     inherits: [Database.Item],
+    new ::(data) {
+        @this = Ability.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : ::<= {
-        @database = Database.new().initialize(
+        @database = Database.new(
             attributes : {
                 name : String,
                 description : String,
@@ -71,9 +76,7 @@
     },
     define:::(this) {
         // adds item to database and applies attributes
-        this.constructor = ::{
-            Ability.database.bind(item:this);
-        }
+        Ability.database.add(item:this);
     }
 );
 
@@ -84,7 +87,7 @@
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Attack',
         targetMode : TARGET_MODE.ONE,
@@ -109,7 +112,7 @@ Ability.new().initialize(
         }
     }
 )
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Headhunter',
         targetMode : TARGET_MODE.ONE,
@@ -144,7 +147,7 @@ Ability.new().initialize(
         }
     }
 )
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Precise Strike',
         targetMode : TARGET_MODE.ONE,
@@ -171,7 +174,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Tranquilizer',
         targetMode : TARGET_MODE.ONE,
@@ -202,7 +205,7 @@ Ability.new().initialize(
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Coordination',
         targetMode : TARGET_MODE.ALLALLY,
@@ -230,7 +233,7 @@ Ability.new().initialize(
     }
 )            
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Follow Up',
         targetMode : TARGET_MODE.ONE,
@@ -265,7 +268,7 @@ Ability.new().initialize(
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Doublestrike',
         targetMode : TARGET_MODE.ALLENEMY,
@@ -298,7 +301,7 @@ Ability.new().initialize(
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Triplestrike',
         targetMode : TARGET_MODE.ALLENEMY,
@@ -335,7 +338,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Run',
         targetMode : TARGET_MODE.ONE,
@@ -351,7 +354,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Focus Perception',
         targetMode : TARGET_MODE.NONE,
@@ -368,7 +371,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Cheer',
         targetMode : TARGET_MODE.ALLALLY,
@@ -389,7 +392,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Lunar Blessing',
         targetMode : TARGET_MODE.NONE,
@@ -414,7 +417,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Solar Blessing',
         targetMode : TARGET_MODE.NONE,
@@ -440,7 +443,7 @@ Ability.new().initialize(
 )            
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Moonbeam',
         targetMode : TARGET_MODE.ONE,
@@ -475,7 +478,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Sunbeam',
         targetMode : TARGET_MODE.ONE,
@@ -510,7 +513,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Sunburst',
         targetMode : TARGET_MODE.ALLENEMY,
@@ -547,7 +550,7 @@ Ability.new().initialize(
     }
 )            
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Night Veil',
         targetMode : TARGET_MODE.ONE,
@@ -580,7 +583,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Dayshroud',
         targetMode : TARGET_MODE.ONE,
@@ -612,7 +615,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Call of the Night',
         targetMode : TARGET_MODE.ONE,
@@ -646,7 +649,7 @@ Ability.new().initialize(
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Lunacy',
         targetMode : TARGET_MODE.ONE,
@@ -678,7 +681,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Moonsong',
         targetMode : TARGET_MODE.ONE,
@@ -710,7 +713,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Sol Attunement',
         targetMode : TARGET_MODE.ONE,
@@ -742,7 +745,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Ensnare',
         targetMode : TARGET_MODE.ONE,
@@ -774,7 +777,7 @@ Ability.new().initialize(
 ) 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Call',
         targetMode : TARGET_MODE.NONE,
@@ -812,7 +815,7 @@ Ability.new().initialize(
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Tame',
         targetMode : TARGET_MODE.ONE,
@@ -857,7 +860,7 @@ Ability.new().initialize(
     }
 ) 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Leg Sweep',
         targetMode : TARGET_MODE.ALLENEMY,
@@ -886,7 +889,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Big Swing',
         targetMode : TARGET_MODE.ALLENEMY,
@@ -914,7 +917,7 @@ Ability.new().initialize(
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Tackle',
         targetMode : TARGET_MODE.ONE,
@@ -938,7 +941,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Throw Item',
         targetMode : TARGET_MODE.ONE,
@@ -971,7 +974,7 @@ Ability.new().initialize(
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Stun',
         targetMode : TARGET_MODE.ONE,
@@ -998,7 +1001,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Sheer Cold',
         targetMode : TARGET_MODE.ONE,
@@ -1026,7 +1029,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Mind Read',
         targetMode : TARGET_MODE.ONE,
@@ -1063,7 +1066,7 @@ Ability.new().initialize(
         }
     }
 )             
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Flight',
         targetMode : TARGET_MODE.ONE,
@@ -1082,7 +1085,7 @@ Ability.new().initialize(
         }
     }
 )         
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Grapple',
         targetMode : TARGET_MODE.ONE,
@@ -1107,7 +1110,7 @@ Ability.new().initialize(
 )            
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Swipe Kick',
         targetMode : TARGET_MODE.ONE,
@@ -1135,7 +1138,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Poison Rune',
         targetMode : TARGET_MODE.ONE,
@@ -1153,7 +1156,7 @@ Ability.new().initialize(
         }
     }
 )            
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Rune Release',
         targetMode : TARGET_MODE.ONE,
@@ -1208,7 +1211,7 @@ Ability.new().initialize(
         }
     }
 )            
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Destruction Rune',
         targetMode : TARGET_MODE.ONE,
@@ -1228,7 +1231,7 @@ Ability.new().initialize(
 )       
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Regeneration Rune',
         targetMode : TARGET_MODE.ONE,
@@ -1246,7 +1249,7 @@ Ability.new().initialize(
         }
     }
 )
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Shield Rune',
         targetMode : TARGET_MODE.ONE,
@@ -1264,7 +1267,7 @@ Ability.new().initialize(
         }
     }
 )  
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Cure Rune',
         targetMode : TARGET_MODE.ONE,
@@ -1283,7 +1286,7 @@ Ability.new().initialize(
     }
 )             
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Multiply Runes',
         targetMode : TARGET_MODE.ONE,
@@ -1319,7 +1322,7 @@ Ability.new().initialize(
 )  
 
                  
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Poison Attack',
         targetMode : TARGET_MODE.ONE,
@@ -1344,7 +1347,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Petrify',
         targetMode : TARGET_MODE.ONE,
@@ -1368,7 +1371,7 @@ Ability.new().initialize(
         }
     }
 )            
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Tripwire',
         targetMode : TARGET_MODE.ONE,
@@ -1388,7 +1391,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Trip Explosive',
         targetMode : TARGET_MODE.ONE,
@@ -1417,7 +1420,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Spike Pit',
         targetMode : TARGET_MODE.ALLENEMY,
@@ -1449,7 +1452,7 @@ Ability.new().initialize(
     }
 )            
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Stab',
         targetMode : TARGET_MODE.ONE,
@@ -1474,7 +1477,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'First Aid',
         targetMode : TARGET_MODE.ONE,
@@ -1494,7 +1497,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Mend',
         targetMode : TARGET_MODE.ONE,
@@ -1513,7 +1516,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Give Snack',
         targetMode : TARGET_MODE.ONE,
@@ -1557,7 +1560,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Summon: Fire Sprite',
         targetMode : TARGET_MODE.NONE,
@@ -1617,7 +1620,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Summon: Ice Elemental',
         targetMode : TARGET_MODE.NONE,
@@ -1674,7 +1677,7 @@ Ability.new().initialize(
     }
 )            
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Summon: Thunder Spawn',
         targetMode : TARGET_MODE.NONE,
@@ -1731,7 +1734,7 @@ Ability.new().initialize(
     }
 )       
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Summon: Guiding Light',
         targetMode : TARGET_MODE.NONE,
@@ -1788,7 +1791,7 @@ Ability.new().initialize(
     }
 )                   
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Unsummon',
         targetMode : TARGET_MODE.ONE,
@@ -1826,7 +1829,7 @@ Ability.new().initialize(
     }
 )                        
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Fire',
         targetMode : TARGET_MODE.ONE,
@@ -1851,7 +1854,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Backdraft',
         targetMode : TARGET_MODE.ALLENEMY,
@@ -1883,7 +1886,7 @@ Ability.new().initialize(
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Flare',
         targetMode : TARGET_MODE.ONE,
@@ -1908,7 +1911,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Dematerialize',
         targetMode : TARGET_MODE.ONE,
@@ -1943,7 +1946,7 @@ Ability.new().initialize(
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Ice',
         targetMode : TARGET_MODE.ALLENEMY,
@@ -1969,7 +1972,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Frozen Flame',
         targetMode : TARGET_MODE.ALLENEMY,
@@ -1998,7 +2001,7 @@ Ability.new().initialize(
 )            
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Telekinesis',
         targetMode : TARGET_MODE.ONE,
@@ -2024,7 +2027,7 @@ Ability.new().initialize(
 )          
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Explosion',
         targetMode : TARGET_MODE.ALLENEMY,
@@ -2050,7 +2053,7 @@ Ability.new().initialize(
     }
 )            
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Flash',
         targetMode : TARGET_MODE.ALLENEMY,
@@ -2076,7 +2079,7 @@ Ability.new().initialize(
     }
 )            
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Thunder',
         targetMode : TARGET_MODE.ALLENEMY,
@@ -2104,7 +2107,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Wild Swing',
         targetMode : TARGET_MODE.ALLENEMY,
@@ -2132,7 +2135,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Cure',
         targetMode : TARGET_MODE.ONE,
@@ -2153,7 +2156,7 @@ Ability.new().initialize(
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Cleanse',
         targetMode : TARGET_MODE.ONE,
@@ -2183,7 +2186,7 @@ Ability.new().initialize(
     }
 )          
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Magic Mist',
         targetMode : TARGET_MODE.ALLENEMY,
@@ -2205,7 +2208,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Antidote',
         targetMode : TARGET_MODE.ONE,
@@ -2230,7 +2233,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Greater Cure',
         targetMode : TARGET_MODE.ONE,
@@ -2250,7 +2253,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Protect',
         targetMode : TARGET_MODE.ONE,
@@ -2270,7 +2273,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Duel',
         targetMode : TARGET_MODE.ONE,
@@ -2290,7 +2293,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Grace',
         targetMode : TARGET_MODE.ONE,
@@ -2310,7 +2313,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Phoenix Soul',
         targetMode : TARGET_MODE.ONE,
@@ -2336,7 +2339,7 @@ Ability.new().initialize(
     }
 )            
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Protect All',
         targetMode : TARGET_MODE.ALLALLY,
@@ -2357,7 +2360,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Meditate',
         targetMode : TARGET_MODE.NONE,
@@ -2377,7 +2380,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Soothe',
         targetMode : TARGET_MODE.ONE,
@@ -2398,7 +2401,7 @@ Ability.new().initialize(
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Steal',
         targetMode : TARGET_MODE.ONE,
@@ -2439,7 +2442,7 @@ Ability.new().initialize(
 )            
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Counter',
         targetMode : TARGET_MODE.NONE,
@@ -2457,7 +2460,7 @@ Ability.new().initialize(
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Unarm',
         targetMode : TARGET_MODE.ONE,
@@ -2499,7 +2502,7 @@ Ability.new().initialize(
     }
 ) 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Mug',
         targetMode : TARGET_MODE.ONE,
@@ -2541,7 +2544,7 @@ Ability.new().initialize(
     }
 )   
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Sneak',
         targetMode : TARGET_MODE.ONE,
@@ -2558,7 +2561,7 @@ Ability.new().initialize(
     }
 )     
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Mind Focus',
         targetMode : TARGET_MODE.NONE,
@@ -2577,7 +2580,7 @@ Ability.new().initialize(
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Defend',
         targetMode : TARGET_MODE.NONE,
@@ -2594,7 +2597,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Guard',
         targetMode : TARGET_MODE.NONE,
@@ -2611,7 +2614,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Proceed with Caution',
         targetMode : TARGET_MODE.ALLALLY,
@@ -2627,7 +2630,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Retaliate',
         targetMode : TARGET_MODE.ALLALLY,
@@ -2643,7 +2646,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Defensive Stance',
         targetMode : TARGET_MODE.NONE,
@@ -2662,7 +2665,7 @@ Ability.new().initialize(
     }
 )           
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Offensive Stance',
         targetMode : TARGET_MODE.NONE,
@@ -2681,7 +2684,7 @@ Ability.new().initialize(
     }
 )            
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Light Stance',
         targetMode : TARGET_MODE.NONE,
@@ -2700,7 +2703,7 @@ Ability.new().initialize(
     }
 )            
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Heavy Stance',
         targetMode : TARGET_MODE.NONE,
@@ -2719,7 +2722,7 @@ Ability.new().initialize(
     }
 ) 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Meditative Stance',
         targetMode : TARGET_MODE.NONE,
@@ -2738,7 +2741,7 @@ Ability.new().initialize(
     }
 )                 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Striking Stance',
         targetMode : TARGET_MODE.NONE,
@@ -2758,7 +2761,7 @@ Ability.new().initialize(
 )  
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Reflective Stance',
         targetMode : TARGET_MODE.NONE,
@@ -2777,7 +2780,7 @@ Ability.new().initialize(
     }
 ) 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Evasive Stance',
         targetMode : TARGET_MODE.NONE,
@@ -2796,7 +2799,7 @@ Ability.new().initialize(
     }
 )                            
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Wait',
         targetMode : TARGET_MODE.NONE,
@@ -2813,7 +2816,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Plant Poisonroot',
         targetMode : TARGET_MODE.ONE,
@@ -2830,7 +2833,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Plant Triproot',
         targetMode : TARGET_MODE.ONE,
@@ -2847,7 +2850,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Plant Healroot',
         targetMode : TARGET_MODE.ONE,
@@ -2865,7 +2868,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Green Thumb',
         targetMode : TARGET_MODE.NONE,
@@ -2894,7 +2897,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Fire Shift',
         targetMode : TARGET_MODE.NONE,
@@ -2912,7 +2915,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Elemental Tag',
         targetMode : TARGET_MODE.ONE,
@@ -2930,7 +2933,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Elemental Shield',
         targetMode : TARGET_MODE.NONE,
@@ -2949,7 +2952,7 @@ Ability.new().initialize(
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Ice Shift',
         targetMode : TARGET_MODE.NONE,
@@ -2966,7 +2969,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Thunder Shift',
         targetMode : TARGET_MODE.NONE,
@@ -2983,7 +2986,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Tri Shift',
         targetMode : TARGET_MODE.NONE,
@@ -3003,7 +3006,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Use Item',
         targetMode : TARGET_MODE.ONE,
@@ -3024,7 +3027,7 @@ Ability.new().initialize(
     }
 )        
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Quickhand Item',
         targetMode : TARGET_MODE.ONE,
@@ -3053,7 +3056,7 @@ Ability.new().initialize(
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Equip Item',
         targetMode : TARGET_MODE.ONE,
@@ -3074,7 +3077,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Defend Other',
         targetMode : TARGET_MODE.ONE,
@@ -3092,7 +3095,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Perfect Guard',
         targetMode : TARGET_MODE.ONE,
@@ -3110,7 +3113,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Sharpen',
         targetMode : TARGET_MODE.ONE,
@@ -3136,7 +3139,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Weaken Armor',
         targetMode : TARGET_MODE.ONE,
@@ -3162,7 +3165,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Dull Weapon',
         targetMode : TARGET_MODE.ONE,
@@ -3188,7 +3191,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Strengthen Armor',
         targetMode : TARGET_MODE.ONE,
@@ -3214,7 +3217,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Convince',
         targetMode : TARGET_MODE.ONE,
@@ -3239,7 +3242,7 @@ Ability.new().initialize(
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Pink Brew',
         targetMode : TARGET_MODE.NONE,
@@ -3271,12 +3274,12 @@ Ability.new().initialize(
 
             windowEvent.queueMessage(text: '... and made a Pink Potion!');
             inventory.removeByName(name:'Ingredient');
-            inventory.add(item:Item.Base.database.find(name:'Pink Potion').new(from:user));                            
+            inventory.add(item:Item.new(base:Item.Base.database.find(name:'Pink Potion'), from:user));                            
         }
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Cyan Brew',
         targetMode : TARGET_MODE.NONE,
@@ -3308,13 +3311,18 @@ Ability.new().initialize(
 
             windowEvent.queueMessage(text: '... and made a Cyan Potion!');
             inventory.removeByName(name:'Ingredient');
-            inventory.add(item:Item.Base.database.find(name:'Cyan Potion').new(from:user));                            
+            inventory.add(item:
+                Item.new(
+                    base:Item.Base.database.find(name:'Cyan Potion'),
+                    from:user
+                )
+            );                            
         }
     }
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Green Brew',
         targetMode : TARGET_MODE.NONE,
@@ -3346,14 +3354,18 @@ Ability.new().initialize(
 
             windowEvent.queueMessage(text: '... and made a Green Potion!');
             inventory.removeByName(name:'Ingredient');
-            inventory.add(item:Item.Base.database.find(name:'Green Potion').new(from:user));                            
+            inventory.add(
+                item:Item.new(
+                    base:Item.Base.database.find(name:'Green Potion'),
+                    from:user
+            ));                            
         }
     }
 )
 
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Orange Brew',
         targetMode : TARGET_MODE.NONE,
@@ -3385,12 +3397,17 @@ Ability.new().initialize(
 
             windowEvent.queueMessage(text: '... and made a Orange Potion!');
             inventory.removeByName(name:'Ingredient');
-            inventory.add(item:Item.Base.database.find(name:'Orange Potion').new(from:user));                            
+            inventory.add(item:
+                Item.new(
+                    base:Item.Base.database.find(name:'Orange Potion'),
+                    from:user
+                )
+            );                            
         }
     }
 )
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Purple Brew',
         targetMode : TARGET_MODE.NONE,
@@ -3422,13 +3439,18 @@ Ability.new().initialize(
 
             windowEvent.queueMessage(text: '... and made a Purple Potion!');
             inventory.removeByName(name:'Ingredient');
-            inventory.add(item:Item.Base.database.find(name:'Purple Potion').new(from:user));                            
+            inventory.add(
+                item:Item.new(
+                    new:Item.Base.database.find(name:'Purple Potion'),
+                    from:user
+                )
+            );                            
         }
     }
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Black Brew',
         targetMode : TARGET_MODE.NONE,
@@ -3460,13 +3482,18 @@ Ability.new().initialize(
 
             windowEvent.queueMessage(text: '... and made a Black Potion!');
             inventory.removeByName(name:'Ingredient');
-            inventory.add(item:Item.Base.database.find(name:'Black Potion').new(from:user));                            
+            inventory.add(
+                item:Item.new(
+                    base:Item.Base.database.find(name:'Black Potion'),
+                    from:user
+                )
+            );                            
         }
     }
 )
 
 
-Ability.new().initialize(
+Ability.new(
     data: {
         name: 'Bribe',
         targetMode : TARGET_MODE.ONE,

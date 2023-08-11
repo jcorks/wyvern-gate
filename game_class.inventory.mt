@@ -17,8 +17,13 @@
 */
 @:class = import(module:'Matte.Core.Class');
 
-return class(
+@:Inventory = class(
     name: 'Wyvern.Inventory',
+    new ::(size ) {
+        @:this = Inventory.defaultNew();
+        this.maxItems = size;
+        return this;
+    },
     define:::(this) {
 
 
@@ -100,7 +105,7 @@ return class(
                     gold = value.gold;
                     items = [];
                     foreach(value.items)::(i, itemData) {
-                        @:item = Item.Base.database.find(name:itemData.baseName).new(state:itemData);
+                        @:item = Item.new(base:Item.Base.database.find(name:itemData.baseName, state:itemData));
                         this.add(item);
                     }
                 },
@@ -117,3 +122,4 @@ return class(
         }
     }
 );
+return Inventory;

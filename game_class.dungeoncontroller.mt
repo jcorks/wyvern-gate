@@ -7,8 +7,13 @@
 @:AGGRESSIVE_DISTANCE = 5;
 
 
-return class(
+@:DungeonController = class(
     name: 'Wyvern.DungeonController',
+    new::(map => Object, island => Object, landmark => Object) {
+        @:this = DungeonController.defaultNew();
+        this.initialize(map, island, landmark);
+        return this;
+    },
     define:::(this) {
         @:entities = [];
         @map_;
@@ -46,12 +51,12 @@ return class(
                 @:Item = import(module:'game_class.item.mt');
                 ent.ref.inventory.clear();
                 for(0, 1+(Number.random()*3)->floor)::(i) {
-                    @:item = Item.Base.database.getRandomWeightedFiltered(
+                    @:itembase = Item.Base.database.getRandomWeightedFiltered(
                         filter:::(value) <- value.isUnique == false && value.tier <= story.tier
                         
                     );
-                    if (item.name != 'None') ::<={
-                        @:itemInstance = item.new(from:ent.ref);
+                    if (itembase.name != 'None') ::<={
+                        @:itemInstance = Item.new(base:itembase, from:ent.ref);
                         ent.ref.inventory.add(item:itemInstance);
                     }
                 }
@@ -69,13 +74,15 @@ return class(
                     ])
                 );
         }
+        
+
     
         this.interface = {
             floorHint : {
                 set ::(value) <- floorHint = value
             },
             
-            initialize::(map => Object, island => Object, landmark => Object) {
+            initialize::(map, island, landmark) {
                 map_ = map;
                 island_ = island;
                 landmark_ = landmark;
@@ -167,3 +174,4 @@ return class(
         }
     }
 );
+return DungeonController;

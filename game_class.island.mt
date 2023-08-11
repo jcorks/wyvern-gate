@@ -103,6 +103,13 @@
             }
          }
     },
+    
+    new::(world => Object, levelHint => Number, party => Party.type, nameHint, state, tierHint => Number) {
+        @:this = Island.defaultNew();
+        this.initialize(world, levelHint, party, nameHint, state, tierHint);
+        return this;
+    },
+    
     define:::(this) {
         @name = NameGen.island();
 
@@ -211,7 +218,8 @@
                     
                 entity.equip(
                     slot:Entity.EQUIP_SLOTS.HAND_L, 
-                    item:wep.new(
+                    item:Item.new(
+                        base:wep,
                         from: entity
                     ), 
                     inventory:entity.inventory, 
@@ -238,7 +246,8 @@
                     
                 entity.equip(
                     slot:Entity.EQUIP_SLOTS.HAND_L, 
-                    item:wep.new(
+                    item:Item.new(
+                        base: wep,
                         from: entity
                     ), 
                     inventory:entity.inventory, 
@@ -264,7 +273,8 @@
                     
                 entity.equip(
                     slot:Entity.EQUIP_SLOTS.HAND_L, 
-                    item:wep.new(
+                    item:Item.new(
+                        base:wep,
                         from: entity
                     ), 
                     inventory:entity.inventory, 
@@ -281,7 +291,8 @@
                     
                 entity.equip(
                     slot:Entity.EQUIP_SLOTS.ARMOR, 
-                    item:wep.new(
+                    item:Item.new(
+                        base: wep,
                         from: entity
                     ), 
                     inventory:entity.inventory, 
@@ -297,7 +308,7 @@
 
         
         this.interface = {
-            initialize::(world => Object, levelHint => Number, party => Party.type, nameHint, state, tierHint => Number) {
+            initialize::(world, levelHint, party, nameHint, state, tierHint) {
                 world_ = world;            
                 party_ = party;
                 tier_ = tierHint;
@@ -407,7 +418,10 @@
                     map = LargeMap.new(state:value.map);
 
                     foreach(value.significantLandmarks)::(index, landmarkData) {
-                        @:landmark = Landmark.Base.database.find(name:landmarkData.baseName).new(x:0, y:0, state:landmarkData, island:this);
+                        @:landmark = Landmark.new(
+                            base:Landmark.Base.database.find(name:landmarkData.baseName),
+                            x:0, y:0, state:landmarkData, island:this
+                        );
                         map.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.name);
                         significantLandmarks->push(value:landmark);
                     }
@@ -497,16 +511,18 @@
                         // mostly its encounters. 0.1% chance of encounter 
                         if (Number.random() < 0.001) ::<= {
                             this.addEvent(
-                                event:Event.Base.database.find(name:'Encounter:Normal').new(
+                                event:Event.new(
+                                    base:Event.Base.database.find(name:'Encounter:Normal'),
                                     island:this, 
                                     party:world_.party //, currentTime
                                 )
                             );
                         } else ::<= {
                             this.addEvent(
-                                event:Event.Base.database.getRandomFiltered(
-                                    filter:::(value) <- !value.name->contains(key:'Encounter')
-                                ).new(
+                                event:Event.new(
+                                    base:Event.Base.database.getRandomFiltered(
+                                        filter:::(value) <- !value.name->contains(key:'Encounter')
+                                    ),
                                     island:this, 
                                     party:world_.party //, currentTime
                                 )

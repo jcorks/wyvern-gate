@@ -37,6 +37,11 @@
         }
     },
     
+    new ::(base, party, island, landmark, currentTime, state) {
+        @:this = Event.defaultNew();
+        this.initialize(base, party, island, landmark, currentTime, state);
+        return this;
+    },
     
     define:::(this) {
         @timeLeft;
@@ -119,9 +124,14 @@
 Event.Base = class(
     name : 'Wyvern.Event.Base',
     inherits : [Database.Item],
+    new::(data) {
+        @:this = Event.Base.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     rarity: Number,
@@ -136,16 +146,14 @@ Event.Base = class(
         }
     },
     define:::(this) {
-        this.constructor = ::{
-            Event.Base.database.bind(item:this);
-        }
+        Event.Base.database.add(item:this);
     }
 
 );
 
 
 
-Event.Base.new().initialize(
+Event.Base.new(
     data: {
         name : 'Weather:1',
         rarity: 10,        
@@ -194,7 +202,7 @@ Event.Base.new().initialize(
     }
 )
 
-Event.Base.new().initialize(
+Event.Base.new(
     data: {
         name : 'Encounter:GateBoss',
         rarity: 10000000,        
@@ -320,7 +328,7 @@ Event.Base.new().initialize(
     }
 )
 
-Event.Base.new().initialize(
+Event.Base.new(
     data: {
         name : 'Encounter:TreasureBoss',
         rarity: 10000000,        
@@ -369,7 +377,7 @@ Event.Base.new().initialize(
                         match(result) {
                           (Battle.RESULTS.ALLIES_WIN): ::<= {
                             windowEvent.queueMessage(text: 'It looks like they dropped some items during the fight...');
-                            @:item = Item.Base.database.find(name:'Skill Crystal').new(from:boss);
+                            @:item = Item.new(base:Item.Base.database.find(name:'Skill Crystal'), from:boss);
                             @message = 'The party found a Skill Crystal!';
                             party.inventory.add(item);
                             windowEvent.queueMessage(text: message);
@@ -401,7 +409,7 @@ Event.Base.new().initialize(
     }
 )        
 
-Event.Base.new().initialize(
+Event.Base.new(
     data: {
         name : 'Chest:Normal',
         rarity: 1, //5        
@@ -433,9 +441,12 @@ Event.Base.new().initialize(
                 
                 windowEvent.queueMessage(text:'The chest contained ' + itemCount + ' items!'); 
                 for(0, itemCount)::(index) {
-                    @:item = Item.Base.database.getRandomFiltered(
-                        filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= story.tier
-                    ).new(rngEnchantHint:true, from:opener);
+                    @:item = Item.new(
+                        base:Item.Base.database.getRandomFiltered(
+                            filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= story.tier
+                        ),
+                        rngEnchantHint:true, from:opener
+                    );
                     @message = 'The party found ' + correctA(word:item.name);
                     windowEvent.queueMessage(text: message);
 
@@ -484,7 +495,7 @@ Event.Base.new().initialize(
 )
 
 
-Event.Base.new().initialize(
+Event.Base.new(
     data: {
         name : 'BBQ',
         rarity: 1, //5        
@@ -564,7 +575,7 @@ Event.Base.new().initialize(
     }
 )
 
-Event.Base.new().initialize(
+Event.Base.new(
     data: {
         name : 'Camp out',
         rarity: 1, //5        
@@ -651,7 +662,7 @@ Event.Base.new().initialize(
 
 
 
-Event.Base.new().initialize(
+Event.Base.new(
     data: {
         name : 'Encounter:Normal',
         rarity: 2,        
@@ -757,7 +768,7 @@ Event.Base.new().initialize(
 )
 
 
-Event.Base.new().initialize(
+Event.Base.new(
     data: {
         name : 'Encounter:Non-peaceful',
         rarity: 20000000,        
@@ -790,9 +801,10 @@ Event.Base.new().initialize(
                     
                     foreach(e)::(index, guard) {
                         guard.equip(
-                            item:Item.Base.database.find(
-                                name:'Halberd'
-                            ).new(
+                            item:Item.new(
+                                base:Item.Base.database.find(
+                                    name:'Halberd'
+                                ),
                                 from:guard, 
                                 qualityHint:'Standard',
                                 materialHint: 'Mythril',
@@ -804,9 +816,10 @@ Event.Base.new().initialize(
                         );
 
                         guard.equip(
-                            item:Item.Base.database.find(
-                                name:'Plate Armor'
-                            ).new(
+                            item:Item.new(
+                                base: Item.Base.database.find(
+                                    name:'Plate Armor'
+                                ),
                                 from:guard, 
                                 qualityHint:'Standard',
                                 materialHint: 'Mythril',

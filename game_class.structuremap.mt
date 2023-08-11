@@ -52,6 +52,12 @@
 
 @Zone = class(
     name: 'Wyvern.StructureMap.Zone',
+    
+    new ::(map, category => Number) {
+        @:this = Zone.defaultNew();
+        this.initialize(map, category);
+        return this;
+    },
     define::(this) {
         @_x;
         @_y;
@@ -448,7 +454,7 @@
 
         
         this.interface = {
-            initialize::(map, category => Number) {
+            initialize::(map, category) {
                 unitsWide = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
                 unitsHigh = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
 
@@ -676,11 +682,15 @@
 
 
 
-return class(
+@:StructureMap = class(
     name: 'Wyvern.StructureMap',
     inherits:[import(module:'game_class.mapbase.mt')],
 
-  
+    new::(mapHint => Object) {
+        @:this = StructureMap.defaultNew();
+        this.initialize(mapHint);
+        return this;
+    },
     define:::(this) {
 
         
@@ -968,3 +978,4 @@ return class(
         } 
     }
 );
+return StructureMap;

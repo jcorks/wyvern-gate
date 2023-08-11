@@ -889,7 +889,6 @@ return class(
 
                     {:::} {
                         forever ::{
-                            breakpoint();
                             when (isWalled(x, y:new)) ::<= {
                                 new = new + (if (greater) -1 else 1);
                             } 

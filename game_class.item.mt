@@ -88,6 +88,11 @@
         ATTRIBUTE : {get::<-ATTRIBUTE},
         USE_TARGET_HINT : {get::<-USE_TARGET_HINT}
     },
+    new ::(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint, abilityHint) {
+        @:this = Item.defaultNew();
+        this.initialize(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint, abilityHint);
+        return this;
+    },
     define:::(this) {
         ;
         @base_;
@@ -115,7 +120,7 @@
                            // increased in the hand equip slot.
                            //
                            // Also the item can become enchanted through use 
-        @:stats = StatSet.new().initialize();
+        @:stats = StatSet.new();
         
         @:recalculateName = ::{
 
@@ -158,7 +163,7 @@
             random.pickArrayItem(list:[
                 ::{
                     description = description + 'It is smaller than expected. ';
-                    stats.add(stats:StatSet.new().initialize(
+                    stats.add(stats:StatSet.new(
                         ATK:-10,
                         DEF:-10,
                         SPD:10,
@@ -169,7 +174,7 @@
 
                 ::{
                     description = description + 'It is quite small. ';
-                    stats.add(stats:StatSet.new().initialize(
+                    stats.add(stats:StatSet.new(
                         ATK:-20,
                         DEF:-20,
                         SPD:20,
@@ -184,7 +189,7 @@
 
                 ::{
                     description = description + 'It is larger than expected. ';
-                    stats.add(stats:StatSet.new().initialize(
+                    stats.add(stats:StatSet.new(
                         ATK:10,
                         DEF:10,
                         SPD:-10,
@@ -195,7 +200,7 @@
 
                 ::{
                     description = description + 'It is quite large. ';
-                    stats.add(stats:StatSet.new().initialize(
+                    stats.add(stats:StatSet.new(
                         ATK:20,
                         DEF:20,
                         SPD:-20,
@@ -245,7 +250,7 @@
                     // made with love and care
                     if (random.try(percentSuccess:15)) ::<= {
                         description = description + 'The maker\'s emblem is engraved on it. ';
-                        stats.add(stats:StatSet.new().initialize(
+                        stats.add(stats:StatSet.new(
                             ATK:10,
                             DEF:10,
                             SPD:10,
@@ -303,9 +308,11 @@
                         
                         
                         for(0, enchantCount)::(i) {
-                            @mod = ItemEnchant.Base.database.getRandomFiltered(
-                                filter::(value) <- value.tier <= story.tier && (if (base.canHaveTriggerEnchants == false) value.triggerConditionEffects->keycount == 0 else true)
-                            ).new();
+                            @mod = ItemEnchant.new(
+                                base:ItemEnchant.Base.database.getRandomFiltered(
+                                    filter::(value) <- value.tier <= story.tier && (if (base.canHaveTriggerEnchants == false) value.triggerConditionEffects->keycount == 0 else true)
+                                )
+                            )
                             this.addEnchant(mod);
                         }
                     }
@@ -507,9 +514,9 @@
                 victoryCount += 1;
                 if (victoryCount % 3 == 0) ::<= {
                     @choice = random.integer(from:0, to:7);
-                    @:oldStats = StatSet.new().initialize();
+                    @:oldStats = StatSet.new();
                     oldStats.add(stats);
-                    stats.add(stats:StatSet.new().initialize(
+                    stats.add(stats:StatSet.new(
                         HP: if (choice == 0) 1 else 0,
                         AP: if (choice == 1) 1 else 0,
                         ATK: if (choice == 2) 1 else 0,
@@ -591,9 +598,14 @@
 Item.Base = class(
     name : 'Wyvern.Item.Base',
     inherits : [Database.Item],
+    new ::(data) {
+        @:this = Item.Base.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     description : String,
@@ -635,21 +647,19 @@ Item.Base = class(
                 return this.attributes->any(condition::(value) <- value == attribute);
             }
         }
-        this.constructor = ::{        
-            Item.Base.database.bind(item:this);
-        }
+        Item.Base.database.add(item:this);
     }
 );
 
 
 
-Item.Base.new().initialize(
+Item.Base.new(
     data : {
         name : 'None',
         description : '',
         examine : '',
         equipType : TYPE.HAND,
-        equipMod : StatSet.new().initialize(),
+        equipMod : StatSet.new(),
         isUnique : true,
         weight: 0,
         rarity: 100,
@@ -672,7 +682,7 @@ Item.Base.new().initialize(
         possibleAbilities : [],
     }
 )
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Cat of Bea",
     description: 'A small, white figurine depicting a cat. It smells faintly of strawberry pastries.',
     examine : 'It appears to be entirely white and oddly angular. The bottom side is engraved with the number \'IX\'.',
@@ -695,7 +705,7 @@ Item.Base.new().initialize(data : {
     onCreate ::(item, user, creationHint) {},
     possibleAbilities : [],
     
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         DEF: 4,   // 
         INT: 10,  // strawberries are magical probably
         SPD: 8    // because zoomy
@@ -716,7 +726,7 @@ Item.Base.new().initialize(data : {
 })
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Bracelet of Luna",
     description: 'A bracelet inset with an opal in the shape of a crescent moon.',
     examine : "Once the greatest treasure in a dragons' hoard, it softly gleams in the moonlight with incredible power.",
@@ -736,7 +746,7 @@ Item.Base.new().initialize(data : {
     canBeColored : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         DEF: 4, 
         ATK: 10
     ),
@@ -754,7 +764,7 @@ Item.Base.new().initialize(data : {
     onCreate ::(item, user, creationHint) {}
 })
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Skie's Ring",
     description: 'A simple ring said to have been worn by a great dragon.',
     examine : 'Wearers appear to feel a bit tired from wearing it, but feel their potential profoundly grow.',
@@ -776,7 +786,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         AP: -20, // 
         DEF: -20, // 
         SPD: -20, // 
@@ -796,7 +806,7 @@ Item.Base.new().initialize(data : {
     onCreate ::(item, user, creationHint) {}
 })
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Pink Potion",
     description: 'Pink-colored potions are known to be for recovery of injuries',
     examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
@@ -816,7 +826,7 @@ Item.Base.new().initialize(data : {
     hasMaterial : false,
     isUnique : false,        
     useTargetHint : USE_TARGET_HINT.ONE,
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         SPD: -2, // itll slow you down
         DEX: -10   // its oddly shaped.
     ),
@@ -836,7 +846,7 @@ Item.Base.new().initialize(data : {
 })
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Purple Potion",
     description: 'Purple-colored potions are known to combine the effects of pink and cyan potions',
     examine : 'These potions are handy, as the effects of ',
@@ -857,7 +867,7 @@ Item.Base.new().initialize(data : {
     isUnique : false,        
     possibleAbilities : [],
     useTargetHint : USE_TARGET_HINT.ONE,
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         SPD: -2, // itll slow you down
         DEX: -10   // its oddly shaped.
     ),
@@ -876,7 +886,7 @@ Item.Base.new().initialize(data : {
 
 })    
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Green Potion",
     description: 'Green-colored potions are known to be toxic.',
     examine : 'Often used offensively, these potions are known to be used as poison once used and doused on a target.',
@@ -897,7 +907,7 @@ Item.Base.new().initialize(data : {
     hasSize : false,
     possibleAbilities : [],
     useTargetHint : USE_TARGET_HINT.ONE,
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         SPD: -2, // itll slow you down
         DEX: -10   // its oddly shaped.
     ),
@@ -915,7 +925,7 @@ Item.Base.new().initialize(data : {
 
 })    
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Orange Potion",
     description: 'Orange-colored potions are known to be volatile.',
     examine : 'Often used offensively, these potions are known to explode on contact.',
@@ -936,7 +946,7 @@ Item.Base.new().initialize(data : {
     isUnique : false,        
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         SPD: -2, // itll slow you down
         DEX: -10   // its oddly shaped.
     ),
@@ -953,7 +963,7 @@ Item.Base.new().initialize(data : {
 })    
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Black Potion",
     description: 'Black-colored potions are known to be toxic to all organic life.',
     examine : 'Often used offensively, these potions are known to cause instant petrification.',
@@ -974,7 +984,7 @@ Item.Base.new().initialize(data : {
     isUnique : false,        
     possibleAbilities : [],
     useTargetHint : USE_TARGET_HINT.ONE,
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         SPD: -2, // itll slow you down
         DEX: -10   // its oddly shaped.
     ),
@@ -994,7 +1004,7 @@ Item.Base.new().initialize(data : {
 
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Pinkish Potion",
     description: 'Pink-colored potions are known to be for recovery of injuries',
     examine : 'This potion does not have the same hue as the common recovery potion and is a bit heavier. Did you get it from a reliable source?',
@@ -1015,7 +1025,7 @@ Item.Base.new().initialize(data : {
     hasQuality : false,
     possibleAbilities : [],
     useTargetHint : USE_TARGET_HINT.ONE,
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         SPD: -2, // itll slow you down
         DEX: -10   // its oddly shaped.
     ),
@@ -1035,7 +1045,7 @@ Item.Base.new().initialize(data : {
 
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Cyan Potion",
     description: 'Cyan-colored potions are known to be for recovery of mental fatigue.',
     examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
@@ -1056,7 +1066,7 @@ Item.Base.new().initialize(data : {
     hasQuality : false,
     possibleAbilities : [],
     useTargetHint : USE_TARGET_HINT.ONE,
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         SPD: -2, // itll slow you down
         DEX: -10   // its oddly shaped.
     ),
@@ -1074,7 +1084,7 @@ Item.Base.new().initialize(data : {
 
 })
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Pitchfork",
     description: 'A common farming implement.',
     examine : 'Quite sturdy and pointy, some people use these as weapons.',
@@ -1099,7 +1109,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 15,
         DEF: 20
     ),
@@ -1119,7 +1129,7 @@ Item.Base.new().initialize(data : {
 
 })
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Shovel",
     description: 'A common farming implement.',
     examine : 'Quite sturdy and pointy, some people use these as weapons.',
@@ -1141,7 +1151,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 20,
         DEF: 10,
         SPD: -10,
@@ -1166,7 +1176,7 @@ Item.Base.new().initialize(data : {
 
 })
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Pickaxe",
     description: 'A common mining implement.',
     examine : 'Quite sturdy and pointy, some people use these as weapons.',
@@ -1188,7 +1198,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 25,
         DEF: 5,
         SPD: -15,
@@ -1216,7 +1226,7 @@ Item.Base.new().initialize(data : {
 })
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Butcher's Knife",
     description: 'Common knife meant for cleaving meat.',
     examine : 'Quite sharp.',
@@ -1238,7 +1248,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 25,
         DEX: 5
     ),
@@ -1262,7 +1272,7 @@ Item.Base.new().initialize(data : {
 
 })
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Bludgeon",
     description: 'A basic blunt weapon. The hilt has a $color$ trim.',
     examine : 'Clubs and bludgeons seem primitive, but are quite effective.',
@@ -1284,7 +1294,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 20,
         DEF: 15,
         SPD: -10
@@ -1307,7 +1317,7 @@ Item.Base.new().initialize(data : {
 
 })    
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Shortsword",
     description: 'A basic sword. The hilt has a $color$ trim.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
@@ -1329,7 +1339,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 30,
         DEF: 10,
         SPD: -5
@@ -1355,7 +1365,7 @@ Item.Base.new().initialize(data : {
 })
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Longsword",
     description: 'A basic sword. The hilt has a $color$ trim.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
@@ -1377,7 +1387,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 35,
         DEF: 15,
         SPD: -10
@@ -1400,7 +1410,7 @@ Item.Base.new().initialize(data : {
 
 })
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Chakram",
     description: 'A pair of round blades. The handles have a $color$ trim.',
     examine : '.',
@@ -1427,7 +1437,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 25,
         DEF: 5,
         SPD: 15,
@@ -1447,7 +1457,7 @@ Item.Base.new().initialize(data : {
 })    
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Falchion",
     description: 'A basic sword with a large blade. The hilt has a $color$ trim.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
@@ -1476,7 +1486,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 35,
         DEF: 10,
         SPD: -10
@@ -1495,7 +1505,7 @@ Item.Base.new().initialize(data : {
 })    
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Morning Star",
     description: 'A spiked weapon. The hilt has a $color$ trim.',
     examine : '',
@@ -1523,7 +1533,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 30,
         DEF: 20,
         SPD: -10
@@ -1541,7 +1551,7 @@ Item.Base.new().initialize(data : {
 
 })     
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Scimitar",
     description: 'A basic sword with a curved blade. The hilt has a $color$ trim.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
@@ -1569,7 +1579,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 30,
         DEF: 10,
         SPD: -10,
@@ -1589,7 +1599,7 @@ Item.Base.new().initialize(data : {
 }) 
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Rapier",
     description: 'A slender sword excellent for thrusting. The hilt has a $color$ trim.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
@@ -1617,7 +1627,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 35,
         SPD: 10,
         DEF:-10,
@@ -1637,7 +1647,7 @@ Item.Base.new().initialize(data : {
 })    
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Bow & Quiver",
     description: 'A basic bow and quiver full of arrows. The bow has a streak of $color$ across it.',
     examine : '',
@@ -1665,7 +1675,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 25,
         SPD: 10,
         DEX: 60
@@ -1684,7 +1694,7 @@ Item.Base.new().initialize(data : {
 })
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Greatsword",
     description: 'A basic, large sword. The hilt has a $color$ trim.',
     examine : 'Not as common as shortswords, but rather easy to find. Favored by larger warriors.',
@@ -1712,7 +1722,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 30,
         DEF: 25,
         SPD: -15
@@ -1730,7 +1740,7 @@ Item.Base.new().initialize(data : {
 
 })
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Dagger",
     description: 'A basic knife. The handle has an intricate $color$ trim.',
     examine : 'Commonly favored by both swift warriors and common folk for their easy handling and easiness to produce.',
@@ -1751,7 +1761,7 @@ Item.Base.new().initialize(data : {
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 15,
         SPD: 10,
         DEX: 20
@@ -1775,7 +1785,7 @@ Item.Base.new().initialize(data : {
 
 })    
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Smithing Hammer",
     description: 'A basic hammer meant for smithing.',
     examine : 'Easily available, this hammer is common as a general tool for metalworking.',
@@ -1800,7 +1810,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK:  30,
         SPD: -30,
         DEX: -30
@@ -1819,7 +1829,7 @@ Item.Base.new().initialize(data : {
 })
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Halberd",
     description: 'A weapon with long reach and deadly power. The handle has a $color$ trim.',
     examine : '',
@@ -1847,7 +1857,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK:  40,
         SPD:  15,
         DEX:  20
@@ -1866,7 +1876,7 @@ Item.Base.new().initialize(data : {
 
 })
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Lance",
     description: 'A weapon with long reach and deadly power. The handle has a $color$ trim.',
     examine : '',
@@ -1894,7 +1904,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK:  35,
         SPD:  20,
         DEX:  15
@@ -1913,7 +1923,7 @@ Item.Base.new().initialize(data : {
 
 })    
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Glaive",
     description: 'A weapon with long reach and deadly power. The handle has a $color$ trim.',
     examine : '',
@@ -1941,7 +1951,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK:  35,
         SPD:  15,
         DEX:  25
@@ -1961,7 +1971,7 @@ Item.Base.new().initialize(data : {
 })    
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Staff",
     description: 'A combat staff. Promotes fluid movement when used well.The ends are tied with a $color$ fabric.',
     examine : '',
@@ -1988,7 +1998,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK:  25,
         SPD:  15,
         DEX:  30
@@ -2008,7 +2018,7 @@ Item.Base.new().initialize(data : {
 })    
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Mage-Staff",
     description: 'Similar to a wand, promotes mental acuity. The handle has a $color$ trim.',
     examine : '',
@@ -2044,7 +2054,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK:  25,
         SPD:  -10,
         INT:  45
@@ -2063,7 +2073,7 @@ Item.Base.new().initialize(data : {
 
 }) 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Wand",
     description: 'The handle has a $color$ trim.',
     examine : '',
@@ -2096,7 +2106,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK:  5,
         INT:  25,
         SPD:  45,
@@ -2118,7 +2128,7 @@ Item.Base.new().initialize(data : {
 
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Warhammer",
     description: 'A hammer meant for combat. The end is tied with a $color$ fabric.',
     examine : 'A common choice for those who wish to cause harm and have the arm to back it up.',
@@ -2145,7 +2155,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 45,
         DEF: 30,
         SPD: -25,
@@ -2165,7 +2175,7 @@ Item.Base.new().initialize(data : {
 })
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Tome",
     description: 'A plated book for magick-users in the heat of battle. The cover is imprinted with a $color$ fabric.',
     examine : 'A lightly enchanted book meant to both be used as reference on-the-fly and meant to increase the mental acquity of the holder.',
@@ -2193,7 +2203,7 @@ Item.Base.new().initialize(data : {
         "Cure",
     ],
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         DEF: 15,
         INT: 60,
         SPD: -10
@@ -2211,7 +2221,7 @@ Item.Base.new().initialize(data : {
     
 })
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Tunic",
     description: 'Simple cloth for the body. It is predominantly $color$.',
     examine : 'Common type of light armor',
@@ -2234,7 +2244,7 @@ Item.Base.new().initialize(data : {
     possibleAbilities : [],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         DEF: 5,
         SPD: 5
     ),
@@ -2248,7 +2258,7 @@ Item.Base.new().initialize(data : {
 })
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Robe",
     description: 'Simple cloth favored by scholars. It features a $color$ design.',
     examine : 'Common type of light armor',
@@ -2271,7 +2281,7 @@ Item.Base.new().initialize(data : {
     possibleAbilities : [],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         DEF: 5,
         INT: 5
     ),
@@ -2284,7 +2294,7 @@ Item.Base.new().initialize(data : {
     
 })
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Scarf",
     description: 'Simple cloth accessory. It is $color$.',
     examine : 'Common type of light armor',
@@ -2307,7 +2317,7 @@ Item.Base.new().initialize(data : {
     possibleAbilities : [],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         DEF: 3
     ),
     useEffects : [
@@ -2320,7 +2330,7 @@ Item.Base.new().initialize(data : {
 })    
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Bandana",
     description: 'Simple cloth accessory. It is $color$.',
     examine : 'Common type of light armor',
@@ -2343,7 +2353,7 @@ Item.Base.new().initialize(data : {
     possibleAbilities : [],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         DEF: 3
     ),
     useEffects : [
@@ -2354,7 +2364,7 @@ Item.Base.new().initialize(data : {
     onCreate ::(item, user, creationHint) {}
     
 })        
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Ring",
     description: 'A metallic ring. The inset gem is $color$.',
     examine : '',
@@ -2375,7 +2385,7 @@ Item.Base.new().initialize(data : {
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 15,
         SPD: 10,
         DEX: 20
@@ -2393,7 +2403,7 @@ Item.Base.new().initialize(data : {
 
 })  
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Cape",
     description: 'Simple cloth accessory. It features a $color$-based design.',
     examine : 'Common type of light armor',
@@ -2416,7 +2426,7 @@ Item.Base.new().initialize(data : {
     possibleAbilities : [],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         DEF: 3
     ),
     useEffects : [
@@ -2428,7 +2438,7 @@ Item.Base.new().initialize(data : {
     
 })    
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Hat",
     description: 'Simple cloth accessory. It is predominantly $color$.',
     examine : 'Common type of light armor',
@@ -2451,7 +2461,7 @@ Item.Base.new().initialize(data : {
     possibleAbilities : [],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         DEF: 3
     ),
     useEffects : [
@@ -2463,7 +2473,7 @@ Item.Base.new().initialize(data : {
     
 })           
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Fortified Cape",
     description: 'A cape fortified with metal. It is a bit heavy. It features a $color$ trim.',
     examine : 'Common type of light armor',
@@ -2486,7 +2496,7 @@ Item.Base.new().initialize(data : {
     possibleAbilities : [],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         DEF: 15,
         SPD: -10
     ),
@@ -2501,7 +2511,7 @@ Item.Base.new().initialize(data : {
 })   
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Light Robe",
     description: 'Enchanted light wear favored by mages. It features a $color$ design.',
     examine : 'Common type of light armor',
@@ -2524,7 +2534,7 @@ Item.Base.new().initialize(data : {
     possibleAbilities : [],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         DEF: 23,
         INT: 15
     ),
@@ -2538,7 +2548,7 @@ Item.Base.new().initialize(data : {
 })    
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Chainmail",
     description: 'Mail made of linked chains. It bears an emblem colored $color$.',
     examine : 'Common type of light armor',
@@ -2561,7 +2571,7 @@ Item.Base.new().initialize(data : {
     possibleAbilities : [],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         DEF: 40,
         SPD: -10
     ),
@@ -2576,7 +2586,7 @@ Item.Base.new().initialize(data : {
     
 })
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Filigree Armor",
     description: 'Hardened material with a fancy $color$ trim.',
     examine : 'Common type of light armor',
@@ -2599,7 +2609,7 @@ Item.Base.new().initialize(data : {
     possibleAbilities : [],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         DEF: 55,
         ATK: 10,
         SPD: -10
@@ -2615,7 +2625,7 @@ Item.Base.new().initialize(data : {
     
 })
     
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Plate Armor",
     description: 'Extremely protective armor of a high-grade. It has a $color$ trim.',
     examine : 'Highly skilled craftspeople are required to make this work.',
@@ -2638,7 +2648,7 @@ Item.Base.new().initialize(data : {
     possibleAbilities : [],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         DEF: 65,
         ATK: 30,
         SPD: -20
@@ -2654,7 +2664,7 @@ Item.Base.new().initialize(data : {
     
 })    
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Edrosae's Key",
     description: 'The gateway to the domain of the Elders.',
     examine : '',
@@ -2677,7 +2687,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 15,
         SPD: -5,
         DEX: -5
@@ -2698,7 +2708,7 @@ Item.Base.new().initialize(data : {
 ////// RAW_METALS
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Copper Ingot",
     description: 'Copper Ingot',
     examine : 'Pure copper ingot.',
@@ -2720,7 +2730,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 2, // well. its hard!
         DEF: 2, // well. its hard!
         SPD: -10,
@@ -2740,7 +2750,7 @@ Item.Base.new().initialize(data : {
 
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Iron Ingot",
     description: 'Iron Ingot',
     examine : 'Pure iron ingot',
@@ -2762,7 +2772,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 2, // well. its hard!
         DEF: 2, // well. its hard!
         SPD: -10,
@@ -2780,7 +2790,7 @@ Item.Base.new().initialize(data : {
 
 })   
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Steel Ingot",
     description: 'Steel Ingot',
     examine : 'Pure Steel ingot.',
@@ -2802,7 +2812,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 2, // well. its hard!
         DEF: 2, // well. its hard!
         SPD: -10,
@@ -2822,7 +2832,7 @@ Item.Base.new().initialize(data : {
 
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Mythril Ingot",
     description: 'Mythril Ingot',
     examine : 'Pure iron ingot',
@@ -2844,7 +2854,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 2, // well. its hard!
         DEF: 2, // well. its hard!
         SPD: -10,
@@ -2862,7 +2872,7 @@ Item.Base.new().initialize(data : {
 
 })   
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Quicksilver Ingot",
     description: 'Quicksilver Ingot',
     examine : 'Pure quicksilver alloy ingot',
@@ -2884,7 +2894,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 2, // well. its hard!
         DEF: 2, // well. its hard!
         SPD: -10,
@@ -2902,7 +2912,7 @@ Item.Base.new().initialize(data : {
 
 })   
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Adamantine Ingot",
     description: 'Adamantine Ingot',
     examine : 'Pure adamantine ingot',
@@ -2924,7 +2934,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 2, // well. its hard!
         DEF: 2, // well. its hard!
         SPD: -10,
@@ -2943,7 +2953,7 @@ Item.Base.new().initialize(data : {
 }) 
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Sunstone Ingot",
     description: 'Sunstone alloy ingot',
     examine : 'An alloy with mostly sunstone, it dully shines with a soft yellow gleam',
@@ -2965,7 +2975,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 2, // well. its hard!
         DEF: 2, // well. its hard!
         SPD: -10,
@@ -2983,7 +2993,7 @@ Item.Base.new().initialize(data : {
 
 }) 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Moonstone Ingot",
     description: 'Sunstone alloy ingot',
     examine : 'An alloy with mostly moonstone, it dully shines with a soft teal',
@@ -3005,7 +3015,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 2, // well. its hard!
         DEF: 2, // well. its hard!
         SPD: -10,
@@ -3023,7 +3033,7 @@ Item.Base.new().initialize(data : {
 
 }) 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Dragonglass Ingot",
     description: 'Dragonglass alloy ingot',
     examine : 'An alloy with mostly dragonglass, it sharply shines black.',
@@ -3045,7 +3055,7 @@ Item.Base.new().initialize(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 2, // well. its hard!
         DEF: 2, // well. its hard!
         SPD: -10,
@@ -3062,7 +3072,7 @@ Item.Base.new().initialize(data : {
     onCreate ::(item, user, creationHint) {}
 
 }) 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Ore",
     description: "Raw ore. It's hard to tell exactly what kind of metal it is.",
     examine : 'Could be smelted into',
@@ -3084,7 +3094,7 @@ Item.Base.new().initialize(data : {
     basePrice: 5,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 2, // well. its hard!
         DEF: 2, // well. its hard!
         SPD: -10,
@@ -3101,7 +3111,7 @@ Item.Base.new().initialize(data : {
 
 }) 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Gold Pouch",
     description: "A pouch of coins.",
     examine : '',
@@ -3123,7 +3133,7 @@ Item.Base.new().initialize(data : {
     basePrice: 5,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 2, // well. its hard!
         DEF: 2, // well. its hard!
         SPD: -10,
@@ -3141,7 +3151,7 @@ Item.Base.new().initialize(data : {
 
 })
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Skill Crystal",
     description: "Irridescent cyrstal that imparts knowledge when used.",
     examine : 'Quite sought after, highly skilled mages usually produce them for the public',
@@ -3163,7 +3173,7 @@ Item.Base.new().initialize(data : {
     basePrice: 600,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 10, // well. its hard!
         DEF: 2, // well. its hard!
         SPD: -10,
@@ -3185,7 +3195,7 @@ Item.Base.new().initialize(data : {
 
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Runestone",
     description: "Resonates with certain locations and can reveal runes.",
     examine : '',
@@ -3207,7 +3217,7 @@ Item.Base.new().initialize(data : {
     basePrice: 0,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 2, // well. its hard!
         DEF: 2, // well. its hard!
         SPD: -10,
@@ -3225,7 +3235,7 @@ Item.Base.new().initialize(data : {
 
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Tablet",
     description: "A tablet with carved with runes in Draconic. Arcanists might find this valuable.",
     examine : 'Might have been used for some highly specialized purpose. These seem very rare.',
@@ -3247,7 +3257,7 @@ Item.Base.new().initialize(data : {
     basePrice: 1,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 2, // well. its hard!
         DEF: 2, // well. its hard!
         SPD: -10,
@@ -3266,7 +3276,7 @@ Item.Base.new().initialize(data : {
 }) 
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Ingredient",
     description: "A pack of ingredients used for potions and brews.",
     examine : 'Common ingredients used by alchemists.',
@@ -3288,7 +3298,7 @@ Item.Base.new().initialize(data : {
     basePrice: 5,
     possibleAbilities : [],
 
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 0,
         DEF: 2, 
         SPD: -1,
@@ -3306,7 +3316,7 @@ Item.Base.new().initialize(data : {
 }) 
 
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Wyvern Key of Fire",
     description: 'A key to another island. Its quite big and warm to the touch.',
     examine : '',
@@ -3331,7 +3341,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 25,
         SPD: -5,
         DEX: -5
@@ -3365,7 +3375,7 @@ Item.Base.new().initialize(data : {
     
 })
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Wyvern Key of Ice",
     description: 'A key to another island. Its quite big and cold to the touch.',
     examine : '',
@@ -3390,7 +3400,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 25,
         SPD: -5,
         DEX: -5
@@ -3423,7 +3433,7 @@ Item.Base.new().initialize(data : {
     
 })    
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Wyvern Key of Thunder",
     description: 'A key to another island. Its quite big and softly hums.',
     examine : '',
@@ -3448,7 +3458,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 25,
         SPD: -5,
         DEX: -5
@@ -3481,7 +3491,7 @@ Item.Base.new().initialize(data : {
     
 })    
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Wyvern Key of Light",
     description: 'A key to another island. Its quite big and faintly glows.',
     examine : '',
@@ -3506,7 +3516,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 25,
         SPD: -5,
         DEX: -5
@@ -3539,7 +3549,7 @@ Item.Base.new().initialize(data : {
     
 })       
 
-Item.Base.new().initialize(data : {
+Item.Base.new(data : {
     name : "Wyvern Key",
     description: 'A key to another island.',
     examine : '',
@@ -3563,7 +3573,7 @@ Item.Base.new().initialize(data : {
     ],
 
     // fatigued
-    equipMod : StatSet.new().initialize(
+    equipMod : StatSet.new(
         ATK: 15,
         SPD: -5,
         DEX: -5

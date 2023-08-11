@@ -33,9 +33,14 @@
 @:Personality = class(
     name : 'Wyvern.Personality',
     inherits: [Database.Item],
+    new ::(data) {
+        @:this = Personality.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     growth : StatSet.type,
@@ -55,15 +60,13 @@
                 return Random.pickArrayItem(list:this.instance.phrases[kind]);
             }
         }
-        this.constructor = ::{
-            Personality.database.bind(item:this);
-        }
+        Personality.database.add(item:this);
     }
 );
 
-Personality.new().initialize(data: {
+Personality.new(data: {
     name: 'Calm',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 0,
         AP : 1,
         ATK: 0,
@@ -123,9 +126,9 @@ Personality.new().initialize(data: {
 
 })
 
-Personality.new().initialize(data:{
+Personality.new(data:{
     name: 'Short-tempered',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 2,
         AP : -2,
         ATK: 3,
@@ -181,9 +184,9 @@ Personality.new().initialize(data:{
 
 })
 
-Personality.new().initialize(data:{
+Personality.new(data:{
     name: 'Quiet',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 1,
         AP : 3,
         ATK: 0,
@@ -233,9 +236,9 @@ Personality.new().initialize(data:{
 
 })
 
-Personality.new().initialize(data:{
+Personality.new(data:{
     name: 'Charismatic',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : -2,
         AP : 2,
         ATK: -2,
@@ -285,9 +288,9 @@ Personality.new().initialize(data:{
 
 })
 
-Personality.new().initialize(data:{
+Personality.new(data:{
     name: 'Caring',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 1,
         AP : 2,
         ATK: -2,
@@ -333,9 +336,9 @@ Personality.new().initialize(data:{
 
 })
 
-Personality.new().initialize(data:{
+Personality.new(data:{
     name: 'Cold',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 0,
         AP : 4,
         ATK: 2,
@@ -382,9 +385,9 @@ Personality.new().initialize(data:{
 
 })
 
-Personality.new().initialize(data:{
+Personality.new(data:{
     name: 'Disconnected',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : -4,
         AP : 6,
         ATK: -3,
@@ -426,9 +429,9 @@ Personality.new().initialize(data:{
 
 })
 /*
-Personality.new().initialize(data:{
+Personality.new(data:{
     name: 'Unpredictable',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 1,
         AP : 2,
         ATK: 2,
@@ -477,9 +480,9 @@ Personality.new().initialize(data:{
 })
 */
 
-Personality.new().initialize(data:{
+Personality.new(data:{
     name: 'Inquisitive',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 2,
         AP : 3,
         ATK: 0,
@@ -523,9 +526,9 @@ Personality.new().initialize(data:{
 
 })
 
-Personality.new().initialize(data:{
+Personality.new(data:{
     name: 'Curious',
-    growth : StatSet.new().initialize(
+    growth : StatSet.new(
         HP : 2,
         AP : 4,
         ATK: 1,

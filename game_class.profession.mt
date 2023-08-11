@@ -35,6 +35,11 @@
             }
         }
     },
+    new ::(base, state) {
+        @:this = Profession.defaultNew();
+        this.initialize(base, state);
+        return this;
+    },
     name : 'Wyvern.Profession.Instance',
     define :::(this) {
         @base_;
@@ -105,9 +110,14 @@
 Profession.Base = class(
     name : 'Wyvern.Profession',   
     inherits : [Database.Item],
+    new ::(data) {
+        @:this = Profession.Base.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     description : String,
@@ -128,9 +138,7 @@ Profession.Base = class(
        
     }, 
     define:::(this) {
-        this.constructor = ::{
-            Profession.Base.database.bind(item:this);
-        }        
+        Profession.Base.database.add(item:this);
     }
 );
 
@@ -148,11 +156,11 @@ Profession.Base = class(
 
 */
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Adventurer',
     description : 'General, well-rounded profession. Learns abilities on-the-fly to stay alive.', 
     weaponAffinity : 'Shortsword',
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  4,
         AP:  4,
         ATK: 4,
@@ -180,11 +188,11 @@ Profession.Base.new().initialize(data:{
     passives : []
 })
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Martial Artist',
     weaponAffinity: 'Staff',
     description : 'A fighter that uses various stances to bend to the flow of battle.', 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  6,
         AP:  2,
         ATK: 5,
@@ -215,11 +223,11 @@ Profession.Base.new().initialize(data:{
 
 })
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Field Mage',
     description : 'A this-taught mage. Knows a variety of magicks.', 
     weaponAffinity: 'Wand',
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  3,
         AP:  7,
         ATK: 3,
@@ -249,11 +257,11 @@ Profession.Base.new().initialize(data:{
 })
 
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Cleric',
     description : 'A this-taught healing mage. Knows a variety of magicks.', 
     weaponAffinity: 'Mage-rod',
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  5,
         AP:  6,
         ATK: 4,
@@ -282,11 +290,11 @@ Profession.Base.new().initialize(data:{
     passives : []
 })
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Divine Lunist',
     weaponAffinity: 'Tome',
     description : 'Blessed by the moon, their magicks are entwined with the night.', 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  3,
         AP:  8,
         ATK: 2,
@@ -315,11 +323,11 @@ Profession.Base.new().initialize(data:{
     ]
 })
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Divine Solist',
     weaponAffinity: 'Tome',
     description : 'Blessed by the sun, their magicks are entwined with daylight.', 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  3,
         AP:  8,
         ATK: 2,
@@ -349,11 +357,11 @@ Profession.Base.new().initialize(data:{
 })
 
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Blacksmith',
     weaponAffinity: 'Smithing Hammer',
     description : 'Skilled with metalworking, their skills are revered.', 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  14,
         AP:  3,
         ATK: 14,
@@ -378,11 +386,11 @@ Profession.Base.new().initialize(data:{
     ]
 })
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Trader',
     weaponAffinity: 'Dagger',
     description : 'A silver tongue and a quick hand make this profession both lauded and loathed.', 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  4,
         AP:  12,
         ATK: 4,
@@ -407,11 +415,11 @@ Profession.Base.new().initialize(data:{
     ]
 })
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Warrior',
     weaponAffinity: 'Greatsword',
     description : "Excelling in raw strength and technique, users of this profession are fearsome.", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  9,
         AP:  1,
         ATK: 9,
@@ -439,11 +447,11 @@ Profession.Base.new().initialize(data:{
     ]
 }) 
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Guard',
     weaponAffinity: 'Polearm',
     description : "Standard profession excelling in defending others, for better or for worse.", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  6,
         AP:  1,
         ATK: 5,
@@ -472,11 +480,11 @@ Profession.Base.new().initialize(data:{
     ]
 }) 
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Summoner',
     weaponAffinity: 'Tome',
     description : "Amagick-user who is able to temporarily materialize allies.", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  5,
         AP:  15,
         ATK: 7,
@@ -506,11 +514,11 @@ Profession.Base.new().initialize(data:{
 
 
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Arcanist',
     weaponAffinity: 'Tome',
     description : "A scholar first, their large knowledge of the arcane yields interesting magicks for any situation.", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  3,
         AP:  14,
         ATK: 2,
@@ -538,11 +546,11 @@ Profession.Base.new().initialize(data:{
     ]
 }) 
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Runologist',
     weaponAffinity: 'Tome',                
     description : "An arcanist scholar who focuses on runes.", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  3,
         AP:  13,
         ATK: 2,
@@ -573,11 +581,11 @@ Profession.Base.new().initialize(data:{
 }) 
 
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Elementalist',
     weaponAffinity: 'Shortsword',                
     description : "Capable of infusing magicks into normal objects for combat.", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  5,
         AP:  7,
         ATK: 7,
@@ -606,11 +614,11 @@ Profession.Base.new().initialize(data:{
 })
 
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Farmer',
     weaponAffinity: 'Shovel',
     description : "Skilled individual who knows their way around the fields.", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  12,
         AP:  4,
         ATK: 5,
@@ -635,11 +643,11 @@ Profession.Base.new().initialize(data:{
     ]
 })
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Alchemist',
     weaponAffinity: 'Dagger',
     description : "Skilled at brewing potions for all sorts of purposes.", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  3,
         AP:  5,
         ATK: 2,
@@ -667,11 +675,11 @@ Profession.Base.new().initialize(data:{
     ]
 })
 /*
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Cook',
     weaponAffinity: 'Butcher\'s Knife',
     description : "Skilled individual who can cook a mean meal.", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  12,
         AP:  4,
         ATK: 8,
@@ -697,11 +705,11 @@ Profession.Base.new().initialize(data:{
 })
 */
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Ranger',
     weaponAffinity: 'Bow & Quiver',
     description : "", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  4,
         AP:  4,
         ATK: 6,
@@ -730,11 +738,11 @@ Profession.Base.new().initialize(data:{
 })
 
 /*
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Blood Mage',
     weaponAffinity: 'Tome',
     description : "", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  7,
         AP:  4,
         ATK: 4,
@@ -767,11 +775,11 @@ Profession.Base.new().initialize(data:{
 */
 
 /*
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Thief',
     weaponAffinity: 'Dagger',
     description : "Efficient, silent movements are this profession's assets.", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  4,
         AP:  3,
         ATK: 4,
@@ -804,11 +812,11 @@ Profession.Base.new().initialize(data:{
 
 
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Assassin',
     weaponAffinity: 'Dagger',                
     description : "Unparalleled in their ability to take down a target, this profession is respected for its abilities.", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  2,
         AP:  5,
         ATK: 10,
@@ -840,11 +848,11 @@ Profession.Base.new().initialize(data:{
 
 
 /*
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Mercenary',
     weaponAffinity: 'Shortsword',                
     description : "", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  6,
         AP:  3,
         ATK: 6,
@@ -867,11 +875,11 @@ Profession.Base.new().initialize(data:{
 }) 
 */
 /*
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Bounty Hunter',
     weaponAffinity: 'Shortsword',
     description : "", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  6,
         AP:  3,
         ATK: 6,
@@ -894,11 +902,11 @@ Profession.Base.new().initialize(data:{
 }) 
 */
 /*
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Necromancer',
     weaponAffinity: 'Mage-rod',                
     description : "", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  3,
         AP:  7,
         ATK: 3,
@@ -922,11 +930,11 @@ Profession.Base.new().initialize(data:{
 */
 
 /*
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Pyromancer',
     weaponAffinity: 'Shortsword',                
     description : "", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  5,
         AP:  8,
         ATK: 4,
@@ -949,11 +957,11 @@ Profession.Base.new().initialize(data:{
 })  
 */          
 /*
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Witch',
     weaponAffinity: 'Tome',                
     description : "", 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  3,
         AP:  7,
         ATK: 4,
@@ -977,13 +985,13 @@ Profession.Base.new().initialize(data:{
 */
 
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Keeper',
     weaponAffinity: 'Glaive',                
     description : "", 
     levelMinimum : 100,
 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  10,
         AP:  10,
         ATK: 10,
@@ -1007,13 +1015,13 @@ Profession.Base.new().initialize(data:{
 })
 
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Creature',
     weaponAffinity: 'Shortsword',
     description : "", 
     levelMinimum : 100,
 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  7,
         AP:  7,
         ATK: 2,
@@ -1034,13 +1042,13 @@ Profession.Base.new().initialize(data:{
     ]
 })
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Fire Sprite',
     weaponAffinity: 'Shortsword',
     description : "", 
     levelMinimum : 100,
 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  7,
         AP:  7,
         ATK: 2,
@@ -1062,13 +1070,13 @@ Profession.Base.new().initialize(data:{
     ]
 })
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Ice Elemental',
     weaponAffinity: 'Shortsword',
     description : "", 
     levelMinimum : 100,
 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  7,
         AP:  7,
         ATK: 2,
@@ -1091,13 +1099,13 @@ Profession.Base.new().initialize(data:{
     ]
 })            
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Thunder Spawn',
     weaponAffinity: 'Shortsword',
     description : "", 
     levelMinimum : 100,
 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  7,
         AP:  7,
         ATK: 2,
@@ -1121,13 +1129,13 @@ Profession.Base.new().initialize(data:{
     ]
 })
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Guiding Light',
     weaponAffinity: 'Shortsword',
     description : "", 
     levelMinimum : 100,
 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  7,
         AP:  7,
         ATK: 2,
@@ -1152,13 +1160,13 @@ Profession.Base.new().initialize(data:{
     ]
 })            
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Wyvern of Fire',
     weaponAffinity: 'None',
     description : "", 
     levelMinimum : 100,
 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  20,
         AP:  20,
         ATK: 20,
@@ -1185,13 +1193,13 @@ Profession.Base.new().initialize(data:{
     ]
 })
 
-Profession.Base.new().initialize(data:{
+Profession.Base.new(data:{
     name: 'Wyvern of Ice',
     weaponAffinity: 'None',
     description : "", 
     levelMinimum : 100,
 
-    growth: StatSet.new().initialize(
+    growth: StatSet.new(
         HP:  20,
         AP:  20,
         ATK: 20,

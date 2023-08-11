@@ -60,8 +60,13 @@
 
 
 
-return class(
+@:DungeonMap = class(
     name: 'Wyvern.DungeonMap',
+    new ::(mapHint => Object) {
+        @:this = DungeonMap.defaultNew();
+        this.initialize(mapHint);
+        return this;
+    },
     inherits:[import(module:'game_class.mapbase.mt')],
 
   
@@ -275,12 +280,14 @@ return class(
             applyCavities();
             cleanupAreas();
         }
+        
+
 
 
 
         
         this.interface = {
-            initialize ::(mapHint => Object) {
+            initialize ::(mapHint) {
 
                 if (mapHint.roomAreaSize != empty) ROOM_AREA_SIZE = mapHint.roomAreaSize;
                 if (mapHint.roomAreaSizeLarge != empty) ROOM_AREA_SIZE_LARGE = mapHint.roomAreaSize;
@@ -314,3 +321,4 @@ return class(
         } 
     }
 );
+return DungeonMap;

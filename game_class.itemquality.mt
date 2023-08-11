@@ -23,9 +23,14 @@
 @:ItemQuality = class(
     name : 'Wyvern.ItemQuality',
     inherits : [Database.Item],
+    new ::(data) {
+        @:this = ItemQuality.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     description : String,
@@ -43,18 +48,16 @@
         }
     },
     define:::(this) {
-        this.constructor = ::{
-            ItemQuality.database.bind(item:this);
-        }
+        ItemQuality.database.add(item:this);
     }
 );
 
 
-ItemQuality.new().initialize(
+ItemQuality.new(
     data : {
         name : 'Worn',
         description : 'The surface appears worn out; it might not be able to last much longer.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEF: -30,
             ATK: -50,
             SPD: -40
@@ -74,11 +77,11 @@ ItemQuality.new().initialize(
 
 
 
-ItemQuality.new().initialize(
+ItemQuality.new(
     data : {
         name : 'Cheap',
         description : 'It is of poor quality.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEF: -30,
             ATK: -30,
             DEX: -20
@@ -96,11 +99,11 @@ ItemQuality.new().initialize(
 )
 
 
-ItemQuality.new().initialize(
+ItemQuality.new(
     data : {
         name : 'Sturdy',
         description : 'It is unusually sturdy.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEF: 20,
             ATK: 10,
             SPD: 10,
@@ -118,11 +121,11 @@ ItemQuality.new().initialize(
 )                
 
 
-ItemQuality.new().initialize(
+ItemQuality.new(
     data : {
         name : 'Polished',
         description : 'The surface has a shine as if it has been well-kept.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEF: 10,
             ATK: 10,
             SPD: 20,
@@ -139,11 +142,11 @@ ItemQuality.new().initialize(
     }
 )
 
-ItemQuality.new().initialize(
+ItemQuality.new(
     data : {
         name : 'Quality',
         description : 'The quality of this is remarkable.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEF: 5,
             ATK: 5,
             SPD: 10,
@@ -159,11 +162,11 @@ ItemQuality.new().initialize(
     }
 )
 
-ItemQuality.new().initialize(
+ItemQuality.new(
     data : {
         name : 'Light',
         description : 'It appears to be lighter than expected.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 30,
             DEX: 20,
             ATK: -5,
@@ -179,11 +182,11 @@ ItemQuality.new().initialize(
     }
 )
 
-ItemQuality.new().initialize(
+ItemQuality.new(
     data : {
         name : 'Decorative',
         description : 'It appears a bit more ornate than the usual.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: -5,
             DEX: -5,
             ATK: -5,
@@ -199,12 +202,12 @@ ItemQuality.new().initialize(
     }
 )
 
-ItemQuality.new().initialize(
+ItemQuality.new(
     data : {
         name : 'Apprentice\'s',
         description : "This seems to be the work of a master's apprentice.",
         levelMinimum: 1,
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEF: 10,
             ATK: 10,
             SPD: 10,
@@ -221,11 +224,11 @@ ItemQuality.new().initialize(
 )
 
 
-ItemQuality.new().initialize(
+ItemQuality.new(
     data : {
         name : 'Standard',
         description : 'The quality of this seems to meet some sort of standard stock, perhaps of military grade.',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 25,
             DEX: 25,
             ATK: 25,
@@ -241,12 +244,12 @@ ItemQuality.new().initialize(
     }
 )
 
-ItemQuality.new().initialize(
+ItemQuality.new(
     data : {
         name : 'King\'s',
         description : "The quality of this is as if it were meant for a king.",
         levelMinimum: 1,
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEF: 50,
             ATK: 50,
             SPD: 50,
@@ -262,12 +265,12 @@ ItemQuality.new().initialize(
     }
 )
 
-ItemQuality.new().initialize(
+ItemQuality.new(
     data : {
         name : 'Queen\'s',
         description : "The quality of this is as if it were meant for a queen.",
         levelMinimum: 1,
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEF: 75,
             ATK: 75,
             SPD: 75,
@@ -283,12 +286,12 @@ ItemQuality.new().initialize(
     }
 )
 
-ItemQuality.new().initialize(
+ItemQuality.new(
     data : {
         name : 'Masterwork',
         description : "A crowning achievement by a craftsperson representing a life's work.",
         levelMinimum: 1,
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEF: 100,
             ATK: 100,
             SPD: 100,

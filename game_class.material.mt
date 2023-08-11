@@ -23,9 +23,14 @@
 @:Material = class(
     name : 'Wyvern.Material',
     inherits : [Database.Item],
+    new ::(data) {
+        @:this = Material.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     rarity : Number,
@@ -41,20 +46,18 @@
         }
     },
     define:::(this) {
-        this.constructor = ::{
-            Material.database.bind(item:this);
-        }
+        Material.database.add(item:this);
     }
 );
 
 
-Material.new().initialize(
+Material.new(
     data : {
         name : 'Hardstone',
         description : 'The polished hardstone it\'s made of is dark and shiny.',
         rarity : 3,
         tier : 0,
-        statMod : StatSet.new().initialize(
+        statMod : StatSet.new(
             DEF: 3,
             ATK: 7,
             SPD: -5
@@ -63,13 +66,13 @@ Material.new().initialize(
     }
 )
 
-Material.new().initialize(
+Material.new(
     data : {
         name : 'Copper',
         description : 'The copper material used gives off a radiant brown color.',
         rarity : 3,
         tier : 0,
-        statMod : StatSet.new().initialize(
+        statMod : StatSet.new(
             DEF: 5,
             ATK: 6
         ),
@@ -77,13 +80,13 @@ Material.new().initialize(
     }
 )
 
-Material.new().initialize(
+Material.new(
     data : {
         name : 'Steel',
         description : 'The steel used gives a persistent shine.',
         rarity : 5,
         tier : 1,
-        statMod : StatSet.new().initialize(
+        statMod : StatSet.new(
             DEF: 30,
             ATK: 30
         ),
@@ -91,13 +94,13 @@ Material.new().initialize(
     }
 )
 
-Material.new().initialize(
+Material.new(
     data : {
         name : 'Iron',
         description : 'The iron used gives it a solid grey color.',
         rarity : 2,
         tier : 0,
-        statMod : StatSet.new().initialize(
+        statMod : StatSet.new(
             DEF: 10,
             ATK: 20,
             SPD: -5
@@ -106,13 +109,13 @@ Material.new().initialize(
     }
 )
 
-Material.new().initialize(
+Material.new(
     data : {
         name : 'Gold',
         description : 'The gold used gives a radiant glow.',
         rarity : 50,
         tier : 1,
-        statMod : StatSet.new().initialize(
+        statMod : StatSet.new(
             DEF: 10,
             ATK: 10,
             INT: 30,
@@ -122,13 +125,13 @@ Material.new().initialize(
     }
 )
 
-Material.new().initialize(
+Material.new(
     data : {
         name : 'Tungsten',
         description : 'The tungsten used gives it a whitish-grey color.',
         rarity : 2,
         tier : 1,
-        statMod : StatSet.new().initialize(
+        statMod : StatSet.new(
             DEF: 20,
             ATK: 25,
             SPD: -10
@@ -138,13 +141,13 @@ Material.new().initialize(
 )
 
 
-Material.new().initialize(
+Material.new(
     data : {
         name : 'Mythril',
         description : 'The mythril used makes it radiantly green',
         rarity : 100,
         tier : 2,
-        statMod : StatSet.new().initialize(
+        statMod : StatSet.new(
             DEF: 70,
             ATK: 70,
             SPD: 30
@@ -153,13 +156,13 @@ Material.new().initialize(
     }
 )
 
-Material.new().initialize(
+Material.new(
     data : {
         name : 'Adamantine',
         description : 'The adamantine used makes it earthly',
         rarity : 150,
         tier : 3,
-        statMod : StatSet.new().initialize(
+        statMod : StatSet.new(
             DEF: 100,
             ATK: 100
         ),
@@ -167,13 +170,13 @@ Material.new().initialize(
     }
 )    
 
-Material.new().initialize(
+Material.new(
     data : {
         name : 'Quicksilver',
         description : 'The quicksilver used makes it remarkably shiny.',
         rarity : 150,
         tier : 3,
-        statMod : StatSet.new().initialize(
+        statMod : StatSet.new(
             DEF: 50,
             ATK: 50,
             SPD: 60
@@ -182,13 +185,13 @@ Material.new().initialize(
     }
 )    
 
-Material.new().initialize(
+Material.new(
     data : {
         name : 'Dragonglass',
         description : 'The dragonglass used gives it a deep black color.',
         rarity : 200,
         tier : 3,
-        statMod : StatSet.new().initialize(
+        statMod : StatSet.new(
             DEF: -20,
             ATK: 150,
             SPD: 10
@@ -197,13 +200,13 @@ Material.new().initialize(
     }
 )    
 
-Material.new().initialize(
+Material.new(
     data : {
         name : 'Composite',
         rarity : 20,
         description : 'The composite material used is sturdy.',
         tier : 1,
-        statMod : StatSet.new().initialize(
+        statMod : StatSet.new(
             DEF: 45,
             ATK: 45,
             SPD: 20
@@ -212,13 +215,13 @@ Material.new().initialize(
     }
 )    
 
-Material.new().initialize(
+Material.new(
     data : {
         name : 'Crystal',
         rarity : 150,
         description : 'The crystal used makes it semi-transparent.',
         tier : 2,
-        statMod : StatSet.new().initialize(
+        statMod : StatSet.new(
             DEF: 35,
             INT: 35,
             ATK: 35
@@ -229,13 +232,13 @@ Material.new().initialize(
 
 
 
-Material.new().initialize(
+Material.new(
     data : {
         name : 'Sunstone',
         rarity : 150,
         description : 'The sunstone used gives it a warm touch.',
         tier : 1,
-        statMod : StatSet.new().initialize(
+        statMod : StatSet.new(
             DEF: 35,
             INT: 15,
             ATK: 35
@@ -244,13 +247,13 @@ Material.new().initialize(
     }
 )   
 
-Material.new().initialize(
+Material.new(
     data : {
         name : 'Moonstone',
         rarity : 150,
         description : 'The moonstone used gives it a cold touch.',
         tier : 1,
-        statMod : StatSet.new().initialize(
+        statMod : StatSet.new(
             DEF: 15,
             INT: 35,
             ATK: 35

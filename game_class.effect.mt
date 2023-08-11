@@ -25,9 +25,14 @@
 
 @:Effect = class(
     inherits: [Database.Item],
+    new::(data) {
+        @:this = Effect.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     description : String,
@@ -51,9 +56,7 @@
         }
     },
     define:::(this) {
-        this.constructor = ::{
-            Effect.database.bind(item:this);
-        }
+        Effect.database.add(item:this);
     }
 );
 
@@ -61,14 +64,14 @@
 
     ////////////////////// SPECIAL EFFECTS
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'EVENTEFFECT::scene0_0_sylviaenter',
         description: '',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
 
@@ -106,14 +109,14 @@ Effect.new().initialize(
 
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Defend',
         description: 'Reduces damage by 40%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: holder.name + ' takes a defensive stance!'
@@ -152,14 +155,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Guard',
         description: 'Reduces damage by 90%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: holder.name + ' takes a guarding stance!'
@@ -193,14 +196,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Defensive Stance',
         description: 'ATK -50%, DEF +75%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(ATK:-50, DEF:75),
+        stats: StatSet.new(ATK:-50, DEF:75),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: holder.name + ' changes their stance to be defensive!'
@@ -233,14 +236,14 @@ Effect.new().initialize(
 )        
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Offsensive Stance',
         description: 'DEF -50%, ATK +75%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(DEF:-50, ATK:75),
+        stats: StatSet.new(DEF:-50, ATK:75),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: holder.name + ' changes their stance to be offensive!'
@@ -272,14 +275,14 @@ Effect.new().initialize(
     }
 ) 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Light Stance',
         description: 'ATK -50%, SPD +75%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(ATK:-50, SPD:75),
+        stats: StatSet.new(ATK:-50, SPD:75),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: holder.name + ' changes their stance to be light on their feet!'
@@ -311,14 +314,14 @@ Effect.new().initialize(
     }
 ) 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Heavy Stance',
         description: 'SPD -50%, DEF +75%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(SPD:-50, DEF:75),
+        stats: StatSet.new(SPD:-50, DEF:75),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: holder.name + ' changes their stance to be heavy and sturdy!'
@@ -351,14 +354,14 @@ Effect.new().initialize(
 )         
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Meditative Stance',
         description: 'SPD -50%, INT +75%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(SPD:-50, INT:75),
+        stats: StatSet.new(SPD:-50, INT:75),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: holder.name + ' changes their stance for mental focus!'
@@ -391,14 +394,14 @@ Effect.new().initialize(
 )         
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Striking Stance',
         description: 'SPD -30%, DEF -30%, ATK +100%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(SPD:-30, DEF:-30, ATK:100),
+        stats: StatSet.new(SPD:-30, DEF:-30, ATK:100),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: holder.name + ' changes their stance for maximum attack!'
@@ -430,14 +433,14 @@ Effect.new().initialize(
     }
 ) 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Reflective Stance',
         description: 'Attack retaliation',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: holder.name + ' changes their stance to reflect attacks!'
@@ -484,14 +487,14 @@ Effect.new().initialize(
     }
 )                 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Counter',
         description: 'Dodges attacks and retaliates.',
         battleOnly : true,
         skipTurn : true,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: holder.name + ' is prepared for an attack!'
@@ -537,14 +540,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Evasive Stance',
         description: '%50 chance damage nullify when from others.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: holder.name + ' changes their stance to evade attacks!'
@@ -584,14 +587,14 @@ Effect.new().initialize(
     }
 )               
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Sneaked',
         description: 'Guarantees next damage from user is x3',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:user.name + " snuck behind " + holder.name + '!');
         
@@ -627,14 +630,14 @@ Effect.new().initialize(
 )
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Mind Focused',
         description: 'INT +100%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             INT: 100
         ),
         onAffliction : ::(user, item, holder) {
@@ -666,14 +669,14 @@ Effect.new().initialize(
 )        
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Protect',
         description: 'DEF +100%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             DEF: 100
         ),
         onAffliction : ::(user, item, holder) {
@@ -704,14 +707,14 @@ Effect.new().initialize(
     }
 )  
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Shield',
         description: 'DEF +10%, 30% chance to block',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             DEF: 10
         ),
         onAffliction : ::(user, item, holder) {
@@ -746,14 +749,14 @@ Effect.new().initialize(
 )
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Trigger Protect',
         description: 'Casts Protect',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
@@ -786,14 +789,14 @@ Effect.new().initialize(
     }
 ) 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Trigger Evade',
         description: 'Allows the user to evade all attacks for the next turn.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
@@ -825,14 +828,14 @@ Effect.new().initialize(
     }
 ) 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Evade',
         description: 'Allows the user to evade all attacks.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + ' is covered in a mysterious wind!');
@@ -863,14 +866,14 @@ Effect.new().initialize(
 ) 
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Trigger Regen',
         description: 'Slightly heals wounds.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
@@ -902,14 +905,14 @@ Effect.new().initialize(
     }
 ) 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Trigger Spikes',
         description: 'Casts Spikes',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
@@ -942,14 +945,14 @@ Effect.new().initialize(
     }
 ) 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Spikes',
         description: 'DEF +10%, light damage when attacked.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             DEF: 10
         ),
         onAffliction : ::(user, item, holder) {
@@ -985,14 +988,14 @@ Effect.new().initialize(
     }
 ) 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Trigger AP Regen',
         description: 'Slightly recovers AP.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
@@ -1024,14 +1027,14 @@ Effect.new().initialize(
     }
 ) 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Trigger Shield',
         description: 'Casts Shield',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
@@ -1065,14 +1068,14 @@ Effect.new().initialize(
 )         
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Trigger Strength Boost',
         description: 'Triggers a boost in strength.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
@@ -1104,14 +1107,14 @@ Effect.new().initialize(
     }
 )   
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Strength Boost',
         description: 'ATK +70%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             ATK:70
         ),
         onAffliction : ::(user, item, holder) {
@@ -1142,14 +1145,14 @@ Effect.new().initialize(
     }
 )  
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Trigger Defense Boost',
         description: 'Triggers a boost in defense.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
@@ -1181,14 +1184,14 @@ Effect.new().initialize(
     }
 )   
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Defense Boost',
         description: 'DEF +70%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             DEF:70
         ),
         onAffliction : ::(user, item, holder) {
@@ -1219,14 +1222,14 @@ Effect.new().initialize(
     }
 )  
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Trigger Mind Boost',
         description: 'Triggers a boost in mental acuity.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
@@ -1258,14 +1261,14 @@ Effect.new().initialize(
     }
 )   
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Mind Boost',
         description: 'INT +70%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             INT:70
         ),
         onAffliction : ::(user, item, holder) {
@@ -1296,14 +1299,14 @@ Effect.new().initialize(
     }
 )  
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Trigger Dex Boost',
         description: 'Triggers a boost in dexterity.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
@@ -1335,14 +1338,14 @@ Effect.new().initialize(
     }
 )   
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Dex Boost',
         description: 'DEX +70%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             DEX:70
         ),
         onAffliction : ::(user, item, holder) {
@@ -1373,14 +1376,14 @@ Effect.new().initialize(
     }
 )  
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Trigger Speed Boost',
         description: 'Triggers a boost in speed.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
@@ -1412,14 +1415,14 @@ Effect.new().initialize(
     }
 )   
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Speed Boost',
         description: 'SPD +70%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             SPD:70
         ),
         onAffliction : ::(user, item, holder) {
@@ -1452,14 +1455,14 @@ Effect.new().initialize(
 
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Weapon Affinity',
         description: 'User has their profession\'s ideal weapon. ATK,DEF,SPD,INT,DEX +60%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             ATK: 60,
             DEF: 60,
             SPD: 60,
@@ -1492,14 +1495,14 @@ Effect.new().initialize(
     }
 )         
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Night Veil',
         description: 'DEF +40%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             DEF: 50
         ),
         onAffliction : ::(user, item, holder) {
@@ -1529,14 +1532,14 @@ Effect.new().initialize(
     }
 )  
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Dayshroud',
         description: 'DEF +40%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             DEF: 50
         ),
         onAffliction : ::(user, item, holder) {
@@ -1566,14 +1569,14 @@ Effect.new().initialize(
     }
 )  
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Call of the Night',
         description: 'ATK +40%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             ATK: 40
         ),
         onAffliction : ::(user, item, holder) {
@@ -1604,14 +1607,14 @@ Effect.new().initialize(
 )  
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Lunacy',
         description: 'Skips turn and, instead, attacks a random enemy. ATK,DEF +70%.',
         battleOnly : true,
         skipTurn : true,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             DEF: 70,
             ATK: 70
         ),
@@ -1651,14 +1654,14 @@ Effect.new().initialize(
 )
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Greater Call of the Night',
         description: 'ATK +100%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             ATK: 100
         ),
         onAffliction : ::(user, item, holder) {
@@ -1688,14 +1691,14 @@ Effect.new().initialize(
     }
 )  
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Greater Night Veil',
         description: 'DEF +100%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             DEF: 100
         ),
         onAffliction : ::(user, item, holder) {
@@ -1726,14 +1729,14 @@ Effect.new().initialize(
 )  
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Greater Dayshroud',
         description: 'DEF +100%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             DEF: 100
         ),
         onAffliction : ::(user, item, holder) {
@@ -1763,14 +1766,14 @@ Effect.new().initialize(
     }
 )  
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Moonsong',
         description: 'Heals 5% HP every turn',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
         },
@@ -1799,14 +1802,14 @@ Effect.new().initialize(
     }
 )  
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Sol Attunement',
         description: 'Heals 5% HP every turn',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
         },
@@ -1835,14 +1838,14 @@ Effect.new().initialize(
     }
 )          
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Greater Moonsong',
         description: 'Heals 15% HP every turn',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
         },
@@ -1871,14 +1874,14 @@ Effect.new().initialize(
     }
 )       
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Greater Sol Attunement',
         description: 'Heals 15% HP every turn',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
         },
@@ -1907,14 +1910,14 @@ Effect.new().initialize(
     }
 )          
    
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Grace',
         description: 'If hurt while HP is 0, the damage is nullified and this effect disappears.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:'A halo appears above ' + holder.name + '!');
@@ -1955,14 +1958,14 @@ Effect.new().initialize(
 )     
    
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Consume Item',
         description: 'The item is destroyed in the process of its effects',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: "The " + item.name + ' is consumed.'
@@ -1993,14 +1996,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Break Item',
         description: 'The item is destroyed in the process of misuse or strain',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             if (Number.random() > 0.5) ::<= {
                 windowEvent.queueMessage(
@@ -2033,14 +2036,14 @@ Effect.new().initialize(
     }
 )        
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Fling',
         description: 'The item is violently lunged at a target, likely causing damage. The target may catch the item.',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: user.name + ' flung the ' + item.name + ' at ' + holder.name + '!'
@@ -2093,14 +2096,14 @@ Effect.new().initialize(
     }
 )      
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'HP Recovery: All',
         description: 'Heals 100% of HP.',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             holder.heal(amount:holder.stats.HP);
         },
@@ -2128,14 +2131,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'AP Recovery: All',
         description: 'Heals 100% of AP.',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             holder.healAP(amount:holder.stats.AP);
         },
@@ -2163,14 +2166,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Treasure I',
         description: 'Opening gives a fair number of G.',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             @:world = import(module:'game_singleton.world.mt');
             @:amount = (50 + Number.random()*400)->floor;                    
@@ -2201,14 +2204,14 @@ Effect.new().initialize(
     }
 )        
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Field Cook',
         description: 'Chance to cook a meal after battle.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2251,14 +2254,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Penny Picker',
         description: 'Looks on the ground for G after battle.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2300,14 +2303,14 @@ Effect.new().initialize(
 )
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Alchemist\'s Scavenging',
         description: 'Scavenges for alchemist ingredients.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2329,7 +2332,7 @@ Effect.new().initialize(
             );
 
             for(0, amt)::(i) {                    
-                world.party.inventory.add(item:Item.Base.database.find(name:'Ingredient').new(from:holder));
+                world.party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Ingredient'),from:holder));
             }
             
         },                
@@ -2355,14 +2358,14 @@ Effect.new().initialize(
 )
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Trained Hand',
         description: 'ATK +30%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(ATK:30),
+        stats: StatSet.new(ATK:30),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2391,14 +2394,14 @@ Effect.new().initialize(
 
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Focus Perception',
         description: 'ATK +30%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(ATK:30),
+        stats: StatSet.new(ATK:30),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2425,14 +2428,14 @@ Effect.new().initialize(
     }
 )   
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Cheered',
         description: 'ATK +25%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(ATK:25),
+        stats: StatSet.new(ATK:25),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2459,14 +2462,14 @@ Effect.new().initialize(
     }
 )           
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Poisonroot Growing',
         description: 'Vines grow on target. SPD -10%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,                
-        stats: StatSet.new().initialize(SPD:-10),
+        stats: StatSet.new(SPD:-10),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2495,14 +2498,14 @@ Effect.new().initialize(
 )
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Poisonroot',
         description: 'Every turn takes poison damage. SPD -10%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(SPD:-10),
+        stats: StatSet.new(SPD:-10),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2535,14 +2538,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Triproot Growing',
         description: 'Vines grow on target. SPD -10%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(SPD:-10),
+        stats: StatSet.new(SPD:-10),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2571,14 +2574,14 @@ Effect.new().initialize(
 )
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Triproot',
         description: 'Every turn 40% chance to trip. SPD -10%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(SPD:-10),
+        stats: StatSet.new(SPD:-10),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2610,14 +2613,14 @@ Effect.new().initialize(
 )
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Healroot Growing',
         description: 'Vines grow on target. SPD -10%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(SPD:-10),
+        stats: StatSet.new(SPD:-10),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2646,14 +2649,14 @@ Effect.new().initialize(
 )
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Healroot',
         description: 'Every turn heal 5% HP. SPD -10%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(SPD:-10),
+        stats: StatSet.new(SPD:-10),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2684,14 +2687,14 @@ Effect.new().initialize(
 
      
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Defend Other',
         description: 'Takes hits for another.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2733,14 +2736,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Perfect Guard',
         description: 'All damage is nullified.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + ' is strongly guarding themself');
         },
@@ -2772,14 +2775,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Convinced',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2809,14 +2812,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Grappled',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2846,14 +2849,14 @@ Effect.new().initialize(
     }
 )   
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Ensnared',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2883,14 +2886,14 @@ Effect.new().initialize(
     }
 )  
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Grappling',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2917,14 +2920,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Ensnaring',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -2951,14 +2954,14 @@ Effect.new().initialize(
     }
 )                        
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Running',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: holder.name + ' starts to run from the fight!'
@@ -2989,14 +2992,14 @@ Effect.new().initialize(
     }
 )        
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Bribed',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -3023,14 +3026,14 @@ Effect.new().initialize(
         }
     }
 )
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Stunned',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + ' was stunned!');
         },
@@ -3058,14 +3061,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Sharpen',
         description: 'ATK +20%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             ATK: 20
         ),
         onAffliction : ::(user, item, holder) {
@@ -3093,14 +3096,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Weaken Armor',
         description: 'DEF -20%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             DEF: -20
         ),
         onAffliction : ::(user, item, holder) {
@@ -3128,14 +3131,14 @@ Effect.new().initialize(
     }
 )        
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Dull Weapon',
         description: 'ATK -20%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             ATK: -20
         ),
         onAffliction : ::(user, item, holder) {
@@ -3163,14 +3166,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Strengthen Armor',
         description: 'DEF +20%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             DEF: 20
         ),
         onAffliction : ::(user, item, holder) {
@@ -3199,14 +3202,14 @@ Effect.new().initialize(
 )  
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Lunar Affinity',
         description: 'INT,DEF,ATK +40% if night time.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             
         ),
         onAffliction : ::(user, item, holder) {
@@ -3237,20 +3240,20 @@ Effect.new().initialize(
             @:world = import(module:'game_singleton.world.mt');
 
             if (world.time > world.TIME.EVENING) ::<= {
-                stats.modRate(stats:StatSet.new().initialize(INT:40, DEF:40, ATK:40));
+                stats.modRate(stats:StatSet.new(INT:40, DEF:40, ATK:40));
             }                    
         }
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Coordinated',
         description: 'SPD,DEF,ATK +35%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             ATK:35,
             DEF:35,
             SPD:35
@@ -3280,14 +3283,14 @@ Effect.new().initialize(
         }
     }
 )
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Proceed with Caution',
         description: 'DEF + 50%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             
         ),
         onAffliction : ::(user, item, holder) {
@@ -3312,20 +3315,20 @@ Effect.new().initialize(
         onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
         },
         onStatRecalculate : ::(user, item, holder, stats) {
-            stats.modRate(stats:StatSet.new().initialize(DEF:50));
+            stats.modRate(stats:StatSet.new(DEF:50));
         }
     }
 )
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Solar Affinity',
         description: 'INT,DEF,ATK +40% if day time.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             
         ),
         onAffliction : ::(user, item, holder) {
@@ -3356,21 +3359,21 @@ Effect.new().initialize(
             @:world = import(module:'game_singleton.world.mt');
 
             if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
-                stats.modRate(stats:StatSet.new().initialize(INT:40, DEF:40, ATK:40));
+                stats.modRate(stats:StatSet.new(INT:40, DEF:40, ATK:40));
             }                    
         }
     }
 )
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Non-combat Weapon',
         description: '20% chance to deflect attack then break weapon.',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -3405,14 +3408,14 @@ Effect.new().initialize(
     }
 )   
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Flight',
         description: 'Dodges attacks.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -3443,14 +3446,14 @@ Effect.new().initialize(
     }
 )        
    
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Assassin\'s Pride',
         description: 'SPD, ATK +25% for each slain.',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -3482,14 +3485,14 @@ Effect.new().initialize(
         }
     }
 )        
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Pride',
         description: 'SPD, ATK +25%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             ATK:25,
             SPD:25
         ),
@@ -3522,14 +3525,14 @@ Effect.new().initialize(
     }
 )        
   
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Dueled',
         description: 'If attacked by user, 1.5x damage.',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -3558,14 +3561,14 @@ Effect.new().initialize(
         }
     }
 )  
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Consume Item Partially',
         description: 'The item has a chance of being used up',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             if (Number.random() > 0.7) ::<={
                 windowEvent.queueMessage(
@@ -3602,14 +3605,14 @@ Effect.new().initialize(
     }
 )  
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Bleeding',
         description: 'Damage every turn to holder. ATK,DEF,SPD -20%.',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             ATK: -20,
             DEF: -20,
             SPD: -20
@@ -3653,14 +3656,14 @@ Effect.new().initialize(
     }
 )     
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Learn Skill',
         description: 'Acquire a new skill',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             
         ),
         onAffliction : ::(user, item, holder) {
@@ -3696,14 +3699,14 @@ Effect.new().initialize(
         }
     }
 ) 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Explode',
         description: 'Damage to holder.',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:"The " + item.name + " explodes on " + user.name + "!");
             
@@ -3740,14 +3743,14 @@ Effect.new().initialize(
         }
     }
 )        
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Poison Rune',
         description: 'Damage every turn to holder.',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:'Glowing purple runes were imprinted on ' + holder.name + "!");
         
@@ -3787,14 +3790,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Destruction Rune',
         description: 'Causes INT-based damage when rune is released.',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:'Glowing orange runes were imprinted on ' + holder.name + "!");
         
@@ -3824,14 +3827,14 @@ Effect.new().initialize(
         }
     }
 )
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Regeneration Rune',
         description: 'Heals holder every turn.',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:'Glowing cyan runes were imprinted on ' + holder.name + "!");
         
@@ -3862,14 +3865,14 @@ Effect.new().initialize(
         }
     }
 )        
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Shield Rune',
         description: '+100% DEF while active.',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             DEF: 100
         ),
         onAffliction : ::(user, item, holder) {
@@ -3903,14 +3906,14 @@ Effect.new().initialize(
 )        
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Cure Rune',
         description: 'Cures the holder when the rune is released.',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:'Glowing green runes were imprinted on ' + holder.name + "!");
@@ -3945,14 +3948,14 @@ Effect.new().initialize(
 //////////////////////////////
 /// STATUS AILMENTS
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Poisoned',
         description: 'Damage every turn to holder.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + " was poisoned!");
         
@@ -3992,14 +3995,14 @@ Effect.new().initialize(
     }
 )     
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Blind',
         description: '50% chance to miss attacks.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + " was blinded!");
         
@@ -4034,14 +4037,14 @@ Effect.new().initialize(
 )             
   
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Burned',
         description: '50% chance to get damage each turn.',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + " was burned!");
         
@@ -4080,14 +4083,14 @@ Effect.new().initialize(
         }
     }
 ) 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Frozen',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
         stackable: false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + " was frozen");
         
@@ -4117,14 +4120,14 @@ Effect.new().initialize(
     }
 )         
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Paralyzed',
         description: 'SPD,ATK -100%',
         battleOnly : true,
         skipTurn : true,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             SPD: -100,
             ATK: -100
         ),
@@ -4157,14 +4160,14 @@ Effect.new().initialize(
     }
 ) 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Petrified',
         description: 'Unable to act. DEF -50%',
         battleOnly : true,
         skipTurn : true,
         stackable: false,
-        stats: StatSet.new().initialize(
+        stats: StatSet.new(
             DEF: -50
         ),
         onAffliction : ::(user, item, holder) {
@@ -4196,14 +4199,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Elemental Tag',
         description: 'Weakness to Fire, Ice, and Thunder damage by 100%',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -4240,13 +4243,13 @@ Effect.new().initialize(
 )
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Elemental Shield',
         description: 'Nullify ',
         battleOnly : true,
         skipTurn : false,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         stackable: false,
         onAffliction : ::(user, item, holder) {
         },
@@ -4290,14 +4293,14 @@ Effect.new().initialize(
 )
 
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Burning',
         description: 'Gives fire damage and gives 50% ice resist',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -4332,14 +4335,14 @@ Effect.new().initialize(
     }
 )         
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Icy',
         description: 'Gives ice damage and gives 50% fire resist',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -4374,14 +4377,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Shock',
         description: 'Gives thunder damage and gives 50% thunder resist',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -4416,14 +4419,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Toxic',
         description: 'Gives poison damage and gives 50% poison resist',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -4460,14 +4463,14 @@ Effect.new().initialize(
     }
 )
 
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Shimmering',
         description: 'Gives light damage and gives 50% dark resist',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         
@@ -4501,14 +4504,14 @@ Effect.new().initialize(
         }
     }
 )        
-Effect.new().initialize(
+Effect.new(
     data : {
         name : 'Dark',
         description: 'Gives dark damage and gives 50% light resist',
         battleOnly : true,
         skipTurn : false,
         stackable: true,
-        stats: StatSet.new().initialize(),
+        stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
         },
         

@@ -23,9 +23,14 @@
 @:ItemColor = class(
     name : 'Wyvern.ItemColor',
     inherits : [Database.Item],
+    new ::(data) {
+        @:this = ItemColor.defaultNew();
+        this.initialize(data);
+        return this;
+    },
     statics : {
         database  :::<= {
-            @db = Database.new().initialize(
+            @db = Database.new(
                 attributes : {
                     name : String,
                     equipMod : StatSet.type, // percentages
@@ -38,17 +43,15 @@
 
     },
     define:::(this) {
-        this.constructor = ::{
-            ItemColor.database.bind(item:this);
-        }
+        ItemColor.database.add(item:this);
     }
 );
 
 
-ItemColor.new().initialize(
+ItemColor.new(
     data : {
         name : 'Red',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEF: 3,
             ATK: 3,
             SPD: 3
@@ -56,10 +59,10 @@ ItemColor.new().initialize(
     }
 )
 
-ItemColor.new().initialize(
+ItemColor.new(
     data : {
         name : 'Blue',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 3,
             DEX: 3,
             INT: 3
@@ -67,10 +70,10 @@ ItemColor.new().initialize(
     }
 )
 
-ItemColor.new().initialize(
+ItemColor.new(
     data : {
         name : 'Green',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 3,
             DEX: 3,
             ATK: 3
@@ -78,59 +81,59 @@ ItemColor.new().initialize(
     }
 )
 
-ItemColor.new().initialize(
+ItemColor.new(
     data : {
         name : 'Yellow',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEX: 5,
             ATK: 3
         ),
     }
 )
 
-ItemColor.new().initialize(
+ItemColor.new(
     data : {
         name : 'Orange',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             DEX: 3,
             ATK: 5
         ),
     }
 )
 
-ItemColor.new().initialize(
+ItemColor.new(
     data : {
         name : 'Grey',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 5,
             DEX: 3
         ),
     }
 )
 
-ItemColor.new().initialize(
+ItemColor.new(
     data : {
         name : 'Black',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             ATK: 7
         ),
     }
 )
 
-ItemColor.new().initialize(
+ItemColor.new(
     data : {
         name : 'Silver',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             ATK: 5,
             DEF: 5
         ),
     }
 )
 
-ItemColor.new().initialize(
+ItemColor.new(
     data : {
         name : 'Aquamarine',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             INT: 5,
             DEF: 3
         ),
@@ -138,10 +141,10 @@ ItemColor.new().initialize(
 )        
 
 
-ItemColor.new().initialize(
+ItemColor.new(
     data : {
         name : 'Teal',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             SPD: 5,
             INT: 3
         ),
@@ -149,10 +152,10 @@ ItemColor.new().initialize(
 )        
 
 
-ItemColor.new().initialize(
+ItemColor.new(
     data : {
         name : 'Gold',
-        equipMod : StatSet.new().initialize(
+        equipMod : StatSet.new(
             ATK: 5,
             DEF: 5,
             SPD: 5,
