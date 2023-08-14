@@ -300,6 +300,8 @@ return class(
                 this.onLoadState = onLoadState;
                 
                 
+                import(module:'game_singleton.gamblist.mt').playGame(onFinish::{});
+                return empty;
                 
                 
                 windowEvent.queueMessage(

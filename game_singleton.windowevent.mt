@@ -650,17 +650,26 @@
             queueDisplay::(prompt, lines, pageAfter, leftWeight, topWeight, renderable, onLeave) {
                 nextResolve->push(value:[::{
                     if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
-                    for(0, lines->keycount/pageAfter)::(i) {
-                        choiceStack->push(value:{
-                            topWeight: topWeight,
-                            leftWeight : leftWeight,
-                            lines:lines->subset(from:i*pageAfter, to:min(a:i*pageAfter+pageAfter, b:lines->keycount)-1),
-                            pageAfter: pageAfter,
-                            prompt: prompt,
-                            onLeave: onLeave,
-                            mode: CHOICE_MODE.DISPLAY,
-                            renderable: renderable
-                        });
+                    @iter = lines->keycount - pageAfter;
+                    {:::} {
+                        forever ::{
+                            if (iter < 0) iter = 0;                        
+                            @last = iter == 0;
+                            choiceStack->push(value:{
+                                topWeight: topWeight,
+                                leftWeight : leftWeight,
+                                lines:lines->subset(from:iter, to:min(a:iter+pageAfter, b:lines->keycount)-1),
+                                pageAfter: pageAfter,
+                                prompt: prompt,
+                                onLeave: onLeave,
+                                mode: CHOICE_MODE.DISPLAY,
+                                renderable: renderable
+                            });
+                            when (last) send();
+                            
+                            iter -= pageAfter;
+                            
+                        }
                     }
                 }]);
             },
@@ -810,11 +819,12 @@
             },
 
             // ask yes or no immediately.
-            queueAskBoolean::(prompt, onChoice => Function, onLeave) {
+            queueAskBoolean::(prompt, onChoice => Function, renderable, onLeave) {
                 this.queueChoices(prompt, choices:['Yes', 'No'], canCancel:false, onLeave:onLeave,
                     onChoice::(choice){
                         onChoice(which: choice == 1);
-                    }
+                    },
+                    renderable
                 );
             },
             

@@ -244,6 +244,16 @@ return class(
                 canvas[penx+peny*CANVAS_WIDTH] = text->charAt(index:0);               
             },
             
+            drawRectangle ::(text => String, width => Number, height => Number) {
+                @ch = text->charAt(index:0);
+                for(0, height)::(y) {
+                    @offsety = peny + y;
+                    for(0, width)::(x) {
+                        canvas[penx+x + (offsety)*CANVAS_WIDTH] = ch
+                    }
+                }
+            },
+            
             erase :: {
                 this.penColor = hints.NEUTRAL;
                 this.drawChar(text:' ');

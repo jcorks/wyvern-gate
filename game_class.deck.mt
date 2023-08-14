@@ -51,6 +51,10 @@
             suit : {get ::<- suit_},
             value : {get ::<- value_},
             
+            string : {
+                get ::<- VALUES_TEXT[value_] + ' ' + SUITS_TEXT[suit_]
+            },
+            
             initialize::(suit, value) {
                 if (suit < 0 || suit >= SUITS_TEXT->keycount)
                     error(message:'Card was made with invalid suit.');
@@ -77,6 +81,7 @@
             */
 
             render ::(x, y, flipped) {
+                canvas.movePen(x:x, y:y); canvas.drawRectangle(text: ' ', width:CARD_WIDTH, height: CARD_HEIGHT);                
                 canvas.movePen(x:x, y:y); canvas.drawChar(text:'┌');
                 canvas.movePen(x:x+CARD_WIDTH-1, y:y); canvas.drawChar(text:'┐');
                 for(1, CARD_WIDTH-1)::(i) {
@@ -139,7 +144,6 @@
                 @card = random.pickArrayItem(list:set);
                 set->remove(value:set->findIndex(value:card));
                 
-                discard->push(value:card);
                 return card;
             },
             
@@ -147,8 +151,11 @@
                 when (set->keycount == 0) empty;
                 
                 @card = set->pop;                
-                discard->push(value:card);
                 return card;
+            },
+            
+            discard ::(card) {
+                discard->push(value:card);
             },
             
             shuffle :: {
@@ -164,7 +171,7 @@
             },
             
             // re-adds all drawn cards back into the deck
-            resetCards ::{
+            readdCardsFromDiscard ::{
                 foreach(discard)::(ind, card) {
                     set->push(value:card);
                 }                
