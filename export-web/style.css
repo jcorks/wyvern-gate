@@ -4,8 +4,8 @@
 }
 
 :root {
- --canvas__font-height: 21px;
-  --canvas__font-width: 10px;
+  --canvas__font-height: 2vw;
+  --canvas__font-width: 2vw * (10 / 21);
 }
 
 html, body {
@@ -28,13 +28,13 @@ body {
   height: 100%;
 
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
 }
 
 .wrapper {
   display: flex;
-  margin: 40px;
+  margin: 0px;
 }
 
 #canvas {

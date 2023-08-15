@@ -298,7 +298,10 @@ return class(
             ) {
                 this.onSaveState = onSaveState;
                 this.onLoadState = onLoadState;
-                                
+                             
+                import(module:'game_singleton.gamblist.mt').playGame(onFinish::{});   
+                return empty;
+                
                 
                 windowEvent.queueMessage(
                     text: ' Wyvern Gate ' + VERSION + ' '
