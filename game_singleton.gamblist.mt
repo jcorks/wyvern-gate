@@ -34,9 +34,9 @@ Starting a Game
 
 Scoring
 
-- Each player's points are kept in separate, 2-card piles 
+- Each player's points are kept in separate, card piles 
   in an unused play area (their respective scoring area) and are used
-  to mark the score. Each 2-card pile represents a point. If the
+  to mark the score. Each card pile represents a point. If the
   attacker doesnt win, the flipped cards are placed in a game-wide
   discard pile and no scoring occurs.
 
@@ -205,7 +205,6 @@ Playing the Game
                 playCard::(index) {
                     @card = hand[index];
                     hand->remove(key:index);
-                    breakpoint();
                     return card;
                 },
                 
@@ -237,7 +236,7 @@ Playing the Game
 
 
     return ::(onFinish) {
-
+        @partyWins;
         @placeholderDecider = ::(
             player,
             onChoose,
@@ -262,11 +261,19 @@ Playing the Game
                 return 0;
             });
             
-            @:index = if (firstBout == empty) ::<= {
+            @index = if (firstBout == empty) ::<= {
                 return player.hand->findIndex(value:hand[0]);
             } else ::<= {
                 return player.hand->findIndex(value:hand[hand->keycount-1]);            
             }
+            
+            
+            // if attacking and pressured other, 
+            // always pick highest card.
+            if (attacker == player && challenger.hand->keycount <= 1) ::<= {
+                index = player.hand->findIndex(value:hand[hand->keycount-1]);                        
+            }
+            
             
             windowEvent.queueMessage(
                 text: 'I\'ll pick this card',
@@ -480,13 +487,21 @@ Playing the Game
         
             when (player.points->keycount >= 3) ::<= {
                 windowEvent.queueMessage(
-                    text: player.name + ' wins!'
+                    text: player.name + ' wins!',
+                    onLeave ::{
+                        partyWins = true;
+                        windowEvent.jumpToTag(name:'Sorcerer', goBeforeTag: true);                    
+                    }
                 );                
             }
 
             when (gamblist.points->keycount >= 3) ::<= {
                 windowEvent.queueMessage(
-                    text: gamblist.name + ' wins!'
+                    text: gamblist.name + ' wins!',
+                    onLeave :: {
+                        partyWins = false;
+                        windowEvent.jumpToTag(name:'Sorcerer', goBeforeTag: true);                    
+                    }
                 );                
             }
             
@@ -767,7 +782,7 @@ Playing the Game
             jumpTag: 'Sorcerer',
             onEnter::{},
             onLeave::{        
-                onFinish();
+                onFinish(partyWins);
             }
         );   
         
@@ -800,16 +815,16 @@ Playing the Game
                         "  flip, or some other agreement.",
                         "",
                         "- Once decided, the deck is shuffled. Both",
-                        "  players 5 cards to their hand from the",
+                        "  players draw 5 cards from the",
                         "  deck. Each player can (and should)",
-                        " look at their hands.",
+                        "  look at their hands.",
                         "",
                         "Scoring",
                         "",
                         "- Each player's points are kept in",
-                        "  separate, 2-card piles in an unused play",
+                        "  separate card piles in an unused play",
                         "  area (their respective scoring area) and",
-                        "  are used to mark the score. Each 2-card",
+                        "  are used to mark the score. Each card",
                         "  pile represents a point. If the attacker",
                         "  doesnt win, the flipped cards are placed",
                         "  in a game-wide discard pile and no",
@@ -896,13 +911,13 @@ Playing the Game
         ];
     
         this.interface = {
-            /*
+            
             gameList : {
-                set::(value) {
-                
+                get::(value) {
+                    return gameList;
                 }
             },
-            */
+            
             
             playGame ::(onFinish) {
                 random.pickArrayItem(list:gameList)(onFinish);

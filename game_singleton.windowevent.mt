@@ -307,10 +307,13 @@
             @:defaultChoice = data.defaultChoice;
             @:onChoice = data.onChoice;
             @:choice = input;         
-            
+            @:onMenu = data.onMenu;            
 
-            when(choice == CURSOR_ACTIONS.CANCEL) ::<= {
-                return true;
+            when(choice == CURSOR_ACTIONS.CANCEL ||
+                 choice == CURSOR_ACTIONS.CONFIRM) ::<= {
+                onMenu();
+                resolveNext();
+                return false;
             }           
 
             if (  choice == CURSOR_ACTIONS.UP||
@@ -322,15 +325,15 @@
                     onChoice(choice);
                     resolveNext();
                 }
-                    
+                
                 renderThis(data, thisRender::{
-                    renderText(
+                    /*renderText(
                         lines: ['[Cancel to return]'],
                         speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
                         leftWeight,
                         topWeight,
                         limitLines:13
-                    );             
+                    );*/             
                 });
             }
             return false;    
@@ -791,7 +794,7 @@
                     });
                 }]);
             },            
-            queueCursorMove ::(prompt, leftWeight, topWeight, onMove, renderable, onLeave) {
+            queueCursorMove ::(prompt, leftWeight, topWeight, onMove, onMenu => Function, renderable, onLeave, jumpTag) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode: CHOICE_MODE.CURSOR_MOVE,
@@ -801,6 +804,8 @@
                         onChoice:onMove,
                         onLeave:onLeave,
                         renderable:renderable,
+                        jumpTag: jumpTag,
+                        onMenu : onMenu
                     });
                     canvas.clear();
                 }]);

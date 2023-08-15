@@ -298,11 +298,7 @@ return class(
             ) {
                 this.onSaveState = onSaveState;
                 this.onLoadState = onLoadState;
-                
-                
-                import(module:'game_singleton.gamblist.mt').playGame(onFinish::{});
-                return empty;
-                
+                                
                 
                 windowEvent.queueMessage(
                     text: ' Wyvern Gate ' + VERSION + ' '
@@ -572,131 +568,140 @@ return class(
                     y: somewhere.y
                 );               
 
-
-                windowEvent.queueChoices(
-                    leftWeight: 1,
-                    topWeight: 1,
-                    prompt: 'What next?',
-                    renderable: island.map,
-                    keep: true,
-                    jumpTag: 'VisitIsland',
-                    onGetChoices ::{
-                        @:choices = [
-                            'Travel',
-                            'Check',
-                            'Party',
-                            'Look around',
-                            'System',
-                        ];
-                        @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
-
-                        if (visitable != empty) ::<= {
-                            foreach(visitable)::(i, vis) {
-                                choices->push(value:'Visit ' + vis.name);                
-                            }
-                        }
-                        return choices;
-                    },
-                    onChoice::(choice) {
-                        @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
-
-                       
-                        match(choice-1) {
-                          // travel
-                          (0): ::<= {
-
-                            windowEvent.queueCursorMove(
-                                leftWeight: 1,
-                                topWeight: 1,
-                                prompt: 'Traveling...',
-                                renderable:island.map,
-                                onMove ::(choice) {
-                                    
-                                    @:target = island.landmarks[choice-1];
-                                    
-                                    
-                                    // move by one unit in that direction
-                                    // or ON it if its within one unit.
-                                    island.map.movePointerFree(
-                                        x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 4 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -4 else 0,
-                                        y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  4 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -4 else 0
-                                    );
-                                    world.stepTime(); 
-                                    island.map.title = world.timeString + '                   ';
-                                    island.incrementTime();
-                                    
-                                    // cancel if we've arrived somewhere
-                                    @:arrival = island.map.getNamedItemsUnderPointerRadius(radius:5);
-                                    if (arrival != empty) ::<= {
-                                        foreach(arrival)::(i, arr) {
-                                            windowEvent.queueMessage(
-                                                text:"The party has arrived at the " + arr.data.name
-                                            );
-                                            windowEvent.queueNoDisplay(
-                                                onEnter::{
-                                                    arr.data.discover();
-                                                    island.map.discover(data:arr.data);                                            
-                                                }
-                                            );
-                                            //island.map.setPointer(
-                                            //    x: arr.x,
-                                            //    y: arr.y
-                                            //);
-                                        
-                                        }
-                                        
-                                    }                            
-
-                                }
+                @enteredChoices = false;
+                @islandTravel = ::{
+                    windowEvent.queueCursorMove(
+                        leftWeight: 1,
+                        topWeight: 1,
+                        prompt: 'Traveling...',
+                        jumpTag: 'VisitIsland',
+                        renderable:island.map,
+                        onMenu :: {
+                            islandChoices();
+                        },
+                        onMove ::(choice) {
                             
+                            @:target = island.landmarks[choice-1];
+                            
+                            
+                            // move by one unit in that direction
+                            // or ON it if its within one unit.
+                            island.map.movePointerFree(
+                                x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 4 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -4 else 0,
+                                y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  4 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -4 else 0
                             );
-                                
-                          },
-                        
-                          // check
-                          (1): ::<= {
-                            choice = windowEvent.queueChoices(
-                                leftWeight: 1,
-                                topWeight: 1,
-                                prompt: 'Check which?',
-                                choices: [
-                                    'Island',
-                                ],
-                                canCancel: true,
-                                onChoice::(choice){
-                                    match(choice-1) {
-                                      (0): windowEvent.queueMessage(speaker: 'About ' + island.name, text: island.description)
-                                    }                                                        
-                                }
-                            );
-                          
-                          },
-                          
-
-                          (3): ::<= {
+                            world.stepTime(); 
+                            island.map.title = world.timeString + '                   ';
                             island.incrementTime();
-                            windowEvent.queueMessage(text:'Nothing to see but the peaceful scenery of ' + island.name + '.');                          
-                          },
-                          // party options
-                          (2): partyOptions(),
+                            
+                            // cancel if we've arrived somewhere
+                            @:arrival = island.map.getNamedItemsUnderPointerRadius(radius:5);
+                            if (arrival != empty) ::<= {
+                                foreach(arrival)::(i, arr) {
+                                    windowEvent.queueMessage(
+                                        text:"The party has arrived at the " + arr.data.name
+                                    );
+                                    windowEvent.queueNoDisplay(
+                                        onEnter::{
+                                            arr.data.discover();
+                                            island.map.discover(data:arr.data);                                            
+                                        }
+                                    );
+                                    //island.map.setPointer(
+                                    //    x: arr.x,
+                                    //    y: arr.y
+                                    //);
+                                
+                                }
+                                
+                            }                            
 
-                          (4): ::<= {
-                            systemMenu();                          
-                          },                          
-                          
-                          // visit landmark
-                          default: ::<= {
-                            //breakpoint();
-                            this.visitLandmark(landmark:visitable[choice-6].data);
-                          }
                         }
+                    );
+                }
+
+                
+                
+                
+                @:islandChoices = ::{   
+                    enteredChoices = true;
+                    windowEvent.queueChoices(
+                        leftWeight: 1,
+                        topWeight: 1,
+                        prompt: 'What next?',
+                        renderable: island.map,
+                        canCancel : true,
+                        onGetChoices ::{
+                            @:choices = [
+                                'Travel',
+                                'Check',
+                                'Party',
+                                'Look around',
+                                'System',
+                            ];
+                            @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
+
+                            if (visitable != empty) ::<= {
+                                foreach(visitable)::(i, vis) {
+                                    choices->push(value:'Visit ' + vis.name);                
+                                }
+                            }
+                            return choices;
+                        },
+                        onChoice::(choice) {
+                            @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
+
+                           
+                            match(choice-1) {
+                              // travel
+                              (0): ::<= {
+                              },
+                            
+                              // check
+                              (1): ::<= {
+                                choice = windowEvent.queueChoices(
+                                    leftWeight: 1,
+                                    topWeight: 1,
+                                    prompt: 'Check which?',
+                                    choices: [
+                                        'Island',
+                                    ],
+                                    canCancel: true,
+                                    onChoice::(choice){
+                                        match(choice-1) {
+                                          (0): windowEvent.queueMessage(speaker: 'About ' + island.name, text: island.description)
+                                        }                                                        
+                                    }
+                                );
+                              
+                              },
+                              
+
+                              (3): ::<= {
+                                island.incrementTime();
+                                windowEvent.queueMessage(text:'Nothing to see but the peaceful scenery of ' + island.name + '.');                          
+                              },
+                              // party options
+                              (2): partyOptions(),
+
+                              (4): ::<= {
+                                systemMenu();                          
+                              },                          
+                              
+                              // visit landmark
+                              default: ::<= {
+                                //breakpoint();
+                                this.visitLandmark(landmark:visitable[choice-6].data);
+                              }
+                            }
 
 
-                    
-                    
-                    }
-                );
-
+                        
+                        
+                        }
+                    );
+                }
+                islandTravel();
 
 
             },      

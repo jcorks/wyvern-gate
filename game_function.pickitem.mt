@@ -27,6 +27,7 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
         prompt: if (prompt == empty) 'Choose an item:' else prompt => String,
         onGetPrompt: onGetPrompt,
         canCancel: canCancel,
+        jumpTag: 'pickItem',
         onGetChoices ::{
             @:names = [...inventory.items]->map(to:::(value) {
                 when(showGold) ::<= {

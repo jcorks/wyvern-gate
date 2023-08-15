@@ -282,6 +282,7 @@ Interaction.new(
                             text:'Care to try your luck again? All it costs is an item of yours. Any will do.'
                         );                               
                     } else ::<= {
+                        story.gamblistEncountered = true;
                         windowEvent.queueMessage(
                             speaker: '???',
                             text:'Hello, stranger.'
@@ -291,6 +292,12 @@ Interaction.new(
                             speaker: 'Wandering Gamblist',
                             text:'May I interest you in some... Entertainment? All it costs is an item of yours. Any will do.'
                         );                               
+
+                            windowEvent.queueMessage(
+                                speaker: 'Wandering Gamblist',
+                                text:'If you win, you get your item back and one of mine. If I win, well...'
+                            );                               
+
                     }
                     
                     
@@ -302,8 +309,104 @@ Interaction.new(
                                     speaker: 'Wandering Gamblist',
                                     text:'Suit yourself. Perhaps another time.'
                                 );                               
-                            
                             }       
+
+                            @:pickItem = import(module:'game_function.pickitem.mt');
+                            pickItem(
+                                inventory:party.inventory, 
+                                canCancel:true, 
+                                onGetPrompt::{
+                                    return 'Wager which?'
+                                },
+                                topWeight : 0.5,
+                                leftWeight : 0.5,
+                                onPick::(item) {
+                                    when(item == empty) ::<= {
+                                        windowEvent.queueMessage(
+                                            speaker: 'Wandering Gamblist',
+                                            text:'Suit yourself. Perhaps another time.'
+                                        );
+                                        windowEvent.jumpToTag(name:'pickItem', doResolveNext: true, goBeforeTag: true);
+                                                                                                          
+                                    }
+                                
+                                    windowEvent.queueMessage(
+                                        speaker: 'Wandering Gamblist',
+                                        text: 'Excellent. Now, we play.'                                    
+                                    );
+                                    windowEvent.jumpToTag(name:'pickItem', doResolveNext: true, goBeforeTag: true);
+                                    
+                                    @:gamblist = import(module:'game_singleton.gamblist.mt');
+                                    gamblist.playGame(onFinish::(partyWins) {
+                                        when(!partyWins) ::<= {
+                                            windowEvent.queueMessage(
+                                                speaker: 'Wandering Gamblist',
+                                                text: 'Ah, well. Perhaps next time. A gamble is a gamble, after all.'                                    
+                                            );
+                                            party.inventory.remove(item);
+                                        }
+                                        windowEvent.queueMessage(
+                                            speaker: 'Wandering Gamblist',
+                                            text: 'Ah, well done. A gamble is a gamble, after all.'                                    
+                                        );
+                                        
+                                        @itemPrice = item.price;
+                                        @itemChoices = [];
+                                        for(0, 50)::(i) {
+                                            @newItem = Item.new(
+                                                base: Item.Base.database.getRandomFiltered(
+                                                    filter::(value) <- (
+                                                        value.isUnique == false 
+                                                        && value.tier <= story.tier
+                                                    )
+                                                ),
+                                                rngEnchantHint:true,                                                 
+                                                from:location.ownedBy
+                                            )    
+                                            itemChoices->push(value:newItem);                                    
+                                        }
+                                        
+                                        itemChoices->sort(comparator::(a, b) {
+                                            @diffA = (a.price - itemPrice)->abs;
+                                            @diffB = (b.price - itemPrice)->abs;
+                                            when (diffA < diffB) -1;
+                                            when (diffA > diffB)  1;
+                                            return 0;
+                                        });
+                                        
+                                        itemChoices = itemChoices->subset(from:0, to:6);
+                                        
+                                        @:Inventory = import(module:'game_class.inventory.mt');
+                                        @inv = Inventory.new(size: 30);
+                                        foreach(itemChoices)::(i, it) {
+                                            inv.add(item:it);
+                                        }
+                                        
+                                        pickItem(
+                                            canCancel : false,
+                                            onGetPrompt ::<- 'Pick a prize!',
+                                            topWeight : 0.5,
+                                            leftWeight : 0.5,
+                                            inventory:inv,
+                                            onPick::(item) {
+                                                windowEvent.queueMessage(
+                                                    text: 'The party won the ' + item.name + '!'
+                                                );
+                                                
+                                                party.inventory.add(item);
+
+                                                windowEvent.queueMessage(
+                                                    speaker: 'Wandering Gamblist',
+                                                    text: 'Until next time...'                                    
+                                                );
+                                                windowEvent.jumpToTag(name:'pickItem', doResolveNext: true, goBeforeTag: true);
+                                            }
+                                        );
+                                    });
+                                }
+                            )
+
+
                         }
                     );
                   },
