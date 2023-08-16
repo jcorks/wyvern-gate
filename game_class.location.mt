@@ -39,7 +39,8 @@
                 RESIDENTIAL : 1,
                 BUSINESS : 2,
                 UTILITY : 3,
-                EXIT : 4
+                EXIT : 4,
+                DUNGEON_SPECIAL : 5
             }
             return {
                 get ::<- ct
@@ -1446,6 +1447,44 @@ Location.Base.new(data:{
     
     }
 }) 
+
+
+
+Location.Base.new(data:{
+    name: 'Fountain',
+    rarity: 4,
+    ownVerb : '',
+    symbol: 'S',
+    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    minStructureSize : 1,
+
+    descriptions: [
+    ],
+    interactions : [
+        'drink-fountain'
+    ],
+    
+    aggressiveInteractions : [
+    ],
+
+
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {},
+    
+    onInteract ::(location) {
+    },
+    
+    onCreate ::(location) {
+
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+
+});
 
 
 Location.Base.new(data:{

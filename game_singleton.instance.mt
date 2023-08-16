@@ -129,166 +129,115 @@ return class(
                 
                 @stepCount = 0;
 
-                windowEvent.queueChoices(
-                    leftWeight: 1,
-                    topWeight: 1,
-                    prompt: 'What next?',
-                    keep:true,
-                    jumpTag: 'VisitLandmark',
-                    onGetChoices ::{
-                        @choices = [                
-                            'Walk...',
-                            'Party'
-                        ];
-                        
-                        
-                        @locationAt = landmark.map.getNamedItemsUnderPointer();
-                        if (locationAt != empty) ::<= {
-                            foreach(locationAt)::(i, loc) {
-                                choices->push(value:'Check ' + loc.name);
+
+                @:landmarkChoices = ::{
+                    windowEvent.queueChoices(
+                        leftWeight: 1,
+                        topWeight: 1,
+                        prompt: 'What next?',
+                        keep:true,
+                        canCancel:true,
+                        onGetChoices ::{
+                            @choices = [                
+                                'Party'
+                            ];
+                            
+                            
+                            @locationAt = landmark.map.getNamedItemsUnderPointer();
+                            if (locationAt != empty) ::<= {
+                                foreach(locationAt)::(i, loc) {
+                                    choices->push(value:'Check ' + loc.name);
+                                }
+                            }
+
+                            return choices;                
+                        },
+                        renderable:landmark.map,
+                        onChoice::(choice) {
+                            @locationAt = landmark.map.getNamedItemsUnderPointer();
+                                
+
+                                
+                            @:MAX_STATIC_CHOICES = 1;
+                            match(choice-1) {
+                              
+                              (0): ::<={
+                                partyOptions();
+                                landmark.step();
+                              },
+                              
+                              
+                              default: ::<= {
+                                when(choice == empty) empty;
+                                choice -= MAX_STATIC_CHOICES + 1;
+                                when(choice >= locationAt->keycount) empty;
+                                locationAt = locationAt[choice].data;
+                                
+                                
+                                locationAt.interact();
+
+                              }
+                            
                             }
                         }
-
-                        return choices;                
+                    );
+                }
+                
+                
+                windowEvent.queueCursorMove(
+                    jumpTag: 'VisitLandmark',
+                    onMenu ::{
+                        landmarkChoices()
                     },
                     renderable:landmark.map,
-                    onChoice::(choice) {
-                        @locationAt = landmark.map.getNamedItemsUnderPointer();
-                            
-
-                            
-                        @:MAX_STATIC_CHOICES = 2;
-                        match(choice-1) {
-                          (0)::<= {
-                            
-                            @lastChoice = 0;
-
-                            if (false) ::<= {
-
-                                @choices = [];
-                                foreach(landmark.locations)::(index, location) {
-                                    choices->push(value:location.name);
-                                }
-                                
-                                windowEvent.queueChoices(
-                                    leftWeight: 1,
-                                    topWeight: 1,
-                                    prompt: 'Walk where?',
-                                    choices,
-                                    defaultChoice: lastChoice,
-                                    canCancel : true,
-                                    onChoice::(choice) {
-                                        when(choice == 0) send();
-                                        lastChoice = choice;
-                                        landmark.map.movePointerToward(x:landmark.locations[choice-1].x, y:landmark.locations[choice-1].y);
-                                        stepsSinceLast += 1;
-                                        if (landmark.peaceful == false) ::<= {
-                                            if (stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
-                                                island.addEvent(
-                                                    event:Event.new(
-                                                        base:Event.Base.database.find(name:'Encounter:Non-peaceful'),
-                                                        island, party, landmark //, currentTime
-                                                    )
-                                                );
-                                                stepsSinceLast = 0;
-                                            }
-                                        }
-                                        when(party.isIncapacitated()) send();
+                    onMove ::(choice) {
+                        // move by one unit in that direction
+                        // or ON it if its within one unit.
+                        landmark.map.movePointerAdjacent(
+                            x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
+                            y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
+                        );
+                        landmark.step();
+                        stepCount += 1;
 
 
-
-                                        @:arrival = landmark.map.getNamedItemsUnderPointer();
-                                        if (arrival != empty) ::<= {
-                                            foreach(arrival)::(index, arr) {
-                                                windowEvent.queueMessage(
-                                                    text:"The party has arrived at " + arr.name
-                                                );
-                                            }
-                                        }                                
-                                    }
-                                );                 
-                                
-                                
-                            } else ::<= {
-                                windowEvent.queueCursorMove(
-                                    leftWeight: 1,
-                                    topWeight: 1,
-                                    prompt: 'Walk which way?',
-                                    renderable:landmark.map,
-                                    onMove ::(choice) {
-                                        lastChoice = choice;
-                                        // move by one unit in that direction
-                                        // or ON it if its within one unit.
-                                        landmark.map.movePointerAdjacent(
-                                            x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
-                                            y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
-                                        );
-                                        landmark.step();
-                                        stepCount += 1;
-
-
-                                        // every 5 steps, heal 1% HP
-                                        if (stepCount % 15 == 0) ::<= {
-                                            foreach(party.members)::(i, member) <- member.heal(amount:(member.stats.HP * 0.01)->ceil);
-                                        }
-
-                                        stepsSinceLast += 1;
-                                        if (landmark.peaceful == false) ::<= {
-                                            if (stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
-                                                island.addEvent(
-                                                    event:Event.new(
-                                                        base:Event.Base.database.find(name:'Encounter:Non-peaceful'),
-                                                        island, party, landmark //, currentTime
-                                                    )
-                                                );
-                                                stepsSinceLast = 0;
-                                            }
-                                        }
-
-
-                                        
-                                        // cancel if we've arrived somewhere
-                                        @:arrival = landmark.map.getNamedItemsUnderPointer();
-                                        if (arrival != empty && arrival->keycount > 0) ::<= {
-                                            foreach(arrival)::(index, arr) {
-                                                windowEvent.queueMessage(
-                                                    text:"The party has arrived at the " + arr.name
-                                                );
-                                            }
-                                            landmark.map.setPointer(
-                                                x: arrival[0].x,
-                                                y: arrival[0].y
-                                            );
-                                            
-                                        }                            
-
-                                    }
-                                
-                                );
-                        
-                            }
-                          },
-                          
-                          (1): ::<={
-                            partyOptions();
-                            landmark.step();
-                          },
-                          
-                          
-                          default: ::<= {
-                            when(choice == empty) empty;
-                            choice -= MAX_STATIC_CHOICES + 1;
-                            when(choice >= locationAt->keycount) empty;
-                            locationAt = locationAt[choice].data;
-                            
-                            
-                            locationAt.interact();
-
-                          }
-                        
+                        // every 5 steps, heal 1% HP
+                        if (stepCount % 15 == 0) ::<= {
+                            foreach(party.members)::(i, member) <- member.heal(amount:(member.stats.HP * 0.01)->ceil);
                         }
-                    }
-                );
+
+                        stepsSinceLast += 1;
+                        if (landmark.peaceful == false) ::<= {
+                            if (stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
+                                island.addEvent(
+                                    event:Event.new(
+                                        base:Event.Base.database.find(name:'Encounter:Non-peaceful'),
+                                        island, party, landmark //, currentTime
+                                    )
+                                );
+                                stepsSinceLast = 0;
+                            }
+                        }
+
+
+                        
+                        // cancel if we've arrived somewhere
+                        @:arrival = landmark.map.getNamedItemsUnderPointer();
+                        if (arrival != empty && arrival->keycount > 0) ::<= {
+                            foreach(arrival)::(index, arr) {
+                                windowEvent.queueMessage(
+                                    text:"The party has arrived at the " + arr.name
+                                );
+                            }
+                            landmark.map.setPointer(
+                                x: arrival[0].x,
+                                y: arrival[0].y
+                            );
+                            
+                        }                            
+
+                    }                
+                )
             },
 
 
@@ -297,11 +246,7 @@ return class(
                 onLoadState => Function,
             ) {
                 this.onSaveState = onSaveState;
-                this.onLoadState = onLoadState;
-                             
-                import(module:'game_singleton.gamblist.mt').playGame(onFinish::{});   
-                return empty;
-                
+                this.onLoadState = onLoadState;                
                 
                 windowEvent.queueMessage(
                     text: ' Wyvern Gate ' + VERSION + ' '
@@ -634,9 +579,9 @@ return class(
                         prompt: 'What next?',
                         renderable: island.map,
                         canCancel : true,
+                        keep: true,
                         onGetChoices ::{
                             @:choices = [
-                                'Travel',
                                 'Check',
                                 'Party',
                                 'Look around',
@@ -656,12 +601,9 @@ return class(
 
                            
                             match(choice-1) {
-                              // travel
-                              (0): ::<= {
-                              },
                             
                               // check
-                              (1): ::<= {
+                              (0): ::<= {
                                 choice = windowEvent.queueChoices(
                                     leftWeight: 1,
                                     topWeight: 1,
@@ -680,21 +622,21 @@ return class(
                               },
                               
 
-                              (3): ::<= {
+                              (2): ::<= {
                                 island.incrementTime();
                                 windowEvent.queueMessage(text:'Nothing to see but the peaceful scenery of ' + island.name + '.');                          
                               },
                               // party options
-                              (2): partyOptions(),
+                              (1): partyOptions(),
 
-                              (4): ::<= {
+                              (3): ::<= {
                                 systemMenu();                          
                               },                          
                               
                               // visit landmark
                               default: ::<= {
                                 //breakpoint();
-                                this.visitLandmark(landmark:visitable[choice-6].data);
+                                this.visitLandmark(landmark:visitable[choice-5].data);
                               }
                             }
 

@@ -146,7 +146,7 @@ return class(
             
             stepTime :: {
                 turn += 1;
-                if (turn > 5) ::<={
+                if (turn > 10) ::<={
                     turn = 0;
                     time += 1;
                 }

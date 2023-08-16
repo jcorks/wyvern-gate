@@ -1478,6 +1478,35 @@ Interaction.new(
 
 Interaction.new(
     data : {
+        displayName : 'Drink Water',
+        name : 'drink-fountain',
+        onInteract ::(location, party) {
+            @:world = import(module:'game_singleton.world.mt');
+            
+            windowEvent.queueMessage(text:'The party took turns drinking from the fountain.');
+        
+            foreach(world.party.members) ::(index, member) {
+                if (member.hp < member.stats.HP)
+                    member.heal(amount: member.stats.HP * 0.1);
+                if (member.ap < member.stats.AP)
+                    member.healAP(amount: member.stats.AP * 0.1);
+            }
+            
+            
+            windowEvent.queueMessage(text:
+                random.pickArrayItem(list:[
+                    'The party feels slightly refreshed.',
+                    'Everyone was slightly refreshed by the drink.',
+                    'A welcomed rest for the party.'
+                ])
+            );
+        }
+    }
+) 
+
+
+Interaction.new(
+    data : {
         displayName : 'Loot',
         name : 'loot',
         onInteract ::(location, party) {

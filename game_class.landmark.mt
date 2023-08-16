@@ -664,6 +664,7 @@ Landmark.Base.new(
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
             {name: 'Small Chest', rarity:3},
+            {name: 'Fountain', rarity:10},
         ],
         requiredLocations : [
             'Stairs Down',
