@@ -907,6 +907,140 @@ Effect.new(
 
 Effect.new(
     data : {
+        name : 'Trigger Hurt Chance',
+        description: '10% chance to hurt for 1HP.',
+        battleOnly : true,
+        skipTurn : false,
+        stackable: false,
+        stats: StatSet.new(
+        ),
+        onAffliction : ::(user, item, holder) {
+            if (random.try(percentSuccess:10)) ::<= {
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                holder.damage(
+                    from:holder,
+                    damage: Damage.new(
+                        amount: 1,
+                        damageType: Damage.TYPE.NEUTRAL,
+                        damageClass: Damage.CLASS.HP
+                    ),
+                    dodgeable: false
+                );                        
+            }
+        },
+        onPostAttackOther : ::(user, item, holder, to) {
+        },
+
+        onPreAttackOther : ::(user, item, holder, to, damage) {
+        },
+        onAttacked : ::(user, item, holder, by, damage) {
+        
+        },
+
+        onRemoveEffect : ::(user, item, holder) {
+        },                
+
+        onDamage : ::(user, item, holder, from, damage) {
+        },
+        
+        onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+        },
+        onStatRecalculate : ::(user, item, holder, stats) {
+        
+        }
+    }
+) 
+
+Effect.new(
+    data : {
+        name : 'Trigger Fatigue Chance',
+        description: '10% chance to hurt for 1AP.',
+        battleOnly : true,
+        skipTurn : false,
+        stackable: false,
+        stats: StatSet.new(
+        ),
+        onAffliction : ::(user, item, holder) {
+            if (random.try(percentSuccess:10)) ::<= {
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                holder.damage(
+                    from:holder,
+                    damage: Damage.new(
+                        amount: 1,
+                        damageType: Damage.TYPE.NEUTRAL,
+                        damageClass: Damage.CLASS.AP
+                    ),
+                    dodgeable: false
+                );                        
+            }
+        },
+        onPostAttackOther : ::(user, item, holder, to) {
+        },
+
+        onPreAttackOther : ::(user, item, holder, to, damage) {
+        },
+        onAttacked : ::(user, item, holder, by, damage) {
+        
+        },
+
+        onRemoveEffect : ::(user, item, holder) {
+        },                
+
+        onDamage : ::(user, item, holder, from, damage) {
+        },
+        
+        onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+        },
+        onStatRecalculate : ::(user, item, holder, stats) {
+        
+        }
+    }
+) 
+
+Effect.new(
+    data : {
+        name : 'Trigger Break Chance',
+        description: '5% chance to break item.',
+        battleOnly : true,
+        skipTurn : false,
+        stackable: false,
+        stats: StatSet.new(
+        ),
+        onAffliction : ::(user, item, holder) {
+            if (random.try(percentSuccess:5)) ::<= {
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                holder.unequipItem(item, silent: true);
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' disintegrates.');                
+            }
+        },
+        onPostAttackOther : ::(user, item, holder, to) {
+        },
+
+        onPreAttackOther : ::(user, item, holder, to, damage) {
+        },
+        onAttacked : ::(user, item, holder, by, damage) {
+        
+        },
+
+        onRemoveEffect : ::(user, item, holder) {
+        },                
+
+        onDamage : ::(user, item, holder, from, damage) {
+        },
+        
+        onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+        },
+        onStatRecalculate : ::(user, item, holder, stats) {
+        
+        }
+    }
+) 
+
+Effect.new(
+    data : {
         name : 'Trigger Spikes',
         description: 'Casts Spikes',
         battleOnly : true,
@@ -987,6 +1121,91 @@ Effect.new(
         }
     }
 ) 
+
+
+Effect.new(
+    data : {
+        name : 'Trigger Spikes',
+        description: 'Casts Spikes',
+        battleOnly : true,
+        skipTurn : false,
+        stackable: false,
+        stats: StatSet.new(
+        ),
+        onAffliction : ::(user, item, holder) {
+            windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+            windowEvent.queueMessage(text:'It covers ' + holder.name + ' in spikes of light!');
+            holder.addEffect(
+                from:user, name: 'Spikes', durationTurns: 3
+            );                        
+        },
+        onPostAttackOther : ::(user, item, holder, to) {
+        },
+
+        onPreAttackOther : ::(user, item, holder, to, damage) {
+        },
+        onAttacked : ::(user, item, holder, by, damage) {
+        
+        },
+
+        onRemoveEffect : ::(user, item, holder) {
+        },                
+
+        onDamage : ::(user, item, holder, from, damage) {
+        },
+        
+        onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+        },
+        onStatRecalculate : ::(user, item, holder, stats) {
+        
+        }
+    }
+) 
+
+Effect.new(
+    data : {
+        name : 'Spikes',
+        description: 'DEF +10%, light damage when attacked.',
+        battleOnly : true,
+        skipTurn : false,
+        stackable: false,
+        stats: StatSet.new(
+            DEF: 10
+        ),
+        onAffliction : ::(user, item, holder) {
+            windowEvent.queueMessage(text:holder.name + ' is covered in spikes of light.');
+        },
+        onPostAttackOther : ::(user, item, holder, to) {
+        },
+
+        onPreAttackOther : ::(user, item, holder, to, damage) {
+        },
+        onAttacked : ::(user, item, holder, by, damage) {
+            windowEvent.queueMessage(text:by.name + ' gets hurt by ' + holder.name + '\'s spikes of light!');
+            by.damage(from:holder, damage:Damage.new(
+                amount:random.integer(from:1, to:4),
+                damageType:Damage.TYPE.LIGHT,
+                damageClass:Damage.CLASS.HP
+            ),dodgeable: false);
+        },
+
+        onRemoveEffect : ::(user, item, holder) {
+            windowEvent.queueMessage(text:holder.name + '\'s spikes of light fade.');
+        },                
+
+        onDamage : ::(user, item, holder, from, damage) {
+        },
+        
+        onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+
+        },
+        onStatRecalculate : ::(user, item, holder, stats) {
+        
+        }
+    }
+) 
+
 
 Effect.new(
     data : {

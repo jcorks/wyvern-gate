@@ -132,22 +132,11 @@ ItemEnchantCondition.new(
 
 ItemEnchantCondition.new(
     data : {
-        name : '33% Chance',
-        description : 'About 1/3rd of the time',                
+        name : 'End Of Turn',
+        description : 'At the end of the wielder\'s turn',                
         isState : false,
         onTurnCheck ::(wielder, item, battle) {
             return Number.random() < 0.3;
-        }                                
-    }
-)
-
-ItemEnchantCondition.new(
-    data : {
-        name : '50% Chance',
-        description : 'About 1/2 of the time',                
-        isState : false,
-        onTurnCheck ::(wielder, item, battle) {
-            return Number.random() < 0.5;
         }                                
     }
 )

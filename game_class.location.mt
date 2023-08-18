@@ -1459,6 +1459,7 @@ Location.Base.new(data:{
     minStructureSize : 1,
 
     descriptions: [
+        'A simple fountain flowing with fresh water.'
     ],
     interactions : [
         'drink-fountain'
@@ -1485,6 +1486,50 @@ Location.Base.new(data:{
     }
 
 });
+
+
+Location.Base.new(data:{
+    name: 'Enchantment Stand',
+    rarity: 4,
+    ownVerb : '',
+    symbol: '%',
+    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    minStructureSize : 1,
+
+    descriptions: [
+        'A stone stand with magic runes.'
+    ],
+    interactions : [
+        'enchant-once'
+    ],
+    
+    aggressiveInteractions : [
+    ],
+
+    
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {
+    },  
+    
+    onInteract ::(location) {
+    },
+    
+    onCreate ::(location) { 
+        @:ItemEnchant = import(module:'game_class.itemenchant.mt');
+        location.data.hasEnchant = true;
+        location.data.enchant = ItemEnchant.new(
+            base:ItemEnchant.Base.database.getRandom()
+        )
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+
+});
+
 
 
 Location.Base.new(data:{

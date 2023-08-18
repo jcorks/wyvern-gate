@@ -50,15 +50,13 @@
                 @story = import(module:'game_singleton.story.mt');
                 @:Item = import(module:'game_class.item.mt');
                 ent.ref.inventory.clear();
-                for(0, 1+(Number.random()*3)->floor)::(i) {
-                    @:itembase = Item.Base.database.getRandomWeightedFiltered(
-                        filter:::(value) <- value.isUnique == false && value.tier <= story.tier
-                        
-                    );
-                    if (itembase.name != 'None') ::<={
-                        @:itemInstance = Item.new(base:itembase, from:ent.ref);
-                        ent.ref.inventory.add(item:itemInstance);
-                    }
+                @:itembase = Item.Base.database.getRandomWeightedFiltered(
+                    filter:::(value) <- value.isUnique == false && value.tier <= story.tier
+                    
+                );
+                if (itembase.name != 'None') ::<={
+                    @:itemInstance = Item.new(base:itembase, from:ent.ref, rngEnchantHint:true);
+                    ent.ref.inventory.add(item:itemInstance);
                 }
             }
             ent.ref.anonymize();

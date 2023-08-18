@@ -665,11 +665,13 @@ Landmark.Base.new(
 //                    {name: 'Stairs Down', rarity:1},
             {name: 'Small Chest', rarity:3},
             {name: 'Fountain', rarity:10},
+            {name: 'Enchantment Stand', rarity: 11}
+
         ],
         requiredLocations : [
             'Stairs Down',
             'Stairs Down',
-            'Small Chest'
+            'Small Chest',
         ],
         mapHint:{},
         onCreate ::(landmark, island){

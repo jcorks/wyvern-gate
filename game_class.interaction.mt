@@ -1504,6 +1504,55 @@ Interaction.new(
     }
 ) 
 
+Interaction.new(
+    data : {
+        displayName : 'Enchant',
+        name : 'enchant-once',
+        onInteract ::(location, party) {
+            @:world = import(module:'game_singleton.world.mt');
+            
+            when(!location.data.hasEnchant) ::<= {
+                windowEvent.queueMessage(text:'The enchant stand doesnt seem to be active anymore.');                
+            };
+
+            windowEvent.queueMessage(text:'The stand lights up as you approach.');                
+            windowEvent.queueMessage(text:'The runes appear before you, but you cannot read them.');                
+            windowEvent.queueMessage(text:'An abstract thought appears in your mind. It seems like this will enchant a single item.');                
+            windowEvent.queueMessage(text:'The stand grants the enchantment: ' + location.data.enchant.name);                
+
+            windowEvent.queueAskBoolean(
+                prompt: 'Enchant?',
+                onChoice::(which) {
+                    when(!which) empty;
+                    
+                    @:pickItem = import(module:'game_function.pickitem.mt');
+                    pickItem(
+                        inventory:party.inventory, 
+                        canCancel:true, 
+                        onGetPrompt::{
+                            return 'Enchant which?'
+                        },
+                        topWeight : 0.5,
+                        leftWeight : 0.5,
+                        onPick::(item) {
+                            windowEvent.queueMessage(text:'This will add the enchant ' + location.data.enchant.name + ' to the ' + item.name + '. This change is permanent.');
+                            windowEvent.queueAskBoolean(
+                                prompt: 'Continue?',
+                                onChoice::(which) {
+                                    windowEvent.queueMessage(text:'The stand glows along with the item for a time before returning to normal.');
+                                    item.addEnchant(mod:location.data.enchant);
+                                    location.data.hasEnchant = false;
+                                }
+                            );
+                            windowEvent.jumpToTag(name:'pickItem', goBeforeTag: true);
+                        }
+                    );                    
+                }
+            );            
+
+        }
+    }
+) 
 
 Interaction.new(
     data : {

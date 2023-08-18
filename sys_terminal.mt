@@ -73,8 +73,7 @@ if (ret != empty) ::<= {
                 textRenderer.size = FONT_SIZE; 
 
                 this.constructor = ::{
-                    this.baseConstructor[Topaz.Entity]();
-                    this.instance.components = [textRenderer];
+                    this.components = [textRenderer];
                 }
 
                 this.interface = {
@@ -98,21 +97,19 @@ if (ret != empty) ::<= {
 
         
         this.constructor = ::{
-            
 
-            @self = this.instance;
             bg.formRectangle(width:640, height:480);
             bg.color = '#242424';
-            self.components = [bg];
+            this.components = [bg];
             bg.position = {x:0, y:-480 + LINE_SPACING*2}
             for(0, RENDERER_HEIGHT)::(i) {
                 lines[i] = TextLine.new();
                 lines[i].position = {x:0, y:-LINE_SPACING*i}
-                self.attach(entity:lines[i]);
+                this.attach(entity:lines[i]);
             }
 
 
-            return this.instance;
+            return this;
         }
         
 

@@ -297,7 +297,7 @@
                     }
 
                     
-                    if (rngEnchantHint != empty && random.try(percentSuccess:45)) ::<= {
+                    if (rngEnchantHint != empty && random.try(percentSuccess:60)) ::<= {
                         @enchantCount = random.integer(from:1, to:match(story.tier) {
                             (4):    7,
                             (3):    5,
@@ -528,7 +528,7 @@
                     ));
                     
                     if (silent == empty && base_.name != 'None') ::<= {
-                        windowEvent.queueMessage(text:'The party get\'s more used to using the ' + this.name + '.');
+                        windowEvent.queueMessage(text:'The party gets more used to using the ' + this.name + '.');
                         oldStats.printDiffRate(other:stats, prompt:this.name);
                     }
                 

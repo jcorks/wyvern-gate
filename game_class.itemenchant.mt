@@ -19,6 +19,27 @@
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:ItemEnchantCondition = import(module:'game_class.itemenchantcondition.mt');
+@:random = import(module:'game_singleton.random.mt');
+
+
+@:CONDITION_CHANCES = [
+    10,
+    33,
+    60,
+    80,
+    100
+];
+
+@:CONDITION_CHANCE_NAMES = [
+    'rarely',
+    'sometimes',
+    'often',
+    'very often',
+    'always'
+];
+
+
+
 
 
 @:ItemEnchant = class(
@@ -40,6 +61,8 @@
     define:::(this) {
         @base_;
         @condition;
+        @conditionChance;
+        @conditionChanceName
         
         this.interface = {
             initialize ::(base, conditionHint, state) {
@@ -55,6 +78,9 @@
                     } else ::<= {
                         condition = ItemEnchantCondition.database.getRandom();
                     }
+                    @conditionIndex = random.pickArrayItem(list:CONDITION_CHANCES->keys);
+                    conditionChance = CONDITION_CHANCES[conditionIndex];
+                    conditionChanceName = CONDITION_CHANCE_NAMES[conditionIndex];
                 }
                 return this;
             },
@@ -63,7 +89,7 @@
             description : {
                 get ::{
                     when(condition == empty) base_.description;
-                    return condition.description + base_.description;
+                    return condition.description + (base_.description)->replace(key:'$1', with: conditionChanceName);
                     
                 }
             },
@@ -83,6 +109,8 @@
             onTurnCheck ::(wielder, item, battle) {
                 when(condition == empty) empty;
                 if (condition.onTurnCheck(wielder, item, battle) == true) ::<= {
+                    when(!random.try(percentSuccess:conditionChance)) empty;
+                
                     foreach(base_.triggerConditionEffects)::(i, effectName) {
                         wielder.addEffect(
                             from:wielder, name: effectName, durationTurns: 1, item
@@ -143,7 +171,7 @@ ItemEnchant.Base = class(
 ItemEnchant.Base.new(
     data : {
         name : 'Protect',
-        description : ', will cast Protect on the wielder for a while, which greatly increases defense.',
+        description : ', will $1 cast Protect on the wielder for a while, which greatly increases defense.',
         equipMod : StatSet.new(
         ),
         levelMinimum : 1,
@@ -164,7 +192,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Evade',
-        description : ', will allow the wielder to evade attacks the next turn.',
+        description : ', will $1 allow the wielder to evade attacks the next turn.',
         equipMod : StatSet.new(
         ),
         levelMinimum : 1,
@@ -187,7 +215,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Regen',
-        description : ', will slightly recover the users wounds.',
+        description : ', will $1 slightly recover the users wounds.',
         equipMod : StatSet.new(
         ),
         levelMinimum : 1,
@@ -207,8 +235,73 @@ ItemEnchant.Base.new(
 
 ItemEnchant.Base.new(
     data : {
+        name : 'Chance to Break',
+        description : ', will $1 break.',
+        equipMod : StatSet.new(
+        ),
+        levelMinimum : 1,
+        priceMod: -1000,
+        tier : 1,
+        
+        triggerConditionEffects : [
+            'Trigger Break Chance'
+        ],
+        
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+)
+
+
+ItemEnchant.Base.new(
+    data : {
+        name : 'Chance to Hurt',
+        description : ', will $1 hurt the wielder.',
+        equipMod : StatSet.new(
+        ),
+        levelMinimum : 1,
+        priceMod: -200,
+        tier : 0,
+        
+        triggerConditionEffects : [
+            'Trigger Hurt Chance'
+        ],
+        
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+)
+
+ItemEnchant.Base.new(
+    data : {
+        name : 'Chance to Fatigue',
+        description : ', will $1 fatigue the wielder.',
+        equipMod : StatSet.new(
+        ),
+        levelMinimum : 1,
+        priceMod: -200,
+        tier : 0,
+        
+        triggerConditionEffects : [
+            'Trigger Fatigue Chance'
+        ],
+        
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+)
+
+
+ItemEnchant.Base.new(
+    data : {
         name : 'Spikes',
-        description : ', will damage an enemy when attacked for a few turns.',
+        description : ', will $1 cast a spell that damages an enemy when attacked for a few turns.',
         equipMod : StatSet.new(
         ),
         levelMinimum : 1,
@@ -227,11 +320,33 @@ ItemEnchant.Base.new(
 )
 
 
+ItemEnchant.Base.new(
+    data : {
+        name : 'Ensnare',
+        description : ', will $1 cast a spell to cause the wielder and the attacker to get ensnared.',
+        equipMod : StatSet.new(
+        ),
+        levelMinimum : 1,
+        priceMod: 350,
+        tier : 1,
+        
+        triggerConditionEffects : [
+            'Trigger Ensnare'
+        ],
+        
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+)
+
+
 
 ItemEnchant.Base.new(
     data : {
         name : 'Ease',
-        description : ', will recover from mental fatigue.',
+        description : ', will $1 recover from mental fatigue.',
         equipMod : StatSet.new(
         ),
         levelMinimum : 1,
@@ -252,7 +367,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Shield',
-        description : ', casts Shield for a while, which may block attacks.',
+        description : ', will $1 cast Shield for a while, which may block attacks.',
         equipMod : StatSet.new(
         ),
         levelMinimum : 1,
@@ -273,7 +388,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Boost Strength',
-        description : ', will boost the wielder\'s power for a while.',
+        description : ', will $1 boost the wielder\'s power for a while.',
         equipMod : StatSet.new(
         ),
         levelMinimum : 1,
@@ -294,7 +409,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Boost Defense',
-        description : ', will boost the wielder\'s defense for a while.',
+        description : ', will $1 boost the wielder\'s defense for a while.',
         equipMod : StatSet.new(
         ),
         levelMinimum : 1,
@@ -315,7 +430,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Boost Mind',
-        description : ', will boost the wielder\'s mental acquity for a while.',
+        description : ', will $1 boost the wielder\'s mental acquity for a while.',
         equipMod : StatSet.new(
         ),
         levelMinimum : 1,
@@ -336,7 +451,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Boost Dex',
-        description : ', will boost the wielder\'s dexterity for a while.',
+        description : ', will $1 boost the wielder\'s dexterity for a while.',
         equipMod : StatSet.new(
         ),
         levelMinimum : 1,
@@ -357,7 +472,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Boost Speed',
-        description : ', will boost the wielder\'s speed for a while.',
+        description : ', will $1 boost the wielder\'s speed for a while.',
         equipMod : StatSet.new(
         ),
         levelMinimum : 1,
