@@ -20,7 +20,7 @@
 
 
 @:CANVAS_WIDTH  = 80;
-@:CANVAS_HEIGHT = 22;
+@:CANVAS_HEIGHT = 24;
 
 @:hints = {
     // for general messages describing whats going on.

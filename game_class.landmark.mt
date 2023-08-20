@@ -671,7 +671,6 @@ Landmark.Base.new(
         requiredLocations : [
             'Stairs Down',
             'Stairs Down',
-            'Small Chest',
         ],
         mapHint:{},
         onCreate ::(landmark, island){

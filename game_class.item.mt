@@ -88,9 +88,9 @@
         ATTRIBUTE : {get::<-ATTRIBUTE},
         USE_TARGET_HINT : {get::<-USE_TARGET_HINT}
     },
-    new ::(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint, abilityHint) {
+    new ::(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant) {
         @:this = Item.defaultNew();
-        this.initialize(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint, abilityHint);
+        this.initialize(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant);
         return this;
     },
     define:::(this) {
@@ -217,7 +217,7 @@
         @:world = import(module:'game_singleton.world.mt');
         
         this.interface = {
-            initialize::(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint, abilityHint) {
+            initialize::(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant) {
                 when(state != empty) ::<= {
                     this.state = state;
                     return this;
@@ -297,12 +297,12 @@
                     }
 
                     
-                    if (rngEnchantHint != empty && random.try(percentSuccess:60)) ::<= {
+                    if (rngEnchantHint != empty && (random.try(percentSuccess:60) || forceEnchant)) ::<= {
                         @enchantCount = random.integer(from:1, to:match(story.tier) {
-                            (4):    7,
-                            (3):    5,
-                            (1):    3,
-                            default: 1
+                            (4):    8,
+                            (3):    6,
+                            (1):    4,
+                            default: 2
                         });
                         
                         

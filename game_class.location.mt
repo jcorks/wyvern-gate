@@ -1438,6 +1438,7 @@ Location.Base.new(data:{
                                             && value.tier <= story.tier
                 ),
                 rngEnchantHint:true, 
+                forceEnchant:true,
                 from:location.landmark.island.newInhabitant()
             )
         );

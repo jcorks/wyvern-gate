@@ -470,7 +470,7 @@
                     @out = 'A ' + Island.climateToString(climate) + ' island, ' + name + ' is mostly populated by people of ' + species[0].species.name + ' and ' + species[1].species.name + ' descent. ';//The island is known for its ' + professions[0].profession.name + 's and ' + professions[1].profession.name + 's.\n';
                     //out = out + this.class.describeEncounterRate(rate:encounterRate) + '\n';
                     //out = out + '(Level range: ' + levelMin + ' - ' + levelMax + ')' + '\n\n';
-                    
+                    /*
                     out = out + 'It has ' + significantLandmarks->keycount + ' landmark(s): \n';
 
                     foreach(significantLandmarks)::(index, landmark) {
@@ -479,7 +479,7 @@
                         else
                             out = out + 'An undiscovered ' + landmark.base.name + '\n';
                     }
-                    
+                    */
                     return out;
                 }
             },

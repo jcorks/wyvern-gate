@@ -751,7 +751,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Teal Crystal',
-        description : 'Set with an simple, enchanted teal crystal of alchemical origin.',
+        description : 'Set with a simple, enchanted teal crystal of alchemical origin.',
         equipMod : StatSet.new(
             SPD: 15,
             DEX: 15,
