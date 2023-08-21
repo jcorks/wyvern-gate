@@ -1125,7 +1125,7 @@ Profession.Base.new(data:{
         'Ensnare'
     ],
     passives : [
-        'Shocking'
+        'Shock'
     ]
 })
 

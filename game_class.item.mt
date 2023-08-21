@@ -431,8 +431,8 @@
                     equipEffects->push(value:effect);
                 }
                 stats.add(stats:mod.base.equipMod);
-                if (description->contains(key:mod.description) == false)
-                    description = description + mod.description + ' ';
+                //if (description->contains(key:mod.description) == false)
+                //    description = description + mod.description + ' ';
                 recalculateName();
                 price += mod.base.priceMod;
                 price = price->ceil;
@@ -467,24 +467,48 @@
                     text:description,
                     pageAfter:canvas.height-4
                 );
+                
+                if (enchants->keycount != 0) ::<= {
+                    windowEvent.queueMessage(
+                        speaker:this.name + ' - Enchantments',
+                        pageAfter:canvas.height-4,
+                        text:::<={
+                            @:list = [
+                                'I', 'II', 'III', 'IV', 'V', 'VI', "VII", 'VIII', 'IX', 'X', 'XI'
+                            ]
+                            @out = '';
+                            when (enchants->keycount == 0) 'None.';
+                            foreach(enchants)::(i, mod) {
+                                out = out + list[i] + ' - ' + mod.description + '\n';
+                            }
+                            return out;
+                        }
+                    );                
+                }                
+                
                 windowEvent.queueMessage(
                     speaker:this.name + ' - Equip Stats',
                     text:stats.description,
                     pageAfter:canvas.height-4
                 );
 
-                windowEvent.queueMessage(
-                    speaker:this.name + ' - Equip Effects',
-                    pageAfter:canvas.height-4,
-                    text:::<={
-                        @out = '';
-                        when (equipEffects->keycount == 0) 'None.';
-                        foreach(equipEffects)::(i, effect) {
-                            out = out + '. ' + Effect.database.find(name:effect).description + '\n';
+                if (equipEffects->keycount != 0) ::<= {
+                    windowEvent.queueMessage(
+                        speaker:this.name + ' - Equip Effects',
+                        pageAfter:canvas.height-4,
+                        text:::<={
+                            @out = '';
+                            when (equipEffects->keycount == 0) 'None.';
+                            foreach(equipEffects)::(i, effect) {
+                                out = out + '. ' + Effect.database.find(name:effect).description + '\n';
+                            }
+                            return out;
                         }
-                        return out;
-                    }
-                );                
+                    );
+                }
+                
+
+                                
                 windowEvent.queueMessage(
                     speaker:this.name + ' - Use Effects',
                     pageAfter:canvas.height-4,

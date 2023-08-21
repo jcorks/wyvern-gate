@@ -171,9 +171,12 @@ return ::{
                                                     choices:itemNames,
                                                     prompt: member.name + ': ' + slotToName(slot),
                                                     canCancel: true,
+                                                    keep:true,
+                                                    jumpTag: 'EquipWhich',
                                                     
                                                     onChoice:::(choice) {
                                                         @:index = choice -1;
+
                                                         // unequip
                                                         when (index == items->keycount) ::<= {
                                                             @item = member.getEquipped(slot);
@@ -183,17 +186,45 @@ return ::{
                                                                 );
                                                                 member.unequipItem(item);
                                                                 party.inventory.add(item);
+                                                                windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);
                                                             }
                                                         }
                                                         
                                                         @item = items[index];
 
-                                                        // equip 
-                                                        member.equip(
-                                                            item, 
-                                                            slot:member.getSlotsForItem(item)[0], 
-                                                            inventory:party.inventory
-                                                        );
+                                                        windowEvent.queueChoices(
+                                                            choices: ['Equip', 'Check', 'Compare'],
+                                                            canCancel: true,
+                                                            leftWeight: 1,
+                                                            topWeight: 1,
+                                                            onChoice::(choice) {
+                                                                when (choice == 0) empty;
+                                                                when(choice == 1) ::<= {
+                                                        
+                                                                    // equip 
+                                                                    member.equip(
+                                                                        item, 
+                                                                        slot:member.getSlotsForItem(item)[0], 
+                                                                        inventory:party.inventory
+                                                                    );
+                                                                    windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);
+                                                                }
+                                                                
+                                                                when(choice == 2) 
+                                                                    item.describe();
+
+
+                                                                when(choice == 3) ::<= {
+                                                                    @slot = member.getSlotsForItem(item)[0];
+                                                                    @currentEquip = member.getEquipped(slot);
+                                                                    
+                                                                    currentEquip.equipMod.printDiffRate(
+                                                                        prompt: currentEquip.name + ' -> ' + item.name,
+                                                                        other:item.equipMod
+                                                                    );                                                                     
+                                                                }
+                                                            }
+                                                        )
                                                     }
                                                 );
                                             }
@@ -208,11 +239,11 @@ return ::{
                                                 topWeight: 1,
                                                 onGetChoices:: {
                                                     @choices = ['Equip'];
-                                                    if (member.getEquipped(slot).name != 'None') ::<= {
+                                                    return if (member.getEquipped(slot).name != 'None') ::<= {
                                                         choices->push(value:'Check');
                                                         choices->push(value:'Improve');
-                                                    }
-                                                    return choices;
+                                                        return choices;
+                                                    } else empty;
                                                 },
                                                 onGetPrompt::{
                                                     return member.name + ': ' + member.getEquipped(slot).name + '';

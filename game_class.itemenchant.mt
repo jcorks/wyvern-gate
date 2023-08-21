@@ -751,7 +751,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Teal Crystal',
-        description : 'Set with a simple, enchanted teal crystal of alchemical origin.',
+        description : 'Set with a simple, enchanted teal crystal of alchemical origin, which alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: 15,
             DEX: 15,
@@ -775,7 +775,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Lavender Crystal',
-        description : 'Set with an simple, enchanted lavender crystal of alchemical origin.',
+        description : 'Set with a simple, enchanted lavender crystal of alchemical origin, which alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: -5,
             DEX: 15,
@@ -799,7 +799,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Orange Crystal',
-        description : 'Set with an simple, enchanted orange crystal of alchemical origin.',
+        description : 'Set with a simple, enchanted orange crystal of alchemical origin, which alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: -5,
             DEX: -5,
@@ -823,7 +823,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Indigo Crystal',
-        description : 'Set with an simple, enchanted indigo crystal of alchemical origin.',
+        description : 'Set with a simple, enchanted indigo crystal of alchemical origin, which alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: -5,
             DEX: -5,
@@ -848,7 +848,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Rose Crystal',
-        description : 'Set with an simple, enchanted rose crystal of alchemical origin.',
+        description : 'Set with a simple, enchanted rose crystal of alchemical origin, which alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: 15,
             DEX: -5,
@@ -872,7 +872,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Cyan Crystal',
-        description : 'Set with an simple, enchanted cyan crystal of alchemical origin.',
+        description : 'Set with a simple, enchanted cyan crystal of alchemical origin, which alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: 15,
             DEX: -5,
@@ -896,7 +896,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: White Crystal',
-        description : 'Set with an simple, enchanted white crystal of alchemical origin.',
+        description : 'Set with a simple, enchanted white crystal of alchemical origin, which alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: 15,
             DEX: -5,
@@ -920,7 +920,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Violet Crystal',
-        description : 'Set with an simple, enchanted violet crystal of alchemical origin.',
+        description : 'Set with a simple, enchanted violet crystal of alchemical origin, which alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: -5,
             DEX: 15,
@@ -944,7 +944,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Scarlet Crystal',
-        description : 'Set with an simple, enchanted scarlet crystal of alchemical origin.',
+        description : 'Set with a simple, enchanted scarlet crystal of alchemical origin, which alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: -5,
             DEX: 15,
@@ -968,7 +968,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Maroon Crystal',
-        description : 'Set with an simple, enchanted maroon crystal of alchemical origin.',
+        description : 'Set with a simple, enchanted maroon crystal of alchemical origin, which alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: 15,
             DEX: -5,
@@ -992,7 +992,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Crimson Crystal',
-        description : 'Set with an simple, enchanted crimson crystal of alchemical origin.',
+        description : 'Set with a simple, enchanted crimson crystal of alchemical origin, which alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: -5,
             DEX: -5,
@@ -1028,7 +1028,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Morion',
-        description : 'Set with an enchanted morion stone.',
+        description : 'Set with an enchanted morion stone, which greatly alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: 50,
             DEX: 50,
@@ -1052,7 +1052,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Amethyst',
-        description : 'Set with an enchanted amethyst.',
+        description : 'Set with an enchanted amethyst, which greatly alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: -25,
             DEX: 50,
@@ -1076,7 +1076,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Citrine',
-        description : 'Set with an enchanted citrine stone.',
+        description : 'Set with an enchanted citrine stone, which greatly alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: -25,
             DEX: -25,
@@ -1100,7 +1100,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Garnet',
-        description : 'Set with an enchanted garnet stone.',
+        description : 'Set with an enchanted garnet stone, which greatly alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: -25,
             DEX: -25,
@@ -1125,7 +1125,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Praesolite',
-        description : 'Set with an enchanted praesolite stone.',
+        description : 'Set with an enchanted praesolite stone, which greatly alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: 50,
             DEX: -25,
@@ -1149,7 +1149,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Aquamarine',
-        description : 'Set with an enchanted aquamarine stone.',
+        description : 'Set with an enchanted aquamarine stone, which greatly alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: 50,
             DEX: -25,
@@ -1173,7 +1173,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Diamond',
-        description : 'Set with an enchanted diamond stone.',
+        description : 'Set with an enchanted diamond stone, which greatly alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: 50,
             DEX: -25,
@@ -1197,7 +1197,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Pearl',
-        description : 'Set with an enchanted pearl.',
+        description : 'Set with an enchanted pearl, which greatly alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: -25,
             DEX: 50,
@@ -1221,7 +1221,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Ruby',
-        description : 'Set with an enchanted ruby.',
+        description : 'Set with an enchanted ruby, which greatly alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: -25,
             DEX: 50,
@@ -1245,7 +1245,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Sapphire',
-        description : 'Set with an enchanted sapphire.',
+        description : 'Set with an enchanted sapphire, which greatly alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: 50,
             DEX: -25,
@@ -1269,7 +1269,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Opal',
-        description : 'Set with an enchanted opal stone.',
+        description : 'Set with an enchanted opal stone, which greatly alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: -25,
             DEX: -25,
@@ -1294,7 +1294,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Cursed',
-        description : 'Somehow, cursed magicks have seeped into this.',
+        description : 'Somehow, cursed magicks have seeped into this, which greatly alters the stats of the item.',
         equipMod : StatSet.new(
             DEF: -70,
             ATK: -70,
@@ -1319,7 +1319,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Bloodstone',
-        description : 'Set with a large bloodstone, shining sinisterly',
+        description : 'Set with a large bloodstone, shining sinisterly. This greatly alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: 30,
             DEX: 30,
@@ -1344,7 +1344,7 @@ ItemEnchant.Base.new(
 ItemEnchant.Base.new(
     data : {
         name : 'Inlet: Soulstone',
-        description : 'Set with a large soulstone, shining sinisterly',
+        description : 'Set with a large soulstone, shining sinisterly. This greatly alters the stats of the item.',
         equipMod : StatSet.new(
             SPD: 30,
             DEX: 30,
