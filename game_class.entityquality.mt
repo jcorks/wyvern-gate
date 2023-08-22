@@ -197,6 +197,9 @@ EntityQuality.Base.new(
             'light brown',
             'black',
             'grey',
+            'orange',
+            'yellow',
+            'goldenrod',
             'soft grey'
         ],
         
@@ -394,6 +397,60 @@ EntityQuality.Base.new(
         ]             
     }
 )        
+
+EntityQuality.Base.new(
+    data : {
+        name : 'horns',
+        plural : true,
+        appearanceChance : 0.5,
+        descriptions : [
+            '$0',
+            '$0 and $1',
+        ],
+        
+        trait0 : [
+            'short',
+            'large',
+            'medium-size',
+            'long'
+        ],
+        
+        trait1 : [
+            'sharp',
+            'curled',
+            'dulled'
+        ],
+        
+        trait2 : [
+        ]             
+    }
+)        
+
+
+EntityQuality.Base.new(
+    data : {
+        name : 'tail',
+        plural : false,
+        appearanceChance : 1,
+        descriptions : [
+            '$0',
+            '$0 and always moving',
+        ],
+        
+        trait0 : [
+            'small',
+            'large',
+            'medium-size',
+        ],
+        
+        trait1 : [
+        ],
+        
+        trait2 : [
+        ]             
+    }
+) 
+
 
 EntityQuality.Base.new(
     data : {

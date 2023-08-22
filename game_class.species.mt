@@ -49,19 +49,22 @@
     }
 );
 
+
+// 36 points
+
 Species.new(data:{
     name : 'Wolf',
     rarity : 10,
     description: 'A common canid race.',
     growth : StatSet.new(
-        HP : 5,
+        HP : 8,
         AP : 2,
-        ATK: 3,
-        DEF: 3,
+        ATK: 4,
+        DEF: 4,
         INT: 2,
         LUK: 1,
-        SPD: 2,
-        DEX: 3
+        SPD: 7,
+        DEX: 8
     ),        
     qualities : [
         'snout',
@@ -69,7 +72,8 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
-        'body'
+        'body',
+        'tail'
     ],
     special : false,
     passives : [
@@ -96,7 +100,8 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
-        'body'
+        'body',
+        'tail'
     ],
     
     special : false,
@@ -109,7 +114,7 @@ Species.new(data:{
     rarity : 10,
     description: 'A canid race.',
     growth : StatSet.new(
-        HP : 3,
+        HP : 2,
         AP : 6,
         ATK: 4,
         DEF: 1,
@@ -124,6 +129,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     
@@ -152,6 +158,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     
@@ -165,14 +172,14 @@ Species.new(data:{
     description: 'A common felid race.',
     rarity : 45,
     growth : StatSet.new(
-        HP : 3,
-        AP : 2,
-        ATK: 6,
+        HP : 5,
+        AP : 3,
+        ATK: 7,
         DEF: 2,
         INT: 4,
         LUK: 2,
-        SPD: 5,
-        DEX: 3
+        SPD: 6,
+        DEX: 7
     ),
     qualities : [
         'snout',
@@ -180,6 +187,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     
@@ -197,7 +205,7 @@ Species.new(data:{
         AP : 4,
         ATK: 3,
         DEF: 4,
-        INT: 5,
+        INT: 4,
         LUK: 6,
         SPD: 6,
         DEX: 6
@@ -208,6 +216,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     
@@ -236,6 +245,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     
@@ -251,20 +261,51 @@ Species.new(data:{
     rarity : 30,
     growth : StatSet.new(
         HP : 1,
-        AP : 10,
-        ATK: 2,
-        DEF: 2,
-        INT: 10,
-        LUK: 4,
-        SPD: 10,
+        AP : 8,
+        ATK: 1,
+        DEF: 1,
+        INT: 8,
+        LUK: 1,
+        SPD: 8,
         DEX: 8
     ),
     qualities : [
         'snout',
         'scales',
         'eyes',
-        'ears',
         'face',
+        'tail',
+        'horns',
+        'body'
+    ],
+    
+    special : false,
+    passives : [
+    ]
+})
+
+
+Species.new(data:{
+    name : 'Drake-kin',
+    description: 'A common dragon-like race of medium stature with fur.',
+    rarity : 30,
+    growth : StatSet.new(
+        HP : 5,
+        AP : 4,
+        ATK: 4,
+        DEF: 9,
+        INT: 5,
+        LUK: 2,
+        SPD: 1,
+        DEX: 6
+    ),
+    qualities : [
+        'snout',
+        'fur',
+        'eyes',
+        'face',
+        'tail',
+        'horns',
         'body'
     ],
     
@@ -284,8 +325,8 @@ Species.new(data:{
         DEF: 2,
         INT: 4,
         LUK: 6,
-        SPD: 10,
-        DEX: 8
+        SPD: 8,
+        DEX: 7
     ),
     qualities : [
         'snout',
@@ -293,6 +334,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     
@@ -307,14 +349,14 @@ Species.new(data:{
     rarity : 30,
     description: 'A slender canid race.',
     growth : StatSet.new(
-        HP : 5,
-        AP : 4,
+        HP : 6,
+        AP : 5,
         ATK: 2,
-        DEF: 1,
-        INT: 3,
+        DEF: 2,
+        INT: 4,
         LUK: 6,
-        SPD: 4,
-        DEX: 5
+        SPD: 5,
+        DEX: 6
     ),
     qualities : [
         'snout',
@@ -322,6 +364,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     
@@ -342,7 +385,7 @@ Species.new(data:{
         INT: 4,
         LUK: 10,
         SPD: 3,
-        DEX: 2
+        DEX: 3
     ),
     qualities : [
         'snout',
@@ -350,6 +393,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     
@@ -363,14 +407,14 @@ Species.new(data:{
     rarity : 100,
     description: 'A large mammal race.',
     growth : StatSet.new(
-        HP : 10,
+        HP : 12,
         AP : 1,
-        ATK: 7,
+        ATK: 8,
         DEF: 9,
-        INT: 1,
-        LUK: -3,
-        SPD: -3,
-        DEX: 1
+        INT: 2,
+        LUK: 1,
+        SPD: 1,
+        DEX: 2
     ),
     qualities : [
         'snout',
@@ -391,14 +435,14 @@ Species.new(data:{
     rarity : 100,
     description: 'A large mammal race.',
     growth : StatSet.new(
-        HP : 4,
-        AP : 3,
-        ATK: 8,
+        HP : 5,
+        AP : 4,
+        ATK: 10,
         DEF: 2,
-        INT: 4,
-        LUK: 0,
-        SPD: 5,
-        DEX: 0
+        INT: 5,
+        LUK: 1,
+        SPD: 6,
+        DEX: 3
     ),
     qualities : [
         'snout',
@@ -406,6 +450,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     
@@ -420,10 +465,10 @@ Species.new(data:{
     description: 'A bird race of medium stature',
     growth : StatSet.new(
         HP : 3,
-        AP : 8,
+        AP : 9,
         ATK: 3,
         DEF: 2,
-        INT: 7,
+        INT: 8,
         LUK: 2,
         SPD: 5,
         DEX: 4
@@ -446,13 +491,13 @@ Species.new(data:{
     description: 'A bird race of medium stature',
     growth : StatSet.new(
         HP : 4,
-        AP : 0,
+        AP : 1,
         ATK: 5,
         DEF: 5,
-        INT: 0,
-        LUK: 10,
+        INT: 1,
+        LUK: 9,
         SPD: 10,
-        DEX: 0
+        DEX: 1
     ),
     qualities : [
         'feathers',
@@ -473,14 +518,14 @@ Species.new(data:{
     rarity : 100,
     description: 'A mammal race of medium stature',
     growth : StatSet.new(
-        HP : 4,
-        AP : 3,
-        ATK: 3,
-        DEF: 3,
-        INT: 4,
-        LUK: 5,
-        SPD: 3,
-        DEX: 3
+        HP : 5,
+        AP : 5,
+        ATK: 4,
+        DEF: 4,
+        INT: 5,
+        LUK: 3,
+        SPD: 5,
+        DEX: 5
     ),
     qualities : [
         'snout',
@@ -488,6 +533,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     
@@ -501,14 +547,14 @@ Species.new(data:{
     rarity : 40,
     description: 'A felid race of medium stature',
     growth : StatSet.new(
-        HP : 3,
-        AP : 4,
-        ATK: 2,
-        DEF: 3,
-        INT: 5,
+        HP : 4,
+        AP : 6,
+        ATK: 3,
+        DEF: 4,
+        INT: 7,
         LUK: 2,
-        SPD: 6,
-        DEX: 2
+        SPD: 7,
+        DEX: 3
     ),
     qualities : [
         'snout',
@@ -516,6 +562,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     
@@ -529,10 +576,10 @@ Species.new(data:{
     rarity : 40,
     description: 'A canid race of medium stature',
     growth : StatSet.new(
-        HP : 3,
+        HP : 6,
         AP : 4,
         ATK: 2,
-        DEF: 2,
+        DEF: 8,
         INT: 5,
         LUK: 2,
         SPD: 3,
@@ -544,6 +591,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     
@@ -563,9 +611,9 @@ Species.new(data:{
         ATK: 10,
         DEF: 1,
         INT: 2,
-        LUK: 0,
+        LUK: 1,
         SPD: 10,
-        DEX: 1
+        DEX: 2
     ),
     qualities : [
         'snout',
@@ -573,6 +621,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     
@@ -588,7 +637,7 @@ Species.new(data:{
     growth : StatSet.new(
         HP : 4,
         AP : 2,
-        ATK: 4,
+        ATK: 5,
         DEF: 3,
         INT: 7,
         LUK: 2,
@@ -602,6 +651,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     
@@ -621,8 +671,8 @@ Species.new(data:{
         DEF: 5,
         INT: 2,
         LUK: 1,
-        SPD: 6,
-        DEX: 3
+        SPD: 7,
+        DEX: 6
     ),
     qualities : [
         'snout',
@@ -630,6 +680,7 @@ Species.new(data:{
         'eyes',
         'ears',
         'face',
+        'tail',
         'body'
     ],
     

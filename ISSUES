@@ -2,21 +2,17 @@ Known bugs / concerns:
 - Missing skills in professions
   . Assassin
   . Farmer
-- Skills are not used by AI yet.
 - Defeating a person in battle can cause them to rejoin the battle sometimes 
 - bribing or otherwise dismissing an enemy from battle will not 
   remove them from the dungeon map, making them still chase you afterwards 
 - Time of day is still listed in dungeons when time of day doesnt change. Need to display 
   level and other useful information instead
-- When Entering a landmark, the previous menu from the overworld pokes through
-- When using items, the inventory screen persists, causing a layering effect (purely visual)
-
+- Running away causes the battle screen to lock up
+- Some time of day displays go offscreen when the island name 
+  is too long.
 
 
 Coming changes:
-  . Item descriptions can have a colored tag to them. For example, the description of a short 
-    sword could have added 'The hilt of the shortsword has a green trim'. If an item has 
-    a color, it counts as a color attribute and gets those stat changes
   . Enchanter stall
     . disenchant (remove effects) from equip for a flat rate 
     . enchant from a list of per-enchanter mods
@@ -27,7 +23,12 @@ Coming changes:
     
   . Dungeon crawl-style maps for:
     - abandoned castles
-  . enemy spawns are ALWAYS offscreen areas
+    
+  . Additional dungeon random locations
+    - Clothing stall
+    - Wyvern statue with tablet. one time.
+    - Blessing statues, permanent + base state to a party member. one time.
+    
    
   . Stratum keys are pre-defined:
     - First dunegon yields the FIRE key. Enemies here do not use skills and do not have equips
@@ -38,19 +39,14 @@ Coming changes:
       that must be fought to progress to the next island.
     - After the last dragon, credits and post game.
 
-  . Each wyvern has a service they provide if you ever revisit them 
-    . Ice wyvern challenges the party (for 1000G) a game of Generala. If the party wins 
-      the Ice wyvern gives the party a Masterwork item with an Icy enchant.
 
 - Post Game
 
 - Research Hall
-    . Tablet exchange
-- area plots for towns and cities to give it a better sense of order
+    . Tablet exchange. Tablets are rare finds and can be exchanged for 
+      uniques.
+    . 
 - Books containing lore and other fun things
-- Gambling Tent
-  . Dice poker
-  . others?
 
 
 

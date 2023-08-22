@@ -205,6 +205,8 @@ Interaction.new(
         displayName: 'Buy Drink',
         name : 'drink:tavern',
         onInteract ::(location, party) {
+            @:story = import(module:'game_singleton.story.mt');
+            @:world = import(module:'game_singleton.world.mt');
             when (location.landmark.peaceful == false) ::<= {
                 windowEvent.queueMessage(
                     speaker: 'Bartender',
@@ -261,12 +263,14 @@ Interaction.new(
                   
 
                   // gamblist
-                  (chance < 0.8)::<= {
+                  (chance < 0.8 && story.gamblistInParty == false)::<= {
+
+                  
+                  
                     windowEvent.queueMessage(
                         text:'Someone sits next to you...'
                     );   
                     
-                    @:story = import(module:'game_singleton.story.mt');
                     if (story.gamblistEncountered) ::<= {
                         windowEvent.queueMessage(
                             text:'... wait it\'s.. huh.'
@@ -277,10 +281,7 @@ Interaction.new(
                             text:'Hello again, stranger.'
                         );                               
 
-                        windowEvent.queueMessage(
-                            speaker: 'Wandering Gamblist',
-                            text:'Care to try your luck again? All it costs is an item of yours. Any will do.'
-                        );                               
+                              
                     } else ::<= {
                         story.gamblistEncountered = true;
                         windowEvent.queueMessage(
@@ -288,19 +289,20 @@ Interaction.new(
                             text:'Hello, stranger.'
                         );                               
 
-                        windowEvent.queueMessage(
-                            speaker: 'Wandering Gamblist',
-                            text:'May I interest you in some... Entertainment? All it costs is an item of yours. Any will do.'
-                        );                               
-
-                            windowEvent.queueMessage(
-                                speaker: 'Wandering Gamblist',
-                                text:'If you win, you get your item back and one of mine. If I win, well...'
-                            );                               
-
                     }
                     
-                    
+
+                    windowEvent.queueMessage(
+                        speaker: 'Wandering Gamblist',
+                        text:'May I interest you in some... Entertainment? All it costs is an item of yours. Any will do.'
+                    );                               
+
+                    windowEvent.queueMessage(
+                        speaker: 'Wandering Gamblist',
+                        text:'If you win, you get your item back and one of mine. If I win, well...'
+                    );                            
+
+
                     windowEvent.queueAskBoolean(
                         prompt:'Play a game?',
                         onChoice::(which) {
@@ -350,56 +352,113 @@ Interaction.new(
                                             text: 'Ah, well done. A gamble is a gamble, after all.'                                    
                                         );
                                         
-                                        @itemPrice = item.price;
-                                        @itemChoices = [];
-                                        for(0, 50)::(i) {
-                                            @newItem = Item.new(
-                                                base: Item.Base.database.getRandomFiltered(
-                                                    filter::(value) <- (
-                                                        value.isUnique == false 
-                                                        && value.tier <= story.tier
-                                                    )
-                                                ),
-                                                rngEnchantHint:true,                                                 
-                                                from:location.ownedBy
-                                            )    
-                                            itemChoices->push(value:newItem);                                    
-                                        }
+                                        windowEvent.queueMessage(
+                                            speaker: 'Wandering Gamblist',
+                                            text: 'Alternatively, I can offer my services...'                                    
+                                        );
                                         
-                                        itemChoices->sort(comparator::(a, b) {
-                                            @diffA = (a.price - itemPrice)->abs;
-                                            @diffB = (b.price - itemPrice)->abs;
-                                            when (diffA < diffB) -1;
-                                            when (diffA > diffB)  1;
-                                            return 0;
-                                        });
                                         
-                                        itemChoices = itemChoices->subset(from:0, to:6);
-                                        
-                                        @:Inventory = import(module:'game_class.inventory.mt');
-                                        @inv = Inventory.new(size: 30);
-                                        foreach(itemChoices)::(i, it) {
-                                            inv.add(item:it);
-                                        }
-                                        
-                                        pickItem(
-                                            canCancel : false,
-                                            onGetPrompt ::<- 'Pick a prize!',
-                                            topWeight : 0.5,
-                                            leftWeight : 0.5,
-                                            inventory:inv,
-                                            onPick::(item) {
-                                                windowEvent.queueMessage(
-                                                    text: 'The party won the ' + item.name + '!'
-                                                );
-                                                
-                                                party.inventory.add(item);
+                                        windowEvent.queueChoices(
+                                            canCancel: false,
+                                            choices: ['Get Prize', 'Join Party'],
+                                            onChoice::(choice) {
+                                                when(choice == 2) ::<= {
+                                                    @:Species = import(module:'game_class.species.mt');
+                                                    @:Entity = import(module:'game_class.entity.mt');
+                                                    @:skie = Entity.new(
+                                                        speciesHint: Species.database.find(name:'Drake-kin'),
+                                                        professionHint: 'Runologist',
+                                                        levelHint: 5,
+                                                        adventurousHint: true
+                                                    );
+                                                    
+                                                    @:skieWeapon = Item.new(
+                                                        base: Item.Base.database.find(name: 'Tome'),
+                                                        rngEnchantHint: true,
+                                                        qualityHint: 'Standard',
+                                                        materialHint: 'Mythril',
+                                                        colorHint: 'Gold',
+                                                        forceEnchant: true
+                                                    );
+                                                    
+                                                    @:skieRobe = Item.new(
+                                                        base: Item.Base.database.find(name: 'Robe'),
+                                                        rngEnchantHint: true,
+                                                        qualityHint: 'Standard',
+                                                        colorHint: 'Gold',
+                                                        forceEnchant: true
+                                                    );
+                                                    
+                                                    
+                                                    skie.equip(item:skieWeapon, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true);
+                                                    skie.equip(item:skieRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);
 
-                                                windowEvent.queueMessage(
-                                                    speaker: 'Wandering Gamblist',
-                                                    text: 'Until next time...'                                    
-                                                );
-                                                windowEvent.jumpToTag(name:'pickItem', doResolveNext: true, goBeforeTag: true);
+                                                    
+                                                    @:learned = skie.profession.gainSP(amount:20);
+                                                    foreach(learned)::(index, ability) {
+                                                        skie.learnAbility(name:ability);
+                                                    }                                                
+                                                    skie.name = 'Skie';
+                                                    party.add(member:skie);
+                                                    windowEvent.queueMessage(
+                                                        text: skie.name + ' joins the party!'
+                                                    );                
+                                                }
+                                            
+                                            
+                                                @itemPrice = item.price;
+                                                @itemChoices = [];
+                                                for(0, 50)::(i) {
+                                                    @newItem = Item.new(
+                                                        base: Item.Base.database.getRandomFiltered(
+                                                            filter::(value) <- (
+                                                                value.isUnique == false 
+                                                                && value.tier <= story.tier
+                                                            )
+                                                        ),
+                                                        rngEnchantHint:true,                                                 
+                                                        from:location.ownedBy
+                                                    )    
+                                                    itemChoices->push(value:newItem);                                    
+                                                }
+                                                
+                                                itemChoices->sort(comparator::(a, b) {
+                                                    @diffA = (a.price - itemPrice)->abs;
+                                                    @diffB = (b.price - itemPrice)->abs;
+                                                    when (diffA < diffB) -1;
+                                                    when (diffA > diffB)  1;
+                                                    return 0;
+                                                });
+                                                
+                                                itemChoices = itemChoices->subset(from:0, to:6);
+                                                
+                                                @:Inventory = import(module:'game_class.inventory.mt');
+                                                @inv = Inventory.new(size: 30);
+                                                foreach(itemChoices)::(i, it) {
+                                                    inv.add(item:it);
+                                                }
+                                                
+                                                pickItem(
+                                                    canCancel : false,
+                                                    onGetPrompt ::<- 'Pick a prize!',
+                                                    topWeight : 0.5,
+                                                    leftWeight : 0.5,
+                                                    inventory:inv,
+                                                    onPick::(item) {
+                                                        windowEvent.queueMessage(
+                                                            text: 'The party won the ' + item.name + '!'
+                                                        );
+                                                        
+                                                        party.inventory.add(item);
+
+                                                        windowEvent.queueMessage(
+                                                            speaker: 'Wandering Gamblist',
+                                                            text: 'Until next time...'                                    
+                                                        );
+                                                        windowEvent.jumpToTag(name:'pickItem', doResolveNext: true, goBeforeTag: true);
+                                                    }
+                                                );                                            
+                                            
                                             }
                                         );
                                     });
@@ -408,7 +467,7 @@ Interaction.new(
 
 
                         }
-                    );
+                    )                    
                   },
 
 
@@ -1486,9 +1545,9 @@ Interaction.new(
             windowEvent.queueMessage(text:'The party took turns drinking from the fountain.');
         
             foreach(world.party.members) ::(index, member) {
-                if (member.hp < member.stats.HP)
+                if (member.hp < member.stats.HP/2)
                     member.heal(amount: member.stats.HP * 0.1);
-                if (member.ap < member.stats.AP)
+                if (member.ap < member.stats.AP/2)
                     member.healAP(amount: member.stats.AP * 0.1);
             }
             

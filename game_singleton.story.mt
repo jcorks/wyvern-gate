@@ -41,6 +41,8 @@ return struct(
         // whether the player has seen the wandering gamblist
         gamblistEncountered : Boolean,
         
+        // Whether the player has hired the gamblist ever.
+        gamblistInParty : Boolean,
         
         // progression of defeated wyverns
         // tier 0 -> none 
@@ -68,6 +70,7 @@ return struct(
     
     hasDarkKey : false,
     gamblistEncountered : false,
+    gamblistInParty : false,
     
     data_locationsDiscovered : 0,
     data_locationsNeeded : 25

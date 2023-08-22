@@ -52,16 +52,7 @@
 );
 
 
-ItemEnchantCondition.new(
-    data : {
-        name : 'On Attack',
-        description : 'After the wielder attacks',
-        isState : false,
-        onTurnCheck ::(wielder, item, battle) {
-            return wielder.flags.has(flag:StateFlags.ATTACKED);
-        }
-    }
-)
+
 
 ItemEnchantCondition.new(
     data : {
@@ -74,6 +65,16 @@ ItemEnchantCondition.new(
     }
 )
 
+ItemEnchantCondition.new(
+    data : {
+        name : 'On Attack',
+        description : 'After the wielder attacks',
+        isState : false,
+        onTurnCheck ::(wielder, item, battle) {
+            return wielder.flags.has(flag:StateFlags.ATTACKED);
+        }
+    }
+)
 
 ItemEnchantCondition.new(
     data : {
@@ -136,7 +137,7 @@ ItemEnchantCondition.new(
         description : 'At the end of the wielder\'s turn',                
         isState : false,
         onTurnCheck ::(wielder, item, battle) {
-            return Number.random() < 0.3;
+            return true;
         }                                
     }
 )

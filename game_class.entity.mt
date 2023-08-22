@@ -91,9 +91,9 @@
    
     },
         
-    new ::(speciesHint, professionHint, levelHint => Number, state) {
+    new ::(speciesHint, professionHint, levelHint => Number, state, adventurousHint) {
         @:this = Entity.defaultNew();
-        this.initialize(speciesHint, professionHint, levelHint, state);
+        this.initialize(speciesHint, professionHint, levelHint, state, adventurousHint);
         return this;
     },
     
@@ -191,8 +191,11 @@
 
         
         this.interface = {
-            initialize::(speciesHint, professionHint, levelHint, state) {
-                   
+            initialize::(speciesHint, professionHint, levelHint, state, adventurousHint) {
+                if (adventurousHint != empty)
+                    adventurous = adventurousHint;
+
+
                 battleAI = BattleAI.new(
                     user: this
                 );            
@@ -947,7 +950,7 @@
                 get ::<- battleAI
             },
             
-            equip ::(item => none->type, slot => Number, silent, inventory => Inventory.type) {
+            equip ::(item => none->type, slot => Number, silent, inventory) {
                 this.recalculateStats();
                 @:oldstats = StatSet.new();
                 oldstats.add(stats: this.stats);
@@ -964,7 +967,7 @@
                 @:old = this.unequip(slot, silent:true);                
 
 
-                if (old != empty)
+                if (old != empty && inventory)
                     inventory.add(item:old);
 
                 if (item.base.equipType == Item.TYPE.TWOHANDED) ::<={
@@ -998,8 +1001,8 @@
                 }
 
 
-
-                inventory.remove(item);
+                if (inventory)
+                    inventory.remove(item);
                 
                 this.recalculateStats();
 
@@ -1100,7 +1103,7 @@
             },
             
             // interacts with this entity
-            interactPerson ::(party, location, onDone) {
+            interactPerson ::(party, location, onDone, overrideChat, skipIntro) {
                 when(onInteract) onInteract(party, location, onDone);
                 
                 @:finish ::{
@@ -1108,10 +1111,12 @@
                     windowEvent.jumpToTag(name:'InteractPerson', goBeforeTag:true, doResolveNext:true);
                 }
                 
-                windowEvent.queueMessage(
-                    speaker: name,
-                    text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.GREET])
-                );                
+                if (skipIntro == empty) 
+                    windowEvent.queueMessage(
+                        speaker: name,
+                        text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.GREET])
+                    );                
+                    
                 windowEvent.queueChoices(
                     canCancel : true,
                     prompt: 'Talking to ' + name,
@@ -1132,6 +1137,9 @@
                         match(choice-1) {
                           // Chat
                           (0): ::<= {
+                            when (overrideChat) overrideChat();
+                            
+                             
                             windowEvent.queueMessage(
                                 speaker: name,
                                 text: random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.CHAT])
