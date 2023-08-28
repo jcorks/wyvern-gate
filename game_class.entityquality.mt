@@ -185,7 +185,7 @@ EntityQuality.Base.new(
         descriptions : [
             '$0',
             '$0 with $1',
-            'slightly irridescent $0 with $1',
+            'slightly iridescent $0 with $1',
             '$0 with stripes of $2',
             'thick and has $1',
             '$0 with $2 spots',
@@ -200,6 +200,7 @@ EntityQuality.Base.new(
             'orange',
             'yellow',
             'goldenrod',
+            'pure white',
             'soft grey'
         ],
         
@@ -263,7 +264,7 @@ EntityQuality.Base.new(
         descriptions : [
             '$0',
             '$0 with $1',
-            'slightly irridescent $0 with $1',
+            'slightly iridescent $0 with $1',
             '$0 with a checkered pattern of $2',
             'shiny and $1',
         ],
@@ -304,7 +305,7 @@ EntityQuality.Base.new(
             '$0 with $1',
             '$0',
             '$0 with $1',
-            'slightly irridescent $0 with $1',
+            'slightly iridescent $0 with $1',
             'shiny with $1',
         ],
         
@@ -406,6 +407,11 @@ EntityQuality.Base.new(
         descriptions : [
             '$0',
             '$0 and $1',
+            '$0',
+            '$0 and $1',
+            '$0',
+            '$0 and $1',
+            'in multiple sets which are $1'
         ],
         
         trait0 : [

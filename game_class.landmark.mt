@@ -212,13 +212,16 @@
                 
                     mapIndex += 1;
                 }
-                
+                @:possibleLocations = [...base.possibleLocations];
                 for(0, random.integer(from:base.minLocations, to:base.maxLocations))::(i) {
-                    when(base.possibleLocations->keycount == 0) empty;
-                    @:which = random.pickArrayItemWeighted(list:base.possibleLocations);
+                    when(possibleLocations->keycount == 0) empty;
+                    @:which = random.pickArrayItemWeighted(list:possibleLocations);
                     this.addLocation(
                         name:which.name
                     );
+                    if (which.onePerLandmark) ::<= {
+                        possibleLocations->remove(key:possibleLocations->findIndex(value:which));
+                    }
                     mapIndex += 1;
                 }
                 
@@ -665,12 +668,14 @@ Landmark.Base.new(
 //                    {name: 'Stairs Down', rarity:1},
             {name: 'Small Chest', rarity:3},
             {name: 'Fountain', rarity:10},
-            {name: 'Enchantment Stand', rarity: 11}
+            {name: 'Enchantment Stand', rarity: 11},
+            {name: 'Wyvern Statue', rarity: 8},
+            {name: 'Clothing Shop', rarity: 25}
 
         ],
         requiredLocations : [
             'Stairs Down',
-            'Stairs Down',
+            'Stairs Down'
         ],
         mapHint:{},
         onCreate ::(landmark, island){

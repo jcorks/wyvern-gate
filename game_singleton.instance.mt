@@ -404,7 +404,7 @@ return class(
                 
                 @:Species = import(module:'game_class.species.mt');
                 @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
-                @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:5);
+                @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:3);
                 // debug
                     //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
                     //).new(from:island.newInhabitant(),rngEnchantHint:true));
@@ -416,8 +416,7 @@ return class(
                     
                     //party.inventory.addGold(amount:2000);
                     
-                    //party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Fire'
-                    //).new(from:island.newInhabitant()));
+
 
                     //party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Ice'
                     //).new(from:island.newInhabitant()));
@@ -442,6 +441,21 @@ return class(
                     @:crystal = Item.new(base:Item.Base.database.find(name:'Skill Crystal'), from:p0);
                     party.inventory.add(item:crystal);
                 }
+
+                party.inventory.add(item:Item.new(
+                    base:Item.Base.database.find(name:'Pink Potion'),
+                    from:island.newInhabitant()
+                ));
+                party.inventory.add(item:Item.new(
+                    base:Item.Base.database.find(name:'Pink Potion'),
+                    from:island.newInhabitant()
+                ));
+                party.inventory.add(item:Item.new(
+                    base:Item.Base.database.find(name:'Pink Potion'),
+                    from:island.newInhabitant()
+                ));
+
+                /*
                 @:sword = Item.new(
                     base: Item.Base.database.find(name:'Shortsword'),
                     from:p0,
@@ -458,7 +472,7 @@ return class(
                 );
                 party.inventory.add(item:sword);
                 party.inventory.add(item:tome);
-
+                */
 
 
 

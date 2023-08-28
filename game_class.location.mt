@@ -197,6 +197,13 @@
                 get ::<- landmark_
             },
             
+            peaceful : {
+                get ::{
+                    when (data.peaceful) true;
+                    return landmark_.peaceful;
+                }
+            },
+            
             interact ::{
                 @world = import(module:'game_singleton.world.mt');
                 @party = world.party;            
@@ -323,6 +330,10 @@ Location.Base = class(
                     minOccupants : Number,
                     // number of people aside from the owner
                     maxOccupants : Number,
+                    
+                    // Whether there can only be one per landmark.
+                    // This is strictly followed in dungeons.
+                    onePerLandmark: Boolean,
 
                     // when the location is interacted with, before displaying options
                     // The return value is whether to continue with interaction options 
@@ -363,6 +374,7 @@ Location.Base.new(data:{
     ownVerb: '',
     category : Location.CATEGORY.ENTRANCE,
     minStructureSize : 1,
+    onePerLandmark : false,
     descriptions: [
         "A sturdy gate surrounded by a well-maintained fence around the area.",
         "A decrepit gate surrounded by a feeble attempt at fencing.",
@@ -413,6 +425,7 @@ Location.Base.new(data:{
     category : Location.CATEGORY.RESIDENTIAL,
     symbol: 'F',
     minStructureSize : 2,
+    onePerLandmark : false,
 
     descriptions: [
         "A well-maintained farm. Looks like an experienced farmer works it.",
@@ -479,6 +492,7 @@ Location.Base.new(data:{
     category : Location.CATEGORY.RESIDENTIAL,
     symbol: '^',
     minStructureSize : 1,
+    onePerLandmark : false,
 
     descriptions: [
         "A well-kept residence. Looks like it's big enough to hold a few people",
@@ -562,6 +576,7 @@ Location.Base.new(data:{
     
     minOccupants : 0,
     maxOccupants : 0,
+    onePerLandmark : false,
     onFirstInteract ::(location) {
     },            
     onInteract ::(location) {
@@ -587,6 +602,7 @@ Location.Base.new(data:{
     ownVerb: '???',
     category : Location.CATEGORY.UTILITY,
     symbol: 'm',
+    onePerLandmark : false,
     minStructureSize : 1,
 
     descriptions: [
@@ -636,6 +652,7 @@ Location.Base.new(data:{
     ownVerb : 'owned',
     category : Location.CATEGORY.RESIDENTIAL,
     symbol: 'W',
+    onePerLandmark : true,
     minStructureSize : 1,
 
     descriptions: [
@@ -718,6 +735,7 @@ Location.Base.new(data:{
     ownVerb : 'owned',
     category : Location.CATEGORY.RESIDENTIAL,
     symbol: 'W',
+    onePerLandmark : true,
     minStructureSize : 1,
 
     descriptions: [
@@ -800,6 +818,7 @@ Location.Base.new(data:{
     ownVerb : 'run',
     category : Location.CATEGORY.BUSINESS,
     symbol: '$',
+    onePerLandmark : false,
     minStructureSize : 1,
 
     descriptions: [
@@ -891,6 +910,7 @@ Location.Base.new(data:{
     ownVerb : 'run',
     category : Location.CATEGORY.BUSINESS,
     symbol: '$',
+    onePerLandmark : false,
     minStructureSize : 1,
 
     descriptions: [
@@ -964,6 +984,7 @@ Location.Base.new(data:{
         "A modest trading shop. Relatively small.",
         "Extravagant shop with many wild trinkets."
     ],
+    onePerLandmark : false,
     interactions : [
         'buy:shop',
         'forge',
@@ -1026,6 +1047,7 @@ Location.Base.new(data:{
     ownVerb : 'run',
     category : Location.CATEGORY.UTILITY,
     symbol: '&',
+    onePerLandmark : false,
     minStructureSize : 2,
 
     descriptions: [
@@ -1067,6 +1089,7 @@ Location.Base.new(data:{
     ownVerb : 'run',
     category : Location.CATEGORY.UTILITY,
     symbol: '!',
+    onePerLandmark : false,
     minStructureSize : 2,
 
     descriptions: [
@@ -1107,6 +1130,7 @@ Location.Base.new(data:{
     ownVerb : 'run',
     category : Location.CATEGORY.UTILITY,
     symbol: '=',
+    onePerLandmark : false,
     minStructureSize : 2,
 
 
@@ -1147,6 +1171,7 @@ Location.Base.new(data:{
     ownVerb : 'run',
     category : Location.CATEGORY.UTILITY,
     symbol: '+',
+    onePerLandmark : false,
     minStructureSize : 2,
 
     descriptions: [
@@ -1187,6 +1212,7 @@ Location.Base.new(data:{
     ownVerb : '',
     category : Location.CATEGORY.UTILITY,
     symbol: '[]',
+    onePerLandmark : true,
     minStructureSize : 2,
 
     descriptions: [
@@ -1226,6 +1252,7 @@ Location.Base.new(data:{
     ownVerb : '',
     category : Location.CATEGORY.UTILITY,
     symbol: '@',
+    onePerLandmark : true,
     minStructureSize : 1,
 
     descriptions: [
@@ -1263,6 +1290,7 @@ Location.Base.new(data:{
     ownVerb : '',
     symbol: '\\',
     category : Location.CATEGORY.EXIT,
+    onePerLandmark : false,
     minStructureSize : 1,
 
     descriptions: [
@@ -1297,6 +1325,7 @@ Location.Base.new(data:{
     rarity: 1000000000000,
     ownVerb : '',
     symbol: '=',
+    onePerLandmark : false,
     category : Location.CATEGORY.EXIT,
     minStructureSize : 1,
 
@@ -1333,6 +1362,7 @@ Location.Base.new(data:{
     ownVerb : '',
     symbol: '?',
     category : Location.CATEGORY.EXIT,
+    onePerLandmark : false,
     minStructureSize : 1,
 
     descriptions: [
@@ -1374,6 +1404,7 @@ Location.Base.new(data:{
     ownVerb : '',
     symbol: '^',
     category : Location.CATEGORY.EXIT,
+    onePerLandmark : true,
     minStructureSize : 1,
 
     descriptions: [
@@ -1409,6 +1440,7 @@ Location.Base.new(data:{
     ownVerb : '',
     symbol: '$',
     category : Location.CATEGORY.UTILITY,
+    onePerLandmark : false,
     minStructureSize : 1,
 
     descriptions: [
@@ -1457,6 +1489,7 @@ Location.Base.new(data:{
     ownVerb : '',
     symbol: 'S',
     category : Location.CATEGORY.DUNGEON_SPECIAL,
+    onePerLandmark : true,
     minStructureSize : 1,
 
     descriptions: [
@@ -1490,11 +1523,54 @@ Location.Base.new(data:{
 
 
 Location.Base.new(data:{
+    name: 'Wyvern Statue',
+    rarity: 4,
+    ownVerb : '',
+    symbol: 'M',
+    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    onePerLandmark : false,
+    minStructureSize : 1,
+
+    descriptions: [
+        'A statue depecting a forlorn wyvern holding their hands in the air in sorrow. It\'s very old.',
+        'A statue depecting a kneeling wyvern, looking to the sky. It\'s very old.',
+        'A statue depecting a wyvern with one wing in the air, and the other wrapping around themself. It\'s very old.',
+    ],
+    interactions : [
+        'pray-statue'
+    ],
+    
+    aggressiveInteractions : [
+    ],
+
+
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {},
+    
+    onInteract ::(location) {
+    },
+    
+    onCreate ::(location) {
+        location.data.hasPrayer = true;
+
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+
+});
+
+
+Location.Base.new(data:{
     name: 'Enchantment Stand',
     rarity: 4,
     ownVerb : '',
     symbol: '%',
     category : Location.CATEGORY.DUNGEON_SPECIAL,
+    onePerLandmark : false,
     minStructureSize : 1,
 
     descriptions: [
@@ -1532,6 +1608,140 @@ Location.Base.new(data:{
 });
 
 
+Location.Base.new(data:{
+    name: 'Clothing Shop',
+    rarity: 4,
+    ownVerb : '',
+    symbol: '%',
+    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    onePerLandmark : true,
+    minStructureSize : 1,
+
+    descriptions: [
+        'A makeshift wooden stand with a crude sign depecting a sheep selling clothing.'
+    ],
+    interactions : [
+        'buy:shop',
+        'talk',
+        'examine'
+    ],
+    
+    aggressiveInteractions : [
+    ],
+
+    
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {
+        @:Profession = import(module:'game_class.profession.mt');
+        @:Entity = import(module:'game_class.entity.mt');
+        @:EntityQuality = import(module:'game_class.entityquality.mt');
+        location.ownedBy = Entity.new(
+            speciesHint: 'Sheep',
+            professionHint: 'Cleric',
+            personalityHint: 'Caring',
+            levelHint: 5,
+            adventurousHint: true,
+            qualities : [
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'snout'), trait0Hint:2),
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'fur'),   descriptionHint: 0, trait0Hint:8),
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'eyes'),  descriptionHint: 0, trait2Hint:0, trait1Hint: 0),
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'ears'),  descriptionHint: 2, trait0Hint:2),
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'face'),  descriptionHint: 0, trait0Hint:0),
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'tail'),  descriptionHint: 0, trait0Hint:0),
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'body'),  descriptionHint: 1, trait0Hint:0, trait1Hint:5),            
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'horns'), descriptionHint: 1, trait0Hint:2, trait1Hint:1)
+            ]
+        );
+
+        location.ownedBy.onHire = ::{
+            @:story = import(module:'game_singleton.story.mt');
+            story.meiInParty = true;            
+        };
+
+        @:meiWeapon = Item.new(
+            base: Item.Base.database.find(name: 'Falchion'),
+            rngEnchantHint: true,
+            qualityHint: 'Quality',
+            materialHint: 'Dragonglass',
+            colorHint: 'Pink',
+            forceEnchant: true
+        );
+        
+        @:meiRobe = Item.new(
+            base: Item.Base.database.find(name: 'Robe'),
+            rngEnchantHint: true,
+            qualityHint: 'Masterwork',
+            colorHint: 'Pink',
+            apparelHint: 'Wool+',
+            forceEnchant: true
+        );
+        
+        @:meiAcc = Item.new(
+            base: Item.Base.database.find(name: 'Mei\'s Bow'),
+            rngEnchantHint: true,
+            forceEnchant: true
+        );
+        
+        location.ownedBy.equip(item:meiWeapon, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true);
+        location.ownedBy.equip(item:meiRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);
+        location.ownedBy.equip(item:meiAcc,    slot:Entity.EQUIP_SLOTS.TRINKET, silent:true);
+
+        location.ownedBy.heal(
+            amount: 9999,
+            silent: true
+        );
+
+        @:learned = location.ownedBy.profession.gainSP(amount:20);
+        foreach(learned)::(index, ability) {
+            location.ownedBy.learnAbility(name:ability);
+        }                                                
+
+
+
+        location.ownedBy.name = 'Mei';
+        location.inventory.maxItems = 50;
+
+        @:nameGen = import(module:'game_singleton.namegen.mt');
+        @:story = import(module:'game_singleton.story.mt');
+
+        for(0, 10)::(i) {
+            // no weight, as the value scales
+            location.inventory.add(item:
+                Item.new(
+                    base:Item.Base.database.getRandomFiltered(
+                        filter:::(value) <- value.isApparel == true
+                    ),
+                    apparelHint: 'Wool+',
+                    from:location.ownedBy, 
+                    rngEnchantHint:true
+                )
+            );
+        }
+    },  
+    
+    onInteract ::(location) {
+        @:story = import(module:'game_singleton.story.mt');
+        when(story.meiInParty) ::<= {
+            windowEvent.queueMessage(
+                text: 'The shop seems empty...'
+            );
+            return false;
+        }
+            
+    },
+    
+    onCreate ::(location) { 
+        location.data.peaceful = true;
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+
+});
+
 
 Location.Base.new(data:{
     name: 'Large Chest',
@@ -1540,6 +1750,7 @@ Location.Base.new(data:{
     symbol: '$',
     category : Location.CATEGORY.UTILITY,
     minStructureSize : 1,
+    onePerLandmark : true,
 
     descriptions: [
     ],
@@ -1613,6 +1824,7 @@ Location.Base.new(data:{
     symbol: 'x',
     category : Location.CATEGORY.UTILITY,
     minStructureSize : 1,
+    onePerLandmark : false,
 
     descriptions: [
         'An incapacitated individual.'
@@ -1651,6 +1863,7 @@ Location.Base.new(data:{
     symbol: '*',
     category : Location.CATEGORY.UTILITY,
     minStructureSize : 2,
+    onePerLandmark : true,
 
     descriptions: [
         "A library stocked with books many times a person\'s height. Various colors and sizes of book bindings cover each columned shelf",

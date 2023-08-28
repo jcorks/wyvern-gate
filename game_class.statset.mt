@@ -59,6 +59,18 @@
                 if (DEX != empty) DEX_ = DEX;   
                 return this;
             },
+            
+            isEmpty : {
+                get ::<- 
+                    HP_ ==0 &&
+                    MP_ ==0 &&
+                    ATK_ ==0 &&
+                    INT_ ==0 &&
+                    DEF_ ==0 &&
+                    LUK_ ==0 &&
+                    SPD_ ==0 &&
+                    DEX_ ==0                    
+            },
 
 
             state : {

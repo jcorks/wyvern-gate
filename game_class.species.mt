@@ -225,6 +225,67 @@ Species.new(data:{
     ]
 })
 
+
+Species.new(data:{
+    name : 'Goat',
+    description: 'A common ungulate race.',
+    rarity : 10,
+    growth : StatSet.new(
+        HP : 3,
+        AP : 4,
+        ATK: 4,
+        DEF: 2,
+        INT: 3,
+        LUK: 6,
+        SPD: 6,
+        DEX: 8
+    ),
+    qualities : [
+        'snout',
+        'fur',
+        'eyes',
+        'ears',
+        'face',
+        'tail',
+        'body',
+        'horns'
+    ],
+    
+    special : false,
+    passives : [
+    ]
+})
+
+
+Species.new(data:{
+    name : 'Sheep',
+    description: 'A common ungulate race.',
+    rarity : 10,
+    growth : StatSet.new(
+        HP : 3,
+        AP : 6,
+        ATK: 3,
+        DEF: 4,
+        INT: 6,
+        LUK: 4,
+        SPD: 6,
+        DEX: 4
+    ),
+    qualities : [
+        'snout',
+        'fur',
+        'eyes',
+        'ears',
+        'face',
+        'tail',
+        'body',
+        'horns'
+    ],
+    
+    special : false,
+    passives : [
+    ]
+})
 Species.new(data:{
     name : 'Gazelle',
     description: 'A tall ungulate race.',

@@ -70,6 +70,41 @@ ItemColor.new(
     }
 )
 
+
+ItemColor.new(
+    data : {
+        name : 'Purple',
+        equipMod : StatSet.new(
+            SPD: 2,
+            DEX: 2,
+            INT: 2,
+            ATK: 2
+        ),
+    }
+)
+
+
+ItemColor.new(
+    data : {
+        name : 'Pink',
+        equipMod : StatSet.new(
+            DEX: 3,
+            INT: 5
+        ),
+    }
+)
+
+ItemColor.new(
+    data : {
+        name : 'White',
+        equipMod : StatSet.new(
+            DEF: 7
+        ),
+    }
+)
+
+
+
 ItemColor.new(
     data : {
         name : 'Green',

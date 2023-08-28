@@ -43,13 +43,12 @@ return ::(
         choices : [
             'Act',
             'Check',
-            'Run',
             'Wait',
             'Item'
         ],
         jumpTag: 'BattleMenu',
         keep: true,
-        itemsPerColumn: 3,
+        itemsPerColumn: 2,
         renderable: battle,
         prompt: 'What will ' + user.name + ' do?',
         canCancel: false,
@@ -253,22 +252,10 @@ return ::(
 
               },
               
-              // run 
-              (2): ::<= {
-                commitAction(action:
-                    BattleAction.new(
-                        state : {
-                            ability: Ability.database.find(name:'Run'),
-                            targets: [],
-                            extraData: {}
-                        }
-                    )                
-                );
-                
-              },
+
               
               // wait
-              (3): ::<={
+              (2): ::<={
                 commitAction(action:
                     BattleAction.new(
                         state : {
@@ -281,7 +268,7 @@ return ::(
               },
               
               // Item
-              (4): ::<= {
+              (3): ::<= {
                 itemmenu(inBattle:true, user, party, enemies, onAct::(action){
                     commitAction(action);
                 });

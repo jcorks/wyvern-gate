@@ -3173,43 +3173,7 @@ Effect.new(
     }
 )                        
 
-Effect.new(
-    data : {
-        name : 'Running',
-        description: 'Unable to act.',
-        battleOnly : true,
-        skipTurn : true,
-        stackable: false,
-        stats: StatSet.new(),
-        onAffliction : ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: holder.name + ' starts to run from the fight!'
-            );
-        },
-        
-        onRemoveEffect : ::(user, item, holder) {
-        },                
-        onPostAttackOther : ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther : ::(user, item, holder, to, damage) {
-        },
-        
-        onAttacked : ::(user, item, holder, by, damage) {
-        
-        },
-        onDamage : ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
-            windowEvent.queueMessage(text: user.name + ' runs from the battle!');
-            user.requestsRemove = true;
-        },
-        onStatRecalculate : ::(user, item, holder, stats) {
-        
-        }
-    }
-)        
+      
 
 Effect.new(
     data : {

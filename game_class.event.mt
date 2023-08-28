@@ -218,17 +218,17 @@ Event.Base.new(
             @:party = event.party;
 
             @lackey0 = Entity.new(
-                speciesHint:    Species.database.find(name:'Wyvern'),
+                speciesHint:    'Wyvern',
                 levelHint:      event.island.levelMin,
                 professionHint: 'Disciple'
             );
             @lackey1 = Entity.new(
-                speciesHint:    Species.database.find(name:'Wyvern'),
+                speciesHint:    'Wyvern',
                 levelHint:      event.island.levelMin,
                 professionHint: 'Disciple'
             );
             @boss = Entity.new(
-                speciesHint:    Species.database.find(name:'Wyvern'),
+                speciesHint:    'Wyvern',
                 levelHint:      event.island.levelMax,
                 professionHint: 'Keeper'
             );
@@ -389,7 +389,7 @@ Event.Base.new(
                           
                           
                           (Battle.RESULTS.NOONE_WIN): ::<= {
-                            windowEvent.queueMessage(text:'The ' + boss.name + ' corners you!');                              
+                            windowEvent.queueMessage(text:boss.name + ' corners you!');                              
                             battleStart();
                           }
                         }

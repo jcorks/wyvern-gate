@@ -23,6 +23,7 @@
 @:ItemQuality = import(module:'game_class.itemquality.mt');
 @:ItemColor = import(module:'game_class.itemcolor.mt');
 @:Material = import(module:'game_class.material.mt');
+@:ApparelMaterial = import(module:'game_class.apparelmaterial.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
@@ -88,9 +89,9 @@
         ATTRIBUTE : {get::<-ATTRIBUTE},
         USE_TARGET_HINT : {get::<-USE_TARGET_HINT}
     },
-    new ::(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant) {
+    new ::(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant) {
         @:this = Item.defaultNew();
-        this.initialize(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant);
+        this.initialize(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant);
         return this;
     },
     define:::(this) {
@@ -99,6 +100,7 @@
         @enchants = []; // ItemMod
         @quality;
         @material;
+        @apparel;
         @customName = empty;
         @description;
         @container;
@@ -112,6 +114,7 @@
         @improvementsStart;
         @equipEffects = [];
         @useEffects = [];
+        @equippedBy;
         @ability;
         @victoryCount = 0; // like exp, stat mods increase with victories
                            // conceptually: the user becomes more familiar
@@ -125,7 +128,9 @@
         @:recalculateName = ::{
 
             @baseName =
-            if (base_.hasMaterial && material != empty)
+            if (base_.isApparel && apparel)
+                customName = apparel.name + ' ' + base_.name
+            else if (base_.hasMaterial && material != empty)
                 customName = material.name + ' ' + base_.name
             else 
                 customName = base_.name
@@ -217,7 +222,7 @@
         @:world = import(module:'game_singleton.world.mt');
         
         this.interface = {
-            initialize::(base, from, creationHint, qualityHint, enchantHint, materialHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant) {
+            initialize::(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant) {
                 when(state != empty) ::<= {
                     this.state = state;
                     return this;
@@ -249,7 +254,10 @@
                     // random chance to have a maker's emblem on it, indicating 
                     // made with love and care
                     if (random.try(percentSuccess:15)) ::<= {
-                        description = description + 'The maker\'s emblem is engraved on it. ';
+                        if (base.isApparel) 
+                            description = description + 'The maker\'s emblem is sewn on it. '
+                        else
+                            description = description + 'The maker\'s emblem is engraved on it. ';
                         stats.add(stats:StatSet.new(
                             ATK:10,
                             DEF:10,
@@ -288,7 +296,19 @@
                     stats.add(stats:material.statMod);
                     recalculateName();
                 }
-                
+
+                if (base.isApparel) ::<= {
+                    if (apparelHint == empty) ::<= {
+                        apparel = ApparelMaterial.database.getRandomWeightedFiltered(
+                            filter::(value) <- value.tier <= story.tier
+                        );
+                    } else ::<= {
+                        apparel = ApparelMaterial.database.find(name:apparelHint);                
+                    }
+                    description = description + apparel.description + ' ';
+                    stats.add(stats:apparel.statMod);
+                    recalculateName();
+                }                
 
                 
                 if (base.canHaveEnchants) ::<= {
@@ -374,6 +394,14 @@
                 set ::(value => Inventory.type) {
                     container = value;
                 }
+            },
+            
+            equippedBy : {
+                set ::(value) {
+                    equippedBy = value;
+                },
+                
+                get ::<- equippedBy
             },
 
             ability : {
@@ -644,6 +672,7 @@ Item.Base = class(
                     enchantLimit : Number,
                     hasQuality : Boolean,
                     hasMaterial : Boolean,
+                    isApparel : Boolean,
                     isUnique : Boolean,
                     keyItem : Boolean,
                     useEffects : Object,
@@ -696,6 +725,7 @@ Item.Base.new(
         enchantLimit : 0,
         hasQuality : false,
         hasMaterial : false,
+        isApparel : false,
         useTargetHint : USE_TARGET_HINT.ONE,
         useEffects : [],
         equipEffects : [],
@@ -722,6 +752,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
+    isApparel : false,
     isUnique : true,
     canBeColored : false,
     useTargetHint : USE_TARGET_HINT.ONE,
@@ -749,6 +780,45 @@ Item.Base.new(data : {
     ]
 })
 
+Item.Base.new(data : {
+    name : "Mei\'s Bow",
+    description: 'A neck accessory featuring an ornate bell and bow.',
+    examine : '',
+    equipType: TYPE.TRINKET,
+    rarity : 30000,
+    basePrice : 1,
+    keyItem : false,
+    weight : 0.1,
+    levelMinimum : 1,
+    tier: 0,
+    canHaveEnchants : true,
+    canHaveTriggerEnchants : true,
+    enchantLimit : 0,
+    hasQuality : false,
+    hasMaterial : false,
+    isApparel : false,
+    isUnique : true,
+    canBeColored : false,
+    useTargetHint : USE_TARGET_HINT.ONE,
+    hasSize : false,
+    onCreate ::(item, user, creationHint) {},
+    possibleAbilities : [],
+    
+    equipMod : StatSet.new(
+        HP: 30,
+        DEF: 50
+    ),
+    useEffects : [
+        'Fling',
+        'Break Item'
+    ],
+    equipEffects : [
+    ],
+    attributes : [
+        ATTRIBUTE.FRAGILE
+    ]
+})
+
 
 Item.Base.new(data : {
     name : "Bracelet of Luna",
@@ -766,6 +836,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
+    isApparel : false,
     isUnique : true,
     canBeColored : false,
     levelMinimum : 1,
@@ -798,6 +869,7 @@ Item.Base.new(data : {
     keyItem : false,
     tier: 0,
     hasMaterial : false,
+    isApparel : false,
     canHaveEnchants : false,
     canHaveTriggerEnchants : false,
     enchantLimit : 0,
@@ -848,6 +920,7 @@ Item.Base.new(data : {
     canHaveEnchants : false,
     hasQuality : false,
     hasMaterial : false,
+    isApparel : false,
     isUnique : false,        
     useTargetHint : USE_TARGET_HINT.ONE,
     equipMod : StatSet.new(
@@ -888,6 +961,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
+    isApparel : false,
     isUnique : false,        
     possibleAbilities : [],
     useTargetHint : USE_TARGET_HINT.ONE,
@@ -927,6 +1001,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
+    isApparel : false,
     isUnique : false,        
     hasSize : false,
     possibleAbilities : [],
@@ -967,6 +1042,7 @@ Item.Base.new(data : {
     hasSize : false,
     hasQuality : false,
     hasMaterial : false,
+    isApparel : false,
     isUnique : false,        
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
@@ -1004,6 +1080,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
+    isApparel : false,
     hasSize : false,
     isUnique : false,        
     possibleAbilities : [],
@@ -1038,6 +1115,7 @@ Item.Base.new(data : {
     basePrice: 20,
     canBeColored : false,
     hasMaterial : false,
+    isApparel : false,
     levelMinimum : 1,
     keyItem : false,
     hasSize : false,
@@ -1083,6 +1161,7 @@ Item.Base.new(data : {
     levelMinimum : 1,
     hasSize : false,
     hasMaterial : false,
+    isApparel : false,
     isUnique : false,
     canHaveEnchants : false,
     canHaveTriggerEnchants : false,
@@ -1125,6 +1204,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     hasSize : true,
     possibleAbilities : [
@@ -1171,6 +1251,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
 
@@ -1218,6 +1299,7 @@ Item.Base.new(data : {
     hasQuality : true,
     hasSize : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
 
@@ -1268,6 +1350,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
 
@@ -1314,6 +1397,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
 
@@ -1359,6 +1443,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
 
@@ -1407,6 +1492,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
 
@@ -1452,6 +1538,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
@@ -1499,6 +1586,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
@@ -1547,6 +1635,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
@@ -1558,7 +1647,7 @@ Item.Base.new(data : {
 
     // fatigued
     equipMod : StatSet.new(
-        ATK: 30,
+        ATK: 35,
         DEF: 20,
         SPD: -10
     ),
@@ -1593,6 +1682,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
@@ -1607,7 +1697,7 @@ Item.Base.new(data : {
         ATK: 30,
         DEF: 10,
         SPD: -10,
-        DEX: 5
+        DEX: 10
     ),
     useEffects : [
         'Fling',
@@ -1641,6 +1731,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
@@ -1689,6 +1780,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
@@ -1735,6 +1827,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
@@ -1781,6 +1874,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
@@ -1827,6 +1921,7 @@ Item.Base.new(data : {
     hasSize : true,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
@@ -1871,6 +1966,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
@@ -1918,6 +2014,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
@@ -1965,6 +2062,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
@@ -2013,6 +2111,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
@@ -2060,6 +2159,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
@@ -2115,6 +2215,7 @@ Item.Base.new(data : {
     tier: 2,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
@@ -2168,6 +2269,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     basePrice: 200,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
@@ -2216,6 +2318,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 220,
@@ -2262,9 +2365,10 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : false,
+    isApparel : true,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    basePrice: 15,
+    basePrice: 100,
     possibleAbilities : [],
 
     // fatigued
@@ -2299,9 +2403,10 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : false,
+    isApparel : true,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    basePrice: 15,
+    basePrice: 100,
     possibleAbilities : [],
 
     // fatigued
@@ -2335,9 +2440,10 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : false,
+    isApparel : true,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    basePrice: 10,
+    basePrice: 40,
     possibleAbilities : [],
 
     // fatigued
@@ -2355,7 +2461,7 @@ Item.Base.new(data : {
 
 
 Item.Base.new(data : {
-    name : "Bandana",
+    name : "Headband",
     description: 'Simple cloth accessory. It is $color$.',
     examine : 'Common type of light armor',
     equipType: TYPE.TRINKET,
@@ -2371,9 +2477,10 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : false,
+    isApparel : true,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    basePrice: 10,
+    basePrice: 40,
     possibleAbilities : [],
 
     // fatigued
@@ -2405,6 +2512,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
@@ -2444,9 +2552,10 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : false,
+    isApparel : true,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    basePrice: 14,
+    basePrice: 55,
     possibleAbilities : [],
 
     // fatigued
@@ -2479,6 +2588,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : false,
+    isApparel : true,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 10,
@@ -2514,6 +2624,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 200,
@@ -2552,6 +2663,7 @@ Item.Base.new(data : {
     enchantLimit : 10,
     hasQuality : true,
     hasMaterial : false,
+    isApparel : true,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 350,
@@ -2589,6 +2701,7 @@ Item.Base.new(data : {
     enchantLimit : 1,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 200,
@@ -2627,6 +2740,7 @@ Item.Base.new(data : {
     hasQuality : true,
     tier: 2,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 350,
@@ -2666,6 +2780,7 @@ Item.Base.new(data : {
     enchantLimit : 1,
     hasQuality : true,
     hasMaterial : true,
+    isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 400,
@@ -2706,6 +2821,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : true,
     hasMaterial : false,
+    isApparel : false,
     isUnique : true,
     possibleAbilities : [],
     useTargetHint : USE_TARGET_HINT.ONE,
@@ -2749,7 +2865,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
@@ -2791,7 +2907,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
@@ -2831,7 +2947,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
@@ -2873,7 +2989,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
@@ -2913,7 +3029,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
@@ -2953,7 +3069,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
@@ -2994,7 +3110,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
@@ -3034,7 +3150,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [],
@@ -3072,7 +3188,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     basePrice: 250,
     tier: 2,
     levelMinimum : 1,
@@ -3112,7 +3228,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     levelMinimum : 100000,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 5,
@@ -3151,7 +3267,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 5,
@@ -3191,7 +3307,7 @@ Item.Base.new(data : {
     hasSize : false,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 600,
@@ -3235,7 +3351,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     levelMinimum : 1000000,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 0,
@@ -3275,7 +3391,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     levelMinimum : 10000000,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 1,
@@ -3316,7 +3432,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : false,
+    isApparel : false,    isUnique : false,
     levelMinimum : 10000000,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 5,
@@ -3358,7 +3474,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : true,
+    isApparel : false,    isUnique : true,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
         "Fire" // for fun!
@@ -3417,7 +3533,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : true,
+    isApparel : false,    isUnique : true,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
         "Ice" // for fun!
@@ -3475,7 +3591,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : true,
+    isApparel : false,    isUnique : true,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
         "Thunder" // for fun!
@@ -3533,7 +3649,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : true,
+    isApparel : false,    isUnique : true,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
         "Explosion" // for fun!
@@ -3591,7 +3707,7 @@ Item.Base.new(data : {
     enchantLimit : 0,
     hasQuality : false,
     hasMaterial : false,
-    isUnique : true,
+    isApparel : false,    isUnique : true,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
     ],

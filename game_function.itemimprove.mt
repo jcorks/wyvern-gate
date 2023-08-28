@@ -63,7 +63,7 @@ return ::(user, item, inBattle) {
             ];               
             windowEvent.queueChoices(
                 prompt: 'Choose a stat to improve.',
-                choices: statChoices,
+                choices: [...statChoices]->map(to:::(value)<- value + ' (' + item.equipMod[value] + '%)'),
                 canCancel: true,
                 onChoice::(choice) {
                     when(choice == 0) empty;
@@ -123,6 +123,20 @@ return ::(user, item, inBattle) {
                                             );
                                             
                                             item.equipMod.state = newStats.state;
+                                            
+                                            if (item.equippedBy != empty) ::<= {
+                                                @:oldStats = StatSet.new();
+                                                @equiper = item.equippedBy;
+                                                oldStats.state = equiper.stats.state;
+                                                
+                                                @slot = equiper.unequipItem(item, silent:true);
+                                                equiper.equip(item, slot, silent:true);
+                                                
+                                                oldStats.printDiff(
+                                                    other: equiper.stats,
+                                                    prompt: equiper.name + ': New stats'
+                                                )
+                                            }   
                                                 
                                         } else ::<= {
                                             windowEvent.queueMessage(

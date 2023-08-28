@@ -1,18 +1,59 @@
 Known bugs / concerns:
-- Missing skills in professions
-  . Assassin
-  . Farmer
+
 - Defeating a person in battle can cause them to rejoin the battle sometimes 
 - bribing or otherwise dismissing an enemy from battle will not 
   remove them from the dungeon map, making them still chase you afterwards 
 - Time of day is still listed in dungeons when time of day doesnt change. Need to display 
   level and other useful information instead
-- Running away causes the battle screen to lock up
 - Some time of day displays go offscreen when the island name 
   is too long.
-
+- Saving + Loading is broken
+- Sometimes, dungeons will have missing items because of unconnected areas
 
 Coming changes:
+  . dungeon layout variants per key 
+    - Fire: current 
+    - Ice: structured grid
+
+    
+  . Trap events
+    - tiles that are hidden until stepped on 
+    - Activates something as soon as its stepped on 
+    - Ones to add:
+        - Pit: fall to next floor in random area
+        - Spikes: minor damage 
+        - Teleport: random area of current floor
+        - Ambush trap: spawns an encounter of 3 people ONCE.
+        - Creature nest trap    
+            . one party member is captured and forced to fight 3 creatures
+
+  . Soul Orb dungeon location 
+    - Possible dungeon location.
+    - If currently not having a soul orb (story flag), 
+      the stone pedestal has a soul orb 
+    - party has a choice to grab it. If they do the 
+      orb talks to the party asking them to take them 
+      to a new pedestal, for the old one is decrepit.
+    - If finds another pedestal, makes a weapon ability
+      permanent.
+    - can sell orb for high price, but doing so breaks the chain
+        . If sell, the orb yells at you saying you will regret 
+          your actions.  
+    - chain:
+        . If stand created and storyflag for hasOrb == false,
+          location.data.decrepit = true
+          location.data.hasOrb = true
+          
+        . If pick up orb, storyflag for hasOrb = true
+          
+        . If stand created and storyflag hasOrb == true 
+          location.data.decrepit = false 
+          location.data.hasOrb = false 
+          
+        
+    
+
+
   . Enchanter stall
     . disenchant (remove effects) from equip for a flat rate 
     . enchant from a list of per-enchanter mods
@@ -25,9 +66,7 @@ Coming changes:
     - abandoned castles
     
   . Additional dungeon random locations
-    - Clothing stall
     - Wyvern statue with tablet. one time.
-    - Blessing statues, permanent + base state to a party member. one time.
     
    
   . Stratum keys are pre-defined:

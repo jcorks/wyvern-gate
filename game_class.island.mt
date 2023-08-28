@@ -175,7 +175,7 @@
                     )
             ]->map(
                 to:::(value) <- {
-                    species: value, 
+                    species: value.name, 
                     rarity: rarity *= 1.4
                 }
             );
@@ -410,7 +410,7 @@
                     foreach(value.species)::(index, speciesData) {
                         species->push(value:{
                             rarity: speciesData.rarity,
-                            species: Species.database.find(name:speciesData.name)
+                            species: speciesData.name
                         });
                     }
 
@@ -451,7 +451,7 @@
                         stepsSinceLastEvent : stepsSinceLastEvent,
                         map : map.state,
                         climate : climate,
-                        species : [...species]->map(to:::(value) <- {rarity:value.rarity, name:value.species.name}),
+                        species : [...species]->map(to:::(value) <- {rarity:value.rarity, name:value.species}),
                         significantLandmarks : [...significantLandmarks]->map(to:::(value) <- value.state),
                         events : [...events]->map(to:::(value) <- value.state),
                     
@@ -467,7 +467,7 @@
             
             description : {
                 get :: {
-                    @out = 'A ' + Island.climateToString(climate) + ' island, ' + name + ' is mostly populated by people of ' + species[0].species.name + ' and ' + species[1].species.name + ' descent. ';//The island is known for its ' + professions[0].profession.name + 's and ' + professions[1].profession.name + 's.\n';
+                    @out = 'A ' + Island.climateToString(climate) + ' island, ' + name + ' is mostly populated by people of ' + species[0].species + ' and ' + species[1].species + ' descent. ';//The island is known for its ' + professions[0].profession.name + 's and ' + professions[1].profession.name + 's.\n';
                     //out = out + this.class.describeEncounterRate(rate:encounterRate) + '\n';
                     //out = out + '(Level range: ' + levelMin + ' - ' + levelMax + ')' + '\n\n';
                     /*
@@ -584,7 +584,7 @@
             newHostileCreature ::(levelMaxHint) {
                 @levelHint = random.integer(from:levelMin, to:if(levelMaxHint == empty) levelMax else levelMaxHint);
                 @:angy =  Entity.new(
-                    speciesHint: Species.database.find(name:'Creature'),
+                    speciesHint: 'Creature',
                     levelHint,
                     professionHint: 'Creature'
                 );       

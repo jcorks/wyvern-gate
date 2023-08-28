@@ -58,9 +58,9 @@ ItemQuality.new(
         name : 'Worn',
         description : 'The surface appears worn out; it might not be able to last much longer.',
         equipMod : StatSet.new(
-            DEF: -30,
-            ATK: -50,
-            SPD: -40
+            DEF: -20,
+            ATK: -5,
+            DEX: -10
         ),
         pricePercentMod: -60,
         levelMinimum : 1,
@@ -82,9 +82,9 @@ ItemQuality.new(
         name : 'Cheap',
         description : 'It is of poor quality.',
         equipMod : StatSet.new(
-            DEF: -30,
-            ATK: -30,
-            DEX: -20
+            DEF: -10,
+            ATK: -10,
+            DEX: -5
         ),
         levelMinimum : 1,
         pricePercentMod: -50,
@@ -123,8 +123,8 @@ ItemQuality.new(
 
 ItemQuality.new(
     data : {
-        name : 'Polished',
-        description : 'The surface has a shine as if it has been well-kept.',
+        name : 'Robust',
+        description : 'It has been shown that this is resistant to even heavy use.',
         equipMod : StatSet.new(
             DEF: 10,
             ATK: 10,
@@ -141,6 +141,7 @@ ItemQuality.new(
         useEffects : []
     }
 )
+
 
 ItemQuality.new(
     data : {
@@ -223,6 +224,46 @@ ItemQuality.new(
     }
 )
 
+ItemQuality.new(
+    data : {
+        name : 'Reinforced',
+        description : "Extra care has been taken to assure that this will last a long time.",
+        levelMinimum: 1,
+        equipMod : StatSet.new(
+            DEF: 15,
+            ATK: 15,
+            DEX: 15,
+            INT: 15
+        ),
+        pricePercentMod: 115,
+        equipEffects : [
+        ],
+        rarity: 25,
+        
+        useEffects : []
+    }
+)
+
+ItemQuality.new(
+    data : {
+        name : 'Durable',
+        description : "At the intersection of good quality materials and workmanship.",
+        levelMinimum: 1,
+        equipMod : StatSet.new(
+            DEF: 20,
+            ATK: 20,
+            DEX: 20,
+            INT: 20,
+            SPD: 20
+        ),
+        pricePercentMod: 117,
+        equipEffects : [
+        ],
+        rarity: 25,
+        
+        useEffects : []
+    }
+)
 
 ItemQuality.new(
     data : {

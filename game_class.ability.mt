@@ -338,21 +338,6 @@ Ability.new(
     }
 )
 
-Ability.new(
-    data: {
-        name: 'Run',
-        targetMode : TARGET_MODE.ONE,
-        description: "Takes 2 turns to run.",
-        durationTurns: 0,
-        hpCost : 0,
-        apCost : 0,
-        usageHintAI : USAGE_HINT.DONTUSE,
-        oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
-            user.addEffect(from:user, name: 'Running', durationTurns: 1);                        
-        }
-    }
-)
 
 Ability.new(
     data: {
@@ -1596,7 +1581,7 @@ Ability.new(
             @:Entity = import(module:'game_class.entity.mt');
             @:Species = import(module:'game_class.species.mt');
             @:sprite = Entity.new(
-                speciesHint: Species.database.find(name: 'Fire Sprite'),
+                speciesHint: 'Fire Sprite',
                 professionHint: 'Fire Sprite',
                 levelHint:5
             );
@@ -1653,7 +1638,7 @@ Ability.new(
             @:Entity = import(module:'game_class.entity.mt');
             @:Species = import(module:'game_class.species.mt');
             @:sprite = Entity.new(
-                speciesHint: Species.database.find(name: 'Ice Elemental'),
+                speciesHint: 'Ice Elemental',
                 professionHint: 'Ice Elemental',
                 levelHint:5
             );
@@ -1710,7 +1695,7 @@ Ability.new(
             @:Entity = import(module:'game_class.entity.mt');
             @:Species = import(module:'game_class.species.mt');
             @:sprite = Entity.new(
-                speciesHint: Species.database.find(name: 'Thunder Spawn'),
+                speciesHint: 'Thunder Spawn',
                 professionHint: 'Thunder Spawn',
                 levelHint:5
             );
@@ -1767,7 +1752,7 @@ Ability.new(
             @:Entity = import(module:'game_class.entity.mt');
             @:Species = import(module:'game_class.species.mt');
             @:sprite = Entity.new(
-                speciesHint: Species.database.find(name: 'Guiding Light'),
+                speciesHint: 'Guiding Light',
                 professionHint: 'Guiding Light',
                 levelHint:5
             );

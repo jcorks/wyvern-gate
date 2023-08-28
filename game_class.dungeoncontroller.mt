@@ -20,6 +20,7 @@
         @island_;
         @landmark_;
         @floorHint = 0;;
+        @encountersOnFloor = 0;
 
         @:Entity = import(module:'game_class.entity.mt');
         @:Location = import(module:'game_class.location.mt');
@@ -77,7 +78,10 @@
     
         this.interface = {
             floorHint : {
-                set ::(value) <- floorHint = value
+                set ::(value) {
+                    floorHint = value;
+                    encountersOnFloor = 0;
+                }
             },
             
             initialize::(map, island, landmark) {
@@ -164,8 +168,9 @@
                 
                 
                 // add additional entities out of spawn points (stairs)
-                if ((entities->keycount < (if (floorHint == 0) 0 else (1+(floorHint/4)->ceil))) && Number.random() < 0.1 && landmark_.base.peaceful == false) ::<= {
+                if ((entities->keycount < (if (floorHint == 0) 0 else (1+(floorHint/4)->ceil))) && landmark_.base.peaceful == false && Number.random() < 0.1 / (encountersOnFloor*10+1)) ::<= {
                     addEntity();
+                    encountersOnFloor += 1;
                 }
             
             }

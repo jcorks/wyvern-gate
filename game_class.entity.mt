@@ -91,9 +91,9 @@
    
     },
         
-    new ::(speciesHint, professionHint, levelHint => Number, state, adventurousHint) {
+    new ::(speciesHint, professionHint, personalityHint, levelHint => Number, state, adventurousHint, qualities) {
         @:this = Entity.defaultNew();
-        this.initialize(speciesHint, professionHint, levelHint, state, adventurousHint);
+        this.initialize(speciesHint, professionHint, personalityHint, levelHint, state, adventurousHint, qualities);
         return this;
     },
     
@@ -118,11 +118,13 @@
         @allies_ = [];
         @battle_;
         @qualityDescription = empty;
+        @qualitiesHint;
         @abilitiesUsedBattle = empty;
         @adventurous = Number.random() <= 0.5;
         @battleAI;
         // requests removal from battle
         @requestsRemove = false;
+        @onHire;
         
 
         @none = Item.new(base:Item.Base.database.find(name:'None'));
@@ -191,10 +193,14 @@
 
         
         this.interface = {
-            initialize::(speciesHint, professionHint, levelHint, state, adventurousHint) {
+            initialize::(speciesHint, professionHint, personalityHint, levelHint, state, adventurousHint, qualities) {
                 if (adventurousHint != empty)
                     adventurous = adventurousHint;
+                
+                if (personalityHint != empty)
+                    personality = Personality.database.find(name:personalityHint);
 
+                qualitiesHint = qualities;
 
                 battleAI = BattleAI.new(
                     user: this
@@ -215,7 +221,7 @@
                 );
                 professions->push(value:profession);
                 if (speciesHint != empty) ::<= {
-                    species = speciesHint;
+                    species = Species.database.find(name:speciesHint);
                 }
                 
                 
@@ -509,6 +515,12 @@
                 get ::<- [...effects]
             },
             
+            onHire : {
+                set ::(value) {
+                    onHire = value;
+                }
+            },
+            
             
             attack::(
                 amount => Number,
@@ -566,7 +578,7 @@
             },
             
             damage ::(from => Entity.type, damage => Damage.type, dodgeable => Boolean, critical) {
-                when(isDead) empty;
+                when(isDead) false;
 
                 @whiff = false;
                 if (dodgeable) ::<= {
@@ -950,7 +962,7 @@
                 get ::<- battleAI
             },
             
-            equip ::(item => none->type, slot => Number, silent, inventory) {
+            equip ::(item => none->type, slot, silent, inventory) {
                 this.recalculateStats();
                 @:oldstats = StatSet.new();
                 oldstats.add(stats: this.stats);
@@ -977,6 +989,7 @@
                     equips[slot] = item;
                 }
                 
+                item.equippedBy = this;
                 
                 foreach(item.equipEffects)::(index, effect) {
                     this.addEffect(
@@ -1055,7 +1068,7 @@
                 if (profession.base.weaponAffinity == current.base.name)
                     effects->remove(key:effects->findIndex(query::(value) <- value.effect.name == 'Weapon Affinity'));
                 
-
+                current.equippedBy = empty;
 
                 
                 foreach(current.equipEffects)::(i, effect) {
@@ -1074,10 +1087,14 @@
                 return current;
             },
             unequipItem ::(item, silent) {
+                @slotOut;
                 foreach(equips)::(slot, equip) {
-                    if (equip == item)
+                    if (equip == item) ::<= {
                         this.unequip(slot, silent);
+                        slotOut = slot;
+                    }
                 }
+                return slotOut;
             },
             
             useAbility::(ability, targets, turnIndex, extraData) {
@@ -1182,7 +1199,9 @@
                                     party.add(member:this);
                                         windowEvent.queueMessage(
                                             text: name + ' joins the party!'
-                                        );                
+                                        );     
+                                        
+                                    if (onHire) onHire();           
 
                                 }
                             );
@@ -1313,13 +1332,16 @@
             describeQualities ::{
                 when (qualityDescription) qualityDescription;
                 
-                @qualities = [];
-                foreach(species.qualities)::(i, qual) {
-                    @:q = EntityQuality.Base.database.find(name:qual);
-                    if (q.appearanceChance == 1 || Number.random() < q.appearanceChance)
-                        qualities->push(value:EntityQuality.new(base:q));
+                @qualities = qualitiesHint;
+                
+                if (qualities == empty) ::<= {
+                    qualities = [];
+                    foreach(species.qualities)::(i, qual) {
+                        @:q = EntityQuality.Base.database.find(name:qual);
+                        if (q.appearanceChance == 1 || Number.random() < q.appearanceChance)
+                            qualities->push(value:EntityQuality.new(base:q));
+                    }
                 }
-
             
                 @out = this.name + ' is ' + correctA(word:species.name) + '. ';
                 @:quals = [...qualities];
@@ -1350,7 +1372,7 @@
                             + qual.description + '. ',
 
                         'Their ' + qual.name + 
-                                (if (qual.plural) ' are very clearly ' else ' is very clearly ') 
+                                (if (qual.plural) ' are quite ' else ' is quite ') 
                             + qual.description + '. ',
                             
 
@@ -1359,7 +1381,7 @@
                             + qual.description + '. ',
 
                         'Their ' + qual.name + 
-                                (if (qual.plural) ' are evidently ' else ' is evidently ') 
+                                (if (qual.plural) ' are seemingly ' else ' is seemingly ') 
                             + qual.description + '. ',
 
                         'Their ' + qual.name + 

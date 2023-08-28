@@ -58,7 +58,7 @@ Interaction.new(
         name : 'exit',
         displayName : 'Exit',
         onInteract ::(location, party) {
-            when (location.landmark.peaceful == false && (location.landmark.name == 'town' || location.landmark.name == 'city')) ::<= {
+            when (location.peaceful == false && (location.landmark.name == 'town' || location.landmark.name == 'city')) ::<= {
                 windowEvent.queueMessage(
                     speaker: '???',
                     text: "There they are!!"
@@ -155,7 +155,7 @@ Interaction.new(
                     when(talkee == empty) empty;
 
 
-                    if (location.landmark.peaceful == false) ::<= {
+                    if (location.peaceful == false) ::<= {
                         @:Event = import(module:'game_class.event.mt');
 
                         if (location.landmark.base.guarded == true) ::<= {
@@ -207,7 +207,7 @@ Interaction.new(
         onInteract ::(location, party) {
             @:story = import(module:'game_singleton.story.mt');
             @:world = import(module:'game_singleton.world.mt');
-            when (location.landmark.peaceful == false) ::<= {
+            when (location.peaceful == false) ::<= {
                 windowEvent.queueMessage(
                     speaker: 'Bartender',
                     text: "Nope. Not servin' ya. Get out."
@@ -366,7 +366,7 @@ Interaction.new(
                                                     @:Species = import(module:'game_class.species.mt');
                                                     @:Entity = import(module:'game_class.entity.mt');
                                                     @:skie = Entity.new(
-                                                        speciesHint: Species.database.find(name:'Drake-kin'),
+                                                        speciesHint:'Drake-kin',
                                                         professionHint: 'Runologist',
                                                         levelHint: 5,
                                                         adventurousHint: true
@@ -386,6 +386,7 @@ Interaction.new(
                                                         rngEnchantHint: true,
                                                         qualityHint: 'Standard',
                                                         colorHint: 'Gold',
+                                                        apparelHint: 'Eversilk',
                                                         forceEnchant: true
                                                     );
                                                     
@@ -650,7 +651,7 @@ Interaction.new(
         displayName : 'Sell',
         name : 'sell:shop',
         onInteract ::(location, party) {
-            when (location.landmark.peaceful == false && location.ownedBy != empty) ::<= {
+            when (location.peaceful == false && location.ownedBy != empty) ::<= {
                 windowEvent.queueMessage(
                     speaker: location.ownedBy.name,
                     text: "You're not welcome here!!"
@@ -715,7 +716,7 @@ Interaction.new(
         displayName : 'Buy',
         name : 'buy:shop',
         onInteract ::(location, party) {
-            when (location.landmark.peaceful == false && location.ownedBy != empty) ::<= {
+            when (location.peaceful == false && location.ownedBy != empty) ::<= {
                 windowEvent.queueMessage(
                     speaker: location.ownedBy.name,
                     text: "You're not welcome here!!"
@@ -1563,6 +1564,136 @@ Interaction.new(
     }
 ) 
 
+
+Interaction.new(
+    data : {
+        displayName : 'Approach',
+        name : 'pray-statue',
+        onInteract ::(location, party) {
+            @:world = import(module:'game_singleton.world.mt');
+
+
+            @whom;
+            @:approach = :: {
+                windowEvent.queueMessage(text:whom.name + ' approaches the wyvern statue slowly.');                
+                windowEvent.queueMessage(text:'They feel an energy, an aura from it...');                
+                windowEvent.queueMessage(text:'Its as if the statue calls for them. Calling for judgement...');                
+                windowEvent.queueAskBoolean(
+                    prompt: 'Place hand on statue?',
+                    onChoice::(which) {
+                        when(which == false) empty;
+
+                        windowEvent.queueMessage(text:whom.name + ' places their hand on the statue.');                
+                        
+                        // already exhausted
+                        when(location.data.hasPrayer == false) ::<= {
+                            windowEvent.queueMessage(text:'Nothing happens.');                
+                        }
+                        
+                        location.data.hasPrayer = false;
+                        windowEvent.queueMessage(text:'After a moment of silence, the statue hums gently.');                
+                        
+                        @:statChoices = [
+                            'HP',
+                            'AP',
+                            'ATK',
+                            'INT',
+                            'DEF',
+                            'LUK',
+                            'SPD',
+                            'DEX'
+                        ];
+
+                        // Good!
+                        when(random.flipCoin()) ::<= {
+                            windowEvent.queueMessage(text: 'The statue glows along with ' + whom.name + '.');
+                            windowEvent.queueMessage(text: whom.name + ' is met with a blessing.');
+                            
+                            
+                            windowEvent.queueChoices(
+                                choices: [...statChoices]->map(to:::(value) <- value + ' (' + whom.stats.state[value] + ')'),
+                                prompt: 'Pick a base stat to improve.',
+                                canCancel : false,
+                                onChoice::(choice) {
+                                    @:oldStats = StatSet.new();
+                                    oldStats.state = whom.stats.state;
+                                    @:newState = whom.stats.state;
+                                    newState[statChoices[choice-1]] += 3;
+                                    whom.stats.state = newState;
+                                    
+                                    oldStats.printDiff(
+                                        other:whom.stats,
+                                        prompt: 'New stats: ' + whom.name
+                                    );
+                                }
+                            );
+
+                        };      
+
+
+
+                        
+                        // bad!              
+                        windowEvent.queueMessage(text: 'The statue glows along with ' + whom.name + '.');
+                        windowEvent.queueMessage(text: whom.name + ' is met with a sudden burst of malevolent energy.');
+
+                        @:Entity = import(module:'game_class.entity.mt');
+                        @:Damage = import(module:'game_class.damage.mt');
+
+                        @:statue = Entity.new(levelHint: 5);
+                        statue.name = 'the Wyvern Statue';
+                        @:landed = whom.damage(
+                            from: statue,
+                            damage: Damage.new(
+                                amount: 1,
+                                damageType: Damage.TYPE.NEUTRAL,
+                                damageClass: Damage.CLASS.HP
+                            ),
+                            dodgeable : true,
+                            critical : false
+                        );
+                        
+                        if (landed) ::<= {
+
+                            windowEvent.queueMessage(text: whom.name + ' is met with a curse.');
+
+                            @:oldStats = StatSet.new();
+                            oldStats.state = whom.stats.state;
+                            @:newState = {...whom.stats.state};
+                            @:stat = random.pickArrayItem(list:statChoices);
+                            newState[stat] -= 2;
+                            if (newState[stat] < 1)
+                                newState[stat] = 1;
+                                
+                            whom.stats.state = newState;
+                                
+                            oldStats.printDiff(
+                                other:whom.stats,
+                                prompt: whom.name + ': No...'
+                            );
+                        }
+
+                    }
+                );
+            }
+
+            windowEvent.queueMessage(text:'Who approaches the statue?');
+            @:choices = [...world.party.members]->map(to:::(value) <- value.name);
+            windowEvent.queueChoices(
+                choices,
+                prompt: 'Pick someone.',
+                canCancel: true,
+                onChoice::(choice) {
+                    when(choice == 0) empty;
+                    whom = world.party.members[choice-1];
+                    
+                    approach();
+                }
+            )
+        }
+    }
+) 
+
 Interaction.new(
     data : {
         displayName : 'Enchant',
@@ -1577,8 +1708,16 @@ Interaction.new(
             windowEvent.queueMessage(text:'The stand lights up as you approach.');                
             windowEvent.queueMessage(text:'The runes appear before you, but you cannot read them.');                
             windowEvent.queueMessage(text:'An abstract thought appears in your mind. It seems like this will enchant a single item.');                
-            windowEvent.queueMessage(text:'The stand grants the enchantment: ' + location.data.enchant.name);                
+            windowEvent.queueMessage(text:'The stand grants the enchantment: ' + location.data.enchant.name + ', which will add the following description to an item: "' + location.data.enchant.description +'"');                
 
+            if (!location.data.enchant.base.equipMod.isEmpty)
+                windowEvent.queueMessage(
+                    speaker:location.data.enchant.name + ' - Enchant Stats',
+                    text:location.data.enchant.base.equipMod.description,
+                    pageAfter:canvas.height-4
+                );
+                
+                
             windowEvent.queueAskBoolean(
                 prompt: 'Enchant?',
                 onChoice::(which) {
@@ -1601,9 +1740,9 @@ Interaction.new(
                                     windowEvent.queueMessage(text:'The stand glows along with the item for a time before returning to normal.');
                                     item.addEnchant(mod:location.data.enchant);
                                     location.data.hasEnchant = false;
+                                    windowEvent.jumpToTag(name:'pickItem', goBeforeTag: true, doResolveNext:true);
                                 }
                             );
-                            windowEvent.jumpToTag(name:'pickItem', goBeforeTag: true);
                         }
                     );                    
                 }

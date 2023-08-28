@@ -44,6 +44,9 @@ return struct(
         // Whether the player has hired the gamblist ever.
         gamblistInParty : Boolean,
         
+        // Whether the wool+ shopkeeper was hired.
+        meiInParty : Boolean,
+        
         // progression of defeated wyverns
         // tier 0 -> none 
         // tier 1 -> fire 
@@ -71,6 +74,7 @@ return struct(
     hasDarkKey : false,
     gamblistEncountered : false,
     gamblistInParty : false,
+    meiInParty : false,
     
     data_locationsDiscovered : 0,
     data_locationsNeeded : 25
