@@ -216,6 +216,10 @@ Scene.new(
                 
                 @:instance = import(module:'game_singleton.instance.mt');
                 // cancel and flush current VisitIsland session
+                if (key.islandEntry == empty)
+                    key.addIslandEntry(world);
+
+                
                 instance.visitIsland(where:key.islandEntry);
                 if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
                     windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);

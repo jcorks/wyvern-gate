@@ -68,6 +68,11 @@
 - changed death to only occur on explicit attacking of a knocked out individual rather than any damage, preventing a lot of accidental deaths
 
 0.1.4b
+- Added Ice Shrine specific dungeon layout 
+- Better location distribution in dungeons to prevent clumping of items 
+- Added pressure plates. Now stairways and chests can be locked. Some plates are trapped and some are real.
+- removed entrances from shrine dungeons
+- removed Run option. Sorry!
 - Added apparel materials 
 - Added conditional enchants.
 - Added gamblist to taverns. Is recruitable and will play a custom card game with you

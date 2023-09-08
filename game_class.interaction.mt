@@ -127,6 +127,102 @@ Interaction.new(
 
 Interaction.new(
     data : {
+        name : 'press-pressure-plate',
+        displayName : 'Press',
+        onInteract ::(location, party) {
+            
+            windowEvent.queueChoices(
+                prompt: 'Who will press it?',
+                canCancel: true,
+                choices: [...party.members]->map(to:::(value) <- value.name),
+                onChoice::(choice) {
+                    when(choice == 0) empty;
+                    @whom = party.members[choice-1];
+        
+                    when (location.data.pressed) ::<= {
+                        windowEvent.queueMessage(
+                            text: 'The plate was pressed but nothing happened.'
+                        );
+                    }
+                    if (location.data.trapped == true) ::<= {
+                        windowEvent.queueMessage(
+                            text: 'The pressure plate was trapped!'
+                        );
+                        (import(module:'game_function.trap.mt'))(location, party, whom);
+                                        
+                    } else ::<= {
+                        windowEvent.queueMessage(
+                            text: 'Something clicked elsewhere.'
+                        );                
+                    }
+                    location.data.pressed = true;                
+                }
+            )
+        }        
+    }
+
+)
+
+
+Interaction.new(
+    data : {
+        name : 'examine-plate',
+        displayName : 'Is this a trap...?',
+        onInteract ::(location, party) {
+            @:displayState ::(speaker){
+                if (location.data.detected == true) ::<= {
+                    if (location.data.trapped == true) ::<= {
+                        windowEvent.queueMessage(
+                            speaker,
+                            text: '"It is very likely this is trapped."'
+                        );
+                    } else ::<= {
+                        windowEvent.queueMessage(
+                            speaker,
+                            text: '"It is very likely that this is safe."'
+                        );                    
+                    }
+                } else ::<= {
+                    windowEvent.queueMessage(
+                        speaker,
+                        text: '"It\'s hard to tell if it\'s trapped."'
+                    );                                
+                }
+            }
+            
+            
+            when (location.data.detected != empty) ::<= {
+                displayState();
+            }
+
+            windowEvent.queueChoices(
+                prompt: 'Who will examine it?',
+                canCancel: true,
+                choices: [...party.members]->map(to:::(value) <- value.name),
+                onChoice::(choice) {
+                    when(choice == 0) empty;
+                    @whom = party.members[choice-1];
+        
+                    @:test = location.landmark.island.newAggressor();
+                    if (random.try(percentSuccess:70))
+                        location.data.detected = (test.stats.INT < whom.stats.INT)
+                    else
+                        location.data.detected = false;
+                        
+                    displayState(speaker:whom.name);
+               
+                }
+            )
+
+        }        
+    }
+
+)
+
+
+
+Interaction.new(
+    data : {
         name : 'talk',
         displayName : 'Talk',
         onInteract ::(location, party) {
@@ -1047,7 +1143,7 @@ Interaction.new(
                     
                     location.targetLandmark = 
                         Landmark.new(
-                            base:Landmark.Base.database.find(name:'Shrine'),
+                            base:Landmark.Base.database.find(name:location.landmark.base.name),
                             island:location.landmark.island,
                             x:-1,
                             y:-1,

@@ -9,46 +9,58 @@ Known bugs / concerns:
   is too long.
 - Saving + Loading is broken
 - Sometimes, dungeons will have missing items because of unconnected areas
-
+- Beta dungeon layouts can sometimes have the top-left corner connect to nothing if its a pathway 
+- Beta dungeon layouts can sometimes generate features beyond its span, making some content inaccessible
 Coming changes:
   . dungeon layout variants per key 
     - Fire: current 
     - Ice: structured grid
-
     
-  . Trap events
-    - tiles that are hidden until stepped on 
-    - Activates something as soon as its stepped on 
-    - Ones to add:
-        - Pit: fall to next floor in random area
-        - Spikes: minor damage 
-        - Teleport: random area of current floor
-        - Ambush trap: spawns an encounter of 3 people ONCE.
+  . 'Pray' action
+    - prays to the Ancient Wyvern, which grants a special blessing/curse 
+      to ALL participants of the battle.
+        . Sudden Death: reduce everyone to 1 HP
+        . Divine light: Damage everyone, 50% current HP 
+        . Let go of posessions: unequip all items 
+        . Wyverns Breath, max heal everyone
+        . mild wyverns breath: HoT for everyone
+        . nothing: nothing
+        . 0 AP cost for all abilities
+        
+
+  . starting tier 1:        
+          
+
+      . Traps:
         - Creature nest trap    
             . one party member is captured and forced to fight 3 creatures
+        - spiders nest 
+            . party is trapped in web (cant move for 4 first turns of battle), spider npc freely attacks party 
 
-  . Soul Orb dungeon location 
-    - Possible dungeon location.
-    - If currently not having a soul orb (story flag), 
-      the stone pedestal has a soul orb 
-    - party has a choice to grab it. If they do the 
-      orb talks to the party asking them to take them 
-      to a new pedestal, for the old one is decrepit.
-    - If finds another pedestal, makes a weapon ability
-      permanent.
-    - can sell orb for high price, but doing so breaks the chain
-        . If sell, the orb yells at you saying you will regret 
-          your actions.  
-    - chain:
-        . If stand created and storyflag for hasOrb == false,
-          location.data.decrepit = true
-          location.data.hasOrb = true
-          
-        . If pick up orb, storyflag for hasOrb = true
-          
-        . If stand created and storyflag hasOrb == true 
-          location.data.decrepit = false 
-          location.data.hasOrb = false 
+    
+  . Locations
+
+      . Soul Orb dungeon location 
+        - Possible dungeon location.
+        - If currently not having a soul orb (story flag), 
+          the stone pedestal has a soul orb 
+        - party has a choice to grab it. If they do the 
+          orb talks to the party asking them to take them 
+          and use it on a knocked out enemy, stealing their soul
+        - Return to pedestal afterward to make a weapon ability permanent.
+        - can sell orb for high price, but doing so breaks the chain
+            . If sell, the orb yells at you saying you will regret 
+              your actions.  
+        - chain:
+            . If stand created and storyflag for hasOrb == false,
+              location.data.decrepit = true
+              location.data.hasOrb = true
+              
+            . If pick up orb, storyflag for hasOrb = true
+              
+            . If stand created and storyflag hasOrb == true 
+              location.data.decrepit = false 
+              location.data.hasOrb = false 
           
         
     

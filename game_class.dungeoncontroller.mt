@@ -154,14 +154,17 @@
                         map_.moveTowardPointer(data:ent);                    
                     }
 
-                    
-                    map_.moveTowardPoint(data:ent, x:ent.targetX, y:ent.targetY);
-
-                    
-                    if (distance(x0:item.x, y0:item.y, x1:ent.targetX, y1:ent.targetY) < REACHED_DISTANCE) ::<= {
+                    if (ent.pathTo == empty || ent.pathTo->keycount == 0) ::<= {
                         @:ar = map_.getRandomArea();
-                        ent.targetX = (ar.x + ar.width/2)->floor;
-                        ent.targetY = (ar.y + ar.height/2)->floor; 
+                        ent.pathTo = map_.getPathTo(
+                            data: ent,
+                            x:(ar.x + ar.width/2)->floor,
+                            y:(ar.y + ar.height/2)->floor                         
+                        )
+                    }
+                    if (ent.pathTo != empty && ent.pathTo->keycount > 0) ::<= {
+                        @:next = ent.pathTo->pop;
+                        map_.moveItem(data:ent, x:next.x, y:next.y);
                     }
                 }
                 Object.thawGC();

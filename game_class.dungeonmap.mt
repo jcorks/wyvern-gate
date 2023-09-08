@@ -31,6 +31,7 @@
 
 @:BIG = 100000000;
 
+@:GEN_OFFSET = 20;
 
 
 @Area = class(
@@ -40,6 +41,7 @@
         @_y;
         @_w;
         @_h;
+        @items = {};
         
         this.interface = {
             setup::(x, y, width, height) {
@@ -53,7 +55,8 @@
             x : {get::<-_x},        
             y : {get::<-_y},        
             width : {get::<-_w},        
-            height : {get::<-_h}        
+            height : {get::<-_h},
+            items : {get::<-items}      
         }
     }
 );
@@ -69,7 +72,6 @@
     @ROOM_AREA_VARIANCE = random.integer(from:1, to: 3)*0.2; // was 0.2
     @ROOM_SIZE = random.integer(from:40, to:70); //50;
     @ROOM_EMPTY_AREA_COUNT = random.integer(from:5, to: 20); //13;
-    @GEN_OFFSET = 20;
     ;
     
 
@@ -293,41 +295,573 @@
     
     @:AREA_SIZE = random.pickArrayItem(
         list: [
-            5, 7, 9
+            7, 9, 11
         ]
     );
     
     @:AREA_GAP = random.pickArrayItem(
         list: [
-            1, 2, 3, 4
+            1, 2, 3
         ]
     );
     
     
-    @:AREA_WIDTH  = random.integer(from:5, 9);
-    @:AREA_HEIGHT = random.integer(from:5, 9);
+    @:AREA_CHANCE = random.pickArrayItem(
+        list: [
+            33,
+            40,
+            50,
+            65
+        ]
+    );
+    
+    
+    @:AREA_WIDTH  = random.integer(from:5, to:8);
+    @:AREA_HEIGHT = random.integer(from:5, to:8);
 
-    @gridAreas = [];    
-    `
-    for(0, AREA_HEIGHT) ::(y) {
-        for(0, AREA_WIDTH) ::(x) {
-            gridAreas[x + y*AREA_WIDTH] = if (random.flipCoin()) 
-                generateArea(x, y) 
-            else 
-                empty
-            ;
-        }
+    @gridNodes = [];    
+    
+    @:NORTH = 0;
+    @:EAST  = 1;
+    @:WEST  = 2;
+    @:SOUTH = 3;
+    
+    map.width  = AREA_WIDTH  * (AREA_SIZE + AREA_GAP*2) + GEN_OFFSET*2;
+    map.height = AREA_HEIGHT * (AREA_SIZE + AREA_GAP*2) + GEN_OFFSET*2;
+    
+    
+    
+    @:getOpposite::(dir) {
+        when(dir == NORTH) SOUTH;
+        when(dir == EAST)  WEST;
+        when(dir == WEST)  EAST;
+        when(dir == SOUTH) NORTH;
+        error(detail: 'Not a direction');
     }
 
+    @:getNeighbors ::(x, y) {
+        return [
+            if (y == 0)             empty else gridNodes[x + (y-1)*AREA_WIDTH],
+            if (x == AREA_WIDTH-1)  empty else gridNodes[x+1 + (y)*AREA_WIDTH],
+            if (x == 0)             empty else gridNodes[x-1 + (y)*AREA_WIDTH],
+            if (y == AREA_HEIGHT-1) empty else gridNodes[x + (y+1)*AREA_WIDTH]
+        ]
+    }
     
-    if (mapHint.roomAreaSize != empty) ROOM_AREA_SIZE = mapHint.roomAreaSize;
-    if (mapHint.roomAreaSizeLarge != empty) ROOM_AREA_SIZE_LARGE = mapHint.roomAreaSize;
-    if (mapHint.emptyAreaCount != empty) ROOM_EMPTY_AREA_COUNT = mapHint.emptyAreaCount;
-    if (mapHint.roomSize != empty) ROOM_SIZE = mapHint.roomSize;
-    map.width = ROOM_SIZE + GEN_OFFSET*2;
-    map.height = ROOM_SIZE + GEN_OFFSET*2;
+    @:getNeighborsNode ::(node) <- getNeighbors(x:node.x, y:node.y);
+
+    // gets all neighbors connected.
+    @:getNeighborsNodeConnected ::(node) {
+         @neighbors = getNeighbors(x:node.x, y:node.y);
+         foreach(neighbors) ::(dir, neighbor) {
+            when(neighbor == empty) empty;
+            if (node.waysOpen[dir] != true ||
+                neighbor.waysOpen[getOpposite(dir)] != true)
+                neighbors[dir] = empty;
+         }
+         return neighbors;
+     }
+
+
+    @:generateNode ::(x, y) {
+        return {
+            waysOpen : [
+                false,
+                false,
+                false,
+                false
+            ],
+            x: x,
+            y: y
+        }
+    }
+    
+    @:isEmpty ::(node) <- 
+            node.waysOpen[NORTH] == false &&
+            node.waysOpen[EAST]  == false &&
+            node.waysOpen[WEST]  == false &&
+            node.waysOpen[SOUTH] == false;
+    
+    @:generateAreaNode ::(x, y) {
+        @:node = generateNode(x, y);
+        node.area = Area.new().setup(
+            x:x * (AREA_SIZE + AREA_GAP*2) + AREA_GAP + GEN_OFFSET, 
+            y:y * (AREA_SIZE + AREA_GAP*2) + AREA_GAP + GEN_OFFSET,
+            width: AREA_SIZE,
+            height: AREA_SIZE
+        )
+        areas->push(value:node.area);
+        node.isArea = true;
+        return node;
+    }
+    
+    // generate possible paths from this node x, y
+    @:generateWays ::(x, y) {
+        @:list = [];
+        
+        if (x != 0)             list->push(value:WEST);
+        if (y != 0)             list->push(value:NORTH);
+        if (x != AREA_WIDTH-1)  list->push(value:EAST);
+        if (y != AREA_HEIGHT-1) list->push(value:SOUTH);
+        return list;    
+    }
+    
+    // generate starting areas and map nodes
+    for(0, AREA_HEIGHT) ::(y) {
+        for(0, AREA_WIDTH) ::(x) {
+            @:node = if (random.try(percentSuccess:AREA_CHANCE)) ::<= {
+                @:n = generateAreaNode(x, y);
+                // pick 2 directions to be open
+                @:list = generateWays(x, y);
+                
+                
+                @:which0 = random.pickArrayItem(list);
+                list->remove(key:list->findIndex(value:which0));
+                @:which1 = random.pickArrayItem(list);
+                
+                n.waysOpen[which0] = true;
+                n.waysOpen[which1] = true;
+                return n;           
+            } else  
+                generateNode(x, y)
+            ;
+            
+
+            
+            gridNodes[x + y*AREA_WIDTH] = node;
+        }
+    }
+    
+    
+    // keep making path nodes until all 
+    // adjacent nodes that connect to open 
+    // directions have a path.
+    {:::} {
+        forever ::{
+            @complete = true;
+            for(0, AREA_HEIGHT) ::(y) {
+                for(0, AREA_WIDTH) ::(x) {
+                    @:node = gridNodes[x + y*AREA_WIDTH];
+                    
+                    when(isEmpty(node)) empty;
+                    
+                    
+                    // else we found a path or area node.
+                    // need to check if adjacents already have items
+                    foreach(getNeighbors(x, y))::(dir, neighbor) {
+                        // only work with open ways.
+                        when(node.waysOpen[dir] == false) empty;
+
+                        // can have empty neighbors on edges
+                        when(neighbor == empty) empty;
+
+                        @:oppositeDir = getOpposite(dir);
+
+                        // If already has an emplacement, ensure that 
+                        // a path is opened between the node and its neighbor.
+                        when(!isEmpty(node:neighbor)) ::<= {
+                            if ( node.waysOpen[dir] &&
+                                !neighbor.waysOpen[oppositeDir]) ::<= {
+                                neighbor.waysOpen[oppositeDir] = true;
+                                complete = false;                                
+                            }
+                            // if it already had it open, no change is needed
+                        }
+                        
+                        neighbor.waysOpen[oppositeDir] = true;
+                        complete = false;                                
+                        
+                        // we have an empty node. 
+                        // Add 1 to 3 openings
+                        @:openingCount = random.integer(from:0, to:2);
+                        
+                        
+                        match(dir) {
+                            (NORTH): y -= 1,
+                            (SOUTH): y += 1,
+                            (WEST) : x -= 1,
+                            (EAST) : x += 1
+                        }
+                        
+                        
+                        @:list = generateWays(x, y);
+                        for(0, openingCount) ::(i) {
+                            @:d = random.pickArrayItem(list);
+                            list->remove(key:list->findIndex(value:d));
+                            neighbor.waysOpen[d] = true;
+                        }
+                    }
+                }
+            }
+            if (complete)
+                send();
+        }
+    }
+    
+    
+    // now, make sure that ALL nodes are connected one way or another
+    @:ensureOneGroup = ::{
+    
+        @groupIndex = 0;
+        @groups = [];
+        // starting from a node, forms a group of all nodes connected to that node.
+        @:makeGroup = ::(initialNode) {
+            @:index = groupIndex;
+            groupIndex += 1;
+            @:stack = [initialNode];
+            initialNode.groupIndex = index;
+            @:group = [initialNode];
+            {:::} {
+                forever ::{
+                    when(stack->keycount == 0) send();
+                    @:n = stack->pop;
+                    
+                    foreach(getNeighborsNodeConnected(node:n)) ::(k, v) {
+                        when (v == empty) empty;
+                        when (v.groupIndex == index) empty;
+                        v.groupIndex = index;
+                        stack->push(value:v);
+                        group->push(value:v);
+                    }                    
+                }
+            }
+            groups[index] = group;
+        }
+        
+        // Form groups
+        @iter = 0;
+        for(0, AREA_HEIGHT) ::(y) {
+            for(0, AREA_WIDTH) ::(x) {
+                @:node = gridNodes[iter];
+                iter+= 1;
+                when (isEmpty(node)) empty; 
+                when (node.groupIndex == empty)                
+                    makeGroup(initialNode:node);
+            }
+        }
+        
+        groups->sort(comparator::(a, b) {
+            when(a->keycount < b->keycount) -1;
+            when(a->keycount > b->keycount)  1;
+            return 0;
+        });
+        
+        // reset indices.
+        foreach(groups) ::(index, group) {
+            foreach(group) ::(y, member) {
+                member.groupIndex = index;
+            }
+        }
+        
+        
+        @:leader = groups[groups->keycount-1];
+        
+        @:MERGE__COMPLETE = 0;
+        @:MERGE__NEXT = 1;
+        @:MERGE__IMPOSSIBLE = 2;
+        
+        @:merge = ::{
+            return {:::} {
+                @nonLeaderCount = 0;
+                @:leaderIndex = leader[0].groupIndex;
+                @iter = 0;
+                for(0, AREA_HEIGHT) ::(y) {
+                    for(0, AREA_WIDTH) ::(x) {
+                        @:node = gridNodes[iter];
+                        iter += 1;
+                        when(node.groupIndex == empty) empty; // empty node                        
+                        when(node.groupIndex == leaderIndex) empty;
+                        nonLeaderCount += 1;
+                        
+                        foreach(getNeighborsNode(node)) ::(dir, neighbor){
+                            when(neighbor == empty) empty;
+                            if (neighbor.groupIndex == leaderIndex) ::<= {
+                                // this node touches the leader group. form a connection 
+                                // and merge all members of node's group into the 
+                                // leader group
+                                
+                                node.waysOpen[dir] = true;
+                                neighbor.waysOpen[getOpposite(dir)] = true;
+
+                                
+                                @nodeGroup = groups[node.groupIndex];
+                                groups[node.groupIndex] = empty;
+                                foreach(nodeGroup) ::(k, v) {
+                                    v.groupIndex = leaderIndex;
+                                    groups[leaderIndex]->push(value:v);
+                                }
+
+                                send(message:MERGE__NEXT);
+                            }
+                        }
+                    }  
+                }
+                
+                when(nonLeaderCount == 0) MERGE__COMPLETE;                
+                return MERGE__IMPOSSIBLE;    
+            }      
+        }
+        
+        // keep merging adjacent groups until either 
+        // all groups are merged into the leader group 
+        // or a valley is discovered.
+        return {:::} {
+            forever ::{
+                match(merge()) {
+                  (MERGE__COMPLETE): send(message:false),
+                  (MERGE__NEXT): empty,                  
+                  (MERGE__IMPOSSIBLE): send(message:true)
+                }
+            }
+        }   
+    }
+    
+    
+    {:::} {
+        forever ::{
+            @:restart = ensureOneGroup();
+
+            // reset group index
+            @iter = 0;
+            for(0, AREA_HEIGHT) ::(y) {
+                for(0, AREA_WIDTH) ::(x) {
+                    gridNodes[iter].groupIndex = empty;
+                    iter += 1;
+                }
+            }
+
+            when(!restart) send();
+            
+            // ensureOneGroup failed, meaning there were 
+            // some gaps that prevented merging.
+            // This case is very rare, but still possible.
+            // So, now we can attempt to patch it by filling 
+            // a random hole and trying again 
+
+            {:::} {
+                for(0, AREA_HEIGHT) ::(y) {
+                    for(0, AREA_WIDTH) ::(x) {
+                        @node = gridNodes[x + y*AREA_WIDTH];
+                        when(!isEmpty(node)) empty;
+                    
+                        node = generateAreaNode(x, y);
+                        gridNodes[x + y*AREA_WIDTH] = node;
+                        
+                        foreach(getNeighborsNode(node)) ::(dir, neighbor) {
+                            when(neighbor == empty) empty;
+                            node.waysOpen[dir] = true;
+                            neighbor.waysOpen[getOpposite(dir)] = true;
+                        }                        
+                        send();
+                    }                        
+                }
+            }
+        }
+    }
+    
+    
+    
+    
+    
+    // make areas and pathways
+    for(0, AREA_HEIGHT) ::(y) {
+        for(0, AREA_WIDTH) ::(x) {
+            @:node = gridNodes[x + y*AREA_WIDTH];
+            
+            when(isEmpty(node)) empty;
+            
+            // areas are boxes
+            when(node.isArea) ::<= {
+                @:left   = node.area.x;
+                @:top    = node.area.y;
+                @:width  = node.area.width;
+                @:height = node.area.height;
+                for(0, width)::(i) {
+                    map.enableWall(
+                        x:left + i,
+                        y:top
+                    );
+
+                    map.enableWall(
+                        x:left + i,
+                        y:top + height-1
+                    );
+                }
+
+                for(0, height)::(i) {
+                    map.enableWall(
+                        x:left,
+                        y:top + i
+                    );
+
+                    map.enableWall(
+                        x:left + width-1,
+                        y:top + i
+                    );
+                }
+                
+                // openings
+                if (node.waysOpen[NORTH]) map.disableWall(x:left + (width / 2)->floor, y: top);    
+                if (node.waysOpen[SOUTH]) map.disableWall(x:left + (width / 2)->floor, y: top + height-1);    
+                if (node.waysOpen[EAST])  map.disableWall(x:left + width -1,           y: top + (height / 2)->floor);    
+                if (node.waysOpen[WEST])  map.disableWall(x:left,                      y: top + (height / 2)->floor);    
+            }
+            
+            // else its a path
+            @centerX = x * (AREA_SIZE + AREA_GAP*2) + AREA_GAP + (AREA_SIZE/2)->floor + GEN_OFFSET;
+            @centerY = y * (AREA_SIZE + AREA_GAP*2) + AREA_GAP + (AREA_SIZE/2)->floor + GEN_OFFSET;
+
+
+            //start with the junction
+
+            map.enableWall(
+                x:centerX - 1,
+                y:centerY - 1
+            );            
+            map.enableWall(
+                x:centerX - 1,
+                y:centerY
+            );            
+            map.enableWall(
+                x:centerX - 1,
+                y:centerY + 1
+            );            
+
+            map.enableWall(
+                x:centerX + 1,
+                y:centerY - 1
+            );            
+            map.enableWall(
+                x:centerX + 1,
+                y:centerY
+            );            
+            map.enableWall(
+                x:centerX + 1,
+                y:centerY + 1
+            );            
+
+            map.enableWall(
+                x:centerX,
+                y:centerY + 1
+            );            
+
+            map.enableWall(
+                x:centerX,
+                y:centerY - 1
+            ); 
+            
+            if (node.waysOpen[NORTH]) ::<= {
+                map.disableWall(x:centerX, y:centerY-1);   
+
+                for(centerY - (AREA_SIZE/2)->floor, centerY-1)::(i) {
+                    map.enableWall(
+                        x:centerX-1,
+                        y:i
+                    ); 
+                    map.enableWall(
+                        x:centerX+1,
+                        y:i
+                    ); 
+                }
+
+            }
+            if (node.waysOpen[SOUTH]) ::<= {
+                map.disableWall(x:centerX, y:centerY+1);   
+
+                for(centerY+1, centerY+(AREA_SIZE/2)->floor+1)::(i) {
+                    map.enableWall(
+                        x:centerX-1,
+                        y:i
+                    ); 
+                    map.enableWall(
+                        x:centerX+1,
+                        y:i
+                    ); 
+                }
+
+            }
+            if (node.waysOpen[EAST]) ::<= {
+                map.disableWall(x:centerX+1, y:centerY);   
+
+                for(centerX+1, centerX+(AREA_SIZE/2)->floor+1)::(i) {
+                    map.enableWall(
+                        x:i,
+                        y:centerY-1
+                    ); 
+                    map.enableWall(
+                        x:i,
+                        y:centerY+1
+                    ); 
+                }
+            }
+            if (node.waysOpen[WEST]) ::<= {
+                map.disableWall(x:centerX-1, y:centerY);   
+                
+                for(centerX - (AREA_SIZE/2)->floor, centerX-1)::(i) {
+                    map.enableWall(
+                        x:i,
+                        y:centerY-1
+                    ); 
+                    map.enableWall(
+                        x:i,
+                        y:centerY+1
+                    ); 
+                }                
+            }
+
+            
+        }
+    }
+    
+    
+    // Finally, fill in gaps
+    for(0, AREA_HEIGHT) ::(y) {
+        for(0, AREA_WIDTH) ::(x) {
+            @node = gridNodes[x + y*AREA_WIDTH];
+
+            @:leftNode = x * (AREA_SIZE + AREA_GAP*2) + AREA_GAP + GEN_OFFSET; 
+            @:topNode  = y * (AREA_SIZE + AREA_GAP*2) + AREA_GAP + GEN_OFFSET;
+            @centerX = leftNode + (AREA_SIZE/2)->floor;
+            @centerY = topNode  + (AREA_SIZE/2)->floor;
+
+            
+            // the gap to the right and below are covered.
+            if (node.waysOpen[SOUTH]) ::<= {
+
+                @:from = topNode + AREA_SIZE;
+                @:to   = from + AREA_GAP*2;
+                for(from, to) ::(i) {
+                    map.enableWall(
+                        x:centerX+1,
+                        y:i
+                    ); 
+                    map.enableWall(
+                        x:centerX-1,
+                        y:i
+                    );                     
+                }
+            }
+            
+            if (node.waysOpen[EAST]) ::<= {
+
+                @:from = leftNode + AREA_SIZE;
+                @:to   = from + AREA_GAP*2;
+                for(from, to) ::(i) {
+                    map.enableWall(
+                        x:i,
+                        y:centerY+1
+                    ); 
+                    map.enableWall(
+                        x:i,
+                        y:centerY-1
+                    );                     
+                }
+            }            
+        }
+    }    
+
+    
     map.obscure();    
-    generateLayout();
     return areas;
 };
 
@@ -352,11 +886,69 @@
         return this;
     },
     inherits:[import(module:'game_class.mapbase.mt')],
-
-  
+    statics : {
+        LAYOUT_ALPHA : {get::<- 0},  
+        LAYOUT_BETA  : {get::<- 1},  
+        LAYOUT_DELTA : {get::<- 2},  
+        LAYOUT_GAMMA : {get::<- 3},
+        LAYOUT_CUSTOM: {get::<- 4}  
+},
+    
     define:::(this) {
 
         @areas = [];
+
+        @:putArea = ::<= {
+          @:tryMap = [
+                [0, 0],
+                [-1, -1],
+                [1, -1],
+                [-1, 0],
+                [0, -1],
+                [1, 0],
+                [1, 1],
+                [0, 1],
+                [-1, 1],
+                [-2, 1],
+                [-2, 0],
+                [-2, -1],
+                [-2, -2],
+                [-1, -2],
+                [0, -2],
+                [1, -2],
+                [2, -2],
+                [2, -1],
+                [2, 0],
+                [2, 1],
+                [2, 2]
+            ];
+            return ::(area, item, symbol, name) {
+                area.items->push(value:item);
+                {:::} {                
+                    @iter = 0;
+                    forever ::{
+                        @:offset = tryMap[iter];
+                        iter += 1;
+                        @location = {
+                            x: (area.x + area.width/2 + offset[0]*2)->floor,
+                            y: (area.y + area.height/2 + offset[1]*2)->floor
+                        }                
+
+                        @:already = this.itemsAt(x:location.x, y:location.y);
+                        when(already != empty && already->keycount) empty;
+                        item.x = location.x;
+                        item.y = location.y;
+
+                        this.setItem(data:item, x:location.x, y:location.y, symbol, discovered:true, name);
+
+
+
+                        send();
+                    }      
+                }          
+            }
+        }
+
 
         
         this.interface = {
@@ -370,10 +962,12 @@
 
                 if (mapHint.wallCharacter != empty) this.wallCharacter = mapHint.wallCharacter;
                 if (mapHint.outOfBoundsCharacter != empty) this.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
-
-
-                
-                areas = DungeonAlpha(map:this, mapHint);
+                match(mapHint.layoutType) {
+                    (DungeonMap.LAYOUT_ALPHA): areas = DungeonAlpha(map:this, mapHint),
+                    (DungeonMap.LAYOUT_BETA): areas = DungeonBeta(map:this, mapHint),
+                    default:
+                        areas = DungeonAlpha(map:this, mapHint)
+                }
                 return this;
             },
         
@@ -381,9 +975,39 @@
                 get ::<- areas
             },
             
+            addToRandomArea ::(item, symbol, name) {
+                return putArea(
+                    area: random.pickArrayItem(list:areas),
+                    item,
+                    symbol,
+                    name
+                );
+            },
+            
+            addToRandomEmptyArea ::(item, symbol, name) {
+                @areasEmpty = [...areas]->filter(by::(value) <- value.items->keycount == 0);
+                when (areasEmpty->keycount == 0)
+                    this.addToRandomArea(item, symbol, name)
+
+                return putArea(
+                    area: random.pickArrayItem(list:areasEmpty),
+                    item,
+                    symbol,
+                    name
+                );
+            },
+            
+            getRandomEmptyArea :: {
+                @areasEmpty = [...areas]->filter(by::(value) <- value.items->keycount == 0);
+                when (areasEmpty->keycount == 0)
+                    random.pickArrayItem(list:areas);
+                    
+                return random.pickArrayItem(list:areasEmpty);
+            },
+            
             getRandomArea :: {
                 return random.pickArrayItem(list:areas);
-            }
+            }            
         
         } 
     }

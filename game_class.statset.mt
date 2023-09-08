@@ -213,10 +213,11 @@
                 get ::<- (HP_ + MP_ + ATK_ + INT_ + DEF_ + LUK_ + SPD_ + DEX_)
             },
             
-            printDiff ::(other, prompt) {
+            printDiff ::(other, prompt, renderable) {
                 windowEvent.queueDisplayColumns(
                     prompt,
                     pageAfter: 10,
+                    renderable,
                     columns: [
                         [
                             'HP:',

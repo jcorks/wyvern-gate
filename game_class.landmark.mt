@@ -71,58 +71,7 @@
         
         
         
-        
-        @:getLocationXY ::<= {
-            @:tryMap = [
-                [0, 0],
-                [-1, 0],
-                [-1, -1],
-                [0, -1],
-                [1, -1],
-                [1, 0],
-                [1, 1],
-                [0, 1],
-                [-1, 1],
-                [-2, 1],
-                [-2, 0],
-                [-2, -1],
-                [-2, -2],
-                [-1, -2],
-                [0, -2],
-                [1, -2],
-                [2, -2],
-                [2, -1],
-                [2, 0],
-                [2, 1],
-                [2, 2]
-            ];
-            
-            
-            @:tryArea = ::(ar, offset) {
-                @area = {
-                    x: (ar.x + ar.width/2 + offset[0]*2)->floor,
-                    y: (ar.y + ar.height/2 + offset[1]*2)->floor
-                }                
-                
-                @:already = map.itemsAt(x:area.x, y:area.y);
-                when(already != empty && already->keycount) empty;
-                return area;
-            }
-        
-        
-            return ::{
-                @ar = map.getRandomArea();
-                
-                return {:::} {
-                    @iter = 0;
-                    forever ::{
-                        @:try = tryArea(ar, offset:tryMap[iter]);
-                        when(try != empty) send(message:try);
-                        iter += 1;
-                    }
-                }
-            } 
-        }
+
         
         
         
@@ -139,6 +88,12 @@
                     return this;
                 }
 
+                landmark = base;
+                x_ = x;
+                y_ = y;
+                peaceful = base.peaceful;
+
+
                 if (base.dungeonMap) ::<= {
                     map = DungeonMap.new(mapHint: base.mapHint);
                     dungeonLogic = DungeonController.new(map, island, landmark:this);
@@ -150,35 +105,17 @@
                 sizeH = map.height;
 
                 if (base.dungeonMap) ::<= {
-                    @area = map.getRandomArea();                
-
-                    gate = Location.new(
-                        base:Location.Base.database.find(name:'Entrance'),
-                        landmark:this, 
-                        xHint:area.x + (area.width/2)->floor,
-                        yHint:area.y + (area.height/2)->floor
-                    );  
-                    
-                    locations->push(value:gate);
-                    map.setItem(data:gate, x:gate.x, y:gate.y, symbol: gate.base.symbol, discovered:true, name:gate.name);
-                         
+                    if (base.dungeonForceEntrance) ::<= {
+                        gate = this.addLocation(name:'Entrance');
+                    }
                 } else ::<= {
-                
-                    gate = Location.new(
-                        base:Location.Base.database.find(name:'Entrance'),
-                        landmark:this
-                    );            
-                    map.addLocation(location:gate);
+                    gate = this.addLocation(name:'Entrance');
                 }
                 
                 if (base.isUnique)
                     name = base.name
                 else
                     name = base.name + ' of ' + NameGen.place();
-                landmark = base;
-                x_ = x;
-                y_ = y;
-                peaceful = base.peaceful;
                 /*
                 [0, Random.integer(from:base.minLocations, to:base.maxLocations)]->for(do:::(i) {
                     locations->push(value:island.newInhabitant());            
@@ -227,10 +164,15 @@
                 
                 
                 if (base.dungeonMap) ::<= {
-                    map.setPointer(
-                        x:gate.x,
-                        y:gate.y
-                    );
+                    if (gate == empty) ::<= {
+                        breakpoint();
+                        this.movePointerToRandomArea();
+                    } else ::<= {
+                        map.setPointer(
+                            x:gate.x,
+                            y:gate.y
+                        );                    
+                    }
                 } else ::<= {
 
                     map.setPointer(
@@ -394,30 +336,33 @@
             locations : {
                 get :: <- locations 
             },
+            
+            movePointerToRandomArea ::{
+                @:area = map.getRandomEmptyArea();
+                map.setPointer(
+                    x:area.x + (area.width/2)->floor,
+                    y:area.y + (area.height/2)->floor
+                );            
+            },
 
             addLocation ::(name, ownedByHint, x, y) {
-                @loc;
+                @loc = Location.new(
+                    base:Location.Base.database.find(name:name),
+                    landmark:this, ownedByHint,
+                    xHint: x,
+                    yHint: y
+                );
                 if (landmark.dungeonMap) ::<= {
-                    if (x == empty || y == empty) ::<= {
-                        @xy = getLocationXY();
-                        x = xy.x;
-                        y = xy.y;
-                    }
-                    loc = Location.new(
-                        base:Location.Base.database.find(name:name),
-                        landmark:this, ownedByHint, xHint:x, yHint:y
-                    );
-                    map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
-                        
+                    if (x == empty || y == empty)
+                        map.addToRandomEmptyArea(item:loc, symbol: loc.base.symbol, name:loc.name)
+                    else
+                        map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
+                    
                 } else ::<= {
-                    loc = Location.new(
-                        base:Location.Base.database.find(name:name),
-                        landmark:this, ownedByHint
-                    );
-                    map.addLocation(location:loc);
-                
+                    map.addLocation(location:loc);                
                 }
-                locations->push(value:loc);                
+                locations->push(value:loc);    
+                return loc;            
             },
 
             removeLocation ::(location) {
@@ -467,6 +412,7 @@ Landmark.Base = class(
                     requiredLocations : Object,
                     peaceful: Boolean,
                     dungeonMap: Boolean,
+                    dungeonForceEntrance : Boolean,
                     mapHint : Object,
                     onCreate : Function,
                     onVisit : Function,
@@ -494,6 +440,7 @@ Landmark.Base.new(
         isUnique : false,
         peaceful : true,
         dungeonMap : false,
+        dungeonForceEntrance: false,
         guarded : true,
         possibleLocations : [
             {name:'home', rarity: 1},
@@ -531,6 +478,7 @@ Landmark.Base.new(
         peaceful : true,
         guarded : true,
         dungeonMap : false,
+        dungeonForceEntrance: false,
         possibleLocations : [
             {name:'home', rarity: 1},
             //{name:'inn', rarity: 3},
@@ -573,6 +521,7 @@ Landmark.Base.new(
         peaceful : true,
         guarded : false,
         dungeonMap : true,
+        dungeonForceEntrance: true,
         possibleLocations : [
             {name:'ore vein', rarity: 1},
             //{name:'inn', rarity: 3},
@@ -608,6 +557,7 @@ Landmark.Base.new(
         peaceful : true,
         guarded : false,
         dungeonMap : true,
+        dungeonForceEntrance: true,
         possibleLocations : [
 
         ],
@@ -639,6 +589,7 @@ Landmark.Base.new(
         peaceful : true,
         guarded : false,
         dungeonMap : true,
+        dungeonForceEntrance: true,
         possibleLocations : [                    
         ],
         requiredLocations : [
@@ -655,7 +606,7 @@ Landmark.Base.new(
 
 Landmark.Base.new(
     data: {
-        name : 'Shrine',
+        name : 'Shrine of Fire',
         symbol : 'O',
         rarity : 100000,      
         isUnique : true,
@@ -664,9 +615,9 @@ Landmark.Base.new(
         peaceful: false,
         guarded : false,
         dungeonMap : true,
+        dungeonForceEntrance: false,
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
-            {name: 'Small Chest', rarity:3},
             {name: 'Fountain', rarity:10},
             {name: 'Enchantment Stand', rarity: 11},
             {name: 'Wyvern Statue', rarity: 8},
@@ -675,7 +626,9 @@ Landmark.Base.new(
         ],
         requiredLocations : [
             'Stairs Down',
-            'Stairs Down'
+            'Stairs Down',
+            'Small Chest',
+            'Locked Chest'
         ],
         mapHint:{},
         onCreate ::(landmark, island){
@@ -684,6 +637,43 @@ Landmark.Base.new(
         
     }
 )
+
+Landmark.Base.new(
+    data: {
+        name : 'Shrine of Ice',
+        symbol : 'O',
+        rarity : 100000,      
+        isUnique : true,
+        minLocations : 1,
+        maxLocations : 2,
+        peaceful: false,
+        guarded : false,
+        dungeonMap : true,
+        dungeonForceEntrance: false,
+        possibleLocations : [
+//                    {name: 'Stairs Down', rarity:1},
+            {name: 'Fountain', rarity:10},
+            {name: 'Enchantment Stand', rarity: 11},
+            {name: 'Wyvern Statue', rarity: 8},
+            {name: 'Clothing Shop', rarity: 25}
+
+        ],
+        requiredLocations : [
+            'Stairs Up',
+            'Locked Chest',
+            'Small Chest'
+        ],
+        mapHint:{
+            layoutType: DungeonMap.LAYOUT_BETA
+        },
+        onCreate ::(landmark, island){
+        },
+        onVisit ::(landmark, island) {}
+        
+    }
+)
+
+
 
 Landmark.Base.new(
     data: {
@@ -696,6 +686,7 @@ Landmark.Base.new(
         peaceful: true,
         guarded : false,
         dungeonMap : true,
+        dungeonForceEntrance: false,
         possibleLocations : [
             {name: 'Small Chest', rarity:3},
         ],
@@ -729,6 +720,7 @@ Landmark.Base.new(
         guarded : false,
         peaceful: true,
         dungeonMap : true,
+        dungeonForceEntrance: false,
         possibleLocations : [
             {name: 'Small Chest', rarity:5},
         ],
@@ -765,6 +757,7 @@ Landmark.Base.new(
         guarded : false,
         peaceful: true,
         dungeonMap : true,
+        dungeonForceEntrance: true,
         possibleLocations : [
         ],
         requiredLocations : [
@@ -796,6 +789,7 @@ Landmark.Base.new(
         guarded : false,
         peaceful: true,
         dungeonMap : true,
+        dungeonForceEntrance: true,
         possibleLocations : [
         ],
         requiredLocations : [
@@ -830,6 +824,7 @@ Landmark.Base.new(
         isUnique : false,
         dungeonMap : false,
         guarded : true,
+        dungeonForceEntrance: true,
         possibleLocations : [
             {name:'home', rarity:5},
             {name:'shop', rarity:40}
@@ -862,6 +857,7 @@ Landmark.Base.new(
         maxLocations : 7,
         isUnique : false,
         dungeonMap : false,
+        dungeonForceEntrance: false,
         guarded : false,
         possibleLocations : [
             {name:'home', rarity:1},
@@ -889,6 +885,7 @@ Landmark.Base.new(
         peaceful: true,                
         isUnique : false,
         dungeonMap : false,
+        dungeonForceEntrance: false,
         minLocations : 5,
         maxLocations : 10,
         guarded : false,
@@ -932,6 +929,7 @@ Landmark.Base.new(
         peaceful: true,
         isUnique : false,
         dungeonMap : true,
+        dungeonForceEntrance: true,
         minLocations : 3,
         maxLocations : 5,
         guarded : false,
@@ -963,6 +961,7 @@ Landmark.Base.new(
         peaceful: true,
         isUnique : false,
         dungeonMap : true,
+        dungeonForceEntrance: true,
         minLocations : 0,
         maxLocations : 0,
         guarded : false,
@@ -983,6 +982,7 @@ Landmark.Base.new(
         peaceful: false,
         isUnique : false,
         dungeonMap : true,
+        dungeonForceEntrance: true,
         
         minLocations : 0,
         maxLocations : 0,
@@ -1003,6 +1003,7 @@ Landmark.Base.new(
         peaceful: false,
         isUnique : false,
         dungeonMap : true,
+        dungeonForceEntrance: true,
         guarded : false,
         minLocations : 0,
         maxLocations : 0,

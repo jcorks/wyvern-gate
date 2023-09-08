@@ -352,13 +352,29 @@
                 
 
 
-                // guaranteed town
-                significantLandmarks->push(value:
-                    map.addLandmark(
-                        base:Landmark.Base.database.find(name:'Shrine'),
-                        island:this
-                    )
-                );
+                // guaranteed shrine
+                @:story = import(module:'game_singleton.story.mt');
+                significantLandmarks->push(value: ::<= {
+                    return match(story.tier) {
+                        (0):// nothign defeated
+                            map.addLandmark(
+                                base:Landmark.Base.database.find(name:'Shrine of Fire'),
+                                island:this
+                            ),
+
+                        (1):// fire defeated
+                            map.addLandmark(
+                                base:Landmark.Base.database.find(name:'Shrine of Ice'),
+                                island:this
+                            ),
+                            
+                        default:
+                            map.addLandmark(
+                                base:Landmark.Base.database.find(name:'Lost Shrine'),
+                                island:this
+                            )
+                    }                        
+                });
 
                 
                 significantLandmarks->push(value:

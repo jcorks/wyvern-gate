@@ -204,6 +204,38 @@
                 }
             },
             
+            
+            lockWithPressurePlate :: {
+                @:pressurePlate = landmark_.addLocation(
+                    name:'Pressure Plate'
+                );
+                
+                @:id = 'PLATE_' + Number.random();
+                data.plateID = id;
+                pressurePlate.data.plateID = id;
+                pressurePlate.data.pressed = false;
+
+
+                // for every pressure plate, there is a trapped 
+                // pressure plate.
+                @:pressurePlateFake = landmark_.addLocation(
+                    name:'Pressure Plate'
+                );
+                pressurePlateFake.data.trapped = true;
+            },
+            
+            
+            isUnlockedWithPlate :: {
+                when(data.plateID == empty) true;
+                
+                @locations = landmark_.locations;
+                
+                return locations[locations->findIndex(query::(value) <- 
+                    value.name == 'Pressure Plate' &&
+                    value.data.plateID == data.plateID
+                )].data.pressed;
+            },
+            
             interact ::{
                 @world = import(module:'game_singleton.world.mt');
                 @party = world.party;            
@@ -1320,6 +1352,51 @@ Location.Base.new(data:{
     }
 })
 
+
+Location.Base.new(data:{
+    name: 'Stairs Up',
+    rarity: 1000000000000,
+    ownVerb : '',
+    symbol: '\',
+    category : Location.CATEGORY.EXIT,
+    onePerLandmark : false,
+    minStructureSize : 1,
+
+    descriptions: [
+        "Decrepit stairs",
+    ],
+    interactions : [
+        'next floor',
+    ],
+    
+    aggressiveInteractions : [
+    ],
+
+
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    
+    onFirstInteract ::(location) {},
+    onInteract ::(location) {
+        @open = location.isUnlockedWithPlate();
+        if (!open)  
+            windowEvent.queueMessage(text: 'The entry to the stairway is locked. Perhaps some lever or plate nearby can unlock it.');
+        return open;            
+
+    },
+    
+    onCreate ::(location) {
+        if (random.flipCoin()) ::<= {
+            location.lockWithPressurePlate();
+        }
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+})
+
 Location.Base.new(data:{
     name: 'Ladder',
     rarity: 1000000000000,
@@ -1397,42 +1474,6 @@ Location.Base.new(data:{
 
 
 
-
-Location.Base.new(data:{
-    name: 'Stairs Up',
-    rarity: 1000000000000,
-    ownVerb : '',
-    symbol: '^',
-    category : Location.CATEGORY.EXIT,
-    onePerLandmark : true,
-    minStructureSize : 1,
-
-    descriptions: [
-        "Decrepit stairs",
-    ],
-    interactions : [
-        'back-floor',
-    ],
-    
-    aggressiveInteractions : [
-    ],
-
-
-    
-    minOccupants : 0,
-    maxOccupants : 0,
-    
-    onFirstInteract ::(location) {},
-    onInteract ::(location) {
-    },
-    
-    onCreate ::(location) {
-    },
-    
-    onTimeChange::(location, time) {
-    
-    }
-}) 
         
 Location.Base.new(data:{
     name: 'Small Chest',
@@ -1480,6 +1521,104 @@ Location.Base.new(data:{
     
     }
 }) 
+
+
+Location.Base.new(data:{
+    name: 'Locked Chest',
+    rarity: 1000000000000,
+    ownVerb : '',
+    symbol: '$',
+    category : Location.CATEGORY.UTILITY,
+    onePerLandmark : false,
+    minStructureSize : 1,
+
+    descriptions: [
+    ],
+    interactions : [
+        'open-chest'
+    ],
+    
+    aggressiveInteractions : [
+    ],
+
+
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {},
+    
+    onInteract ::(location) {
+        @open = location.isUnlockedWithPlate();
+        if (!open)  
+            windowEvent.queueMessage(text: 'The chest is locked. Perhaps some lever or plate nearby can unlock it.');
+        return open;            
+    },
+    
+    onCreate ::(location) {
+        location.lockWithPressurePlate();    
+    
+        @:story = import(module:'game_singleton.story.mt');
+        story.tier += 1;
+        for(0, 3) ::{
+            location.inventory.add(item:
+                Item.new(
+                    base:Item.Base.database.getRandomFiltered(
+                        filter:::(value) <- value.isUnique == false && value.canHaveEnchants
+                                                && value.tier <= story.tier
+                    ),
+                    rngEnchantHint:true, 
+                    forceEnchant:true,
+                    from:location.landmark.island.newInhabitant()
+                )
+            );
+        }
+        story.tier -= 1;
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+}) 
+
+
+Location.Base.new(data:{
+    name: 'Pressure Plate',
+    rarity: 1000000000000,
+    ownVerb : '',
+    symbol: '=',
+    category : Location.CATEGORY.UTILITY,
+    onePerLandmark : false,
+    minStructureSize : 1,
+
+    descriptions: [
+    ],
+    interactions : [
+        'press-pressure-plate',
+        'examine-plate'
+    ],
+    
+    aggressiveInteractions : [
+    ],
+
+
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {},
+    
+    onInteract ::(location) {
+    },
+    
+    onCreate ::(location) {
+        location.data.pressed = false;
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+}) 
+
+
 
 
 

@@ -1792,9 +1792,9 @@ Item.Base.new(data : {
 
     // fatigued
     equipMod : StatSet.new(
-        ATK: 25,
+        ATK: 15,
         SPD: 10,
-        DEX: 60
+        DEX: 45
     ),
     useEffects : [
         'Fling',
@@ -3508,7 +3508,6 @@ Item.Base.new(data : {
             nameHint:   nameGen.island(),
             tierHint : 1
         );
-        item.addIslandEntry(world);
         
         item.price = 1;
     }

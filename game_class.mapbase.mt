@@ -121,12 +121,12 @@ return class(
 
 
         @:aStarReconstructPath::(cameFrom, current, start) {
-            @last = current;
-            
+            @:path = [];
             return {:::} {
                 forever ::{
+                    path->push(value:current);
                     @:contains = aStarMapFind(map:cameFrom, key:current);
-                    when(contains.id == start.id) send(message:current);
+                    when(contains.id == start.id) send(message:path);
                     current = contains;
                 }
             }
@@ -205,7 +205,7 @@ return class(
         
         // A* finds a path from start to goal.
         // h is the heuristic function. h(n) estimates the cost to reach goal from node n.
-        @:aStarPathNext::(start, goal) {        
+        @:aStarPath::(start, goal) {        
             start = aStarNewNode(x:start.x, y:start.y);
             goal = aStarNewNode(x:goal.x, y:goal.y);
             
@@ -777,31 +777,42 @@ return class(
             },
             
             movePointerToward::(x, y) {
-                @:path = aStarPathNext(start:pointer, goal:{x:x, y:y});                
-                when(path == empty) empty;
+                @:path = aStarPath(start:pointer, goal:{x:x, y:y});                
+                when(path == empty || path->keycount == 0) empty;
                 
                 this.setPointer(
-                    x: path.x,
-                    y: path.y                
+                    x: path[path->keycount-1].x,
+                    y: path[path->keycount-1].y                
                 );
                 
             },
 
             moveTowardPointer::(data) {
-                this.moveTowardPoint(data, x:pointer.x, y:pointer.y);
+                @:path = this.getPathTo(data, x:pointer.x, y:pointer.y);
+                when(path == empty || path->keycount == 0) empty;
+                this.moveItem(
+                    data, 
+                    x:path[path->keycount-1].x,
+                    y:path[path->keycount-1].y
+                )
             },
 
-            moveTowardPoint::(data, x, y) {
+            getPathTo::(data, x, y) {
+                @:ent = retrieveItem(data);            
+
+                @:path = aStarPath(start:ent, goal:{x:x, y:y});
+                when(path == empty || path->keycount == 0) empty;
+                return path;
+            },
+            
+            moveItem::(data, x, y) {
                 @:ent = retrieveItem(data);            
 
                 @items =  itemIndex[ent.x + (ent.y)*(width)];
                 items->remove(key:items->findIndex(value:ent));
-            
-                @:path = aStarPathNext(start:ent, goal:{x:x, y:y});
-                when(path == empty) empty;
-                ent.x = path.x;
-                ent.y = path.y;
 
+                ent.x = x;
+                ent.y = y;            
 
                 @loc = itemIndex[ent.x + (ent.y)*(width)];
 
@@ -810,10 +821,8 @@ return class(
                     itemIndex[ent.x + (ent.y)*(width)] = loc;
                 }
                 loc->push(value:ent);
-
-            },
-
             
+            },      
             
             pointerX : {
                 get ::<- pointer.x

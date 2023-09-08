@@ -610,7 +610,7 @@
             // Similar to display(), but takes in an array of string arrays and 
             // treats them as columns, appended left-to-right separated with a 
             // space.
-            queueDisplayColumns::(prompt, columns, leftWeight, topWeight, pageAfter, onLeave) {
+            queueDisplayColumns::(prompt, columns, leftWeight, topWeight, pageAfter, onLeave, renderable) {
                 @:lines = [];
                 @:widths = [];
                 @rowcount = 0;
@@ -642,7 +642,7 @@
                 }   
            
                 this.queueDisplay(
-                    prompt, lines, pageAfter, leftWeight, topWeight, onLeave
+                    prompt, lines, pageAfter, leftWeight, topWeight, onLeave, renderable
                 );
             },
             
