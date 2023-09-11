@@ -20,7 +20,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:battlemenu = import(module:'game_function.battlemenu.mt');
-@:Random = import(module:'game_singleton.random.mt');
+@:random = import(module:'game_singleton.random.mt');
 @:Party = import(module:'game_class.party.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:StateFlags = import(module:'game_class.stateflags.mt');
@@ -47,6 +47,7 @@
         @alliesWin = false;
         @entityTurn;
         @onTurn_;
+        @onAct_;
         
     
         // some actions last multiple turns.
@@ -160,6 +161,7 @@
                     allies:allies_,
                     enemies:enemies_
                 );
+                if (onAct_) onAct_();
                 
             }
 
@@ -276,6 +278,7 @@
                 landmark => Object,
                 
                 onTurn,
+                onAct,
                 noLoot,
                 exp,
                 
@@ -285,6 +288,7 @@
                 onEnd => Function
             ) {
                 onTurn_ = onTurn;
+                onAct_ = onAct;
                 allies = [...allies];
                 enemies = [...enemies];
                 canvas.pushState();
@@ -367,6 +371,16 @@
                 
 
                 battleEnd = ::{
+                    breakpoint();
+                    @:finishEnd :: {
+                        allies_ = [];
+                        enemies_ = [];
+                        active = false;
+                        onEnd(result);                    
+                        if (windowEvent.canJumpToTag(name:'Battle'))                                            
+                            windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);
+                    
+                    }
                     result = match(true) {
                       (alliesWin):      RESULTS.ALLIES_WIN,
                       default:          RESULTS.ENEMIES_WIN
@@ -384,75 +398,16 @@
                     when (npcBattle != empty) ::<= {
                         active = false;
                         windowEvent.queueMessage(text: 'The battle is over.');
-
-                        allies_ = [];
-                        enemies_ = [];
-                        active = false;
-                        onEnd(result);                    
-                        if (windowEvent.canJumpToTag(name:'Battle'))                                            
-                            windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);
+                        finishEnd();
                     } 
 
 
                     if (alliesWin == true) ::<= {            
 
-                        @exp = 0;
-                        foreach(enemies_)::(index, enemy) {
-                            exp += enemy.dropExp();
-                        }  
-                        exp /= allies_->keycount;
-                        exp = exp->ceil;
-                        if (exp == true)
-                            windowEvent.queueMessage(text: 'Each party member gains ' + exp + ' EXP.');
-                            
-                        foreach(allies_)::(index, ally) {
-                            ally.stats.resetMod();
-                            
-
-                            if (exp == true) ::<= {
-                                @stats = StatSet.new();
-                                @level = ally.level;
-                                stats.add(stats:ally.stats);
-                                ally.gainExp(amount:exp, chooseStat:::(
-                                    hp, ap, atk, def, int, luk, dex, spd
-                                ) {
-                                    windowEvent.queueMessage(text: ally.name + ' has leveled up.');
 
 
-                                    ally.stats.resetMod();
-                                    stats.printDiff(other:ally.stats, prompt:ally.name + ' - (Level:  ' + level  + ' -> ' + (ally.level+1) + ': Base Stats)');                        
-                                    stats = StatSet.new();
-                                    stats.add(stats:ally.stats);                        
-                                    return windowEvent.queueChoicesNow(
-                                        prompt: ally.name + ' - Focus which?',
-                                        choices: [
-                                            'HP  (+' + hp + ')',
-                                            'AP  (+' + ap + ')',
-                                            'ATK (+' + atk + ')',
-                                            'INT (+' + int + ')',
-                                            'DEF (+' + def + ')',
-                                            'SPD (+' + spd + ')',
-                                            'LUK (+' + luk + ')',
-                                            'DEX (+' + dex + ')'
-                                        ]
-                                    )-1;
-                                },
-                                
-                                afterLevel :::{
-                                    ally.stats.resetMod();
-                                    stats.printDiff(other:ally.stats, prompt:'(Level:  ' + level  + ' -> ' + (ally.level+1) + ': Focus)');                        
-                                
-                                });
-                            }
-                            @:Entity = import(module:'game_class.entity.mt');
-                            @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
-                            if (wep != empty) ::<= {
-                                wep.addVictory();
-                            }
-                            ally.recalculateStats();
+
                             
-         
-                        }
                         if (noLoot == empty) ::<= {
                             @:loot = [];
                             foreach(enemies)::(index, enemy) {
@@ -474,12 +429,161 @@
                             }
                         }
                         
-                        windowEvent.queueMessage(text: 'The battle is won.');
-                        windowEvent.queueNoDisplay(onEnter::{
-                            onEnd(result);  
-                            if (windowEvent.canJumpToTag(name:'Battle'))                                              
-                                windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);
-                        });
+                        windowEvent.queueMessage(
+                            text: 'The battle is won.',
+                            onLeave ::{
+
+                                breakpoint();
+                                @:Entity = import(module:'game_class.entity.mt');
+                                @hasWeapon = false;
+                                foreach(allies_)::(index, ally) {   
+                                    @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
+                                    if (wep.name != 'None' && wep.canGainIntuition()) 
+                                        hasWeapon = true;
+                                };
+
+
+
+                                if (hasWeapon && random.flipCoin()) ::<= {
+                                    windowEvent.queueMessage(text:'The party feels their intuition with their weapons grow.');
+                                    windowEvent.queueMessage(text:'The party must choose a way to channel this intuition.');
+                                    @:fWhich = random.integer(from:0, to:2);
+
+
+                                    @:renderTextBox ::(leftWeight, topWeight, lines, prompt) {
+
+                                        @width = if (prompt == empty) 0 else prompt->length;
+                                        foreach(lines)::(index, line) {
+                                            if (line->length > width) width = line->length;
+                                        }
+                                        
+                                        @left   = (canvas.width - (width+4))*leftWeight;
+                                        width   = width + 4;
+                                        @top    = (canvas.height - (lines->keycount + 4)) * topWeight;
+                                        @height = lines->keycount + 4;
+                                        
+                                        if (top < 0) top = 0;
+                                        if (left < 0) left = 0;
+                                        
+                                        
+                                        canvas.renderFrame(top, left, width, height);
+
+                                        // render text:
+                                        
+                                        foreach(lines)::(index, line) {
+                                            canvas.movePen(x: left+2, y: top+2+index);
+                                            canvas.drawText(text:line);
+                                        }
+                                        if (prompt != empty) ::<= {
+                                            canvas.movePen(x: left+2, y:top);
+                                            canvas.drawText(text:prompt);
+                                        }
+
+                                    }
+
+
+
+
+                                    windowEvent.queueChoices(
+                                        prompt: 'Which way?',
+                                        choices : [
+                                            'Inward',
+                                            'Skyward',
+                                            'Forward'
+                                        ],
+                                        canCancel: false,
+                                        leftWeight: 1,
+                                        topWeight : 1,
+                                        
+                                        renderable : {
+                                            render ::{
+
+
+
+
+                                                renderTextBox(
+                                                    prompt:'Inward Intuition', 
+                                                    lines:[
+                                                        'The way inward focuses your inner perception',
+                                                        'your awareness of self when wielding the weapon. ',
+                                                    ],
+                                                    leftWeight: 0.5,
+                                                    topWeight: 0.0
+                                                );
+
+                                                renderTextBox(prompt:'Skyward Intuition',
+                                                    lines: [
+                                                        'The way skyward focuses your perception of the   ',
+                                                        'world around you, making the weapon a better ',
+                                                        'extension of the self.',
+                                                    ],
+                                                    leftWeight: 0.5,
+                                                    topWeight: 0.4
+                                                );
+
+                                                renderTextBox(prompt:'Forward Intuition', 
+                                                    lines: [
+                                                        'The way forward focuses your perception of a   ',
+                                                        'better future, striving to work to meet tomorrows',
+                                                        'challenges better with the weapon.'
+                                                    ],
+                                                    leftWeight: 0.5,
+                                                    topWeight: 0.8
+                                                );
+                                            }
+                                        },
+                                        
+                                        onChoice::(choice) {
+                                            when(random.flipCoin()) ::<= {
+                                                windowEvent.queueMessage(text:'The party is close to a revelation, but not quite there.');                                                                            
+                                                finishEnd();
+                                            }
+                                            windowEvent.queueMessage(text:'The party wields the weapons better through their intuition.');                                                                            
+                                            
+                                            @:choice = match(choice) {
+                                                // inward -> AP, INT, DEF
+                                                (1): random.pickArrayItem(list:[1, 4, 3]),
+                                                // skyward -> DEX, SPD, LUK 
+                                                (2): random.pickArrayItem(list:[6, 7, 5]),
+                                                // forward -> ATK, HP 
+                                                (3): random.pickArrayItem(list:[2, 0])
+                                            };
+
+
+                                            foreach(allies_)::(index, ally) {   
+                                                @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
+                                                when (wep.name == 'None' || !wep.canGainIntuition()) empty;
+
+                                                @:oldAllyStats = StatSet.new();
+                                                oldAllyStats.state = ally.stats.state;
+                                                @:stats = wep.stats;                             
+                                                @:oldStats = StatSet.new();
+                                                oldStats.add(stats);
+                                                stats.add(stats:StatSet.new(
+                                                    HP: if (choice == 0) 15 else 0,
+                                                    AP: if (choice == 1) 15 else 0,
+                                                    ATK: if (choice == 2) 15 else 0,
+                                                    DEF: if (choice == 3) 15 else 0,
+                                                    INT: if (choice == 4) 15 else 0,
+                                                    LUK: if (choice == 5) 15 else 0,
+                                                    DEX: if (choice == 6) 15 else 0,
+                                                    SPD: if (choice == 7) 15 else 0
+                                                ));
+                                                
+                                                oldStats.printDiffRate(other:stats, prompt:wep.name);
+                                                ally.recalculateStats();
+                                                oldAllyStats.printDiff(other:ally.stats, prompt:ally.name);
+                                            }
+                                            finishEnd();
+                                        }
+                                    )
+                                } else ::<= {
+                                    finishEnd();
+                                
+                                }
+                            
+                            }
+                        );
 
                                        
 
@@ -494,9 +598,6 @@
                             
                         }
                     }
-                    allies_ = [];
-                    enemies_ = [];
-                    active = false;
                 }
 
 

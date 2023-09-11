@@ -1357,7 +1357,7 @@ Location.Base.new(data:{
     name: 'Stairs Up',
     rarity: 1000000000000,
     ownVerb : '',
-    symbol: '\',
+    symbol: '/',
     category : Location.CATEGORY.EXIT,
     onePerLandmark : false,
     minStructureSize : 1,
@@ -1807,6 +1807,7 @@ Location.Base.new(data:{
             colorHint: 'Pink',
             forceEnchant: true
         );
+        meiWeapon.maxOut();
         
         @:meiRobe = Item.new(
             base: Item.Base.database.find(name: 'Robe'),
@@ -1816,6 +1817,7 @@ Location.Base.new(data:{
             apparelHint: 'Wool+',
             forceEnchant: true
         );
+        meiRobe.maxOut();
         
         @:meiAcc = Item.new(
             base: Item.Base.database.find(name: 'Mei\'s Bow'),

@@ -112,12 +112,11 @@
                             enemies: [ent.ref],
                             landmark: this,
                             noLoot: true,
-                            onTurn ::{
+                            onAct ::{
                                 this.step();
                             },
                             
                             onEnd::(result) {
-                                breakpoint();
                                 match(result) {
                                   (Battle.RESULTS.ALLIES_WIN):::<= {
                                     map_.removeItem(data:ent);
@@ -131,7 +130,7 @@
                                     windowEvent.queueMessage(text:'Perhaps these Chosen were not ready...',
                                         renderable : {
                                             render :: {
-                                                @:canvas = import(module:'game_singleton.canvas');
+                                                @:canvas = import(module:'game_singleton.canvas.mt');
                                                 canvas.blackout();
                                                 canvas.commit();
                                             }
@@ -151,6 +150,7 @@
                     }
 
                     when (map_.getDistanceFromItem(data:ent) < AGGRESSIVE_DISTANCE + floorHint/2) ::<= {
+                        ent.pathTo = empty;                    
                         map_.moveTowardPointer(data:ent);                    
                     }
 

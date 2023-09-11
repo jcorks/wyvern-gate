@@ -127,7 +127,7 @@
             enemies,
             landmark: {},
             onEnd::(result){
-                if (Battle.RESULTS.ENEMIES_WIN)::<= {
+                if (result == Battle.RESULTS.ENEMIES_WIN)::<= {
                     windowEvent.jumpToTag(name:'MainMenu', clearResolve:true);
                 }            
             }
@@ -189,5 +189,6 @@
 
 
 return ::(location, party, whom) {
+    //traps[3](location, party, whom);
     random.pickArrayItem(list:traps)(location, party, whom);
 }

@@ -10,7 +10,6 @@ Known bugs / concerns:
 - Saving + Loading is broken
 - Sometimes, dungeons will have missing items because of unconnected areas
 - Beta dungeon layouts can sometimes have the top-left corner connect to nothing if its a pathway 
-- Beta dungeon layouts can sometimes generate features beyond its span, making some content inaccessible
 Coming changes:
   . dungeon layout variants per key 
     - Fire: current 

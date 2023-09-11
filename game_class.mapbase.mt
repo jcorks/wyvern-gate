@@ -892,7 +892,7 @@ return class(
                     x = pointer.x;
 
                     if (new < 0) new = 0;
-                    if (new >= width) new = width-1;
+                    if (new >= height) new = height-1;
 
                     @greater = new > old;
 

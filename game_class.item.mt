@@ -114,15 +114,9 @@
         @improvementsStart;
         @equipEffects = [];
         @useEffects = [];
+        @intuition = 0;
         @equippedBy;
         @ability;
-        @victoryCount = 0; // like exp, stat mods increase with victories
-                           // conceptually: the user becomes more familiar
-                           // with how to effectively use it in their hands
-                           // This is only for hand items since it only is 
-                           // increased in the hand equip slot.
-                           //
-                           // Also the item can become enchanted through use 
         @:stats = StatSet.new();
         
         @:recalculateName = ::{
@@ -562,36 +556,27 @@
 
             },
             
-            addVictory ::(silent) {
-                victoryCount += 1;
-                if (victoryCount % 3 == 0) ::<= {
-                    @choice = random.integer(from:0, to:7);
-                    @:oldStats = StatSet.new();
-                    oldStats.add(stats);
-                    stats.add(stats:StatSet.new(
-                        HP: if (choice == 0) 1 else 0,
-                        AP: if (choice == 1) 1 else 0,
-                        ATK: if (choice == 2) 1 else 0,
-                        DEF: if (choice == 3) 1 else 0,
-                        INT: if (choice == 4) 1 else 0,
-                        LUK: if (choice == 5) 1 else 0,
-                        DEX: if (choice == 6) 1 else 0,
-                        SPD: if (choice == 7) 1 else 0
-                    ));
-                    
-                    if (silent == empty && base_.name != 'None') ::<= {
-                        windowEvent.queueMessage(text:'The party gets more used to using the ' + this.name + '.');
-                        oldStats.printDiffRate(other:stats, prompt:this.name);
-                    }
-                
-                }
+            stats : {
+                get ::<- stats
+            },
+            
+            addIntuition :: {
+                intuition += 1;
+            },
+
+            canGainIntuition ::(silent) {
+                return intuition < 20;
+            },
+            
+            maxOut ::{
+                intuition = 20;
+                improvementsLeft = 0;
             },
             
             state : {
                 set ::(value) {
                     base_ = Item.Base.database.find(name:value.baseName);
                     material = if (value.materialName == empty) empty else Material.database.find(name:value.materialName);
-                    victoryCount = value.victoryCount;
                     customName = value.customName;
                     price = value.price;
                     islandLevelHint = value.islandLevelHint;
@@ -624,7 +609,6 @@
                     return {
                         baseName : base_.name,
                         materialName : if (material == empty) empty else material.name,
-                        victoryCount : victoryCount,
                         customName : customName,
                         price : price,
                         islandLevelHint : islandLevelHint,

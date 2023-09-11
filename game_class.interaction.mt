@@ -476,6 +476,7 @@ Interaction.new(
                                                         colorHint: 'Gold',
                                                         forceEnchant: true
                                                     );
+                                                    skieWeapon.maxOut();
                                                     
                                                     @:skieRobe = Item.new(
                                                         base: Item.Base.database.find(name: 'Robe'),
@@ -485,6 +486,7 @@ Interaction.new(
                                                         apparelHint: 'Eversilk',
                                                         forceEnchant: true
                                                     );
+                                                    skieRobe.maxOut();
                                                     
                                                     
                                                     skie.equip(item:skieWeapon, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true);

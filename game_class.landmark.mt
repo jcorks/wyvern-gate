@@ -165,7 +165,6 @@
                 
                 if (base.dungeonMap) ::<= {
                     if (gate == empty) ::<= {
-                        breakpoint();
                         this.movePointerToRandomArea();
                     } else ::<= {
                         map.setPointer(
