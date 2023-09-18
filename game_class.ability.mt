@@ -55,7 +55,8 @@
             ALLALLY : 1,    
             RANDOM  : 2,    
             NONE    : 3,
-            ALLENEMY: 4
+            ALLENEMY: 4,
+            ALL     : 5
         }
         
         @USAGE_HINT = {
@@ -147,6 +148,120 @@ Ability.new(
         }
     }
 )
+
+
+Ability.new(
+    data: {
+        name: 'Wyvern Prayer',
+        targetMode : TARGET_MODE.ALL,
+        description: "Prays for a miracle. If successful, uses all remaining AP.",
+        durationTurns: 0,
+        hpCost : 0,
+        apCost : 0,
+        usageHintAI : USAGE_HINT.DONTUSE,
+        oncePerBattle : false,
+        onAction: ::(user, targets, turnIndex, extraData) {
+            windowEvent.queueMessage(
+                text: user.name + ' closes their eyes, lifts their arms, and prays to the Wyverns for guidance!'
+            );
+            
+            
+            // only valid for non-wyvern battles. No cheating!
+            when (targets->any(condition::(value) <-
+                value.species.name->contains(key:'Wyvern')
+            ))
+                windowEvent.queueMessage(
+                    text: '...But the presence of a Wyvern is interrupting the prayer!'
+                );
+            
+            
+            
+            // Sometimes the gods are busy or arent listening... or you have no AP to offer
+            when (random.try(percentSuccess:66) || user.ap == 0) 
+                windowEvent.queueMessage(
+                    text: '...But nothing happened!'
+                );
+
+            
+
+            
+            (random.pickArrayItem(list:[
+                // sudden death, 1 HP for everyone
+                :: {
+                    windowEvent.queueMessage(
+                        text: 'A malevolent and dark energy befalls the battle.'
+                    );
+                    
+                    foreach(targets) ::(k, target) {
+                        target.damage(from:user, damage:Damage.new(
+                            amount:target.hp-1,
+                            damageType:Damage.TYPE.LIGHT,
+                            damageClass:Damage.CLASS.HP
+                        ),dodgeable: false, exact: true);         
+                    }
+                },
+                
+                // hurt everyone
+                :: {
+                    windowEvent.queueMessage(
+                        text: 'Beams of line shine from above!'
+                    );
+                    
+                    foreach(targets) ::(k, target) {
+                        target.damage(from:user, damage:Damage.new(
+                            amount:(target.hp/2)->floor,
+                            damageType:Damage.TYPE.LIGHT,
+                            damageClass:Damage.CLASS.HP
+                        ),dodgeable: false, exact: true);         
+                    }
+                },                
+
+                // Unequip everyone's weapon.
+                :: {
+                    windowEvent.queueMessage(
+                        text: 'Arcs of electricity blast everyone\'s weapons out of their hands!'
+                    );
+                    @:Entity = import(module:'game_class.entity.mt');
+                    @:party = import(module:'game_singleton.world.mt').party;                    
+                    foreach(targets) ::(k, target) {
+                        @:item = target.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
+                        target.unequip(slot:Entity.EQUIP_SLOTS.HAND_L);
+                        if (party.isMember(entity:target)) ::<= {
+                            party.inventory.add(item);
+                        }
+                    }
+                },   
+
+                // Max HP!
+                :: {
+                    windowEvent.queueMessage(
+                        text: 'A soothing energy envelopes the battlefield.'
+                    );
+                    
+                    foreach(targets) ::(k, target) {
+                        target.heal(amount:target.stats.HP);       
+                    }
+                },
+
+                // Heal over time. Sol Attunement for now
+                :: {
+                    windowEvent.queueMessage(
+                        text: 'A soothing energy envelopes the battlefield.'
+                    );
+                    
+                    foreach(targets) ::(k, target) {
+                        target.addEffect(from:user, name:'Greater Sol Attunement', durationTurns:9999);
+                    }
+                }
+            ]))();
+            
+
+                                                
+        }
+    }
+)
+
+
 Ability.new(
     data: {
         name: 'Precise Strike',
@@ -820,7 +935,7 @@ Ability.new(
                     text: targets[0].name + ' was not receptive to being tamed!'
                 );                            
             }
-            @:party = import(module:'game_singleton.party.mt');
+            @:party = import(module:'game_singleton.world.mt').party;                    
 
             when(party.isMember(entity:targets[0])) ::<= {
                 windowEvent.queueMessage(

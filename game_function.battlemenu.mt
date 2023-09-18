@@ -44,11 +44,12 @@ return ::(
             'Act',
             'Check',
             'Wait',
-            'Item'
+            'Item',
+            'Prayer',
         ],
         jumpTag: 'BattleMenu',
         keep: true,
-        itemsPerColumn: 2,
+        itemsPerColumn: 3,
         renderable: battle,
         prompt: 'What will ' + user.name + ' do?',
         canCancel: false,
@@ -147,6 +148,20 @@ return ::(
                                 )
                             );
                           },
+
+                          (Ability.TARGET_MODE.ALL): ::<={
+                            commitAction(action:
+                                BattleAction.new(
+                                    state : {
+                                        ability: ability,
+                                        targets: [...allies, ...enemies],
+                                        extraData: {}                                
+                                    }
+                                )
+                            );
+                          },
+
+
 
                           (Ability.TARGET_MODE.NONE): ::<={
                             commitAction(action:
@@ -272,6 +287,19 @@ return ::(
                 itemmenu(inBattle:true, user, party, enemies, onAct::(action){
                     commitAction(action);
                 });
+              },
+              
+              // Pray to the great wyverns
+              (4): ::<= {
+                commitAction(action:
+                    BattleAction.new(
+                        state : {
+                            ability: Ability.database.find(name:'Wyvern Prayer'),
+                            targets: [...enemies, ...allies],
+                            extraData: {}
+                        }
+                    )                
+                );             
               }
             }          
         }

@@ -44,23 +44,32 @@
             @ent = {
                 targetX:tileX, 
                 targetY:tileY, 
-                ref:landmark_.island.newInhabitant()
+                ref:[landmark_.island.newInhabitant()]
             }
+            
+            
 
             ::<={
                 @story = import(module:'game_singleton.story.mt');
                 @:Item = import(module:'game_class.item.mt');
-                ent.ref.inventory.clear();
-                @:itembase = Item.Base.database.getRandomWeightedFiltered(
-                    filter:::(value) <- value.isUnique == false && value.tier <= story.tier
-                    
-                );
-                if (itembase.name != 'None') ::<={
-                    @:itemInstance = Item.new(base:itembase, from:ent.ref, rngEnchantHint:true);
-                    ent.ref.inventory.add(item:itemInstance);
+
+                if (story.tier > 0)
+                    ent.ref->push(value:landmark_.island.newInhabitant());
+
+
+                foreach(ent.ref) ::(index, ref) {
+
+                    ref.inventory.clear();
+                    @:itembase = Item.Base.database.getRandomWeightedFiltered(
+                        filter:::(value) <- value.isUnique == false && value.tier <= story.tier                    
+                    );
+                    if (itembase.name != 'None') ::<={
+                        @:itemInstance = Item.new(base:itembase, from:ref, rngEnchantHint:true);
+                        ref.inventory.add(item:itemInstance);
+                    }
+                    ref.anonymize();
                 }
             }
-            ent.ref.anonymize();
             entities->push(value:ent);
             map_.setItem(data:ent, x:tileX, y:tileY, discovered:true, symbol:'*');
             if (entities->keycount == 1)
@@ -102,14 +111,15 @@
                         @:Battle = import(module:'game_class.battle.mt');
                         
                         when (world.battle.isActive) ::<= {
-                            world.battle.join(enemy:ent.ref);
+                            foreach(ent.ref) ::(i, ref) <-
+                                world.battle.join(enemy:ref);
                         }
                         Object.thawGC();
 
                         world.battle.start(
                             party:island_.world.party,                            
                             allies: island_.world.party.members,
-                            enemies: [ent.ref],
+                            enemies: [...ent.ref],
                             landmark: this,
                             noLoot: true,
                             onAct ::{
@@ -122,7 +132,7 @@
                                     map_.removeItem(data:ent);
                                     entities->remove(key:entities->findIndex(value:ent));
 
-                                    landmark_.addLocation(name:'Body', x:item.x, y:item.y, ownedByHint: ent.ref);
+                                    landmark_.addLocation(name:'Body', x:item.x, y:item.y, ownedByHint: ent.ref[0]);
                                   },
                                   
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {

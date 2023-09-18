@@ -4,7 +4,7 @@ Known bugs / concerns:
 - bribing or otherwise dismissing an enemy from battle will not 
   remove them from the dungeon map, making them still chase you afterwards 
 - Time of day is still listed in dungeons when time of day doesnt change. Need to display 
-  level and other useful information instead
+  level and other useful information in,stead
 - Some time of day displays go offscreen when the island name 
   is too long.
 - Saving + Loading is broken
@@ -24,8 +24,7 @@ Coming changes:
         . Wyverns Breath, max heal everyone
         . mild wyverns breath: HoT for everyone
         . nothing: nothing
-        . 0 AP cost for all abilities
-        
+    - Cant use on wyvern fights. Including the final one.
 
   . starting tier 1:        
           

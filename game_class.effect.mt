@@ -876,6 +876,7 @@ Effect.new(
         stats: StatSet.new(
         ),
         onAffliction : ::(user, item, holder) {
+            when(holder.hp == 0) empty;
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
             holder.heal(
                 amount: holder.stats.HP * 0.05
@@ -2013,6 +2014,7 @@ Effect.new(
         },
         
         onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+            when(holder.hp == 0) empty;
             holder.heal(amount:holder.stats.HP * 0.05);
         },
         onStatRecalculate : ::(user, item, holder, stats) {
@@ -2049,6 +2051,7 @@ Effect.new(
         },
         
         onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+            when(holder.hp == 0) empty;
             holder.heal(amount:holder.stats.HP * 0.05);
         },
         onStatRecalculate : ::(user, item, holder, stats) {
@@ -2085,6 +2088,7 @@ Effect.new(
         },
         
         onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+            when(holder.hp == 0) empty;
             holder.heal(amount:holder.stats.HP * 0.15);
         },
         onStatRecalculate : ::(user, item, holder, stats) {
@@ -2121,6 +2125,7 @@ Effect.new(
         },
         
         onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+            when(holder.hp == 0) empty;
             holder.heal(amount:holder.stats.HP * 0.15);
         },
         onStatRecalculate : ::(user, item, holder, stats) {
@@ -2895,6 +2900,7 @@ Effect.new(
         },
         
         onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+            when(holder.hp == 0) empty;
             windowEvent.queueMessage(text:'The healroot soothe\'s ' + holder.name + '.');
             holder.heal(amount:holder.stats.HP * 0.05);
         },
@@ -4040,6 +4046,7 @@ Effect.new(
         },
         
         onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+            when(holder.hp == 0) empty;
             windowEvent.queueMessage(text:holder.name + " was healed by the regeneration rune.");
             holder.heal(amount:holder.stats.HP * 0.03);
         },

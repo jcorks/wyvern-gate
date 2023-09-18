@@ -1,28 +1,55 @@
-0.1.2b
-- Items can now have equip modifiers
-- Equipped items can now cause typed damage 
-- Added Poison damage type 
-- Changed dropped items from enemies to always be non-modified, while chests will contain modifier items 
--  changed the map system on island view to be more exploration based
-  . open-world exploration using cardinal directions
-  . terrain scenery generated
-- fixed a bug where island's professions would be not saved properly
-- added Assassin abilities: 
-  . tripwire
-  . tripwire explosive
-- added Assassin passive: Assassin's Pride
-- When the party is incapacitated, the game now boots back to the menu
-- map system changed to be "paged". The island sizes have ben adjusted to better match the feel 
-  of this system.
-- fixed a bug where selling items with an empty inventory resulted in a chosen list of entirely the word "empty"
-- Slight terrain generation upgrades
-- SP system is replaced with Skill Crystals.
-  . Skill crystals, upon use, grant a new ability to a user based on their profession
-  . Can be bought or found.
-  . Disappear on use
-- fixed a bug where loading saves would make items unconsumable
-- inventory is now limited. The party can hold 20 items.
-- Fixed a bug where if an inventory is empty and an item needs to be selected, a full inventory of "empty" is displayed when selling
+0.1.5a
+- Added Prayer action 
+- Made Alpha dungeon smaller in size to prevent "long hallways"
+- Added additional gamblist game, codenamed "High Low but Dumb" based on a game that me and Radscale developed.
+
+
+0.1.4b
+- weapon intuition improvement replaces the old victory improvement mechanic
+- Added Ice Shrine specific dungeon layout (code named, "Layout Beta"). Previous layout ("Layout Alpha") is for the Fire shrine
+- Named shrines based on which wyvern they service to prevent confusion when revisiting.
+- Better location distribution in dungeons to prevent clumping of items 
+- Added pressure plates. Now stairways and chests can be locked. Some plates are trapped and some are real.
+- removed entrances from shrine dungeons
+- removed Run option. Sorry!
+- Added apparel materials 
+- Added conditional enchants.
+- Added gamblist to taverns. Is recruitable and will play a custom card game with you
+- Added special dungeon locations that will randomly spawn per-floor
+- Revamped API for changing window management to be less error-prone and unpredictable
+- Added items (2-6) to homes and farms to be stolen if desired
+- Fixed up non-peaceful encounters
+- Added combat when talking to someone in a non-peaceful area
+- Added ladder to treasure room to escape back to the surface from shrines 
+- Rebalanced enchantments to have their counts on items be tiered based on which Wyverns youve defeated 
+- Introduced "rare" enchantments that are more potent than normal enchants 
+- Fixed a bug that allowed re-use of consumable items 
+- Added chakram
+- Added rune enchants
+- Slightly nerfed Kaedjaal in response to rebalance of enchants
+- Added bartering as a basic entity interaction.
+- New structure map featuring visitable buildings
+- Added Queens and Kings quality items. Added rarity to quality.
+- Added custom RNG for future world seed integration.
+- Added item improvement mechanic 
+- Implemented skills for Runologist
+- Added Summoner 
+- Removed empty / incomplete professions
+
+
+
+0.1.4a
+- Dungeon crawl enemies now drop any items 
+- negative dex or speed will make a character skip a turn
+- dex is now used for a "chance for miss" calculation. More dex than your opponent guarantees a hit. Less dex means a chance to miss, up to 50% if way out of proportion.
+- shops now have a max inventory space of 50 items.
+- Added bloodstone and soulstone enchants
+- nerfed stone enchants to be half as chaotic
+- changed default gold amount to 250
+- added Rapier and Lance weapons.
+- added descriptions to entities with unique qualities and traits.
+- changed death to only occur on explicit attacking of a knocked out individual rather than any damage, preventing a lot of accidental deaths
+
 
 0.1.3a
 - Many things broke with the update to an iterative design to support non-terminal setups, like 
@@ -55,45 +82,31 @@
 - Kaedjaal will now trade with you, exchanging 3 items for a single item. The item will always be red (their favorite color) and will have burning.
 - fixed loading screen to actually display
 
-0.1.4a
-- Dungeon crawl enemies now drop any items 
-- negative dex or speed will make a character skip a turn
-- dex is now used for a "chance for miss" calculation. More dex than your opponent guarantees a hit. Less dex means a chance to miss, up to 50% if way out of proportion.
-- shops now have a max inventory space of 50 items.
-- Added bloodstone and soulstone enchants
-- nerfed stone enchants to be half as chaotic
-- changed default gold amount to 250
-- added Rapier and Lance weapons.
-- added descriptions to entities with unique qualities and traits.
-- changed death to only occur on explicit attacking of a knocked out individual rather than any damage, preventing a lot of accidental deaths
 
-0.1.4b
-- weapon intuition improvement replaces the old victory improvement mechanic
-- Added Ice Shrine specific dungeon layout 
-- Better location distribution in dungeons to prevent clumping of items 
-- Added pressure plates. Now stairways and chests can be locked. Some plates are trapped and some are real.
-- removed entrances from shrine dungeons
-- removed Run option. Sorry!
-- Added apparel materials 
-- Added conditional enchants.
-- Added gamblist to taverns. Is recruitable and will play a custom card game with you
-- Added special dungeon locations that will randomly spawn per-floor
-- Revamped API for changing window management to be less error-prone and unpredictable
-- Added items (2-6) to homes and farms to be stolen if desired
-- Fixed up non-peaceful encounters
-- Added combat when talking to someone in a non-peaceful area
-- Added ladder to treasure room to escape back to the surface from shrines 
-- Rebalanced enchantments to have their counts on items be tiered based on which Wyverns youve defeated 
-- Introduced "rare" enchantments that are more potent than normal enchants 
-- Fixed a bug that allowed re-use of consumable items 
-- Added chakram
-- Added rune enchants
-- Slightly nerfed Kaedjaal in response to rebalance of enchants
-- Added bartering as a basic entity interaction.
-- New structure map featuring visitable buildings
-- Added Queens and Kings quality items. Added rarity to quality.
-- Added custom RNG for future world seed integration.
-- Added item improvement mechanic 
-- Implemented skills for Runologist
-- Added Summoner 
-- Removed empty / incomplete professions
+0.1.2b
+- Items can now have equip modifiers
+- Equipped items can now cause typed damage 
+- Added Poison damage type 
+- Changed dropped items from enemies to always be non-modified, while chests will contain modifier items 
+-  changed the map system on island view to be more exploration based
+  . open-world exploration using cardinal directions
+  . terrain scenery generated
+- fixed a bug where island's professions would be not saved properly
+- added Assassin abilities: 
+  . tripwire
+  . tripwire explosive
+- added Assassin passive: Assassin's Pride
+- When the party is incapacitated, the game now boots back to the menu
+- map system changed to be "paged". The island sizes have ben adjusted to better match the feel 
+  of this system.
+- fixed a bug where selling items with an empty inventory resulted in a chosen list of entirely the word "empty"
+- Slight terrain generation upgrades
+- SP system is replaced with Skill Crystals.
+  . Skill crystals, upon use, grant a new ability to a user based on their profession
+  . Can be bought or found.
+  . Disappear on use
+- fixed a bug where loading saves would make items unconsumable
+- inventory is now limited. The party can hold 20 items.
+- Fixed a bug where if an inventory is empty and an item needs to be selected, a full inventory of "empty" is displayed when selling
+
+

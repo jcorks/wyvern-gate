@@ -903,10 +903,283 @@ Playing the Game
     }
 }
 
+
+@:high_low_but_dumb = ::(onFinish) {
+    @deck = Deck.new();
+    deck.addStandard52();
+    deck.shuffle();
+    
+    
+    @pointsWon  = 0;
+    @pointsLost = 0;
+    @partyWins;
+
+
+    @:nextRound :: {
+        when (pointsWon >= 3) ::<= {
+            windowEvent.queueMessage(
+                text: 'The party wins!',
+                onLeave ::{
+                    partyWins = true;
+                    windowEvent.jumpToTag(name:'HighLowButDumb', goBeforeTag: true);                    
+                }
+            );                
+        }
+
+        when (pointsLost >= 3) ::<= {
+            windowEvent.queueMessage(
+                text: 'The Gamblist wins!',
+                onLeave :: {
+                    partyWins = false;
+                    windowEvent.jumpToTag(name:'HighLowButDumb', goBeforeTag: true);                    
+                }
+            );                
+        }    
+        @:is3 = random.flipCoin();
+        
+        
+        @:nameToChoice = ::(name) <-
+            if (is3) 
+                match(name) {
+                    ('Left')   : 0,
+                    ('Middle') : 1,
+                    ('Right')  : 2
+                }
+            else
+                match(name) {
+                    ('Left')   : 0,
+                    ('Right')  : 1
+                }
+        ;
+        
+        @:hand = [
+            deck.drawNextCard(),
+            deck.drawNextCard(),
+        ]
+        
+        @:obscured = [
+            true,
+            true
+        ]
+        
+        @:boardRenderable = {
+            render ::{
+                canvas.blackout();
+                
+                
+                // draw scoreboard
+                canvas.movePen(x:0, y:0);
+                canvas.drawText(text:'Wins  : ');
+                for(0, pointsWon)::(i) {
+                    canvas.movePen(x:8+i, y:0);
+                    canvas.drawChar(text: 'o')
+                }
+
+                canvas.movePen(x:0, y:1);
+                canvas.drawText(text:'Losses: ');
+                for(0, pointsLost)::(i) {
+                    canvas.movePen(x:8+i, y:1);
+                    canvas.drawChar(text: 'x')
+                }
+
+                // draw cards
+                @centerX = (canvas.width  / 2)->floor;
+                @centerY = (canvas.height / 2)->floor;
+                if (is3) ::<= {
+                    @offsetX = centerX - (Deck.Card.WIDTH/2)->floor;
+                    @offsetY = centerY - (Deck.Card.HEIGHT/2)->floor;
+                    hand[0].render(x:offsetX - (Deck.Card.WIDTH - 2), y:offsetY, flipped:obscured[0]);
+                    hand[1].render(x:offsetX +2,                      y:offsetY, flipped:obscured[1]);
+                    hand[2].render(x:offsetX + (Deck.Card.WIDTH + 2), y:offsetY, flipped:obscured[2]);
+                    
+                } else ::<= {
+                    @offsetX = centerX;
+                    @offsetY = centerY - (Deck.Card.HEIGHT/2)->floor;
+                    hand[0].render(x:offsetX - (Deck.Card.WIDTH + 2), y:offsetY, flipped:obscured[0]);
+                    hand[1].render(x:offsetX,                         y:offsetY, flipped:obscured[1]);
+                }
+            }
+        }
+        
+        
+        @:checkFinalChoice = ::(isFirst, which){
+            @highest = which;
+            for(0, hand->keycount) ::(i){
+                obscured[i] = false;
+                if (hand[i].value > hand[highest].value)
+                    highest = i;
+            }
+
+
+            windowEvent.queueMessage(
+                speaker: 'The Gamblist',
+                text: if (highest == which) 'Good choice...' else 'Better luck next time.',
+                topWeight: 1,
+                renderable:boardRenderable,
+                onLeave ::{
+            
+                    // party was correct
+                    if (highest == which)
+                        pointsWon += if (isFirst) 2 else 1
+                    else 
+                        pointsLost += 1
+                        
+                    
+                        
+                    nextRound();
+                
+                }
+
+            );        
+        }
+        
+        
+        
+        if (is3) ::<= {
+            hand->push(value:deck.drawNextCard());
+            obscured->push(value:true);
+            windowEvent.queueMessage(
+                speaker: 'The Gamblist',
+                text: 'In this round, I will draw 3 cards. You must choose the highest card. If your first guess is correct, it counts as 2 wins.',
+                renderable:boardRenderable
+            );
+        } else ::<= {
+            windowEvent.queueMessage(
+                speaker: 'The Gamblist',
+                text: 'In this round, I will draw 2 cards. You must choose which card is higher. If your first guess is correct, it counts as 2 wins.',
+                renderable:boardRenderable
+            );
+        }
+
+
+        windowEvent.queueMessage(
+            speaker: 'The Gamblist',
+            topWeight: 1,
+            text: 'Pick a card.',
+            renderable:boardRenderable
+        );
+
+        @cardChoices = if (is3)
+            ['Left', 'Middle', 'Right']
+        else 
+            ['Left', 'Right'];
+            
+            
+        
+        windowEvent.queueChoices(
+            prompt:'Pick which?',
+            canCancel : false,
+            topWeight: 1,
+            leftWeight: 1,
+            choices: cardChoices,
+            renderable:boardRenderable,
+            onChoice::(choice) {
+                @:originalChoice = choice-1;
+                windowEvent.queueMessage(
+                    topWeight: 1,
+                    text : random.pickArrayItem(list:
+                        if (is3)
+                            [
+                                'The gamblist smiles slyly before revealing two of the cards.',   
+                                'The gamblist emotionlessly flips two of the cards.',   
+                                'The gamblist chuckles for a while before flipping two of the cards.',   
+                                'The gamblist sternly flips two of the cards before starring at you.'
+                            ]
+                        else 
+                            [
+                                'The gamblist smiles slyly before revealing one of the cards.',   
+                                'The gamblist emotionlessly flips one of the cards.',   
+                                'The gamblist chuckles for a while before flipping one of the cards.',   
+                                'The gamblist sternly flips one of the cards before starring at you.'
+                            ]
+                    ),
+                    renderable:boardRenderable,
+                    onLeave ::{
+                    
+                        @isSneaky = random.try(percentSuccess:40);
+                        @dontReveal = 0;
+                        if (!isSneaky) ::<= {
+                            for(1, hand->keycount) ::(i) {
+                                if ((7 - hand[i].value)->abs > (7 - hand[dontReveal].value)->abs) ::<= {
+                                    dontReveal = i;
+                                }
+                            }
+                        } else ::<= {
+                            @choices = [];
+                            for(0, hand->keycount) ::(i) {
+                                choices->push(value:i);
+                            }
+                            dontReveal = random.pickArrayItem(list:choices);              
+                        }
+
+                        for(0, hand->keycount) ::(i) {
+                            when(i == dontReveal) empty;
+                            obscured[i] = false;
+                        }
+
+
+
+                        windowEvent.queueMessage(
+                            speaker: 'The Gamblist',
+                            text : 'Perhaps you\'ll change your choice.',
+                            topWeight: 1,
+                            renderable:boardRenderable,
+                            onLeave ::{
+                                windowEvent.queueAskBoolean(
+                                    prompt: 'Keep original choice of the ' + cardChoices[originalChoice] + ' card?',
+                                    topWeight: 1,
+                                    renderable: boardRenderable,
+                                    onChoice::(which) {
+                                        when(which == true) checkFinalChoice(isFirst:true, which:originalChoice);
+
+                                        cardChoices->remove(key:originalChoice);
+                                    
+                                        windowEvent.queueChoices(
+                                            prompt:'Pick which?',
+                                            canCancel : false,
+                                            topWeight: 1,
+                                            leftWeight: 1,
+                                            choices: cardChoices,
+                                            renderable:boardRenderable,
+                                            keep:true,
+                                            onChoice::(choice) {
+                                                
+                                                checkFinalChoice(isFirst:false, which:nameToChoice(name:cardChoices[choice-1]));
+                                            }
+                                        )
+                                    }
+                                )
+                            }
+                        )
+                    }
+                )
+                
+            }
+        );
+    }
+    
+    windowEvent.queueNoDisplay(
+        renderable : {
+            render::{canvas.blackout();}
+        },
+        keep:true,
+        jumpTag: 'HighLowButDumb',
+        onEnter::{},
+        onLeave::{        
+            onFinish(partyWins);
+        }
+    );  
+    
+    
+    nextRound(); 
+        
+}
+
 @:Gamblist = class(
     define::(this) {
     
         @gameList = [
+            high_low_but_dumb,
             sorcerer
         ];
     

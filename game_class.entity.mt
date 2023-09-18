@@ -577,9 +577,9 @@
                 return true;
             },
             
-            damage ::(from => Entity.type, damage => Damage.type, dodgeable => Boolean, critical) {
+            damage ::(from => Entity.type, damage => Damage.type, dodgeable => Boolean, critical, exact) {
                 when(isDead) false;
-
+                @originalAmount = damage.amount;
                 @whiff = false;
                 if (dodgeable) ::<= {
                     @diffpercent = (from.stats.DEX - this.stats.DEX) / this.stats.DEX;
@@ -626,6 +626,8 @@
                     effect.effect.onDamage(user:effect.from, holder:this, from, damage);
                 }
 
+                if (exact)
+                    damage.amount = originalAmount;
 
                 when (damage.amount == 0) false;
                 when(hp == 0) false;
