@@ -24,26 +24,29 @@ return ::(terminal, onBoot => Function) {
     ];
 
 
-    @:printer = Topaz.Entity.new();
-    terminal.attach(entity:printer);
-    printer.onStep = ::{
-        if (preflight->keycount) ::<= {
-            if (Number.random() < 0.2) ::<= {
-                @:next = preflight[0];
-                preflight->remove(key:0);
-                terminal.print(line:next);
-            }
-        } else ::<= {
-            if (Number.random() < 0.06) ::<= {
-                @:next = messages[0];
-                messages->remove(key:0);
-                terminal.print(line:next);
-            }
-            if (messages->keycount == 0) ::<= {
-                terminal.clear();
-                printer.remove();
-                onBoot();
+    @:printer = Topaz.Entity.create(
+        attributes: {
+            onStep ::{
+                if (preflight->keycount) ::<= {
+                    if (Number.random() < 0.2) ::<= {
+                        @:next = preflight[0];
+                        preflight->remove(key:0);
+                        terminal.print(line:next);
+                    }
+                } else ::<= {
+                    if (Number.random() < 0.06) ::<= {
+                        @:next = messages[0];
+                        messages->remove(key:0);
+                        terminal.print(line:next);
+                    }
+                    if (messages->keycount == 0) ::<= {
+                        terminal.clear();
+                        printer.remove();
+                        onBoot();
+                    }
+                }
             }
         }
-    }
+    );
+    terminal.attach(child:printer);
 }

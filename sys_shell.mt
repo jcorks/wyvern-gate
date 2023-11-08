@@ -103,21 +103,22 @@ return class(
                 terminal.print(line:'');
                 printPrompt();
 
-                @:shell = Topaz.Entity.new();
                 Topaz.Input.addUnicodeListener(
-                    onNewUnicode::(unicode) {
-                        when(programActive) ::<= {
-                            {:::} {
-                                onProgramUnicode(unicode);
-                            } : {
-                                onError::(message) {
-                                    endProgramError(message);
+                    listener : {
+                        onNewUnicode::(unicode) {
+                            when(programActive) ::<= {
+                                {:::} {
+                                    onProgramUnicode(unicode);
+                                } : {
+                                    onError::(message) {
+                                        endProgramError(message);
+                                    }
                                 }
                             }
+                            @:ch = ' '->setCharCodeAt(index:0, value:unicode);
+                            currentCommand = currentCommand + ch;
+                            printPrompt();
                         }
-                        @:ch = ' '->setCharCodeAt(index:0, value:unicode);
-                        currentCommand = currentCommand + ch;
-                        printPrompt();
                     }
                 );
 
@@ -126,136 +127,140 @@ return class(
                 @lastLeftStickY = 0;
                 @:stickDeadzone = 0.35;
                 Topaz.Input.addPadListener(
-                    pad: 0,
-
-                    onUpdate::(input, value) {
-                        when(programActive == false) empty;
-
-
-                        match(input) {
+                    padIndex: 0,
+                    listener : {
+                        onUpdate::(input, value) {
+                            when(programActive == false) empty;
 
 
-                          (Topaz.Input.PAD.AXIS_X): ::<= {
-                            if (value->abs > stickDeadzone && lastLeftStickX->abs < stickDeadzone) ::<= {
-                                if (value < 0)
-                                    onProgramKeyboard(input:Topaz.Input.KEY.LEFT, value:1)
-                                else
-                                    onProgramKeyboard(input:Topaz.Input.KEY.RIGHT, value:1);
-                            }
-                            lastLeftStickX = value;
-                          },
-
-
-                          (Topaz.Input.PAD.AXIS_Y): ::<= {
-                            if (value->abs > stickDeadzone && lastLeftStickY->abs < stickDeadzone) ::<= {
-                                if (value < 0)
-                                    onProgramKeyboard(input:Topaz.Input.KEY.UP, value:1)
-                                else
-                                    onProgramKeyboard(input:Topaz.Input.KEY.DOWN, value:1);
-                            }
-                            lastLeftStickY = value;
-                          }
-
-
-
-                        }
-                    },
-
-                    onPress::(input) {
-                        when(programActive)
                             match(input) {
-                              (Topaz.Input.PAD.A): ::<={
-                                onProgramKeyboard(input:Topaz.Input.KEY.Z, value:1);
-                              },
-
-                              (Topaz.Input.PAD.B): ::<={
-                                onProgramKeyboard(input:Topaz.Input.KEY.X, value:1);
-                              },
 
 
+                              (Topaz.Pad.axis_x): ::<= {
+                                if (value->abs > stickDeadzone && lastLeftStickX->abs < stickDeadzone) ::<= {
+                                    if (value < 0)
+                                        onProgramKeyboard(input:Topaz.Key.left, value:1)
+                                    else
+                                        onProgramKeyboard(input:Topaz.Key.right, value:1);
+                                }
+                                lastLeftStickX = value;
+                              },
 
-                              (Topaz.Input.PAD.D_UP):::<= {
-                                onProgramKeyboard(input:Topaz.Input.KEY.UP, value:1);
-                              },
-                              (Topaz.Input.PAD.D_DOWN):::<= {
-                                onProgramKeyboard(input:Topaz.Input.KEY.DOWN, value:1);
-                              },
-                              (Topaz.Input.PAD.D_LEFT):::<= {
-                                onProgramKeyboard(input:Topaz.Input.KEY.LEFT, value:1);
-                              },
-                              (Topaz.Input.PAD.D_RIGHT):::<= {
-                                onProgramKeyboard(input:Topaz.Input.KEY.RIGHT, value:1);
+
+                              (Topaz.Pad.axis_y): ::<= {
+                                if (value->abs > stickDeadzone && lastLeftStickY->abs < stickDeadzone) ::<= {
+                                    if (value < 0)
+                                        onProgramKeyboard(input:Topaz.Key.up, value:1)
+                                    else
+                                        onProgramKeyboard(input:Topaz.Key.down, value:1);
+                                }
+                                lastLeftStickY = value;
                               }
-                            }
-                        ;                                
 
-                        match(input) {
-                            (Topaz.Input.PAD.A,
-                             Topaz.Input.PAD.START): ::<={
-                                currentCommand = 'start';
-                                printPrompt();                                
-                                runCommand(command:'start', arg:'');
+
+
+                            }
+                        },
+
+                        onPress::(input) {
+                            when(programActive)
+                                match(input) {
+                                  (Topaz.PAD.a): ::<={
+                                    onProgramKeyboard(input:Topaz.Key.z, value:1);
+                                  },
+
+                                  (Topaz.PAD.b): ::<={
+                                    onProgramKeyboard(input:Topaz.Key.x, value:1);
+                                  },
+
+
+
+                                  (Topaz.PAD.d_up):::<= {
+                                    onProgramKeyboard(input:Topaz.Key.up, value:1);
+                                  },
+                                  (Topaz.PAD.d_down):::<= {
+                                    onProgramKeyboard(input:Topaz.Key.down, value:1);
+                                  },
+                                  (Topaz.PAD.d_left):::<= {
+                                    onProgramKeyboard(input:Topaz.Key.left, value:1);
+                                  },
+                                  (Topaz.PAD.d_right):::<= {
+                                    onProgramKeyboard(input:Topaz.Key.right, value:1);
+                                  }
+                                }
+                            ;                                
+
+                            match(input) {
+                                (Topaz.PAD.A,
+                                 Topaz.PAD.START): ::<={
+                                    currentCommand = 'start';
+                                    printPrompt();                                
+                                    runCommand(command:'start', arg:'');
+                                }
                             }
                         }
                     }
                 );
 
-
-                terminal.onStep = ::{
-                    {:::} {
-                        onProgramCycle();
-                    } : {
-                        onError::(message) {
-                            endProgramError(message);
-                        }
-                    }
-                }
-
-                Topaz.Input.addKeyboardListener(
-                    onUpdate::(input, value) {
-                        when(programActive) ::<= {
+                @:shell = Topaz.Entity.create(
+                    attributes : {
+                        onStep : ::{
                             {:::} {
-                                onProgramKeyboard(input, value);
+                                onProgramCycle();
                             } : {
                                 onError::(message) {
                                     endProgramError(message);
                                 }
+                            }           
+                        }         
+                    }
+                );
+                
+                terminal.attach(child:shell);
+
+                Topaz.Input.addKeyboardListener(
+                    listener : {
+                        onUpdate::(input, value) {
+                            when(programActive) ::<= {
+                                {:::} {
+                                    onProgramKeyboard(input, value);
+                                } : {
+                                    onError::(message) {
+                                        endProgramError(message);
+                                    }
+                                }
                             }
-                        }
 
-                        when(value < 1) empty;
-
-                        match(input) {
-                            (Topaz.Input.KEY.ENTER):::<= {
-                                @:args = currentCommand->split(token:' ');
-                                @:command = this.commands->findIndex(value:args[0]);
-                                terminal.backspace(); // remove cursor
-                                terminal.nextLine();
-                                if (command == -1) ::<= {
-                                    if (currentCommand != '')
-                                        terminal.print(line:'Unknown command: ' + args[0]);
-                                } else ::<= {
-                                    runCommand(command:args[0], arg:args[1]);
-                                }
-                                currentCommand = '';
-                                if (!programActive)
-                                    printPrompt();
-                            },
-
-                            (Topaz.Input.KEY.BACKSPACE):::<= {
-                                when (currentCommand->length <= 1) ::<= {
+                            when(value < 1) empty;
+                            match(input) {
+                                (Topaz.Key.enter):::<= {
+                                    @:args = currentCommand->split(token:' ');
+                                    @:command = this.commands->findIndex(value:args[0]);
+                                    terminal.backspace(); // remove cursor
+                                    terminal.nextLine();
+                                    if (command == -1) ::<= {
+                                        if (currentCommand != '')
+                                            terminal.print(line:'Unknown command: ' + args[0]);
+                                    } else ::<= {
+                                        runCommand(command:args[0], arg:args[1]);
+                                    }
                                     currentCommand = '';
+                                    if (!programActive)
+                                        printPrompt();
+                                },
+
+                                (Topaz.Key.backspace):::<= {
+                                    when (currentCommand->length <= 1) ::<= {
+                                        currentCommand = '';
+                                        printPrompt();
+                                    }
+                                    currentCommand = currentCommand->substr(from:0, to:currentCommand->length-2);
                                     printPrompt();
                                 }
-                                currentCommand = currentCommand->substr(from:0, to:currentCommand->length-2);
-                                printPrompt();
                             }
                         }
                     }
                 );
-
-                terminal.attach(entity:shell);
-
             }            
         }
     }

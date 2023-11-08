@@ -5,11 +5,22 @@
 // if topaz is detected, setup its canvas and main loop
 
 @:term = Terminal.new();
-term.position = {
-    x: -Topaz.defaultDisplay.width/2,
-    y:  Topaz.defaultDisplay.height/2 - term.LINE_SPACING*2
+
+@:display = Topaz.ViewManager.getDefault();
+@:displayWidth = ::{
+    return display.getParameter(param:Topaz.Display.Parameter.Width);
 }
-Topaz.defaultDisplay.root = term;
+
+@:displayHeight = ::{
+    return display.getParameter(param:Topaz.Display.Parameter.Height);
+}
+
+
+term.setPosition(value:{
+    x: -displayWidth()/2,
+    y:  displayHeight()/2 - term.LINE_SPACING*2
+});
+display.setRoot(newRoot:term);
 /*
 Topaz.defaultDisplay.setParameter(
     parameter:Topaz.Display.PARAMETER.FULLSCREEN,
