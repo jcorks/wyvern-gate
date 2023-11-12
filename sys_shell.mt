@@ -54,6 +54,73 @@ return class(
                 }
             }
         }
+        
+        @:padDirStates = [
+            {input:Topaz.Input.KEY.LEFT  , time:0},
+            {input:Topaz.Input.KEY.RIGHT , time:0},
+            {input:Topaz.Input.KEY.UP    , time:0},
+            {input:Topaz.Input.KEY.DOWN  , time:0} 
+        ];
+        
+        @:stickDeadzone = 0.35;
+        @lastTime = Topaz.time;
+        @:HOLD_TIME_MIN = 0.4;
+        @:HOLD_TIME_REPEAT = 0.08;
+        @:checkRepeatPadInputs ::{
+            @left = 
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.D_LEFT) > 0 ||
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.AXIS_X) < -stickDeadzone ||
+                Topaz.Input.getState(input:Topaz.Input.KEY.LEFT) > 0
+
+            @right = 
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.D_RIGHT) > 0 ||
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.AXIS_X) > stickDeadzone ||
+                Topaz.Input.getState(input:Topaz.Input.KEY.RIGHT) > 0
+
+
+            @down = 
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.D_DOWN) > 0 ||
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.AXIS_Y) > stickDeadzone ||
+                Topaz.Input.getState(input:Topaz.Input.KEY.DOWN) > 0
+                
+
+            @up = 
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.D_UP) > 0 ||
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.AXIS_Y) < -stickDeadzone ||
+                Topaz.Input.getState(input:Topaz.Input.KEY.UP) > 0
+
+
+
+            padDirStates[0].state = left;
+            padDirStates[1].state = right;
+            padDirStates[2].state = up;
+            padDirStates[3].state = down;
+
+            
+            @:delta = (Topaz.time - lastTime) / 1000;
+            lastTime = Topaz.time;
+            foreach(padDirStates) ::(index, e) {
+                @input = e.input;
+                
+                
+                when (e.state == false)
+                    e.time = 0;
+
+                Topaz.Console.print(message:e.time);
+               
+                if (e.time == 0) 
+                    onProgramKeyboard(input, value:1)
+                    
+                e.time += delta;
+                if (e.time > HOLD_TIME_MIN) ::<= {
+                    if (e.time > HOLD_TIME_MIN + HOLD_TIME_REPEAT) ::<= {
+                        e.time = HOLD_TIME_MIN;
+                        onProgramKeyboard(input, value:1)
+                    }
+                }
+            }
+        }
+        
 
 
         this.interface = {
@@ -128,38 +195,7 @@ return class(
                 Topaz.Input.addPadListener(
                     pad: 0,
 
-                    onUpdate::(input, value) {
-                        when(programActive == false) empty;
-
-
-                        match(input) {
-
-
-                          (Topaz.Input.PAD.AXIS_X): ::<= {
-                            if (value->abs > stickDeadzone && lastLeftStickX->abs < stickDeadzone) ::<= {
-                                if (value < 0)
-                                    onProgramKeyboard(input:Topaz.Input.KEY.LEFT, value:1)
-                                else
-                                    onProgramKeyboard(input:Topaz.Input.KEY.RIGHT, value:1);
-                            }
-                            lastLeftStickX = value;
-                          },
-
-
-                          (Topaz.Input.PAD.AXIS_Y): ::<= {
-                            if (value->abs > stickDeadzone && lastLeftStickY->abs < stickDeadzone) ::<= {
-                                if (value < 0)
-                                    onProgramKeyboard(input:Topaz.Input.KEY.UP, value:1)
-                                else
-                                    onProgramKeyboard(input:Topaz.Input.KEY.DOWN, value:1);
-                            }
-                            lastLeftStickY = value;
-                          }
-
-
-
-                        }
-                    },
+                    onUpdate::(input, value) {},
 
                     onPress::(input) {
                         when(programActive)
@@ -170,22 +206,9 @@ return class(
 
                               (Topaz.Input.PAD.B): ::<={
                                 onProgramKeyboard(input:Topaz.Input.KEY.X, value:1);
-                              },
-
-
-
-                              (Topaz.Input.PAD.D_UP):::<= {
-                                onProgramKeyboard(input:Topaz.Input.KEY.UP, value:1);
-                              },
-                              (Topaz.Input.PAD.D_DOWN):::<= {
-                                onProgramKeyboard(input:Topaz.Input.KEY.DOWN, value:1);
-                              },
-                              (Topaz.Input.PAD.D_LEFT):::<= {
-                                onProgramKeyboard(input:Topaz.Input.KEY.LEFT, value:1);
-                              },
-                              (Topaz.Input.PAD.D_RIGHT):::<= {
-                                onProgramKeyboard(input:Topaz.Input.KEY.RIGHT, value:1);
                               }
+
+
                             }
                         ;                                
 
@@ -203,6 +226,7 @@ return class(
 
                 terminal.onStep = ::{
                     {:::} {
+                        checkRepeatPadInputs();
                         onProgramCycle();
                     } : {
                         onError::(message) {
@@ -215,7 +239,14 @@ return class(
                     onUpdate::(input, value) {
                         when(programActive) ::<= {
                             {:::} {
-                                onProgramKeyboard(input, value);
+                                match(input) {
+                                  (Topaz.Input.KEY.UP,
+                                  Topaz.Input.KEY.DOWN,
+                                  Topaz.Input.KEY.LEFT,
+                                  Topaz.Input.KEY.RIGHT): empty,
+                                  default:
+                                    onProgramKeyboard(input, value)
+                                }
                             } : {
                                 onError::(message) {
                                     endProgramError(message);
