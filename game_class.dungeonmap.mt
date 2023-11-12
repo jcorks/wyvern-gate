@@ -295,7 +295,7 @@
     
     @:AREA_SIZE = random.pickArrayItem(
         list: [
-            7, 9, 11
+            5, 7, 9
         ]
     );
     
@@ -316,8 +316,8 @@
     );
     
     
-    @:AREA_WIDTH  = random.integer(from:5, to:8);
-    @:AREA_HEIGHT = random.integer(from:5, to:8);
+    @:AREA_WIDTH  = random.integer(from:4, to:7);
+    @:AREA_HEIGHT = random.integer(from:4, to:7);
 
     @gridNodes = [];    
     
@@ -867,7 +867,21 @@
 
 
 
+@:DungeonDelta = ::(map, mapHint) {
+    /*
+     o   o
+    o     o
+      
+      
+    
+    o     o
+     o   o
+    */
+    
+    
+    
 
+}
 
 
 

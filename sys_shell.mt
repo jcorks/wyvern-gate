@@ -54,6 +54,73 @@ return class(
                 }
             }
         }
+        
+        @:padDirStates = [
+            {input:Topaz.Input.KEY.LEFT  , time:0},
+            {input:Topaz.Input.KEY.RIGHT , time:0},
+            {input:Topaz.Input.KEY.UP    , time:0},
+            {input:Topaz.Input.KEY.DOWN  , time:0} 
+        ];
+        
+        @:stickDeadzone = 0.35;
+        @lastTime = Topaz.time;
+        @:HOLD_TIME_MIN = 0.4;
+        @:HOLD_TIME_REPEAT = 0.08;
+        @:checkRepeatPadInputs ::{
+            @left = 
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.D_LEFT) > 0 ||
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.AXIS_X) < -stickDeadzone ||
+                Topaz.Input.getState(input:Topaz.Input.KEY.LEFT) > 0
+
+            @right = 
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.D_RIGHT) > 0 ||
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.AXIS_X) > stickDeadzone ||
+                Topaz.Input.getState(input:Topaz.Input.KEY.RIGHT) > 0
+
+
+            @down = 
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.D_DOWN) > 0 ||
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.AXIS_Y) > stickDeadzone ||
+                Topaz.Input.getState(input:Topaz.Input.KEY.DOWN) > 0
+                
+
+            @up = 
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.D_UP) > 0 ||
+                Topaz.Input.getPadState(pad:0, input:Topaz.Input.PAD.AXIS_Y) < -stickDeadzone ||
+                Topaz.Input.getState(input:Topaz.Input.KEY.UP) > 0
+
+
+
+            padDirStates[0].state = left;
+            padDirStates[1].state = right;
+            padDirStates[2].state = up;
+            padDirStates[3].state = down;
+
+            
+            @:delta = (Topaz.time - lastTime) / 1000;
+            lastTime = Topaz.time;
+            foreach(padDirStates) ::(index, e) {
+                @input = e.input;
+                
+                
+                when (e.state == false)
+                    e.time = 0;
+
+                Topaz.Console.print(message:e.time);
+               
+                if (e.time == 0) 
+                    onProgramKeyboard(input, value:1)
+                    
+                e.time += delta;
+                if (e.time > HOLD_TIME_MIN) ::<= {
+                    if (e.time > HOLD_TIME_MIN + HOLD_TIME_REPEAT) ::<= {
+                        e.time = HOLD_TIME_MIN;
+                        onProgramKeyboard(input, value:1)
+                    }
+                }
+            }
+        }
+        
 
 
         this.interface = {
@@ -128,85 +195,57 @@ return class(
                 @:stickDeadzone = 0.35;
                 Topaz.Input.addPadListener(
                     padIndex: 0,
-                    listener : {
-                        onUpdate::(input, value) {
-                            when(programActive == false) empty;
 
+                    onUpdate::(input, value) {},
 
                             match(input) {
-
-
-                              (Topaz.Pad.axis_x): ::<= {
-                                if (value->abs > stickDeadzone && lastLeftStickX->abs < stickDeadzone) ::<= {
-                                    if (value < 0)
-                                        onProgramKeyboard(input:Topaz.Key.left, value:1)
-                                    else
-                                        onProgramKeyboard(input:Topaz.Key.right, value:1);
-                                }
-                                lastLeftStickX = value;
+                              (Topaz.Input.PAD.A): ::<={
+                                onProgramKeyboard(input:Topaz.Input.KEY.Z, value:1);
                               },
 
-
-                              (Topaz.Pad.axis_y): ::<= {
-                                if (value->abs > stickDeadzone && lastLeftStickY->abs < stickDeadzone) ::<= {
-                                    if (value < 0)
-                                        onProgramKeyboard(input:Topaz.Key.up, value:1)
-                                    else
-                                        onProgramKeyboard(input:Topaz.Key.down, value:1);
-                                }
-                                lastLeftStickY = value;
+                              (Topaz.Input.PAD.B): ::<={
+                                onProgramKeyboard(input:Topaz.Input.KEY.X, value:1);
                               }
 
 
-
                             }
-                        },
+                        ;                                
 
-                        onPress::(input) {
-                            when(programActive)
-                                match(input) {
-                                  (Topaz.PAD.a): ::<={
-                                    onProgramKeyboard(input:Topaz.Key.z, value:1);
-                                  },
-
-                                  (Topaz.PAD.b): ::<={
-                                    onProgramKeyboard(input:Topaz.Key.x, value:1);
-                                  },
-
-
-
-                                  (Topaz.PAD.d_up):::<= {
-                                    onProgramKeyboard(input:Topaz.Key.up, value:1);
-                                  },
-                                  (Topaz.PAD.d_down):::<= {
-                                    onProgramKeyboard(input:Topaz.Key.down, value:1);
-                                  },
-                                  (Topaz.PAD.d_left):::<= {
-                                    onProgramKeyboard(input:Topaz.Key.left, value:1);
-                                  },
-                                  (Topaz.PAD.d_right):::<= {
-                                    onProgramKeyboard(input:Topaz.Key.right, value:1);
-                                  }
-                                }
-                            ;                                
-
-                            match(input) {
-                                (Topaz.PAD.A,
-                                 Topaz.PAD.START): ::<={
-                                    currentCommand = 'start';
-                                    printPrompt();                                
-                                    runCommand(command:'start', arg:'');
-                                }
+                        match(input) {
+                            (Topaz.Input.PAD.A,
+                             Topaz.Input.PAD.START): ::<={
+                                currentCommand = 'start';
+                                printPrompt();                                
+                                runCommand(command:'start', arg:'');
                             }
                         }
                     }
                 );
 
-                @:shell = Topaz.Entity.create(
-                    attributes : {
-                        onStep : ::{
+
+                terminal.onStep = ::{
+                    {:::} {
+                        checkRepeatPadInputs();
+                        onProgramCycle();
+                    } : {
+                        onError::(message) {
+                            endProgramError(message);
+                        }
+                    }
+                }
+
+                Topaz.Input.addKeyboardListener(
+                    onUpdate::(input, value) {
+                        when(programActive) ::<= {
                             {:::} {
-                                onProgramCycle();
+                                match(input) {
+                                  (Topaz.Input.KEY.UP,
+                                  Topaz.Input.KEY.DOWN,
+                                  Topaz.Input.KEY.LEFT,
+                                  Topaz.Input.KEY.RIGHT): empty,
+                                  default:
+                                    onProgramKeyboard(input, value)
+                                }
                             } : {
                                 onError::(message) {
                                     endProgramError(message);
