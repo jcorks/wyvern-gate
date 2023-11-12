@@ -170,21 +170,22 @@ return class(
                 terminal.print(line:'');
                 printPrompt();
 
-                @:shell = Topaz.Entity.new();
                 Topaz.Input.addUnicodeListener(
-                    onNewUnicode::(unicode) {
-                        when(programActive) ::<= {
-                            {:::} {
-                                onProgramUnicode(unicode);
-                            } : {
-                                onError::(message) {
-                                    endProgramError(message);
+                    listener : {
+                        onNewUnicode::(unicode) {
+                            when(programActive) ::<= {
+                                {:::} {
+                                    onProgramUnicode(unicode);
+                                } : {
+                                    onError::(message) {
+                                        endProgramError(message);
+                                    }
                                 }
                             }
+                            @:ch = ' '->setCharCodeAt(index:0, value:unicode);
+                            currentCommand = currentCommand + ch;
+                            printPrompt();
                         }
-                        @:ch = ' '->setCharCodeAt(index:0, value:unicode);
-                        currentCommand = currentCommand + ch;
-                        printPrompt();
                     }
                 );
 
@@ -193,12 +194,10 @@ return class(
                 @lastLeftStickY = 0;
                 @:stickDeadzone = 0.35;
                 Topaz.Input.addPadListener(
-                    pad: 0,
+                    padIndex: 0,
 
                     onUpdate::(input, value) {},
 
-                    onPress::(input) {
-                        when(programActive)
                             match(input) {
                               (Topaz.Input.PAD.A): ::<={
                                 onProgramKeyboard(input:Topaz.Input.KEY.Z, value:1);
@@ -251,42 +250,56 @@ return class(
                                 onError::(message) {
                                     endProgramError(message);
                                 }
+                            }           
+                        }         
+                    }
+                );
+                
+                terminal.attach(child:shell);
+
+                Topaz.Input.addKeyboardListener(
+                    listener : {
+                        onUpdate::(input, value) {
+                            when(programActive) ::<= {
+                                {:::} {
+                                    onProgramKeyboard(input, value);
+                                } : {
+                                    onError::(message) {
+                                        endProgramError(message);
+                                    }
+                                }
                             }
-                        }
 
-                        when(value < 1) empty;
-
-                        match(input) {
-                            (Topaz.Input.KEY.ENTER):::<= {
-                                @:args = currentCommand->split(token:' ');
-                                @:command = this.commands->findIndex(value:args[0]);
-                                terminal.backspace(); // remove cursor
-                                terminal.nextLine();
-                                if (command == -1) ::<= {
-                                    if (currentCommand != '')
-                                        terminal.print(line:'Unknown command: ' + args[0]);
-                                } else ::<= {
-                                    runCommand(command:args[0], arg:args[1]);
-                                }
-                                currentCommand = '';
-                                if (!programActive)
-                                    printPrompt();
-                            },
-
-                            (Topaz.Input.KEY.BACKSPACE):::<= {
-                                when (currentCommand->length <= 1) ::<= {
+                            when(value < 1) empty;
+                            match(input) {
+                                (Topaz.Key.enter):::<= {
+                                    @:args = currentCommand->split(token:' ');
+                                    @:command = this.commands->findIndex(value:args[0]);
+                                    terminal.backspace(); // remove cursor
+                                    terminal.nextLine();
+                                    if (command == -1) ::<= {
+                                        if (currentCommand != '')
+                                            terminal.print(line:'Unknown command: ' + args[0]);
+                                    } else ::<= {
+                                        runCommand(command:args[0], arg:args[1]);
+                                    }
                                     currentCommand = '';
+                                    if (!programActive)
+                                        printPrompt();
+                                },
+
+                                (Topaz.Key.backspace):::<= {
+                                    when (currentCommand->length <= 1) ::<= {
+                                        currentCommand = '';
+                                        printPrompt();
+                                    }
+                                    currentCommand = currentCommand->substr(from:0, to:currentCommand->length-2);
                                     printPrompt();
                                 }
-                                currentCommand = currentCommand->substr(from:0, to:currentCommand->length-2);
-                                printPrompt();
                             }
                         }
                     }
                 );
-
-                terminal.attach(entity:shell);
-
             }            
         }
     }

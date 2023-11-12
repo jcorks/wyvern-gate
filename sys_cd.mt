@@ -9,23 +9,23 @@ return ::(terminal, arg, onDone) {
     }
 
 
-    @:path = Topaz.Filesystem.Path.new(fromNode:Topaz.Filesystem.DEFAULT_NODE.TOPAZ);
+    @:path = Topaz.Filesystem.getPath(node:Topaz.Filesystem.DefaultNode.Topaz);
 
 
     @:dirs = {}
-    @:files = path.children;
+    @:files = path.getChildren();
 
 
     @:output = [];        
 
-    foreach(path.children)::(i, next) {
+    foreach(path.getChildren())::(i, next) {
         @:next = files->pop;
         when (next == empty) empty; // shouldnt happen
-        when (next.children != empty && next.children->keycount) empty;
+        when (next.getChildren()->keycount) empty;
 
         // check to see if the real file is prefixed with a directory
         if (Shell.currentDirectory == '') ::<= {
-            @split = next.name->split(token:'_');
+            @split = next.getName()->split(token:'_');
             if (split->keycount >= 2) ::<= {
                 dirs[(split[0])] = true;
             }

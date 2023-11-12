@@ -8,8 +8,8 @@ return ::(terminal, arg, onDone) {
     @:enable = (arg == 'on');
 
 
-    Topaz.defaultDisplay.setParameter(
-        parameter:Topaz.Display.PARAMETER.FULLSCREEN,
+    Topaz.ViewManager.getDefault().setParameter(
+        param:Topaz.Display.Parameter.Fullscreen,
         value:enable
     );
     onDone();

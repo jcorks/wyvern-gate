@@ -20,27 +20,30 @@
 @:Topaz   = import(module:'Topaz');
 @:class   = import(module:'Matte.Core.Class');
 
-Topaz.defaultDisplay.setParameter(
-    parameter:Topaz.Display.PARAMETER.VIEW_POLICY,
-    value:Topaz.Display.VIEW_POLICY.NONE
+@:display = Topaz.ViewManager.getDefault();
+
+
+display.setParameter(
+    param:Topaz.Display.Parameter.ViewPolicy,
+    value:Topaz.Display.ViewPolicy.None
 );
 
 // create font asset
-@:font = Topaz.Resources.createAsset(
+@:font = Topaz.Resources.createDataAssetFromPath(
     path:'sys_FSEX300.ttf',
     name:'Monospace'
 );
 Topaz.FontManager.registerFont(asset:font);
 
 
-@:shader = Topaz.Resources.createAsset(
+@:shader = Topaz.Resources.createDataAssetFromPath(
     path:'sys_crt.glsl',
     name:'sys_crt.glsl'
 );
 
-@:ret = Topaz.defaultDisplay.setPostProcessShader(
-    vertexShader   : shader.string,
-    fragmentShader : shader.string
+@:ret = display.setPostProcessShader(
+    vertexShader   : shader.getAsString(),
+    fragmentShader : shader.getAsString()
 );
 
 if (ret != empty) ::<= {
@@ -58,62 +61,55 @@ if (ret != empty) ::<= {
 @:LINE_SPACING = 15;
 @:FONT_SIZE = 15;
 
-@:Terminal = class(
-    inherits: [Topaz.Entity],
-    define:::(this) {
+@:Terminal = {
+    new :: {
+        @:this = Topaz.Entity.create();
+    
         @cursor = 0;
         // renders a single line.
         // It makes no restrictions on size and assumes that the setter 
         // maintains a proper width
-        @:TextLine = class(
-            inherits:[Topaz.Entity],
-            define:::(this) {
-                @:textRenderer = Topaz.Text2D.new();
-                textRenderer.font = font;
-                textRenderer.size = FONT_SIZE; 
+        @:createTextLine = ::{
+            @:this = Topaz.Entity.create();
+            @:textRenderer = Topaz.Text2D.create();
+            textRenderer.setFont(font, pixelSize:FONT_SIZE);
 
-                this.constructor = ::{
-                    this.components = [textRenderer];
-                }
+            this.addComponent(component:textRenderer);
 
-                this.interface = {
-                    // the displayed line
-                    line : {
-                        set ::(value) {
-                            textRenderer.text = value;
-                        },
-                        get ::<- textRenderer.text
-                    }
-                }
+            this.line = {
+                set ::(value) {
+                    textRenderer.setText(text:value);
+                },
+                get ::<- textRenderer.getText()
             }
-        );
+            
+            this->setIsInterface(enabled:true);
+            return this;
+        };
 
 
         
-        @:bg = Topaz.Shape2D.new();
+        @:bg = Topaz.Shape2D.create();
 
         @:lines = [];
 
 
         
-        this.constructor = ::{
 
-            bg.formRectangle(width:640, height:480);
-            bg.color = '#242424';
-            this.components = [bg];
-            bg.position = {x:0, y:-480 + LINE_SPACING*2}
-            for(0, RENDERER_HEIGHT)::(i) {
-                lines[i] = TextLine.new();
-                lines[i].position = {x:0, y:-LINE_SPACING*i}
-                this.attach(entity:lines[i]);
-            }
-
-
-            return this;
+        bg.formRectangle(width:640, height:480);
+        bg.setColor(color:Topaz.Color.fromString(str:'#242424'));
+        this.addComponent(component:bg);
+        bg.setPosition(value:{x:0, y:-480 + LINE_SPACING*2});
+        for(0, RENDERER_HEIGHT)::(i) {
+            lines[i] = createTextLine();
+            lines[i].setPosition(value:{x:0, y:-LINE_SPACING*i});
+            this.attach(child:lines[i]);
         }
+
+
         
 
-        this.interface = {
+        this. = {
             updateLine::(index => Number, text => String) {
                 lines[index].line = text;
                 cursor = index;
@@ -183,9 +179,10 @@ if (ret != empty) ::<= {
                 cursor+=1;
             }
         }
-
+        this->setIsInterface(enabled:true);
+        return this;
     }
-);
+};
 
 
 

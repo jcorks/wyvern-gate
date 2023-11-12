@@ -4,26 +4,26 @@ return ::(terminal, arg, onDone) {
     @:Shell = import(module:'sys_shell.mt');
 
 
-    @:path = Topaz.Filesystem.Path.new(fromNode:Topaz.Filesystem.DEFAULT_NODE.TOPAZ);
+    @:path = Topaz.Filesystem.getPath(node:Topaz.Filesystem.DefaultNode.Topaz);
 
 
     @:dirs = {}
-    @:files = path.children;
+    @:files = path.getChildren();
 
 
     @:output = [];        
 
-    foreach(path.children)::(i, next) {
+    foreach(path.getChildren())::(i, next) {
         @:next = files->pop;
         when (next == empty) empty; // shouldnt happen
-        when (next.children != empty && next.children->keycount) empty;
+        when (next.getChildren()->keycount) empty;
 
         // only current directory
-        when(Shell.currentDirectory->length > 0 && !next.name->contains(key:Shell.currentDirectory+'_')) empty;
+        when(Shell.currentDirectory->length > 0 && !next.getName()->contains(key:Shell.currentDirectory+'_')) empty;
 
         // check to see if the real file is prefixed with a directory
         if (Shell.currentDirectory == '') ::<= {
-            @split = next.name->split(token:'_');
+            @split = next.getName()->split(token:'_');
             if (split->keycount >= 2) ::<= {
                 dirs[(split[0])] = true;
             }
@@ -31,10 +31,10 @@ return ::(terminal, arg, onDone) {
 
         @name;
         if (filter != empty) ::<= {
-            if (next.name->contains(key:filter))
-                name = next.name;
+            if (next.getName()->contains(key:filter))
+                name = next.getName();
         } else ::<= {
-            name = next.name;
+            name = next.getName();
         }
         when(name == empty) empty;
         // nothing in the toplevel directory.

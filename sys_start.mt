@@ -35,26 +35,26 @@ return ::(terminal, arg, onDone) {
         Shell.onProgramKeyboard = ::(input, value) {
             when(value < 1) empty;
             match(input) {
-                (Topaz.Input.KEY.Z,
-                Topaz.Input.KEY.ENTER):::<= {
+                (Topaz.Key.z,
+                Topaz.Key.enter):::<= {
                     windowEvent.commitInput(input:4);
                 },
 
-                (Topaz.Input.KEY.X,
-                Topaz.Input.KEY.BACKSPACE):::<= {
+                (Topaz.Key.x,
+                Topaz.Key.backspace):::<= {
                     windowEvent.commitInput(input:5);
                 },
 
-                (Topaz.Input.KEY.LEFT):::<= {
+                (Topaz.Key.left):::<= {
                     windowEvent.commitInput(input:0);
                 },
-                (Topaz.Input.KEY.UP):::<= {
+                (Topaz.Key.up):::<= {
                     windowEvent.commitInput(input:1);
                 },
-                (Topaz.Input.KEY.RIGHT):::<= {
+                (Topaz.Key.right):::<= {
                     windowEvent.commitInput(input:2);
                 },
-                (Topaz.Input.KEY.DOWN):::<= {
+                (Topaz.Key.down):::<= {
                     windowEvent.commitInput(input:3);
                 }
 

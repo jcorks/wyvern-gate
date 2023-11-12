@@ -194,23 +194,23 @@ return ::(terminal, arg, onDone) {
 
     Shell.onProgramKeyboard = ::(input, value) {
         match(input) {
-            (Topaz.Input.KEY.L_CTRL,
-                Topaz.Input.KEY.R_CTRL):::<= {
+            (Topaz.Key.lctrl,
+                Topaz.Key.rctrl):::<= {
                 controlHeld = value;
             },
 
-            (Topaz.Input.KEY.X):::<= {
+            (Topaz.Key.x):::<= {
                 if (controlHeld > 0) ::<= {
                     terminal.clear();
                     onDone();            
                 }
             },
 
-            (Topaz.Input.KEY.S):::<= {
+            (Topaz.Key.s):::<= {
                 if (controlHeld > 0) ::<= {
                     lastStatus = "Saved " + name;
                     lastStatusCounter = 10;
-                    item.string = lines->reduce(to:::(previous, value) <- if (previous == empty) value else (previous + '\n' + value)); 
+                    item.setFromString(string:lines->reduce(to:::(previous, value) <- if (previous == empty) value else (previous + '\n' + value))); 
                     Topaz.Resources.writeAsset(asset:item, extension:'', path:nameFiltered);
                     renderTerminal();
                 }
@@ -218,7 +218,7 @@ return ::(terminal, arg, onDone) {
 
 
 
-            (Topaz.Input.KEY.ENTER):::<= {
+            (Topaz.Key.enter):::<= {
                 when (value < 1) empty;
                 // line merges into previous
                 when(cursorPos == 0) ::<= {
@@ -248,7 +248,7 @@ return ::(terminal, arg, onDone) {
             },
 
 
-            (Topaz.Input.KEY.BACKSPACE):::<= {
+            (Topaz.Key.backspace):::<= {
                 when (value < 1) empty;
                 // line merges into previous
                 when(cursorPos == 0) ::<= {
@@ -290,25 +290,25 @@ return ::(terminal, arg, onDone) {
             },
 
 
-            (Topaz.Input.KEY.DOWN):::<= {
+            (Topaz.Key.down):::<= {
                 when (value < 1) empty;
                 moveCursorDown();
                 renderTerminal();
             },
 
-            (Topaz.Input.KEY.UP):::<= {
+            (Topaz.Key.up):::<= {
                 when (value < 1) empty;
                 moveCursorUp();
                 renderTerminal();
             },
 
-            (Topaz.Input.KEY.RIGHT):::<= {
+            (Topaz.Key.right):::<= {
                 when (value < 1) empty;
                 moveCursorRight();
                 renderTerminal();
             },
 
-            (Topaz.Input.KEY.LEFT):::<= {
+            (Topaz.Key.left):::<= {
                 when (value < 1) empty;
                 moveCursorLeft();
                 renderTerminal();
