@@ -125,6 +125,24 @@ Material.new(
     }
 )
 
+
+Material.new(
+    data : {
+        name : 'Crystal',
+        description : 'The crystal material grants a haunting translucency.',
+        rarity : 60,
+        tier : 1,
+        statMod : StatSet.new(
+            DEF: -10,
+            ATK: 30,
+            INT: 30,
+            SPD: 10
+        ),
+        pricePercentMod: 500
+    }
+)
+
+
 Material.new(
     data : {
         name : 'Tungsten',

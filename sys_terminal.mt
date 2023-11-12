@@ -105,8 +105,6 @@ if (ret != empty) ::<= {
             lines[i].setPosition(value:{x:0, y:-LINE_SPACING*i});
             this.attach(child:lines[i]);
         }
-
-
         
 
         this. = {

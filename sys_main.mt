@@ -20,13 +20,14 @@ term.setPosition(value:{
     x: -displayWidth()/2,
     y:  displayHeight()/2 - term.LINE_SPACING*2
 });
-display.setRoot(newRoot:term);
+display.getViewport().attach(child:term);
 /*
 Topaz.defaultDisplay.setParameter(
     parameter:Topaz.Display.PARAMETER.FULLSCREEN,
     value:true
 );
 */
+
 
 @:shell = import(module:'sys_shell.mt');
 import(module:'sys_bootseq.mt')(
