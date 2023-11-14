@@ -102,11 +102,10 @@
             
             step::{
                 // update movement of entity
-                Object.freezeGC();
 
                 foreach(entities)::(i, ent) {
                     @:item = map_.getItem(data:ent);
-                    if (map_.getDistanceFromItem(data:ent) < 2) ::<= {
+                    when (map_.getDistanceFromItem(data:ent) < 2) ::<= {
                         @:world = import(module:'game_singleton.world.mt');
                         @:Battle = import(module:'game_class.battle.mt');
                         
@@ -114,14 +113,17 @@
                             foreach(ent.ref) ::(i, ref) <-
                                 world.battle.join(enemy:ref);
                         }
-                        Object.thawGC();
+
+                        map_.removeItem(data:ent);
+                        entities->remove(key:entities->findIndex(value:ent));
+
 
                         world.battle.start(
                             party:island_.world.party,                            
                             allies: island_.world.party.members,
                             enemies: [...ent.ref],
                             landmark: this,
-                            noLoot: true,
+                            loot: true,
                             onAct ::{
                                 this.step();
                             },
@@ -129,10 +131,6 @@
                             onEnd::(result) {
                                 match(result) {
                                   (Battle.RESULTS.ALLIES_WIN):::<= {
-                                    map_.removeItem(data:ent);
-                                    entities->remove(key:entities->findIndex(value:ent));
-
-                                    landmark_.addLocation(name:'Body', x:item.x, y:item.y, ownedByHint: ent.ref[0]);
                                   },
                                   
                                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
@@ -156,7 +154,6 @@
                                 }
                             }
                         ); 
-                        Object.freezeGC();
                     }
 
                     when (map_.getDistanceFromItem(data:ent) < AGGRESSIVE_DISTANCE + floorHint/2) ::<= {
@@ -177,7 +174,6 @@
                         map_.moveItem(data:ent, x:next.x, y:next.y);
                     }
                 }
-                Object.thawGC();
                 
                 
                 // add additional entities out of spawn points (stairs)

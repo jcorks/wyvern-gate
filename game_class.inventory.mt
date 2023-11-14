@@ -40,6 +40,16 @@
                 return true;
             },
             
+            clone:: {
+                @:out = Inventory.new();
+                out.maxItems = maxItems;
+                foreach(items) ::(k, item) {
+                    out.add(item);
+                }
+                out.addGold(amount:gold);
+                return out;
+            },
+            
             remove::(item) {
                 @:index = items->findIndex(value:item);
                 when(index == -1) empty;
@@ -98,6 +108,11 @@
             isFull : {
                 get :: <- items->keycount >= maxItems
             },
+            
+            slotsLeft : {
+                get ::<- maxItems - items->keycount
+            },
+            
             state: {
                 set ::(value) {
                     @:Item = import(module:'class.item.mt');

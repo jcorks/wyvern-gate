@@ -101,6 +101,7 @@
         @quality;
         @material;
         @apparel;
+        @customPrefix = empty;
         @customName = empty;
         @description;
         @container;
@@ -119,7 +120,26 @@
         @ability;
         @:stats = StatSet.new();
         
+        @:getEnchantTag ::<- match(enchants->keycount) {
+          (0) :'',
+          (1) :' (I)',
+          (2) :' (II)',
+          (3) :' (III)',
+          (4) :' (IV)',
+          (5) :' (V)',
+          (6) :' (VI)',
+          (7) :' (VII)',
+          (8) :' (VIII)',
+          (9) :' (IX)',
+          (10) :' (X)',
+          default: ' (~)'         
+        };
+        
+        
         @:recalculateName = ::{
+            when (customPrefix)
+                customName = customPrefix + getEnchantTag();
+
 
             @baseName =
             if (base_.isApparel && apparel)
@@ -131,20 +151,7 @@
             ;
             
                 
-            @enchantName = match(enchants->keycount) {
-              (0) :'',
-              (1) :' (I)',
-              (2) :' (II)',
-              (3) :' (III)',
-              (4) :' (IV)',
-              (5) :' (V)',
-              (6) :' (VI)',
-              (7) :' (VII)',
-              (8) :' (VIII)',
-              (9) :' (IX)',
-              (10) :' (X)',
-              default: ' (~)'         
-            }
+            @enchantName = getEnchantTag();
             
             customName = if (base_.hasQuality && quality != empty)
                 quality.name + ' ' + baseName + enchantName 
@@ -313,10 +320,10 @@
                     
                     if (rngEnchantHint != empty && (random.try(percentSuccess:60) || forceEnchant)) ::<= {
                         @enchantCount = random.integer(from:1, to:match(story.tier) {
-                            (4):    8,
-                            (3):    6,
-                            (1):    4,
-                            default: 2
+                            (6, 7, 8, 9, 10):    8,
+                            (3,4,5):    4,
+                            (1, 2):    2,
+                            default: 1
                         });
                         
                         
@@ -368,7 +375,8 @@
                 },
                 
                 set ::(value => String)  {
-                    customName = value;
+                    customPrefix = value;
+                    recalculateName();
                 }
             },
             
@@ -3254,7 +3262,7 @@ Item.Base.new(data : {
     isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
-    basePrice: 5,
+    basePrice: 1000,
     possibleAbilities : [],
 
     equipMod : StatSet.new(

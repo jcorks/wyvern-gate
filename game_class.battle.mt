@@ -31,6 +31,94 @@
     NOONE_WIN: 2, // not everyone incapacitated
 }
 
+
+
+@:battleLoot ::(party) {
+
+    @:Item = import(module:'game_class.item.mt');
+    @:story = import(module:'game_singleton.story.mt');
+
+    if (random.try(percentSuccess:100)) ::<= {
+        windowEvent.queueMessage(text: 'What\'s this? They dropped something during the fight...');
+
+        @:lootTable = [
+            {
+                func::{
+                    windowEvent.queueMessage(text: 'It turned out to be junk.');
+                },
+                rarity: 50
+            },
+            
+            {   
+                func::{
+                    windowEvent.queueMessage(text: 'Jackpot! They dropped some gold!');
+                    @:amount = (20 + Number.random()*75)->floor;
+                    windowEvent.queueMessage(text:'The party found ' + amount + 'G');
+                    party.inventory.addGold(amount);    
+                },
+                rarity: 25
+            },
+            
+            {   
+                func::{
+                    windowEvent.queueMessage(text: 'Whoa! It\'s a bag of stuff!');
+                    
+                    when(3 > party.inventory.slotsLeft) ::<= {
+                        windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
+                    }
+                    for(0, 3)::(index) {
+                        @:item = Item.new(
+                            base:Item.Base.database.getRandomFiltered(
+                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= story.tier+1
+                            ),
+                            rngEnchantHint:true, from:party.members[0]
+                        );
+                        @message = 'The party found ' + correctA(word:item.name);
+                        windowEvent.queueMessage(text: message);
+
+
+                        party.inventory.add(item);
+                        
+                    }
+                },
+                rarity: 20
+            },
+
+            {   
+                func::{
+                    windowEvent.queueMessage(text: 'Oh wow, they dropped a bag, but it looks different somehow...');
+                    
+                    when(3 > party.inventory.slotsLeft) ::<= {
+                        windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
+                    }
+                    for(0, 3)::(index) {
+                        @:item = Item.new(
+                            base:Item.Base.database.getRandomFiltered(
+                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= story.tier+2
+                            ),
+                            rngEnchantHint:true, from:party.members[0]
+                        );
+                        @message = 'The party found ' + correctA(word:item.name);
+                        windowEvent.queueMessage(text: message);
+
+
+                        party.inventory.add(item);
+                        
+                    }
+                },
+                rarity: 5
+            },
+
+            
+        ]
+        
+
+        random.pickArrayItemWeighted(list:lootTable).func();
+    }
+
+}
+
+
 @:Battle = class(
     statics : {
         RESULTS : {get::<-RESULTS}
@@ -279,7 +367,7 @@
                 
                 onTurn,
                 onAct,
-                noLoot,
+                loot,
                 exp,
                 
                 renderable,
@@ -371,7 +459,6 @@
                 
 
                 battleEnd = ::{
-                    breakpoint();
                     @:finishEnd :: {
                         allies_ = [];
                         enemies_ = [];
@@ -408,32 +495,18 @@
 
 
                             
-                        if (noLoot == empty) ::<= {
-                            @:loot = [];
-                            foreach(enemies)::(index, enemy) {
-                                foreach(enemy.inventory.items)::(index, item) {
-                                    if (Number.random() > 0.7 && loot->keycount == 0) ::<= {
-                                        loot->push(value:enemy.inventory.remove(item));
-                                    }
-                                }
-                            }
-                            
-                            if (loot->keycount > 0) ::<= {
-                                windowEvent.queueMessage(text: 'It looks like they dropped some items during the fight...');
-                                @message = 'The party found:\n\n';
-                                foreach(loot)::(index, item) {
-                                    @message = 'The party found ' + correctA(word:item.name);
-                                    windowEvent.queueMessage(text: message);
-                                    party.inventory.add(item);
-                                }
-                            }
-                        }
+ 
                         
                         windowEvent.queueMessage(
                             text: 'The battle is won.',
                             onLeave ::{
 
-                                breakpoint();
+                                if (loot == true) ::<= {
+                                    battleLoot(party);
+                                }
+
+
+
                                 @:Entity = import(module:'game_class.entity.mt');
                                 @hasWeapon = false;
                                 foreach(allies_)::(index, ally) {   

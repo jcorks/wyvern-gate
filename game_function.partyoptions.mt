@@ -193,7 +193,7 @@ return ::{
                                                         @item = items[index];
 
                                                         windowEvent.queueChoices(
-                                                            choices: ['Equip', 'Check', 'Compare'],
+                                                            choices: ['Equip', 'Check', 'Rename', 'Compare'],
                                                             canCancel: true,
                                                             leftWeight: 1,
                                                             topWeight: 1,
@@ -213,8 +213,23 @@ return ::{
                                                                 when(choice == 2) 
                                                                     item.describe();
 
-
                                                                 when(choice == 3) ::<= {
+                                                                    when (!item.base.canHaveEnchants)
+                                                                        windowEvent.queueMessage(text:item.name + ' cannot be renamed.');
+                                                                
+                                                                
+                                                                    @:name = import(module:"game_function.name.mt");
+                                                                    name(
+                                                                        prompt: 'New item name:',
+                                                                        onDone::(name) {
+                                                                            item.name = name;
+                                                                            windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);
+                                                                        }
+                                                                    );
+                                                                }
+                                                                    
+
+                                                                when(choice == 4) ::<= {
                                                                     @slot = member.getSlotsForItem(item)[0];
                                                                     @currentEquip = member.getEquipped(slot);
                                                                     
@@ -242,6 +257,7 @@ return ::{
                                                     return if (member.getEquipped(slot).name != 'None') ::<= {
                                                         choices->push(value:'Check');
                                                         choices->push(value:'Improve');
+                                                        choices->push(value:'Rename');
                                                         return choices;
                                                     } else empty;
                                                 },
@@ -264,6 +280,18 @@ return ::{
                                                         // improve
                                                         (3):::<= {
                                                             (import(module:'game_function.itemimprove.mt'))(inBattle: false, user:member, item:member.getEquipped(slot));
+                                                        },
+                                                        // Rename 
+                                                        (4):::<= {
+                                                            when (!member.getEquipped(slot).base.canHaveEnchants)
+                                                                windowEvent.queueMessage(text:member.getEquipped(slot).name + ' cannot be renamed.');
+                                                            @:name = import(module:"game_function.name.mt");
+                                                            name(
+                                                                prompt: 'New item name:',
+                                                                onDone::(name) {
+                                                                    member.getEquipped(slot).name = name;
+                                                                }
+                                                            );                                                        
                                                         }
                                                     }
                                                 }                                                            

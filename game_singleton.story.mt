@@ -55,7 +55,7 @@ return struct(
         // tier 4 -> light 
         tier : Number,
         
-        
+        levelHint : Number,
         
         // Number of discovered locations
         data_locationsDiscovered : Number,
@@ -77,5 +77,7 @@ return struct(
     meiInParty : false,
     
     data_locationsDiscovered : 0,
-    data_locationsNeeded : 25
+    data_locationsNeeded : 25,
+    
+    levelHint : 6
 });

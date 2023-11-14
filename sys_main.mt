@@ -15,18 +15,19 @@
     return display.getParameter(param:Topaz.Display.Parameter.Height);
 }
 
+display.setName(name:"tOS");
 
 term.setPosition(value:{
     x: -displayWidth()/2,
     y:  displayHeight()/2 - term.LINE_SPACING*2
 });
 display.getViewport().attach(child:term);
-/*
-Topaz.defaultDisplay.setParameter(
-    parameter:Topaz.Display.PARAMETER.FULLSCREEN,
+
+display.setParameter(
+    param:Topaz.Display.Parameter.Fullscreen,
     value:true
 );
-*/
+
 
 
 @:shell = import(module:'sys_shell.mt');

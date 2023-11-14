@@ -860,6 +860,7 @@ Location.Base.new(data:{
     interactions : [
         'buy:shop',
         'sell:shop',
+        'bag:shop',
         'talk',
         'examine'
     ],
@@ -1515,6 +1516,42 @@ Location.Base.new(data:{
                 from:location.landmark.island.newInhabitant()
             )
         );
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+}) 
+
+
+Location.Base.new(data:{
+    name: 'Magic Chest',
+    rarity: 1000000000000,
+    ownVerb : '',
+    symbol: '$',
+    category : Location.CATEGORY.UTILITY,
+    onePerLandmark : true,
+    minStructureSize : 1,
+
+    descriptions: [
+    ],
+    interactions : [
+        'open-magic-chest'
+    ],
+    
+    aggressiveInteractions : [
+    ],
+
+
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {},
+    
+    onInteract ::(location) {
+    },
+    
+    onCreate ::(location) {
     },
     
     onTimeChange::(location, time) {

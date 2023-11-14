@@ -39,15 +39,23 @@
 // returns EXP recommended for next level
 @:levelUp ::(level, stats => StatSet.type, growthPotential => StatSet.type, whichStat) {
             
+    @:stat = ::(name) {
+        @:base = growthPotential[name];
+        @val =  (0.5 * (Number.random()/2) * (base / 3))->floor
+        when (val < 1)
+            Number.random() * 2;
+        return val;
+    }
+            
     stats.add(stats:StatSet.new(
-        HP  : 2+(Number.random()*3)->floor,
-        AP  : 2+(Number.random()*3)->floor,
-        ATK : (Number.random()*3)->floor,
-        INT : (Number.random()*3)->floor,
-        DEF : (Number.random()*3)->floor,
-        SPD : (Number.random()*3)->floor,
-        LUK : (Number.random()*3)->floor,
-        DEX : (Number.random()*3)->floor
+        HP  : 1+(stat(name:'HP')),
+        AP  : 2+(stat(name:'AP')),
+        ATK : stat(name:'ATK'),
+        INT : stat(name:'INT'),
+        DEF : stat(name:'DEF'),
+        SPD : stat(name:'SPD'),
+        LUK : stat(name:'LUK'),
+        DEX : stat(name:'DEX')
     ));
     
     return (50 + (level*level * 0.1056) * 1000)->floor;
@@ -99,7 +107,16 @@
     
     
     define :::(this) {
-        @stats = StatSet.new(HP:1);
+        @stats = StatSet.new(
+            HP:1,
+            AP:1,
+            ATK:1,
+            DEX:1,
+            INT:1,
+            DEF:1,
+            // LUK can be zero. some people are just unlucky!
+            SPD:1    
+        );
         @hp = stats.HP;
         @ap = stats.AP;
         @:flags = StateFlags.new();

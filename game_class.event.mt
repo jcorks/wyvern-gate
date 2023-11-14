@@ -440,6 +440,11 @@ Event.Base.new(
                 @:itemCount = (2+Number.random()*3)->floor;
                 
                 windowEvent.queueMessage(text:'The chest contained ' + itemCount + ' items!'); 
+                
+            
+                when(itemCount > party.inventory.slotsLeft) ::<= {
+                    windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
+                }                
                 for(0, itemCount)::(index) {
                     @:item = Item.new(
                         base:Item.Base.database.getRandomFiltered(
@@ -450,9 +455,6 @@ Event.Base.new(
                     @message = 'The party found ' + correctA(word:item.name);
                     windowEvent.queueMessage(text: message);
 
-                    when(party.inventory.isFull) ::<= {
-                        windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
-                    }
 
                     party.inventory.add(item);
                     
@@ -746,6 +748,7 @@ Event.Base.new(
                 allies: party.members,
                 enemies,
                 landmark: {},
+                loot : true,
                 onEnd::(result){
                 
                 }
@@ -870,6 +873,7 @@ Event.Base.new(
                 allies: party.members,
                 enemies,
                 landmark: {},
+                loot : true,
                 onEnd::(result){
                 
                     if (Battle.RESULTS.ENEMIES_WIN)::<= {

@@ -619,15 +619,16 @@ Landmark.Base.new(
 //                    {name: 'Stairs Down', rarity:1},
             {name: 'Fountain', rarity:10},
             {name: 'Enchantment Stand', rarity: 11},
-            {name: 'Wyvern Statue', rarity: 8},
-            {name: 'Clothing Shop', rarity: 25}
+            {name: 'Wyvern Statue', rarity: 15},
+            {name: 'Small Chest', rarity: 16},
+            {name: 'Clothing Shop', rarity: 2000}
 
         ],
         requiredLocations : [
             'Stairs Down',
             'Stairs Down',
-            'Small Chest',
-            'Locked Chest'
+            'Locked Chest',
+            'Enchantment Stand'
         ],
         mapHint:{},
         onCreate ::(landmark, island){
@@ -653,8 +654,9 @@ Landmark.Base.new(
 //                    {name: 'Stairs Down', rarity:1},
             {name: 'Fountain', rarity:10},
             {name: 'Enchantment Stand', rarity: 11},
+            {name: 'Magic Chest', rarity: 15},            
             {name: 'Wyvern Statue', rarity: 8},
-            {name: 'Clothing Shop', rarity: 25}
+            {name: 'Clothing Shop', rarity: 500}
 
         ],
         requiredLocations : [

@@ -20,7 +20,7 @@ return ::(terminal, arg, onDone) {
 
     @nameFiltered = name->replace(keys:['\\', '..'], with: '');
     nameFiltered = name->replace(key:'/', with:'_');
-    @item = Topaz.Resources.createAsset(
+    @item = Topaz.Resources.createDataAssetFromPath(
         path:nameFiltered,
         name:name
     );
@@ -31,7 +31,7 @@ return ::(terminal, arg, onDone) {
     if (item == empty) ::<= {
         item = Topaz.Resources.createAsset(name:nameFiltered);
     } else ::<= {
-        @:data = item.string;
+        @:data = item.getAsString();
         lines = data->split(token:'\n');  
         if (lines[0] == empty)
             lines[0] = '';      

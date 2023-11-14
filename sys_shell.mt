@@ -27,6 +27,7 @@ return class(
             term.print(line:'An error occurred:');
             foreach(message.summary->split(token:'\n'))::(i, line) {
                 term.print(line);
+                Topaz.Console.print(message:line);
                 printPrompt();
                 programActive = false;
                 onProgramCycle = ::{}

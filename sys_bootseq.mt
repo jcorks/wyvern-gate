@@ -27,6 +27,11 @@ return ::(terminal, onBoot => Function) {
     @:printer = Topaz.Entity.create(
         attributes: {
             onStep ::{
+                if (Topaz.Input.getState(input:Topaz.Key.space)) ::<= {
+                    terminal.clear();
+                    printer.remove();
+                    onBoot();
+                }
                 if (preflight->keycount) ::<= {
                     if (Number.random() < 0.2) ::<= {
                         @:next = preflight[0];

@@ -807,6 +807,29 @@ Interaction.new(
         
     }
 )
+Interaction.new(
+    data : {
+        displayName : 'Expand Bag',
+        name : 'bag:shop',
+        onInteract ::(location, party) {
+            @:cost = (200 + 30*(party.inventory.maxItems - 10)**1.3)->floor;
+            windowEvent.queueMessage(text: 'The shopkeep offers to exchange your bag for a larger one. This new one will hold 5 additional items, making the capacity ' + (party.inventory.maxItems + 5) + ' items. This upgrade will cost ' + cost +'G');
+            when(party.inventory.gold < cost)
+                windowEvent.queueMessage(text: 'The party cant afford to upgrade their bag.');
+            windowEvent.queueAskBoolean(
+                prompt: 'Expand bag for ' + cost + 'G?',
+                onChoice::(which) {
+                    when(which == false) empty;
+                    
+                    party.inventory.maxItems += 5;
+                    windowEvent.queueMessage(text: 'The party\'s bag can now hold ' + party.inventory.maxItems + ' items.');
+                    party.inventory.subtractGold(amount:cost);
+                }
+            );                            
+                        
+        }
+    }
+);
 
 
 Interaction.new(
@@ -1612,8 +1635,8 @@ Interaction.new(
             
             windowEvent.queueMessage(text:'The party opened the chest...');
             
-            when(world.party.inventory.isFull) ::<= {
-                windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
+            when(location.inventory.items->keycount > world.party.inventory.slotsLeft) ::<= {
+                windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
             }
             
             foreach(location.inventory.items)::(i, item) {
@@ -1633,6 +1656,85 @@ Interaction.new(
         }
     }
 )              
+
+Interaction.new(
+    data : {
+        displayName : 'Open Chest',
+        name : 'open-magic-chest',
+        onInteract ::(location, party) {
+            @:world = import(module:'game_singleton.world.mt');
+
+            windowEvent.queueMessage(text:'The magic chest billows out a murky mist as its opened.');
+            windowEvent.queueMessage(text:'The mist is so thick, its hard to see inside of it.');
+            windowEvent.queueMessage(text:'It appears to beckon for items to be placed inside. It looks as if theres enough room for 3 items.');
+
+            when (party.inventory.items->size < 3)
+                windowEvent.queueMessage(text:'The party hasn\'t 3 items to place inside...');
+
+            
+            windowEvent.queueAskBoolean(
+                prompt: 'Place items inside?',
+                onChoice::(which) {
+                    when(which == false) empty;
+                        
+                    @:pick3 = ::<= {
+                        @which = [];     
+                        @dummy = party.inventory.clone();             
+                        return ::(doAfter) { 
+                            when (which->size == 3) 
+                                doAfter(items:which);
+                                                  
+                            @:pickItem = import(module:'game_function.pickitem.mt');
+                            pickItem(
+                                inventory:dummy, 
+                                canCancel:true,
+                                topWeight: 0.5,
+                                leftWeight: 0.5, 
+                                onGetPrompt::{
+                                    return 'Pick ' + match(which->size) {
+                                      (0): '1st',
+                                      (1): '2nd',
+                                      (2): '3rd'
+                                    } + ' item'
+                                },
+                                onPick ::(item) {
+                                    dummy.remove(item);
+                                    which->push(value:item);
+                                    pick3(doAfter);
+                                    windowEvent.jumpToTag(name:'pickItem', doResolveNext: true, goBeforeTag: true);
+                                }
+                            ); 
+                        }
+                    };
+                    
+                    pick3(doAfter::(items) {
+                        foreach(items)::(index, item) {
+                            party.inventory.remove(item);
+                        }
+                        @:story = import(module:'game_singleton.story.mt');
+                        
+                        windowEvent.queueMessage(text:'After the 3rd item, the chest shines brightly.');
+                        windowEvent.queueMessage(text:'Something is rising out...');
+                        
+                        @:item = Item.new(
+                            base:Item.Base.database.getRandomFiltered(
+                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= story.tier+2
+                            ),
+                            rngEnchantHint:true, from:party.members[0]
+                        );
+                        @message = 'The party received ' + correctA(word:item.name);
+                        windowEvent.queueMessage(text: message);
+
+
+                        party.inventory.add(item);                        
+                    });
+                }                               
+            );
+
+        }
+    }
+)  
+
 
 Interaction.new(
     data : {
@@ -1821,9 +1923,8 @@ Interaction.new(
                 onChoice::(which) {
                     when(!which) empty;
                     
-                    @:pickItem = import(module:'game_function.pickitem.mt');
+                    @:pickItem = import(module:'game_function.pickequippeditem.mt');
                     pickItem(
-                        inventory:party.inventory, 
                         canCancel:true, 
                         onGetPrompt::{
                             return 'Enchant which?'

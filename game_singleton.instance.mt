@@ -375,10 +375,11 @@ return class(
             },
         
             startNew ::{
+                @:story = import(module:'game_singleton.story.mt');
                 @:keyhome = Item.new(
                     base: Item.Base.database.find(name:'Wyvern Key'),
                     creationHint: {
-                        nameHint:namegen.island(), levelHint:5
+                        nameHint:namegen.island(), levelHint:story.levelHint
                     }
                 );
                 
@@ -390,6 +391,7 @@ return class(
                 party = world.party;
                 party.reset();
                 party.inventory.addGold(amount:250);
+                
                 // debug
                 //party.inventory.addGold(amount:100000);
                 
@@ -403,8 +405,8 @@ return class(
                 
                 
                 @:Species = import(module:'game_class.species.mt');
-                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:5);
-                @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:3);
+                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:story.levelHint);
+                @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:story.levelHint-2);
                 // debug
                     //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
                     //).new(from:island.newInhabitant(),rngEnchantHint:true));

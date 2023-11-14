@@ -52,6 +52,7 @@ return ::(
                 'Check',
                 'Equip',
                 'Compare',
+                'Rename',
                 'Improve',
                 'Toss'
             ],
@@ -175,12 +176,27 @@ return ::(
                         other:item.equipMod
                     ); 
                   },
-                  // improve
+                  // rename
                   (4)::<= {
+                    when (!item.base.canHaveEnchants)
+                        windowEvent.queueMessage(text:item.name + ' cannot be renamed.');
+                  
+                    @:name = import(module:"game_function.name.mt");
+                    name(
+                        prompt: 'New item name:',
+                        onDone::(name) {
+                            item.name = name;
+                            if (windowEvent.canJumpToTag(name:'Item'))
+                                windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
+                        }
+                    );
+                  },
+                  // improve
+                  (5)::<= {
                     (import(module:'game_function.itemimprove.mt'))(user, item, inBattle); 
                   },               
                   // Toss
-                  (5)::<= {
+                  (6)::<= {
                     windowEvent.queueAskBoolean(
                         prompt:'Are you sure you wish to throw away the ' + item.name + '?',
                         onChoice::(which) {

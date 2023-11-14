@@ -1366,4 +1366,154 @@ ItemEnchant.Base.new(
     }
 )
 
+
+ItemEnchant.Base.new(
+    data : {
+        name : 'Aura: Green',
+        description : 'Imbued with a stamina aura; it softly glows green.',
+        equipMod : StatSet.new(
+            SPD: -15,
+            HP:  25
+        ),
+        priceMod: 200,
+        tier : 4,
+        levelMinimum : 1,
+        
+        triggerConditionEffects : [
+        ],
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+)
+
+ItemEnchant.Base.new(
+    data : {
+        name : 'Aura: Red',
+        description : 'Imbued with a stamina aura; it softly glows red.',
+        equipMod : StatSet.new(
+            ATK: -15,
+            HP:  25
+        ),
+        priceMod: 200,
+        tier : 4,
+        levelMinimum : 1,
+        
+        triggerConditionEffects : [
+        ],
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+)
+
+ItemEnchant.Base.new(
+    data : {
+        name : 'Aura: Blue',
+        description : 'Imbued with a stamina aura; it softly glows blue with a glimmer.',
+        equipMod : StatSet.new(
+            DEF: 15,
+            HP:  25
+        ),
+        priceMod: 400,
+        tier : 4,
+        levelMinimum : 1,
+        
+        triggerConditionEffects : [
+        ],
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+)
+
+
+ItemEnchant.Base.new(
+    data : {
+        name : 'Aura: Yellow',
+        description : 'Imbued with a stamina aura; it softly glows yellow.',
+        equipMod : StatSet.new(
+            INT: -15,
+            HP:  25
+        ),
+        priceMod: 200,
+        tier : 4,
+        levelMinimum : 1,
+        
+        triggerConditionEffects : [
+        ],
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+)
+
+ItemEnchant.Base.new(
+    data : {
+        name : 'Aura: Orange',
+        description : 'Imbued with a stamina aura; it softly glows orange.',
+        equipMod : StatSet.new(
+            DEX: -15,
+            HP:  25
+        ),
+        priceMod: 200,
+        tier : 4,
+        levelMinimum : 1,
+        
+        triggerConditionEffects : [
+        ],
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+)
+
+ItemEnchant.Base.new(
+    data : {
+        name : 'Aura: Silver',
+        description : 'Imbued with a stamina aura; it softly glows silver.',
+        equipMod : StatSet.new(
+            AP: -15,
+            HP:  25
+        ),
+        priceMod: 200,
+        tier : 4,
+        levelMinimum : 1,
+        
+        triggerConditionEffects : [
+        ],
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+)
+
+
+ItemEnchant.Base.new(
+    data : {
+        name : 'Aura: Gold',
+        description : 'Imbued with a stamina aura; it softly glows gold.',
+        equipMod : StatSet.new(
+            AP:  35,
+            HP:  35
+        ),
+        priceMod: 1000,
+        tier : 4,
+        levelMinimum : 1,
+        
+        triggerConditionEffects : [
+        ],
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+)
+
 return ItemEnchant;
