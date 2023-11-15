@@ -111,42 +111,52 @@
     },
     
     define:::(this) {
-        @name = NameGen.island();
-
+   
         // the world
         @world_;
 
+        // current party
+        @party_;
+
+
+
+
+
+        @state = State.new();
+
+
+        state.new = NameGen.island();
+
         // minimum level of encountered individuals
-        @levelMin;
+        state.levelMin = 0;
         
         // maximum level of encountered individuals
-        @levelMax;
+        state.levelMax = 0;
         
         // how often encounters happen between turns.
-        @encounterRate = Number.random();        
+        state.encounterRate = Number.random();        
         
         // Size of the island... Islands are always square-ish
         @factor = Number.random()*50 + 70;
-        @sizeW  = (factor)->floor;
-        @sizeH  = (factor*0.5)->floor;
+        state.sizeW  = (factor)->floor;
+        state.sizeH  = (factor*0.5)->floor;
         
         // steps since the last event
-        @stepsSinceLastEvent = 0;
+        state.stepsSinceLastEvent = 0;
         
         // map of the region
-        @map = LargeMap.new(sizeW, sizeH);
+        state.map = LargeMap.new(sizeW, sizeH);
         
-        @id = genID();
+        state.id = genID();
 
         
-        @climate = random.integer(
+        state.climate = random.integer(
             from:Island.CLIMATE.WARM, 
             to  :Island.CLIMATE.COLD
         );
         
-        @events = []; //array of Events
+        state.events = []; //array of Events
         
-        @party_;
         
         // the tier of the island. This determines the difficulty
         // tier 0-> enemies have no skills or equips. Large chests drop Fire keys 
@@ -154,11 +164,11 @@
         // tier 2-> enemies have 1 to 2 skills and have weapons. Large chests drop Thunder keys 
         // tier 3-> enemies have all skills and have equips. Large chests drop Light keys
         // tier 4-> enemies have a random set of all skills and have full equip sets.
-        @tier_ = 0;
+        state.tier = 0;
 
 
         // every island has hostile creatures.
-        @:nativeCreatures = [
+        state.nativeCreatures = [
             NameGen.creature(),
             NameGen.creature(),
             NameGen.creature()
@@ -166,7 +176,7 @@
         
         //Within these, there are 2-6 predominant races per island,
         //usually in order of population distribution
-        @species = ::<={
+        state.species = ::<={
             @rarity = 1;
             return [
                 ... Species.database.getRandomSet(
