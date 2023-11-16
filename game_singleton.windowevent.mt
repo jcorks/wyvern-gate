@@ -235,10 +235,7 @@
                 
                 
                 if (choices->keycount > PAGE_SIZE) ::<= {
-                    @initialLine = if (cursorPageTop > 0) lineTop else ' ';
-                    for(initialLine->length, WIDTH)::(i) {
-                        initialLine = initialLine + ' ';
-                    }
+                    @initialLine = if (cursorPageTop > 0) lineTop else '';
                     choicesModified->push(value:initialLine);
 
 
@@ -251,7 +248,7 @@
                     if (cursorPageTop + PAGE_SIZE < (choices->keycount))                    
                         choicesModified->push(value:lineBot)
                     else
-                        choicesModified->push(value:'       ');
+                        choicesModified->push(value:'');
 
                 } else ::<= {
                     for(0, choices->keycount)::(index) {
