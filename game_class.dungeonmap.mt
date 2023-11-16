@@ -867,22 +867,545 @@
 
 
 
-@:DungeonDelta = ::(map, mapHint) {
-    /*
-     o   o
-    o     o
-      
-      
-    
-    o     o
-     o   o
-    */
-    
-    
-    
+@:DungeonDelta = ::<= {
 
+    @:DIRECTION = {
+        NORTH : 0,
+        EAST : 1,
+        WEST : 2,
+        SOUTH : 3
+    }
+
+    @:getOpposite::(dir) <-
+        match(dir) {
+          (DIRECTION.EAST): DIRECTION.WEST,
+          (DIRECTION.WEST): DIRECTION.EAST,
+          (DIRECTION.NORTH): DIRECTION.SOUTH,
+          (DIRECTION.SOUTH): DIRECTION.NORTH
+        }
+    ;
+
+    @isDirVertical::(dir) <- 
+        match(dir) {(DIRECTION.NORTH, DIRECTION.SOUTH):true, default:false};
+
+
+    
+    @:DeltaSpace = class(
+        define ::(this) {
+            @:openings = [
+                [],
+                [],
+                [],
+                []
+            ];
+            
+            @w = empty;
+            @h = empty;
+            @x_ = empty;
+            @y_ = empty;
+            @area = empty;
+            @root;
+            @allConnected; // only populated if root.
+            @walls;
+            this.interface = {
+                setup ::(width, height) {
+                    w = width;
+                    h = height;
+                },
+                width : {get ::<- w},
+                height : {get ::<- h},
+                
+                addOpening ::(dir, space) {
+                    space = space->floor; // just in case.
+                    @isVert = isDirVertical();
+                    if (isVert && space < 0 || space >= w)
+                        error(detail:"Too long.");
+
+                    if (!isVert && space < 0 || space >= h)
+                        error(detail:"Too long.");
+
+                    openings[dir][space] = false;
+                },
+                
+                // force placement at 0,0
+                anchorRoot ::(x, y) {
+                    x_ = x;
+                    y_ = y;
+                    root = this;
+                    allConnected = [this];
+                },
+                
+                // places a space.
+                // assumed to be adjacent to an existing space with 
+                // no overlaps.
+                anchor ::(x, y, from) {
+                    root = from.getRoot();
+                    x_ = x;
+                    y_ = y;
+                },
+                
+                // gets the root.
+                // the root holds all connected areas.
+                getRoot ::<- root,
+                
+                
+                
+                // sets whether or not this is an externally recognized area.
+                // some places are hallways.
+                markAsArea ::(x, y, width, height) {
+                    // prototype;
+                    area = {
+                        x: x,
+                        y: y,
+                        width: width,
+                        height: height
+                    }
+                },
+                
+                
+                getArea ::{
+                    if (area != empty && area->type != Area.type) ::<= {
+                        area = Area.new().setup(
+                            x:x_ + area.x,
+                            y:y_ + area.y,
+                            width:area.width,
+                            height:area.height
+                        );                    
+                    }
+                    
+                    return area;
+                },
+                
+                // gets the openings in that direction
+                getOpenings ::(dir) {
+                    @:opens = [];
+                    foreach(openings[dir]) ::(k, v) {
+                        if (v->type == Boolean)
+                            opens->push(value:k);
+                    }
+                    return opens;
+                },
+                
+                occupy ::(dir, space, other) {
+                    openings[dir][space] = other;
+                },
+                
+                // gets all attached areas. Attached areas 
+                // always have a valid XY
+                getAllAttached ::{
+                    when (root == this) allConnected;
+                    return root.getAllAttached();
+                },
+                
+                x : {get ::<- x_},
+                y : {get ::<- y_},
+                
+                getAllSpan ::{
+                    @x = 1000;
+                    @y = 1000;
+                    @x1 = -1000;
+                    @y1 = -1000;
+
+                    foreach(root.getAllAttached()) ::(k, space) {
+                        if (space.x < x) x = space.x;
+                        if (space.y < y) y = space.y;
+
+                        if (space.x + space.width > x1) x1 = space.x + space.width;
+                        if (space.y + space.height > y1) y1 = space.y + space.height;
+                    }
+
+
+                    if (x < 0 || y < 0)
+                        error(detail:"Too big");
+                    return {
+                        x: x,
+                        y: y,
+                        width: x1 - x,
+                        height: y1 - y,
+                    };
+                     
+                        
+                },
+                
+                setWalls ::(coords) {
+                    walls = coords;
+                },
+                
+                // determines whether this area (placed) 
+                // overlaps with the given rectangle
+                overlaps ::(x, y, width, height) {
+                    @:ra_x0 = x_;
+                    @:ra_x1 = x_ + w;
+                    @:ra_y0 = y_;
+                    @:ra_y1 = y_ + h;
+                                    
+                    return
+                        (ra_x0 < x + width && ra_x1 > x &&
+                         ra_y0 < y + height && ra_y1 > y)
+                    ;
+                },
+                
+                // Checks to see if a rectangle would be allowed to be placed
+                isPlacementAllowed ::(x, y, width, height) {
+                    @:all = this.getRoot().getAllAttached();
+                    return {:::} {
+                        foreach(all) ::(k, space) {
+                            if (space.overlaps(x, y, width, height))
+                                send(message:false);
+                        }
+                        return true;
+                    }
+                },
+                
+                // enables wall using the given map
+                finalize ::(map) {  
+                    @localx;
+                    @localy;
+                    foreach(walls) ::(k, coor) {
+                        when(localx == empty)
+                            localx = coor;
+                            
+                        localy = coor;
+                        
+                        @:x = x_ + localx;
+                        @:y = y_ + localy;
+                        map.enableWall(x, y);
+                        localx = empty;
+                    }
+                },
+                
+                
+                // Any openings are blocked off with a wall.
+                cap ::(map) {
+                    for(0, 4) ::(dir) {
+                        foreach(openings[dir]) ::(space, item) {
+                            when(item->type != Boolean || item == empty) empty; // covered. Good!
+                            when(dir == DIRECTION.NORTH) ::<= {
+                                map.enableWall(
+                                    x: x_ + space,
+                                    y: y_ 
+                                );
+                            }
+                         
+                            when(dir == DIRECTION.EAST) ::<= {
+                                map.enableWall(
+                                    y: y_ + space,
+                                    x: x_ + w-1
+                                );
+                            }
+
+                            when(dir == DIRECTION.WEST) ::<= {
+                                map.enableWall(
+                                    y: y_ + space,
+                                    x: x_
+                                );
+                            }
+
+                            when(dir == DIRECTION.SOUTH) ::<= {
+                                map.enableWall(
+                                    x: x_ + space,
+                                    y: y_ + h-1
+                                );
+                            }
+                        }
+                    }
+                },
+                
+                // attempts to place a space next to this space.
+                // success is returned.
+                placeAdjacent ::(other => DeltaSpace.type) {
+                    
+                    @:otherWidth = other.width;
+                    @:otherHeight = other.height;
+
+
+                    
+                    return {:::} {
+                        // choose a random direction                    
+                        foreach(random.scrambled(list:[DIRECTION.NORTH, DIRECTION.SOUTH, DIRECTION.EAST, DIRECTION.WEST])) ::(k, dir) {
+                            @:openings = random.scrambled(list:this.getOpenings(dir));
+                            foreach(openings) ::(k, opening) {
+                                when(opening == empty) empty;
+                                // test until we find an opening.
+                                @:otherOpenings = random.scrambled(list:other.getOpenings(dir:getOpposite(dir)));
+                                
+                                foreach(otherOpenings) ::(k, oppositeOpening) {
+                                    when(opening == empty) empty;
+
+                                    @x;
+                                    @y;
+                                    
+                                    if (dir == DIRECTION.WEST) ::<= {
+                                         x = x_ - otherWidth;
+                                         y = y_ - oppositeOpening + opening; // aligned entrance
+                                    } 
+                                    
+                                    
+                                    if (dir == DIRECTION.EAST) ::<= {
+                                        
+                                         x = x_ + w;
+                                         y = y_ - oppositeOpening + opening; // aligned entrance
+                                    } 
+
+                                    if (dir == DIRECTION.NORTH) ::<= {
+                                        x = x_ - oppositeOpening + opening;
+                                        y = y_ - otherHeight
+                                    }
+
+                                    
+                                    if (dir == DIRECTION.SOUTH) ::<= {
+                                        x = x_ - oppositeOpening + opening;
+                                        y = y_ + h
+                                    }
+                                    
+                                    when (x == empty || y == empty) empty;
+                                    
+                                    
+                                    // if overlaps with existing placement, give up
+                                    when(!this.isPlacementAllowed(
+                                        x, y, width:otherWidth, height:otherHeight
+                                    )) empty;
+
+
+                                    
+                                    // else, we made it 
+                                    other.anchor(x, y, from:this);
+                                    root.getAllAttached()->push(value:other);
+                                    
+                                    // connect
+                                    this.occupy(dir, space:opening, other);
+                                    other.occupy(dir:getOpposite(dir), space:oppositeOpening, other:this);
+
+
+                                    // complete
+                                    send(message:true);           
+                                }
+                            }
+                        }
+                        
+                        // couldnt place. failure
+                        return false;
+                    }
+                }
+            }
+        }
+    );
+    
+    
+    // true area layouts.
+    // Only these can be anchors
+    @:areaSpaces = [
+        ::<= {
+            @:coords = [
+                0, 0, 1, 0, 2, 0,     4, 0, 5, 0, 6, 0,
+                0, 1, 1, 1,                 5, 1, 6, 1,
+                0, 2,                             6, 2,
+
+                0, 4,                             6, 4,
+                0, 5, 1, 5,                 5, 5, 6, 5,
+                0, 6, 1, 6, 2, 6,     4, 6, 5, 6, 6, 6,
+            ];
+            return ::{
+                @:area = DeltaSpace.new();
+                area.setup(width:7, height:7);
+                area.addOpening(dir:DIRECTION.WEST, space:3);
+                area.addOpening(dir:DIRECTION.EAST, space:3);
+                area.addOpening(dir:DIRECTION.NORTH, space:3);
+                area.addOpening(dir:DIRECTION.SOUTH, space:3);
+                area.setWalls(coords);
+                area.markAsArea(
+                    x:2,
+                    y:2,
+                    width:3,
+                    height:3
+                );
+                return area;
+            }
+        }  
+    
+    ]
+
+    // transient spaces
+    @:hallSpaces = [
+   
+        ::<= {
+            @:coords = [
+                                  3, 0,       5, 0,
+                      1, 1, 2, 1, 3, 1,       5, 1, 6, 1, 7, 1,
+                      1, 2,                               7, 2,
+                0, 3, 1, 3,       3, 3, 4, 3, 5, 3,       7, 3, 8, 3,
+                                  3, 4,       5, 4,
+                0, 5, 1, 5,       3, 5, 4, 5, 5, 5,       7, 5, 8, 5,
+                      1, 6,                               7, 6,
+                      1, 7, 2, 7, 3, 7,       5, 7, 6, 7, 7, 7,
+                                  3, 8,       5, 8
+
+            ];
+            return ::{
+                @:hall = DeltaSpace.new();
+                hall.setup(width:9, height:9);
+                hall.addOpening(dir:DIRECTION.WEST, space:4);
+                hall.addOpening(dir:DIRECTION.EAST, space:4);
+                hall.addOpening(dir:DIRECTION.NORTH, space:4);
+                hall.addOpening(dir:DIRECTION.SOUTH, space:4);
+                hall.setWalls(coords);
+                return hall;
+            }
+        },
+        
+        
+        ::<= {
+            @:coords = [
+                                  3, 0,       5, 0,
+                                  3, 1,       5, 1,
+                            2, 2, 3, 2,       5, 2, 6, 2,
+                      1, 3, 2, 3,                   6, 3, 7, 3,
+                0, 4, 1, 4,                               7, 4, 8, 4,
+                0, 5,             3, 5, 4, 5, 5, 5,             8, 5,
+                0, 6,       2, 6, 3, 6,       5, 6, 6, 6,       8, 6,
+                0, 7,       2, 7,                   6, 7,       8, 7,
+                0, 8,       2, 8,                   6, 8,       8, 8,
+                0, 9,       2, 9,                   6, 9,       8, 9
+            ];
+            
+            return ::{
+                @:hall = DeltaSpace.new();
+                hall.setup(width:9, height:10);
+                hall.addOpening(dir:DIRECTION.NORTH, space:4);
+                hall.addOpening(dir:DIRECTION.SOUTH, space:7);
+                hall.addOpening(dir:DIRECTION.SOUTH, space:1);
+                hall.setWalls(coords);
+                return hall;
+            }
+        },
+        
+
+        ::<= {
+            @:coords = [
+                0, 0,       2, 0,                   6, 0,       8, 0,
+                0, 1,       2, 1,                   6, 1,       8, 1,
+                0, 2,       2, 2,                   6, 2,       8, 2,
+                0, 3,       2, 3, 3, 3,       5, 3, 6, 3,       8, 3,
+                0, 4,             3, 4, 4, 4, 5, 4,             8, 4,
+                0, 5, 1, 5,                               7, 5, 8, 5,
+                      1, 6, 2, 6,                   6, 6, 7, 6,
+                            2, 7, 3, 7,       5, 7, 6, 7,
+                                  3, 8,       5, 8,
+                                  3, 9,       5, 9
+            ];
+            
+            return ::{
+                @:hall = DeltaSpace.new();
+                hall.setup(width:9, height:10);
+                hall.addOpening(dir:DIRECTION.SOUTH, space:4);
+                hall.addOpening(dir:DIRECTION.NORTH, space:7);
+                hall.addOpening(dir:DIRECTION.NORTH, space:1);
+                hall.setWalls(coords);
+                return hall;
+            }
+        },
+        
+        ::<= {
+            @:coords = [
+                0, 0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0,
+                                              5, 1, 6, 1, 
+                0, 2, 1, 2, 2, 2, 3, 2,             6, 2, 7, 2,
+                                  3, 3, 4, 3,             7, 3, 8, 3, 9, 3,
+                                        4, 4,
+                                  3, 5, 4, 5,             7, 5, 8, 5, 9, 5,
+                0, 6, 1, 6, 2, 6, 3, 6,             6, 6, 7, 6,
+                                              5, 7, 6, 7,
+                0, 8, 1, 8, 2, 8, 3, 8, 4, 8, 5, 8
+            ];
+            
+            return ::{
+                @:hall = DeltaSpace.new();
+                hall.setup(width:10, height:9);
+                hall.addOpening(dir:DIRECTION.EAST, space:4);
+                hall.addOpening(dir:DIRECTION.WEST, space:7);
+                hall.addOpening(dir:DIRECTION.WEST, space:1);
+                hall.setWalls(coords);
+                return hall;
+            }
+        },                
+
+
+        ::<= {
+            @:coords = [
+                                        4, 0, 5, 0, 6, 0, 7, 0, 8, 0, 9, 0,
+                                  3, 1, 4, 1, 
+                            2, 2, 3, 2,             6, 2, 7, 2, 8, 2, 9, 2,
+                0, 3, 1, 3, 2, 3,             5, 3, 6, 3,             
+                                              5, 4,
+                0, 5, 1, 5, 2, 5,             5, 5, 6, 5,            
+                            2, 6, 3, 6,             6, 6, 7, 6, 8, 6, 9, 6,
+                                  3, 7, 4, 7,
+                                        4, 8, 5, 8, 6, 8, 7, 8, 8, 8, 9, 8
+            ];
+            
+            return ::{
+                @:hall = DeltaSpace.new();
+                hall.setup(width:10, height:9);
+                hall.addOpening(dir:DIRECTION.WEST, space:4);
+                hall.addOpening(dir:DIRECTION.EAST, space:7);
+                hall.addOpening(dir:DIRECTION.EAST, space:1);
+                hall.setWalls(coords);
+                return hall;
+            }
+        },                
+
+        
+    ];
+    
+    @:getASpace = ::{
+        when(random.flipCoin()) random.pickArrayItem(list:areaSpaces)();
+        return random.pickArrayItem(list:hallSpaces)();
+    }
+    
+    return ::(map, mapHint) {
+    
+        @:CENTER_X = 70;
+        @:CENTER_Y = 70;
+        @:SPACE_COUNT = 32;
+    
+        // first, pick an initial location
+        @:root = random.pickArrayItem(list:areaSpaces)();
+        root.anchorRoot(x:CENTER_X, y:CENTER_Y);
+        
+        @:areas = [];
+        
+        for(0, SPACE_COUNT) ::(i) {
+            // either area or a hallway
+            @:next = getASpace();
+            
+            // find where it should go and keep trying till it fits.
+            @:list = random.scrambled(list:root.getAllAttached());
+            {:::} {
+                foreach(list) ::(k, existing) {
+                    if (existing.placeAdjacent(other:next))
+                        send();
+                }
+            }
+            
+        }
+        
+        @:span = root.getAllSpan();
+        map.width = span.x + span.width + 10;
+        map.height = span.y + span.height + 10;
+
+        
+        foreach(root.getAllAttached()) ::(k, space) {
+            @:area = space.getArea();
+            if (area != empty)
+                areas->push(value:area);
+            space.finalize(map);
+            space.cap(map);
+        }
+
+        map.obscure();
+        return areas;
+    }
 }
-
 
 
 
@@ -979,6 +1502,7 @@
                 match(mapHint.layoutType) {
                     (DungeonMap.LAYOUT_ALPHA): areas = DungeonAlpha(map:this, mapHint),
                     (DungeonMap.LAYOUT_BETA): areas = DungeonBeta(map:this, mapHint),
+                    (DungeonMap.LAYOUT_DELTA): areas = DungeonDelta(map:this, mapHint),
                     default:
                         areas = DungeonAlpha(map:this, mapHint)
                 }

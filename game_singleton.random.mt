@@ -152,6 +152,18 @@ return class(
                 return table[this.pickArrayItem(list:table->keys)];
             },
             
+            scrambled::(list) {
+                @:input = [...list];
+                @:output = [];
+                for(0, list->size) ::(i) {
+                    @:index = this.integer(from:0, to:input->keycount-1);
+                    @:next = input[index];
+                    output->push(value:next);
+                    input->remove(key:index);
+                }
+                return output;
+            },
+            
             flipCoin:: <- tt800.next() < 0.5,
             
             try::(percentSuccess) <- tt800.next() < percentSuccess / 100,

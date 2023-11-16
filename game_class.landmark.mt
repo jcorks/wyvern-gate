@@ -630,7 +630,9 @@ Landmark.Base.new(
             'Locked Chest',
             'Enchantment Stand'
         ],
-        mapHint:{},
+        mapHint:{
+            layoutType: DungeonMap.LAYOUT_ALPHA
+        },
         onCreate ::(landmark, island){
         },
         onVisit ::(landmark, island) {}

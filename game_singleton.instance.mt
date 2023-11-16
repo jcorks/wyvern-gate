@@ -414,7 +414,7 @@ return class(
                     //@:story = import(module:'game_singleton.story.mt');
                     //story.foundFireKey = true;
                     //story.foundIceKey = true;
-                    //story.tier = 2;
+                    //story.tier = 3;
                     
                     //party.inventory.addGold(amount:2000);
                     
