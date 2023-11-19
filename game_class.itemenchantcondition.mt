@@ -21,9 +21,11 @@
 
 
 
+@:ITEM_ENCHANT_CONDITION_NAME = 'Wyvern.ItemEnchantCondition';
+
 // conditions are checked at the end of turns
 @:ItemEnchantCondition = class(
-    name : 'Wyvern.ItemEnchantCondition',
+    name : ITEM_ENCHANT_CONDITION_NAME,
     inherits : [Database.Item],
     new ::(data) {
         @:this = ItemEnchantCondition.defaultNew();
@@ -33,6 +35,7 @@
     statics : {
         database  :::<= {
             @db = Database.new(
+                name : ITEM_ENCHANT_CONDITION_NAME,
                 attributes : {
                     name : String,
                     description : String,

@@ -37,6 +37,14 @@ return class(
         @set = [];
         
         this.interface = {
+            save ::{
+                return {...set}
+            },
+            
+            load ::(serialized) {
+                set = {...serialized};
+            },
+        
             add::(flag, flags) {
                 when(flags == empty) ::<= {
                     set[flag] = true;

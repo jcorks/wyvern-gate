@@ -73,50 +73,48 @@
             },
 
 
-            state : {
-                set ::(value) {
-                    HP_ = value.HP;
-                    MP_ = value.AP;
-                    ATK_ = value.ATK;
-                    INT_ = value.INT;
-                    DEF_ = value.DEF;
-                    LUK_ = value.LUK;
-                    SPD_ = value.SPD;
-                    DEX_ = value.DEX;
+            load::(serialized) {
+                @:value = serialized;
+                HP_ = value.HP;
+                MP_ = value.AP;
+                ATK_ = value.ATK;
+                INT_ = value.INT;
+                DEF_ = value.DEF;
+                LUK_ = value.LUK;
+                SPD_ = value.SPD;
+                DEX_ = value.DEX;
 
-                    HPmod = value.HPmod;
-                    MPmod = value.MPmod;
-                    ATKmod = value.ATKmod;
-                    INTmod = value.INTmod;
-                    DEFmod = value.DEFmod;
-                    LUKmod = value.LUKmod;
-                    SPDmod = value.SPDmod;
-                    DEXmod = value.DEXmod;
-
-                
-                },
+                HPmod = value.HPmod;
+                MPmod = value.MPmod;
+                ATKmod = value.ATKmod;
+                INTmod = value.INTmod;
+                DEFmod = value.DEFmod;
+                LUKmod = value.LUKmod;
+                SPDmod = value.SPDmod;
+                DEXmod = value.DEXmod;
+            },
             
-                get :: {
-                    return {
-                        HP: HP_,
-                        AP: MP_,
-                        ATK: ATK_,
-                        INT: INT_,
-                        DEF: DEF_,
-                        LUK: LUK_,
-                        SPD: SPD_,
-                        DEX: DEX_,
-                        
-                        HPmod : HPmod,
-                        MPmod : MPmod,
-                        ATKmod : ATKmod,
-                        INTmod : INTmod,
-                        DEFmod : DEFmod,
-                        SPDmod : SPDmod,
-                        LUKmod : LUKmod,
-                        DEXmod : DEXmod
-                    }                
-                }
+            save ::{
+                return {
+                    HP: HP_,
+                    AP: MP_,
+                    ATK: ATK_,
+                    INT: INT_,
+                    DEF: DEF_,
+                    LUK: LUK_,
+                    SPD: SPD_,
+                    DEX: DEX_,
+                    
+                    HPmod : HPmod,
+                    MPmod : MPmod,
+                    ATKmod : ATKmod,
+                    INTmod : INTmod,
+                    DEFmod : DEFmod,
+                    SPDmod : SPDmod,
+                    LUKmod : LUKmod,
+                    DEXmod : DEXmod
+                }                
+                
             },
         
             mod ::(stats) {

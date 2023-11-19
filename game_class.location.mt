@@ -333,7 +333,11 @@
     }
 );
 
+
+@:LOCATION_NAME = 'Wyvern.Location.Base';
+
 Location.Base = class(
+    name: LOCATION_NAME,
     inherits : [Database.Item],
     new::(data) {
         @:this = Location.Base.defaultNew();
@@ -343,6 +347,7 @@ Location.Base = class(
     statics : {
         database  :::<= {
             @db = Database.new(
+                name: LOCATION_NAME,
                 attributes : {
                     name: String,
                     rarity: Number,
@@ -845,6 +850,88 @@ Location.Base.new(data:{
 
 
 Location.Base.new(data:{
+    name: 'Wyvern Throne of Thunder',
+    rarity: 1,
+    ownVerb : 'owned',
+    category : Location.CATEGORY.RESIDENTIAL,
+    symbol: 'W',
+    onePerLandmark : true,
+    minStructureSize : 1,
+
+    descriptions: [
+        "What seems to be a stone throne",
+    ],
+    interactions : [
+        'talk',
+        'examine'
+    ],
+    
+    aggressiveInteractions : [
+        'vandalize',            
+    ],
+
+
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    
+    onFirstInteract ::(location) {
+    },
+    onInteract ::(location) {
+        return true;
+
+    },            
+    
+    onCreate ::(location) {
+        location.name = 'Wyvern Throne';
+        @:Profession = import(module:'game_class.profession.mt');
+        @:Species = import(module:'game_class.species.mt');
+        @:Story = import(module:'game_singleton.story.mt');
+        @:Scene = import(module:'game_class.scene.mt');
+        @:StatSet = import(module:'game_class.statset.mt');
+        location.ownedBy = location.landmark.island.newInhabitant();
+        location.ownedBy.name = 'Wyvern of Thunder';
+        location.ownedBy.species = Species.database.find(name:'Wyvern of Thunder');
+        location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Wyvern of Thunder'));               
+        location.ownedBy.clearAbilities();
+        foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
+            location.ownedBy.learnAbility(name:ability);
+        }
+
+        
+        location.ownedBy.onInteract = ::(party, location, onDone) {
+            if (Story.tier < 3) ::<= {
+                Scene.database.find(name:'scene_wyvernthunder0').act(onDone::{}, location, landmark:location.landmark);
+            } else ::<= {
+                // just visiting!
+                Scene.database.find(name:'scene_wyvernthunder1').act(onDone::{}, location, landmark:location.landmark);                        
+            }
+        }
+        location.ownedBy.stats.state = StatSet.new(
+            HP:   710,
+            AP:   999,
+            ATK:  15,
+            INT:  10,
+            DEF:  10,
+            LUK:  99,
+            SPD:  30,
+            DEX:  16
+        ).state;
+        location.ownedBy.heal(amount:9999, silent:true); 
+        location.ownedBy.healAP(amount:9999, silent:true); 
+
+        
+
+
+
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+})
+
+Location.Base.new(data:{
     name: 'shop',
     rarity: 100,
     ownVerb : 'run',
@@ -878,6 +965,7 @@ Location.Base.new(data:{
         @:Profession = import(module:'game_class.profession.mt');
         location.ownedBy = location.landmark.island.newInhabitant();            
         location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Trader'));
+        location.name = 'shop';
         location.inventory.maxItems = 50;
 
         @:nameGen = import(module:'game_singleton.namegen.mt');

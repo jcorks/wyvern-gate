@@ -19,9 +19,10 @@
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 
+@:APPAREL_NAME = 'Wyvern.ApparelMaterial'
 
 @:ApparelMaterial = class(
-    name : 'Wyvern.ApparelApparelMaterial',
+    name : APPAREL_NAME,
     inherits : [Database.Item],
     new ::(data) {
         @:this = ApparelMaterial.defaultNew();
@@ -31,6 +32,7 @@
     statics : {
         database  :::<= {
             @db = Database.new(
+                name: APPAREL_NAME,
                 attributes : {
                     name : String,
                     rarity : Number,

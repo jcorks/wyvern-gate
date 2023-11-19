@@ -19,9 +19,9 @@
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 
-
+@:ITEM_QUALITY_NAME = 'Wyvern.ItemQuality';
 @:ItemQuality = class(
-    name : 'Wyvern.ItemQuality',
+    name : ITEM_QUALITY_NAME,
     inherits : [Database.Item],
     new ::(data) {
         @:this = ItemQuality.defaultNew();
@@ -31,6 +31,7 @@
     statics : {
         database  :::<= {
             @db = Database.new(
+                name : ITEM_QUALITY_NAME,
                 attributes : {
                     name : String,
                     description : String,

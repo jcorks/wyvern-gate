@@ -170,7 +170,7 @@
                     x:random.integer(from:BUFFER_SPACE + (0.2*(this.width  - BUFFER_SPACE*2))->floor, to:(this.width  - BUFFER_SPACE)-(0.2*(this.width  - BUFFER_SPACE*2))->floor),
                     y:random.integer(from:BUFFER_SPACE + (0.2*(this.height - BUFFER_SPACE*2))->floor, to:(this.height - BUFFER_SPACE)-(0.2*(this.height - BUFFER_SPACE*2))->floor)
                 );
-                this.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.name);
+                this.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.legendName);
                 return landmark;
             },
             

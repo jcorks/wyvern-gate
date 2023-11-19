@@ -22,8 +22,12 @@
 @:Damage = import(module:'game_class.damage.mt');
 @:Item = import(module:'game_class.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
+
+
+@:SCENE_NAME = 'Wyvern.Scene'
+
 @:Scene = class(
-    name : 'Wyvern.Scene',
+    name : SCENE_NAME,
     inherits : [Database.Item],
     new ::(data) {
         @:this = Scene.defaultNew();
@@ -33,6 +37,7 @@
     statics : {
         database  :::<= {
             @db = Database.new(
+                name : SCENE_NAME,
                 attributes : {
                     name : String,
                     script : Object
@@ -153,7 +158,7 @@ Scene.new(
                     }
                 );                         
             },
-            ['Kaedjaal', 'Ha ha ha, splendid! Chosen, that was excellent. You have shown how well you can handle yourthis.'],
+            ['Kaedjaal', 'Ha ha ha, splendid! Chosen, that was excellent. You have shown how well you can handle yourself.'],
             ['Kaedjaal', 'However, be cautious: you are not the first to have triumphed over me.'],
             ['Kaedjaal', 'There are many with their own goals and ambitions, and some will be more skilled that you currently are.'],
             ['Kaedjaal', 'Well, I hope you enjoyed this little visit. Come and see me any time.'],
@@ -388,7 +393,7 @@ Scene.new(
         script: [
             ['???',      '...'],
             ['???', '... Another Chosen, or so you would be called.'],
-            ['???', 'Why my sibling wastes our time with some of these karrjuhzaalii to us is a mystery to me.'],
+            ['???', 'Why my sibling wastes our time with some of these karrjuhzaalii is a mystery to me.'],
             ['???', 'But with me, your journey may end here. I will not let you pass unless you earn it.'],
             ['???', 'I will not be as easy-going as Kaedjaal.'],
             ['???', 'Through the unforgiving cold and ice, you will understand the power which you challenge.'],
@@ -440,13 +445,13 @@ Scene.new(
                     }
                 );                         
             },
-            ['Ziikkaettaal', 'I... I see. Kaedjaal was perhaps right to let you continue to me.'],
+            ['Ziikkaettaal', 'I... I see. Kaedjaal was perhaps right to let you continue.'],
             ['Ziikkaettaal', 'It has been some time since I have let another Chosen pass.'],
-            ['Ziikkaettaal', 'You have handled yourthis well.'],
+            ['Ziikkaettaal', 'You have handled yourself well.'],
             ['', 'The party hands over the Wyvern Key of Ice.'],
             ['Ziikkaettaal', 'May you find peace and prosperity in your heart. Remember: seek the shrine to find the Key.'],
             ::(location, landmark, doNext) {
-                location.ownedBy.name = 'Kaedjaa, Wyvern of Ice';
+                location.ownedBy.name = 'Kaedjaal, Wyvern of Ice';
                 @:world = import(module:'game_singleton.world.mt');
                 @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Fire');
                 if (key != empty) key = key[0];
@@ -530,7 +535,7 @@ Scene.new(
                         
                         windowEvent.queueMessage(
                             speaker: 'Ziikkaettaal',
-                            text: 'Prepare yourthis.',
+                            text: 'Prepare yourself.',
                             onLeave::{
                                 @:dice = import(module:'game_function.dice.mt');
                                 dice(
@@ -619,5 +624,149 @@ Scene.new(
         ]
     }
 )
+
+
+Scene.new(
+    data : {
+        name : 'scene_wyvernthunder0',
+        script: [
+            ['???', '...'],
+            ['???', 'Ah, ppuh-sho-zaaluh naan. Excellent.'],
+            ['???', 'As we wait, we begin to wonder if someone will show with enough shiikohl surpass us.'],
+            ['???', 'Yet as time passes, more of you come. Some quite formiddable too.'],
+            ['???', 'What is it you seek? Is it just a wish, or something more? A test of your own growth?'],
+            ['???', 'Regardless, you come before me, Juhriikaal, in hopes to get to the Wyvern of Light.'],
+            ['Juhriikaal', 'Congratulations on getting this far. Just blind luck will not get you past me.'],
+            ['Juhriikaal', 'You will find my electrifying methods to be most a little less forgiving than my siblings.'],
+            ['Juhriikaal', 'Prepare yourself, Chosen!'],
+            ::(location, landmark, doNext) {
+                @:world = import(module:'game_singleton.world.mt');
+                @:Battle = import(module:'game_class.battle.mt');
+                @:canvas = import(module:'game_singleton.canvas.mt');
+                location.ownedBy.name = 'Juhriikaal, Wyvern of Thunder';
+                @:end = ::(result){
+
+                    when(result == Battle.RESULTS.ENEMIES_WIN) ::<= {
+                        windowEvent.queueMessage(
+                            speaker:'Juhriikaal',
+                            text:'Djiirohshuhlo jiin.'
+                        );
+                        
+                        windowEvent.queueNoDisplay(
+                            onEnter::{
+                                windowEvent.jumpToTag(name:'MainMenu');                                    
+                            }
+                        );
+                    }
+                    
+                
+                    when (!location.ownedBy.isIncapacitated()) ::<= {
+                        world.battle.start(
+                            party: world.party,                            
+                            allies: world.party.members,
+                            enemies: [location.ownedBy],
+                            landmark: landmark,
+                            renderable:{render::{canvas.blackout();}},
+                            onEnd::(result) {
+                                end(result);
+                            }
+                        );                                
+                    } 
+                    
+                    doNext();
+                }
+                
+                @:thunderSpawn ::{
+                    @:Entity = import(module:'game_class.entity.mt');
+                    @:sprite = Entity.new(
+                        speciesHint: 'Thunder Spawn',
+                        professionHint: 'Thunder Spawn',
+                        levelHint:5
+                    );
+                    sprite.name = 'the Thunder Spawn';
+                    
+                    for(0, 10)::(i) {
+                        sprite.learnNextAbility();
+                    }          
+                    return sprite;      
+                };
+                
+                world.battle.start(
+                    party:world.party,                            
+                    allies: world.party.members,
+                    enemies: [
+                        thunderSpawn(),                        
+                        location.ownedBy,
+                        thunderSpawn()
+                    ],
+                    landmark: landmark,
+                    renderable:{render::{canvas.blackout();}},
+                    onEnd::(result) {
+                        end(result);
+                    }
+                );                         
+            },
+            ['Juhriikaal', 'You\'ve got something special with you. The way you fight and prove yourself... You\'ve got potential.'],
+            ['Juhriikaal', 'Ah... it\'s refreshing.'],
+            ['', 'The party hands over the Wyvern Key of Thunder.'],
+            ['Juhriikaal', 'May you find peace and prosperity in your heart. Remember: seek the shrine to find the Key.'],
+            ::(location, landmark, doNext) {
+                location.ownedBy.name = 'Juhriikaal, Wyvern of Thunder';
+                @:world = import(module:'game_singleton.world.mt');
+                @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Thunder');
+                if (key != empty) key = key[0];
+                // could be equipped by hooligans and jokesters
+                if (key == empty) ::<= {
+                    key = {:::} {
+                        foreach(world.party.members)::(i, member) {
+                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_L);
+                            if (wep.name == 'Wyvern Key of Thunder') ::<= {
+                                send(message:key);
+                            }
+                        }
+                    }
+                }
+                // you can technically throw it out or Literally Throw It.
+                when(key == empty) ::<= {
+                    windowEvent.queueMessage(
+                        speaker: 'Juhriikaal',
+                        text: 'Uhm. Where\'s the thunder key..?'
+                    );
+                    
+                    @:item = Item.new(base:Item.Base.database.find(name:'Wyvern Key of Thunder'),
+                             from:location.ownedBy);
+                    windowEvent.queueMessage(text:'The party was given a ' + item.name + '.');
+                    world.party.inventory.add(item);
+                    key = item;
+
+                    windowEvent.queueMessage(
+                        speaker: 'Juhriikaal',
+                        text: '...'
+                    );
+                }
+                
+                @:story = import(module:'game_singleton.story.mt');
+                if (story.tier < 3)
+                    story.tier = 3;
+                
+                @:instance = import(module:'game_singleton.instance.mt');
+                // cancel and flush current VisitIsland session
+                instance.visitIsland(where:key.islandEntry);
+                if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
+                    windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
+                }
+
+                breakpoint();
+                doNext();
+            }
+            
+            
+            
+        ]
+    }
+) 
+
+
+
 
 return Scene;

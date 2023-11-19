@@ -18,7 +18,12 @@
 @:Database = import(module:'game_class.database.mt');
 @:class = import(module:'Matte.Core.Class');
 @:StatSet = import(module:'game_class.statset.mt');
+
+
+@:SPECIES_NAME = 'Wyvern.Species'
+
 @:Species = class(
+    name : SPECIES_NAME,
     inherits : [Database.Item],
     new ::(data) {
         @:this = Species.defaultNew();
@@ -28,6 +33,7 @@
     statics : {
         database  :::<= {
             @db = Database.new(
+                name : SPECIES_NAME,
                 attributes : {
                     name : String,
                     rarity: Number,
@@ -934,6 +940,30 @@ Species.new(data:{
     special : true,
     passives : [
         'Icy'
+    ]
+})
+
+
+Species.new(data:{
+    name : 'Wyvern of Thunder',
+    rarity : 2000000000000,
+    description: 'Keepers of the gates',
+    growth : StatSet.new(
+        HP : 60,
+        AP : 10,
+        ATK: 10,
+        DEF: 10,
+        INT: 10,
+        LUK: 10,
+        SPD: 10,
+        DEX: 10
+    ),
+    qualities : [
+    ],
+    
+    special : true,
+    passives : [
+        'Shock'
     ]
 })
 

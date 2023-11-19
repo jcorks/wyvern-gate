@@ -30,8 +30,10 @@
     INAPPROPRIATE_TIME: 6
 }
 
+@:PERSONALITY_NAME = 'Wyvern.Personality';
+
 @:Personality = class(
-    name : 'Wyvern.Personality',
+    name : PERSONALITY_NAME,
     inherits: [Database.Item],
     new ::(data) {
         @:this = Personality.defaultNew();
@@ -41,6 +43,7 @@
     statics : {
         database  :::<= {
             @db = Database.new(
+                name : PERSONALITY_NAME,
                 attributes : {
                     name : String,
                     growth : StatSet.type,

@@ -20,8 +20,9 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
+@:MATERIAL_NAME = 'Wyvern.Material'; 
 @:Material = class(
-    name : 'Wyvern.Material',
+    name : MATERIAL_NAME,
     inherits : [Database.Item],
     new ::(data) {
         @:this = Material.defaultNew();
@@ -31,6 +32,7 @@
     statics : {
         database  :::<= {
             @db = Database.new(
+                name : MATERIAL_NAME,
                 attributes : {
                     name : String,
                     rarity : Number,

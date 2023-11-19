@@ -19,11 +19,12 @@
 @:Random = import(module:'game_singleton.random.mt');
 
 @:Item2Database = {};
-
+@:LOOKUP = {};
 
 @:Database = class(
     name : 'Wyvern.Database',
     statics : {
+        Lookup : LOOKUP,
         Item : ::<= {
             @:Item = class(
                 define::(this) {
@@ -79,8 +80,9 @@
     
    
     },
-    new ::(attributes) {
+    new ::(attributes, name) {
         @this = Database.defaultNew();
+        LOOKUP[name] = this;
         this.initialize(attributes);
         return this;
     },

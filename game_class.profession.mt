@@ -107,8 +107,9 @@
     }
 );
 
+@:PROFESSION_BASE_NAME = 'Wyvern.Profession.Base'
 Profession.Base = class(
-    name : 'Wyvern.Profession',   
+    name : PROFESSION_BASE_NAME,   
     inherits : [Database.Item],
     new ::(data) {
         @:this = Profession.Base.defaultNew();
@@ -118,6 +119,7 @@ Profession.Base = class(
     statics : {
         database  :::<= {
             @db = Database.new(
+                name : PROFESSION_BASE_NAME,   
                 attributes : {
                     name : String,
                     description : String,
@@ -1224,5 +1226,42 @@ Profession.Base.new(data:{
     passives : [
     ]
 })            
+
+
+Profession.Base.new(data:{
+    name: 'Wyvern of Thunder',
+    weaponAffinity: 'None',
+    description : "", 
+    levelMinimum : 100,
+
+    growth: StatSet.new(
+        HP:  20,
+        AP:  20,
+        ATK: 20,
+        INT: 20,
+        DEF: 20,
+        SPD: 20,
+        LUK: 20,
+        DEX: 20
+    ),
+    minKarma : 0,
+    maxKarma : 50,
+    learnable : false,
+    
+    abilities : [
+        'Thunder',
+        'Summon: Thunder Spawn',
+        'Magic Mist', // remove all effects
+        'Wild Swing',
+        'Triplestrike',
+        'Leg Sweep',
+        'Flight',
+        'Flash',
+        'Unarm'
+    ],
+    passives : [
+    ]
+})       
+
 
 return Profession;

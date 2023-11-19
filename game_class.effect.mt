@@ -23,7 +23,11 @@
 @:Scene = import(module:'game_class.scene.mt');
 @:random = import(module:'game_singleton.random.mt');
 
+
+@:EFFECT_NAME = "Wyvern.Effect";
+
 @:Effect = class(
+    name: EFFECT_NAME,
     inherits: [Database.Item],
     new::(data) {
         @:this = Effect.defaultNew();
@@ -33,6 +37,7 @@
     statics : {
         database  :::<= {
             @db = Database.new(
+                name : EFFECT_NAME,
                 attributes : {
                     name : String,
                     description : String,

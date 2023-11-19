@@ -8,12 +8,8 @@ up to 3 people exploring the Lohrthall, an
 expanse of islands in the sky, all of which 
 consist of the remaining habitable planet.
 
-The islands are grouped into "strata", leaving 
-the highest strata shrouded in mystery.
-Can you reach the top?
-
-
-
+You are beckoned by the Wyvern of Light. Can you reach 
+them and get your wish granted?
 
 Updated every now and then.
 A fun little test of [my language](http://github.com/jcorks/matte) 

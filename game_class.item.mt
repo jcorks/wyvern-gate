@@ -639,8 +639,9 @@
 );
 
 
+@:ITEM_BASE_NAME = 'Wyvern.Item.Base';
 Item.Base = class(
-    name : 'Wyvern.Item.Base',
+    name : ITEM_BASE_NAME,
     inherits : [Database.Item],
     new ::(data) {
         @:this = Item.Base.defaultNew();
@@ -650,6 +651,7 @@ Item.Base = class(
     statics : {
         database  :::<= {
             @db = Database.new(
+                name: ITEM_BASE_NAME,
                 attributes : {
                     name : String,
                     description : String,

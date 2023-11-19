@@ -41,7 +41,6 @@
 
 
 
-
 @:ItemEnchant = class(
     name : 'Wyvern.ItemEnchant',
     statics : {
@@ -133,9 +132,10 @@
 
 );
 
+@:ITEM_ENCHANT_BASE_NAME = 'Wyvern.ItemEnchant.Base';
 
 ItemEnchant.Base = class(
-    name : 'Wyvern.ItemEnchant.Base',
+    name : ITEM_ENCHANT_BASE_NAME,
     inherits : [Database.Item],
     new ::(data) {
         @:this = ItemEnchant.Base.defaultNew();
@@ -145,6 +145,7 @@ ItemEnchant.Base = class(
     statics : {
         database  :::<= {
             @db = Database.new(
+                name : ITEM_ENCHANT_BASE_NAME,
                 attributes : {
                     name : String,
                     description : String,

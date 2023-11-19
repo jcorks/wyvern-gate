@@ -23,8 +23,11 @@
 @:random = import(module:'game_singleton.random.mt');
 @:StateFlags = import(module:'game_class.stateflags.mt');
 
+
+@:ABILITY_NAME = 'Wyvern.Ability';
+
 @:Ability = class(
-    name : 'Wyvern.Ability',    
+    name : ABILITY_NAME,    
     inherits: [Database.Item],
     new ::(data) {
         @this = Ability.defaultNew();
@@ -33,6 +36,7 @@
     },
     statics : ::<= {
         @database = Database.new(
+            name: ABILITY_NAME,
             attributes : {
                 name : String,
                 description : String,
@@ -3044,7 +3048,7 @@ Ability.new(
         usageHintAI: USAGE_HINT.BUFF,
         oncePerBattle : false,
         onAction: ::(user, targets, turnIndex, extraData) {
-            windowEvent.queueMessage(text:targets[0].name + ' becomes shielded to elemental damage!');
+            windowEvent.queueMessage(text:user.name + ' becomes shielded to elemental damage!');
             user.addEffect(from:user, name:'Elemental Shield', durationTurns:20);                            
         }
     }

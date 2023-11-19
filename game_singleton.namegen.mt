@@ -139,6 +139,10 @@
         kaarrjuhzaal    groveler
         ziikkael        fang
         ttaal           ice / cold / snow
+        kaal            thunder / lighting
+        juhriil         claw / talon
+        shiikohl        power / influence / strength
+        
         
         
         // verbs. infinitive always ends in uh 

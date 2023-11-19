@@ -143,9 +143,9 @@
 
 
 
-
+@:ENTITY_QUALITY_BASE_NAME = 'Wyvern.EntityQuality.Base';
 EntityQuality.Base = class(
-    name : 'Wyvern.EntityQuality.Base',
+    name : ENTITY_QUALITY_BASE_NAME,
     inherits : [Database.Item],
     new ::(data) {
         @:this = EntityQuality.Base.defaultNew();
@@ -155,6 +155,7 @@ EntityQuality.Base = class(
     statics : {
         database  :::<= {
             @db = Database.new(
+                name : ENTITY_QUALITY_BASE_NAME,            
                 attributes : {
                     name : String,
                     plural : Boolean,

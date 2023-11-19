@@ -121,8 +121,10 @@
 );
 
 
+@:EVENT_BASE_NAME = 'Wyvern.Event.Base';
+
 Event.Base = class(
-    name : 'Wyvern.Event.Base',
+    name : EVENT_BASE_NAME,
     inherits : [Database.Item],
     new::(data) {
         @:this = Event.Base.defaultNew();
@@ -132,6 +134,7 @@ Event.Base = class(
     statics : {
         database  :::<= {
             @db = Database.new(
+                name : EVENT_BASE_NAME,
                 attributes : {
                     name : String,
                     rarity: Number,

@@ -27,6 +27,8 @@
 @:Party = import(module:'game_class.party.mt');
 @:Profession = import(module:'game_class.profession.mt');
 @:Event = import(module:'game_class.event.mt');
+@:State = import(module:'game_class.state.mt');
+
 @:CLIMATE = {
     WARM : 0,
     TEMPERATE : 1,
@@ -106,7 +108,9 @@
     
     new::(world => Object, levelHint => Number, party => Party.type, nameHint, state, tierHint => Number) {
         @:this = Island.defaultNew();
-        this.initialize(world, levelHint, party, nameHint, state, tierHint);
+        this.initialize(world, levelHint, party, nameHint, tierHint);
+        if (state != empty)
+            this.load(serialized:state);
         return this;
     },
     
@@ -125,7 +129,7 @@
         @state = State.new();
 
 
-        state.new = NameGen.island();
+        state.name = NameGen.island();
 
         // minimum level of encountered individuals
         state.levelMin = 0;
@@ -145,7 +149,7 @@
         state.stepsSinceLastEvent = 0;
         
         // map of the region
-        state.map = LargeMap.new(sizeW, sizeH);
+        state.map = LargeMap.new(sizeW:state.sizeW, sizeH:state.sizeH);
         
         state.id = genID();
 
@@ -196,11 +200,11 @@
         // Islands have a set number of landmarks.
 
 
-        @significantLandmarks = {}
+        state.significantLandmarks = {}
 
         // augments an entity based on the current tier
         @augmentTiered = ::(entity) {
-            match(tier_) {
+            match(state.tier) {
               (0): empty, // tier zero has no mods 
 
               // tier 1: learn 1 to 2 skills
@@ -318,20 +322,16 @@
 
         
         this.interface = {
-            initialize::(world, levelHint, party, nameHint, state, tierHint) {
+            initialize::(world, levelHint, party, nameHint, tierHint) {
                 world_ = world;            
                 party_ = party;
-                tier_ = tierHint;
+                state.tier = tierHint;
 
-                when (state != empty) ::<= {
-                    this.state = state;
-                    return this;            
-                }
-                levelMin = (levelHint - Number.random() * (levelHint * 0.4))->ceil;
-                levelMax = (levelHint + Number.random() * (levelHint * 0.4))->floor;
-                if (levelMin < 1) levelMin = 1;
+                state.levelMin = (levelHint - Number.random() * (levelHint * 0.4))->ceil;
+                state.levelMax = (levelHint + Number.random() * (levelHint * 0.4))->floor;
+                if (state.levelMin < 1) state.levelMin = 1;
                 if (nameHint != empty)
-                    name = (nameHint) => String;
+                    state.name = (nameHint) => String;
 
                 @rarity = 1;
 
@@ -342,8 +342,8 @@
                 @locationCount = (1 + (Number.random()*4)->floor); 
                 if (locationCount < 1) locationCount = 1;
                 for(0, locationCount)::(i) {
-                    significantLandmarks->push(value:
-                        map.addLandmark(
+                    state.significantLandmarks->push(value:
+                        state.map.addLandmark(
                             base:Landmark.Base.database.getRandomWeightedFiltered(
                                 filter:::(value) <- value.isUnique == false
                             ),
@@ -353,8 +353,8 @@
                 }
                 
                 // guaranteed gate
-                significantLandmarks->push(value:
-                    map.addLandmark(
+                state.significantLandmarks->push(value:
+                    state.map.addLandmark(
                         base:Landmark.Base.database.find(name:'Wyvern Gate'),
                         island:this
                     )
@@ -364,22 +364,29 @@
 
                 // guaranteed shrine
                 @:story = import(module:'game_singleton.story.mt');
-                significantLandmarks->push(value: ::<= {
+                state.significantLandmarks->push(value: ::<= {
                     return match(story.tier) {
                         (0):// nothign defeated
-                            map.addLandmark(
+                            state.map.addLandmark(
                                 base:Landmark.Base.database.find(name:'Shrine of Fire'),
                                 island:this
                             ),
 
                         (1):// fire defeated
-                            map.addLandmark(
+                            state.map.addLandmark(
                                 base:Landmark.Base.database.find(name:'Shrine of Ice'),
                                 island:this
                             ),
+
+                        (1):// fire defeated
+                            state.map.addLandmark(
+                                base:Landmark.Base.database.find(name:'Shrine of Thunder'),
+                                island:this
+                            ),
+
                             
                         default:
-                            map.addLandmark(
+                            state.map.addLandmark(
                                 base:Landmark.Base.database.find(name:'Lost Shrine'),
                                 island:this
                             )
@@ -387,9 +394,9 @@
                 });
 
                 
-                significantLandmarks->push(value:
-                    map.addLandmark(
-                        base:Landmark.Base.database.find(name:'town'),
+                state.significantLandmarks->push(value:
+                    state.map.addLandmark(
+                        base:Landmark.Base.database.find(name:'Town'),
                         island:this
                     )
                 );
@@ -399,18 +406,18 @@
 
 
                 // free treasure!
-                significantLandmarks->push(value:
-                    map.addLandmark(
-                        base:Landmark.Base.database.find(name:'forest'),
+                state.significantLandmarks->push(value:
+                    state.map.addLandmark(
+                        base:Landmark.Base.database.find(name:'Forest'),
                         island:this
                     )
                 );
 
 
 
-                significantLandmarks->push(value:
-                    map.addLandmark(
-                        base:Landmark.Base.database.find(name:'city'),
+                state.significantLandmarks->push(value:
+                    state.map.addLandmark(
+                        base:Landmark.Base.database.find(name:'City'),
                         island:this
                     )
                 );
@@ -421,79 +428,22 @@
                 return this;
             },
 
-            state : {
-                set ::(value) {
-                    id = value.id;
-                    name = value.name;
-                    levelMin = value.levelMin;
-                    levelMax = value.levelMax;
-                    encounterRate = value.encounterRate;
-                    sizeW = value.sizeW;
-                    sizeH = value.sizeH;
-                    stepsSinceLastEvent = value.stepsSinceLastEvent;
-                    climate = value.climate;
-                    species = [];
-                    foreach(value.species)::(index, speciesData) {
-                        species->push(value:{
-                            rarity: speciesData.rarity,
-                            species: speciesData.name
-                        });
-                    }
-
-                    significantLandmarks = [];
-                    map = LargeMap.new(state:value.map);
-
-                    foreach(value.significantLandmarks)::(index, landmarkData) {
-                        @:landmark = Landmark.new(
-                            base:Landmark.Base.database.find(name:landmarkData.baseName),
-                            x:0, y:0, state:landmarkData, island:this
-                        );
-                        map.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.name);
-                        significantLandmarks->push(value:landmark);
-                    }
-                    
-                    events = [];
-                    @:world = import(module:'game_singleton.world.mt');
-                    foreach(value.events)::(index, eventData) {
-                        @:event = Event.new(state:eventData, island:this, party:world.party);
-                        events->push(value:event);
-                    }
-
-
-
-                },
-            
-                get :: {
-                    breakpoint();
-                
-                    return {
-                        name : name,
-                        levelMin : levelMin,
-                        levelMax : levelMax,
-                        id : id,
-                        encounterRate : encounterRate,
-                        sizeW : sizeW,
-                        sizeH : sizeH,
-                        stepsSinceLastEvent : stepsSinceLastEvent,
-                        map : map.state,
-                        climate : climate,
-                        species : [...species]->map(to:::(value) <- {rarity:value.rarity, name:value.species}),
-                        significantLandmarks : [...significantLandmarks]->map(to:::(value) <- value.state),
-                        events : [...events]->map(to:::(value) <- value.state),
-                    
-                    }
-                }
+            save ::{
+                return state.save();
+            },
+            load ::(serialized) {
+                state.load(serialized);
             },
             
             name : {
                 get :: {
-                    return name;
+                    return state.name;
                 }
             }, 
             
             description : {
                 get :: {
-                    @out = 'A ' + Island.climateToString(climate) + ' island, ' + name + ' is mostly populated by people of ' + species[0].species + ' and ' + species[1].species + ' descent. ';//The island is known for its ' + professions[0].profession.name + 's and ' + professions[1].profession.name + 's.\n';
+                    @out = 'A ' + Island.climateToString(climate:state.climate) + ' island, ' + state.name + ' is mostly populated by people of ' + state.species[0].species + ' and ' + state.species[1].species + ' descent. ';//The island is known for its ' + professions[0].profession.name + 's and ' + professions[1].profession.name + 's.\n';
                     //out = out + this.class.describeEncounterRate(rate:encounterRate) + '\n';
                     //out = out + '(Level range: ' + levelMin + ' - ' + levelMax + ')' + '\n\n';
                     /*
@@ -511,29 +461,29 @@
             },
             
             id : {
-                get ::<- id
+                get ::<- state.id
             },
             
             sizeW : {
-                get ::<- sizeW
+                get ::<- state.sizeW
             },
             sizeH : {
-                get ::<- sizeH
+                get ::<- state.sizeH
             },
             
             tier : {
-                get ::<- tier_
+                get ::<- state.tier
             },
             
             map : {
-                get:: <- map
+                get:: <- state.map
             },
             
             incrementTime:: {
                 // every step, an event can occur.
                 //if (stepsSinceLastEvent > 200000) ::<= {
-                if (stepsSinceLastEvent > 13) ::<= {
-                    if (Number.random() > 13 - (stepsSinceLastEvent-5) / 5) ::<={
+                if (state.stepsSinceLastEvent > 13) ::<= {
+                    if (Number.random() > 13 - (state.stepsSinceLastEvent-5) / 5) ::<={
                         // mostly its encounters. 0.1% chance of encounter 
                         if (Number.random() < 0.001) ::<= {
                             this.addEvent(
@@ -554,34 +504,34 @@
                                 )
                             );                        
                         }
-                        stepsSinceLastEvent = 0;
+                        state.stepsSinceLastEvent = 0;
                     }
                 }    
-                stepsSinceLastEvent += 1;        
+                state.stepsSinceLastEvent += 1;        
             
-                foreach(events)::(index, event) {
+                foreach(state.events)::(index, event) {
                     event.stepTime();
                 }
-                foreach(events)::(index, event) {
+                foreach(state.events)::(index, event) {
                     if (event.expired) ::<= {
                         event.base.onEventEnd(event);                    
-                        events->remove(key:events->findIndex(value:event));
+                        state.events->remove(key:state.events->findIndex(value:event));
                     }
                 }
             },
             
             addEvent::(event) {
-                events->push(value:event);
+                state.events->push(value:event);
             },
             
             events : {
-                get :: <- events
+                get :: <- state.events
             },
                                     
             newInhabitant ::(professionHint, levelHint, speciesHint) {
                 @:out = Entity.new(
-                    speciesHint:    if (speciesHint == empty) random.pickArrayItemWeighted(list:species).species else speciesHint,
-                    levelHint:      if (levelHint == empty) random.integer(from:levelMin, to:levelMax) else levelHint,
+                    speciesHint:    if (speciesHint == empty) random.pickArrayItemWeighted(list:state.species).species else speciesHint,
+                    levelHint:      if (levelHint == empty) random.integer(from:state.levelMin, to:state.levelMax) else levelHint,
                     professionHint: if (professionHint == empty) Profession.Base.database.getRandomFiltered(filter::(value)<-value.learnable).name else professionHint
                 );
                 
@@ -592,13 +542,13 @@
             
             
             species : {
-                get :: <- [...species]->map(to:::(value) <- value.species)
+                get :: <- [...state.species]->map(to:::(value) <- value.species)
             },
             
             newAggressor ::(levelMaxHint) {            
-                @levelHint = random.integer(from:levelMin, to:if(levelMaxHint == empty) levelMax else levelMaxHint);
+                @levelHint = random.integer(from:state.levelMin, to:if(levelMaxHint == empty) state.levelMax else levelMaxHint);
                 @:angy =  Entity.new(
-                    speciesHint: random.pickArrayItemWeighted(list:species).species,
+                    speciesHint: random.pickArrayItemWeighted(list:state.species).species,
                     levelHint,
                     professionHint: Profession.Base.database.getRandomFiltered(filter::(value)<-value.learnable).name
                 );       
@@ -608,32 +558,32 @@
             },
 
             newHostileCreature ::(levelMaxHint) {
-                @levelHint = random.integer(from:levelMin, to:if(levelMaxHint == empty) levelMax else levelMaxHint);
+                @levelHint = random.integer(from:state.levelMin, to:if(levelMaxHint == empty) state.levelMax else levelMaxHint);
                 @:angy =  Entity.new(
                     speciesHint: 'Creature',
                     levelHint,
                     professionHint: 'Creature'
                 );       
                 
-                angy.nickname = random.pickArrayItem(list:nativeCreatures);
+                angy.nickname = random.pickArrayItem(list:state.nativeCreatures);
                        
                 return angy;  
             },
 
             
             getLandmarkIndex ::(landmark => Landmark.type) {
-                return significantLandmarks->findIndex(value:landmark);
+                return state.significantLandmarks->findIndex(value:landmark);
             },
             
             landmarks : {
-                get ::<- significantLandmarks
+                get ::<- state.significantLandmarks
             },
             
             levelMin : {
-                get ::<- levelMin
+                get ::<- state.levelMin
             },
             levelMax : {
-                get ::<- levelMax
+                get ::<- state.levelMax
             },
             
             world : {

@@ -26,8 +26,12 @@
 @:Profession = import(module:'game_class.profession.mt');
 @:Item = import(module:'game_class.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
+
+
+@:INTERACTION_NAME = 'Wyvern.Interaction';
+
 @:Interaction = class(
-    name : 'Wyvern.Interaction',
+    name : INTERACTION_NAME,
     inherits: [Database.Item],
     new::(data) {
         @:this = Interaction.defaultNew();
@@ -37,6 +41,7 @@
     statics : {
         database  :::<= {
             @db = Database.new(
+                name : INTERACTION_NAME,
                 attributes : {
                     name : String,
                     displayName : String,
@@ -792,6 +797,8 @@ Interaction.new(
                     when(item == empty) empty;
 
                     @price = (item.price * ((0.5 / 5)*0.5))->ceil;
+                    if (price < 0)
+                        price = 1;
                     
                     windowEvent.queueMessage(text: 'Sold the ' + item.name + ' for ' + price + 'G');
 
@@ -881,6 +888,8 @@ Interaction.new(
                 onPick::(item) {
                     when(item == empty) empty;
                     @price = (item.price * (0.5 / 5))->ceil;
+                    if (price < 0)
+                        price = 1;
                     
                     windowEvent.queueChoices(
                         prompt: item.name,
@@ -904,7 +913,7 @@ Interaction.new(
                                     location.landmark.island.world.storyFlags.foundFirstKey = true;
                                     windowEvent.queueMessage(
                                         speaker:location.ownedBy.name,
-                                        text: 'Going up the strata, eh? Best of luck to ye. Those wyverns are pretty ruthless.'
+                                        text: 'Going up the strata, eh? Best of luck to ye. Pretty treacherous stuff.'
                                     );
                                     windowEvent.queueMessage(
                                         speaker:location.ownedBy.name,

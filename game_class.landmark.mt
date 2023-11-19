@@ -388,9 +388,9 @@
     }
 );
 
-
+@:LANDMARK_NAME = 'Wyvern.Landmark.Base'
 Landmark.Base = class(
-    name : 'Wyvern.Landmark.Base',
+    name : LANDMARK_NAME,
     inherits : [Database.Item],
     new::(data) {
         @:this = Landmark.Base.defaultNew();
@@ -400,8 +400,10 @@ Landmark.Base = class(
     statics : {
         database  :::<= {
             @db = Database.new(
+                name : LANDMARK_NAME,
                 attributes : {
                     name : String,
+                    legendName : String,
                     symbol : String,
                     rarity: Number,
                     isUnique : Boolean,
@@ -431,7 +433,8 @@ Landmark.Base = class(
 
 Landmark.Base.new(
     data: {
-        name : 'town',
+        name : 'Town',
+        legendName : 'Town',
         symbol : '#',
         rarity : 100000,
         minLocations : 3,
@@ -468,7 +471,8 @@ Landmark.Base.new(
 
 Landmark.Base.new(
     data: {
-        name : 'city',
+        name : 'City',
+        legendName : 'City',
         symbol : '|',
         rarity : 5,
         minLocations : 3,
@@ -512,6 +516,7 @@ Landmark.Base.new(
 Landmark.Base.new(
     data: {
         name : 'Mine',
+        legendName: 'Mine',
         symbol : 'O',
         rarity : 5,
         minLocations : 3,
@@ -548,6 +553,7 @@ Landmark.Base.new(
 Landmark.Base.new(
     data: {
         name : 'Wyvern Gate',
+        legendName: 'Gate',
         symbol : '@',
         rarity : 10,
         isUnique : true,
@@ -580,6 +586,7 @@ Landmark.Base.new(
 Landmark.Base.new(
     data: {
         name : 'Wyvern Temple',
+        legendName: 'Temple',
         symbol : '{}',
         rarity : 10000000,
         isUnique : true,
@@ -606,6 +613,7 @@ Landmark.Base.new(
 Landmark.Base.new(
     data: {
         name : 'Shrine of Fire',
+        legendName: 'Shrine',
         symbol : 'O',
         rarity : 100000,      
         isUnique : true,
@@ -643,6 +651,7 @@ Landmark.Base.new(
 Landmark.Base.new(
     data: {
         name : 'Shrine of Ice',
+        legendName: 'Shrine',
         symbol : 'O',
         rarity : 100000,      
         isUnique : true,
@@ -676,12 +685,49 @@ Landmark.Base.new(
     }
 )
 
+Landmark.Base.new(
+    data: {
+        name : 'Shrine of Thunder',
+        symbol : 'O',
+        legendName: 'Shrine',
+        rarity : 100000,      
+        isUnique : true,
+        minLocations : 2,
+        maxLocations : 4,
+        peaceful: false,
+        guarded : false,
+        dungeonMap : true,
+        dungeonForceEntrance: false,
+        possibleLocations : [
+//                    {name: 'Stairs Down', rarity:1},
+            {name: 'Fountain', rarity:10},
+            {name: 'Enchantment Stand', rarity: 11},
+            {name: 'Magic Chest', rarity: 15},            
+            {name: 'Wyvern Statue', rarity: 8},
+            {name: 'Clothing Shop', rarity: 500}
+
+        ],
+        requiredLocations : [
+            'Stairs Up',
+            'Locked Chest',
+            'Small Chest'
+        ],
+        mapHint:{
+            layoutType: DungeonMap.LAYOUT_DELTA
+        },
+        onCreate ::(landmark, island){
+        },
+        onVisit ::(landmark, island) {}
+        
+    }
+)
 
 
 Landmark.Base.new(
     data: {
         name : 'Shrine: Lost Floor',
         symbol : 'O',
+        legendName: 'Shrine',
         rarity : 100000,      
         isUnique : true,
         minLocations : 2,
@@ -715,6 +761,7 @@ Landmark.Base.new(
 Landmark.Base.new(
     data: {
         name : 'Treasure Room',
+        legendName: 'T. Room',
         symbol : 'O',
         rarity : 5,      
         isUnique : true,
@@ -752,6 +799,7 @@ Landmark.Base.new(
 Landmark.Base.new(
     data: {
         name : 'Fire Wyvern Dimension',
+        legendName: '???',
         symbol : 'M',
         rarity : 1,      
         isUnique : true,
@@ -784,6 +832,7 @@ Landmark.Base.new(
 Landmark.Base.new(
     data: {
         name : 'Ice Wyvern Dimension',
+        legendName: '???',
         symbol : 'M',
         rarity : 1,      
         isUnique : true,
@@ -813,12 +862,44 @@ Landmark.Base.new(
     }
 ) 
 
-
+Landmark.Base.new(
+    data: {
+        name : 'Thunder Wyvern Dimension',
+        legendName: '???',
+        symbol : 'M',
+        rarity : 1,      
+        isUnique : true,
+        minLocations : 2,
+        maxLocations : 2,
+        guarded : false,
+        peaceful: true,
+        dungeonMap : true,
+        dungeonForceEntrance: true,
+        possibleLocations : [
+        ],
+        requiredLocations : [
+            'Wyvern Throne of Thunder',
+        ],
+        
+        mapHint : {
+            roomSize: 20,
+            roomAreaSize: 15,
+            roomAreaSizeLarge: 15,
+            emptyAreaCount: 1,
+            wallCharacter: ' '
+            
+        },
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+        
+    }
+) 
 
 
 Landmark.Base.new(
     data: {
-        name : 'port',
+        name : 'Port',
+        legendName: 'Port',
         rarity : 30,                
         symbol : '~',
         minLocations : 3,
@@ -852,7 +933,8 @@ Landmark.Base.new(
 
 Landmark.Base.new(
     data: {
-        name : 'village',
+        name : 'Village',
+        legendName: 'Village',
         rarity : 5,                
         symbol : '*',
         peaceful: true,
@@ -882,7 +964,8 @@ Landmark.Base.new(
 
 Landmark.Base.new(
     data: {
-        name : 'villa',
+        name : 'Villa',
+        legendName: 'Villa',
         symbol : '=',
         rarity : 20,
         peaceful: true,                
@@ -926,7 +1009,8 @@ Landmark.Base.new(
 
 Landmark.Base.new(
     data: {
-        name : 'forest',
+        name : 'Forest',
+        legendName: 'Forest',
         symbol : 'T',
         rarity : 40,                
         peaceful: true,
@@ -958,7 +1042,8 @@ Landmark.Base.new(
 
 Landmark.Base.new(
     data: {
-        name : 'cave',
+        name : 'Cave',
+        legendName: 'Cave',
         symbol : 'O',
         rarity : 200,                
         peaceful: true,
@@ -979,7 +1064,8 @@ Landmark.Base.new(
 
 Landmark.Base.new(
     data: {
-        name : 'abandoned castle',
+        name : 'Abandoned Castle',
+        legendName: 'Castle',
         symbol : 'X',
         rarity : 10000,
         peaceful: false,
@@ -1000,7 +1086,8 @@ Landmark.Base.new(
 )
 Landmark.Base.new(
     data: {
-        name : 'abandoned town',
+        name : 'Abandoned Town',
+        legendName: 'Town',
         rarity : 400,                
         symbol : 'x',
         peaceful: false,
