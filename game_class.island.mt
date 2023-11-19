@@ -126,81 +126,88 @@
 
 
 
-        @state = State.new();
+        @state;
+        
+        ::<= {
+            @factor = Number.random()*50 + 70;
+            @sizeW  = (factor)->floor;
+            @sizeH  = (factor*0.5)->floor;
+
+            state = State.new(
+                items : {
+                    name : NameGen.island(),
+
+                    // minimum level of encountered individuals
+                    levelMin : 0,
+                    
+                    // maximum level of encountered individuals
+                    levelMax : 0,
+                    
+                    // how often encounters happen between turns.
+                    encounterRate : Number.random(),        
+                    
+                    // Size of the island... Islands are always square-ish
+                    sizeW  : sizeW,
+                    sizeH  : sizeH,
+                    
+                    // steps since the last event
+                    stepsSinceLastEvent : 0,
+                    
+                    // map of the region
+                    map : LargeMap.new(sizeW, sizeH),
+                    
+                    id : genID(),
+
+                    
+                    climate : random.integer(
+                        from:Island.CLIMATE.WARM, 
+                        to  :Island.CLIMATE.COLD
+                    ),
+                    
+                    events : [], //array of Events
+                    
+                    
+                    // the tier of the island. This determines the difficulty
+                    // tier 0-> enemies have no skills or equips. Large chests drop Fire keys 
+                    // tier 1-> enemies have 1 to 2 skills, but have no equips. Large chests drop Ice keys 
+                    // tier 2-> enemies have 1 to 2 skills and have weapons. Large chests drop Thunder keys 
+                    // tier 3-> enemies have all skills and have equips. Large chests drop Light keys
+                    // tier 4-> enemies have a random set of all skills and have full equip sets.
+                    tier : 0,
 
 
-        state.name = NameGen.island();
-
-        // minimum level of encountered individuals
-        state.levelMin = 0;
-        
-        // maximum level of encountered individuals
-        state.levelMax = 0;
-        
-        // how often encounters happen between turns.
-        state.encounterRate = Number.random();        
-        
-        // Size of the island... Islands are always square-ish
-        @factor = Number.random()*50 + 70;
-        state.sizeW  = (factor)->floor;
-        state.sizeH  = (factor*0.5)->floor;
-        
-        // steps since the last event
-        state.stepsSinceLastEvent = 0;
-        
-        // map of the region
-        state.map = LargeMap.new(sizeW:state.sizeW, sizeH:state.sizeH);
-        
-        state.id = genID();
-
-        
-        state.climate = random.integer(
-            from:Island.CLIMATE.WARM, 
-            to  :Island.CLIMATE.COLD
-        );
-        
-        state.events = []; //array of Events
-        
-        
-        // the tier of the island. This determines the difficulty
-        // tier 0-> enemies have no skills or equips. Large chests drop Fire keys 
-        // tier 1-> enemies have 1 to 2 skills, but have no equips. Large chests drop Ice keys 
-        // tier 2-> enemies have 1 to 2 skills and have weapons. Large chests drop Thunder keys 
-        // tier 3-> enemies have all skills and have equips. Large chests drop Light keys
-        // tier 4-> enemies have a random set of all skills and have full equip sets.
-        state.tier = 0;
+                    // every island has hostile creatures.
+                    nativeCreatures : [
+                        NameGen.creature(),
+                        NameGen.creature(),
+                        NameGen.creature()
+                    ],
+                    
+                    //Within these, there are 2-6 predominant races per island,
+                    //usually in order of population distribution
+                    species : ::<={
+                        @rarity = 1;
+                        return [
+                            ... Species.database.getRandomSet(
+                                    count : (5+Number.random()*5)->ceil,
+                                    filter:::(value) <- value.special == false
+                                )
+                        ]->map(
+                            to:::(value) <- {
+                                species: value.name, 
+                                rarity: rarity *= 1.4
+                            }
+                        );
+                    },
 
 
-        // every island has hostile creatures.
-        state.nativeCreatures = [
-            NameGen.creature(),
-            NameGen.creature(),
-            NameGen.creature()
-        ];
-        
-        //Within these, there are 2-6 predominant races per island,
-        //usually in order of population distribution
-        state.species = ::<={
-            @rarity = 1;
-            return [
-                ... Species.database.getRandomSet(
-                        count : (5+Number.random()*5)->ceil,
-                        filter:::(value) <- value.special == false
-                    )
-            ]->map(
-                to:::(value) <- {
-                    species: value.name, 
-                    rarity: rarity *= 1.4
+
+                    // Islands have a set number of landmarks.
+                    significantLandmarks : {}        
                 }
             );
-        }
+        };
 
-
-
-        // Islands have a set number of landmarks.
-
-
-        state.significantLandmarks = {}
 
         // augments an entity based on the current tier
         @augmentTiered = ::(entity) {

@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:class = import(module:'Matte.Core.Class');
+@:State = import(module:'game_class.state.mt');
+
 
 @:Inventory = class(
     name: 'Wyvern.Inventory',
@@ -25,45 +27,47 @@
         return this;
     },
     define:::(this) {
-
-
-        @items = [];    
-        @gold = 0;
-        @maxItems;
-    
+        @:state = State.new(
+            items : {
+                items : [],
+                gold : 0,
+                maxItems : 0
+            }
+        );
+   
         this.interface = {
             add::(item) {
                 when (item.base.name == 'None') false; // never accept None as a real item
-                when (items->keycount == maxItems) false;
-                items->push(value:item);
+                when (state.items->keycount == state.maxItems) false;
+                state.items->push(value:item);
                 item.container = this;
                 return true;
             },
             
             clone:: {
                 @:out = Inventory.new();
-                out.maxItems = maxItems;
-                foreach(items) ::(k, item) {
+                out.maxItems = state.maxItems;
+                foreach(state.items) ::(k, item) {
                     out.add(item);
                 }
-                out.addGold(amount:gold);
+                out.addGold(amount:state.gold);
                 return out;
             },
             
             remove::(item) {
-                @:index = items->findIndex(value:item);
+                @:index = state.items->findIndex(value:item);
                 when(index == -1) empty;
                 
-                items->remove(key:index);
+                state.items->remove(key:index);
                 item.resetContainer();
                 return item;
             },
             
             removeByName::(name) {
                 {:::} {
-                    foreach(items)::(i, item) {
+                    foreach(state.items)::(i, item) {
                         if (item.base.name == name) ::<= {
-                            items->remove(key:i);
+                            state.items->remove(key:i);
                             send();
                         }
                     }
@@ -72,68 +76,54 @@
             
             maxItems : {
                 set ::(value) {
-                    maxItems = value;
+                    state.maxItems = value;
                 },
                 
-                get ::<- maxItems
+                get ::<- state.maxItems
             },
             
             gold : {
-                get ::<- gold,
+                get ::<- state.gold,
             },
             
             addGold::(amount) {
-                gold += amount;
+                state.gold += amount;
             },
             
             subtractGold::(amount) {
-                when(gold < amount) false;
-                gold -= amount;
+                when(state.gold < amount) false;
+                state.gold -= amount;
                 return true;
             },
             clear :: {
-                items = [];
+                state.items = [];
             },
             
             items : {
                 get :: {
-                    return items;
+                    return state.items;
                 }
             },
             
             isEmpty : {
-                get ::<- items->keycount == 0
+                get ::<- state.items->keycount == 0
             },
             
             isFull : {
-                get :: <- items->keycount >= maxItems
+                get :: <- state.items->keycount >= state.maxItems
             },
             
             slotsLeft : {
-                get ::<- maxItems - items->keycount
+                get ::<- state.maxItems - state.items->keycount
             },
             
-            state: {
-                set ::(value) {
-                    @:Item = import(module:'class.item.mt');
-                
-                    gold = value.gold;
-                    items = [];
-                    foreach(value.items)::(i, itemData) {
-                        @:item = Item.new(base:Item.Base.database.find(name:itemData.baseName, state:itemData));
-                        this.add(item);
-                    }
-                },
-            
-                get :: {
-                    
-                    return {
-                        items: [...items]->map(to:::(value) <- value.state),
-                        gold : gold
-                    }
+            save ::<- state.save(),
+            load ::(serialized) { 
+                state.load(serialized);
+                foreach(state.items) ::(k, item) {
+                    item.container = this;                
                 }
             }
-            
         }
     }
 );

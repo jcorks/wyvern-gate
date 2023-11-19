@@ -125,60 +125,67 @@
 
 
 
-        @state = State.new();
-    
-        state.stats = StatSet.new(
-            HP:1,
-            AP:1,
-            ATK:1,
-            DEX:1,
-            INT:1,
-            DEF:1,
-            // LUK can be zero. some people are just unlucky!
-            SPD:1    
+        @state = State.new(
+            items : {
+                stats : StatSet.new(
+                    HP:1,
+                    AP:1,
+                    ATK:1,
+                    DEX:1,
+                    INT:1,
+                    DEF:1,
+                    // LUK can be zero. some people are just unlucky!
+                    SPD:1    
+                ),
+
+
+
+                hp : 1,
+                ap : 1,
+                flags : StateFlags.new(),
+                isDead : false,
+                name : NameGen.person(),
+                nickname : empty,
+                species : Species.database.getRandom(),
+                profession : empty,
+                personality : Personality.database.getRandom(),
+                emotionalState : empty,
+                favoritePlace : Location.Base.database.getRandom(),
+                favoriteItem : Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false && value.tier <= story.tier),
+                growth : StatSet.new(),
+                qualityDescription : empty,
+                qualitiesHint : empty,
+                adventurous : Number.random() <= 0.5,
+                battleAI : empty,
+                professions : [],
+                
+
+                equips : [
+                    none, // handl
+                    none, // handr
+                    none, // armor
+                    none, // amulet
+                    none, // ringl
+                    none, // ringr
+                    none
+                ],
+                effects : [], // effects. abilities and equips push / pop these.
+                abilitiesAvailable : [
+                    Ability.database.find(name:'Attack'),
+                    Ability.database.find(name:'Defend'),
+
+                ], // active that can choose in combat
+                abilitiesLearned : [], // abilities that can choose outside battle.
+                
+                inventory : Inventory.new(size:10),
+                expNext : 10,
+                level : 0
+            }
         );
-
-
-
-        state.hp = state.stats.HP;
-        state.ap = state.stats.AP;
-        state.flags = StateFlags.new();
-        state.isDead = false;
-        state.name = NameGen.person();
-        state.nickname = empty;
-        state.species = Species.database.getRandom();
-        state.profession;
-        state.personality = Personality.database.getRandom();
-        state.emotionalState;
-        state.favoritePlace = Location.Base.database.getRandom();
-        state.favoriteItem = Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false && value.tier <= story.tier);
-        state.growth = StatSet.new();
-        state.qualityDescription = empty;
-        state.qualitiesHint;
-        state.adventurous = Number.random() <= 0.5;
-        state.battleAI;
-        state.professions = [];
-        
-
-        state.equips = [
-            none, // handl
-            none, // handr
-            none, // armor
-            none, // amulet
-            none, // ringl
-            none, // ringr
-            none
-        ];
-        state.effects = []; // effects. abilities and equips push / pop these.
-        state.abilitiesAvailable = [
-            Ability.database.find(name:'Attack'),
-            Ability.database.find(name:'Defend'),
-
-        ]; // active that can choose in combat
-        state.abilitiesLearned = []; // abilities that can choose outside battle.
-        
-        state.inventory = Inventory.new(size:10);
         state.inventory.addGold(amount:(Number.random() * 100)->ceil);
+
+
+
         
         for(0, 3)::(i) {
             state.inventory.add(item:
@@ -191,8 +198,6 @@
                 )
             );
         }
-        state.expNext = 10;
-        state.level = 0;
 
 
         @:resetEffects :: {
@@ -288,6 +293,9 @@
             
             load ::(serialized) {
                 state.load(serialized);
+                foreach(state.equips) ::(k, equip) {
+                    equip.equippedBy = this;
+                }
             },
 
         

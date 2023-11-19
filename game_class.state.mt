@@ -81,7 +81,12 @@
 
 
 return {
-    new :: {
+    new ::(items)  {
+        @:keys = [];
+        foreach(items) ::(k => String, value) {
+            keys[k] = true;
+        }
+        
         @:output = {
             save :: {
                 @:serialized = {};
@@ -101,6 +106,24 @@ return {
                 }
             }
         }
+        
+        output->setAttributes(
+            attributes : {
+                '.' : {
+                    set ::(key, value) {
+                        if (keys[key] == empty)
+                            error(detail:'State has no member named ' + key);
+                        items[key] = value;
+                    },
+                    
+                    get ::(key) {
+                        if (keys[key] == empty)
+                            error(detail:'State has no member named ' + key);
+                        return items[key];                    
+                    }
+                }   
+            }
+        )
         
         return output;
     }

@@ -19,7 +19,7 @@
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:random = import(module:'game_singleton.random.mt');
-
+@:State = import(module:'game_class.state.mt');
 
 
 
@@ -39,46 +39,49 @@
     
     new ::(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint, state) {
         @:this = EntityQuality.defaultNew();
-        this.initialize(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint, state);
+        this.initialize(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint);
+        if (state != empty)
+            this.load(serialized:state);
         return this;
     },
     
     define:::(this) {
-        @base_;
-        @descIndex;
-        @trait0;
-        @trait1;
-        @trait2;
-
+        @:state = State.new(
+            items : {
+                trait0 : 0,
+                trait1 : 0,
+                trait2 : 0,
+                descIndex : 0,
+                base : empty
+            }
+        );
+        
+        
         
         this.interface = {
-            initialize ::(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint, state) {
-                when(state != empty) ::<= {
-                    this.state = state;
-                    return this;
-                }
-                base_ = base;            
+            initialize ::(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint) {
+                state.base = base;            
                 
                 if (trait0Hint != empty) 
-                    trait0 = trait0Hint
+                    state.trait0 = trait0Hint
                 else 
-                    trait0 = random.integer(from:0, to:base_.trait0->keycount-1);
+                    state.trait0 = random.integer(from:0, to:state.base.trait0->keycount-1);
 
 
                 if (trait1Hint != empty) 
-                    trait1 = trait1Hint
+                    state.trait1 = trait1Hint
                 else 
-                    trait1 = random.integer(from:0, to:base_.trait1->keycount-1);
+                    state.trait1 = random.integer(from:0, to:state.base.trait1->keycount-1);
 
                 if (trait2Hint != empty) 
-                    trait2 = trait2Hint
+                    state.trait2 = trait2Hint
                 else 
-                    trait2 = random.integer(from:0, to:base_.trait2->keycount-1);
+                    state.trait2 = random.integer(from:0, to:state.base.trait2->keycount-1);
                 
                 if (descriptionHint != empty) 
-                    descIndex = descriptionHint
+                    state.descIndex = descriptionHint
                 else 
-                    descIndex = random.integer(from:0, to:base_.descriptions->keycount-1);
+                    state.descIndex = random.integer(from:0, to:state.base.descriptions->keycount-1);
                 
                 return this;
                 
@@ -86,54 +89,43 @@
         
             base : {
                 get :: {
-                    return base_;
+                    return state.base;
                 }
             },
             
             
             name : {
                 get :: {
-                    return base_.name;
+                    return state.base.name;
                 },
             },
 
             plural : {
                 get :: {
-                    return base_.plural;
+                    return state.base.plural;
                 },
             },
             
             appearanceChance : {
-                get ::<- base_.appearanceChance
+                get ::<- state.base.appearanceChance
             },
             
             description : {
                 get ::{
-                    @base = base_.descriptions[descIndex];
-                    if (base->contains(key:'$0')) base = base->replace(key:'$0', with:base_.trait0[trait0]);
-                    if (base->contains(key:'$1')) base = base->replace(key:'$1', with:base_.trait1[trait1]);
-                    if (base->contains(key:'$2')) base = base->replace(key:'$2', with:base_.trait2[trait2]);
+                    @base = state.base.descriptions[state.descIndex];
+                    if (base->contains(key:'$0')) base = base->replace(key:'$0', with:state.base.trait0[state.trait0]);
+                    if (base->contains(key:'$1')) base = base->replace(key:'$1', with:state.base.trait1[state.trait1]);
+                    if (base->contains(key:'$2')) base = base->replace(key:'$2', with:state.base.trait2[state.trait2]);
                     return base;
                 }
             },
             
-            state : {
-                set ::(value) {
-                    base_ = EntityQuality.Base.database.find(name:value.baseName);
-                    descIndex = value.descIndex;
-                    trait0 = value.trait0;
-                    trait1 = value.trait1;
-                    trait2 = value.trait2;
-                },
-                get :: {
-                    return {
-                        baseName : base_.name,
-                        descIndex : descIndex,
-                        trait0: trait0,
-                        trait1: trait1,
-                        trait2: trait2                        
-                    }
-                }
+            save ::{
+                return state.save();
+            },
+            
+            load ::(serialized) {
+                state.load(serialized);
             }
         }
     

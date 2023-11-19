@@ -28,6 +28,8 @@
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:correctA = import(module:'game_function.correcta.mt');
+@:State = import(module:'game_class.state.mt');
+
 /*
     Items. 
     
@@ -91,36 +93,46 @@
     },
     new ::(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant) {
         @:this = Item.defaultNew();
-        this.initialize(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant);
+        this.initialize(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, abilityHint, forceEnchant);
+        if (state != empty)
+            this.load(serialized:state);
         return this;
     },
     define:::(this) {
-        ;
-        @base_;
-        @enchants = []; // ItemMod
-        @quality;
-        @material;
-        @apparel;
-        @customPrefix = empty;
-        @customName = empty;
-        @description;
-        @container;
-        @price;
-        @color;
-        @island;
-        @islandLevelHint;
-        @islandNameHint;
-        @islandTierHint;
-        @improvementsLeft;
-        @improvementsStart;
-        @equipEffects = [];
-        @useEffects = [];
-        @intuition = 0;
-        @equippedBy;
-        @ability;
-        @:stats = StatSet.new();
+    
+
+        @container = empty;
+        @equippedBy = empty;
         
-        @:getEnchantTag ::<- match(enchants->keycount) {
+        @:state = State.new(
+            items : {
+                base : empty,
+                enchants : [], // ItemMod
+                quality : empty,
+                material : empty,
+                apparel : empty,
+                customPrefix : empty,
+                customName : empty,
+                description : empty,
+                price : empty,
+                color : empty,
+                island : empty,
+                islandLevelHint : empty,
+                islandNameHint : empty,
+                islandTierHint : empty,
+                improvementsLeft : empty,
+                improvementsStart : empty,
+                equipEffects : [],
+                useEffects : [],
+                intuition : 0,
+                ability : empty,
+                stats : StatSet.new()
+            }
+        );
+    
+
+        
+        @:getEnchantTag ::<- match(state.enchants->keycount) {
           (0) :'',
           (1) :' (I)',
           (2) :' (II)',
@@ -132,34 +144,36 @@
           (8) :' (VIII)',
           (9) :' (IX)',
           (10) :' (X)',
-          default: ' (~)'         
+          default: ' (*)'         
         };
         
         
         @:recalculateName = ::{
-            when (customPrefix)
-                customName = customPrefix + getEnchantTag();
+            when (state.customPrefix)
+                state.customName = state.customPrefix + getEnchantTag();
 
 
             @baseName =
-            if (base_.isApparel && apparel)
-                customName = apparel.name + ' ' + base_.name
-            else if (base_.hasMaterial && material != empty)
-                customName = material.name + ' ' + base_.name
+            if (state.base.isApparel && state.apparel)
+                state.apparel.name + ' ' + state.base.name
+            else if (state.base.hasMaterial && state.material != empty)
+                state.material.name + ' ' + state.base.name
             else 
-                customName = base_.name
+                state.base.name
             ;
+            
+            state.customName = baseName;
             
                 
             @enchantName = getEnchantTag();
             
-            customName = if (base_.hasQuality && quality != empty)
-                quality.name + ' ' + baseName + enchantName 
+            state.customName = if (state.base.hasQuality && state.quality != empty)
+                state.quality.name + ' ' + baseName + enchantName 
             else
                 baseName + enchantName;
 
-            if (improvementsLeft != improvementsStart) ::<= {
-                customName = customName +  '+'+(improvementsStart - improvementsLeft);
+            if (state.improvementsLeft != state.improvementsStart) ::<= {
+                state.customName = state.customName +  '+'+(state.improvementsStart - state.improvementsLeft);
             }
 
 
@@ -168,51 +182,51 @@
         @:assignSize = ::{
             random.pickArrayItem(list:[
                 ::{
-                    description = description + 'It is smaller than expected. ';
-                    stats.add(stats:StatSet.new(
+                    state.description = state.description + 'It is smaller than expected. ';
+                    state.stats.add(stats:StatSet.new(
                         ATK:-10,
                         DEF:-10,
                         SPD:10,
                         DEX:10                    
                     ));
-                    price *= 0.85;                    
+                    state.price *= 0.85;                    
                 },
 
                 ::{
-                    description = description + 'It is quite small. ';
-                    stats.add(stats:StatSet.new(
+                    state.description = state.description + 'It is quite small. ';
+                    state.stats.add(stats:StatSet.new(
                         ATK:-20,
                         DEF:-20,
                         SPD:20,
                         DEX:20                    
                     ));
-                    price *= 0.75;                    
+                    state.price *= 0.75;                    
                 },
 
                 ::{
-                    description = description + 'It is average-sized. ';
+                    state.description = state.description + 'It is average-sized. ';
                 },
 
                 ::{
-                    description = description + 'It is larger than expected. ';
-                    stats.add(stats:StatSet.new(
+                    state.description = state.description + 'It is larger than expected. ';
+                    state.stats.add(stats:StatSet.new(
                         ATK:10,
                         DEF:10,
                         SPD:-10,
                         DEX:-10                    
                     ));
-                    price *= 1.15;                    
+                    state.price *= 1.15;                    
                 },
 
                 ::{
-                    description = description + 'It is quite large. ';
-                    stats.add(stats:StatSet.new(
+                    state.description = state.description + 'It is quite large. ';
+                    state.stats.add(stats:StatSet.new(
                         ATK:20,
                         DEF:20,
                         SPD:-20,
                         DEX:-20                    
                     ));
-                    price *= 1.25;                    
+                    state.price *= 1.25;                    
                 }
 
             
@@ -223,30 +237,26 @@
         @:world = import(module:'game_singleton.world.mt');
         
         this.interface = {
-            initialize::(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant) {
-                when(state != empty) ::<= {
-                    this.state = state;
-                    return this;
-                }
+            initialize::(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, abilityHint, forceEnchant) {
                 
-                ability = if (abilityHint) abilityHint else random.pickArrayItem(list:base.possibleAbilities);
-                base_ = base;
-                stats.add(stats:base.equipMod);
-                price = base.basePrice;
-                price *= 1.05 * base_.weight;
-                improvementsLeft = random.integer(from:10, to:25);
-                improvementsStart = improvementsLeft;
+                state.ability = if (abilityHint) abilityHint else random.pickArrayItem(list:base.possibleAbilities);
+                state.base = base;
+                state.stats.add(stats:base.equipMod);
+                state.price = base.basePrice;
+                state.price *= 1.05 * state.base.weight;
+                state.improvementsLeft = random.integer(from:10, to:25);
+                state.improvementsStart = state.improvementsLeft;
                 
-                description = base.description + ' ';
+                state.description = base.description + ' ';
                 if (base.hasSize)   
                     assignSize();
-                description = description + (if (ability == empty) '' else 'If equipped, grants the ability: "' + ability + '". ');
+                state.description = state.description + (if (state.ability == empty) '' else 'If equipped, grants the ability: "' + state.ability + '". ');
                 foreach(base.equipEffects)::(i, effect) {
-                    equipEffects->push(value:effect);
+                    state.equipEffects->push(value:effect);
                 }
 
                 foreach(base.useEffects)::(i, effect) {
-                    useEffects->push(value:effect);
+                    state.useEffects->push(value:effect);
                 }
                 
                 
@@ -256,28 +266,28 @@
                     // made with love and care
                     if (random.try(percentSuccess:15)) ::<= {
                         if (base.isApparel) 
-                            description = description + 'The maker\'s emblem is sewn on it. '
+                            state.description = state.description + 'The maker\'s emblem is sewn on it. '
                         else
-                            description = description + 'The maker\'s emblem is engraved on it. ';
-                        stats.add(stats:StatSet.new(
+                            state.description = state.description + 'The maker\'s emblem is engraved on it. ';
+                        state.stats.add(stats:StatSet.new(
                             ATK:10,
                             DEF:10,
                             SPD:10,
                             INT:10,
                             DEX:10                    
                         ));
-                        price *= 1.05;
+                        state.price *= 1.05;
                     }
                     
                     
                     if (random.try(percentSuccess:30) || (qualityHint != empty)) ::<= {
-                        quality = if (qualityHint == empty)
+                        state.quality = if (qualityHint == empty)
                             ItemQuality.database.getRandomWeighted()
                         else 
                             ItemQuality.database.find(name:qualityHint);
-                        stats.add(stats:quality.equipMod);
-                        price += (price * (quality.pricePercentMod/100));
-                        description = description + quality.description + ' ';
+                        state.stats.add(stats:state.quality.equipMod);
+                        state.price += (state.price * (state.quality.pricePercentMod/100));
+                        state.description = state.description + state.quality.description + ' ';
                         
                     }
                     recalculateName();
@@ -287,27 +297,27 @@
 
                 if (base.hasMaterial) ::<= {
                     if (materialHint == empty) ::<= {
-                        material = Material.database.getRandomWeightedFiltered(
+                        state.material = Material.database.getRandomWeightedFiltered(
                             filter::(value) <- value.tier <= story.tier
                         );
                     } else ::<= {
-                        material = Material.database.find(name:materialHint);                
+                        state.material = Material.database.find(name:materialHint);                
                     }
-                    description = description + material.description + ' ';
-                    stats.add(stats:material.statMod);
+                    state.description = state.description + state.material.description + ' ';
+                    state.stats.add(stats:state.material.statMod);
                     recalculateName();
                 }
 
                 if (base.isApparel) ::<= {
                     if (apparelHint == empty) ::<= {
-                        apparel = ApparelMaterial.database.getRandomWeightedFiltered(
+                        state.apparel = ApparelMaterial.database.getRandomWeightedFiltered(
                             filter::(value) <- value.tier <= story.tier
                         );
                     } else ::<= {
-                        apparel = ApparelMaterial.database.find(name:apparelHint);                
+                        state.apparel = ApparelMaterial.database.find(name:apparelHint);                
                     }
-                    description = description + apparel.description + ' ';
-                    stats.add(stats:apparel.statMod);
+                    state.description = state.description + state.apparel.description + ' ';
+                    state.stats.add(stats:state.apparel.statMod);
                     recalculateName();
                 }                
 
@@ -341,18 +351,18 @@
 
 
                 if (base.canBeColored) ::<= {
-                    color = if (colorHint) ItemColor.database.find(name:colorHint) else ItemColor.database.getRandom();
-                    stats.add(stats:color.equipMod);
-                    description = description->replace(key:'$color$', with:color.name);
+                    state.color = if (colorHint) ItemColor.database.find(name:colorHint) else ItemColor.database.getRandom();
+                    state.stats.add(stats:state.color.equipMod);
+                    state.description = state.description->replace(key:'$color$', with:state.color.name);
                 }
                             
                 
                 
 
-                if (material != empty) 
-                    price += price * (material.pricePercentMod / 100);
+                if (state.material != empty) 
+                    state.price += state.price * (state.material.pricePercentMod / 100);
                     
-                price = (price)->ceil;
+                state.price = (state.price)->ceil;
                 
                 base.onCreate(item:this, user:from, creationHint);
                 
@@ -363,29 +373,29 @@
 
             base : {
                 get :: {
-                    return base_;
+                    return state.base;
                 }
             },
             
             
             name : {
                 get :: {
-                    when (customName != empty) customName;
-                    return base_.name;
+                    when (state.customName != empty) state.customName;
+                    return state.base.name;
                 },
                 
                 set ::(value => String)  {
-                    customPrefix = value;
+                    state.customPrefix = value;
                     recalculateName();
                 }
             },
             
             enchantsCount : {
-                get ::<- enchants->keycount
+                get ::<- state.enchants->keycount
             },
             
             equipMod : {
-                get ::<- stats
+                get ::<- state.stats
             },
             
             container : {
@@ -407,31 +417,31 @@
             },
 
             ability : {
-                get ::<- ability
+                get ::<- state.ability
             },
             
             equipEffects : {
-                get ::<- equipEffects
+                get ::<- state.equipEffects
             },
             
             islandEntry : {
-                get ::<- island
+                get ::<- state.island
             },
             
             setIslandGenAttributes ::(levelHint => Number, nameHint => String, tierHint => Number, islandHint) {
-                islandLevelHint = levelHint;
-                islandNameHint = nameHint;
-                islandTierHint = tierHint;
-                island = islandHint;
+                state.islandLevelHint = levelHint;
+                state.islandNameHint = nameHint;
+                state.islandTierHint = tierHint;
+                state.island = islandHint;
             },
             
             addIslandEntry ::(world) {
-                when (island != empty) empty;
+                when (state.island != empty) empty;
 
-                island = world.discoverIsland(
-                    levelHint: (islandLevelHint)=>Number,
-                    nameHint: (islandNameHint)=>String,
-                    tierHint: (islandTierHint)=>Number
+                state.island = world.discoverIsland(
+                    levelHint: (state.islandLevelHint)=>Number,
+                    nameHint: (state.islandNameHint)=>String,
+                    tierHint: (state.islandTierHint)=>Number
                 );                
             },
             
@@ -446,46 +456,44 @@
             
             
             price : {
-                get ::<-price,
-                set ::(value) <- price = value
+                get ::<-state.price,
+                set ::(value) <- state.price = value
             },
             
             material : {
-                get ::<- material
+                get ::<- state.material
             },
             
             addEnchant::(mod) {
-                when (enchants->keycount >= base_.enchantLimit) empty;
-                enchants->push(value:mod);
+                when (state.enchants->keycount >= state.base.enchantLimit) empty;
+                state.enchants->push(value:mod);
                 foreach(mod.base.equipEffects)::(i, effect) {
-                    equipEffects->push(value:effect);
+                    state.equipEffects->push(value:effect);
                 }
-                stats.add(stats:mod.base.equipMod);
+                state.stats.add(stats:mod.base.equipMod);
                 //if (description->contains(key:mod.description) == false)
                 //    description = description + mod.description + ' ';
                 recalculateName();
-                price += mod.base.priceMod;
-                price = price->ceil;
+                state.price += mod.base.priceMod;
+                state.price = state.price->ceil;
             },
             
             description : {
                 get :: {
-                    
-                
-                    return description + '\nEquip effects: \n' + stats.getRates();
+                    return state.description + '\nEquip effects: \n' + state.stats.getRates();
                 }
             },
             
             onTurnEnd ::(wielder, battle){
-                foreach(enchants)::(i, enchant) {
+                foreach(state.enchants)::(i, enchant) {
                     enchant.onTurnCheck(wielder, item:this, battle);
                 }
             },
             
             improvementsLeft : {
-                get::<- improvementsLeft,
+                get::<- state.improvementsLeft,
                 set::(value) {
-                    improvementsLeft = value;
+                    state.improvementsLeft = value;
                     recalculateName();
                 }
             },
@@ -494,11 +502,11 @@
                 @:Effect = import(module:'game_class.effect.mt');
                 windowEvent.queueMessage(
                     speaker:this.name,
-                    text:description,
+                    text:state.description,
                     pageAfter:canvas.height-4
                 );
                 
-                if (enchants->keycount != 0) ::<= {
+                if (state.enchants->keycount != 0) ::<= {
                     windowEvent.queueMessage(
                         speaker:this.name + ' - Enchantments',
                         pageAfter:canvas.height-4,
@@ -507,8 +515,8 @@
                                 'I', 'II', 'III', 'IV', 'V', 'VI', "VII", 'VIII', 'IX', 'X', 'XI'
                             ]
                             @out = '';
-                            when (enchants->keycount == 0) 'None.';
-                            foreach(enchants)::(i, mod) {
+                            when (state.enchants->keycount == 0) 'None.';
+                            foreach(state.enchants)::(i, mod) {
                                 out = out + list[i] + ' - ' + mod.description + '\n';
                             }
                             return out;
@@ -518,18 +526,18 @@
                 
                 windowEvent.queueMessage(
                     speaker:this.name + ' - Equip Stats',
-                    text:stats.description,
+                    text:state.stats.description,
                     pageAfter:canvas.height-4
                 );
 
-                if (equipEffects->keycount != 0) ::<= {
+                if (state.equipEffects->keycount != 0) ::<= {
                     windowEvent.queueMessage(
                         speaker:this.name + ' - Equip Effects',
                         pageAfter:canvas.height-4,
                         text:::<={
                             @out = '';
-                            when (equipEffects->keycount == 0) 'None.';
-                            foreach(equipEffects)::(i, effect) {
+                            when (state.equipEffects->keycount == 0) 'None.';
+                            foreach(state.equipEffects)::(i, effect) {
                                 out = out + '. ' + Effect.database.find(name:effect).description + '\n';
                             }
                             return out;
@@ -544,8 +552,8 @@
                     pageAfter:canvas.height-4,
                     text:::<={
                         @out = '';
-                        when (useEffects->keycount == 0) 'None.';
-                        foreach(useEffects)::(i, effect) {
+                        when (state.useEffects->keycount == 0) 'None.';
+                        foreach(state.useEffects)::(i, effect) {
                             out = out + '. ' + Effect.database.find(name:effect).description + '\n';
                         }
                         return out;
@@ -554,87 +562,35 @@
 
 
                 if (by != empty) ::<= {
-                    when(by.profession.base.weaponAffinity != base_.name) empty;
+                    when(by.profession.base.weaponAffinity != state.base.name) empty;
                     windowEvent.queueMessage(
                         speaker:by.name,
                         pageAfter:canvas.height-4,
                         text:'Oh! This weapon type really works for me as ' + correctA(word:by.profession.base.name) + '.'
                     );  
                 }
-
             },
             
             stats : {
-                get ::<- stats
+                get ::<- state.stats
             },
             
             addIntuition :: {
-                intuition += 1;
+                state.intuition += 1;
             },
 
             canGainIntuition ::(silent) {
-                return intuition < 20;
+                return state.intuition < 20;
             },
             
             maxOut ::{
-                intuition = 20;
-                improvementsLeft = 0;
+                state.intuition = 20;
+                state.improvementsLeft = 0;
             },
             
-            state : {
-                set ::(value) {
-                    base_ = Item.Base.database.find(name:value.baseName);
-                    material = if (value.materialName == empty) empty else Material.database.find(name:value.materialName);
-                    customName = value.customName;
-                    price = value.price;
-                    islandLevelHint = value.islandLevelHint;
-                    islandNameHint = value.islandNameHint;
-                    if (value.island != empty) ::<= {
-                        if (world.island.id == value.island.id) 
-                            island = world.island  // already handled by current world loading.
-                        else
-                            island = Island.new(levelHint: 0, world: this, party : world.party, state:value.island);                        
-                            
-                    } else 
-                        island = empty;
-                        
-                    description = value.description;
-                    stats.state = value.stats;
-                    equipEffects = [];
-                    foreach(value.equipEffects)::(index, effectName) {
-                        equipEffects->push(value:effectName);
-                    }
-
-                    enchants = [];
-                    foreach(value.enchantNames)::(index, modName) {
-                        @:mod = ItemEnchant.database.find(name:modName);
-                        enchants->push(value:mod);
-                    }
-                    
-                    quality = ItemQuality.database.find(name:value.quality);
-                },
-                get :: {
-                    return {
-                        baseName : base_.name,
-                        materialName : if (material == empty) empty else material.name,
-                        customName : customName,
-                        price : price,
-                        islandLevelHint : islandLevelHint,
-                        islandNameHint : islandNameHint,
-                        island : if (island != empty && island.id != world.island.id) island.state else empty,
-                        description : description,
-                        stats : stats.state,
-                        enchantNames : [...enchants]->map(to:::(value) <- value.name),
-                        equipEffects : [...equipEffects],
-                        quality : quality.name
-                    }
-                }
-            }
-            
-            
-            
+            save ::<- state.save(),
+            load ::(serialized) <- state.load(serialized)
         }
-    
     }
 );
 

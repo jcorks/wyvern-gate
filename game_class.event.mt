@@ -26,6 +26,9 @@
 @:Scene = import(module:'game_class.scene.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:story = import(module:'game_singleton.story.mt');
+@:State = import(module:'game_class.state.mt');
+
+
 @:Event = class(
     statics : {
         Base  :::<= {
@@ -39,64 +42,61 @@
     
     new ::(base, party, island, landmark, currentTime, state) {
         @:this = Event.defaultNew();
-        this.initialize(base, party, island, landmark, currentTime, state);
+        this.initialize(base, party, island, landmark, currentTime);
+        if (state != empty)
+            this.load(serialized:state);
         return this;
     },
     
     define:::(this) {
-        @timeLeft;
-        @duration;
-        @base_;
+        @:state = State.new(
+            items : {
+                timeLeft : 0,
+                base : empty,
+                duration : 0,
+                startAt : 0                  
+            }
+        );
+        
+    
         @party_;
         @island_;
-        @startAt;
         @landmark_;
 
 
         this.interface = {
-            initialize ::(base, party, island, landmark, currentTime, state) {
+            initialize ::(base, party, island, landmark, currentTime) {
                 island_ = island;
                 party_ = party;
-                when (state != empty) ::<= {
-                    this.state = state;
-                    return this;
-                } 
-                base_ = base; 
-                startAt = currentTime;
                 landmark_ = landmark;
-                duration = base.onEventStart(event:this);
-                timeLeft = duration;
+
+
+                state.base = base; 
+                state.startAt = currentTime;
+                state.duration = base.onEventStart(event:this);
+                state.timeLeft = state.duration;
                 return this;
             },
 
-            state : {
-                set ::(value) {
-                    base_ = Event.Base.database.find(name:value.baseName);
-                    timeLeft = value.timeLeft;
-                    duration = value.duration;
-                    startAt = value.startAt;
-                },
-                get :: {
-                    return {
-                        baseName : base_.name,
-                        timeLeft : timeLeft,
-                        duration : duration,
-                        startAt : startAt
-                    }    
-                }
+            save ::{
+                return state.save();
+            },
+            
+            load ::(serialized) {
+                state.load(serialized);
             },
         
             expired : {
-                get :: <- timeLeft == 0
+                get :: <- state.timeLeft == 0
             },
             
             stepTime :: {
-                base_.onEventUpdate(event:this);
-                if (timeLeft > 0) timeLeft -= 1;
+                state.base.onEventUpdate(event:this);
+                if (state.timeLeft > 0) state.timeLeft -= 1;
             },
             
             duration : {
-                get :: <- duration
+                get :: <- state.duration
             },
             
             island : {
@@ -112,7 +112,7 @@
             },
             
             base : {
-                get :: <- base_
+                get :: <- state.base
             }
             
         }
