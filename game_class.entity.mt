@@ -161,13 +161,13 @@
                 
 
                 equips : [
-                    none, // handl
-                    none, // handr
-                    none, // armor
-                    none, // amulet
-                    none, // ringl
-                    none, // ringr
-                    none
+                    empty, // handl
+                    empty, // handr
+                    empty, // armor
+                    empty, // amulet
+                    empty, // ringl
+                    empty, // ringr
+                    empty
                 ],
                 effects : [], // effects. abilities and equips push / pop these.
                 abilitiesAvailable : [
@@ -205,7 +205,9 @@
             
             for(0, EQUIP_SLOTS.RING_R+1)::(slot) {
                 when(slot == EQUIP_SLOTS.HAND_R) empty;
-                foreach(state.equips[slot].equipEffects)::(index, effect) {
+                @:equip = state.equips[slot];
+                when(equip == empty) empty;
+                foreach(equip.equipEffects)::(index, effect) {
                     this.addEffect(
                         from:this, 
                         name:effect, 
@@ -294,6 +296,7 @@
             load ::(serialized) {
                 state.load(serialized);
                 foreach(state.equips) ::(k, equip) {
+                    when(equip == empty) empty;
                     equip.equippedBy = this;
                 }
             },
@@ -353,6 +356,7 @@
                 }
 
                 foreach(state.equips)::(index, equip) {
+                    when(equip == empty) empty;
                     when(index == EQUIP_SLOTS.HAND_R) empty;
                     state.stats.modRate(stats:equip.equipMod);
                 }
@@ -363,9 +367,11 @@
             },
             
             endTurn ::(battle) {
+                @:equips = state.equips;
                 foreach(EQUIP_SLOTS)::(str, i) {
-                    when(i == 0 && state.equips[0] == state.equips[1]) empty;
-                    state.equips[i].onTurnEnd(wielder:this, battle);
+                    when(i == 0 && equips[0] == equips[1]) empty;
+                    when(equips[i] == empty) empty;
+                    equips[i].onTurnEnd(wielder:this, battle);
                 }
             },
 
@@ -949,6 +955,8 @@
                 oldstats.add(stats: this.stats);
 
                 @olditem = state.equips[slot];
+                if (item.name == 'None')
+                    error(detail:'Can\'t equip the None item. Unequip instead.');
         
                 when (this.getSlotsForItem(item)->findIndex(value:slot) == -1) ::<= {
                     when(silent) empty;
@@ -1002,7 +1010,7 @@
 
                 
                 if (silent != true) ::<={
-                    if (olditem.name == 'None') ::<= {
+                    if (olditem == empty || olditem.name == 'None') ::<= {
                         windowEvent.queueMessage(text:this.name + ' has equipped the ' + item.name + '.');                    
                     } else ::<= {
                         windowEvent.queueMessage(text:this.name + ' unequipped the ' + olditem.name + ' and equipped the ' + item.name + '.');                    
@@ -1015,7 +1023,9 @@
             },
             
             getEquipped::(slot => Number) {
-                return state.equips[slot];
+                @:eq = state.equips[slot];
+                when(eq == empty) none;
+                return eq;
             },
 
             isEquipped::(item) {
@@ -1040,11 +1050,12 @@
             
             unequip ::(slot => Number, silent) {
                 @:current = state.equips[slot];
-                if (state.equips[slot].base.equipType == Item.TYPE.TWOHANDED) ::<={
-                    state.equips[EQUIP_SLOTS.HAND_L] = none;                                
-                    state.equips[EQUIP_SLOTS.HAND_R] = none;                                
+                when (current == empty) empty;
+                if (current.base.equipType == Item.TYPE.TWOHANDED) ::<={
+                    state.equips[EQUIP_SLOTS.HAND_L] = empty;                                
+                    state.equips[EQUIP_SLOTS.HAND_R] = empty;                                
                 } else ::<={
-                    state.equips[slot] = none;                
+                    state.equips[slot] = empty;                
                 }
                 if (state.profession.base.weaponAffinity == current.base.name)
                     state.effects->remove(key:state.effects->findIndex(query::(value) <- value.effect.name == 'Weapon Affinity'));
@@ -1067,7 +1078,7 @@
                 this.recalculateStats();
                 return current;
             },
-            unequipItem ::(item, silent) {
+            unequipItem ::(item => none->type, silent) {
                 @slotOut;
                 foreach(state.equips)::(slot, equip) {
                     if (equip == item) ::<= {
@@ -1428,6 +1439,7 @@
                 }
 
                 foreach(state.equips)::(index, equip) {
+                    when(equip == empty) empty;
                     when(index == EQUIP_SLOTS.HAND_R) empty;
                     modRate.add(stats:equip.equipMod);
                 }
@@ -1436,7 +1448,6 @@
                 plainStats.printDiff(other:state.stats, 
                     prompt:this.name + '(Base -> w/Mods.)'
                 );
-                
                 windowEvent.queueMessageSet(
                     speaker: this.name,
                     pageAfter:canvas.height-4,
@@ -1452,13 +1463,13 @@
                          ,
                          
                           ' -Equipment-  \n'                
-                                + 'hand(l): ' + state.equips[EQUIP_SLOTS.HAND_L].name + '\n'
-                                + 'hand(r): ' + state.equips[EQUIP_SLOTS.HAND_R].name + '\n'
-                                + 'armor  : ' + state.equips[EQUIP_SLOTS.ARMOR].name + '\n'
-                                + 'amulet : ' + state.equips[EQUIP_SLOTS.AMULET].name + '\n'
-                                + 'trinket: ' + state.equips[EQUIP_SLOTS.TRINKET].name + '\n'
-                                + 'ring(l): ' + state.equips[EQUIP_SLOTS.RING_L].name + '\n'
-                                + 'ring(r): ' + state.equips[EQUIP_SLOTS.RING_R].name + '\n'
+                                + 'hand(l): ' + this.getEquipped(slot:EQUIP_SLOTS.HAND_L).name + '\n'
+                                + 'hand(r): ' + this.getEquipped(slot:EQUIP_SLOTS.HAND_R).name + '\n'
+                                + 'armor  : ' + this.getEquipped(slot:EQUIP_SLOTS.ARMOR).name + '\n'
+                                + 'amulet : ' + this.getEquipped(slot:EQUIP_SLOTS.AMULET).name + '\n'
+                                + 'trinket: ' + this.getEquipped(slot:EQUIP_SLOTS.TRINKET).name + '\n'
+                                + 'ring(l): ' + this.getEquipped(slot:EQUIP_SLOTS.RING_L).name + '\n'
+                                + 'ring(r): ' + this.getEquipped(slot:EQUIP_SLOTS.RING_R).name + '\n'
                          ,
                         
                           

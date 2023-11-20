@@ -174,7 +174,6 @@
         }
         
         @:endTurn ::{
-            checkRemove();  
             turnIndex+=1;
             if (turnPoppable->keycount == 0) ::<= {      
                 foreach(turn)::(index, obj) {
@@ -195,6 +194,7 @@
                     battleEnd();
                 }
             }
+            checkRemove();  
         }
         
         @:nextTurn ::{
@@ -628,7 +628,7 @@
                                                 when (wep.name == 'None' || !wep.canGainIntuition()) empty;
 
                                                 @:oldAllyStats = StatSet.new();
-                                                oldAllyStats.state = ally.stats.state;
+                                                oldAllyStats.load(serialized:ally.stats.save());
                                                 @:stats = wep.stats;                             
                                                 @:oldStats = StatSet.new();
                                                 oldStats.add(stats);
