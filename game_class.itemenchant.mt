@@ -20,7 +20,7 @@
 @:StatSet = import(module:'game_class.statset.mt');
 @:ItemEnchantCondition = import(module:'game_class.itemenchantcondition.mt');
 @:random = import(module:'game_singleton.random.mt');
-
+@:State = import(module:'game_class.state.mt');
 
 @:CONDITION_CHANCES = [
     10,
@@ -54,32 +54,37 @@
     },
     new ::(base, conditionHint, state) { 
         @:this = ItemEnchant.defaultNew();
-        this.initialize(base, conditionHint, state);
+        this.initialize(base, conditionHint);
+        
+        if (state != empty)
+            this.load(serialized:state);
         return this;
     },
     define:::(this) {
-        @base_;
-        @condition;
-        @conditionChance;
-        @conditionChanceName
+    
+        @:state = State.new(
+            items : {
+                base : empty,
+                condition : empty,
+                conditionChance : 0,
+                conditionChanceName : empty
+            }        
+        );
+    
         
         this.interface = {
-            initialize ::(base, conditionHint, state) {
-                base_ = base;
-                when(state != empty) ::<= {
-                    this.state = state;
-                    return this;
-                }
+            initialize ::(base, conditionHint) {
+                state.base = base;
                 
                 if (base.triggerConditionEffects->keycount > 0) ::<= {
                     if (conditionHint != empty) ::<= {
-                        condition = ItemEnchantCondition.database.find(name:conditionHint);
+                        state.condition = ItemEnchantCondition.database.find(name:conditionHint);
                     } else ::<= {
-                        condition = ItemEnchantCondition.database.getRandom();
+                        state.condition = ItemEnchantCondition.database.getRandom();
                     }
                     @conditionIndex = random.pickArrayItem(list:CONDITION_CHANCES->keys);
-                    conditionChance = CONDITION_CHANCES[conditionIndex];
-                    conditionChanceName = CONDITION_CHANCE_NAMES[conditionIndex];
+                    state.conditionChance = CONDITION_CHANCES[conditionIndex];
+                    state.conditionChanceName = CONDITION_CHANCE_NAMES[conditionIndex];
                 }
                 return this;
             },
@@ -87,30 +92,30 @@
 
             description : {
                 get ::{
-                    when(condition == empty) base_.description;
-                    return condition.description + (base_.description)->replace(key:'$1', with: conditionChanceName);
+                    when(state.condition == empty) state.base.description;
+                    return state.condition.description + (state.base.description)->replace(key:'$1', with: state.conditionChanceName);
                     
                 }
             },
             
             name : {
                 get ::{
-                    when(condition == empty) base_.name;
+                    when(state.condition == empty) state.base.name;
                     breakpoint();
-                    return condition.name + ': ' + base_.name;
+                    return state.condition.name + ': ' + state.base.name;
                 }
             },
             
             base : {
-                get ::<- base_
+                get ::<- state.base
             },
             
             onTurnCheck ::(wielder, item, battle) {
-                when(condition == empty) empty;
-                if (condition.onTurnCheck(wielder, item, battle) == true) ::<= {
-                    when(!random.try(percentSuccess:conditionChance)) empty;
+                when(state.condition == empty) empty;
+                if (state.condition.onTurnCheck(wielder, item, battle) == true) ::<= {
+                    when(!random.try(percentSuccess:state.conditionChance)) empty;
                 
-                    foreach(base_.triggerConditionEffects)::(i, effectName) {
+                    foreach(state.base.triggerConditionEffects)::(i, effectName) {
                         wielder.addEffect(
                             from:wielder, name: effectName, durationTurns: 1, item
                         );                        
@@ -118,15 +123,8 @@
                 }
             },
             
-            state : {
-                get ::{
-                
-                },
-                
-                set ::(value) {
-                
-                }
-            }
+            save ::<- state.save(),
+            load ::(serialized) <- state.load(serialized)
         }
     }
 

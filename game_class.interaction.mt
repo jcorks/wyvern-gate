@@ -1442,11 +1442,14 @@ Interaction.new(
         displayName : 'Bet',
         name : 'bet',
         onInteract ::(location, party) {
-            @:getAWeapon = ::<-
-                Item.Base.database.getRandomFiltered(
-                    filter:::(value) <- (
-                        value.isUnique == false &&
-                        value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
+            @:getAWeapon = ::(from)<-
+                Item.new(
+                    from,
+                    base:Item.Base.database.getRandomFiltered(
+                        filter:::(value) <- (
+                            value.isUnique == false &&
+                            value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
+                        )
                     )
                 )                    
             ;
@@ -1460,7 +1463,7 @@ Interaction.new(
 
             for(0, count)::(i) {
                 @:combatant = location.landmark.island.newInhabitant();
-                @:weapon = getAWeapon().new(from:combatant);
+                @:weapon = getAWeapon(from:combatant);
                 combatant.equip(item:weapon, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true, inventory: combatant.inventory);
 
                 teamA->push(value:combatant);
@@ -1468,7 +1471,7 @@ Interaction.new(
 
             for(0, count)::(i) {
                 @:combatant = location.landmark.island.newInhabitant();
-                @:weapon = getAWeapon().new(from:combatant);                        
+                @:weapon = getAWeapon(from:combatant);                        
                 combatant.equip(item:weapon, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true, inventory: combatant.inventory);
 
                 teamB->push(value:combatant);

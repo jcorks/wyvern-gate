@@ -25,6 +25,7 @@
 @:DungeonController = import(module:'game_class.dungeoncontroller.mt');
 @:distance = import(module:'game_function.distance.mt');
 @Location = empty; // circular dep.
+@:State = import(module:'game_class.state.mt');
 
 
 
@@ -46,27 +47,35 @@
     
     new::(base, island, x, y, state, floorHint){ 
         @:this = Landmark.defaultNew();
-        this.initialize(base, island, x, y, state, floorHint);
+        this.initialize(base, island, x, y, floorHint);
+        if (state != empty) 
+            this.load(serialized:state);
+            
         return this;
     },
     
     define :::(this) {
         if (Location == empty) Location = import(module:'game_class.location.mt');
-        ;
-        @name;
-        @landmark;
-        @x_;
-        @y_;
-        @discovered = false;
-        @locations = [];
+
         @island_;
-        @sizeW;
-        @sizeH;
-        @peaceful;
-        @floor = 0;
-        @map;
-        @gate;
         @dungeonLogic;
+
+        @:state = State.new(
+            items : {
+                name : empty,
+                base : empty,
+                x : 0,
+                y : 0,
+                discovered : false,
+                locations : [],
+                peaceful : false,
+                floor : 0,
+                map : empty,
+                gate : empty
+            
+            }
+        );
+
 
         
         
@@ -81,49 +90,43 @@
   
 
         this.interface =  {
-            initialize::(base, island, x, y, state, floorHint){
+            initialize::(base, island, x, y, floorHint){
                 island_ = island;
-                when(state != empty) ::<= {
-                    this.state = state;
-                    return this;
-                }
 
-                landmark = base;
-                x_ = x;
-                y_ = y;
-                peaceful = base.peaceful;
+                state.base = base;
+                state.x = x;
+                state.y = y;
+                state.peaceful = base.peaceful;
 
 
                 if (base.dungeonMap) ::<= {
-                    map = DungeonMap.new(mapHint: base.mapHint);
-                    dungeonLogic = DungeonController.new(map, island, landmark:this);
+                    state.map = DungeonMap.new(mapHint: base.mapHint);
+                    dungeonLogic = DungeonController.new(map:state.map, island, landmark:this);
                 } else ::<= {
-                    map = StructureMap.new(mapHint:base.mapHint);//Map.new(mapHint: base.mapHint);
+                    state.map = StructureMap.new(mapHint:base.mapHint);//Map.new(mapHint: base.mapHint);
                 }
 
-                sizeW = map.width;
-                sizeH = map.height;
 
                 if (base.dungeonMap) ::<= {
                     if (base.dungeonForceEntrance) ::<= {
-                        gate = this.addLocation(name:'Entrance');
+                        this.addLocation(name:'Entrance');
                     }
                 } else ::<= {
-                    gate = this.addLocation(name:'Entrance');
+                    this.addLocation(name:'Entrance');
                 }
                 
                 if (base.isUnique)
-                    name = base.name
+                    state.name = base.name
                 else
-                    name = base.name + ' of ' + NameGen.place();
+                    state.name = base.name + ' of ' + NameGen.place();
                 /*
                 [0, Random.integer(from:base.minLocations, to:base.maxLocations)]->for(do:::(i) {
                     locations->push(value:island.newInhabitant());            
                 });
                 */
                 @mapIndex = 0;
-                map.title = landmark.name + (
-                    if (name == '') '' else (' of ' + name)
+                state.map.title = state.base.name + (
+                    if (state.name == '') '' else (' of ' + state.name)
                 );         
 
 
@@ -139,7 +142,7 @@
 
 
 
-
+                
 
 
                 foreach(base.requiredLocations)::(i, loc) {
@@ -157,36 +160,36 @@
                         name:which.name
                     );
                     if (which.onePerLandmark) ::<= {
-                        possibleLocations->remove(key:possibleLocations->findIndex(value:which));
+                        state.possibleLocations->remove(key:state.possibleLocations->findIndex(value:which));
                     }
                     mapIndex += 1;
                 }
                 
-                
+                @:gate = this.gate;
                 if (base.dungeonMap) ::<= {
                     if (gate == empty) ::<= {
                         this.movePointerToRandomArea();
                     } else ::<= {
-                        map.setPointer(
+                        state.map.setPointer(
                             x:gate.x,
                             y:gate.y
                         );                    
                     }
                 } else ::<= {
 
-                    map.setPointer(
+                    state.map.setPointer(
                         x:gate.x,
                         y:gate.y
                     );
 
-                    map.finalize();            
+                    state.map.finalize();            
                 }
 
                 if (floorHint != empty) ::<= {
-                    floor = floorHint;
-                    floor => Number;
-                    if (landmark.dungeonMap)
-                        dungeonLogic.floorHint = floor;
+                    state.floor = floorHint;
+                    state.floor => Number;
+                    if (state.base.dungeonMap)
+                        dungeonLogic.floorHint = state.floor;
                 }
 
                 
@@ -195,66 +198,18 @@
                 return this;
             },
 
-            state : {
-                set ::(value) {
-                    landmark = Landmark.Base.database.find(name:value.baseName);
-                    x_ = value.x;
-                    y_ = value.y;
-                    discovered = value.discovered;
-                    name = value.name;
-                    sizeW = value.sizeW;
-                    sizeH = value.sizeH;
-                    peaceful = value.peaceful;
-                    floor = value.floor;
-                    locations = [];
-                    map = Map.new();
-                    gate = empty;
-                    foreach(value.locations)::(index, location) {
-                        @loc = Location.new(
-                            base:Location.Base.database.find(name:location.baseName),
-                            landmark:this, state:location
-                        );
-                        if (loc.base.name == 'Entrance')
-                            gate = loc;
+            save ::<- state.save(),
+            load ::(serialized) { 
+                state.load(serialized)
+                dungeonLogic = DungeonController.new(map:state.map, island:island_, landmark:this);
 
-                        map.setItem(
-                            data:loc,
-                            x: loc.x,
-                            y: loc.y,
-                            symbol: loc.base.symbol,
-                            discovered: true
-                        );
-                        locations->push(value:loc);
-                    }
-                    if (gate == empty)
-                        error(detail: 'landmark state is missing an Entrance.');
-
-                    map.state = value.map;
-                },
-            
-                get :: {
-                    return {
-                        baseName : landmark.name,
-                        name : name,
-                        x: x_,
-                        y: y_,
-                        sizeW : sizeW,
-                        sizeH : sizeH,
-                        peaceful : peaceful,
-                        map : map.state,
-                        floor : floor,
-                        locations : [...locations]->map(to:::(value) <- value.state),
-                        discovered : discovered
-                        
-                    }
-                }
             },
         
             description : {
                 get :: {
-                    @out = name + ', a ' + landmark.name;
-                    if (locations->keycount > 0) ::<={
-                        out = out + ' with ' + locations->keycount + ' permanent inhabitants';//:\n';
+                    @out = state.name + ', a ' + state.base.name;
+                    if (state.locations->keycount > 0) ::<={
+                        out = out + ' with ' + state.locations->keycount + ' permanent inhabitants';//:\n';
                         //foreach(in:locations, do:::(index, inhabitant) {
                         //    out = out + '   ' + inhabitant.name + ', a ' + inhabitant.species.name + ' ' + inhabitant.profession.base.name +'\n';
                         //});
@@ -264,81 +219,87 @@
             },
 
             base : {
-                get ::<- landmark
+                get ::<- state.base
             },
             
             name : {
                 get :: {
-                    return name;                
+                    return state.name;                
                 },
                 
                 set ::(value) {
-                    name = value;
-                    map.title = value;
+                    state.name = value;
+                    state.map.title = value;
                 }
             },
             
             x : {
-                get ::<- x_
+                get ::<- state.x
             },
             
             y : {
-                get ::<- y_
+                get ::<- state.y
             },
             
             width : {
-                get ::<- sizeW
+                get ::<- state.map.width
             },
             height : {
-                get ::<- sizeH
+                get ::<- state.map.height
             },
             
             peaceful : {
-                get :: <- peaceful,
-                set ::(value) <- peaceful = value
+                get :: <- state.peaceful,
+                set ::(value) <- state.peaceful = value
             },
 
             floor : {
-                get :: <- floor
+                get :: <- state.floor
             },
 
             step :: {
-                when(!landmark.dungeonMap) empty;
+                when(!state.base.dungeonMap) empty;
                 dungeonLogic.step();
             },
             
             kind : {
                 get :: {
-                    return landmark.name;
+                    return state.base.name;
                 }
             },
             
             gate : {
-                get :: <- gate
+                get :: {
+                    @:index = state.locations->findIndex(query::(value) {
+                        return value.base.name == 'Entrance'
+                    });
+                    when (index != -1)
+                        state.locations[index];
+                }
             },
             discover :: {
                 @:world = import(module:'game_singleton.world.mt');
                 @:windowEvent = import(module:'game_singleton.windowevent.mt');
-                if (!discovered)
+                if (!state.discovered)
                     if (world.party.inventory.items->filter(by:::(value) <- value.base.name == 'Runestone')->keycount != 0) ::<= {
                         world.storyFlags.data_locationsDiscovered += 1;
                         windowEvent.queueMessage(text:'Location found! ' + world.storyFlags.data_locationsDiscovered + ' / ' 
                                                                  + world.storyFlags.data_locationsNeeded + ' locations.');               
                     }
-                discovered = true;
+                state.discovered = true;
             },
             
             discovered : {
-                get ::<- discovered
+                get ::<- state.discovered
             },
             
             locations : {
-                get :: <- locations 
+                get :: <- state.locations 
             },
             
             movePointerToRandomArea ::{
-                @:area = map.getRandomEmptyArea();
-                map.setPointer(
+                @:area = state.map.getRandomEmptyArea();
+                state.map.setPointer(
                     x:area.x + (area.width/2)->floor,
                     y:area.y + (area.height/2)->floor
                 );            
@@ -351,23 +312,23 @@
                     xHint: x,
                     yHint: y
                 );
-                if (landmark.dungeonMap) ::<= {
+                if (state.base.dungeonMap) ::<= {
                     if (x == empty || y == empty)
-                        map.addToRandomEmptyArea(item:loc, symbol: loc.base.symbol, name:loc.name)
+                        state.map.addToRandomEmptyArea(item:loc, symbol: loc.base.symbol, name:loc.name)
                     else
-                        map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
+                        state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
                     
                 } else ::<= {
-                    map.addLocation(location:loc);                
+                    state.map.addLocation(location:loc);                
                 }
-                locations->push(value:loc);    
+                state.locations->push(value:loc);    
                 return loc;            
             },
 
             removeLocation ::(location) {
-                @:index = locations->findIndex(value:location);
+                @:index = state.locations->findIndex(value:location);
                 when(index < 0) empty;
-                locations->remove(key:index);
+                state.locations->remove(key:index);
             },
 
             
@@ -376,12 +337,12 @@
             },
             
             map : {
-                get ::<- map
+                get ::<- state.map
             },
             
             inhabitants : {
                 get :: {
-                    return locations;
+                    return state.locations;
                 }
             }
         }
