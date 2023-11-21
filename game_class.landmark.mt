@@ -67,7 +67,6 @@
                 x : 0,
                 y : 0,
                 discovered : false,
-                locations : [],
                 peaceful : false,
                 floor : 0,
                 map : empty,
@@ -94,19 +93,6 @@
 
         this.interface =  {
             initialize::(base, island, x, y, floorHint){
-                @:addLocationMap ::(name, ownedByHint, x, y) {
-                    @:loc = this.addLocation(name, ownedByHint, x, y);
-                    if (state.base.dungeonMap) ::<= {
-                        if (x == empty || y == empty)
-                            state.map.addToRandomEmptyArea(item:loc, symbol: loc.base.symbol, name:loc.name)
-                        else
-                            state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
-                        
-                    } else ::<= {
-                        structureMapBuilder.addLocation(location:loc);                
-                    }
-                    return loc;            
-                };
 
 
                 island_ = island;
@@ -128,10 +114,10 @@
 
                 if (base.dungeonMap) ::<= {
                     if (base.dungeonForceEntrance) ::<= {
-                        addLocationMap(name:'Entrance');
+                        this.addLocation(name:'Entrance');
                     }
                 } else ::<= {
-                    addLocationMap(name:'Entrance');
+                    this.addLocation(name:'Entrance');
                 }
                 
                 if (base.isUnique)
@@ -163,7 +149,7 @@
 
 
                 foreach(base.requiredLocations)::(i, loc) {
-                    addLocationMap(
+                    this.addLocation(
                         name:loc
                     );
                 
@@ -173,7 +159,7 @@
                 for(0, random.integer(from:base.minLocations, to:base.maxLocations))::(i) {
                     when(possibleLocations->keycount == 0) empty;
                     @:which = random.pickArrayItemWeighted(list:possibleLocations);
-                    addLocationMap(
+                    this.addLocation(
                         name:which.name
                     );
                     if (which.onePerLandmark) ::<= {
@@ -182,8 +168,8 @@
                     mapIndex += 1;
                 }
                 
-                @:gate = this.gate;
                 if (base.dungeonMap) ::<= {
+                    @:gate = this.gate;
                     if (gate == empty) ::<= {
                         this.movePointerToRandomArea();
                     } else ::<= {
@@ -194,6 +180,7 @@
                     }
                 } else ::<= {
                     state.map = structureMapBuilder.finalize();
+                    @:gate = this.gate;
                     state.map.setPointer(
                         x:gate.x,
                         y:gate.y
@@ -227,9 +214,10 @@
         
             description : {
                 get :: {
+                    @:locations = this.locations;
                     @out = state.name + ', a ' + state.base.name;
-                    if (state.locations->keycount > 0) ::<={
-                        out = out + ' with ' + state.locations->keycount + ' permanent inhabitants';//:\n';
+                    if (locations->keycount > 0) ::<={
+                        out = out + ' with ' + locations->keycount + ' permanent inhabitants';//:\n';
                         //foreach(in:locations, do:::(index, inhabitant) {
                         //    out = out + '   ' + inhabitant.name + ', a ' + inhabitant.species.name + ' ' + inhabitant.profession.base.name +'\n';
                         //});
@@ -290,11 +278,12 @@
             
             gate : {
                 get :: {
-                    @:index = state.locations->findIndex(query::(value) {
+                    @:locations = this.locations;
+                    @:index = locations->findIndex(query::(value) {
                         return value.base.name == 'Entrance'
                     });
                     when (index != -1)
-                        state.locations[index];
+                        locations[index];
                 }
             },
             discover :: {
@@ -314,7 +303,7 @@
             },
             
             locations : {
-                get :: <- state.locations 
+                get :: <- state.map.getAllItems() 
             },
             
             movePointerToRandomArea ::{
@@ -327,13 +316,9 @@
 
 
             removeLocation ::(location) {
-                @:index = state.locations->findIndex(value:location);
-                when(index < 0) empty;
-                state.locations->remove(key:index);
+                state.map.removeItem(data:location);
             },
 
-            // does NOT do any map work. Any map work 
-            // has to be done by hand.
             addLocation ::(name, ownedByHint, x, y) {
                 @loc = Location.new(
                     base:Location.Base.database.find(name:name),
@@ -341,8 +326,21 @@
                     xHint: x,
                     yHint: y
                 );
-                state.locations->push(value:loc); 
-                return loc;   
+
+                if (state.base.dungeonMap) ::<= {
+                    if (x == empty || y == empty)
+                        state.map.addToRandomEmptyArea(item:loc, symbol: loc.base.symbol, name:loc.name)
+                    else
+                        state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
+                    
+                } else ::<= {
+                    if (structureMapBuilder != empty)
+                        structureMapBuilder.addLocation(location:loc)
+                    else 
+                        state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);                    
+                }
+                return loc;            
+ 
             },
             
             island : {
@@ -353,11 +351,6 @@
                 get ::<- state.map
             },
             
-            inhabitants : {
-                get :: {
-                    return state.locations;
-                }
-            }
         }
     }
 );

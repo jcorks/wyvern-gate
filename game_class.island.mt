@@ -199,11 +199,6 @@
                             }
                         );
                     },
-
-
-
-                    // Islands have a set number of landmarks.
-                    significantLandmarks : {}        
                 }
             );
         };
@@ -353,94 +348,82 @@
                 @locationCount = (1 + (Number.random()*4)->floor); 
                 if (locationCount < 1) locationCount = 1;
                 for(0, locationCount)::(i) {
-                    state.significantLandmarks->push(value:
-                        LargeMap.addLandmark(
-                            map:state.map,
-                            base:Landmark.Base.database.getRandomWeightedFiltered(
-                                filter:::(value) <- value.isUnique == false
-                            ),
-                            island:this
-                        )
-                    );
+                    LargeMap.addLandmark(
+                        map:state.map,
+                        base:Landmark.Base.database.getRandomWeightedFiltered(
+                            filter:::(value) <- value.isUnique == false
+                        ),
+                        island:this
+                    )
                 }
                 
                 // guaranteed gate
-                state.significantLandmarks->push(value:
-                    LargeMap.addLandmark(
-                        map:state.map,
-                        base:Landmark.Base.database.find(name:'Wyvern Gate'),
-                        island:this
-                    )
-                );
+                LargeMap.addLandmark(
+                    map:state.map,
+                    base:Landmark.Base.database.find(name:'Wyvern Gate'),
+                    island:this
+                )
                 
 
 
                 // guaranteed shrine
                 @:story = import(module:'game_singleton.story.mt');
-                state.significantLandmarks->push(value: ::<= {
-                    return match(story.tier) {
-                        (0):// nothign defeated
-                            LargeMap.addLandmark(
-                                map:state.map,
-                                base:Landmark.Base.database.find(name:'Shrine of Fire'),
-                                island:this
-                            ),
+                match(story.tier) {
+                    (0):// nothign defeated
+                        LargeMap.addLandmark(
+                            map:state.map,
+                            base:Landmark.Base.database.find(name:'Shrine of Fire'),
+                            island:this
+                        ),
 
-                        (1):// fire defeated
-                            LargeMap.addLandmark(
-                                map:state.map,
-                                base:Landmark.Base.database.find(name:'Shrine of Ice'),
-                                island:this
-                            ),
+                    (1):// fire defeated
+                        LargeMap.addLandmark(
+                            map:state.map,
+                            base:Landmark.Base.database.find(name:'Shrine of Ice'),
+                            island:this
+                        ),
 
-                        (1):// fire defeated
-                            LargeMap.addLandmark(
-                                map:state.map,
-                                base:Landmark.Base.database.find(name:'Shrine of Thunder'),
-                                island:this
-                            ),
+                    (1):// fire defeated
+                        LargeMap.addLandmark(
+                            map:state.map,
+                            base:Landmark.Base.database.find(name:'Shrine of Thunder'),
+                            island:this
+                        ),
 
-                            
-                        default:
-                            LargeMap.addLandmark(
-                                map:state.map,
-                                base:Landmark.Base.database.find(name:'Lost Shrine'),
-                                island:this
-                            )
-                    }                        
-                });
+                        
+                    default:
+                        LargeMap.addLandmark(
+                            map:state.map,
+                            base:Landmark.Base.database.find(name:'Lost Shrine'),
+                            island:this
+                        )
+                }                        
 
                 
-                state.significantLandmarks->push(value:
-                    LargeMap.addLandmark(
-                        map:state.map,
-                        base:Landmark.Base.database.find(name:'Town'),
-                        island:this
-                    )
-                );
+                LargeMap.addLandmark(
+                    map:state.map,
+                    base:Landmark.Base.database.find(name:'Town'),
+                    island:this
+                )
 
 
 
 
 
                 // free treasure!
-                state.significantLandmarks->push(value:
-                    LargeMap.addLandmark(
-                        map:state.map,
-                        base:Landmark.Base.database.find(name:'Forest'),
-                        island:this
-                    )
-                );
+                LargeMap.addLandmark(
+                    map:state.map,
+                    base:Landmark.Base.database.find(name:'Forest'),
+                    island:this
+                )
 
 
 
-                state.significantLandmarks->push(value:
-                    LargeMap.addLandmark(
-                        map:state.map,
-                        base:Landmark.Base.database.find(name:'City'),
-                        island:this
-                    )
-                );
+                LargeMap.addLandmark(
+                    map:state.map,
+                    base:Landmark.Base.database.find(name:'City'),
+                    island:this
+                )
 
 
                 
@@ -592,11 +575,11 @@
 
             
             getLandmarkIndex ::(landmark => Landmark.type) {
-                return state.significantLandmarks->findIndex(value:landmark);
+                return state.map.getAllItems()->findIndex(value:landmark);
             },
             
             landmarks : {
-                get ::<- state.significantLandmarks
+                get ::<- state.map.getAllItems()
             },
             
             levelMin : {

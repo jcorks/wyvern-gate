@@ -113,15 +113,10 @@
             }
             
             
-            @:interact = ::{
-                windowEvent.queueMessage(
-                    text: 'Arrived at the ' + location.name + '.'
-                );
-                location.interact();
-            }
             
-            _map.setStepAction(x:left + 2, y: top + 3, action:interact);
-            _map.setStepAction(x:left + 3, y: top + 3, action:interact);
+            
+            _map.setItem(data:location, x:left + 2, y: top + 3, symbol: ' ', discovered:true, name:location.name);
+            _map.setItem(data:location, x:left + 3, y: top + 3, symbol: ' ', discovered:true, name:location.name);
                 
 
         }  
@@ -291,7 +286,7 @@
               // North             
               (NORTH):::<={
                 for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING+1)::(i) {
-                    _map.setStepAction(x:left+i,   y:top-ZONE_CONTENT_PADDING+1, action:interact);
+                    _map.setItem(data:location, x:left+i,   y:top-ZONE_CONTENT_PADDING+1, symbol: '#', discovered:true, name:location.name);
                     _map.setSceneryIndex(x:left+i,   y:top-ZONE_CONTENT_PADDING+1, symbol:index);
                 }
                 
@@ -301,7 +296,7 @@
               // East             
               (EAST):::<={
                 for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING+1)::(i) {
-                    _map.setStepAction(x:left+ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING-1, y:top+i, action:interact);
+                    _map.setItem(data:location, x:left+ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING-1, y:top+i, symbol: '#', discovered:true, name:location.name);
                     _map.setSceneryIndex(x:left+ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING-1, y:top+i, symbol:index);
                 }
 
@@ -312,7 +307,7 @@
               // West             
               (WEST):::<={
                 for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING+1)::(i) {
-                    _map.setStepAction(x:left-ZONE_CONTENT_PADDING+1, y:top+i, action:interact);
+                    _map.setItem(data:location, x:left-ZONE_CONTENT_PADDING+1, y:top+i, symbol: '#', discovered:true, name:location.name);
                     _map.setSceneryIndex(x:left-ZONE_CONTENT_PADDING+1, y:top+i, symbol:index);
                 }
               },
@@ -322,7 +317,7 @@
               // South
               (SOUTH):::<={
                 for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING+1)::(i) {
-                    _map.setStepAction(x:left+i,   y:top+ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING-1, action:interact);
+                    _map.setItem(data:location, x:left+i,   y:top+ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING-1, symbol: '#', discovered:true, name:location.name);
                     _map.setSceneryIndex(x:left+i,   y:top+ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING-1, symbol:index);
                 }
 
@@ -354,12 +349,6 @@
             
             */
 
-            @:interact = ::{
-                windowEvent.queueMessage(
-                    text: 'Arrived at the ' + location.name + '.'
-                );
-                location.interact();
-            }
 
 
             for(0, 3)::(y) {
@@ -374,8 +363,9 @@
                 _map.disableWall(x:left + 3, y: top + 3);
                 _map.clearScenery(x:left + 2, y: top + 3);
                 _map.clearScenery(x:left + 3, y: top + 3);
-                _map.setStepAction(x:left + 2, y: top + 3, action:interact);
-                _map.setStepAction(x:left + 3, y: top + 3, action:interact);
+
+                _map.setItem(data:location, x:left + 2, y: top + 3, symbol: ' ', discovered:true, name:location.name);
+                _map.setItem(data:location, x:left + 3, y: top + 3, symbol: ' ', discovered:true, name:location.name);
                 
 
                 if (symbol != empty) ::<= {
@@ -390,8 +380,10 @@
                 _map.disableWall(x:left + 9, y: top + 3);
                 _map.clearScenery(x:left + 8, y: top + 3);
                 _map.clearScenery(x:left + 9, y: top + 3);
-                _map.setStepAction(x:left + 8, y: top + 3, action:interact);
-                _map.setStepAction(x:left + 9, y: top + 3, action:interact);
+                
+                _map.setItem(data:location, x:left + 8, y: top + 3, symbol: ' ', discovered:true, name:location.name);
+                _map.setItem(data:location, x:left + 9, y: top + 3, symbol: ' ', discovered:true, name:location.name);
+                
 
                 if (symbol != empty) ::<= {
                     @:index = _map.addScenerySymbol(character:symbol);
@@ -423,20 +415,16 @@
                 }
             }
 
-            @:interact = ::{
-                windowEvent.queueMessage(
-                    text: 'Arrived at the ' + location.name + '.'
-                );
-                location.interact();
-            }
+
 
 
             _map.disableWall(x:left + 2, y: top + 7);
             _map.disableWall(x:left + 3, y: top + 7);
             _map.clearScenery(x:left + 2, y: top + 7);
             _map.clearScenery(x:left + 3, y: top + 7);
-            _map.setStepAction(x:left + 2, y: top + 7, action:interact);
-            _map.setStepAction(x:left + 3, y: top + 7, action:interact);
+            
+            _map.setItem(data:location, x:left + 2, y: top + 7, symbol: ' ', discovered:true, name:location.name);
+            _map.setItem(data:location, x:left + 3, y: top + 7, symbol: ' ', discovered:true, name:location.name);
 
             
             if (symbol != empty) ::<= {
@@ -897,6 +885,7 @@
         }
         
         @Location = import(module:'game_class.location.mt');
+        @:locations = [];
         this.interface = {
             initialize::(mapHint => Object) {
                 map = Map.new();
@@ -930,6 +919,7 @@
                     zone = addZone(category:location.base.category);
                     zone.addLocation(location);
                 }
+                locations->push(value:location);
             },
             
             getWidth ::<- map.width,
@@ -967,6 +957,7 @@
 
                     }
                 }
+
 
                 return map;
             }

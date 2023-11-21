@@ -145,6 +145,10 @@ return class(
         @sceneryValues = [];
         @stepAction = [];
         @areas;
+        @renderOutOfBounds = true;
+        @isDark = false;
+
+        @aStarPQCompareTable;
 
         
         @:isWalled ::(x, y) {
@@ -152,8 +156,6 @@ return class(
             return (scenery[at] & IS_WALLED_MASK) != 0;
         }
         
-        @renderOutOfBounds = true;
-        @isDark = false;
 
         @:aStarHeuristicH::(from, to) <-
             distance(x0:from.x, y0:from.y, x1:to.x, y1:to.y)
@@ -221,7 +223,6 @@ return class(
         @:aStarGetScore::(value) <- if (value == empty) THE_BIG_ONE else value;
         
 
-        @aStarPQCompareTable;
 
 
         @:aStarPQCompare::(a, b) {
@@ -800,6 +801,14 @@ return class(
             
             getItem::(data) {
                 return retrieveItem(data);
+            },
+            
+            getAllItems::{
+                @:out = {};
+                foreach(items) ::(k, val) {
+                    out[val.data] = true;
+                }
+                return out->keys;
             },
             
             itemsAt::(x, y) {
