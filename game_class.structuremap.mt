@@ -19,7 +19,7 @@
 @:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
 @windowEvent = import(module:'game_singleton.windowevent.mt');
-
+@:Map = import(module:'game_class.map.mt');
 
 
 @:EPSILON = 0.000001;
@@ -684,15 +684,8 @@
 
 @:StructureMap = class(
     name: 'Wyvern.StructureMap',
-    inherits:[import(module:'game_class.mapbase.mt')],
-
-    new::(mapHint => Object) {
-        @:this = StructureMap.defaultNew();
-        this.initialize(mapHint);
-        return this;
-    },
     define:::(this) {
-
+        @map;
         
         @hasZoningWalls = true;
         @hasFillerBuildings = true;
@@ -745,8 +738,8 @@
             when (
                 top < STRUCTURE_MAP_PADDING ||
                 left < STRUCTURE_MAP_PADDING ||
-                left + zone.width  > this.width - STRUCTURE_MAP_PADDING ||
-                top + zone.height > this.height - STRUCTURE_MAP_PADDING
+                left + zone.width  > map.width - STRUCTURE_MAP_PADDING ||
+                top + zone.height > map.height - STRUCTURE_MAP_PADDING
                 
             ) false;
 
@@ -783,7 +776,7 @@
         // out in the open. Else, it must be touching an existing zone 
         // on its side
         @:addZone ::(category) {
-            @zone = Zone.new(map:this, category);
+            @zone = Zone.new(map:map, category);
             @top;
             @left;
             @alongIcoord;
@@ -795,22 +788,22 @@
                 match(zone.gateSide) {
                   (NORTH):::<= {
                     top = STRUCTURE_MAP_PADDING;
-                    left = ((this.width - STRUCTURE_MAP_PADDING) / 2)->floor;
+                    left = ((map.width - STRUCTURE_MAP_PADDING) / 2)->floor;
                   },
 
                   (EAST):::<= {
-                    top = ((this.height - STRUCTURE_MAP_PADDING) / 2)->floor;
-                    left = (this.width - STRUCTURE_MAP_PADDING) - zone.width;
+                    top = ((map.height - STRUCTURE_MAP_PADDING) / 2)->floor;
+                    left = (map.width - STRUCTURE_MAP_PADDING) - zone.width;
                   },
                   
                   (WEST):::<= {
-                    top = ((this.height - STRUCTURE_MAP_PADDING) / 2)->floor;
+                    top = ((map.height - STRUCTURE_MAP_PADDING) / 2)->floor;
                     left = STRUCTURE_MAP_PADDING;
                   },
                   
                   (SOUTH):::<= {
-                    top = (this.height - STRUCTURE_MAP_PADDING) - zone.height;
-                    left = ((this.width - STRUCTURE_MAP_PADDING) / 2)->floor;
+                    top = (map.height - STRUCTURE_MAP_PADDING) - zone.height;
+                    left = ((map.width - STRUCTURE_MAP_PADDING) / 2)->floor;
                   },
 
                   default: ::<= {
@@ -906,22 +899,21 @@
         @Location = import(module:'game_class.location.mt');
         this.interface = {
             initialize::(mapHint => Object) {
-                this = this;
+                map = Map.new();
 
-                this.paged = false;
-                this.renderOutOfBounds = true;
-                this.outOfBoundsCharacter = ' ';
+                map.paged = false;
+                map.renderOutOfBounds = true;
+                map.outOfBoundsCharacter = ' ';
                 
 
-                if (mapHint.wallCharacter != empty) this.wallCharacter = mapHint.wallCharacter;
-                if (mapHint.outOfBoundsCharacter != empty) this.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
+                if (mapHint.wallCharacter != empty) map.wallCharacter = mapHint.wallCharacter;
+                if (mapHint.outOfBoundsCharacter != empty) map.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
                 if (mapHint.hasZoningWalls != empty) hasZoningWalls = mapHint.hasZoningWalls;
                 if (mapHint.hasFillerBuildings != empty) hasFillerBuildings = mapHint.hasFillerBuildings;
 
-                this.width = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
-                this.height = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
+                map.width = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
+                map.height = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
 
-                return this;
             },        
         
             // special function that adds a location value 
@@ -939,6 +931,9 @@
                     zone.addLocation(location);
                 }
             },
+            
+            getWidth ::<- map.width,
+            getHeight ::<- map.height,
             
             // indicates that no other locations will be added 
             // so any final step can be taken, such as adding 
@@ -958,22 +953,22 @@
                     match(data.side) {
                       (NORTH, SOUTH):::<= {
                         for(data.center-1, data.center+2)::(x) {
-                            this.disableWall(x, y: data.coord);
-                            this.clearScenery(x, y: data.coord);                        
+                            map.disableWall(x, y: data.coord);
+                            map.clearScenery(x, y: data.coord);                        
                         }
                       },
 
                       (EAST, WEST):::<= {
                         for(data.center-1, data.center+2)::(y) {
-                            this.disableWall(x:data.coord, y);
-                            this.clearScenery(x:data.coord, y);                        
+                            map.disableWall(x:data.coord, y);
+                            map.clearScenery(x:data.coord, y);                        
                         }
                       }
 
                     }
                 }
 
-
+                return map;
             }
         } 
     }

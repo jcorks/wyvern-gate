@@ -28,6 +28,7 @@
 @:Item = import(module:'game_class.item.mt');
 @:namegen = import(module:'game_singleton.namegen.mt');
 @:partyOptions = import(module:'game_function.partyoptions.mt');
+@:LargeMap = import(module:'game_singleton.largemap.mt');
 @:distance::(x0, y0, x1, y1) {
     @xd = x1 - x0;
     @yd = y1 - y0;
@@ -526,7 +527,7 @@ return class(
                 island.map.title = "(Map of " + island.name + ')';
 
 
-                @somewhere = island.map.getAPosition();
+                @somewhere = LargeMap.getAPosition(map:island.map);
                 island.map.setPointer(
                     x: somewhere.x,
                     y: somewhere.y

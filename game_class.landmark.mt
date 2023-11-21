@@ -19,8 +19,7 @@
 @:random = import(module:'game_singleton.random.mt');
 @:NameGen = import(module:'game_singleton.namegen.mt');
 @:Database = import(module:'game_class.database.mt');
-@:Map = import(module:'game_class.map.mt');
-@:DungeonMap = import(module:'game_class.dungeonmap.mt');
+@:DungeonMap = import(module:'game_singleton.dungeonmap.mt');
 @:StructureMap = import(module:'game_class.structuremap.mt');
 @:DungeonController = import(module:'game_class.dungeoncontroller.mt');
 @:distance = import(module:'game_function.distance.mt');
@@ -59,6 +58,7 @@
 
         @island_;
         @dungeonLogic;
+        @structureMapBuilder; // only used in initialization
 
         @:state = State.new(
             items : {
@@ -89,30 +89,49 @@
 
   
 
+        
+
+
         this.interface =  {
             initialize::(base, island, x, y, floorHint){
+                @:addLocationMap ::(name, ownedByHint, x, y) {
+                    @:loc = this.addLocation(name, ownedByHint, x, y);
+                    if (state.base.dungeonMap) ::<= {
+                        if (x == empty || y == empty)
+                            state.map.addToRandomEmptyArea(item:loc, symbol: loc.base.symbol, name:loc.name)
+                        else
+                            state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
+                        
+                    } else ::<= {
+                        structureMapBuilder.addLocation(location:loc);                
+                    }
+                    return loc;            
+                };
+
+
                 island_ = island;
 
                 state.base = base;
                 state.x = x;
                 state.y = y;
                 state.peaceful = base.peaceful;
-
+                
 
                 if (base.dungeonMap) ::<= {
-                    state.map = DungeonMap.new(mapHint: base.mapHint);
+                    state.map = DungeonMap.create(mapHint: base.mapHint);
                     dungeonLogic = DungeonController.new(map:state.map, island, landmark:this);
                 } else ::<= {
-                    state.map = StructureMap.new(mapHint:base.mapHint);//Map.new(mapHint: base.mapHint);
+                    structureMapBuilder = StructureMap.new();//Map.new(mapHint: base.mapHint);
+                    structureMapBuilder.initialize(mapHint:base.mapHint);
                 }
 
 
                 if (base.dungeonMap) ::<= {
                     if (base.dungeonForceEntrance) ::<= {
-                        this.addLocation(name:'Entrance');
+                        addLocationMap(name:'Entrance');
                     }
                 } else ::<= {
-                    this.addLocation(name:'Entrance');
+                    addLocationMap(name:'Entrance');
                 }
                 
                 if (base.isUnique)
@@ -125,9 +144,7 @@
                 });
                 */
                 @mapIndex = 0;
-                state.map.title = state.base.name + (
-                    if (state.name == '') '' else (' of ' + state.name)
-                );         
+       
 
 
 
@@ -146,7 +163,7 @@
 
 
                 foreach(base.requiredLocations)::(i, loc) {
-                    this.addLocation(
+                    addLocationMap(
                         name:loc
                     );
                 
@@ -156,7 +173,7 @@
                 for(0, random.integer(from:base.minLocations, to:base.maxLocations))::(i) {
                     when(possibleLocations->keycount == 0) empty;
                     @:which = random.pickArrayItemWeighted(list:possibleLocations);
-                    this.addLocation(
+                    addLocationMap(
                         name:which.name
                     );
                     if (which.onePerLandmark) ::<= {
@@ -176,15 +193,18 @@
                         );                    
                     }
                 } else ::<= {
-
+                    state.map = structureMapBuilder.finalize();
                     state.map.setPointer(
                         x:gate.x,
                         y:gate.y
                     );
 
-                    state.map.finalize();            
+                    // cant add locations to structure maps through the landmark.
+                    structureMapBuilder = empty;
                 }
-
+                state.map.title = state.base.name + (
+                    if (state.name == '') '' else (' of ' + state.name)
+                );  
                 if (floorHint != empty) ::<= {
                     state.floor = floorHint;
                     state.floor => Number;
@@ -242,10 +262,10 @@
             },
             
             width : {
-                get ::<- state.map.width
+                get ::<- if (structureMapBuilder) structureMapBuilder.getWidth() else state.map.width
             },
             height : {
-                get ::<- state.map.height
+                get ::<- if (structureMapBuilder) structureMapBuilder.getHeight() else state.map.height
             },
             
             peaceful : {
@@ -305,25 +325,6 @@
                 );            
             },
 
-            addLocation ::(name, ownedByHint, x, y) {
-                @loc = Location.new(
-                    base:Location.Base.database.find(name:name),
-                    landmark:this, ownedByHint,
-                    xHint: x,
-                    yHint: y
-                );
-                if (state.base.dungeonMap) ::<= {
-                    if (x == empty || y == empty)
-                        state.map.addToRandomEmptyArea(item:loc, symbol: loc.base.symbol, name:loc.name)
-                    else
-                        state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
-                    
-                } else ::<= {
-                    state.map.addLocation(location:loc);                
-                }
-                state.locations->push(value:loc);    
-                return loc;            
-            },
 
             removeLocation ::(location) {
                 @:index = state.locations->findIndex(value:location);
@@ -331,6 +332,18 @@
                 state.locations->remove(key:index);
             },
 
+            // does NOT do any map work. Any map work 
+            // has to be done by hand.
+            addLocation ::(name, ownedByHint, x, y) {
+                @loc = Location.new(
+                    base:Location.Base.database.find(name:name),
+                    landmark:this, ownedByHint,
+                    xHint: x,
+                    yHint: y
+                );
+                state.locations->push(value:loc); 
+                return loc;   
+            },
             
             island : {
                 get ::<- island_

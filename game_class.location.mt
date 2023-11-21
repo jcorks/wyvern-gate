@@ -23,6 +23,7 @@
 @:Inventory = import(module:'game_class.inventory.mt');
 @:Scene = import(module:'game_class.scene.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
+@:State = import(module:'game_class.state.mt');
 
 @:Location = class(
     statics : {
@@ -50,92 +51,61 @@
     
     new::(base, landmark, xHint, yHint, state, targetLandmarkHint, ownedByHint) {
         @:this = Location.defaultNew();
-        this.initialize(base, landmark, xHint, yHint, state, targetLandmarkHint, ownedByHint);
+        this.initialize(base, landmark, xHint, yHint, targetLandmarkHint, ownedByHint);
+        if (state != empty)
+            this.load(serialized:state);
         return this;
     },
     
     define:::(this) {
-        @base_;
+
         @targetLandmark; // where this location could take the party. Could be a different island in theory
-        @occupants = []; // entities. non-owners can shift
-        @ownedBy;// entity
-        @description;
-        @inventory = Inventory.new(size:30);
+
         @landmark_;
-        @x;
-        @y;
-        @contested = false;
-        @name;
-        @data = {}; // simple table
-        @visited = false;
-        ;
+    
+        @:state = State.new(
+            items : {
+                base : empty,
+                occupants : [], // entities. non-owners can shift
+                ownedBy : empty,// entity
+                description : empty,
+                inventory : Inventory.new(size:30),
+                x : 0,
+                y : 0,
+                contested : false,
+                name : empty,
+                data : {}, // simple table
+                visited : false
+            }
+        );
         
         
         this.interface = {
-            initialize ::(base, landmark, xHint, yHint, state, targetLandmarkHint, ownedByHint) {
+            initialize ::(base, landmark, xHint, yHint, targetLandmarkHint, ownedByHint) {
                 landmark_ = landmark;     
 
-                when(state != empty) ::<={
-                    this.state = state;
-                    return this;
-                }
-                base_ = base;
-                x = if (xHint == empty) (Number.random() * landmark.width ) else xHint;  
-                y = if (yHint == empty) (Number.random() * landmark.height) else yHint;
+                state.base = base;
+                state.x = if (xHint == empty) (Number.random() * landmark.width ) else xHint;  
+                state.y = if (yHint == empty) (Number.random() * landmark.height) else yHint;
                 if (ownedByHint != empty)
-                    ownedBy = ownedByHint;
+                    state.ownedBy = ownedByHint;
                        
-                description = random.pickArrayItem(list:base.descriptions);            
+                state.description = random.pickArrayItem(list:base.descriptions);            
                 base.onCreate(location:this);
                 return this;
             },
 
-            state : {
-                set ::(value) {
-                    @:Entity = import(module:'game_class.entity.mt');
-                
-                    base_ = Location.Base.database.find(name:value.baseName);
-                    name = value.name;
-                    contested = value.contested;
-                    description = description;
-                    ownedBy = if (value.ownedBy == empty) empty else Entity.new(levelHint: 0, state: value.ownedBy);
-                    occupants = [];
-                    foreach(value.occupants)::(index, occupantData) {
-                        occupants->push(value:Entity.new(levelHint: 0, state: occupantData));
-                    }
-                    inventory.state = value.inventory;
-                    x = value.x;
-                    y = value.y;
-                    data = value.data;
-                    targetLandmark = empty;
-                    if (value.targetLandmark != empty)
-                        targetLandmark = Landmark.new(state:value.targetLandmark);
-                        
-                        
-                    if (data == empty) data = {}
-                },
-                get :: {
-                    return {
-                        baseName : base_.name,
-                        inventory : inventory.state,
-                        occupants : [...occupants]->map(to:::(value) <- value.state),
-                        ownedBy : if (ownedBy == empty) empty else ownedBy.state,
-                        description : description,
-                        targetLandmark : if(targetLandmark == empty) empty else targetLandmark.state,
-                        x : x,
-                        y : y,
-                        contested : contested,
-                        name : name,
-                        data : data
-                    
-                    }
-                }
+            save ::{
+                return state.save()
             },
             
-        
+            load ::(serialized) {
+                state.load(serialized)
+            },
+                
             base : {
                 get :: {
-                    return base_;
+                    return state.base;
                 }
             },
             
@@ -145,46 +115,46 @@
             },
             
             inventory : {
-                get ::<- inventory
+                get ::<- state.inventory
             },
             ownedBy : {
-                get ::<- ownedBy,
-                set ::(value) <- ownedBy = value
+                get ::<- state.ownedBy,
+                set ::(value) <- state.ownedBy = value
             },
             
             data : {
-                get ::<- data
+                get ::<- state.data
             },
             
             description : {
-                get ::<- description + (if (ownedBy != empty) ' This ' + base_.name + ' is ' + base_.ownVerb + ' by ' + ownedBy.name + '.' else '')
+                get ::<- state.description + (if (state.ownedBy != empty) ' This ' + state.base.name + ' is ' + state.base.ownVerb + ' by ' + state.ownedBy.name + '.' else '')
             },
             
             contested : {
-                get ::<- contested,
-                set ::(value) <- contested = value
+                get ::<- state.contested,
+                set ::(value) <- state.contested = value
             },
             x : {
-                get:: <- x,
-                set::(value) <- x = value
+                get:: <- state.x,
+                set::(value) <- state.x = value
             },
             
             y : {
-                get:: <- y,
-                set::(value) <- y = value
+                get:: <- state.y,
+                set::(value) <- state.y = value
             },
             
             inventory : {
-                get :: <- inventory
+                get :: <- state.inventory
             },
             
             name : {
-                get::<- if (name == empty) (if (ownedBy == empty) base_.name else (ownedBy.name + "'s " + base_.name)) else name,
-                set::(value) <- name = value
+                get::<- if (state.name == empty) (if (state.ownedBy == empty) state.base.name else (state.ownedBy.name + "'s " + state.base.name)) else state.name,
+                set::(value) <- state.name = value
             },
             occupants : {
                 get :: {
-                    return occupants;
+                    return state.occupants;
                 }
             },
             
@@ -199,7 +169,7 @@
             
             peaceful : {
                 get ::{
-                    when (data.peaceful) true;
+                    when (state.data.peaceful) true;
                     return landmark_.peaceful;
                 }
             },
@@ -211,7 +181,7 @@
                 );
                 
                 @:id = 'PLATE_' + Number.random();
-                data.plateID = id;
+                state.data.plateID = id;
                 pressurePlate.data.plateID = id;
                 pressurePlate.data.pressed = false;
 
@@ -226,13 +196,13 @@
             
             
             isUnlockedWithPlate :: {
-                when(data.plateID == empty) true;
+                when(state.data.plateID == empty) true;
                 
                 @locations = landmark_.locations;
                 
                 return locations[locations->findIndex(query::(value) <- 
                     value.name == 'Pressure Plate' &&
-                    value.data.plateID == data.plateID
+                    value.data.plateID == state.data.plateID
                 )].data.pressed;
             },
             
@@ -281,13 +251,13 @@
                 // initial interaction 
                 // Initial interaction triggers an event.
                 
-                if (visited == false) ::<= {
-                    for(0, random.integer(from:base_.minOccupants, to:base_.maxOccupants))::(i) {
-                        occupants->push(value:landmark_.island.newInhabitant());
+                if (state.visited == false) ::<= {
+                    for(0, random.integer(from:state.base.minOccupants, to:state.base.maxOccupants))::(i) {
+                        state.occupants->push(value:landmark_.island.newInhabitant());
                     }
                 
                 
-                    visited = true;
+                    state.visited = true;
                     this.base.onFirstInteract(location:this);
                 }
                     

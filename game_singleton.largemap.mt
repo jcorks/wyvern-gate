@@ -19,6 +19,7 @@
 @:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
 @:Landmark = import(module:'game_class.landmark.mt');
+@:Map = import(module:'game_class.map.mt');
 
 @:mapSizeW  = 38;
 @:mapSizeH  = 16;
@@ -112,72 +113,60 @@
 
 @:LargeMap = class(
     name: 'Wyvern.LargeMap',
-    inherits:[import(module:'game_class.mapbase.mt')],
-
-    new::(state, sizeW, sizeH) {
-        @:this = LargeMap.defaultNew();
-        this.initialize(state, sizeW, sizeH);
-        return this;
-    },
-  
     define:::(this) {
         
         this.interface = {
 
-            initialize::(state, sizeW, sizeH) {
-                when (state) ::<= {
-                    this.state = state;
-                    return this;
-                }
-                
-                this.width = sizeW + BUFFER_SPACE*2;
-                this.height = sizeH + BUFFER_SPACE*2;
+            create::(sizeW, sizeH) {                
+                @:map = Map.new();
+                map.width = sizeW + BUFFER_SPACE*2;
+                map.height = sizeH + BUFFER_SPACE*2;
 
-                @index = this.addScenerySymbol(character:'▓');
+                @index = map.addScenerySymbol(character:'▓');
 
-                for(0, this.height)::(y) {
-                    for(0, this.width)::(x) {
+                for(0, map.height)::(y) {
+                    for(0, map.width)::(x) {
                         when(y > BUFFER_SPACE && x > BUFFER_SPACE &&
                              x < sizeW + BUFFER_SPACE && y < sizeH + BUFFER_SPACE) empty;
-                        this.enableWall(x, y);
-                        this.setSceneryIndex(x, y, symbol:index);
+                        map.enableWall(x, y);
+                        map.setSceneryIndex(x, y, symbol:index);
                     }
                 }
                 
-                this.offsetX = 100;
-                this.offsetY = 100;
-                this.paged = true;
-                this.drawLegend = true;
+                map.offsetX = 100;
+                map.offsetY = 100;
+                map.paged = true;
+                map.drawLegend = true;
                 
-                foreach(generateTerrain(map:this, width:this.width - BUFFER_SPACE*2, height:this.height - BUFFER_SPACE*2))::(index, value) {
-                    //when(value.x < 0 || value.x >= this.width || value.y < 0 || value.y >= this.height)
+                foreach(generateTerrain(map, width:map.width - BUFFER_SPACE*2, height:map.height - BUFFER_SPACE*2))::(index, value) {
+                    //when(value.x < 0 || value.x >= map.width || value.y < 0 || value.y >= map.height)
                         //empty;
-                    this.setSceneryIndex(
+                    map.setSceneryIndex(
                         x:value.x,
                         y:value.y,
                         symbol:value.symbol
                     );
                 }
-                return this;
+                return map;
                         
             },
 
 
-             addLandmark::(island, base) { 
+            addLandmark::(map, island, base) { 
                 @landmark = Landmark.new(
                     base,
                     island,             
-                    x:random.integer(from:BUFFER_SPACE + (0.2*(this.width  - BUFFER_SPACE*2))->floor, to:(this.width  - BUFFER_SPACE)-(0.2*(this.width  - BUFFER_SPACE*2))->floor),
-                    y:random.integer(from:BUFFER_SPACE + (0.2*(this.height - BUFFER_SPACE*2))->floor, to:(this.height - BUFFER_SPACE)-(0.2*(this.height - BUFFER_SPACE*2))->floor)
+                    x:random.integer(from:BUFFER_SPACE + (0.2*(map.width  - BUFFER_SPACE*2))->floor, to:(map.width  - BUFFER_SPACE)-(0.2*(map.width  - BUFFER_SPACE*2))->floor),
+                    y:random.integer(from:BUFFER_SPACE + (0.2*(map.height - BUFFER_SPACE*2))->floor, to:(map.height - BUFFER_SPACE)-(0.2*(map.height - BUFFER_SPACE*2))->floor)
                 );
-                this.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.legendName);
+                map.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.legendName);
                 return landmark;
             },
             
-            getAPosition ::{
+            getAPosition ::(map) {
                 return {
-                    x:random.integer(from:BUFFER_SPACE + (0.2*(this.width  - BUFFER_SPACE*2))->floor, to:(this.width  - BUFFER_SPACE)-(0.2*(this.width  - BUFFER_SPACE*2))->floor),
-                    y:random.integer(from:BUFFER_SPACE + (0.2*(this.height - BUFFER_SPACE*2))->floor, to:(this.height - BUFFER_SPACE)-(0.2*(this.height - BUFFER_SPACE*2))->floor)
+                    x:random.integer(from:BUFFER_SPACE + (0.2*(map.width  - BUFFER_SPACE*2))->floor, to:(map.width  - BUFFER_SPACE)-(0.2*(map.width  - BUFFER_SPACE*2))->floor),
+                    y:random.integer(from:BUFFER_SPACE + (0.2*(map.height - BUFFER_SPACE*2))->floor, to:(map.height - BUFFER_SPACE)-(0.2*(map.height - BUFFER_SPACE*2))->floor)
                 }
             }
             
@@ -185,4 +174,4 @@
         }
     }
 );
-return LargeMap;
+return LargeMap.new();

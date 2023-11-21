@@ -18,7 +18,9 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
+@:Map = import(module:'game_class.map.mt');
 
+@:Area = Map.Area;
 
 
 @:EPSILON = 0.000001;
@@ -34,32 +36,6 @@
 @:GEN_OFFSET = 20;
 
 
-@Area = class(
-    name: 'Wyvern.DungeonMap.Area',
-    define::(this) {
-        @_x;
-        @_y;
-        @_w;
-        @_h;
-        @items = {};
-        
-        this.interface = {
-            setup::(x, y, width, height) {
-                _x = x => Number;
-                _y = y => Number;
-                _w = width => Number;
-                _h = height => Number;
-                return this;
-            },
-            
-            x : {get::<-_x},        
-            y : {get::<-_y},        
-            width : {get::<-_w},        
-            height : {get::<-_h},
-            items : {get::<-items}      
-        }
-    }
-);
 
 
 
@@ -95,7 +71,7 @@
         if (top + height +2 >= (ROOM_SIZE+GEN_OFFSET)-1) top = (ROOM_SIZE+GEN_OFFSET) - height - 3;
         
 
-        areas->push(value: Area.new().setup(
+        areas->push(value: Area.new(
             x: left,
             y: top,
             width: width,
@@ -384,7 +360,7 @@
     
     @:generateAreaNode ::(x, y) {
         @:node = generateNode(x, y);
-        node.area = Area.new().setup(
+        node.area = Area.new(
             x:x * (AREA_SIZE + AREA_GAP*2) + AREA_GAP + GEN_OFFSET, 
             y:y * (AREA_SIZE + AREA_GAP*2) + AREA_GAP + GEN_OFFSET,
             width: AREA_SIZE,
@@ -965,7 +941,7 @@
                 
                 getArea ::{
                     if (area != empty && area->type != Area.type) ::<= {
-                        area = Area.new().setup(
+                        area = Area.new(
                             x:x_ + area.x,
                             y:y_ + area.y,
                             width:area.width,
@@ -1414,140 +1390,45 @@
 
 
 
-
+@:LAYOUT_ALPHA = 0;
+@:LAYOUT_BETA = 1;
+@:LAYOUT_DELTA = 2;
+@:LAYOUT_GAMMA = 3;
+@:LAYOUT_CUSTOM = 4;
 @:DungeonMap = class(
     name: 'Wyvern.DungeonMap',
-    new ::(mapHint => Object) {
-        @:this = DungeonMap.defaultNew();
-        this.initialize(mapHint);
-        return this;
-    },
-    inherits:[import(module:'game_class.mapbase.mt')],
-    statics : {
-        LAYOUT_ALPHA : {get::<- 0},  
-        LAYOUT_BETA  : {get::<- 1},  
-        LAYOUT_DELTA : {get::<- 2},  
-        LAYOUT_GAMMA : {get::<- 3},
-        LAYOUT_CUSTOM: {get::<- 4}  
-},
-    
     define:::(this) {
-
-        @areas = [];
-
-        @:putArea = ::<= {
-          @:tryMap = [
-                [0, 0],
-                [-1, -1],
-                [1, -1],
-                [-1, 0],
-                [0, -1],
-                [1, 0],
-                [1, 1],
-                [0, 1],
-                [-1, 1],
-                [-2, 1],
-                [-2, 0],
-                [-2, -1],
-                [-2, -2],
-                [-1, -2],
-                [0, -2],
-                [1, -2],
-                [2, -2],
-                [2, -1],
-                [2, 0],
-                [2, 1],
-                [2, 2]
-            ];
-            return ::(area, item, symbol, name) {
-                area.items->push(value:item);
-                {:::} {                
-                    @iter = 0;
-                    forever ::{
-                        @:offset = tryMap[iter];
-                        iter += 1;
-                        @location = {
-                            x: (area.x + area.width/2 + offset[0]*2)->floor,
-                            y: (area.y + area.height/2 + offset[1]*2)->floor
-                        }                
-
-                        @:already = this.itemsAt(x:location.x, y:location.y);
-                        when(already != empty && already->keycount) empty;
-                        item.x = location.x;
-                        item.y = location.y;
-
-                        this.setItem(data:item, x:location.x, y:location.y, symbol, discovered:true, name);
-
-
-
-                        send();
-                    }      
-                }          
-            }
-        }
-
-
-        
         this.interface = {
-            initialize ::(mapHint) {
+            LAYOUT_ALPHA : {get::<- LAYOUT_ALPHA},  
+            LAYOUT_BETA  : {get::<- LAYOUT_BETA},  
+            LAYOUT_DELTA : {get::<- LAYOUT_DELTA},  
+            LAYOUT_GAMMA : {get::<- LAYOUT_GAMMA},
+            LAYOUT_CUSTOM: {get::<- LAYOUT_CUSTOM},
 
 
+            create ::(mapHint) {
+                @:map = Map.new();
 
-                this.paged = false;
-                this.renderOutOfBounds = true;
-                this.outOfBoundsCharacter = '`';
+                @areas;
 
-                if (mapHint.wallCharacter != empty) this.wallCharacter = mapHint.wallCharacter;
-                if (mapHint.outOfBoundsCharacter != empty) this.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
+                map.paged = false;
+                map.renderOutOfBounds = true;
+                map.outOfBoundsCharacter = '`';
+
+                if (mapHint.wallCharacter != empty) map.wallCharacter = mapHint.wallCharacter;
+                if (mapHint.outOfBoundsCharacter != empty) map.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
                 match(mapHint.layoutType) {
-                    (DungeonMap.LAYOUT_ALPHA): areas = DungeonAlpha(map:this, mapHint),
-                    (DungeonMap.LAYOUT_BETA): areas = DungeonBeta(map:this, mapHint),
-                    (DungeonMap.LAYOUT_DELTA): areas = DungeonDelta(map:this, mapHint),
+                    (LAYOUT_ALPHA): areas = DungeonAlpha(map:map, mapHint),
+                    (LAYOUT_BETA): areas = DungeonBeta(map:map, mapHint),
+                    (LAYOUT_DELTA): areas = DungeonDelta(map:map, mapHint),
                     default:
-                        areas = DungeonAlpha(map:this, mapHint)
+                        areas = DungeonAlpha(map:map, mapHint)
                 }
-                return this;
-            },
-        
-            areas : {
-                get ::<- areas
-            },
-            
-            addToRandomArea ::(item, symbol, name) {
-                return putArea(
-                    area: random.pickArrayItem(list:areas),
-                    item,
-                    symbol,
-                    name
-                );
-            },
-            
-            addToRandomEmptyArea ::(item, symbol, name) {
-                @areasEmpty = [...areas]->filter(by::(value) <- value.items->keycount == 0);
-                when (areasEmpty->keycount == 0)
-                    this.addToRandomArea(item, symbol, name)
-
-                return putArea(
-                    area: random.pickArrayItem(list:areasEmpty),
-                    item,
-                    symbol,
-                    name
-                );
-            },
-            
-            getRandomEmptyArea :: {
-                @areasEmpty = [...areas]->filter(by::(value) <- value.items->keycount == 0);
-                when (areasEmpty->keycount == 0)
-                    random.pickArrayItem(list:areas);
-                    
-                return random.pickArrayItem(list:areasEmpty);
-            },
-            
-            getRandomArea :: {
-                return random.pickArrayItem(list:areas);
-            }            
-        
+                
+                map.setAreas(new:areas);
+                return map;
+            }
         } 
     }
 );
-return DungeonMap;
+return DungeonMap.new();

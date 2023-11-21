@@ -23,7 +23,7 @@
 @:Landmark = import(module:'game_class.landmark.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
-@:LargeMap = import(module:'game_class.largemap.mt');
+@:LargeMap = import(module:'game_singleton.largemap.mt');
 @:Party = import(module:'game_class.party.mt');
 @:Profession = import(module:'game_class.profession.mt');
 @:Event = import(module:'game_class.event.mt');
@@ -154,7 +154,7 @@
                     stepsSinceLastEvent : 0,
                     
                     // map of the region
-                    map : LargeMap.new(sizeW, sizeH),
+                    map : LargeMap.create(sizeW, sizeH),
                     
                     id : genID(),
 
@@ -327,6 +327,10 @@
         }
 
 
+
+        
+
+
         
         this.interface = {
             initialize::(world, levelHint, party, nameHint, tierHint) {
@@ -350,7 +354,8 @@
                 if (locationCount < 1) locationCount = 1;
                 for(0, locationCount)::(i) {
                     state.significantLandmarks->push(value:
-                        state.map.addLandmark(
+                        LargeMap.addLandmark(
+                            map:state.map,
                             base:Landmark.Base.database.getRandomWeightedFiltered(
                                 filter:::(value) <- value.isUnique == false
                             ),
@@ -361,7 +366,8 @@
                 
                 // guaranteed gate
                 state.significantLandmarks->push(value:
-                    state.map.addLandmark(
+                    LargeMap.addLandmark(
+                        map:state.map,
                         base:Landmark.Base.database.find(name:'Wyvern Gate'),
                         island:this
                     )
@@ -374,26 +380,30 @@
                 state.significantLandmarks->push(value: ::<= {
                     return match(story.tier) {
                         (0):// nothign defeated
-                            state.map.addLandmark(
+                            LargeMap.addLandmark(
+                                map:state.map,
                                 base:Landmark.Base.database.find(name:'Shrine of Fire'),
                                 island:this
                             ),
 
                         (1):// fire defeated
-                            state.map.addLandmark(
+                            LargeMap.addLandmark(
+                                map:state.map,
                                 base:Landmark.Base.database.find(name:'Shrine of Ice'),
                                 island:this
                             ),
 
                         (1):// fire defeated
-                            state.map.addLandmark(
+                            LargeMap.addLandmark(
+                                map:state.map,
                                 base:Landmark.Base.database.find(name:'Shrine of Thunder'),
                                 island:this
                             ),
 
                             
                         default:
-                            state.map.addLandmark(
+                            LargeMap.addLandmark(
+                                map:state.map,
                                 base:Landmark.Base.database.find(name:'Lost Shrine'),
                                 island:this
                             )
@@ -402,7 +412,8 @@
 
                 
                 state.significantLandmarks->push(value:
-                    state.map.addLandmark(
+                    LargeMap.addLandmark(
+                        map:state.map,
                         base:Landmark.Base.database.find(name:'Town'),
                         island:this
                     )
@@ -414,7 +425,8 @@
 
                 // free treasure!
                 state.significantLandmarks->push(value:
-                    state.map.addLandmark(
+                    LargeMap.addLandmark(
+                        map:state.map,
                         base:Landmark.Base.database.find(name:'Forest'),
                         island:this
                     )
@@ -423,7 +435,8 @@
 
 
                 state.significantLandmarks->push(value:
-                    state.map.addLandmark(
+                    LargeMap.addLandmark(
+                        map:state.map,
                         base:Landmark.Base.database.find(name:'City'),
                         island:this
                     )

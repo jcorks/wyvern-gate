@@ -524,7 +524,7 @@ Event.Base.new(
                         windowEvent.queueMessage(text:'The food is delicious.');
                         foreach(event.party.members)::(index, member) {
                             @oldStats = StatSet.new();
-                            oldStats.state = member.stats.state;
+                            oldStats.load(serialized:member.stats.save());
                             member.stats.add(stats:StatSet.new(HP:(oldStats.HP*0.1)->ceil, AP:(oldStats.AP*0.1)->ceil));
                             oldStats.printDiff(other:member.stats, prompt:member.name + ': Mmmm...');
 
@@ -537,7 +537,7 @@ Event.Base.new(
                         @:Damage = import(module:'game_class.damage.mt');
                         foreach(event.party.members)::(index, member) {
                             @oldStats = StatSet.new();
-                            oldStats.state = member.stats.state;
+                            oldStats.load(serialized:member.stats.save());
                             member.stats.add(stats:StatSet.new(HP:-(oldStats.HP*0.1)->ceil, AP:-(oldStats.AP*0.1)->ceil));
                             oldStats.printDiff(other:member.stats, prompt:member.name + ': Ugh...');
 
@@ -634,7 +634,7 @@ Event.Base.new(
             
                             foreach(event.party.members)::(index, member) {
                                 @oldStats = StatSet.new();
-                                oldStats.state = member.stats.state;
+                                oldStats.load(serialized:member.stats.save());
                                 member.stats.add(stats:StatSet.new(HP:(oldStats.HP*0.1)->ceil, AP:(oldStats.AP*0.1)->ceil));
                                 oldStats.printDiff(other:member.stats, prompt:member.name + ': I feel refreshed!');
 
