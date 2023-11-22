@@ -17,13 +17,18 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:State = import(module:'game_class.state.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 
-@:Inventory = class(
+@:Inventory = LoadableClass.new(
     name: 'Wyvern.Inventory',
-    new ::(size ) {
+    new ::(size, parent, state) {
         @:this = Inventory.defaultNew();
         this.maxItems = size;
+        
+        if (state != empty)
+            this.load(serialized:state);
+        
         return this;
     },
     define:::(this) {
@@ -119,7 +124,7 @@
             
             save ::<- state.save(),
             load ::(serialized) { 
-                state.load(serialized);
+                state.load(parent:this, serialized);
                 foreach(state.items) ::(k, item) {
                     item.container = this;                
                 }

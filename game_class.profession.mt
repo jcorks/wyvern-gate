@@ -18,6 +18,8 @@
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
+@:State = import(module:'game_class.state.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 
 @: nextSPLevel ::(spLevel) {
@@ -25,7 +27,7 @@
     //return (((spLevel+1)*0.75 * 10) + (spLevel+1) * 5)->ceil;
 }
 
-@:Profession = class(
+@:Profession = LoadableClass.new(
     statics : {
         Base  :::<= {
             @db;
@@ -35,67 +37,63 @@
             }
         }
     },
-    new ::(base, state) {
+    new ::(base, parent, state) {
         @:this = Profession.defaultNew();
-        this.initialize(base, state);
+
+        if (state != empty)
+            this.load(serialized:state)
+        else 
+            this.defaultLoad(base);
+
         return this;
     },
     name : 'Wyvern.Profession.Instance',
     define :::(this) {
-        @base_;
-        @sp = 0;
-        @spNext = 1;
-        @spLevel = 0;
+        @:state = State.new(
+            items : {
+                base : empty,
+                sp : 0,
+                spNext : 1,
+                spLevel : 0
+            }
+        );
         
         this.interface = {
-            initialize ::(base, state){
-                when(state != empty) ::<= {
-                    this.state = state;
-                    return this;
-                }
-                base_ = base;
+            defaultLoad ::(base) {
+                state.base = base;
                 return this;
             },
 
-            state : {   
-                set ::(value) {
-                    sp = value.sp;
-                    spNext = value.spNext;
-                    base_ = Profession.Base.database.find(name:value.baseName);
-                    spLevel = value.spLevel;
-                },
-                get :: {
-                    return {
-                        baseName : base_.name,
-                        sp : sp,
-                        spNext : spNext,
-                        spLevel : spLevel,
-                    }
-                }
+            save ::{
+                return state.save()
+            },
+            
+            load ::(serialized) {
+                state.load(parent:this, serialized);
             },
             base : {
                 get ::{
-                    return base_;
+                    return state.base;
                 }
             },
             
             sp : {
                 get :: {
-                    return sp;
+                    return state.sp;
                 }
             },
             
             // returns any learned abilities();
             gainSP ::(amount) {
-                spNext -= amount;
+                state.spNext -= amount;
                 @learned = [];
                 {:::} {
                     forever ::{
-                        when(spNext > 0) send();
-                        @:next = base_.abilities[spLevel];
+                        when(state.spNext > 0) send();
+                        @:next = state.base.abilities[state.spLevel];
 
-                        spNext += nextSPLevel(spLevel);
-                        spLevel+=1;
+                        state.spNext += nextSPLevel(spLevel: state.spLevel);
+                        state.spLevel+=1;
                         when(next == empty) empty; 
                         learned->push(value:next);
                     

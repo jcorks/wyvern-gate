@@ -23,6 +23,7 @@
 
 
 @:Database = import(module:'game_class.database.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 @:serialize = ::(value) {
     return match(value->type) {
@@ -36,6 +37,17 @@
                 database : '' + value->type,
                 name : value.name
             };
+        // tagged classes get instantiated and loaded with their state
+        when (LoadableClass.isLoadable(name:String(from:value->type))) ::<= {
+            @:output = value.save();
+            output.___c = '' + value->type;
+            return output;
+        }
+        
+        if (value->type != Object)
+            error(detail:
+                'The only Object kinds allowed when serializing are plain objects/arrays, Database.Items, and LoadableClasses. This seems to be a class instance of some sort. Try making your class (' + value->type + ') a LoadableClass instead.'
+            );
 
         if (value->size > 0) ::<= {
             @:arr = {};
@@ -52,17 +64,24 @@
 }
 
 
-@:deserialize = ::(output, key, value) {
+@:deserialize = ::(parent, output, key, value) {
     match(value->type) {
       (Number, String, Boolean, Empty):::<= {
         output[key] = value
       },
       
       default: ::<= {
+        when(value.___c != empty) ::<= {
+            @:cl = LoadableClass.load(name:value.___c);
+            if (cl == empty)
+                error(detail:'Looks like a save file contained a LoadableClass that hasnt been loaded yet or is missing entirely. Check your mods and check your save file version!');
+            output[key] = (cl).new(parent, state:value);
+        }
         when(value.___isDatabase != empty) ::<= {
             @:database = Database.Lookup[value.database];
             output[key] = database.find(name:value.name);
         }
+        
       
         if (value->size > 0) ::<= {
             for(0, value->size) ::(i) {
@@ -73,7 +92,7 @@
                 )
             }   
         } else ::<= {
-            output[key].load(serialized:value);
+            output[key].load(parent, serialized:value);
         }
       }
     }
@@ -96,9 +115,12 @@ return {
                 return serialized;
             },
             
-            load ::(serialized) {
+            load ::(parent, serialized) {
+                if (parent == empty)
+                    error(detail:'state loading parent MUST be present. (parent parameter must be set to something)');
                 foreach(serialized) ::(key, value) {
                     deserialize(
+                        parent, 
                         output,
                         key,
                         value

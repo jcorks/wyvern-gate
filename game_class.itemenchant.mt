@@ -21,6 +21,7 @@
 @:ItemEnchantCondition = import(module:'game_class.itemenchantcondition.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:State = import(module:'game_class.state.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 @:CONDITION_CHANCES = [
     10,
@@ -41,7 +42,7 @@
 
 
 
-@:ItemEnchant = class(
+@:ItemEnchant = LoadableClass.new(
     name : 'Wyvern.ItemEnchant',
     statics : {
         Base  :::<= {
@@ -52,12 +53,13 @@
             }
         }
     },
-    new ::(base, conditionHint, state) { 
+    new ::(parent, base, conditionHint, state) { 
         @:this = ItemEnchant.defaultNew();
-        this.initialize(base, conditionHint);
         
         if (state != empty)
-            this.load(serialized:state);
+            this.load(serialized:state)
+        else 
+            this.defaultLoad(base, conditionHint);
         return this;
     },
     define:::(this) {
@@ -73,7 +75,7 @@
     
         
         this.interface = {
-            initialize ::(base, conditionHint) {
+            defaultLoad ::(base, conditionHint) {
                 state.base = base;
                 
                 if (base.triggerConditionEffects->keycount > 0) ::<= {
@@ -124,7 +126,7 @@
             },
             
             save ::<- state.save(),
-            load ::(serialized) <- state.load(serialized)
+            load ::(serialized) <- state.load(parent:this, serialized)
         }
     }
 

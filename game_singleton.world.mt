@@ -19,7 +19,8 @@
 @:Island = import(module:'game_class.island.mt');
 @:Party = import(module:'game_class.party.mt');
 @:Battle = import(module:'game_class.battle.mt');
-
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:State = import(module:'game_class.state.mt');
 @:TIME = {
     DAWN : 0,
     EARLY_MORNING : 1,
@@ -45,24 +46,41 @@
 }
 
 
-return class(
+@:World = LoadableClass.new(
     name: 'Wyvern.World',
-    define:::(this) {
     
-        // 5 turns per "time"
-        // 14 times per "day"
-        // 100 days per "year"
-        @turn = 0;
-        @time = TIME.LATE_MORNING;
-        @day = (Number.random()*100)->floor;
-        @year = 1033;
-        @party = Party.new();
+    // not used due to singleton nature.
+    new ::(parent, state) {
+        @:this = World.defaultNew();
+        
+        if (state != empty)
+            this.load(serialized:state);
+            
+        return this;
+    },
+    define:::(this) {
+
         @battle = Battle.new();
-        @island = empty;
-        @story = import(module:'game_singleton.story.mt');
+
+    
+        @:state = State.new(
+            items : {
+                // 5 turns per "time"
+                // 14 times per "day"
+                // 100 days per "year"
+                turn : 0,
+                time : TIME.LATE_MORNING,
+                day : (Number.random()*100)->floor,
+                year : 1033,
+                party : Party.new(),
+                island : empty,
+                story : import(module:'game_singleton.story.mt')
+            }
+        );
+
         
         @:getDayString = ::{
-            return match(time) {
+            return match(state.time) {
               (TIME.DAWN): 'It is dawn.',
               (TIME.EARLY_MORNING): 'It is early morning.',
               (TIME.MORNING): 'It is mid-morning.',
@@ -100,27 +118,27 @@ return class(
         
             timeString : {
                 get :: {
-                    return 'Year ' + year +', ' + getSeasonString() + '. ' + getDayString();
+                    return 'Year ' + state.year +', ' + getSeasonString() + '. ' + getDayString();
                 }
             },
             
             
             
             discoverIsland ::(levelHint => Number, tierHint => Number, nameHint) {
-                @:out = Island.new(world:this, levelHint, party, nameHint, tierHint);
+                @:out = Island.new(parent:this, levelHint, nameHint, tierHint);
                 return out;
             },
             
             time : {
-                get ::<- time
+                get ::<- state.time
             },
             
             season : {
                 get :: {
                     return match(true) {
-                      (day > 75): SEASON.WINTER,
-                      (day > 50): SEASON.AUTUMN,
-                      (day > 25): SEASON.SUMMER,
+                      (state.day > 75): SEASON.WINTER,
+                      (state.day > 50): SEASON.AUTUMN,
+                      (state.day > 25): SEASON.SUMMER,
                       default: SEASON.SPRING
                     }
                 }
@@ -128,72 +146,54 @@ return class(
 
             
             party : {
-                get ::<- party
+                get ::<- state.party
             },
             
             island : {
-                get :: <- island,
-                set ::(value) <- island = value
+                get :: <- state.island,
+                set ::(value) <- state.island = value
             },
             
             battle : {
-                get :: <- battle
+                get :: <- state.battle
             },
             
             storyFlags : {
-                get :: <- story
+                get :: <- state.story
             },
             
             stepTime :: {
-                turn += 1;
-                if (turn > 10) ::<={
-                    turn = 0;
-                    time += 1;
+                state.turn += 1;
+                if (state.turn > 10) ::<={
+                    state.turn = 0;
+                    state.time += 1;
                 }
                     
-                if (time > 13) ::<={
-                    time = 0;
-                    day += 1;
+                if (state.time > 13) ::<={
+                    state.time = 0;
+                    state.day += 1;
                 }
                 
-                if (day > 99) ::<={
-                    day = 0;
-                    year += 1;
+                if (state.day > 99) ::<={
+                    state.day = 0;
+                    state.year += 1;
                 }                
                 
             },
             
-            state : {
-                set ::(value) {
-                    turn = value.turn;
-                    time = value.time;
-                    day = value.day;
-                    year = value.year;
-                    
-                    island = Island.new(levelHint: 0, world: this, party : this.party, state:value.island);                        
-                    party.state = value.party;
-                    
-                    foreach(value.storyFlags)::(key, value) {
-                        story[key] = value;
-                    }
-                },
-                get :: {
-                    @:storyFlags = {}
-                    foreach(story)::(key, value) {
-                        storyFlags[key] = value;
-                    }
-                    return { 
-                        turn : turn,
-                        time: time,
-                        day : day,
-                        year : year,
-                        island : island.state, // always valid.
-                        party : party.state,
-                        storyFlags : storyFlags
-                    }
-                }
+            save ::{
+                return state.save()
+            },
+            
+            load ::(serialized) {
+                state.load(parent:this, serialized);
+                @:st = state.story;
+                state.story = import(module:'game_singleton.story.mt');
+                state.story.load(serialized:st);
             }
             
         }
     }
-).new();
+);
+
+return World.new();

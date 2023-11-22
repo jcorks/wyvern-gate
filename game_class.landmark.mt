@@ -25,6 +25,7 @@
 @:distance = import(module:'game_function.distance.mt');
 @Location = empty; // circular dep.
 @:State = import(module:'game_class.state.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 
 
@@ -32,7 +33,7 @@
 
 
 
-@:Landmark = class(  
+@:Landmark = LoadableClass.new(  
     name : 'Wyvern.Landmark',
     statics : {
         Base  :::<= {
@@ -44,12 +45,14 @@
         }
     },
     
-    new::(base, island, x, y, state, floorHint){ 
+    new::(parent, base, x, y, state, floorHint){ 
+        @:island = parent;
         @:this = Landmark.defaultNew();
-        this.initialize(base, island, x, y, floorHint);
+        this.initialize(island);
         if (state != empty) 
-            this.load(serialized:state);
-            
+            this.load(serialized:state)
+        else 
+            this.defaultLoad(base, x, y, floorHint);                    
         return this;
     },
     
@@ -92,10 +95,11 @@
 
 
         this.interface =  {
-            initialize::(base, island, x, y, floorHint){
-
-
+            initialize::(island){
                 island_ = island;
+            },
+            defaultLoad::(base, x, y, floorHint){
+
 
                 state.base = base;
                 state.x = x;
@@ -105,7 +109,7 @@
 
                 if (base.dungeonMap) ::<= {
                     state.map = DungeonMap.create(mapHint: base.mapHint);
-                    dungeonLogic = DungeonController.new(map:state.map, island, landmark:this);
+                    dungeonLogic = DungeonController.new(map:state.map, island:island_, landmark:this);
                 } else ::<= {
                     structureMapBuilder = StructureMap.new();//Map.new(mapHint: base.mapHint);
                     structureMapBuilder.initialize(mapHint:base.mapHint);
@@ -200,7 +204,7 @@
                 }
 
                 
-                this.base.onCreate(landmark:this, island);
+                this.base.onCreate(landmark:this, island:island_);
                 
                 return this;
             },
@@ -322,7 +326,7 @@
             addLocation ::(name, ownedByHint, x, y) {
                 @loc = Location.new(
                     base:Location.Base.database.find(name:name),
-                    landmark:this, ownedByHint,
+                    parent:this, ownedByHint,
                     xHint: x,
                     yHint: y
                 );

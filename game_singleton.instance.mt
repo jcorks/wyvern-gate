@@ -77,7 +77,7 @@ return class(
                                 when(choice == 0) empty;
                                 
                                 
-                                onSaveState(slot:choice, data:JSON.encode(object:this.state));        
+                                onSaveState(slot:choice, data:JSON.encode(object:this.save()));        
                                 windowEvent.queueMessage(text:'Saved successfully to slot ' + choice);
                             }
                         );
@@ -213,7 +213,7 @@ return class(
                                 island.addEvent(
                                     event:Event.new(
                                         base:Event.Base.database.find(name:'Encounter:Non-peaceful'),
-                                        island, party, landmark //, currentTime
+                                        parent:landmark //, currentTime
                                     )
                                 );
                                 stepsSinceLast = 0;
@@ -678,21 +678,12 @@ return class(
             currentIsland : {
                 get::<-island
             },
-            state : {
-                set::(value) {
-
-                    world.state = value.world;
-                    party = world.party;
-                    island = world.island;
-                    landmark = if (value.landmarkIndex == empty) empty else 
-                               island.landmarks[value.landmarkIndex];
-                },
-                get:: {
-                    return {
-                        landmarkIndex : if (landmark == empty) -1 else island.getLandmarkIndex(landmark),
-                        world : world.state
-                    }
-                }   
+            save ::{
+                return world.save();
+            },
+            
+            load ::(serialized) {
+                world.load(parent:{}, serialized);
             }
         }
     }

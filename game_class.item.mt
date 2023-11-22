@@ -29,6 +29,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:State = import(module:'game_class.state.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 /*
     Items. 
@@ -77,7 +78,7 @@
 
 
 
-@:Item = class(
+@:Item = LoadableClass.new(
     name : 'Wyvern.Item',
     statics : {
         Base  :::<= {
@@ -91,11 +92,14 @@
         ATTRIBUTE : {get::<-ATTRIBUTE},
         USE_TARGET_HINT : {get::<-USE_TARGET_HINT}
     },
-    new ::(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant) {
+    new ::(parent, base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant) {
         @:this = Item.defaultNew();
-        this.initialize(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, abilityHint, forceEnchant);
+
         if (state != empty)
-            this.load(serialized:state);
+            this.load(serialized:state)
+        else 
+            this.defaultLoad(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, abilityHint, forceEnchant);
+            
         return this;
     },
     define:::(this) {
@@ -237,7 +241,7 @@
         @:world = import(module:'game_singleton.world.mt');
         
         this.interface = {
-            initialize::(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, abilityHint, forceEnchant) {
+            defaultLoad::(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, abilityHint, forceEnchant) {
                 
                 state.ability = if (abilityHint) abilityHint else random.pickArrayItem(list:base.possibleAbilities);
                 state.base = base;

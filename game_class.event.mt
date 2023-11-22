@@ -27,9 +27,11 @@
 @:correctA = import(module:'game_function.correcta.mt');
 @:story = import(module:'game_singleton.story.mt');
 @:State = import(module:'game_class.state.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 
-@:Event = class(
+@:Event = LoadableClass.new(
+    name: 'Wyvern.Event',
     statics : {
         Base  :::<= {
             @db;
@@ -40,11 +42,21 @@
         }
     },
     
-    new ::(base, party, island, landmark, currentTime, state) {
+    new ::(parent, base, currentTime, state) {
         @:this = Event.defaultNew();
-        this.initialize(base, party, island, landmark, currentTime);
+
+        @:world = import(module:'game_singleton.world.mt');
+        
+        @:landmark = parent;
+        @:island = landmark.island;
+        @:party = world.party;
+        
+        this.initialize(party, island, landmark);
+
         if (state != empty)
-            this.load(serialized:state);
+            this.load(serialized:state)
+        else
+            this.defaultLoad(base, currentTime);
         return this;
     },
     
@@ -65,12 +77,13 @@
 
 
         this.interface = {
-            initialize ::(base, party, island, landmark, currentTime) {
+            initialize ::(party, island, landmark) {
                 island_ = island;
                 party_ = party;
                 landmark_ = landmark;
+            },
 
-
+            defaultLoad ::(base, currentTime) {
                 state.base = base; 
                 state.startAt = currentTime;
                 state.duration = base.onEventStart(event:this);
@@ -83,7 +96,7 @@
             },
             
             load ::(serialized) {
-                state.load(serialized);
+                state.load(parent:this, serialized);
             },
         
             expired : {

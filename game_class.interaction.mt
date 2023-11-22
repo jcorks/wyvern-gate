@@ -264,7 +264,7 @@ Interaction.new(
                             location.landmark.island.addEvent(
                                 event:Event.new(
                                     base: Event.Base.database.find(name:'Encounter:Non-peaceful'),
-                                    island:location.landmark.island, party, landmark:location.landmark //, currentTime
+                                    parent:location.landmark //, currentTime
                                 )
                             );
                         } else ::<= {
@@ -1132,7 +1132,7 @@ Interaction.new(
                                 ('Wyvern Key of Light'):   'Light Wyvern Dimension',
                                 default: 'Unknown Wyvern Dimension'
                             }),
-                            island:location.landmark.island,
+                            parent:location.landmark.island,
                             x: 0,
                             y: 0
                         );
@@ -1166,7 +1166,7 @@ Interaction.new(
                     location.targetLandmark = 
                         Landmark.new(
                             base:Landmark.Base.database.find(name:'Shrine: Lost Floor'),
-                            island:location.landmark.island,
+                            parent:location.landmark.island,
                             x:-1,
                             y:-1
                         )
@@ -1178,7 +1178,7 @@ Interaction.new(
                     location.targetLandmark = 
                         Landmark.new(
                             base:Landmark.Base.database.find(name:location.landmark.base.name),
-                            island:location.landmark.island,
+                            parent:location.landmark.island,
                             x:-1,
                             y:-1,
                             floorHint:location.landmark.floor+1
@@ -1227,10 +1227,9 @@ Interaction.new(
             if (location.contested == true) ::<= {
                 @:event = Event.new(
                     base:Event.Base.database.find(name:'Encounter:TreasureBoss'),
-                    island:location.landmark.island,
                     party:world.party,
                     currentTime:0, // TODO,
-                    landmark:location.landmark
+                    parent:location.landmark
                 );  
                 location.contested = false;
             } else ::<= {
@@ -1241,7 +1240,7 @@ Interaction.new(
                     location.targetLandmark = 
                         Landmark.new(
                             base:Landmark.Base.database.find(name:'Treasure Room'),
-                            island:location.landmark.island,
+                            parent:location.landmark.island,
                             x:-1,
                             y:-1
                         )

@@ -20,12 +20,13 @@
 @:StatSet = import(module:'game_class.statset.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:State = import(module:'game_class.state.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 
 
 
 
-@:EntityQuality = class(
+@:EntityQuality = LoadableClass.new(
     name : 'Wyvern.EntityQuality',
     statics : {
         Base  :::<= {
@@ -37,11 +38,12 @@
         }
     },
     
-    new ::(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint, state) {
+    new ::(parent, base, descriptionHint, trait0Hint, trait1Hint, trait2Hint, state) {
         @:this = EntityQuality.defaultNew();
-        this.initialize(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint);
         if (state != empty)
-            this.load(serialized:state);
+            this.load(serialized:state)
+        else
+            this.defaultLoad(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint);
         return this;
     },
     
@@ -59,7 +61,7 @@
         
         
         this.interface = {
-            initialize ::(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint) {
+            defaultLoad::(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint) {
                 state.base = base;            
                 
                 if (trait0Hint != empty) 
@@ -125,7 +127,7 @@
             },
             
             load ::(serialized) {
-                state.load(serialized);
+                state.load(parent:this, serialized);
             }
         }
     

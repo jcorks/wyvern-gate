@@ -15,37 +15,35 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-@:struct = import(module:'game_struct.mt');
+@:State = import(module:"game_class.state.mt");
 
 
-return struct(
-    name: 'Wyvern.StoryFlags',
-    
+return State.new(
     items : {
         // whether the Fire Key is has been given to the party
-        foundFireKey : Boolean,
+        foundFireKey : false,
 
         // whether the Ice Key has been given to the party
-        foundIceKey : Boolean,
+        foundIceKey : false,
 
         // whether the thunder key has been given to the party
-        foundThunderKey : Boolean,
+        foundThunderKey : false,
 
         // whether the light key has been given to the party        
-        foundLightKey : Boolean,
+        foundLightKey : false,
         
         // whether the dark key has been given to the party
-        hasDarkKey : Boolean,
+        hasDarkKey : false,
         
         
         // whether the player has seen the wandering gamblist
-        gamblistEncountered : Boolean,
+        gamblistEncountered : false,
         
         // Whether the player has hired the gamblist ever.
-        gamblistInParty : Boolean,
+        gamblistInParty : false,
         
         // Whether the wool+ shopkeeper was hired.
-        meiInParty : Boolean,
+        meiInParty : false,
         
         // progression of defeated wyverns
         // tier 0 -> none 
@@ -53,31 +51,13 @@ return struct(
         // tier 2 -> ice 
         // tier 3 -> thunder 
         // tier 4 -> light 
-        tier : Number,
+        tier : 0,
         
-        levelHint : Number,
+        levelHint : 6,
         
         // Number of discovered locations
-        data_locationsDiscovered : Number,
+        data_locationsDiscovered : 0,
         
-        data_locationsNeeded : Number
+        data_locationsNeeded : 25
     }
-).new(state: {
-    foundFireKey : false,
-    foundIceKey : false,
-    foundThunderKey : false,
-    foundLightKey : false,
-    
-    
-    tier : 0,
-    
-    hasDarkKey : false,
-    gamblistEncountered : false,
-    gamblistInParty : false,
-    meiInParty : false,
-    
-    data_locationsDiscovered : 0,
-    data_locationsNeeded : 25,
-    
-    levelHint : 6
-});
+);

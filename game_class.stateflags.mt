@@ -16,9 +16,10 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:class = import(module:'Matte.Core.Class');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 
-return class(
+@:StateFlags = LoadableClass.new(
     name : 'Wyvern.StateFlag',
     statics : {
         HURT : {get::<-0},
@@ -33,6 +34,15 @@ return class(
         ATTACKED : {get::<-9},
         ABILITY : {get::<-10}
     },
+    
+    new ::(state, parent) {
+        @:this = StateFlags.defaultNew();
+        
+        if (state != empty)
+            this.load(serialized:state);
+        return this;
+    },
+    
     define :::(this) {
         @set = [];
         
@@ -76,3 +86,5 @@ return class(
     
     }
 );
+
+return StateFlags;

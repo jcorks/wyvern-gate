@@ -17,14 +17,18 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 
 
-@:StatSet = class(
+@:StatSet = LoadableClass.new(
     name : 'Wyvern.Entity.StatSet',
-    new ::(HP, AP, ATK, INT, DEF, LUK, SPD, DEX) {
+    new ::(parent, state, HP, AP, ATK, INT, DEF, LUK, SPD, DEX) {
         @:this = StatSet.defaultNew();
-        this.initialize(HP, AP, ATK, INT, DEF, LUK, SPD, DEX);
+        if (state != empty)
+            this.load(serialized:state)
+        else
+            this.defaultLoad(HP, AP, ATK, INT, DEF, LUK, SPD, DEX);
         return this;
     },
     define:::(this) {
@@ -48,7 +52,7 @@
         ;
         
         this.interface = {
-            initialize::(HP, AP, ATK, INT, DEF, LUK, SPD, DEX) {
+            defaultLoad::(HP, AP, ATK, INT, DEF, LUK, SPD, DEX) {
                 if (HP != empty) HP_  = HP;
                 if (AP != empty) MP_  = AP;
                 if (ATK != empty)ATK_ = ATK;

@@ -28,6 +28,7 @@
 @:Profession = import(module:'game_class.profession.mt');
 @:Event = import(module:'game_class.event.mt');
 @:State = import(module:'game_class.state.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 @:CLIMATE = {
     WARM : 0,
@@ -77,7 +78,7 @@
 // todo: database.
 
 
-@:Island = class(
+@:Island = LoadableClass.new(
     name: 'Wyvern.Island',
     statics : {
         CLIMATE : {get::<-CLIMATE},
@@ -106,11 +107,18 @@
          }
     },
     
-    new::(world => Object, levelHint => Number, party => Party.type, nameHint, state, tierHint => Number) {
+    new::(parent, levelHint, nameHint, state, tierHint) {
         @:this = Island.defaultNew();
-        this.initialize(world, levelHint, party, nameHint, tierHint);
+
+        @:world = parent;
+        @:party = world.party;
+
+        this.initialize(world, party);
+
         if (state != empty)
-            this.load(serialized:state);
+            this.load(serialized:state)
+        else
+            this.defaultLoad(levelHint, nameHint, tierHint);
         return this;
     },
     
@@ -328,9 +336,12 @@
 
         
         this.interface = {
-            initialize::(world, levelHint, party, nameHint, tierHint) {
+            initialize ::(world, party) {
                 world_ = world;            
                 party_ = party;
+            
+            },
+            defaultLoad::(levelHint, nameHint, tierHint) {
                 state.tier = tierHint;
 
                 state.levelMin = (levelHint - Number.random() * (levelHint * 0.4))->ceil;
@@ -435,7 +446,7 @@
                 return state.save();
             },
             load ::(serialized) {
-                state.load(serialized);
+                state.load(parent:this, serialized);
             },
             
             name : {

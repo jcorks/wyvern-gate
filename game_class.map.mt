@@ -18,6 +18,9 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:State = import(module:'game_class.state.mt');
+
 //@:MemoryBuffer = import(module:'Matte.Core.MemoryBuffer');
 
 
@@ -50,11 +53,14 @@
 @:distance = import(module:'game_function.distance.mt');
 
 
-@Area = class(
+@Area = LoadableClass.new(
     name: 'Wyvern.Map.Area',
-    new::(x, y, width, height) {
+    new::(state, parent, x, y, width, height) {
         @:this = Area.defaultNew();
-        this.setup(x, y, width, height);
+        if (state != empty)
+            this.load(serialized:state)
+        else
+            this.loadDefault(x, y, width, height);
         return this;
     },
     define::(this) {
@@ -65,11 +71,12 @@
         @isOccupied = false;
         
         this.interface = {
-            setup::(x, y, width, height) {
+            loadDefault::(x, y, width, height) {
                 _x = x => Number;
                 _y = y => Number;
                 _w = width => Number;
                 _h = height => Number;
+                isOccupied = false;
                 return this;
             },
 
@@ -108,7 +115,7 @@
 );
 
 
-return class(
+@:Map =  LoadableClass.new(
     name: 'Wyvern.Map',
 
     statics : {
@@ -116,12 +123,24 @@ return class(
             get::<-Area
         } 
     },
+    
+    new ::(parent, state) {
+        @:this = Map.defaultNew();
+        
+        if (state != empty)
+            this.load(serialized:state)
+        // no default load. Maps are empty and defined 
+        // externally when first created.
+        return this;
+    },
   
     define:::(this) {
-        @:itemIndex = [];
-        @:entities = [];
-        @:items = [];
-        @:legendEntries = [];
+    
+    
+        @itemIndex = [];
+        @entities = [];
+        @items = [];
+        @legendEntries = [];
         @title;
 
         @pointer = {
@@ -1220,7 +1239,92 @@ return class(
                 canvas.drawText(text:title);
                 
             
+            },
+            
+            save ::{
+                @:state = State.new(
+                    items : {
+                        itemIndex : itemIndex,
+                        entities : entities,
+                        items : items,
+                        legendEntries : legendEntries,
+                        title : title,
+
+                        pointer : pointer,
+                        width : width,
+                        height : height,
+                        offsetX : offsetX,
+                        offsetY : offsetY,
+                        drawLegend : drawLegend,
+                        paged : paged,
+                        outOfBoundsCharacter : outOfBoundsCharacter,
+                        wallCharacter : wallCharacter,
+                        //@scenery = MemoryBuffer.new();
+                        scenery : scenery,
+                        sceneryValues : sceneryValues,
+                        stepAction : stepAction,
+                        areas : areas,
+                        renderOutOfBounds : renderOutOfBounds,
+                        isDark : isDark,
+                    }
+                );    
+                return state.save();        
+            },
+            
+            load ::(serialized) {
+                @:v = State.new(
+                    items : {
+                        itemIndex : itemIndex,
+                        entities : entities,
+                        items : items,
+                        legendEntries : legendEntries,
+                        title : title,
+
+                        pointer : pointer,
+                        width : width,
+                        height : height,
+                        offsetX : offsetX,
+                        offsetY : offsetY,
+                        drawLegend : drawLegend,
+                        paged : paged,
+                        outOfBoundsCharacter : outOfBoundsCharacter,
+                        wallCharacter : wallCharacter,
+                        //@scenery = MemoryBuffer.new();
+                        scenery : scenery,
+                        sceneryValues : sceneryValues,
+                        stepAction : stepAction,
+                        areas : areas,
+                        renderOutOfBounds : renderOutOfBounds,
+                        isDark : isDark,
+                    }
+                );    
+                v.load(parent:this, serialized);
+
+                itemIndex = v.itemIndex;
+                entities = v.entities;
+                items = v.items;
+                legendEntries = v.legendEntries;
+                title = v.title;
+
+                pointer = v.pointer;
+                width = v.width;
+                height = v.height;
+                offsetX = v.offsetX;
+                offsetY = v.offsetY;
+                drawLegend = v.drawLegend;
+                paged = v.paged;
+                outOfBoundsCharacter = v.outOfBoundsCharacter;
+                wallCharacter = v.wallCharacter;
+                //@scenery = MemoryBuffer.new();
+                scenery = v.scenery;
+                sceneryValues = v.sceneryValues;
+                stepAction = v.stepAction;
+                areas = v.areas;
+                renderOutOfBounds = v.renderOutOfBounds;
+                isDark = v.isDark;
             }
         }    
     }
 );
+
+return Map;

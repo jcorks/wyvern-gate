@@ -36,6 +36,7 @@
 @:correctA = import(module:'game_function.correcta.mt');
 @:story = import(module:'game_singleton.story.mt');
 @:State = import(module:'game_class.state.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 // returns EXP recommended for next level
 @:levelUp ::(level, stats => StatSet.type, growthPotential => StatSet.type, whichStat) {
@@ -95,18 +96,21 @@
 
 @none;
 
-@:Entity = class(
+@:Entity = LoadableClass.new(
     name : 'Wyvern.Entity', 
     statics : {
         EQUIP_SLOTS : {get::<- EQUIP_SLOTS}
    
     },
         
-    new ::(speciesHint, professionHint, personalityHint, levelHint => Number, state, adventurousHint, qualities) {
+    new ::(parent, speciesHint, professionHint, personalityHint, levelHint => Number, state, adventurousHint, qualities) {
         @:this = Entity.defaultNew();
-        this.initialize(speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities);
+        this.initialize();
         if (state != empty)
-            this.load(serialized:state);
+            this.load(serialized:state)
+        else 
+            this.defaultLoad(speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities);
+
         return this;
     },
     
@@ -229,9 +233,16 @@
         }
 
 
+
         
         this.interface = {
-            initialize::(speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities) {
+            initialize ::{
+                state.battleAI = BattleAI.new(
+                    user: this
+                );                
+            },
+
+            defaultLoad::(speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities) {
                 if (adventurousHint != empty)
                     state.adventurous = adventurousHint;
                 
@@ -240,9 +251,7 @@
 
                 state.qualitiesHint = qualities;
 
-                state.battleAI = BattleAI.new(
-                    user: this
-                );            
+    
                 
                 state.profession = Profession.new(
                     base:
@@ -256,7 +265,7 @@
                 if (speciesHint != empty) ::<= {
                     state.species = Species.database.find(name:speciesHint);
                 }
-                state.professions[state.profession];
+                state.professions->push(value:state.profession);
                 
                 
                 state.growth.mod(stats:state.species.growth);
@@ -294,7 +303,7 @@
             },
             
             load ::(serialized) {
-                state.load(serialized);
+                state.load(parent:this, serialized);
                 foreach(state.equips) ::(k, equip) {
                     when(equip == empty) empty;
                     equip.equippedBy = this;

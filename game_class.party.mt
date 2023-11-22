@@ -19,22 +19,39 @@
 @:Entity = import(module:'game_class.entity.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
+@:State = import(module:'game_class.state.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
-return class(
+@:Party = LoadableClass.new(
     name: 'Wyvern.Party',
-    
-    define:::(this) {
-        @inventory;
-        @members = [];
+    new ::(parent, state) {
+        @:this = Party.defaultNew();
+        
+        
+        if (state != empty)
+            this.load(serialized:state);
+            
+        return this;
+    },
+    define:::(this) {   
+        @:state = State.new(
+            items : {
+                inventory : empty,
+                members : []
+            }
+        );
+        
+        
+        
         this.interface = {    
             reset ::{
-                members = [];
-                inventory = Inventory.new(size:20);
+                state.members = [];
+                state.inventory = Inventory.new(size:20);
             },
         
             add::(member => Entity.type) {
                 // no repeats, please
-                when(members->any(condition::(value) <- value == member)) empty;                
+                when(state.members->any(condition::(value) <- value == member)) empty;                
                 /*
                 member.inventory.items->foreach(do:::(index, item) {
                     inventory.add(item);                    
@@ -42,23 +59,23 @@ return class(
                 member.inventory.clear();
                 */
 
-                members->push(value:member);
+                state.members->push(value:member);
                 
             },
             
             inventory : {
-                get :: <- inventory
+                get :: <- state.inventory
             },
             
             isMember::(entity => Entity.type) {
-                return members->any(condition:::(value) <- value == entity);
+                return state.members->any(condition:::(value) <- value == entity);
             },
             
             remove::(member => Entity.type) {
                 {:::}{
-                    foreach(members)::(index, m) {
+                    foreach(state.members)::(index, m) {
                         if (m == member)::<={
-                            members->remove(key:index);
+                            state.members->remove(key:index);
                             windowEvent.queueMessage(text:m.name + ' has been removed from the party.');
                             send();
                         }                        
@@ -67,37 +84,28 @@ return class(
             },
             
             isIncapacitated :: {
-                return members->all(condition:::(value) <- value.isIncapacitated());
+                return state.members->all(condition:::(value) <- value.isIncapacitated());
             },
             
             
         
             members : {
-                get ::<- members
+                get ::<- state.members
             },
             
             clear :: {
-                inventory.clear();
-                members = [];            
+                state.inventory.clear();
+                state.members = [];            
             },
             
-            state : {
-                set ::(value) {
-                    inventory.state = value.inventory;
-                    members = [];
-                    foreach(value.members)::(index, memberData) {
-                        @member = Entity.new(levelHint: 0, state:memberData);
-                        members->push(value:member);
-                    }
-                },
+            save ::{
+                return state.save()
+            },
             
-                get :: {
-                    return {
-                        inventory : inventory.state,
-                        members: [...members]->map(to:::(value) <- value.state)
-                    }
-                }   
+            load ::(serialized) {
+                state.load(parent:this, serialized);
             }
         }
     }
 );
+return Party;

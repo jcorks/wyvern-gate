@@ -24,8 +24,10 @@
 @:Scene = import(module:'game_class.scene.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:State = import(module:'game_class.state.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
-@:Location = class(
+@:Location = LoadableClass.new(
+    name: 'Wyvern.Location',
     statics : {
         Base  :::<= {
             @db;
@@ -49,11 +51,15 @@
         }
     },
     
-    new::(base, landmark, xHint, yHint, state, targetLandmarkHint, ownedByHint) {
+    new::(base, parent, xHint, yHint, state, targetLandmarkHint, ownedByHint) {
+        @:landmark = parent;
         @:this = Location.defaultNew();
-        this.initialize(base, landmark, xHint, yHint, targetLandmarkHint, ownedByHint);
+        this.initialize(landmark);
+
         if (state != empty)
-            this.load(serialized:state);
+            this.load(serialized:state)
+        else 
+            this.defaultLoad(base, xHint, yHint, targetLandmarkHint, ownedByHint);
         return this;
     },
     
@@ -81,12 +87,15 @@
         
         
         this.interface = {
-            initialize ::(base, landmark, xHint, yHint, targetLandmarkHint, ownedByHint) {
+            initialize ::(landmark) {
                 landmark_ = landmark;     
+            },
+
+            defaultLoad ::(base, xHint, yHint, targetLandmarkHint, ownedByHint) {
 
                 state.base = base;
-                state.x = if (xHint == empty) (Number.random() * landmark.width ) else xHint;  
-                state.y = if (yHint == empty) (Number.random() * landmark.height) else yHint;
+                state.x = if (xHint == empty) (Number.random() * landmark_.width ) else xHint;  
+                state.y = if (yHint == empty) (Number.random() * landmark_.height) else yHint;
                 if (ownedByHint != empty)
                     state.ownedBy = ownedByHint;
                        
@@ -100,7 +109,7 @@
             },
             
             load ::(serialized) {
-                state.load(serialized)
+                state.load(parent:this, serialized)
             },
                 
             base : {
