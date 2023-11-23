@@ -126,7 +126,7 @@
     
     new ::(parent, state) {
         @:this = Map.defaultNew();
-        
+        this.initialize(parent);
         if (state != empty)
             this.load(serialized:state)
         // no default load. Maps are empty and defined 
@@ -166,6 +166,7 @@
         @areas;
         @renderOutOfBounds = true;
         @isDark = false;
+        @parent_;
 
         @aStarPQCompareTable;
 
@@ -692,7 +693,9 @@
 
 
         this.interface = {
-            
+            initialize ::(parent) {
+                parent_ = parent;
+            },
             width : {
                 get ::<- width,
                 set ::(value) {
@@ -1241,13 +1244,76 @@
             
             },
             
+            parent : {
+                get ::<- parent_
+            },
+            
+            
+            
+            /*
+                Custom saving loading to save on data and reduce repeats 
+                while keeping the actual usage of the data optimized for 
+                quick access
+            */
             save ::{
+                @:compressedItems = {}
+                @:dataList = [];
+                @dataListPool = 0;
+                @:dataUnique = {};
+                foreach(items) ::(k, val) {
+                    @:itemCopy = {...val};
+                    compressedItems->push(value:itemCopy);
+
+                    @:dat = val.data;
+                    when(dat == empty) empty;
+
+
+
+                    if (dataUnique[dat] != empty) ::<= {
+                        itemCopy.data = dataUnique[dat]; // index copy.
+                    } else ::<= {
+                        dataUnique[dat] = dataListPool;
+                        dataList->push(value:dat);
+                        itemCopy.data = dataListPool;
+                        dataListPool+=1;
+                    }
+                }
+                
+                
+                
+                
+                @:itemsUnique = {};
+                foreach(items) ::(index, value) {
+                    itemsUnique[value] = index;
+                }
+                
+                
+                @:legendEntriesCompressed = {};
+                foreach(legendEntries) ::(k, val) {
+                    legendEntriesCompressed[k] = itemsUnique[val];
+                    if (legendEntriesCompressed[k] == empty)
+                        error(detail:'Something went wrong (legend entry was a non-numbered index)')
+                }
+
+                // sparse array indexing
+                @:itemIndexCompressed = {};
+                foreach(itemIndex) ::(k ,v) {
+                    when(v == empty) empty;
+                    @:locs = {};
+                    foreach(v) :: (index, loc) {
+                         locs[index] = itemsUnique[loc];
+                    }
+                    itemIndexCompressed[''+k] = locs;
+                };
+                
+            
                 @:state = State.new(
                     items : {
-                        itemIndex : itemIndex,
+                        itemIndexCompressed : itemIndexCompressed,
                         entities : entities,
-                        items : items,
-                        legendEntries : legendEntries,
+                        compressedItems : compressedItems,
+                        dataList : dataList,
+                        legendEntriesCompressed : legendEntriesCompressed,
                         title : title,
 
                         pointer : pointer,
@@ -1274,10 +1340,11 @@
             load ::(serialized) {
                 @:v = State.new(
                     items : {
-                        itemIndex : itemIndex,
+                        itemIndexCompressed : [],
                         entities : entities,
-                        items : items,
-                        legendEntries : legendEntries,
+                        compressedItems : [],
+                        dataList : [],
+                        legendEntriesCompressed : [],
                         title : title,
 
                         pointer : pointer,
@@ -1300,10 +1367,27 @@
                 );    
                 v.load(parent:this, serialized);
 
-                itemIndex = v.itemIndex;
                 entities = v.entities;
-                items = v.items;
-                legendEntries = v.legendEntries;
+                items = v.compressedItems;
+                foreach(items) ::(k, val) {
+                    when(val.data == empty) empty;
+                    
+                    val.data = v.dataList[val.data];
+                }
+                
+                legendEntries = [];
+                foreach(v.legendEntriesCompressed) ::(k, val) {
+                    legendEntries[k] = items[val];
+                }
+                
+                itemIndex = [];
+                foreach(v.itemIndexCompressed) ::(k, locs) {
+                    foreach(locs) ::(index, loc) {
+                        locs[index] = items[loc]
+                    }
+                    itemIndex[Number.parse(string:k)] = locs;
+                }
+                
                 title = v.title;
 
                 pointer = v.pointer;

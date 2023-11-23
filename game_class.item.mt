@@ -593,7 +593,7 @@
             },
             
             save ::<- state.save(),
-            load ::(serialized) <- state.load(serialized)
+            load ::(serialized) <- state.load(parent:this, serialized)
         }
     }
 );

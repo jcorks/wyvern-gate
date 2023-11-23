@@ -1406,8 +1406,8 @@
             LAYOUT_CUSTOM: {get::<- LAYOUT_CUSTOM},
 
 
-            create ::(mapHint) {
-                @:map = Map.new();
+            create ::(mapHint, parent) {
+                @:map = Map.new(parent);
 
                 @areas;
 

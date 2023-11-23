@@ -117,8 +117,8 @@
         
         this.interface = {
 
-            create::(sizeW, sizeH) {                
-                @:map = Map.new();
+            create::(parent, sizeW, sizeH) {                
+                @:map = Map.new(parent);
                 map.width = sizeW + BUFFER_SPACE*2;
                 map.height = sizeH + BUFFER_SPACE*2;
 
@@ -153,14 +153,11 @@
 
 
             addLandmark::(map, island, base) { 
-                @landmark = Landmark.new(
+                return island.newLandmark(
                     base,
-                    parent:island,             
                     x:random.integer(from:BUFFER_SPACE + (0.2*(map.width  - BUFFER_SPACE*2))->floor, to:(map.width  - BUFFER_SPACE)-(0.2*(map.width  - BUFFER_SPACE*2))->floor),
                     y:random.integer(from:BUFFER_SPACE + (0.2*(map.height - BUFFER_SPACE*2))->floor, to:(map.height - BUFFER_SPACE)-(0.2*(map.height - BUFFER_SPACE*2))->floor)
                 );
-                map.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.legendName);
-                return landmark;
             },
             
             getAPosition ::(map) {

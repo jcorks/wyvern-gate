@@ -24,7 +24,9 @@
 @:Database = class(
     name : 'Wyvern.Database',
     statics : {
-        Lookup : LOOKUP,
+        Lookup : {
+            get::<-LOOKUP
+        },
         Item : ::<= {
             @:Item = class(
                 define::(this) {

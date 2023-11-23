@@ -103,7 +103,7 @@
    
     },
         
-    new ::(parent, speciesHint, professionHint, personalityHint, levelHint => Number, state, adventurousHint, qualities) {
+    new ::(parent, speciesHint, professionHint, personalityHint, levelHint, state, adventurousHint, qualities) {
         @:this = Entity.defaultNew();
         this.initialize();
         if (state != empty)

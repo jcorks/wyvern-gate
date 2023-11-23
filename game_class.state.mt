@@ -25,22 +25,30 @@
 @:Database = import(module:'game_class.database.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
+@:SPARSE_THRESHOLD = 30;
+
+@:TAG__IS_DATABASE = '$id';
+@:TAG__LOADABLE_CLASS = '$c';
+@:TAG__SPARSE_ARRAY = '$sa';
+
 @:serialize = ::(value) {
     return match(value->type) {
       (Number, String, Boolean, Empty): value,
+      
+      (Function): error(detail:'Functions are not allowed to be serialized'),
       
       default: ::<= {
         // database items are always saved as strings.
         when (value->isa(type:Database.Item.type))
             {
-                ___isDatabase : true,
+                (TAG__IS_DATABASE) : true,
                 database : '' + value->type,
                 name : value.name
             };
         // tagged classes get instantiated and loaded with their state
         when (LoadableClass.isLoadable(name:String(from:value->type))) ::<= {
             @:output = value.save();
-            output.___c = '' + value->type;
+            output[TAG__LOADABLE_CLASS] = '' + value->type;
             return output;
         }
         
@@ -49,14 +57,38 @@
                 'The only Object kinds allowed when serializing are plain objects/arrays, Database.Items, and LoadableClasses. This seems to be a class instance of some sort. Try making your class (' + value->type + ') a LoadableClass instead.'
             );
 
-        if (value->size > 0) ::<= {
-            @:arr = {};
-            for(0, value->size) ::(i) {
-                arr[i] = serialize(value:value[i]);
+        return if (value->size > 0) ::<= {
+            @arr = {};
+            @emptyCount = 0;
+            {:::} {
+                for(0, value->size) ::(i) {
+                    when(emptyCount > SPARSE_THRESHOLD) ::<= {
+                        arr = empty;
+                        send();
+                    }
+                        
+                    if (value[i] == empty)
+                        emptyCount += 1;
+                    arr[i] = serialize(value:value[i]);
+                }
             }
+            
+            // sparse array
+            if (arr == empty) ::<= {
+                arr = {(TAG__SPARSE_ARRAY):true};
+                for(0, value->size) ::(i) {
+                    when (value[i] == empty) empty
+                    arr[''+i] = serialize(value:value[i]);
+                }
+            }
+            
             return arr;
         } else ::<= {
-            return value.save();
+            @:arr = {};
+            foreach(value) ::(k => String, v) {
+                arr[k] = serialize(value:v);
+            }
+            return arr;
         }
       }
     }
@@ -71,28 +103,52 @@
       },
       
       default: ::<= {
-        when(value.___c != empty) ::<= {
-            @:cl = LoadableClass.load(name:value.___c);
+        when(value[TAG__LOADABLE_CLASS] != empty) ::<= {
+            @:cl = LoadableClass.load(name:value[TAG__LOADABLE_CLASS]);
             if (cl == empty)
                 error(detail:'Looks like a save file contained a LoadableClass that hasnt been loaded yet or is missing entirely. Check your mods and check your save file version!');
             output[key] = (cl).new(parent, state:value);
         }
-        when(value.___isDatabase != empty) ::<= {
+        when(value[TAG__IS_DATABASE] != empty) ::<= {
             @:database = Database.Lookup[value.database];
             output[key] = database.find(name:value.name);
         }
         
-      
-        if (value->size > 0) ::<= {
+        when(value[TAG__SPARSE_ARRAY] != empty) ::<= {
+            @:out = [];
             for(0, value->size) ::(i) {
                 deserialize(
-                    output:output[key],
+                    parent,
+                    output:out,
+                    key:Number.parse(string:i),
+                    value:value[i]
+                )
+            }   
+            output[key] = out;
+        }
+      
+        if (value->size > 0) ::<= {
+            @:out = [];
+            for(0, value->size) ::(i) {
+                deserialize(
+                    parent,
+                    output:out,
                     key:i,
                     value:value[i]
                 )
             }   
+            output[key] = out;            
         } else ::<= {
-            output[key].load(parent, serialized:value);
+            @:out = [];
+            foreach(value) ::(k, v) {
+                deserialize(
+                    parent,
+                    output:out,
+                    key:k,
+                    value:v
+                )
+            }   
+            output[key] = out;            
         }
       }
     }
@@ -101,31 +157,31 @@
 
 return {
     new ::(items)  {
-        @:keys = [];
+        @:keys = {'save':true, 'load':true};
         foreach(items) ::(k => String, value) {
             keys[k] = true;
         }
         
-        @:output = {
-            save :: {
-                @:serialized = {};
-                foreach(output) ::(key, value) {
-                    serialized[key] = serialize(value);
-                }
-                return serialized;
-            },
+        @:output = {};
+        items.save = :: {
+            @:serialized = {};
+            foreach(items) ::(key, value) {
+                when(key == 'save' || key == 'load') empty; // skip
+                serialized[key] = serialize(value);
+            }
+            return serialized;
+        };
             
-            load ::(parent, serialized) {
-                if (parent == empty)
-                    error(detail:'state loading parent MUST be present. (parent parameter must be set to something)');
-                foreach(serialized) ::(key, value) {
-                    deserialize(
-                        parent, 
-                        output,
-                        key,
-                        value
-                    );
-                }
+        items.load = ::(parent, serialized) {
+            if (parent == empty)
+                error(detail:'state loading parent MUST be present. (parent parameter must be set to something)');
+            foreach(serialized) ::(key, value) {
+                deserialize(
+                    parent, 
+                    output:items,
+                    key,
+                    value
+                );
             }
         }
         

@@ -46,7 +46,7 @@
     },
     
     new::(parent, base, x, y, state, floorHint){ 
-        @:island = parent;
+        @:island = parent.parent; // immediate parent is map
         @:this = Landmark.defaultNew();
         this.initialize(island);
         if (state != empty) 
@@ -108,11 +108,11 @@
                 
 
                 if (base.dungeonMap) ::<= {
-                    state.map = DungeonMap.create(mapHint: base.mapHint);
+                    state.map = DungeonMap.create(parent:this, mapHint: base.mapHint);
                     dungeonLogic = DungeonController.new(map:state.map, island:island_, landmark:this);
                 } else ::<= {
                     structureMapBuilder = StructureMap.new();//Map.new(mapHint: base.mapHint);
-                    structureMapBuilder.initialize(mapHint:base.mapHint);
+                    structureMapBuilder.initialize(mapHint:base.mapHint, parent:this);
                 }
 
 
@@ -211,7 +211,7 @@
 
             save ::<- state.save(),
             load ::(serialized) { 
-                state.load(serialized)
+                state.load(parent:this, serialized)
                 dungeonLogic = DungeonController.new(map:state.map, island:island_, landmark:this);
 
             },
@@ -310,6 +310,10 @@
                 get :: <- state.map.getAllItems() 
             },
             
+            island : {
+                get ::<- island_
+            },
+            
             movePointerToRandomArea ::{
                 @:area = state.map.getRandomEmptyArea();
                 state.map.setPointer(
@@ -326,7 +330,7 @@
             addLocation ::(name, ownedByHint, x, y) {
                 @loc = Location.new(
                     base:Location.Base.database.find(name:name),
-                    parent:this, ownedByHint,
+                    landmark:this, ownedByHint,
                     xHint: x,
                     yHint: y
                 );

@@ -29,6 +29,34 @@
 @:namegen = import(module:'game_singleton.namegen.mt');
 @:partyOptions = import(module:'game_function.partyoptions.mt');
 @:LargeMap = import(module:'game_singleton.largemap.mt');
+
+
+
+
+/* make sure base loadable classes are available */
+
+import(module:'game_class.statset.mt');
+import(module:'game_class.battleai.mt');
+import(module:'game_class.entityquality.mt');
+import(module:'game_class.inventory.mt');
+import(module:'game_class.itemenchant.mt');
+import(module:'game_class.map.mt');
+import(module:'game_class.party.mt');
+import(module:'game_class.profession.mt');
+import(module:'game_class.stateflags.mt');
+
+
+import(module:'game_class.item.mt');
+import(module:'game_class.entity.mt');
+import(module:'game_class.event.mt');
+import(module:'game_class.island.mt');
+import(module:'game_class.landmark.mt');
+import(module:'game_class.location.mt');
+
+
+
+
+
 @:distance::(x0, y0, x1, y1) {
     @xd = x1 - x0;
     @yd = y1 - y0;
@@ -65,7 +93,7 @@ return class(
                     match(choice-1) {
                       // save 
                       (0)::<= {
-                        windowEvent.queueChoicesNow(
+                        windowEvent.queueChoices(
                             prompt:'Save which slot?',
                             choices: [
                                 'Slot 1',
@@ -275,16 +303,19 @@ return class(
                                     'Slot 2',
                                     'Slot 3',
                                 ],
-                                canCancel: true
-                            );
-                            when(choice == 0) empty;
-                            @:data = onLoadState(slot:choice);
+                                canCancel: true,
+                                onChoice::(choice) {
+                                    when(choice == 0) empty;
+                                    @:data = onLoadState(slot:choice);
 
-                            when(data == empty)
-                                windowEvent.queueMessage(text:'There is no data in this slot');
+                                    when(data == empty)
+                                        windowEvent.queueMessage(text:'There is no data in this slot');
+                                        
+                                    this.load(serialized:JSON.decode(string:data));
+                                    this.startResume();
                                 
-                            this.state = JSON.decode(string:data);
-                            this.startInstance();
+                                }
+                            );
                           },
                           
                           (1)::<= {
@@ -309,70 +340,10 @@ return class(
                 );
             },
             
-        
-            startInstance ::{
-                /*
-                @destination = empty;
-                @landmarkChain = [];
-
-
-                if (destination != empty) ::<= {
-                    // user initiated island travel
-                    match(destination->type) {
-                      (Island.type)::<={
-                        island = destination;
-                        landmark = empty;
-                        world.island = island;
-                        
-                        // place the player on a random location in the island
-                        island.map.setPointer(
-                            x: Number.random()*island.map.size,
-                            y: Number.random()*island.map.size
-                        );                                                
-
-                      },
-                      
-                      (Landmark.type):::<= {
-                        if (landmark != empty)
-                            landmarkChain->push(value:landmark);
-                        island = destination.island;
-                        landmark = destination;
-                        world.island = island;
-                        landmark.map.setPointer(
-                            x: landmark.gate.x,
-                            y: landmark.gate.y
-                        );                                                
-
-                      }
-                      
-                      
-                    }
-
-                    destination = empty;
-                } else ::<= {
-                    landmark = empty;
-                    // need to go back where we came before back to island                        
-                    if (landmarkChain->keycount > 0) ::<={
-                        landmark = landmarkChain->pop;
-                    }
-                }
-            
-                when(landmark != empty) ::<= {
-                    destination = visitLandmark();
-                    breakpoint();
-                }
-
-
-                // fallback op                        
-                destination = visitIsland();
-                breakpoint();
-                when(party.isIncapacitated()) ::<= {
-                    canvas.clear();
-                    windowEvent.queueMessage(text: 'Perhaps fate has entrusted someone else with the future...');                            
-                    party.clear();
-                    send();
-                }
-                */
+            startResume ::{
+                island = world.island;
+                party = world.party;
+                this.visitIsland();            
             },
         
             startNew ::{
@@ -683,7 +654,7 @@ return class(
             },
             
             load ::(serialized) {
-                world.load(parent:{}, serialized);
+                world.load(serialized);
             }
         }
     }

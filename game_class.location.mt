@@ -51,8 +51,8 @@
         }
     },
     
-    new::(base, parent, xHint, yHint, state, targetLandmarkHint, ownedByHint) {
-        @:landmark = parent;
+    new::(base, parent, landmark, xHint, yHint, state, targetLandmarkHint, ownedByHint) {
+        @:landmark = if (landmark) landmark else parent.parent; // parents of locations are always maps
         @:this = Location.defaultNew();
         this.initialize(landmark);
 

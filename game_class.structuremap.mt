@@ -273,12 +273,6 @@
             location.y = top;
 
 
-            @:interact = ::{
-                windowEvent.queueMessage(
-                    text: 'Arrived at the ' + location.name + '.'
-                );
-                location.interact();
-            }
             
             @:index = _map.addScenerySymbol(character:'#');
 
@@ -887,8 +881,8 @@
         @Location = import(module:'game_class.location.mt');
         @:locations = [];
         this.interface = {
-            initialize::(mapHint => Object) {
-                map = Map.new();
+            initialize::(mapHint => Object, parent) {
+                map = Map.new(parent);
 
                 map.paged = false;
                 map.renderOutOfBounds = true;

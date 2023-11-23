@@ -20,11 +20,8 @@
             @:Landmark = import(module:'game_class.landmark.mt');
             
             location.targetLandmark = 
-                Landmark.new(
+                location.landmark.island.newLandmark(
                     base:Landmark.Base.database.find(name:location.landmark.base.name),
-                    island:location.landmark.island,
-                    x:-1,
-                    y:-1,
                     floorHint:location.landmark.floor+1
                 )
             ;

@@ -20,11 +20,16 @@
 @:class  = import(module:'Matte.Core.Class');
 @:Ability = import(module:'game_class.ability.mt');
 @:random = import(module:'game_singleton.random.mt');
-@:BattleAI = class(
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:BattleAI = LoadableClass.new(
     name: 'Wyvern.BattleAI',
-    new::(user) {
+    new::(state, parent, user) {
         @:this = BattleAI.defaultNew();
         this.setUser(user);
+        
+        if (state != empty)
+            this.load(serialized:state);
+        
         return this;
     },
     define:::(this) {
@@ -38,13 +43,12 @@
             setUser ::(user) {
                 user_ = user;
             },
-            state : {
-                set ::(value) {
-                
-                },
-                get :: {
-                    return {}                
-                }
+            save ::{
+                return {}
+            },
+            
+            load ::(serialized) {
+            
             },
             reset ::(
                 allies,

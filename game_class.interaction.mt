@@ -1124,17 +1124,14 @@ Interaction.new(
                         @:world = import(module:'game_singleton.world.mt');
                         @:instance = import(module:'game_singleton.instance.mt');
 
-                        @:d = Landmark.new(
+                        @:d = location.landmark.island.newLandmark(
                             base:Landmark.Base.database.find(name:match(keys[choice-1].name) {
                                 ('Wyvern Key of Fire'):    'Fire Wyvern Dimension',
                                 ('Wyvern Key of Ice'):     'Ice Wyvern Dimension',
                                 ('Wyvern Key of Thunder'): 'Thunder Wyvern Dimension',
                                 ('Wyvern Key of Light'):   'Light Wyvern Dimension',
                                 default: 'Unknown Wyvern Dimension'
-                            }),
-                            parent:location.landmark.island,
-                            x: 0,
-                            y: 0
+                            })
                         );
                         instance.visitLandmark(landmark:d);                        
                     
@@ -1164,11 +1161,8 @@ Interaction.new(
                     @:Landmark = import(module:'game_class.landmark.mt');
                     
                     location.targetLandmark = 
-                        Landmark.new(
-                            base:Landmark.Base.database.find(name:'Shrine: Lost Floor'),
-                            parent:location.landmark.island,
-                            x:-1,
-                            y:-1
+                        location.landmark.island.newLandmark(
+                            base:Landmark.Base.database.find(name:'Shrine: Lost Floor')
                         )
                     ;
                                             
@@ -1176,11 +1170,8 @@ Interaction.new(
                     @:Landmark = import(module:'game_class.landmark.mt');
                     
                     location.targetLandmark = 
-                        Landmark.new(
+                        location.landmark.island.newLandmark(
                             base:Landmark.Base.database.find(name:location.landmark.base.name),
-                            parent:location.landmark.island,
-                            x:-1,
-                            y:-1,
                             floorHint:location.landmark.floor+1
                         )
                     ;
@@ -1238,11 +1229,8 @@ Interaction.new(
                     
 
                     location.targetLandmark = 
-                        Landmark.new(
-                            base:Landmark.Base.database.find(name:'Treasure Room'),
-                            parent:location.landmark.island,
-                            x:-1,
-                            y:-1
+                        location.landmark.island.newLandmark(
+                            base:Landmark.Base.database.find(name:'Treasure Room')
                         )
                     ;
                     

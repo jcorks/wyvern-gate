@@ -189,7 +189,7 @@
                 state.load(parent:this, serialized);
                 @:st = state.story;
                 state.story = import(module:'game_singleton.story.mt');
-                state.story.load(serialized:st);
+                state.story.load(parent:this, serialized:st);
             }
             
         }

@@ -162,7 +162,7 @@
                     stepsSinceLastEvent : 0,
                     
                     // map of the region
-                    map : LargeMap.create(sizeW, sizeH),
+                    map : LargeMap.create(parent:this, sizeW, sizeH),
                     
                     id : genID(),
 
@@ -503,8 +503,7 @@
                             this.addEvent(
                                 event:Event.new(
                                     base:Event.Base.database.find(name:'Encounter:Normal'),
-                                    island:this, 
-                                    party:world_.party //, currentTime
+                                    parent:this 
                                 )
                             );
                         } else ::<= {
@@ -513,8 +512,7 @@
                                     base:Event.Base.database.getRandomFiltered(
                                         filter:::(value) <- !value.name->contains(key:'Encounter')
                                     ),
-                                    island:this, 
-                                    party:world_.party //, currentTime
+                                    parent:this
                                 )
                             );                        
                         }
@@ -532,6 +530,21 @@
                         state.events->remove(key:state.events->findIndex(value:event));
                     }
                 }
+            },
+            
+            newLandmark ::(base, x, y, floorHint) {
+                @landmark = Landmark.new(
+                    base:base,
+                    parent:state.map,
+                    x: x,
+                    y: y,
+                    floorHint:floorHint
+                );            
+                
+                if (x != empty && y != empty) ::<= {
+                    state.map.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.legendName);
+                }
+                return landmark;
             },
             
             addEvent::(event) {
