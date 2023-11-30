@@ -34,7 +34,7 @@
 
         @:hurt = random.pickArrayItem(list:party.members);
         @:oldStats = StatSet.new();
-        oldStats.state = hurt.stats.state;
+        oldStats.load(serialized:hurt.stats.save());
         (random.pickArrayItem(list: [
             :: {
                 windowEvent.queueMessage(text: hurt.name + ' hurt their head from the fall...', renderable:{render::{canvas.blackout();}});
@@ -61,8 +61,7 @@
         
         oldStats.printDiff(other:hurt.stats, prompt:'Ouch...', renderable:{render::{canvas.blackout();}});
         
-        @:instance = import(module:'game_singleton.instance.mt');
-        instance.visitLandmark(landmark:location.targetLandmark);
+        location.targetLandmark.visit();
     },
     
     // basic damage trap

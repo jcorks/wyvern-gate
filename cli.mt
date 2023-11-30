@@ -102,25 +102,31 @@ instance.mainMenu(
         data
     ) {
         @:Filesystem = import(module:'Matte.System.Filesystem');
+        @:oldcwd = Filesystem.cwd;
         Filesystem.cwd = '/usr/share/Wyvern_SAVES';
         Filesystem.writeString(
             path: 'saveslot' + slot,
             string: data
         );
+        Filesystem.cwd = oldcwd;
+
     },
 
     onLoadState :::(
         slot
     ) {
         @:Filesystem = import(module:'Matte.System.Filesystem');
+        @:oldcwd = Filesystem.cwd;
         Filesystem.cwd = '/usr/share/Wyvern_SAVES';
         return {:::} {
-            return Filesystem.readString(
+            @:out = Filesystem.readString(
                 path: 'saveslot' + slot
             );
-            
+            Filesystem.cwd = oldcwd;
+            return out;            
         } : {
             onError:::(detail) {
+                Filesystem.cwd = oldcwd;
                 return empty;
             }
         }

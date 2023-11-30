@@ -33,6 +33,8 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
                 when(showGold) ::<= {
                     @g = value.price * goldMultiplier;
                     g = g->ceil;
+                    if (g < 1)
+                        g = 1;
                     return value.name + '(' + g + 'G)';
                 }
                 return value.name;

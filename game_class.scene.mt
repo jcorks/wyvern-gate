@@ -174,7 +174,7 @@ Scene.new(
                 if (key == empty) ::<= {
                     key = {:::} {
                         foreach(world.party.members)::(i, member) {
-                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_L);
+                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_LR);
                             if (wep.name == 'Wyvern Key of Fire') ::<= {
                                 send(message:key);
                             }
@@ -305,7 +305,7 @@ Scene.new(
                                     ),
                                     rngEnchantHint:true, 
                                     from:location.landmark.island.newInhabitant(), 
-                                    colorHint:'Red', 
+                                    colorHint:'red', 
                                     materialHint: 'Gold'
                                 );
                                 @:ItemEnchant = import(module:'game_class.itemenchant.mt');
@@ -365,7 +365,7 @@ Scene.new(
                 if (key == empty) ::<= {
                     key = {:::} {
                         foreach(world.party.members)::(i, member) {
-                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_L);
+                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_LR);
                             if (wep.name == 'Wyvern Key of Fire') ::<= {
                                 send(message:key);
                             }
@@ -459,7 +459,7 @@ Scene.new(
                 if (key == empty) ::<= {
                     key = {:::} {
                         foreach(world.party.members)::(i, member) {
-                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_L);
+                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_LR);
                             if (wep.name == 'Wyvern Key of Ice') ::<= {
                                 send(message:key);
                             }
@@ -558,11 +558,11 @@ Scene.new(
                                             
                                             @:prize = Item.new(
                                                 base: Item.Base.database.getRandomFiltered(
-                                                    filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial && value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
+                                                    filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial && value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
                                                 ),
                                                 rngEnchantHint:true, 
                                                 from:location.landmark.island.newInhabitant(), 
-                                                colorHint:'Blue', 
+                                                colorHint:'blue', 
                                                 materialHint: 'Mythril', 
                                                 qualityHint: 'Masterwork'
                                             );
@@ -604,7 +604,7 @@ Scene.new(
                 if (key == empty) ::<= {
                     key = {:::} {
                         foreach(world.party.members)::(i, member) {
-                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_L);
+                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_LR);
                             if (wep.name == 'Wyvern Key of Ice') ::<= {
                                 send(message:key);
                             }
@@ -719,7 +719,7 @@ Scene.new(
                 if (key == empty) ::<= {
                     key = {:::} {
                         foreach(world.party.members)::(i, member) {
-                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_L);
+                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_LR);
                             if (wep.name == 'Wyvern Key of Thunder') ::<= {
                                 send(message:key);
                             }

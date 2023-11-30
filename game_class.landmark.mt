@@ -26,6 +26,7 @@
 @Location = empty; // circular dep.
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:Map = import(module:'game_class.map.mt');
 
 
 
@@ -46,7 +47,12 @@
     },
     
     new::(parent, base, x, y, state, floorHint){ 
-        @:island = parent.parent; // immediate parent is map
+        @island = if (parent->type == Map.type)
+            parent.parent // immediate parent is map
+        else // only other case is its a location, due to targetLandmark
+            parent.landmark.island
+            // loc  map   landm   map   island
+        ;
         @:this = Landmark.defaultNew();
         this.initialize(island);
         if (state != empty) 
@@ -63,8 +69,10 @@
         @dungeonLogic;
         @structureMapBuilder; // only used in initialization
 
+        @:world = import(module:'game_singleton.world.mt');
         @:state = State.new(
             items : {
+                worldID : world.getNextID(),
                 name : empty,
                 base : empty,
                 x : 0,
@@ -73,7 +81,9 @@
                 peaceful : false,
                 floor : 0,
                 map : empty,
-                gate : empty
+                gate : empty,
+                stepsSinceLast: 0,
+                modData : {}
             
             }
         );
@@ -215,6 +225,10 @@
                 dungeonLogic = DungeonController.new(map:state.map, island:island_, landmark:this);
 
             },
+
+            worldID : {
+                get ::<- state.worldID
+            },
         
             description : {
                 get :: {
@@ -321,6 +335,21 @@
                     y:area.y + (area.height/2)->floor
                 );            
             },
+            
+            getRandomEmptyPosition ::{
+                // shouldnt do this!
+                when (!state.base.dungeonMap) empty;
+
+                @:area = state.map.getRandomEmptyArea();
+                return { 
+                    x:area.x + (area.width/2)->floor,
+                    y:area.y + (area.height/2)->floor
+                }
+            },
+            
+            modData : {
+                get ::<- state.modData
+            },
 
 
             removeLocation ::(location) {
@@ -358,6 +387,142 @@
             map : {
                 get ::<- state.map
             },
+            
+            
+            // TODO: Sort of in between controller and internal action 
+            // should probably move back to instance
+            visit ::(where) {
+                if (where != empty)
+                    state.map.setPointer(
+                        x:where.x,
+                        y:where.y
+                    );                    
+                
+                @:windowEvent = import(module:'game_singleton.windowevent.mt');
+                @:partyOptions = import(module:'game_function.partyoptions.mt');
+                @:world = import(module:'game_singleton.world.mt');
+                @:Island = import(module:'game_class.island.mt');
+                @:Event  = import(module:'game_class.event.mt');
+
+                @:party = world.party;
+                
+                this.map.title = this.name + ' - ' + world.timeString + '          ';
+                this.base.onVisit(landmark:this, island:this.island);
+
+
+                
+                @stepCount = 0;
+
+
+                @:landmarkChoices = ::{
+                    windowEvent.queueChoices(
+                        leftWeight: 1,
+                        topWeight: 1,
+                        prompt: 'What next?',
+                        keep:true,
+                        canCancel:true,
+                        onGetChoices ::{
+                            @choices = [                
+                                'Party'
+                            ];
+                            
+                            
+                            @locationAt = this.map.getNamedItemsUnderPointer();
+                            if (locationAt != empty) ::<= {
+                                foreach(locationAt)::(i, loc) {
+                                    choices->push(value:'Check ' + loc.name);
+                                }
+                            }
+
+                            return choices;                
+                        },
+                        renderable:this.map,
+                        onChoice::(choice) {
+                            @locationAt = this.map.getNamedItemsUnderPointer();
+                                
+
+                                
+                            @:MAX_STATIC_CHOICES = 1;
+                            match(choice-1) {
+                              
+                              (0): ::<={
+                                partyOptions();
+                                this.step();
+                              },
+                              
+                              
+                              default: ::<= {
+                                when(choice == empty) empty;
+                                choice -= MAX_STATIC_CHOICES + 1;
+                                when(choice >= locationAt->keycount) empty;
+                                locationAt = locationAt[choice].data;
+                                
+                                
+                                locationAt.interact();
+
+                              }
+                            
+                            }
+                        }
+                    );
+                }
+                
+                
+                windowEvent.queueCursorMove(
+                    jumpTag: 'VisitLandmark',
+                    onMenu ::{
+                        landmarkChoices()
+                    },
+                    renderable:this.map,
+                    onMove ::(choice) {
+                        // move by one unit in that direction
+                        // or ON it if its within one unit.
+                        this.map.movePointerAdjacent(
+                            x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
+                            y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
+                        );
+                        this.step();
+                        stepCount += 1;
+
+
+                        // every 5 steps, heal 1% HP
+                        if (stepCount % 15 == 0) ::<= {
+                            foreach(party.members)::(i, member) <- member.heal(amount:(member.stats.HP * 0.01)->ceil);
+                        }
+
+                        state.stepsSinceLast += 1;
+                        if (this.peaceful == false) ::<= {
+                            if (state.stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
+                                this.island.addEvent(
+                                    event:Event.new(
+                                        base:Event.Base.database.find(name:'Encounter:Non-peaceful'),
+                                        parent:this //, currentTime
+                                    )
+                                );
+                                state.stepsSinceLast = 0;
+                            }
+                        }
+
+
+                        
+                        // cancel if we've arrived somewhere
+                        @:arrival = this.map.getNamedItemsUnderPointer();
+                        if (arrival != empty && arrival->keycount > 0) ::<= {
+                            foreach(arrival)::(index, arr) {
+                                windowEvent.queueMessage(
+                                    text:"The party has arrived at the " + arr.name
+                                );
+                            }
+                            this.map.setPointer(
+                                x: arrival[0].x,
+                                y: arrival[0].y
+                            );
+                            
+                        }                            
+
+                    }                
+                )
+            }
             
         }
     }
@@ -593,7 +758,7 @@ Landmark.Base.new(
         rarity : 100000,      
         isUnique : true,
         minLocations : 1,
-        maxLocations : 2,
+        maxLocations : 3,
         peaceful: false,
         guarded : false,
         dungeonMap : true,
@@ -604,14 +769,14 @@ Landmark.Base.new(
             {name: 'Enchantment Stand', rarity: 11},
             {name: 'Wyvern Statue', rarity: 15},
             {name: 'Small Chest', rarity: 16},
+            {name: 'Locked Chest', rarity: 7},
             {name: 'Clothing Shop', rarity: 2000}
 
         ],
         requiredLocations : [
             'Stairs Down',
             'Stairs Down',
-            'Locked Chest',
-            'Enchantment Stand'
+            'Fancy Shop'
         ],
         mapHint:{
             layoutType: DungeonMap.LAYOUT_ALPHA

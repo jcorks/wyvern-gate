@@ -110,11 +110,11 @@ return ::(user, item, inBattle) {
                                             
                                             @:oldStats = item.equipMod;
                                             @:newStats = StatSet.new();
-                                            @:state = oldStats.state;
+                                            @:state = oldStats.save();
                                             state[stat] += 8;
                                             state[random.pickArrayItem(list:statChoices)] -= 4;
                                             
-                                            newStats.state = state;
+                                            newStats.load(serialized:state);
                                             item.improvementsLeft-=1;
                                             
                                             oldStats.printDiffRate(
@@ -122,12 +122,12 @@ return ::(user, item, inBattle) {
                                                 prompt: 'New stats: ' + item.name
                                             );
                                             
-                                            item.equipMod.state = newStats.state;
+                                            item.equipMod.load(serialized:newStats.save());
                                             
                                             if (item.equippedBy != empty) ::<= {
                                                 @:oldStats = StatSet.new();
                                                 @equiper = item.equippedBy;
-                                                oldStats.state = equiper.stats.state;
+                                                oldStats.load(serialized:equiper.stats());
                                                 
                                                 @slot = equiper.unequipItem(item, silent:true);
                                                 equiper.equip(item, slot, silent:true);

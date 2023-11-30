@@ -51,7 +51,7 @@
         }
     },
     
-    new::(base, parent, landmark, xHint, yHint, state, targetLandmarkHint, ownedByHint) {
+    new::(base, parent, landmark, xHint, yHint, state, ownedByHint) {
         @:landmark = if (landmark) landmark else parent.parent; // parents of locations are always maps
         @:this = Location.defaultNew();
         this.initialize(landmark);
@@ -59,18 +59,20 @@
         if (state != empty)
             this.load(serialized:state)
         else 
-            this.defaultLoad(base, xHint, yHint, targetLandmarkHint, ownedByHint);
+            this.defaultLoad(base, xHint, yHint, ownedByHint);
         return this;
     },
     
     define:::(this) {
 
-        @targetLandmark; // where this location could take the party. Could be a different island in theory
 
         @landmark_;
-    
+        @world = import(module:'game_singleton.world.mt');    
         @:state = State.new(
             items : {
+                worldID : world.getNextID(),
+                targetLandmark : empty, // where this location could take the party. Could be a different island in theory
+                targetLandmarkEntry : empty, // where in the landmark to take to. Should be an X-Y if populated, else its the locations responsibility to populate as needed.
                 base : empty,
                 occupants : [], // entities. non-owners can shift
                 ownedBy : empty,// entity
@@ -81,7 +83,8 @@
                 contested : false,
                 name : empty,
                 data : {}, // simple table
-                visited : false
+                visited : false,
+                modData : {}
             }
         );
         
@@ -91,7 +94,7 @@
                 landmark_ = landmark;     
             },
 
-            defaultLoad ::(base, xHint, yHint, targetLandmarkHint, ownedByHint) {
+            defaultLoad ::(base, xHint, yHint, ownedByHint) {
 
                 state.base = base;
                 state.x = if (xHint == empty) (Number.random() * landmark_.width ) else xHint;  
@@ -111,6 +114,11 @@
             load ::(serialized) {
                 state.load(parent:this, serialized)
             },
+
+            worldID : {
+                get ::<- state.worldID
+            },
+
                 
             base : {
                 get :: {
@@ -119,9 +127,15 @@
             },
             
             targetLandmark : {
-                get ::<- targetLandmark,
-                set ::(value) <- targetLandmark = value
+                get ::<- state.targetLandmark,
+                set ::(value) <- state.targetLandmark = value
             },
+
+            targetLandmarkEntry : {
+                get ::<- state.targetLandmarkEntry,
+                set ::(value) <- state.targetLandmarkEntry = value
+            },
+
             
             inventory : {
                 get ::<- state.inventory
@@ -183,15 +197,18 @@
                 }
             },
             
+            // per location mod data.
+            modData : {
+                get ::<- state.modData
+            },
+            
             
             lockWithPressurePlate :: {
                 @:pressurePlate = landmark_.addLocation(
                     name:'Pressure Plate'
                 );
                 
-                @:id = 'PLATE_' + Number.random();
-                state.data.plateID = id;
-                pressurePlate.data.plateID = id;
+                state.data.plateID = pressurePlate.worldID;
                 pressurePlate.data.pressed = false;
 
 
@@ -211,7 +228,7 @@
                 
                 return locations[locations->findIndex(query::(value) <- 
                     value.name == 'Pressure Plate' &&
-                    value.data.plateID == state.data.plateID
+                    value.worldID == state.data.plateID
                 )].data.pressed;
             },
             
@@ -219,12 +236,20 @@
                 @world = import(module:'game_singleton.world.mt');
                 @party = world.party;            
                 @:Interaction = import(module:'game_class.interaction.mt');
-            
+                
+
             
                 @:aggress::(location, party) {
+                
+                    @:choiceNames = [];
+                    foreach(location.base.aggressiveInteractions) ::(k, name) {
+                        choiceNames->push(value:
+                            Interaction.database.find(name).displayName
+                        );
+                    }                
                     windowEvent.queueChoices(
                         prompt: 'Aggress how?',
-                        choices: location.base.aggressiveInteractions,
+                        choices: choiceNames,
                         canCancel : true,
                         onChoice ::(choice) {
                             when(choice == 0) empty;
@@ -284,7 +309,7 @@
                 @:choices = [...interactionNames];
 
                 if (this.base.aggressiveInteractions->keycount)
-                    choices->push(value: 'Aggress...');
+                    choices->push(value: 'Aggress location...');
                     
                 windowEvent.queueChoices(
                     prompt: 'Interaction',
@@ -720,7 +745,7 @@ Location.Base.new(data:{
                 Scene.database.find(name:'scene_wyvernfire1').act(onDone::{}, location, landmark:location.landmark);                        
             }
         }
-        location.ownedBy.stats.state = StatSet.new(
+        location.ownedBy.stats.load(serialized:StatSet.new(
             HP:   150,
             AP:   999,
             ATK:  12,
@@ -729,7 +754,7 @@ Location.Base.new(data:{
             LUK:  8,
             SPD:  25,
             DEX:  10
-        ).state;
+        ).save());
         location.ownedBy.heal(amount:9999, silent:true); 
         location.ownedBy.healAP(amount:9999, silent:true); 
 
@@ -803,7 +828,7 @@ Location.Base.new(data:{
                 Scene.database.find(name:'scene_wyvernice1').act(onDone::{}, location, landmark:location.landmark);                        
             }
         }
-        location.ownedBy.stats.state = StatSet.new(
+        location.ownedBy.stats.load(serialized:StatSet.new(
             HP:   270,
             AP:   999,
             ATK:  12,
@@ -812,7 +837,7 @@ Location.Base.new(data:{
             LUK:  6,
             SPD:  20,
             DEX:  12
-        ).state;
+        ).save());
         location.ownedBy.heal(amount:9999, silent:true); 
         location.ownedBy.healAP(amount:9999, silent:true); 
 
@@ -886,7 +911,7 @@ Location.Base.new(data:{
                 Scene.database.find(name:'scene_wyvernthunder1').act(onDone::{}, location, landmark:location.landmark);                        
             }
         }
-        location.ownedBy.stats.state = StatSet.new(
+        location.ownedBy.stats.load(serialized:StatSet.new(
             HP:   710,
             AP:   999,
             ATK:  15,
@@ -895,7 +920,7 @@ Location.Base.new(data:{
             LUK:  99,
             SPD:  30,
             DEX:  16
-        ).state;
+        ).save());
         location.ownedBy.heal(amount:9999, silent:true); 
         location.ownedBy.healAP(amount:9999, silent:true); 
 
@@ -967,15 +992,6 @@ Location.Base.new(data:{
 
 
 
-        location.inventory.add(item:Item.new(base:Item.Base.database.find(
-            name: 'Skill Crystal'
-        ), from:location.ownedBy));                
-        location.inventory.add(item:Item.new(base:Item.Base.database.find(
-            name: 'Skill Crystal'
-        ), from:location.ownedBy));                
-        location.inventory.add(item:Item.new(base:Item.Base.database.find(
-            name: 'Skill Crystal'
-        ), from:location.ownedBy));                
         location.inventory.add(item:Item.new(base:Item.Base.database.find(
             name: 'Skill Crystal'
         ), from:location.ownedBy));                
@@ -1838,7 +1854,6 @@ Location.Base.new(data:{
     
     onCreate ::(location) { 
         @:ItemEnchant = import(module:'game_class.itemenchant.mt');
-        location.data.hasEnchant = true;
         location.data.enchant = ItemEnchant.new(
             base:ItemEnchant.Base.database.getRandom()
         )
@@ -1898,17 +1913,14 @@ Location.Base.new(data:{
             ]
         );
 
-        location.ownedBy.onHire = ::{
-            @:story = import(module:'game_singleton.story.mt');
-            story.meiInParty = true;            
-        };
+
 
         @:meiWeapon = Item.new(
             base: Item.Base.database.find(name: 'Falchion'),
             rngEnchantHint: true,
             qualityHint: 'Quality',
             materialHint: 'Dragonglass',
-            colorHint: 'Pink',
+            colorHint: 'pink',
             forceEnchant: true
         );
         meiWeapon.maxOut();
@@ -1917,7 +1929,7 @@ Location.Base.new(data:{
             base: Item.Base.database.find(name: 'Robe'),
             rngEnchantHint: true,
             qualityHint: 'Masterwork',
-            colorHint: 'Pink',
+            colorHint: 'pink',
             apparelHint: 'Wool+',
             forceEnchant: true
         );
@@ -1929,7 +1941,7 @@ Location.Base.new(data:{
             forceEnchant: true
         );
         
-        location.ownedBy.equip(item:meiWeapon, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true);
+        location.ownedBy.equip(item:meiWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
         location.ownedBy.equip(item:meiRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);
         location.ownedBy.equip(item:meiAcc,    slot:Entity.EQUIP_SLOTS.TRINKET, silent:true);
 
@@ -1974,7 +1986,169 @@ Location.Base.new(data:{
             );
             return false;
         }
-            
+        location.ownedBy.onHire = ::{
+            @:story = import(module:'game_singleton.story.mt');
+            story.meiInParty = true;            
+        };            
+    },
+    
+    onCreate ::(location) { 
+        location.data.peaceful = true;
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+
+});
+
+
+
+Location.Base.new(data:{
+    name: 'Fancy Shop',
+    rarity: 4,
+    ownVerb : '',
+    symbol: '$',
+    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    onePerLandmark : true,
+    minStructureSize : 1,
+
+    descriptions: [
+        'A surprisingly ornate and refined shopping stand.'
+    ],
+    interactions : [
+        'buy:shop',
+        'talk',
+        'examine'
+    ],
+    
+    aggressiveInteractions : [
+    ],
+
+    
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {
+        @:Profession = import(module:'game_class.profession.mt');
+        @:Entity = import(module:'game_class.entity.mt');
+        @:EntityQuality = import(module:'game_class.entityquality.mt');
+        location.ownedBy = Entity.new(
+            speciesHint: 'Rabbit',
+            professionHint: 'Summoner',
+            personalityHint: 'Caring',
+            levelHint: 5,
+            adventurousHint: true,
+            qualities : [
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'snout'), trait0Hint:0),
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'fur'),   descriptionHint: 6, trait0Hint:10, trait2Hint:3),
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'eyes'),  descriptionHint: 3, trait2Hint:6, trait1Hint: 0),
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'ears'),  descriptionHint: 1, trait0Hint:2),
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'face'),  descriptionHint: 0, trait0Hint:3),
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'tail'),  descriptionHint: 0, trait0Hint:0),
+                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'body'),  descriptionHint: 1, trait0Hint:0, trait1Hint:0),            
+            ]
+        );
+
+
+
+        @:fausWeapon = Item.new(
+            base: Item.Base.database.find(name: 'Morning Star'),
+            rngEnchantHint: false,
+            qualityHint: 'Masterwork',
+            materialHint: 'Mythril',
+            colorHint: 'gold',
+            enchantHint: 'Aura: Gold',
+            forceEnchant: true
+        );
+        fausWeapon.maxOut();
+        
+        @:fausRobe = Item.new(
+            base: Item.Base.database.find(name: 'Robe'),
+            rngEnchantHint: false,
+            qualityHint: 'Masterwork',
+            colorHint: 'black',
+            apparelHint: 'Mythril',
+            forceEnchant: true,
+            enchantHint: 'Inlet: Opal'            
+        );
+        fausRobe.maxOut();
+
+
+        @:fausCloak = Item.new(
+            base: Item.Base.database.find(name: 'Cloak'),
+            rngEnchantHint: false,
+            qualityHint: 'Masterwork',
+            colorHint: 'olive-green',
+            apparelHint: 'Mythril',
+            forceEnchant: true
+        );
+        fausCloak.maxOut();
+
+
+        
+        
+        location.ownedBy.equip(item:fausWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+        location.ownedBy.equip(item:fausCloak,  slot:Entity.EQUIP_SLOTS.TRINKET, silent:true);
+        location.ownedBy.equip(item:fausRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);
+
+        location.ownedBy.heal(
+            amount: 9999,
+            silent: true
+        );
+
+        @:learned = location.ownedBy.profession.gainSP(amount:20);
+        foreach(learned)::(index, ability) {
+            location.ownedBy.learnAbility(name:ability);
+        }                                                
+
+
+
+        location.ownedBy.name = 'Faus';
+        location.inventory.maxItems = 50;
+
+        @:nameGen = import(module:'game_singleton.namegen.mt');
+        @:story = import(module:'game_singleton.story.mt');
+
+
+
+        @:qualities = [
+            'Legendary',
+            'Divine',
+            'Masterwork',
+            'Queen\'s',
+            'King\'s'
+        ]
+
+
+        for(0, 10)::(i) {
+            // no weight, as the value scales
+            location.inventory.add(item:
+                Item.new(
+                    base:Item.Base.database.getRandomFiltered(
+                        filter:::(value) <- value.hasQuality == true
+                    ),
+                    qualityHint: random.pickArrayItem(list:qualities),
+                    from:location.ownedBy, 
+                    rngEnchantHint:true
+                )
+            );
+        }
+    },  
+    
+    onInteract ::(location) {
+        @:story = import(module:'game_singleton.story.mt');
+        when(story.fausInParty) ::<= {
+            windowEvent.queueMessage(
+                text: 'The shop seems empty...'
+            );
+            return false;
+        }
+        
+        location.ownedBy.onHire = ::{
+            @:story = import(module:'game_singleton.story.mt');
+            story.fausInParty = true;            
+        };        
     },
     
     onCreate ::(location) { 

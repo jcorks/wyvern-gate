@@ -17,7 +17,7 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-
+@:State = import(module:'game_class.state.mt');
 
 @:StateFlags = LoadableClass.new(
     name : 'Wyvern.StateFlag',
@@ -44,43 +44,47 @@
     },
     
     define :::(this) {
-        @set = [];
+        @:state = State.new(
+            items: {
+                set : []
+            }
+        );
         
         this.interface = {
             save ::{
-                return {...set}
+                return state.save();
             },
             
             load ::(serialized) {
-                set = {...serialized};
+                state.load(parent:this, serialized);
             },
         
             add::(flag, flags) {
                 when(flags == empty) ::<= {
-                    set[flag] = true;
+                    state.set[flag] = true;
                 }
                 
                 foreach(flags)::(index, flag) {
-                    set[flag] = true;
+                    state.set[flag] = true;
                 }
             },
             
             unset::(flag, flags) {
                 when(flag) ::<= {
-                    set[flag] = empty;
+                    state.set[flag] = empty;
                 }
                 
                 foreach(flags)::(index, flag) {
-                    set[flag] = empty;
+                    state.set[flag] = empty;
                 }
             },
             
             has::(flag) {
-                return set[flag] == true;
+                return state.set[flag] == true;
             },
             
             reset:: {
-                set = [];
+                state.set = [];
             }            
         }
     

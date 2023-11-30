@@ -57,7 +57,7 @@ Material.new(
     data : {
         name : 'Hardstone',
         description : 'The polished hardstone it\'s made of is dark and shiny.',
-        rarity : 3,
+        rarity : 13,
         tier : 0,
         statMod : StatSet.new(
             DEF: 3,
@@ -72,7 +72,7 @@ Material.new(
     data : {
         name : 'Copper',
         description : 'The copper material used gives off a radiant brown color.',
-        rarity : 3,
+        rarity : 13,
         tier : 0,
         statMod : StatSet.new(
             DEF: 5,
@@ -86,7 +86,7 @@ Material.new(
     data : {
         name : 'Steel',
         description : 'The steel used gives a persistent shine.',
-        rarity : 5,
+        rarity : 15,
         tier : 1,
         statMod : StatSet.new(
             DEF: 30,
@@ -100,7 +100,7 @@ Material.new(
     data : {
         name : 'Iron',
         description : 'The iron used gives it a solid grey color.',
-        rarity : 2,
+        rarity : 13,
         tier : 0,
         statMod : StatSet.new(
             DEF: 10,
@@ -115,7 +115,7 @@ Material.new(
     data : {
         name : 'Gold',
         description : 'The gold used gives a radiant glow.',
-        rarity : 50,
+        rarity : 30,
         tier : 1,
         statMod : StatSet.new(
             DEF: 10,
@@ -149,7 +149,7 @@ Material.new(
     data : {
         name : 'Tungsten',
         description : 'The tungsten used gives it a whitish-grey color.',
-        rarity : 2,
+        rarity : 15,
         tier : 1,
         statMod : StatSet.new(
             DEF: 20,
@@ -165,7 +165,7 @@ Material.new(
     data : {
         name : 'Mythril',
         description : 'The mythril used makes it radiantly green',
-        rarity : 100,
+        rarity : 70,
         tier : 2,
         statMod : StatSet.new(
             DEF: 70,
@@ -180,7 +180,7 @@ Material.new(
     data : {
         name : 'Adamantine',
         description : 'The adamantine used makes it earthly',
-        rarity : 150,
+        rarity : 90,
         tier : 3,
         statMod : StatSet.new(
             DEF: 100,
@@ -194,7 +194,7 @@ Material.new(
     data : {
         name : 'Quicksilver',
         description : 'The quicksilver used makes it remarkably shiny.',
-        rarity : 150,
+        rarity : 110,
         tier : 3,
         statMod : StatSet.new(
             DEF: 50,
@@ -209,7 +209,7 @@ Material.new(
     data : {
         name : 'Dragonglass',
         description : 'The dragonglass used gives it a deep black color.',
-        rarity : 200,
+        rarity : 110,
         tier : 3,
         statMod : StatSet.new(
             DEF: -20,
@@ -238,7 +238,7 @@ Material.new(
 Material.new(
     data : {
         name : 'Crystal',
-        rarity : 150,
+        rarity : 80,
         description : 'The crystal used makes it semi-transparent.',
         tier : 2,
         statMod : StatSet.new(
@@ -250,12 +250,26 @@ Material.new(
     }
 )   
 
-
+Material.new(
+    data : {
+        name : 'Ray',
+        rarity : 150,
+        description : 'Parts of this seem to be made of solid light.',
+        tier : 5,
+        statMod : StatSet.new(
+            DEF: 60,
+            INT: 200,
+            ATK: 200,
+            SPD: 100
+        ),
+        pricePercentMod: 9500
+    }
+)  
 
 Material.new(
     data : {
         name : 'Sunstone',
-        rarity : 150,
+        rarity : 50,
         description : 'The sunstone used gives it a warm touch.',
         tier : 1,
         statMod : StatSet.new(
@@ -270,7 +284,7 @@ Material.new(
 Material.new(
     data : {
         name : 'Moonstone',
-        rarity : 150,
+        rarity : 50,
         description : 'The moonstone used gives it a cold touch.',
         tier : 1,
         statMod : StatSet.new(

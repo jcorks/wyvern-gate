@@ -30,6 +30,7 @@
 @:partyOptions = import(module:'game_function.partyoptions.mt');
 @:LargeMap = import(module:'game_singleton.largemap.mt');
 
+import(module:'game_function.pickequippeditem.mt');
 
 
 
@@ -74,7 +75,6 @@ return class(
         @party;
         @onSaveState;
         @onLoadState;
-        @stepsSinceLast = 0;
 
         
         
@@ -140,134 +140,7 @@ return class(
         
         
         this.interface = {
-            visitLandmark ::(landmark){
-                landmark.map.title = landmark.name + ' - ' + world.timeString + '          ';
-                landmark.base.onVisit(landmark, island:landmark.island);
-                // render pattern
-                /*canvas.clear();
-                [0, 100]->for(do:::(y) {
-                    canvas.movePen(
-                        x:((canvas.width)*Number.random())->floor, 
-                        y:((canvas.height)*Number.random())->floor
-                    );
-                    canvas.drawChar(text:',');
-                });
-
-                canvas.pushState();
-                */
-                
-                @stepCount = 0;
-
-
-                @:landmarkChoices = ::{
-                    windowEvent.queueChoices(
-                        leftWeight: 1,
-                        topWeight: 1,
-                        prompt: 'What next?',
-                        keep:true,
-                        canCancel:true,
-                        onGetChoices ::{
-                            @choices = [                
-                                'Party'
-                            ];
-                            
-                            
-                            @locationAt = landmark.map.getNamedItemsUnderPointer();
-                            if (locationAt != empty) ::<= {
-                                foreach(locationAt)::(i, loc) {
-                                    choices->push(value:'Check ' + loc.name);
-                                }
-                            }
-
-                            return choices;                
-                        },
-                        renderable:landmark.map,
-                        onChoice::(choice) {
-                            @locationAt = landmark.map.getNamedItemsUnderPointer();
-                                
-
-                                
-                            @:MAX_STATIC_CHOICES = 1;
-                            match(choice-1) {
-                              
-                              (0): ::<={
-                                partyOptions();
-                                landmark.step();
-                              },
-                              
-                              
-                              default: ::<= {
-                                when(choice == empty) empty;
-                                choice -= MAX_STATIC_CHOICES + 1;
-                                when(choice >= locationAt->keycount) empty;
-                                locationAt = locationAt[choice].data;
-                                
-                                
-                                locationAt.interact();
-
-                              }
-                            
-                            }
-                        }
-                    );
-                }
-                
-                
-                windowEvent.queueCursorMove(
-                    jumpTag: 'VisitLandmark',
-                    onMenu ::{
-                        landmarkChoices()
-                    },
-                    renderable:landmark.map,
-                    onMove ::(choice) {
-                        // move by one unit in that direction
-                        // or ON it if its within one unit.
-                        landmark.map.movePointerAdjacent(
-                            x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
-                            y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
-                        );
-                        landmark.step();
-                        stepCount += 1;
-
-
-                        // every 5 steps, heal 1% HP
-                        if (stepCount % 15 == 0) ::<= {
-                            foreach(party.members)::(i, member) <- member.heal(amount:(member.stats.HP * 0.01)->ceil);
-                        }
-
-                        stepsSinceLast += 1;
-                        if (landmark.peaceful == false) ::<= {
-                            if (stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
-                                island.addEvent(
-                                    event:Event.new(
-                                        base:Event.Base.database.find(name:'Encounter:Non-peaceful'),
-                                        parent:landmark //, currentTime
-                                    )
-                                );
-                                stepsSinceLast = 0;
-                            }
-                        }
-
-
-                        
-                        // cancel if we've arrived somewhere
-                        @:arrival = landmark.map.getNamedItemsUnderPointer();
-                        if (arrival != empty && arrival->keycount > 0) ::<= {
-                            foreach(arrival)::(index, arr) {
-                                windowEvent.queueMessage(
-                                    text:"The party has arrived at the " + arr.name
-                                );
-                            }
-                            landmark.map.setPointer(
-                                x: arrival[0].x,
-                                y: arrival[0].y
-                            );
-                            
-                        }                            
-
-                    }                
-                )
-            },
+            
 
 
             mainMenu ::(
@@ -343,7 +216,7 @@ return class(
             startResume ::{
                 island = world.island;
                 party = world.party;
-                this.visitIsland();            
+                this.visitIsland(restorePos:true);            
             },
         
             startNew ::{
@@ -354,6 +227,7 @@ return class(
                         nameHint:namegen.island(), levelHint:story.levelHint
                     }
                 );
+                keyhome.name = 'Wyvern Key: Home';
                 
                 
                     
@@ -392,12 +266,13 @@ return class(
                     
 
 
-                    //party.inventory.add(item:Item.Base.database.find(name:'Wyvern Key of Ice'
-                    //).new(from:island.newInhabitant()));
+                    /*
+                    party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Ice'
+                    ), from:island.newInhabitant()));
 
-                    //@:story = import(module:'game_singleton.story.mt');
-                    //story.tier = 1;
-
+                    @:story = import(module:'game_singleton.story.mt');
+                    story.tier = 1;
+                    */
 
                     
 
@@ -411,11 +286,14 @@ return class(
                     
                     
 
-                for(0, 3)::(i) {
+                for(0, 1)::(i) {
                     @:crystal = Item.new(base:Item.Base.database.find(name:'Skill Crystal'), from:p0);
                     party.inventory.add(item:crystal);
                 }
 
+                party.inventory.add(item:keyhome);
+
+
                 party.inventory.add(item:Item.new(
                     base:Item.Base.database.find(name:'Pink Potion'),
                     from:island.newInhabitant()
@@ -429,24 +307,24 @@ return class(
                     from:island.newInhabitant()
                 ));
 
-                /*
+                
                 @:sword = Item.new(
                     base: Item.Base.database.find(name:'Shortsword'),
                     from:p0,
-                    materialHint: 'Hardstone',
+                    materialHint: 'Ray',
                     rngEnchantHint: false
                 );
 
                 @:tome = Item.new(
                     base:Item.Base.database.find(name:'Tome'),
                     from:p0,
-                    materialHint: 'Hardstone',
+                    materialHint: 'Ray',
                     rngEnchantHint: false,
                     abilityHint: 'Cure'
                 );
                 party.inventory.add(item:sword);
                 party.inventory.add(item:tome);
-                */
+                
 
 
 
@@ -488,7 +366,7 @@ return class(
           
                 
             },
-            visitIsland ::(where) {
+            visitIsland ::(where, restorePos) {
                 if (where != empty) ::<= {
                     island = where;
                     world.island = island;
@@ -497,12 +375,13 @@ return class(
                 // check if we're AT a location.
                 island.map.title = "(Map of " + island.name + ')';
 
-
-                @somewhere = LargeMap.getAPosition(map:island.map);
-                island.map.setPointer(
-                    x: somewhere.x,
-                    y: somewhere.y
-                );               
+                if (restorePos == empty) ::<= {
+                    @somewhere = LargeMap.getAPosition(map:island.map);
+                    island.map.setPointer(
+                        x: somewhere.x,
+                        y: somewhere.y
+                    );               
+                }
 
                 @enteredChoices = false;
                 @islandTravel = ::{
@@ -624,7 +503,7 @@ return class(
                               // visit landmark
                               default: ::<= {
                                 //breakpoint();
-                                this.visitLandmark(landmark:visitable[choice-5].data);
+                                visitable[choice-5].data.visit();
                               }
                             }
 
@@ -649,8 +528,11 @@ return class(
             currentIsland : {
                 get::<-island
             },
-            save ::{
-                return world.save();
+
+            save ::{    
+                @:State = import(module:'game_class.state.mt');
+                @:w = world.save();
+                return w;
             },
             
             load ::(serialized) {

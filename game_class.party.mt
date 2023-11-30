@@ -70,7 +70,7 @@
             isMember::(entity => Entity.type) {
                 return state.members->any(condition:::(value) <- value == entity);
             },
-            
+                        
             remove::(member => Entity.type) {
                 {:::}{
                     foreach(state.members)::(index, m) {

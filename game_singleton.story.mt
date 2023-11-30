@@ -16,48 +16,85 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:State = import(module:"game_class.state.mt");
+@:LoadableClass = import(module:"game_singleton.loadableclass.mt");
 
+@:Story = LoadableClass.new(
+    name : 'Wyvern.Story',
+    new ::(parent, state) {
+        @:this = Story.defaultNew();
+        if (state != empty)
+            this.load(serialized:state);
+        return this;
+    },
+    define::(this) {
+        @state;
+        ::<= {
+            @:items = {
+                // whether the Fire Key is has been given to the party
+                foundFireKey : false,
 
-return State.new(
-    items : {
-        // whether the Fire Key is has been given to the party
-        foundFireKey : false,
+                // whether the Ice Key has been given to the party
+                foundIceKey : false,
 
-        // whether the Ice Key has been given to the party
-        foundIceKey : false,
+                // whether the thunder key has been given to the party
+                foundThunderKey : false,
 
-        // whether the thunder key has been given to the party
-        foundThunderKey : false,
+                // whether the light key has been given to the party        
+                foundLightKey : false,
+                
+                // whether the dark key has been given to the party
+                hasDarkKey : false,
+                
+                
+                // whether the player has seen the wandering gamblist
+                skieEncountered : false,
+                
+                // Whether the player has hired the gamblist ever.
+                skieInParty : false,
+                
+                // Whether the wool+ shopkeeper was hired.
+                meiInParty : false,
+                
+                // Whether the wandering high-value shopkeeper was hired
+                fausInParty : false,
+                
+                // progression of defeated wyverns
+                // tier 0 -> none 
+                // tier 1 -> fire 
+                // tier 2 -> ice 
+                // tier 3 -> thunder 
+                // tier 4 -> light 
+                tier : 0,
+                
+                levelHint : 6,
+                
+                // Number of discovered locations
+                data_locationsDiscovered : 0,
+                
+                data_locationsNeeded : 25
+            }
+            @:interface = {
+                save ::{
+                    return state.save()
+                },
+                
+                load::(serialized) {
+                    state.load(parent:this, serialized);
+                }
+            
+            };
+            foreach(items) ::(item, val) {
+                interface[item] = {
+                    get ::<- state[item],
+                    set ::(value) <- state[item] = value
+                }
+            }
+            state = State.new(items);
 
-        // whether the light key has been given to the party        
-        foundLightKey : false,
-        
-        // whether the dark key has been given to the party
-        hasDarkKey : false,
-        
-        
-        // whether the player has seen the wandering gamblist
-        gamblistEncountered : false,
-        
-        // Whether the player has hired the gamblist ever.
-        gamblistInParty : false,
-        
-        // Whether the wool+ shopkeeper was hired.
-        meiInParty : false,
-        
-        // progression of defeated wyverns
-        // tier 0 -> none 
-        // tier 1 -> fire 
-        // tier 2 -> ice 
-        // tier 3 -> thunder 
-        // tier 4 -> light 
-        tier : 0,
-        
-        levelHint : 6,
-        
-        // Number of discovered locations
-        data_locationsDiscovered : 0,
-        
-        data_locationsNeeded : 25
+            this.interface = interface;
+        }
     }
+
 );
+
+return Story.new();

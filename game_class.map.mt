@@ -1306,6 +1306,29 @@
                     itemIndexCompressed[''+k] = locs;
                 };
                 
+                
+                // EXTREMELY simple compression thats ideal for general maps
+                // since they have a lot of empty space (repeats)
+                @:sceneryCompressed = [scenery->size];
+                @sceneryLast = -1;
+                @sceneryCount = 0;
+                foreach(scenery) ::(index, value) {
+                    if (sceneryLast != value) ::<= {
+                        if (sceneryCount > 0) ::<= {
+                            sceneryCompressed->push(value:sceneryLast);
+                            sceneryCompressed->push(value:sceneryCount);
+                        }
+                        
+                        sceneryLast = value;
+                        sceneryCount = 0;
+                    }
+                    sceneryCount += 1;
+                }
+                if (sceneryCount > 0) ::<= {
+                    sceneryCompressed->push(value:sceneryLast);
+                    sceneryCompressed->push(value:sceneryCount);
+                }
+                
             
                 @:state = State.new(
                     items : {
@@ -1326,7 +1349,7 @@
                         outOfBoundsCharacter : outOfBoundsCharacter,
                         wallCharacter : wallCharacter,
                         //@scenery = MemoryBuffer.new();
-                        scenery : scenery,
+                        sceneryCompressed : sceneryCompressed,
                         sceneryValues : sceneryValues,
                         stepAction : stepAction,
                         areas : areas,
@@ -1345,6 +1368,7 @@
                         compressedItems : [],
                         dataList : [],
                         legendEntriesCompressed : [],
+                        sceneryCompressed : [],
                         title : title,
 
                         pointer : pointer,
@@ -1388,6 +1412,29 @@
                     itemIndex[Number.parse(string:k)] = locs;
                 }
                 
+
+                // unpack scenery by first presizing the array
+                scenery = [];
+                @sceneryIndex = 0;
+                scenery[v.sceneryCompressed[0]] = 0;
+                scenery->remove(key:v.sceneryCompressed[0]);
+                
+                @sceneryLast;
+                @sceneryCount;
+                for(1, v.sceneryCompressed->size) ::(index) {
+                    @:value = v.sceneryCompressed[index];
+                    when (sceneryLast == empty) ::<= {
+                        sceneryLast = value;
+                    }
+                    
+                    sceneryCount = value;
+                    for(0, sceneryCount) ::(i) {
+                        scenery[sceneryIndex] = sceneryLast;
+                        sceneryIndex += 1;
+                    }
+                    sceneryLast = empty;
+                }               
+                
                 title = v.title;
 
                 pointer = v.pointer;
@@ -1399,8 +1446,6 @@
                 paged = v.paged;
                 outOfBoundsCharacter = v.outOfBoundsCharacter;
                 wallCharacter = v.wallCharacter;
-                //@scenery = MemoryBuffer.new();
-                scenery = v.scenery;
                 sceneryValues = v.sceneryValues;
                 stepAction = v.stepAction;
                 areas = v.areas;

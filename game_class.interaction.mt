@@ -256,8 +256,9 @@ Interaction.new(
                     when(talkee == empty) empty;
 
 
-                    if (location.peaceful == false) ::<= {
+                    if (location.peaceful == false && !talkee.isIncapacitated()) ::<= {
                         @:Event = import(module:'game_class.event.mt');
+
 
                         if (location.landmark.base.guarded == true) ::<= {
                             windowEvent.queueMessage(speaker:talkee.name, text:'Guards! Guards! Help!');
@@ -276,7 +277,6 @@ Interaction.new(
                                 enemies: [talkee],
                                 landmark: {},
                                 onEnd::(result) {
-                                    breakpoint();
                                     when(result == Battle.RESULTS.ENEMIES_WIN)
                                         windowEvent.jumpToTag(name:'MainMenu', clearResolve:true);
                                 
@@ -494,7 +494,7 @@ Interaction.new(
                                                     skieRobe.maxOut();
                                                     
                                                     
-                                                    skie.equip(item:skieWeapon, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true);
+                                                    skie.equip(item:skieWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
                                                     skie.equip(item:skieRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);
 
                                                     
@@ -659,7 +659,7 @@ Interaction.new(
 
 
 
-            @:miners = party.members->filter(by:::(value) <- value.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L).base.name == 'Pickaxe');
+            @:miners = party.members->filter(by:::(value) <- value.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).base.name == 'Pickaxe');
             when(miners->keycount == 0)
                 windowEvent.queueMessage(text:'No party member has a pickaxe equipped. Ore cannot be mined.');
 
@@ -683,17 +683,12 @@ Interaction.new(
 
                     when (party.inventory.isFull) ::<= {
                         windowEvent.queueMessage(text:'The party\'s inventory is full...');     
-                        send();
                     }
                     party.inventory.add(item);
 
 
                     location.data.charges -= 1;      
                     
-                    when (location.data.charges <= 0) ::<= {
-                        windowEvent.queueMessage(text:'The ore vein is depleted...');
-                        send();
-                    }
                     
                 } else ::<= {
                     windowEvent.queueMessage(text:'Nothing yet...');
@@ -797,7 +792,7 @@ Interaction.new(
                     when(item == empty) empty;
 
                     @price = (item.price * ((0.5 / 5)*0.5))->ceil;
-                    if (price < 0)
+                    if (price < 1)
                         price = 1;
                     
                     windowEvent.queueMessage(text: 'Sold the ' + item.name + ' for ' + price + 'G');
@@ -888,7 +883,7 @@ Interaction.new(
                 onPick::(item) {
                     when(item == empty) empty;
                     @price = (item.price * (0.5 / 5))->ceil;
-                    if (price < 0)
+                    if (price < 1)
                         price = 1;
                     
                     windowEvent.queueChoices(
@@ -1066,7 +1061,7 @@ Interaction.new(
                     canCancel: true,
                     onChoice::(choice) {
                         when(choice == 0) empty;
-                        @:hammer = smiths[choice-1].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
+                        @:hammer = smiths[choice-1].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
                         when (hammer == empty || hammer.base.name != 'Smithing Hammer')
                             windowEvent.queueMessage(text:'Smithing requires a Smithing Hammer to be equipped.');
 
@@ -1133,7 +1128,7 @@ Interaction.new(
                                 default: 'Unknown Wyvern Dimension'
                             })
                         );
-                        instance.visitLandmark(landmark:d);                        
+                        d.visit();                        
                     
                     });
                 }
@@ -1165,7 +1160,6 @@ Interaction.new(
                             base:Landmark.Base.database.find(name:'Shrine: Lost Floor')
                         )
                     ;
-                                            
                 } else ::<= {
                     @:Landmark = import(module:'game_class.landmark.mt');
                     
@@ -1178,16 +1172,15 @@ Interaction.new(
                     
                     location.targetLandmark.name = 'Shrine ('+location.targetLandmark.floor+'F)';
                 }
+
+                location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();          
             }
 
             canvas.clear();
             windowEvent.queueMessage(text:'The party travels to the next floor.', renderable:{render::{canvas.blackout();}});
             
             
-            @:instance = import(module:'game_singleton.instance.mt');
-            instance.visitLandmark(landmark:location.targetLandmark);
-
-
+            location.targetLandmark.visit(where:location.targetLandmarkEntry);
         },
     }
 )  
@@ -1218,7 +1211,6 @@ Interaction.new(
             if (location.contested == true) ::<= {
                 @:event = Event.new(
                     base:Event.Base.database.find(name:'Encounter:TreasureBoss'),
-                    party:world.party,
                     currentTime:0, // TODO,
                     parent:location.landmark
                 );  
@@ -1233,10 +1225,9 @@ Interaction.new(
                             base:Landmark.Base.database.find(name:'Treasure Room')
                         )
                     ;
-                    
+                    location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
                 }
-                @:instance = import(module:'game_singleton.instance.mt');
-                instance.visitLandmark(landmark:location.targetLandmark);
+                location.targetLandmark.visit(where:location.targetLandmarkEntry);
 
 
                 canvas.clear();
@@ -1266,7 +1257,7 @@ Interaction.new(
             }
 
 
-            if (location.ownedBy != empty) ::<= {
+            if (location.ownedBy != empty && !location.ownedBy.isIncapacitated()) ::<= {
                 windowEvent.queueMessage(
                     speaker: location.ownedBy.name,
                     text: "What do you think you're doing?!"
@@ -1281,7 +1272,6 @@ Interaction.new(
                       match(result) {
                           (Battle.RESULTS.ALLIES_WIN,
                            Battle.RESULTS.NOONE_WIN): ::<= {
-                            location.ownedBy = empty;                          
                           },
                           
                           (Battle.RESULTS.ENEMIES_WIN): ::<= {
@@ -1435,7 +1425,7 @@ Interaction.new(
                     base:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- (
                             value.isUnique == false &&
-                            value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
+                            value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
                         )
                     )
                 )                    
@@ -1451,7 +1441,7 @@ Interaction.new(
             for(0, count)::(i) {
                 @:combatant = location.landmark.island.newInhabitant();
                 @:weapon = getAWeapon(from:combatant);
-                combatant.equip(item:weapon, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true, inventory: combatant.inventory);
+                combatant.equip(item:weapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true, inventory: combatant.inventory);
 
                 teamA->push(value:combatant);
             }
@@ -1459,7 +1449,7 @@ Interaction.new(
             for(0, count)::(i) {
                 @:combatant = location.landmark.island.newInhabitant();
                 @:weapon = getAWeapon(from:combatant);                        
-                combatant.equip(item:weapon, slot:Entity.EQUIP_SLOTS.HAND_L, silent:true, inventory: combatant.inventory);
+                combatant.equip(item:weapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true, inventory: combatant.inventory);
 
                 teamB->push(value:combatant);
             }
@@ -1810,15 +1800,15 @@ Interaction.new(
                             
                             
                             windowEvent.queueChoices(
-                                choices: [...statChoices]->map(to:::(value) <- value + ' (' + whom.stats.state[value] + ')'),
+                                choices: [...statChoices]->map(to:::(value) <- value + ' (' + whom.stats.save()[value] + ')'),
                                 prompt: 'Pick a base stat to improve.',
                                 canCancel : false,
                                 onChoice::(choice) {
                                     @:oldStats = StatSet.new();
-                                    oldStats.state = whom.stats.state;
-                                    @:newState = whom.stats.state;
+                                    oldStats.load(serialized:whom.stats.save());
+                                    @:newState = whom.stats.save();
                                     newState[statChoices[choice-1]] += 3;
-                                    whom.stats.state = newState;
+                                    whom.stats.load(serialized:newState);
                                     
                                     oldStats.printDiff(
                                         other:whom.stats,
@@ -1857,14 +1847,14 @@ Interaction.new(
                             windowEvent.queueMessage(text: whom.name + ' is met with a curse.');
 
                             @:oldStats = StatSet.new();
-                            oldStats.state = whom.stats.state;
-                            @:newState = {...whom.stats.state};
+                            oldStats.load(serialized:whom.stats());
+                            @:newState = {...whom.stats.save()};
                             @:stat = random.pickArrayItem(list:statChoices);
                             newState[stat] -= 2;
                             if (newState[stat] < 1)
                                 newState[stat] = 1;
                                 
-                            whom.stats.state = newState;
+                            whom.stats.load(serialized:newState);
                                 
                             oldStats.printDiff(
                                 other:whom.stats,
@@ -1900,7 +1890,7 @@ Interaction.new(
         onInteract ::(location, party) {
             @:world = import(module:'game_singleton.world.mt');
             
-            when(!location.data.hasEnchant) ::<= {
+            when(location.data.enchant == empty) ::<= {
                 windowEvent.queueMessage(text:'The enchant stand doesnt seem to be active anymore.');                
             };
 
@@ -1909,7 +1899,10 @@ Interaction.new(
             windowEvent.queueMessage(text:'An abstract thought appears in your mind. It seems like this will enchant a single item.');                
             windowEvent.queueMessage(text:'The stand grants the enchantment: ' + location.data.enchant.name + ', which will add the following description to an item: "' + location.data.enchant.description +'"');                
 
-            if (!location.data.enchant.base.equipMod.isEmpty)
+
+            @:isStatBased = !location.data.enchant.base.equipMod.isEmpty;
+
+            if (isStatBased)
                 windowEvent.queueMessage(
                     speaker:location.data.enchant.name + ' - Enchant Stats',
                     text:location.data.enchant.base.equipMod.description,
@@ -1936,8 +1929,15 @@ Interaction.new(
                                 prompt: 'Continue?',
                                 onChoice::(which) {
                                     windowEvent.queueMessage(text:'The stand glows along with the item for a time before returning to normal.');
+                                    @:whom = item.equippedBy;
+                                    @:oldStats = StatSet.new(state:whom.stats.save());
+                                    @:slot = whom.unequipItem(item, silent:true);
                                     item.addEnchant(mod:location.data.enchant);
-                                    location.data.hasEnchant = false;
+                                    location.data.enchant = empty;
+                                    whom.equip(item, slot, silent:true);
+                                    if (isStatBased)
+                                        oldStats.printDiff(prompt: whom.name + ': enchanted ' + item.name, other:whom.stats);
+                                    
                                     windowEvent.jumpToTag(name:'pickItem', goBeforeTag: true, doResolveNext:true);
                                 }
                             );

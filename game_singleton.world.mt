@@ -61,7 +61,21 @@
     define:::(this) {
 
         @battle = Battle.new();
-
+        @island = empty;
+        @loadableIslands = [];
+    
+        @:findIsland ::{
+            {:::}{
+                foreach(loadableIslands) ::(k, is) {
+                    if (is.worldID == state.islandID) ::<= {
+                        island = is;
+                        send();
+                    }                
+                }
+                
+                error(detail: 'Internal error: Could not find loadable island.');
+            }
+        }
     
         @:state = State.new(
             items : {
@@ -73,8 +87,14 @@
                 day : (Number.random()*100)->floor,
                 year : 1033,
                 party : Party.new(),
-                island : empty,
-                story : import(module:'game_singleton.story.mt')
+                islandID : empty,
+                orphanedIsland : empty, // IN THE CASE that a user has tossed or otherwise 
+                                        // lost the key to the island they are residing in 
+                                        // the island becomes orphaned. The world becomes 
+                                        // the sole owner of the island.
+                idPool : 0,
+                story : import(module:'game_singleton.story.mt'),
+                modData : {}
             }
         );
 
@@ -150,12 +170,21 @@
             },
             
             island : {
-                get :: <- state.island,
-                set ::(value) <- state.island = value
+                get :: <- island,
+                set ::(value) {
+                    state.islandID = value.worldID;
+                    island = value;
+                }
+            },
+
+            
+            getNextID ::{
+                state.idPool += 1;
+                return state.idPool-1;
             },
             
             battle : {
-                get :: <- state.battle
+                get :: <- battle
             },
             
             storyFlags : {
@@ -181,15 +210,56 @@
                 
             },
             
+            modData : {
+                get ::<- state.modData
+            },
+            
             save ::{
-                return state.save()
+                State.startRootSerializeGuard();
+
+                loadableIslands = [];
+                @:out = state.save()
+
+                // check to see if we have an orphaned island
+                @hasIsland = false;
+                {:::} {
+                    foreach(loadableIslands) ::(k, is) {
+                        if (state.islandID == is.worldID) ::<= {
+                            hasIsland = true;
+                            send();
+                        }
+                    }
+                }
+                
+                @:output = if (hasIsland == false) ::<= {
+                    state.orphanedIsland = island.save();
+                    State.endRootSerializeGuard();
+                    State.startRootSerializeGuard();
+                    return state.save(); // TODO: is there a faster way that isnt messy?
+                } else out;
+                
+                
+                State.endRootSerializeGuard();
+                
+                loadableIslands = [];                
+                return output;                
+            },
+
+            // for initial loading from state.
+            addLoadableIsland ::(island) {
+                loadableIslands->push(value:island);
             },
             
             load ::(serialized) {
+                loadableIslands = [];
                 state.load(parent:this, serialized);
+                // overwrite singleton with saved instance
                 @:st = state.story;
                 state.story = import(module:'game_singleton.story.mt');
-                state.story.load(parent:this, serialized:st);
+                state.story.load(serialized:st.save());
+                findIsland();                
+                loadableIslands = [];
+                state.orphanedIsland = empty;
             }
             
         }

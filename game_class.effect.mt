@@ -1680,45 +1680,6 @@ Effect.new(
 
 
 
-Effect.new(
-    data : {
-        name : 'Weapon Affinity',
-        description: 'User has their profession\'s ideal weapon. ATK,DEF,SPD,INT,DEX +60%',
-        battleOnly : true,
-        skipTurn : false,
-        stackable: false,
-        stats: StatSet.new(
-            ATK: 60,
-            DEF: 60,
-            SPD: 60,
-            INT: 60,
-            DEX: 60
-        ),
-        onAffliction : ::(user, item, holder) {
-        },
-        onPostAttackOther : ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther : ::(user, item, holder, to, damage) {
-        },
-        onAttacked : ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect : ::(user, item, holder) {
-        },                
-
-        onDamage : ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate : ::(user, item, holder, stats) {
-        
-        }
-    }
-)         
 
 Effect.new(
     data : {
@@ -3588,8 +3549,8 @@ Effect.new(
             
                 windowEvent.queueMessage(text:holder.name + " parries the blow, but their non-combat weapon breaks in the process!");
                 damage.amount = 0;
-                @:item = holder.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
-                holder.unequip(slot:Entity.EQUIP_SLOTS.HAND_L, silent:true);
+                @:item = holder.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
+                holder.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
                 item.throwOut();                      
             }
         },

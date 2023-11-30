@@ -184,6 +184,7 @@ EntityQuality.Base.new(
             '$0 with stripes of $2',
             'thick and has $1',
             '$0 with $2 spots',
+            '$0 with a $2 color at their extremities'
         ],
         
         trait0 : [
@@ -196,7 +197,8 @@ EntityQuality.Base.new(
             'yellow',
             'goldenrod',
             'pure white',
-            'soft grey'
+            'soft grey',
+            'tan',
         ],
         
         trait1 : [
@@ -363,7 +365,8 @@ EntityQuality.Base.new(
             'red',
             'purple',
             'brown',
-            'grey'
+            'grey',
+            'teal'
         ],
         
     }

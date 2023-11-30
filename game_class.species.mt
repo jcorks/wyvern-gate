@@ -115,6 +115,37 @@ Species.new(data:{
     ]
 })
 
+
+Species.new(data:{
+    name : 'Rabbit',
+    rarity : 10,
+    description: 'A mammal race of medium stature.',
+    growth : StatSet.new(
+        HP : 2,
+        AP : 6,
+        ATK: 4,
+        DEF: 1,
+        INT: 4,
+        LUK: 4,
+        SPD: 7,
+        DEX: 8
+    ),
+    qualities : [
+        'snout',
+        'fur',
+        'eyes',
+        'ears',
+        'face',
+        'tail',
+        'body'
+    ],
+    
+    special : false,
+    passives : [
+    ]
+})
+
+
 Species.new(data:{
     name : 'Fox',
     rarity : 10,

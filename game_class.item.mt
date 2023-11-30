@@ -22,6 +22,7 @@
 @:ItemEnchant = import(module:'game_class.itemenchant.mt');
 @:ItemQuality = import(module:'game_class.itemquality.mt');
 @:ItemColor = import(module:'game_class.itemcolor.mt');
+@:ItemDesign = import(module:'game_class.itemdesign.mt');
 @:Material = import(module:'game_class.material.mt');
 @:ApparelMaterial = import(module:'game_class.apparelmaterial.mt');
 @:random = import(module:'game_singleton.random.mt');
@@ -59,14 +60,14 @@
 }
     
 @:ATTRIBUTE = {
-    BLUNT   : 0,
-    SHARP   : 1,
-    FLAT    : 2,
-    SHIELD  : 3,
-    METAL   : 4,
-    FRAGILE : 5,
-    WEAPON  : 7,
-    RAW_METAL     : 8
+    BLUNT     : 0x1,
+    SHARP     : 0x10,
+    FLAT      : 0x100,
+    SHIELD    : 0x1000,
+    METAL     : 0x10000,
+    FRAGILE   : 0x100000,
+    WEAPON    : 0x1000000,
+    RAW_METAL : 0x10000000
 }
 
 @:USE_TARGET_HINT = {
@@ -130,7 +131,9 @@
                 useEffects : [],
                 intuition : 0,
                 ability : empty,
-                stats : StatSet.new()
+                stats : StatSet.new(),
+                design : empty,
+                modData : {}
             }
         );
     
@@ -241,7 +244,7 @@
         @:world = import(module:'game_singleton.world.mt');
         
         this.interface = {
-            defaultLoad::(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, abilityHint, forceEnchant) {
+            defaultLoad::(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, abilityHint, forceEnchant) {
                 
                 state.ability = if (abilityHint) abilityHint else random.pickArrayItem(list:base.possibleAbilities);
                 state.base = base;
@@ -328,7 +331,9 @@
                 
                 if (base.canHaveEnchants) ::<= {
                     if (enchantHint != empty) ::<= {
-                        this.addEnchant(name:enchantHint);
+                        this.addEnchant(mod:ItemEnchant.new(
+                            base:ItemEnchant.Base.database.find(name:enchantHint)
+                        ));
                     }
 
                     
@@ -357,7 +362,11 @@
                 if (base.canBeColored) ::<= {
                     state.color = if (colorHint) ItemColor.database.find(name:colorHint) else ItemColor.database.getRandom();
                     state.stats.add(stats:state.color.equipMod);
+                    state.design = if (designHint) ItemDesign.database.find(name:designHint) else ItemDesign.database.getRandom();
+                    state.stats.add(stats:state.design.equipMod);
+
                     state.description = state.description->replace(key:'$color$', with:state.color.name);
+                    state.description = state.description->replace(key:'$design$', with:state.design.name);
                 }
                             
                 
@@ -437,6 +446,10 @@
                 state.islandNameHint = nameHint;
                 state.islandTierHint = tierHint;
                 state.island = islandHint;
+            },
+            
+            modData : {
+                get ::<- state.modData
             },
             
             addIslandEntry ::(world) {
@@ -631,7 +644,7 @@ Item.Base = class(
                     keyItem : Boolean,
                     useEffects : Object,
                     equipEffects : Object,
-                    attributes : Object,
+                    attributes : Number,
                     useTargetHint : Number,
                     onCreate : Function,
                     basePrice : Number,
@@ -651,7 +664,7 @@ Item.Base = class(
     define:::(this) {
         this.interface = {
             hasAttribute :: (attribute) {
-                return this.attributes->any(condition::(value) <- value == attribute);
+                return (this.attributes & attribute) != 0;
             }
         }
         Item.Base.database.add(item:this);
@@ -683,7 +696,7 @@ Item.Base.new(
         useTargetHint : USE_TARGET_HINT.ONE,
         useEffects : [],
         equipEffects : [],
-        attributes : [],
+        attributes : 0,
         canBeColored : false,
         hasSize : false,
         onCreate ::(item, user, creationHint) {},
@@ -729,9 +742,7 @@ Item.Base.new(data : {
         // 1%  chance -> premonition / subliminal state (incapacitated for turn)
         "Bea's Aura"     
     ],
-    attributes : [
-        ATTRIBUTE.FRAGILE
-    ]
+    attributes : ATTRIBUTE.FRAGILE
 })
 
 Item.Base.new(data : {
@@ -768,9 +779,7 @@ Item.Base.new(data : {
     ],
     equipEffects : [
     ],
-    attributes : [
-        ATTRIBUTE.FRAGILE
-    ]
+    attributes : ATTRIBUTE.FRAGILE    
 })
 
 
@@ -807,9 +816,9 @@ Item.Base.new(data : {
         // At night: attacks gain water affinity with increased strength
         "Luna's Aura"     
     ],
-    attributes : [
+    attributes : 
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 })
 
@@ -850,9 +859,9 @@ Item.Base.new(data : {
         // Growth potential + 3 for all stats
         "Skie's Aura"     
     ],
-    attributes : [
+    attributes : 
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 })
 
@@ -888,9 +897,9 @@ Item.Base.new(data : {
     possibleAbilities : [],
     equipEffects : [
     ],
-    attributes : [
+    attributes : 
         ATTRIBUTE.FRAGILE
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 
@@ -930,9 +939,9 @@ Item.Base.new(data : {
     ],
     equipEffects : [
     ],
-    attributes : [
+    attributes : 
         ATTRIBUTE.FRAGILE
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 
@@ -970,9 +979,9 @@ Item.Base.new(data : {
     ],
     equipEffects : [
     ],
-    attributes : [
+    attributes : 
         ATTRIBUTE.FRAGILE
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 
@@ -1010,9 +1019,9 @@ Item.Base.new(data : {
     ],
     equipEffects : [
     ],
-    attributes : [
+    attributes : 
         ATTRIBUTE.FRAGILE
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 })    
 
@@ -1049,9 +1058,9 @@ Item.Base.new(data : {
     ],
     equipEffects : [
     ],
-    attributes : [
+    attributes : 
         ATTRIBUTE.FRAGILE
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 
@@ -1091,9 +1100,9 @@ Item.Base.new(data : {
     ],
     equipEffects : [
     ],
-    attributes : [
+    attributes : 
         ATTRIBUTE.FRAGILE
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 
@@ -1133,9 +1142,9 @@ Item.Base.new(data : {
     ],
     equipEffects : [
     ],
-    attributes : [
+    attributes : 
         ATTRIBUTE.FRAGILE
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 
@@ -1179,10 +1188,10 @@ Item.Base.new(data : {
         'Non-combat Weapon' // high chance to deflect, but when it deflects, the weapon breaks
         
     ],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })
@@ -1227,10 +1236,10 @@ Item.Base.new(data : {
     possibleAbilities : [
         "Stun"
     ],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })
@@ -1277,10 +1286,10 @@ Item.Base.new(data : {
     ],
 
 
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })
@@ -1325,17 +1334,17 @@ Item.Base.new(data : {
         "Stab"
     ],
 
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })
 
 Item.Base.new(data : {
     name : "Bludgeon",
-    description: 'A basic blunt weapon. The hilt has a $color$ trim.',
+    description: 'A basic blunt weapon. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Clubs and bludgeons seem primitive, but are quite effective.',
     equipType: TYPE.HAND,
     rarity : 300,
@@ -1371,17 +1380,17 @@ Item.Base.new(data : {
     ],
 
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })    
 
 Item.Base.new(data : {
     name : "Shortsword",
-    description: 'A basic sword. The hilt has a $color$ trim.',
+    description: 'A basic sword. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
     equipType: TYPE.HAND,
     rarity : 300,
@@ -1418,11 +1427,11 @@ Item.Base.new(data : {
     ],
 
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.SHARP |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })
@@ -1430,7 +1439,7 @@ Item.Base.new(data : {
 
 Item.Base.new(data : {
     name : "Longsword",
-    description: 'A basic sword. The hilt has a $color$ trim.',
+    description: 'A basic sword. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
     equipType: TYPE.TWOHANDED,
     rarity : 300,
@@ -1465,18 +1474,118 @@ Item.Base.new(data : {
     ],
 
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.SHARP |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
+    ,
+    onCreate ::(item, user, creationHint) {}
+
+})
+
+
+Item.Base.new(data : {
+    name : "Blade & Shield",
+    description: 'A matching medium-length blade and shield. They feature a $color$, $design$ design.',
+    examine : 'Weapons with shields seem to block more than they let on.',
+    equipType: TYPE.TWOHANDED,
+    rarity : 400,
+    canBeColored : true,
+    keyItem : false,
+    weight : 12,
+    basePrice: 250,
+    levelMinimum : 1,
+    tier: 1,
+    hasSize : true,
+    canHaveEnchants : true,
+    canHaveTriggerEnchants : true,
+    enchantLimit : 15,
+    hasQuality : true,
+    hasMaterial : true,
+    isApparel : false,
+    isUnique : false,
+    useTargetHint : USE_TARGET_HINT.ONE,
+
+    // fatigued
+    equipMod : StatSet.new(
+        ATK: 25,
+        DEF: 35,
+        SPD: -15,
+        DEX: 10
+    ),
+    useEffects : [
+        'Fling',
     ],
+    possibleAbilities : [
+        "Counter",
+        "Stun",
+        "Leg Sweep"
+    ],
+
+    equipEffects : [],
+    attributes : 
+        ATTRIBUTE.SHARP  |
+        ATTRIBUTE.METAL  |
+        ATTRIBUTE.SHIELD |
+        ATTRIBUTE.WEAPON
+    ,
+    onCreate ::(item, user, creationHint) {}
+
+})
+
+
+Item.Base.new(data : {
+    name : "Wall Shield",
+    description: 'A large shield that can be used for defending.',
+    examine : 'Weapons with shields seem to block more than they let on.',
+    equipType: TYPE.TWOHANDED,
+    rarity : 400,
+    canBeColored : true,
+    keyItem : false,
+    weight : 17,
+    basePrice: 350,
+    levelMinimum : 1,
+    tier: 2,
+    hasSize : true,
+    canHaveEnchants : true,
+    canHaveTriggerEnchants : true,
+    enchantLimit : 15,
+    hasQuality : true,
+    hasMaterial : true,
+    isApparel : false,
+    isUnique : false,
+    useTargetHint : USE_TARGET_HINT.ONE,
+
+    // fatigued
+    equipMod : StatSet.new(
+        ATK: 15,
+        DEF: 55,
+        SPD: -15,
+        DEX: -10
+    ),
+    useEffects : [
+        'Fling',
+    ],
+    possibleAbilities : [
+        "Counter",
+        "Stun",
+        "Leg Sweep"
+    ],
+
+    equipEffects : [],
+    attributes : 
+        ATTRIBUTE.BLUNT  |
+        ATTRIBUTE.METAL  |
+        ATTRIBUTE.SHIELD |
+        ATTRIBUTE.WEAPON
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })
 
 Item.Base.new(data : {
     name : "Chakram",
-    description: 'A pair of round blades. The handles have a $color$ trim.',
+    description: 'A pair of round blades. The handles have a $color$ trim with a $design$ design..',
     examine : '.',
     equipType: TYPE.TWOHANDED,
     rarity : 300,
@@ -1512,11 +1621,11 @@ Item.Base.new(data : {
         'Fling',
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.SHARP |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })    
@@ -1524,7 +1633,7 @@ Item.Base.new(data : {
 
 Item.Base.new(data : {
     name : "Falchion",
-    description: 'A basic sword with a large blade. The hilt has a $color$ trim.',
+    description: 'A basic sword with a large blade. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
     equipType: TYPE.HAND,
     rarity : 300,
@@ -1561,11 +1670,11 @@ Item.Base.new(data : {
         'Fling',
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.SHARP |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })    
@@ -1573,7 +1682,7 @@ Item.Base.new(data : {
 
 Item.Base.new(data : {
     name : "Morning Star",
-    description: 'A spiked weapon. The hilt has a $color$ trim.',
+    description: 'A spiked weapon. The hilt has a $color$ trim with a $design$ design.',
     examine : '',
     equipType: TYPE.HAND,
     rarity : 300,
@@ -1609,18 +1718,18 @@ Item.Base.new(data : {
         'Fling',
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.SHARP |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })     
 
 Item.Base.new(data : {
     name : "Scimitar",
-    description: 'A basic sword with a curved blade. The hilt has a $color$ trim.',
+    description: 'A basic sword with a curved blade. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
     equipType: TYPE.HAND,
     rarity : 300,
@@ -1657,11 +1766,11 @@ Item.Base.new(data : {
         'Fling',
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.SHARP |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 }) 
@@ -1669,7 +1778,7 @@ Item.Base.new(data : {
 
 Item.Base.new(data : {
     name : "Rapier",
-    description: 'A slender sword excellent for thrusting. The hilt has a $color$ trim.',
+    description: 'A slender sword excellent for thrusting. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
     equipType: TYPE.HAND,
     rarity : 300,
@@ -1706,11 +1815,11 @@ Item.Base.new(data : {
         'Fling',
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.SHARP |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })    
@@ -1718,7 +1827,7 @@ Item.Base.new(data : {
 
 Item.Base.new(data : {
     name : "Bow & Quiver",
-    description: 'A basic bow and quiver full of arrows. The bow has a streak of $color$ across it.',
+    description: 'A basic bow and quiver full of arrows. The bow features a $design$ design and has a streak of $color$ across it.',
     examine : '',
     equipType: TYPE.TWOHANDED,
     rarity : 300,
@@ -1755,18 +1864,63 @@ Item.Base.new(data : {
         'Break Item'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.WEAPON            
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })
 
 
 Item.Base.new(data : {
+    name : "Crossbow",
+    description: 'A mechanical device that launches bolts. It features a $color$, $design$ design design.',
+    examine : '',
+    equipType: TYPE.TWOHANDED,
+    rarity : 300,
+    keyItem : false,
+    weight : 10,
+    hasSize : true,
+    canBeColored : true,
+    basePrice: 76,
+    levelMinimum : 1,
+    tier: 3,
+    canHaveEnchants : true,
+    canHaveTriggerEnchants : true,
+    enchantLimit : 10,
+    hasQuality : true,
+    hasMaterial : true,
+    isApparel : false,
+    isUnique : false,
+    useTargetHint : USE_TARGET_HINT.ONE,
+    possibleAbilities : [
+        "Precise Strike",
+        "Tranquilizer"
+    ],
+
+    // fatigued
+    equipMod : StatSet.new(
+        ATK: 35,
+        SPD: -10,
+        DEX: 45
+    ),
+    useEffects : [
+        'Fling',
+        'Break Item'
+    ],
+    equipEffects : [],
+    attributes : 
+        ATTRIBUTE.SHARP |
+        ATTRIBUTE.WEAPON            
+    ,
+    onCreate ::(item, user, creationHint) {}
+
+})
+
+Item.Base.new(data : {
     name : "Greatsword",
-    description: 'A basic, large sword. The hilt has a $color$ trim.',
+    description: 'A basic, large sword. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Not as common as shortswords, but rather easy to find. Favored by larger warriors.',
     equipType: TYPE.TWOHANDED,
     rarity : 300,
@@ -1802,18 +1956,18 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.SHARP |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON    
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })
 
 Item.Base.new(data : {
     name : "Dagger",
-    description: 'A basic knife. The handle has an intricate $color$ trim.',
+    description: 'A basic knife. The handle has an $color$ trim with a $design$ design.',
     examine : 'Commonly favored by both swift warriors and common folk for their easy handling and easiness to produce.',
     equipType: TYPE.HAND,
     rarity : 300,
@@ -1847,12 +2001,12 @@ Item.Base.new(data : {
         "Triplestrike"
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.SHARP |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
 
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })    
@@ -1892,11 +2046,11 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.BLUNT,
+    attributes : 
+        ATTRIBUTE.BLUNT |
         ATTRIBUTE.METAL
 
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })
@@ -1904,7 +2058,7 @@ Item.Base.new(data : {
 
 Item.Base.new(data : {
     name : "Halberd",
-    description: 'A weapon with long reach and deadly power. The handle has a $color$ trim.',
+    description: 'A weapon with long reach and deadly power. The handle has a $color$ trim with a $design$ design.',
     examine : '',
     equipType: TYPE.TWOHANDED,
     rarity : 100,
@@ -1940,19 +2094,18 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.BLUNT,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.BLUNT |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })
 
 Item.Base.new(data : {
     name : "Lance",
-    description: 'A weapon with long reach and deadly power. The handle has a $color$ trim.',
+    description: 'A weapon with long reach and deadly power. The handle has a $color$ trim with a $design$ design.',
     examine : '',
     equipType: TYPE.TWOHANDED,
     rarity : 100,
@@ -1988,19 +2141,18 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.BLUNT,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.BLUNT |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })    
 
 Item.Base.new(data : {
     name : "Glaive",
-    description: 'A weapon with long reach and deadly power. The handle has a $color$ trim.',
+    description: 'A weapon with long reach and deadly power. The handle has a $color$ trim with a $design$ design.',
     examine : '',
     equipType: TYPE.TWOHANDED,
     rarity : 100,
@@ -2036,12 +2188,11 @@ Item.Base.new(data : {
         'Fling',
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.BLUNT,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.BLUNT |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })    
@@ -2049,7 +2200,7 @@ Item.Base.new(data : {
 
 Item.Base.new(data : {
     name : "Staff",
-    description: 'A combat staff. Promotes fluid movement when used well.The ends are tied with a $color$ fabric.',
+    description: 'A combat staff. Promotes fluid movement when used well. The ends are tied with a $color$ fabric, featuring a $design$ design.',
     examine : '',
     equipType: TYPE.TWOHANDED,
     rarity : 100,
@@ -2084,12 +2235,11 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.BLUNT,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.BLUNT |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })    
@@ -2097,7 +2247,7 @@ Item.Base.new(data : {
 
 Item.Base.new(data : {
     name : "Mage-Staff",
-    description: 'Similar to a wand, promotes mental acuity. The handle has a $color$ trim.',
+    description: 'Similar to a wand, promotes mental acuity. The handle has a $color$ trim with a $design$ design.',
     examine : '',
     equipType: TYPE.TWOHANDED,
     rarity : 100,
@@ -2141,19 +2291,18 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.BLUNT,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.BLUNT |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 }) 
 
 Item.Base.new(data : {
     name : "Wand",
-    description: 'The handle has a $color$ trim.',
+    description: 'The handle has a $color$ trim with a $design$ design.',
     examine : '',
     equipType: TYPE.TWOHANDED,
     rarity : 100,
@@ -2195,12 +2344,11 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.BLUNT,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.BLUNT |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })    
@@ -2209,7 +2357,7 @@ Item.Base.new(data : {
 
 Item.Base.new(data : {
     name : "Warhammer",
-    description: 'A hammer meant for combat. The end is tied with a $color$ fabric.',
+    description: 'A hammer meant for combat with a $design$ design. The end is tied with a $color$ fabric.',
     examine : 'A common choice for those who wish to cause harm and have the arm to back it up.',
     equipType: TYPE.TWOHANDED,
     rarity : 350,
@@ -2245,11 +2393,11 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.BLUNT,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.BLUNT |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })
@@ -2257,7 +2405,7 @@ Item.Base.new(data : {
 
 Item.Base.new(data : {
     name : "Tome",
-    description: 'A plated book for magick-users in the heat of battle. The cover is imprinted with a $color$ fabric.',
+    description: 'A plated book for magick-users in the heat of battle. It is covered with a $color$ fabric featuring a $design$ design.',
     examine : 'A lightly enchanted book meant to both be used as reference on-the-fly and meant to increase the mental acquity of the holder.',
     equipType: TYPE.HAND,
     rarity : 350,
@@ -2293,18 +2441,18 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.BLUNT,
-        ATTRIBUTE.METAL,
+    attributes : 
+        ATTRIBUTE.BLUNT |
+        ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
     
 })
 
 Item.Base.new(data : {
     name : "Tunic",
-    description: 'Simple cloth for the body. It is predominantly $color$.',
+    description: 'Simple cloth for the body with a $design$ design. It is predominantly $color$.',
     examine : 'Common type of light armor',
     equipType: TYPE.ARMOR,
     rarity : 100,
@@ -2333,8 +2481,7 @@ Item.Base.new(data : {
     useEffects : [
     ],
     equipEffects : [],
-    attributes : [
-    ],
+    attributes : 0,
     onCreate ::(item, user, creationHint) {}
     
 })
@@ -2342,7 +2489,7 @@ Item.Base.new(data : {
 
 Item.Base.new(data : {
     name : "Robe",
-    description: 'Simple cloth favored by scholars. It features a $color$ design.',
+    description: 'Simple cloth favored by scholars. It features a $color$, $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.ARMOR,
     rarity : 100,
@@ -2371,15 +2518,14 @@ Item.Base.new(data : {
     useEffects : [
     ],
     equipEffects : [],
-    attributes : [
-    ],
+    attributes : 0,
     onCreate ::(item, user, creationHint) {}
     
 })
 
 Item.Base.new(data : {
     name : "Scarf",
-    description: 'Simple cloth accessory. It is $color$.',
+    description: 'Simple cloth accessory. It is $color$ with a $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.TRINKET,
     rarity : 100,
@@ -2407,8 +2553,7 @@ Item.Base.new(data : {
     useEffects : [
     ],
     equipEffects : [],
-    attributes : [
-    ],
+    attributes : 0,
     onCreate ::(item, user, creationHint) {}
     
 })    
@@ -2416,7 +2561,7 @@ Item.Base.new(data : {
 
 Item.Base.new(data : {
     name : "Headband",
-    description: 'Simple cloth accessory. It is $color$.',
+    description: 'Simple cloth accessory. It is $color$ with a $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.TRINKET,
     rarity : 100,
@@ -2444,14 +2589,13 @@ Item.Base.new(data : {
     useEffects : [
     ],
     equipEffects : [],
-    attributes : [
-    ],
+    attributes : 0,
     onCreate ::(item, user, creationHint) {}
     
 })        
 Item.Base.new(data : {
     name : "Ring",
-    description: 'A metallic ring. The inset gem is $color$.',
+    description: 'A metallic ring. The inset gem is $color$ and features a $design$ design.',
     examine : '',
     equipType: TYPE.RING,
     rarity : 300,
@@ -2482,16 +2626,16 @@ Item.Base.new(data : {
     possibleAbilities : [
     ],
     equipEffects : [],
-    attributes : [
+    attributes : 
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })  
 
 Item.Base.new(data : {
     name : "Cape",
-    description: 'Simple cloth accessory. It features a $color$-based design.',
+    description: 'Simple cloth accessory. It features a $color$-based design with a $design$ pattern.',
     examine : 'Common type of light armor',
     equipType: TYPE.TRINKET,
     rarity : 100,
@@ -2519,15 +2663,51 @@ Item.Base.new(data : {
     useEffects : [
     ],
     equipEffects : [],
-    attributes : [
-    ],
+    attributes : 0,
     onCreate ::(item, user, creationHint) {}
     
 })    
 
+
+Item.Base.new(data : {
+    name : "Cloak",
+    description: 'Simple cloth accessory that covers the entire body and includes a hood. It features a $color$-based design with a $design$ pattern.',
+    examine : 'Stylish!',
+    equipType: TYPE.TRINKET,
+    rarity : 100,
+    weight : 1,
+    hasSize : false,
+    canBeColored : true,
+    keyItem : false,
+    levelMinimum : 1,
+    tier: 2,
+    canHaveEnchants : true,
+    canHaveTriggerEnchants : false,
+    enchantLimit : 10,
+    hasQuality : true,
+    hasMaterial : false,
+    isApparel : true,
+    isUnique : false,
+    useTargetHint : USE_TARGET_HINT.ONE,
+    basePrice: 55,
+    possibleAbilities : [],
+
+    // fatigued
+    equipMod : StatSet.new(
+        SPD: 3,
+        DEX: 5
+    ),
+    useEffects : [
+    ],
+    equipEffects : [],
+    attributes : 0,
+    onCreate ::(item, user, creationHint) {}
+    
+})   
+
 Item.Base.new(data : {
     name : "Hat",
-    description: 'Simple cloth accessory. It is predominantly $color$.',
+    description: 'Simple cloth accessory. It is predominantly $color$ with a $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.TRINKET,
     rarity : 100,
@@ -2555,15 +2735,14 @@ Item.Base.new(data : {
     useEffects : [
     ],
     equipEffects : [],
-    attributes : [
-    ],
+    attributes : 0,
     onCreate ::(item, user, creationHint) {}
     
 })           
 
 Item.Base.new(data : {
     name : "Fortified Cape",
-    description: 'A cape fortified with metal. It is a bit heavy. It features a $color$ trim.',
+    description: 'A cape fortified with metal. It is a bit heavy. It features a $color$ trim and a $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.TRINKET,
     rarity : 350,
@@ -2592,9 +2771,9 @@ Item.Base.new(data : {
     useEffects : [
     ],
     equipEffects : [],
-    attributes : [
+    attributes : 
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
     
 })   
@@ -2602,7 +2781,7 @@ Item.Base.new(data : {
 
 Item.Base.new(data : {
     name : "Light Robe",
-    description: 'Enchanted light wear favored by mages. It features a $color$ design.',
+    description: 'Enchanted light wear favored by mages. It features a $color$, $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.ARMOR,
     rarity : 350,
@@ -2631,8 +2810,7 @@ Item.Base.new(data : {
     useEffects : [
     ],
     equipEffects : [],
-    attributes : [
-    ],
+    attributes : 0,
     onCreate ::(item, user, creationHint) {}
     
 })    
@@ -2640,7 +2818,7 @@ Item.Base.new(data : {
 
 Item.Base.new(data : {
     name : "Chainmail",
-    description: 'Mail made of linked chains. It bears an emblem colored $color$.',
+    description: 'Mail made of linked chains. It bears an emblem colored $color$ with a $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.ARMOR,
     rarity : 350,
@@ -2669,17 +2847,17 @@ Item.Base.new(data : {
     useEffects : [
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.BLUNT,
+    attributes : 
+        ATTRIBUTE.BLUNT |
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
     
 })
 
 Item.Base.new(data : {
     name : "Filigree Armor",
-    description: 'Hardened material with a fancy $color$ trim.',
+    description: 'Hardened material with a fancy $color$ trim and a $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.ARMOR,
     rarity : 500,
@@ -2709,17 +2887,17 @@ Item.Base.new(data : {
     useEffects : [
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.BLUNT,
+    attributes : 
+        ATTRIBUTE.BLUNT |
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
     
 })
     
 Item.Base.new(data : {
     name : "Plate Armor",
-    description: 'Extremely protective armor of a high-grade. It has a $color$ trim.',
+    description: 'Extremely protective armor of a high-grade. It has a $color$ trim with a $design$ design.',
     examine : 'Highly skilled craftspeople are required to make this work.',
     equipType: TYPE.ARMOR,
     rarity : 500,
@@ -2749,10 +2927,10 @@ Item.Base.new(data : {
     useEffects : [
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.BLUNT,
+    attributes : 
+        ATTRIBUTE.BLUNT |
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
     
 })    
@@ -2790,10 +2968,10 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
     
 })
@@ -2834,10 +3012,10 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })      
@@ -2876,10 +3054,10 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })   
@@ -2916,10 +3094,10 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })      
@@ -2958,10 +3136,10 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })   
@@ -2998,10 +3176,10 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })   
@@ -3038,10 +3216,10 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 }) 
@@ -3079,10 +3257,10 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 }) 
@@ -3119,10 +3297,10 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 }) 
@@ -3159,10 +3337,10 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 }) 
@@ -3198,9 +3376,9 @@ Item.Base.new(data : {
         'Fling'
     ],
     equipEffects : [],
-    attributes : [
+    attributes : 
         ATTRIBUTE.SHARP
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 }) 
@@ -3238,16 +3416,16 @@ Item.Base.new(data : {
         'Consume Item'       
     ],
     equipEffects : [],
-    attributes : [
+    attributes : 
         ATTRIBUTE.SHARP
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })
 
 Item.Base.new(data : {
     name : "Skill Crystal",
-    description: "Irridescent cyrstal that imparts knowledge when used.",
+    description: "Irridescent crystal that imparts knowledge when used.",
     examine : 'Quite sought after, highly skilled mages usually produce them for the public',
     equipType: TYPE.HAND,
     rarity : 100,
@@ -3278,9 +3456,9 @@ Item.Base.new(data : {
         'Consume Item'       
     ],
     equipEffects : [],
-    attributes : [
+    attributes : 
         ATTRIBUTE.SHARP
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })
@@ -3320,9 +3498,9 @@ Item.Base.new(data : {
     useEffects : [
     ],
     equipEffects : [],
-    attributes : [
+    attributes : 
         ATTRIBUTE.SHARP
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 })  
@@ -3362,9 +3540,9 @@ Item.Base.new(data : {
         'Break Item'
     ],
     equipEffects : [],
-    attributes : [
+    attributes : 
         ATTRIBUTE.SHARP
-    ],
+    ,
     onCreate ::(item, user, creationHint) {}
 
 }) 
@@ -3403,8 +3581,7 @@ Item.Base.new(data : {
         'Break Item'
     ],
     equipEffects : [],
-    attributes : [
-    ],
+    attributes : 0,
     onCreate ::(item, user, creationHint) {}
 
 }) 
@@ -3445,10 +3622,10 @@ Item.Base.new(data : {
     equipEffects : [
         "Burning"
     ],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {     
     
         @:world = import(module:'game_singleton.world.mt');        
@@ -3456,7 +3633,7 @@ Item.Base.new(data : {
         @:island = {
             island : empty
         }
-
+        breakpoint();
         item.setIslandGenAttributes(
             levelHint:  6,//user.level => Number,
             nameHint:   nameGen.island(),
@@ -3503,10 +3680,10 @@ Item.Base.new(data : {
     equipEffects : [
         "Icy"
     ],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {     
     
         @:world = import(module:'game_singleton.world.mt');        
@@ -3561,10 +3738,10 @@ Item.Base.new(data : {
     equipEffects : [
         "Shock"
     ],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {     
     
         @:world = import(module:'game_singleton.world.mt');        
@@ -3619,10 +3796,10 @@ Item.Base.new(data : {
     equipEffects : [
         "Shimmering"
     ],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP |
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {     
     
         @:world = import(module:'game_singleton.world.mt');        
@@ -3672,13 +3849,12 @@ Item.Base.new(data : {
         DEX: -5
     ),
     useEffects : [
-        'Fling'
     ],
     equipEffects : [],
-    attributes : [
-        ATTRIBUTE.SHARP,
+    attributes : 
+        ATTRIBUTE.SHARP  |
         ATTRIBUTE.METAL
-    ],
+    ,
     onCreate ::(item, user, creationHint) {     
     
         @:world = import(module:'game_singleton.world.mt');        

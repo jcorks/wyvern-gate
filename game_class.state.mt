@@ -31,6 +31,10 @@
 @:TAG__LOADABLE_CLASS = '$c';
 @:TAG__SPARSE_ARRAY = '$sa';
 
+
+@DEBUG_SERIALIZED = [];
+@DEBUG_SERIALIZED_REV = [];
+
 @:serialize = ::(value) {
     return match(value->type) {
       (Number, String, Boolean, Empty): value,
@@ -38,6 +42,10 @@
       (Function): error(detail:'Functions are not allowed to be serialized'),
       
       default: ::<= {
+        if (DEBUG_SERIALIZED[value] != empty)
+            error(detail:'Already serialized object! likely infinite recursion (or at the very least erroneous instance copies)');
+
+      
         // database items are always saved as strings.
         when (value->isa(type:Database.Item.type))
             {
@@ -45,6 +53,11 @@
                 database : '' + value->type,
                 name : value.name
             };
+
+        DEBUG_SERIALIZED[value] = DEBUG_SERIALIZED_REV->size;
+        DEBUG_SERIALIZED_REV->push(value);
+
+
         // tagged classes get instantiated and loaded with their state
         when (LoadableClass.isLoadable(name:String(from:value->type))) ::<= {
             @:output = value.save();
@@ -156,6 +169,15 @@
 
 
 return {
+    startRootSerializeGuard ::{
+        DEBUG_SERIALIZED = [];
+        DEBUG_SERIALIZED_REV = [];
+    },
+    
+    endRootSerializeGuard ::{
+        DEBUG_SERIALIZED = empty;
+        DEBUG_SERIALIZED_REV = empty;    
+    },
     new ::(items)  {
         @:keys = {'save':true, 'load':true};
         foreach(items) ::(k => String, value) {
@@ -164,6 +186,7 @@ return {
         
         @:output = {};
         items.save = :: {
+        
             @:serialized = {};
             foreach(items) ::(key, value) {
                 when(key == 'save' || key == 'load') empty; // skip
@@ -184,22 +207,24 @@ return {
                 );
             }
         }
+        @:reactor = {
+            set ::(key, value) {
+                if (keys[key] == empty)
+                    error(detail:'State has no member named ' + key);
+                items[key] = value;
+            },
+            
+            get ::(key) {
+                if (keys[key] == empty)
+                    error(detail:'State has no member named ' + key);
+                return items[key];                    
+            }
+        }
         
         output->setAttributes(
             attributes : {
-                '.' : {
-                    set ::(key, value) {
-                        if (keys[key] == empty)
-                            error(detail:'State has no member named ' + key);
-                        items[key] = value;
-                    },
-                    
-                    get ::(key) {
-                        if (keys[key] == empty)
-                            error(detail:'State has no member named ' + key);
-                        return items[key];                    
-                    }
-                }   
+                '.' : reactor,
+                '[]' : reactor
             }
         )
         

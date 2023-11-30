@@ -52,7 +52,7 @@
 
 ItemColor.new(
     data : {
-        name : 'Red',
+        name : 'red',
         equipMod : StatSet.new(
             DEF: 3,
             ATK: 3,
@@ -63,7 +63,7 @@ ItemColor.new(
 
 ItemColor.new(
     data : {
-        name : 'Blue',
+        name : 'blue',
         equipMod : StatSet.new(
             SPD: 3,
             DEX: 3,
@@ -75,7 +75,7 @@ ItemColor.new(
 
 ItemColor.new(
     data : {
-        name : 'Purple',
+        name : 'purple',
         equipMod : StatSet.new(
             SPD: 2,
             DEX: 2,
@@ -88,7 +88,7 @@ ItemColor.new(
 
 ItemColor.new(
     data : {
-        name : 'Pink',
+        name : 'pink',
         equipMod : StatSet.new(
             DEX: 3,
             INT: 5
@@ -98,7 +98,7 @@ ItemColor.new(
 
 ItemColor.new(
     data : {
-        name : 'White',
+        name : 'white',
         equipMod : StatSet.new(
             DEF: 7
         ),
@@ -109,7 +109,7 @@ ItemColor.new(
 
 ItemColor.new(
     data : {
-        name : 'Green',
+        name : 'green',
         equipMod : StatSet.new(
             SPD: 3,
             DEX: 3,
@@ -120,7 +120,18 @@ ItemColor.new(
 
 ItemColor.new(
     data : {
-        name : 'Yellow',
+        name : 'olive-green',
+        equipMod : StatSet.new(
+            SPD: 3,
+            DEX: 4,
+            ATK: 3
+        ),
+    }
+)
+
+ItemColor.new(
+    data : {
+        name : 'yellow',
         equipMod : StatSet.new(
             DEX: 5,
             ATK: 3
@@ -130,7 +141,7 @@ ItemColor.new(
 
 ItemColor.new(
     data : {
-        name : 'Orange',
+        name : 'orange',
         equipMod : StatSet.new(
             DEX: 3,
             ATK: 5
@@ -140,7 +151,7 @@ ItemColor.new(
 
 ItemColor.new(
     data : {
-        name : 'Grey',
+        name : 'grey',
         equipMod : StatSet.new(
             SPD: 5,
             DEX: 3
@@ -150,7 +161,7 @@ ItemColor.new(
 
 ItemColor.new(
     data : {
-        name : 'Black',
+        name : 'black',
         equipMod : StatSet.new(
             ATK: 7
         ),
@@ -159,7 +170,7 @@ ItemColor.new(
 
 ItemColor.new(
     data : {
-        name : 'Silver',
+        name : 'silver',
         equipMod : StatSet.new(
             ATK: 5,
             DEF: 5
@@ -169,7 +180,7 @@ ItemColor.new(
 
 ItemColor.new(
     data : {
-        name : 'Aquamarine',
+        name : 'aquamarine',
         equipMod : StatSet.new(
             INT: 5,
             DEF: 3
@@ -180,7 +191,7 @@ ItemColor.new(
 
 ItemColor.new(
     data : {
-        name : 'Teal',
+        name : 'teal',
         equipMod : StatSet.new(
             SPD: 5,
             INT: 3
@@ -191,7 +202,7 @@ ItemColor.new(
 
 ItemColor.new(
     data : {
-        name : 'Gold',
+        name : 'gold',
         equipMod : StatSet.new(
             ATK: 5,
             DEF: 5,

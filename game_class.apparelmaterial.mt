@@ -118,7 +118,7 @@ ApparelMaterial.new(
 ApparelMaterial.new(
     data : {
         name : 'Wool',
-        description : 'The silk material feels lavishly soft.',
+        description : 'The wool material feels warm and soft.',
         rarity : 3,
         tier : 1,
         statMod : StatSet.new(
@@ -147,6 +147,21 @@ ApparelMaterial.new(
             ATK: 25
         ),
         pricePercentMod: 30
+    }
+)
+
+ApparelMaterial.new(
+    data : {
+        name : 'Mythril',
+        description : 'The mythril used makes it radiantly green',
+        rarity : 70,
+        tier : 2,
+        statMod : StatSet.new(
+            DEF: 70,
+            ATK: 70,
+            SPD: 30
+        ),
+        pricePercentMod: 1200
     }
 )
 

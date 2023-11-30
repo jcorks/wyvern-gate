@@ -129,6 +129,69 @@ Personality.new(data: {
 
 })
 
+Personality.new(data: {
+    name: 'Friendly',
+    growth : StatSet.new(
+        HP : 1,
+        AP : 2,
+        ATK: 0,
+        DEF: 1,
+        INT: 2,
+        LUK: 0,
+        SPD: -2,
+        DEX: 1                    
+    ),
+    phrases : {
+        SPEECH_EVENT.HURT : [
+            '..Hrg!',
+            '..Hg..',
+            '..gah!'
+        ],
+        
+        SPEECH_EVENT.DEATH : [
+            'I.. how.. did..',
+            'Avenge me...',
+            'How did this happen..?'
+        ],
+        
+        SPEECH_EVENT.CHAT : [
+            'Tell me, how did we find ourselves here..',
+            "You ever visit here before? It's rather lively.",
+            '... *Achoo*! Much too right now cold for me..',
+            "Well, not every place can be worth a visit",
+            'Did you here that joke at the tavern earlier? It was... well. It was something.',
+            "Don't forget to take a deep breath every now and then. Breathing is an important part of life! Or so I'm told.",
+            "Hmm. I suppose we all do make a good team."
+        ],
+        
+        SPEECH_EVENT.GREET : [
+            "How's it goin'?",
+            "Quite a fine day today.",
+            "Mmmm a nice breeze coming in."
+        ],
+
+        
+        SPEECH_EVENT.ADVENTURE_ACCEPT : [
+            "Sure, why not!",
+            "Hmm, could be fun!",
+        ],
+
+        SPEECH_EVENT.ADVENTURE_DENY : [
+            "Mmm, no thanks.",
+            "Sounds nice, but no thanks."
+        ],
+        
+        SPEECH_EVENT.INAPPROPRIATE_TIME : [
+            "I don't think nows the right time for that...",
+            "Maybe later would be better for this."
+        ],
+
+
+    }
+
+})
+
+
 Personality.new(data:{
     name: 'Short-tempered',
     growth : StatSet.new(

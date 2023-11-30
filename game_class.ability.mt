@@ -228,8 +228,8 @@ Ability.new(
                     @:Entity = import(module:'game_class.entity.mt');
                     @:party = import(module:'game_singleton.world.mt').party;                    
                     foreach(targets) ::(k, target) {
-                        @:item = target.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
-                        target.unequip(slot:Entity.EQUIP_SLOTS.HAND_L);
+                        @:item = target.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
+                        target.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR);
                         if (party.isMember(entity:target)) ::<= {
                             party.inventory.add(item);
                         }
@@ -2581,13 +2581,13 @@ Ability.new(
                 text: user.name + ' attempted to disarm ' + targets[0].name + '!'
             );
             
-            @:equipped = targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L); 
+            @:equipped = targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR); 
             when(equipped.name == 'None') 
                 windowEvent.queueMessage(text:targets[0].name + ' has nothing in-hand!');
                 
             // NICE
             if (Number.random() > 0.31) ::<= {
-                targets[0].unequip(slot:Entity.EQUIP_SLOTS.HAND_L, silent:true);
+                targets[0].unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
                 
                 windowEvent.queueMessage(text:targets[0].name + ' lost grip of their ' + equipped.name + '!');
             } else ::<= {
@@ -3229,8 +3229,8 @@ Ability.new(
         oncePerBattle : false,
         onAction: ::(user, targets, turnIndex, extraData) {
             @:Entity = import(module:'game_class.entity.mt');
-            when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L).base.name == 'None')
-                windowEvent.queueMessage(text:targets[0] + ' has no weapon to sharpen!');                    
+            when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).base.name == 'None')
+                windowEvent.queueMessage(text:targets[0].name + ' has no weapon to sharpen!');                    
 
 
             windowEvent.queueMessage(text:user.name + ' sharpens ' + targets[0].name + '\'s weapon!');
@@ -3281,7 +3281,7 @@ Ability.new(
         oncePerBattle : false,
         onAction: ::(user, targets, turnIndex, extraData) {
             @:Entity = import(module:'game_class.entity.mt');
-            when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L).base.name == 'None')
+            when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).base.name == 'None')
                 windowEvent.queueMessage(text:targets[0] + ' has no weapon to dull!');                    
 
 

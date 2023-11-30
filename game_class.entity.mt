@@ -85,13 +85,12 @@
 
 
 @:EQUIP_SLOTS = {
-    HAND_L : 0,
-    HAND_R : 1,
-    ARMOR : 2,
-    AMULET : 3,
-    RING_L : 4,
-    RING_R : 5,
-    TRINKET : 6
+    HAND_LR : 0,
+    ARMOR : 1,
+    AMULET : 2,
+    RING_L : 3,
+    RING_R : 4,
+    TRINKET : 5
 }
 
 @none;
@@ -125,12 +124,13 @@
         @enemies_ = [];
         @allies_ = [];
         @abilitiesUsedBattle = empty;
+        @effects;
 
 
-
-
+        @:world = import(module:'game_singleton.world.mt');
         @state = State.new(
             items : {
+                worldID : world.getNextID(),
                 stats : StatSet.new(
                     HP:1,
                     AP:1,
@@ -159,6 +159,7 @@
                 growth : StatSet.new(),
                 qualityDescription : empty,
                 qualitiesHint : empty,
+                faveWeapon : Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0),
                 adventurous : Number.random() <= 0.5,
                 battleAI : empty,
                 professions : [],
@@ -173,7 +174,6 @@
                     empty, // ringr
                     empty
                 ],
-                effects : [], // effects. abilities and equips push / pop these.
                 abilitiesAvailable : [
                     Ability.database.find(name:'Attack'),
                     Ability.database.find(name:'Defend'),
@@ -183,9 +183,12 @@
                 
                 inventory : Inventory.new(size:10),
                 expNext : 10,
-                level : 0
+                level : 0,
+                modData : {}
             }
         );
+        
+        
         state.inventory.addGold(amount:(Number.random() * 100)->ceil);
 
 
@@ -205,7 +208,7 @@
 
 
         @:resetEffects :: {
-            state.effects = [];
+            effects = [];
             
             for(0, EQUIP_SLOTS.RING_R+1)::(slot) {
                 when(slot == EQUIP_SLOTS.HAND_R) empty;
@@ -221,7 +224,7 @@
             }
             
             
-            foreach(state.profession.base.passives)::(index, passiveName) {
+            foreach(this.profession.base.passives)::(index, passiveName) {
                 this.addEffect(
                     from:this, 
                     name:passiveName, 
@@ -253,7 +256,7 @@
 
     
                 
-                state.profession = Profession.new(
+                @:profession = Profession.new(
                     base:
                         if (professionHint == empty) 
                             Profession.Base.database.getRandomFiltered(
@@ -265,12 +268,12 @@
                 if (speciesHint != empty) ::<= {
                     state.species = Species.database.find(name:speciesHint);
                 }
-                state.professions->push(value:state.profession);
-                
+                state.professions->push(value:profession);
+                state.profession = 0;
                 
                 state.growth.mod(stats:state.species.growth);
                 state.growth.mod(stats:state.personality.growth);
-                state.growth.mod(stats:state.profession.base.growth);
+                state.growth.mod(stats:state.professions[state.profession].base.growth);
                 for(0, levelHint)::(i) {
                     this.autoLevel();                
                 }
@@ -310,6 +313,9 @@
                 }
             },
 
+            worldID : {
+                get ::<- state.worldID
+            },
         
             // Called to indicate to the entity the 
             // start of a new turn in general.
@@ -342,7 +348,7 @@
             // called to signal that a battle has started involving this entity
             battleEnd :: {
                 battle_ = empty;
-                foreach(state.effects)::(index, effect) {
+                foreach(effects)::(index, effect) {
 
                     effect.effect.onRemoveEffect(
                         user:effect.from, 
@@ -353,17 +359,38 @@
                 allies_ = [];
                 enemies_ = [];
                 abilitiesUsedBattle = empty;                
-                resetEffects();
+                effects;
             },
 
             
             recalculateStats :: {
                 state.stats.resetMod();
-                foreach(state.effects)::(index, effect) {
-                    effect.effect.onStatRecalculate(user:effect.from, stats:state.stats, holder:this, item:effect.item);
-                    state.stats.modRate(stats:effect.effect.stats);
+                if (this.effects != empty) ::<= {
+                    foreach(this.effects)::(index, effect) {
+                        effect.effect.onStatRecalculate(user:effect.user, stats:state.stats, holder:this);
+                        state.stats.modRate(stats:effect.effect.stats);
+                    }
                 }
-
+                
+                @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
+                @weaponAffinity = false;
+                if (hand != empty)
+                    weaponAffinity = 
+                        (this.profession.base.weaponAffinity == hand.base.name) ||
+                        (state.faveWeapon.name == hand.base.name)
+                    ;
+                
+                // flat bonus
+                if (weaponAffinity) ::<= {
+                    state.stats.modRate(stats:StatSet.new(
+                        ATK: 60,
+                        DEF: 60,
+                        SPD: 60,
+                        INT: 60,
+                        DEX: 60
+                    ))
+                }
+                
                 foreach(state.equips)::(index, equip) {
                     when(equip == empty) empty;
                     when(index == EQUIP_SLOTS.HAND_R) empty;
@@ -387,14 +414,14 @@
             // lets the entity know that their turn has come.            
             actTurn ::() => Boolean {
                 @act = true;
-                foreach(state.effects)::(index, effect) {                        
+                foreach(effects)::(index, effect) {                        
                     if (effect.duration != -1 && effect.turnIndex >= effect.duration) ::<= {
                         effect.effect.onRemoveEffect(
                             user:effect.from, 
                             holder:this,
                             item:effect.item
                         );
-                        state.effects->remove(key:index);
+                        effects->remove(key:index);
                     } else ::<= {
                         if (effect.effect.skipTurn == true)
                             act = false;
@@ -404,12 +431,12 @@
                 }
                 
                 if (this.stats.SPD < 0) ::<= {
-                    windowEvent.queueMessage(text:this.name + ' cannot move due to negative speed!');
+                    windowEvent.queueMessage(text:this.name + ' cannot move! (negative speed)');
                     act = false;
                 }
 
                 if (this.stats.DEX < 0) ::<= {
-                    windowEvent.queueMessage(text:this.name + ' fumbles about due to negative dexterity!');
+                    windowEvent.queueMessage(text:this.name + ' fumbles about! (negative dexterity)');
                     act = false;
                 }
 
@@ -451,27 +478,31 @@
                 set ::(value) <- requestsRemove = value
             },
 
+            favoriteItem : {
+                get ::<- state.favoriteItem
+            },
+
             profession : {
                 get :: {
-                    return state.profession;
+                    return state.professions[state.profession];
                 },
                 
                 set ::(value => Profession.type) {
                     state.profession = {:::}{
                         foreach(state.professions)::(index, prof) {
                             if (value.base.name == prof.base.name) ::<= {
-                                send(message:prof);
+                                send(message:index);
                             }
                         }
                         state.professions->push(value);
-                        return value;
+                        return state.professions->size-1;
                     }            
                     
                                         
                     state.growth.resetMod();
                     state.growth.mod(stats:state.species.growth);
                     state.growth.mod(stats:state.personality.growth);
-                    state.growth.mod(stats:state.profession.base.growth);
+                    state.growth.mod(stats:state.professions[state.profession].base.growth);
                 
                 
                 }
@@ -506,7 +537,7 @@
             },
             
             effects : {
-                get ::<- [...state.effects]
+                get ::<- [...effects]
             },
             
             onHire : {
@@ -522,179 +553,210 @@
                 damageClass => Number,
                 target => Entity.type
             ){
-                @:dmg = Damage.new(
-                    amount,
-                    damageType,
-                    damageClass
-                );
-                
-                @:damaged = [];
-                // TODO: add weapon affinities if phys and equip weapon
-                // phys is always assumed to be with equipped weapon
-                foreach(state.effects)::(index, effect) {
-                    when (dmg.amount <= 0) empty;
-                    effect.effect.onPreAttackOther(user:effect.from, item:effect.item, holder:this, to:target, damage:dmg);
+                @:inBattle = effects != empty;
+                if (!inBattle)
+                    this.battleStart(); // dummy battle for effect shells.
+                    
+                @:retval = ::<= {
+                    @:dmg = Damage.new(
+                        amount,
+                        damageType,
+                        damageClass
+                    );
+                    
+                    @:damaged = [];
+                    // TODO: add weapon affinities if phys and equip weapon
+                    // phys is always assumed to be with equipped weapon
+                    foreach(effects)::(index, effect) {
+                        when (dmg.amount <= 0) empty;
+                        effect.effect.onPreAttackOther(user:effect.from, item:effect.item, holder:this, to:target, damage:dmg);
+                    }
+                    
+                    when(dmg.amount <= 0) empty;
+                    foreach(target.effects)::(index, effect) {
+                        when (dmg.amount <= 0) empty;
+                        effect.effect.onAttacked(user:target, item:effect.item, holder:target, by:this, damage:dmg);                
+                    }
+                    
+
+                    when(dmg.amount <= 0) empty;
+                    when(target.hp == 0) ::<= {
+                        this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
+                        target.flags.add(flag:StateFlags.DIED);
+                        target.kill();                
+                    }
+
+                    @critChance = 0.999 - (this.stats.LUK - state.level) / 100;
+                    @isCrit = false;
+                    if (critChance < 0.90) critChance = 0.9;
+                    if (Number.random() > critChance) ::<={
+                        dmg.amount += this.stats.DEX * 2.5;
+                        isCrit = true;
+                    }
+
+                    when(!target.damage(from:this, damage:dmg, dodgeable:true, critical:isCrit)) empty;
+
+
+                    this.flags.add(flag:StateFlags.ATTACKED);
+
+
+                    
+                    foreach(effects)::(index, effect) {
+                        effect.effect.onPostAttackOther(user:effect.from, item:effect.item, holder:this, to:target);
+                    }
+                    return true;
                 }
                 
-                when(dmg.amount <= 0) empty;
-                foreach(target.effects)::(index, effect) {
-                    when (dmg.amount <= 0) empty;
-                    effect.effect.onAttacked(user:target, item:effect.item, holder:target, by:this, damage:dmg);                
-                }
-                
-
-                when(dmg.amount <= 0) empty;
-                when(target.hp == 0) ::<= {
-                    this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
-                    target.flags.add(flag:StateFlags.DIED);
-                    target.kill();                
-                }
-
-                @critChance = 0.999 - (this.stats.LUK - state.level) / 100;
-                @isCrit = false;
-                if (critChance < 0.90) critChance = 0.9;
-                if (Number.random() > critChance) ::<={
-                    dmg.amount += this.stats.DEX * 2.5;
-                    isCrit = true;
-                }
-
-                when(!target.damage(from:this, damage:dmg, dodgeable:true, critical:isCrit)) empty;
-
-
-                this.flags.add(flag:StateFlags.ATTACKED);
-
-
-                
-                foreach(state.effects)::(index, effect) {
-                    effect.effect.onPostAttackOther(user:effect.from, item:effect.item, holder:this, to:target);
-                }
-                return true;
+                if (!inBattle)
+                    this.battleEnd();
+                return retval;
             },
             
             damage ::(from => Entity.type, damage => Damage.type, dodgeable => Boolean, critical, exact) {
-                when(state.isDead) false;
-                @originalAmount = damage.amount;
-                @whiff = false;
-                if (dodgeable) ::<= {
-                    @diffpercent = (from.stats.DEX - this.stats.DEX) / this.stats.DEX;
-                    // if attacker dex is above target dex, hit always connects
-                    when(diffpercent > 0) empty;
+                @:inBattle = effects != empty;
+                if (!inBattle)
+                    this.battleStart(); // dummy battle for effect shells.
                     
-                    // if less dex, then a percent to miss, up to 50%
-                    diffpercent = diffpercent + (1 - diffpercent) / 3.0;
-                    if (diffpercent < 0.5) diffpercent = 0.5;
-                    if (Number.random() > diffpercent)
-                        whiff = true;
-                }
-                
-                when(whiff) ::<= {
-                    windowEvent.queueMessage(text:random.pickArrayItem(list:[
-                        this.name + ' lithely dodges ' + from.name + '\'s attack!',                 
-                        this.name + ' narrowly dodges ' + from.name + '\'s attack!',                 
-                        this.name + ' dances around ' + from.name + '\'s attack!',                 
-                        from.name + '\'s attack completely misses ' + this.name + '!'
-                    ]));
-                    this.flags.add(flag:StateFlags.DODGED_ATTACK);
-                    return false;
-                }
+                @:retval = ::<= {
 
-
-
-                if (from.stats.DEX > this.stats.DEX)               
-                    // as DEX increases: randomness decreases 
-                    // amount of reliable damage increases
-                    // This models user skill vs receiver skill
-                    damage.amount = damage.amount + damage.amount * ((Number.random() - 0.5) * (this.stats.DEX / from.stats.DEX) + (1 -  this.stats.DEX / from.stats.DEX))
-                else
-                    damage.amount = damage.amount + damage.amount * (Number.random() - 0.5)
-                ; 
-                
-                
-
-
-                damage.amount -= state.stats.DEF/4;
-                if (damage.amount <= 0) damage.amount = 1;
-
-
-                foreach(state.effects)::(index, effect) {
-                    effect.effect.onDamage(user:effect.from, holder:this, from, damage);
-                }
-
-                if (exact)
-                    damage.amount = originalAmount;
-
-                when (damage.amount == 0) false;
-                when(state.hp == 0) false;
-
-                
-                if (critical == true)
-                    windowEvent.queueMessage(text: 'Critical damage!');
-
-
-                @damageTypeName ::{
-                    return match(damage.damageType) {
-                      (Damage.TYPE.FIRE): 'fire ',
-                      (Damage.TYPE.ICE): 'ice ',
-                      (Damage.TYPE.THUNDER): 'thunder ',
-                      (Damage.TYPE.LIGHT): 'light ',
-                      (Damage.TYPE.DARK): 'dark ',
-                      (Damage.TYPE.PHYS): 'physical ',
-                      (Damage.TYPE.POISON): 'poison ',
-                      (Damage.TYPE.NEUTRAL): ''
+                    when(state.isDead) false;
+                    @originalAmount = damage.amount;
+                    @whiff = false;
+                    if (dodgeable) ::<= {
+                        @diffpercent = (from.stats.DEX - this.stats.DEX) / this.stats.DEX;
+                        // if attacker dex is above target dex, hit always connects
+                        when(diffpercent > 0) empty;
+                        
+                        // if less dex, then a percent to miss, up to 50%
+                        diffpercent = diffpercent + (1 - diffpercent) / 3.0;
+                        if (diffpercent < 0.5) diffpercent = 0.5;
+                        if (Number.random() > diffpercent)
+                            whiff = true;
                     }
-                }
-                
-                if (damage.damageClass == Damage.CLASS.HP) ::<= {
-                    state.hp -= damage.amount;
-                    if (state.hp < 0) state.hp = 0;
-                    windowEvent.queueMessage(text: '' + this.name + ' received ' + damage.amount + ' '+damageTypeName() + 'damage (HP:' + this.renderHP() + ')' );
-                } else ::<= {
-                    state.ap -= damage.amount;
-                    if (state.ap < 0) state.ap = 0;                
-                    windowEvent.queueMessage(text: '' + this.name + ' received ' + damage.amount + ' AP damage (AP:' + state.ap + '/' + state.stats.AP + ')' );
+                    
+                    
+                    when(whiff) ::<= {
+                        windowEvent.queueMessage(text:random.pickArrayItem(list:[
+                            this.name + ' lithely dodges ' + from.name + '\'s attack!',                 
+                            this.name + ' narrowly dodges ' + from.name + '\'s attack!',                 
+                            this.name + ' dances around ' + from.name + '\'s attack!',                 
+                            from.name + '\'s attack completely misses ' + this.name + '!'
+                        ]));
+                        this.flags.add(flag:StateFlags.DODGED_ATTACK);
+                        return false;
+                    }
 
-                }
-                @:world = import(module:'game_singleton.world.mt');
+                    // flat 15% chance to avoid damage with a shield 
+                    // pretty nifty!
+                    when (dodgeable && this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).base.hasAttribute(attribute:Item.ATTRIBUTE.SHIELD) && random.try(percentSuccess:15)) ::<= {
+                        windowEvent.queueMessage(text:random.pickArrayItem(list:[
+                            this.name + ' defends against ' + from.name + '\'s attack with their shield!',                 
+                        ]));
+                        this.flags.add(flag:StateFlags.DODGED_ATTACK);
+                        return false;                                                            
+                    }
 
-                if (world.party.isMember(entity:this) && state.hp != 0 && damage.amount > state.stats.HP * 0.2 && Number.random() > 0.7)
-                    windowEvent.queueMessage(
-                        speaker: this.name,
-                        text: '"' + random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.HURT]) + '"'
-                    );
+
+                    if (from.stats.DEX > this.stats.DEX)               
+                        // as DEX increases: randomness decreases 
+                        // amount of reliable damage increases
+                        // This models user skill vs receiver skill
+                        damage.amount = damage.amount + damage.amount * ((Number.random() - 0.5) * (this.stats.DEX / from.stats.DEX) + (1 -  this.stats.DEX / from.stats.DEX))
+                    else
+                        damage.amount = damage.amount + damage.amount * (Number.random() - 0.5)
+                    ; 
+                    
                     
 
-                state.flags.add(flag:StateFlags.HURT);
-                
-                if (damage.damageType == Damage.TYPE.FIRE && Number.random() > 0.9)
-                    this.addEffect(from, name:'Burned',durationTurns:5);
-                if (damage.damageType == Damage.TYPE.ICE && Number.random() > 0.9)
-                    this.addEffect(from, name:'Frozen',durationTurns:2);
-                if (damage.damageType == Damage.TYPE.THUNDER && Number.random() > 0.9)
-                    this.addEffect(from, name:'Paralyzed',durationTurns:2);
-                if (damage.damageType == Damage.TYPE.PHYS && Number.random() > 0.99) 
-                    this.addEffect(from, name:'Bleeding',durationTurns:5);
-                if (damage.damageType == Damage.TYPE.POISON && Number.random() > 0.9) 
-                    this.addEffect(from, name:'Poisoned',durationTurns:5);
-                if (damage.damageType == Damage.TYPE.DARK && Number.random() > 0.9)
-                    this.addEffect(from, name:'Blind',durationTurns:2);
-                if (damage.damageType == Damage.TYPE.LIGHT && Number.random() > 0.9)
-                    this.addEffect(from, name:'Petrified',durationTurns:2);
-                
-                
-                if (world.party.isMember(entity:this) && state.hp == 0 && Number.random() > 0.7) ::<= {
-                    windowEvent.queueMessage(
-                        speaker: this.name,
-                        text: '"' + random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.DEATH]) + '"'
-                    );
-                }
-                
-                if (state.hp == 0) ::<= {
-                    windowEvent.queueMessage(text: '' + this.name + ' has been knocked out.');                                
-                    this.flags.add(flag:StateFlags.FALLEN);
-                    from.flags.add(flag:StateFlags.DEFEATED_ENEMY);
-                }
 
-                return true;
+                    damage.amount -= state.stats.DEF/4;
+                    if (damage.amount <= 0) damage.amount = 1;
+
+
+                    foreach(effects)::(index, effect) {
+                        effect.effect.onDamage(user:effect.from, holder:this, from, damage);
+                    }
+
+                    if (exact)
+                        damage.amount = originalAmount;
+
+                    when (damage.amount == 0) false;
+                    when(state.hp == 0) false;
+
+                    
+                    if (critical == true)
+                        windowEvent.queueMessage(text: 'Critical damage!');
+
+
+                    @damageTypeName ::{
+                        return match(damage.damageType) {
+                          (Damage.TYPE.FIRE): 'fire ',
+                          (Damage.TYPE.ICE): 'ice ',
+                          (Damage.TYPE.THUNDER): 'thunder ',
+                          (Damage.TYPE.LIGHT): 'light ',
+                          (Damage.TYPE.DARK): 'dark ',
+                          (Damage.TYPE.PHYS): 'physical ',
+                          (Damage.TYPE.POISON): 'poison ',
+                          (Damage.TYPE.NEUTRAL): ''
+                        }
+                    }
+                    
+                    if (damage.damageClass == Damage.CLASS.HP) ::<= {
+                        state.hp -= damage.amount;
+                        if (state.hp < 0) state.hp = 0;
+                        windowEvent.queueMessage(text: '' + this.name + ' received ' + damage.amount + ' '+damageTypeName() + 'damage (HP:' + this.renderHP() + ')' );
+                    } else ::<= {
+                        state.ap -= damage.amount;
+                        if (state.ap < 0) state.ap = 0;                
+                        windowEvent.queueMessage(text: '' + this.name + ' received ' + damage.amount + ' AP damage (AP:' + state.ap + '/' + state.stats.AP + ')' );
+
+                    }
+                    @:world = import(module:'game_singleton.world.mt');
+
+                    if (world.party.isMember(entity:this) && state.hp != 0 && damage.amount > state.stats.HP * 0.2 && Number.random() > 0.7)
+                        windowEvent.queueMessage(
+                            speaker: this.name,
+                            text: '"' + random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.HURT]) + '"'
+                        );
+                        
+
+                    state.flags.add(flag:StateFlags.HURT);
+                    
+                    if (damage.damageType == Damage.TYPE.FIRE && Number.random() > 0.9)
+                        this.addEffect(from, name:'Burned',durationTurns:5);
+                    if (damage.damageType == Damage.TYPE.ICE && Number.random() > 0.9)
+                        this.addEffect(from, name:'Frozen',durationTurns:2);
+                    if (damage.damageType == Damage.TYPE.THUNDER && Number.random() > 0.9)
+                        this.addEffect(from, name:'Paralyzed',durationTurns:2);
+                    if (damage.damageType == Damage.TYPE.PHYS && Number.random() > 0.99) 
+                        this.addEffect(from, name:'Bleeding',durationTurns:5);
+                    if (damage.damageType == Damage.TYPE.POISON && Number.random() > 0.9) 
+                        this.addEffect(from, name:'Poisoned',durationTurns:5);
+                    if (damage.damageType == Damage.TYPE.DARK && Number.random() > 0.9)
+                        this.addEffect(from, name:'Blind',durationTurns:2);
+                    if (damage.damageType == Damage.TYPE.LIGHT && Number.random() > 0.9)
+                        this.addEffect(from, name:'Petrified',durationTurns:2);
+                    
+                    
+                    if (world.party.isMember(entity:this) && state.hp == 0 && Number.random() > 0.7) ::<= {
+                        windowEvent.queueMessage(
+                            speaker: this.name,
+                            text: '"' + random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.DEATH]) + '"'
+                        );
+                    }
+                    
+                    if (state.hp == 0) ::<= {
+                        windowEvent.queueMessage(text: '' + this.name + ' has been knocked out.');                                
+                        this.flags.add(flag:StateFlags.FALLEN);
+                        from.flags.add(flag:StateFlags.DEFEATED_ENEMY);
+                    }
+
+                    return true;
+                }
+                if (!inBattle)
+                    this.battleEnd();
+
+                return retval;
             },
             
             // where they roam to in their freetime. if places doesnt have one they stay home
@@ -829,6 +891,11 @@
                 }
             },
             
+            // per-entity data for mods
+            modData : {
+                get ::<- state.modData
+            },
+            
             kill ::(silent) {
                 state.hp = 0;
                 if (silent == empty)
@@ -838,13 +905,19 @@
             },
             
             addEffect::(from => Entity.type, name => String, durationTurns => Number, item) {
+                // temporarily make effects active but remove them right after.
+                @inBattle = effects != empty;
+                if (!inBattle)
+                    this.battleStart();
+
+
                 if (durationTurns == empty) durationTurns = -1;
                 
                 @:effect = Effect.database.find(name);
-                @:existingEffectIndex = state.effects->findIndex(query::(value) <- value.effect.name == name);               
+                @:existingEffectIndex = effects->findIndex(query::(value) <- value.effect.name == name);               
                 when (effect.stackable == false && existingEffectIndex != -1) ::<= {
                     // reset duration of effect and source.
-                    @einst = state.effects[existingEffectIndex];
+                    @einst = effects[existingEffectIndex];
                     einst.duration = durationTurns;
                     einst.turnIndex = 0;
                     einst.item = item;
@@ -860,7 +933,7 @@
                 }
                 if (einst.effect == empty || einst.duration->type != Number) error(detail:'Bad addEffect() call: effect or duration was invalid.');                
                 if (durationTurns != 0)
-                    state.effects->push(value:einst);
+                    effects->push(value:einst);
                 
 
                 einst.effect.onAffliction(
@@ -869,12 +942,14 @@
                     item
                 );
                 this.recalculateStats();
+                if (!inBattle)
+                    this.battleEnd();
 
             },
             
             
             removeEffects::(effectBases => Object) {
-                state.effects = state.effects->filter(by:::(value) {
+                effects = effects->filter(by:::(value) {
                     @:current = value.effect;
                     @:keep = effectBases->all(condition:::(value) <-
                         value != current
@@ -981,35 +1056,41 @@
                     inventory.add(item:old);
 
                 if (item.base.equipType == Item.TYPE.TWOHANDED) ::<={
-                    state.equips[EQUIP_SLOTS.HAND_L] = item;
-                    state.equips[EQUIP_SLOTS.HAND_R] = item;
+                    state.equips[EQUIP_SLOTS.HAND_LR] = item;
                 } else ::<= {
                     state.equips[slot] = item;
                 }
                 
+                if (silent != true) ::<= {
+                    if ((slot == EQUIP_SLOTS.HAND_LR) && this.profession.base.weaponAffinity == state.equips[EQUIP_SLOTS.HAND_LR].base.name) ::<= {
+                        if (silent != true) ::<= {
+                            windowEvent.queueMessage(
+                                speaker: this.name,
+                                text: '"This ' + item.base.name + ' really works for me as ' + correctA(word:this.profession.base.name) + '"'
+                            );
+                        }
+                    } else if ((slot == EQUIP_SLOTS.HAND_LR) && state.faveWeapon.name == state.equips[EQUIP_SLOTS.HAND_LR].base.name) ::<= {
+                        if (silent != true) ::<= {
+                            windowEvent.queueMessage(
+                                speaker: this.name,
+                                text: '"This ' + item.base.name + ' is my favorite kind of weapon!"'
+                            );
+                        }                
+                    }                
+                }
+                
                 item.equippedBy = this;
                 
-                foreach(item.equipEffects)::(index, effect) {
-                    this.addEffect(
-                        from:this, 
-                        name:effect, 
-                        durationTurns: -1
-                    );
-                }
-
-                if ((slot == EQUIP_SLOTS.HAND_L || slot == EQUIP_SLOTS.HAND_R) && state.profession.base.weaponAffinity == state.equips[EQUIP_SLOTS.HAND_L].base.name) ::<= {
-                    if (silent != true) ::<= {
-                        windowEvent.queueMessage(
-                            speaker: this.name,
-                            text: '"This ' + item.base.name + ' really works for me as ' + correctA(word:state.profession.base.name) + '"'
+                if (effects != empty) ::<= {
+                    foreach(item.equipEffects)::(index, effect) {
+                        this.addEffect(
+                            from:this, 
+                            name:effect, 
+                            durationTurns: -1
                         );
                     }
-                    this.addEffect(
-                        from:this,
-                        name:'Weapon Affinity',
-                        durationTurns: -1 
-                    );
                 }
+
 
 
                 if (inventory)
@@ -1046,43 +1127,35 @@
             // returns an array of equip slots that the item can fit in.
             getSlotsForItem ::(item => none->type) {
                 return match(item.base.equipType) {
-                    (Item.TYPE.HAND)     :  [EQUIP_SLOTS.HAND_L, EQUIP_SLOTS.HAND_R],
+                    (Item.TYPE.HAND)     :  [EQUIP_SLOTS.HAND_LR],
                     (Item.TYPE.ARMOR)    :  [EQUIP_SLOTS.ARMOR],
                     (Item.TYPE.AMULET)   :  [EQUIP_SLOTS.AMULET],
                     (Item.TYPE.RING)     :  [EQUIP_SLOTS.RING_L, EQUIP_SLOTS.RING_R],
                     (Item.TYPE.TRINKET)  :  [EQUIP_SLOTS.TRINKET],
-                    (Item.TYPE.TWOHANDED):  [EQUIP_SLOTS.HAND_L, EQUIP_SLOTS.HAND_R],
+                    (Item.TYPE.TWOHANDED):  [EQUIP_SLOTS.HAND_LR],
                     default: error(detail:'Item has an invalid equiptype?')      
                 }
             },
             
-            
             unequip ::(slot => Number, silent) {
                 @:current = state.equips[slot];
                 when (current == empty) empty;
-                if (current.base.equipType == Item.TYPE.TWOHANDED) ::<={
-                    state.equips[EQUIP_SLOTS.HAND_L] = empty;                                
-                    state.equips[EQUIP_SLOTS.HAND_R] = empty;                                
-                } else ::<={
-                    state.equips[slot] = empty;                
-                }
-                if (state.profession.base.weaponAffinity == current.base.name)
-                    state.effects->remove(key:state.effects->findIndex(query::(value) <- value.effect.name == 'Weapon Affinity'));
+                state.equips[slot] = empty;                
                 
                 current.equippedBy = empty;
 
-                
-                foreach(current.equipEffects)::(i, effect) {
-                    @:effectObj = state.effects->filter(by:::(value) <- value.effect.name == effect)[0];
-                    effectObj.effect.onRemoveEffect(
-                        user:effectObj.from, 
-                        holder:this,
-                        item:effectObj.item
-                    );
-                    
-                    state.effects->remove(key:state.effects->findIndex(value:effectObj));
+                if (effects != empty) ::<= {
+                    foreach(current.equipEffects)::(i, effect) {
+                        @:effectObj = effects->filter(by:::(value) <- value.effect.name == effect)[0];
+                        effectObj.effect.onRemoveEffect(
+                            user:effectObj.from, 
+                            holder:this,
+                            item:effectObj.item
+                        );
+                        
+                        effects->remove(key:effects->findIndex(value:effectObj));
+                    }
                 }
-                
                 
                 this.recalculateStats();
                 return current;
@@ -1116,198 +1189,16 @@
                 ability.onAction(
                     user:this,
                     targets, turnIndex, extraData                 
-                );
-            
+                );            
             },
             
             // interacts with this entity
             interactPerson ::(party, location, onDone, overrideChat, skipIntro) {
                 when(onInteract) onInteract(party, location, onDone);
                 
-                @:finish ::{
-                    onDone();
-                    windowEvent.jumpToTag(name:'InteractPerson', goBeforeTag:true, doResolveNext:true);
-                }
-                
-                if (skipIntro == empty) 
-                    windowEvent.queueMessage(
-                        speaker: this.name,
-                        text: random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.GREET])
-                    );                
-                    
-                windowEvent.queueChoices(
-                    canCancel : true,
-                    prompt: 'Talking to ' + this.name,
-                    choices: [
-                        'Chat',
-                        'Hire',
-                        'Barter',
-                        'Aggress...'
-                    ],
-                    keep: true,
-                    onLeave :onDone,
-                    canCancel: true,
-                    jumpTag: 'InteractPerson',
-                    onChoice::(choice) {
-                
-                        when(choice == 0) empty;
-                        
-                        match(choice-1) {
-                          // Chat
-                          (0): ::<= {
-                            when (overrideChat) overrideChat();
-                            
-                             
-                            windowEvent.queueMessage(
-                                speaker: this.name,
-                                text: random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.CHAT])
-                            );                                                        
-                          },
-                          
-                          // hire 
-                          (1): ::<= {
-                            when(party.isMember(entity:this))
-                                windowEvent.queueMessage(
-                                    text: this.name + ' is already a party member.'
-                                );                
-                          
-                            when (party.members->keycount >= 3 || !state.adventurous)
-                                windowEvent.queueMessage(
-                                    speaker: this.name,
-                                    text: random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_DENY])
-                                );                
-                                
-                            windowEvent.queueMessage(
-                                speaker: this.name,
-                                text: random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_ACCEPT])
-                            );                
-
-                            @:cost = 50+((state.stats.sum/3 + state.level)*2.5)->ceil;
-
-
-                            this.describe();
-
-                            windowEvent.queueAskBoolean(
-                                prompt: 'Hire for ' + cost + 'G?',
-                                onChoice::(which) {
-                                    when(which == false) empty;
-                                    when(party.inventory.gold < cost)
-                                        windowEvent.queueMessage(
-                                            text: 'The party cannot afford to hire ' + this.name
-                                        );                
-                                        
-                                    party.inventory.subtractGold(amount:cost);
-                                    party.add(member:this);
-                                        windowEvent.queueMessage(
-                                            text: this.name + ' joins the party!'
-                                        );     
-                                        
-                                    if (onHire) onHire();           
-
-                                }
-                            );
-                          },
-                          
-                          // barter
-                          (2):::<= {
-                            when (state.inventory.isEmpty) ::<= {
-                                windowEvent.queueMessage(
-                                    text: this.name + ' has nothing to barter with.'
-                                );                
-                            }
-                            @:item = state.inventory.items[0];
-
-                            windowEvent.queueMessage(
-                                text: this.name + ' is interested in acquiring ' + correctA(word:state.favoriteItem.name) + '. They are willing to trade one for their ' + item.name + '.'
-                            );                
-                            
-                            
-                            @:tradeItems = party.inventory.items->filter(by::(value) <- value.base == state.favoriteItem);
-                            
-                            when(tradeItems->keycount == 0) ::<= {
-                                windowEvent.queueMessage(
-                                    text: 'You have no such items to trade, sadly.'
-                                );                                                 
-                            }
-                            
-
-
-                            windowEvent.queueChoices(
-                                prompt: this.name + ' - bartering',
-                                choices: ['Trade', 'Check Item', 'Compare Equipment'],
-                                jumpTag: 'Barter',
-                                canCancel: true,
-                                keep:true,
-                                onChoice::(choice) {
-                                    when(choice == 0) empty;
-                                    
-                                    match(choice-1) {
-                                      // Trade
-                                      (0)::<= {
-                                        windowEvent.queueChoices(
-                                            choices: [...tradeItems]->map(to::(value) <- value.name),
-                                            canCancel: true,
-                                            onChoice::(choice) {
-                                                when(choice == 0) empty;
-                                                
-                                                @:chosenItem = tradeItems[choice-1];
-                                                party.inventory.remove(item:chosenItem);
-                                                this.inventory.remove(item);
-                                                party.inventory.add(item);
-                                                
-                                                windowEvent.queueMessage(
-                                                    text: 'In exchange for your ' + chosenItem.name + ', ' + this.name + ' gives the party ' + correctA(word:item.name) + '.'
-                                                );                                                                                                 
-                                                
-                                                windowEvent.jumpToTag(name:'Barter', goBeforeTag:true, doResolveNext:true);
-                                            }
-                                        );
-                                      },
-                                      // check
-                                      (1)::<= {
-                                        item.describe();
-                                      },
-                                      // compare 
-                                      (2)::<= {
-                                        @:memberNames = [...party.members]->map(to:::(value) <- value.name);
-                                        @:choice = windowEvent.queueChoices(
-                                            prompt: 'Compare equipment for whom?',
-                                            choices: memberNames,
-                                            onChoice::(choice) {
-                                                @:user = party.members[choice-1];
-                                                @slot = user.getSlotsForItem(item)[0];
-                                                @currentEquip = user.getEquipped(slot);
-                                                
-                                                currentEquip.equipMod.printDiffRate(
-                                                    prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
-                                                    other:item.equipMod
-                                                );                                                                               
-                                            }
-                                        );
-                                      }  
-                                    }   
-                                }
-                            );
-
-                            
-                            
-                            
-                          }
-                        
-                        }                    
-                    }
-                );  
-
-                
-                // if aggress:
-                //
-                /*
-                    choices : [
-                        'fight',
-                        'steal', // ask: Who's stealing? Dex compared to target's Int determines if caught
-                    ]
-                
-                */
+                (import(module:'game_function.interactperson.mt'))(
+                    this, party, location, onDone, overrideChat, skipIntro, onHire
+                );
             },
             
             // dummy for map
@@ -1441,22 +1332,22 @@
                 plainStats.add(stats:state.stats);
                 this.recalculateStats();
 
-                @:modRate = StatSet.new();
-                foreach(state.effects)::(index, effect) {
-                    effect.effect.onStatRecalculate(user:effect.from, stats:state.stats, holder:this, item:effect.item);
-                    modRate.add(stats:effect.effect.stats);
-                }
 
-                foreach(state.equips)::(index, equip) {
-                    when(equip == empty) empty;
-                    when(index == EQUIP_SLOTS.HAND_R) empty;
-                    modRate.add(stats:equip.equipMod);
-                }
-                
 
                 plainStats.printDiff(other:state.stats, 
                     prompt:this.name + '(Base -> w/Mods.)'
                 );
+                
+                @:getRightHandName ::{
+                    @:hand = this.getEquipped(slot:EQUIP_SLOTS.HAND_LR);
+                    return 
+                        if (hand.name == "None")
+                            ""
+                        else
+                            hand.name 
+                    ;
+                }
+                
                 windowEvent.queueMessageSet(
                     speaker: this.name,
                     pageAfter:canvas.height-4,
@@ -1465,33 +1356,35 @@
                           '         HP: ' + this.hp + ' / ' + this.stats.HP + '\n' + 
                           '         AP: ' + this.ap + ' / ' + this.stats.AP + '\n\n' + 
                           '    species: ' + state.species.name + '\n' +
-                          ' profession: ' + state.profession.base.name + '\n' +
+                          ' profession: ' + this.profession.base.name + '\n' +
+                          ' fave. wep.: ' + state.faveWeapon.name + '\n' +
                           'personality: ' + state.personality.name + '\n\n'
                          ,
                          this.describeQualities()
                          ,
                          
                           ' -Equipment-  \n'                
-                                + 'hand(l): ' + this.getEquipped(slot:EQUIP_SLOTS.HAND_L).name + '\n'
-                                + 'hand(r): ' + this.getEquipped(slot:EQUIP_SLOTS.HAND_R).name + '\n'
+                                + 'hand(l): ' + this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).name + '\n'
+                                + 'hand(r): ' + getRightHandName() + '\n'
                                 + 'armor  : ' + this.getEquipped(slot:EQUIP_SLOTS.ARMOR).name + '\n'
                                 + 'amulet : ' + this.getEquipped(slot:EQUIP_SLOTS.AMULET).name + '\n'
                                 + 'trinket: ' + this.getEquipped(slot:EQUIP_SLOTS.TRINKET).name + '\n'
                                 + 'ring(l): ' + this.getEquipped(slot:EQUIP_SLOTS.RING_L).name + '\n'
                                 + 'ring(r): ' + this.getEquipped(slot:EQUIP_SLOTS.RING_R).name + '\n'
                          ,
-                        
                           
-                            ' - Stat Modifiers - \n' +
-                            modRate.getRates()
-                         ,
-                          ::<= {
+                         if (effects != empty) ::<= {
                             @out = ' - Effects - \n\n';
-                            foreach(state.effects)::(index, effect) {
+                            foreach(this.effects)::(index, effect) {
                                 out = out + effect.effect.name + ': ' + effect.effect.description + '\n';
                             }
                             return out;
+                         } else ::<= {
+                            @out = ' - Effects - \n\n';
+                            out = out + 'Effects only active in battle.'
+                            return out;                         
                          }
+                         
                      ]                                   
                 );                     
                            

@@ -349,4 +349,73 @@ ItemQuality.new(
     }
 ) 
 
+
+
+
+
+ItemQuality.new(
+    data : {
+        name : 'Legendary',
+        description : "It is said that this is part of some legend.",
+        levelMinimum: 1,
+        equipMod : StatSet.new(
+            DEF: 150,
+            ATK: 150,
+            SPD: 150,
+            DEX: 150,
+            INT: 150
+        ),
+        rarity: 200,
+        pricePercentMod: 9600,
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+) 
+
+
+ItemQuality.new(
+    data : {
+        name : 'Divine',
+        description : "It is said the origin of this is of mythical.",
+        levelMinimum: 1,
+        equipMod : StatSet.new(
+            DEF: 200,
+            ATK: 200,
+            SPD: 200,
+            DEX: 200,
+            INT: 200
+        ),
+        rarity: 400,
+        pricePercentMod: 10600,
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+) 
+
+ItemQuality.new(
+    data : {
+        name : 'God\'s',
+        description : "It is said this was created by a deity.",
+        levelMinimum: 1,
+        equipMod : StatSet.new(
+            DEF: 400,
+            ATK: 400,
+            SPD: 400,
+            DEX: 400,
+            INT: 400
+        ),
+        rarity: 1000,
+        pricePercentMod: 29600,
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+) 
+
+
 return ItemQuality;

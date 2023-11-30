@@ -47,8 +47,21 @@
 
         @:world = import(module:'game_singleton.world.mt');
         
-        @:landmark = parent;
-        @:island = landmark.island;
+        @:Island = import(module:'game_class.island.mt');
+        @:Landmark = import(module:'game_class.landmark.mt');
+        
+        @landmark;
+        @island;
+        
+        if (parent->type == Island.type) ::<= {
+            landmark = empty;
+            island = parent;
+        } else if (parent->type == Landmark.type) ::<= {
+            landmark = parent;
+            island = landmark.island;
+        } else 
+            error(detail:'Parents of Events can only be either Landmarks or Islands');
+        
         @:party = world.party;
         
         this.initialize(party, island, landmark);

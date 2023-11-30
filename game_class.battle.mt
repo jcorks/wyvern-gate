@@ -33,7 +33,7 @@
 
 
 
-@:battleLoot ::(party) {
+@:battleLoot ::(party, finishEnd) {
 
     @:Item = import(module:'game_class.item.mt');
     @:story = import(module:'game_singleton.story.mt');
@@ -46,7 +46,7 @@
                 func::{
                     windowEvent.queueMessage(text: 'It turned out to be junk.');
                 },
-                rarity: 50
+                rarity: 100 / 50
             },
             
             {   
@@ -56,7 +56,7 @@
                     windowEvent.queueMessage(text:'The party found ' + amount + 'G');
                     party.inventory.addGold(amount);    
                 },
-                rarity: 25
+                rarity: 100 / 25
             },
             
             {   
@@ -81,12 +81,12 @@
                         
                     }
                 },
-                rarity: 20
+                rarity: 100 / 20
             },
 
             {   
                 func::{
-                    windowEvent.queueMessage(text: 'Oh wow, they dropped a bag, but it looks different somehow...');
+                    windowEvent.queueMessage(text: 'Oh wow, they dropped a rare-looking bag!');
                     
                     when(3 > party.inventory.slotsLeft) ::<= {
                         windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
@@ -106,7 +106,7 @@
                         
                     }
                 },
-                rarity: 5
+                rarity: 100 / 5
             },
 
             
@@ -114,6 +114,12 @@
         
 
         random.pickArrayItemWeighted(list:lootTable).func();
+        windowEvent.queueNoDisplay(
+            onEnter ::{},
+            onLeave ::{
+                finishEnd();            
+            }
+        );
     }
 
 }
@@ -501,16 +507,13 @@
                             text: 'The battle is won.',
                             onLeave ::{
 
-                                if (loot == true) ::<= {
-                                    battleLoot(party);
-                                }
 
 
 
                                 @:Entity = import(module:'game_class.entity.mt');
                                 @hasWeapon = false;
                                 foreach(allies_)::(index, ally) {   
-                                    @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
+                                    @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
                                     if (wep.name != 'None' && wep.canGainIntuition()) 
                                         hasWeapon = true;
                                 };
@@ -624,7 +627,7 @@
 
 
                                             foreach(allies_)::(index, ally) {   
-                                                @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L);
+                                                @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
                                                 when (wep.name == 'None' || !wep.canGainIntuition()) empty;
 
                                                 @:oldAllyStats = StatSet.new();
@@ -651,8 +654,12 @@
                                         }
                                     )
                                 } else ::<= {
-                                    finishEnd();
                                 
+                                    if (loot == true) ::<= {
+                                        battleLoot(party, finishEnd);
+                                    } else                                 
+                                        finishEnd()
+                                                                    
                                 }
                             
                             }

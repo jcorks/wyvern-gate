@@ -24,7 +24,7 @@
 @:mapSizeW  = 38;
 @:mapSizeH  = 16;
 
-@:BUFFER_SPACE = 30;
+@:BUFFER_SPACE = 60;
 
 @:EPSILON = 0.000001;
 
@@ -45,46 +45,43 @@
         map.addScenerySymbol(character:'^'),
         map.addScenerySymbol(character:'░')
     ];
-    @:out = {}
-    for(0, 20)::(i) {
-        out->push(value:{
-            x: (Number.random() * width)->floor + BUFFER_SPACE,
-            y: (Number.random() * height)->floor + BUFFER_SPACE,
-            symbol: symbolList[random.integer(from:1, to:symbolList->keycount-1)]
-        });
+    @:out = [];
+    @:seedCount = ((width*height)**0.5) / 2.5
+
+    for(0, seedCount)::(i) {
+        out[
+                                      (Number.random() * width)->floor + BUFFER_SPACE + 
+            (width + BUFFER_SPACE*2) * ((Number.random() * height)->floor + BUFFER_SPACE)
+        ] = symbolList[random.integer(from:1, to:symbolList->keycount-1)]
     }
 
 
-    for(0, 20)::(i) {
-        out->push(value:{
-            x: 0 + BUFFER_SPACE,
-            y: (Number.random() * height)->floor + BUFFER_SPACE,
-            symbol: symbolList[0]
-        });
+    for(0, seedCount)::(i) {
+        out[
+                    0 + BUFFER_SPACE+
+            (width + BUFFER_SPACE*2) * ((Number.random() * height)->floor + BUFFER_SPACE)
+        ] = symbolList[0];
     }
 
-    for(0, 20)::(i) {
-        out->push(value:{
-            x: width + BUFFER_SPACE,
-            y: (Number.random() * height)->floor + BUFFER_SPACE,
-            symbol: symbolList[0]
-        });
+    for(0, seedCount)::(i) {
+        out[
+                    width + BUFFER_SPACE+
+            (width + BUFFER_SPACE*2) * ((Number.random() * height)->floor + BUFFER_SPACE)
+        ] = symbolList[0];
     }
 
-    for(0, 20)::(i) {
-        out->push(value:{
-            x: (Number.random()*width)->floor + BUFFER_SPACE,
-            y: 0 + BUFFER_SPACE,
-            symbol: symbolList[0]
-        });
+    for(0, seedCount)::(i) {
+        out[
+                    (Number.random()*width)->floor + BUFFER_SPACE+
+            (width + BUFFER_SPACE*2) * (0 + BUFFER_SPACE)
+        ] = symbolList[0];
     }
 
-    for(0, 20)::(i) {
-        out->push(value:{
-            x: (Number.random()*width)->floor + BUFFER_SPACE,
-            y: height + BUFFER_SPACE,
-            symbol: symbolList[0]
-        });
+    for(0, seedCount)::(i) {
+        out[
+                    (Number.random()*width)->floor + BUFFER_SPACE + 
+            (width + BUFFER_SPACE*2) * (height + BUFFER_SPACE)
+        ] = symbolList[0];
     }
 
 
@@ -93,21 +90,51 @@
     @xIncr = 1;
     @yIncr = 1;
     
-    for(0, 10)::(i) {
-        @nextset = {}
-        foreach(out)::(n, val) {
-            when(Number.random() < 0.5) empty;
-            @:choice = (Number.random() * 4)->floor;
-            
-            nextset->push(value:{
-                x: if (choice == 1) val.x+xIncr else if (choice == 2) val.x-xIncr else val.x,
-                y: if (choice == 3) val.y+yIncr else if (choice == 0) val.y-yIncr else val.y,
-                symbol: val.symbol
-            });
+    for(0, 4)::(i) {
+        for(0, height + BUFFER_SPACE*2) ::(y) {
+            for(0, width + BUFFER_SPACE*2) ::(x) {
+                //when(Number.random() < 0.4) empty;
+                @:val = out[x + (width + BUFFER_SPACE*2) * y];
+                when(val == empty) empty;
+                
+                @:choice = (Number.random() * 4)->floor;
+                @newx = if (choice == 1) x+xIncr else if (choice == 2) x-xIncr else x;
+                @newy = if (choice == 3) y+yIncr else if (choice == 0) y-yIncr else y;
+                out[newx + (width + BUFFER_SPACE*2) * newy] = val;
+                
+            }
         }
-        
-        foreach(nextset)::(n, val) <- out->push(value:val);
     }
+
+    // fill gaps
+    for(0, 2)::(i) {
+        for(0, height + BUFFER_SPACE*2) ::(y) {
+            for(0, width + BUFFER_SPACE*2) ::(x) {
+                //when(Number.random() < 0.4) empty;
+                @:val = out[x + (width + BUFFER_SPACE*2) * y];
+                when(val != empty) empty;
+                
+
+                @v;                
+                @:v0 = out[x + 1 + (width + BUFFER_SPACE*2) * y];
+                @:v1 = out[x - 1 + (width + BUFFER_SPACE*2) * y];
+                @:v2 = out[x     + (width + BUFFER_SPACE*2) * (y+1)];
+                @:v3 = out[x     + (width + BUFFER_SPACE*2) * (y-1)];
+                
+                @sides = 
+                    (if (v0 != empty) 1 else 0)+
+                    (if (v1 != empty) 1 else 0)+
+                    (if (v2 != empty) 1 else 0)+
+                    (if (v3 != empty) 1 else 0)
+                ;
+                if (sides >= 3)
+                    out[x + (width + BUFFER_SPACE*2) * y] = random.pickArrayItem(list:[v0, v1, v2, v3]->filter(by::(value) <- value != empty));
+                
+
+            }
+        }
+    }
+
     return out;
 }
 
@@ -138,14 +165,18 @@
                 map.paged = true;
                 map.drawLegend = true;
                 
-                foreach(generateTerrain(map, width:map.width - BUFFER_SPACE*2, height:map.height - BUFFER_SPACE*2))::(index, value) {
-                    //when(value.x < 0 || value.x >= map.width || value.y < 0 || value.y >= map.height)
-                        //empty;
-                    map.setSceneryIndex(
-                        x:value.x,
-                        y:value.y,
-                        symbol:value.symbol
-                    );
+                @:table = generateTerrain(map, width:map.width - BUFFER_SPACE*2, height:map.height - BUFFER_SPACE*2);
+
+                for(0, map.height) ::(y) {
+                    for(0, map.width) ::(x) {
+                        @:val = table[x + (sizeW + BUFFER_SPACE*2) * y];
+                        when(val == empty) empty;
+                        map.setSceneryIndex(
+                            x:x,
+                            y:y,
+                            symbol:val
+                        );
+                    }
                 }
                 return map;
                         

@@ -59,21 +59,6 @@
     'f'
 ];
 
-@:genID :: {
-    @:genHex :: {
-        return hexKey[(Number.random()*16)->floor];
-    }
-    
-    @:genBlock :: {
-        return genHex() + genHex() + genHex() + genHex();
-    }
-    
-    return genBlock() + '-' +
-           genBlock() + '-' +
-           genBlock() + '-' +
-           genBlock();
-}
-
 
 // todo: database.
 
@@ -110,7 +95,9 @@
     new::(parent, levelHint, nameHint, state, tierHint) {
         @:this = Island.defaultNew();
 
-        @:world = parent;
+
+        // parent is usually a key
+        @:world = import(module:'game_singleton.world.mt');
         @:party = world.party;
 
         this.initialize(world, party);
@@ -137,10 +124,10 @@
         @state;
         
         ::<= {
-            @factor = Number.random()*50 + 70;
+            @factor = Number.random()*50 + 80;
             @sizeW  = (factor)->floor;
             @sizeH  = (factor*0.5)->floor;
-
+            @:world = import(module:'game_singleton.world.mt');
             state = State.new(
                 items : {
                     name : NameGen.island(),
@@ -164,7 +151,7 @@
                     // map of the region
                     map : LargeMap.create(parent:this, sizeW, sizeH),
                     
-                    id : genID(),
+                    worldID : world.getNextID(),
 
                     
                     climate : random.integer(
@@ -207,6 +194,8 @@
                             }
                         );
                     },
+                    
+                    modData : {}
                 }
             );
         };
@@ -237,11 +226,11 @@
                 @:wep = Item.Base.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
-                        value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
+                        value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
                 );
                     
                 entity.equip(
-                    slot:Entity.EQUIP_SLOTS.HAND_L, 
+                    slot:Entity.EQUIP_SLOTS.HAND_LR, 
                     item:Item.new(
                         base:wep,
                         from: entity
@@ -265,11 +254,11 @@
                 @:wep = Item.Base.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
-                        value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
+                        value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
                 );
                     
                 entity.equip(
-                    slot:Entity.EQUIP_SLOTS.HAND_L, 
+                    slot:Entity.EQUIP_SLOTS.HAND_LR, 
                     item:Item.new(
                         base: wep,
                         from: entity
@@ -292,11 +281,11 @@
                 @:wep = Item.Base.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
-                        value.attributes->findIndex(value:Item.ATTRIBUTE.WEAPON) != -1
+                        value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
                 );
                     
                 entity.equip(
-                    slot:Entity.EQUIP_SLOTS.HAND_L, 
+                    slot:Entity.EQUIP_SLOTS.HAND_LR, 
                     item:Item.new(
                         base:wep,
                         from: entity
@@ -356,7 +345,7 @@
       
 
 
-                @locationCount = (1 + (Number.random()*4)->floor); 
+                @locationCount = (1 + (Number.random()*2)->floor); 
                 if (locationCount < 1) locationCount = 1;
                 for(0, locationCount)::(i) {
                     LargeMap.addLandmark(
@@ -421,14 +410,6 @@
 
 
 
-                // free treasure!
-                LargeMap.addLandmark(
-                    map:state.map,
-                    base:Landmark.Base.database.find(name:'Forest'),
-                    island:this
-                )
-
-
 
                 LargeMap.addLandmark(
                     map:state.map,
@@ -443,10 +424,14 @@
             },
 
             save ::{
+                @:world = import(module:'game_singleton.world.mt');
+                world.addLoadableIsland(island:this);
                 return state.save();
             },
             load ::(serialized) {
+                @:world = import(module:'game_singleton.world.mt');
                 state.load(parent:this, serialized);
+                world.addLoadableIsland(island:this);
             },
             
             name : {
@@ -474,8 +459,8 @@
                 }
             },
             
-            id : {
-                get ::<- state.id
+            worldID : {
+                get ::<- state.worldID
             },
             
             sizeW : {

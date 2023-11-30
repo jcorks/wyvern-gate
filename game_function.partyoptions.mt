@@ -51,7 +51,7 @@ return ::{
                     canvas.movePen(x: x+3, y: top + 3);
                     canvas.drawText(text: member.renderHP() + 'HP: ' + member.hp + ' / ' + member.stats.HP + '    AP: ' + member.ap + ' / ' + member.stats.AP + '\n');
                     canvas.movePen(x: x+3, y: top + 4);
-                    canvas.drawText(text: 'Weapon: ' + member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_L).name);
+                    canvas.drawText(text: 'Weapon: ' + member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).name);
                     
                     top += height;
                     
@@ -122,8 +122,8 @@ return ::{
 
                                     @slotToName::(slot) {
                                         return match(slot) {
-                                          (Entity.EQUIP_SLOTS.HAND_L)  : 'L.Hand  ',
-                                          (Entity.EQUIP_SLOTS.HAND_R)  : 'R.Hand  ',
+                                          (Entity.EQUIP_SLOTS.HAND_LR-1)  : 'L.Hand  ',
+                                          (Entity.EQUIP_SLOTS.HAND_LR)    : 'R.Hand  ',
                                           (Entity.EQUIP_SLOTS.ARMOR)   : 'Armor   ',
                                           (Entity.EQUIP_SLOTS.AMULET)  : 'Amulet  ',
                                           (Entity.EQUIP_SLOTS.RING_L)  : 'L.Ring  ',
@@ -132,7 +132,7 @@ return ::{
                                         }                                    
                                     }
 
-                                    
+                                    @:Item = import(module:'game_class.item.mt');
      
                                     windowEvent.queueChoices(
                                         leftWeight: 1,
@@ -142,11 +142,21 @@ return ::{
                                         canCancel: true,
                                         onGetChoices:: {
                                             @:choices = [];
-                                            for(0, Entity.EQUIP_SLOTS.TRINKET+1)::(i) {
+                                            for(-1, Entity.EQUIP_SLOTS.TRINKET+1)::(i) {
                                                 @str = slotToName(slot:i);
-                                                @:item = member.getEquipped(slot:i);
-                                                str = str +  if (item.name == 'None') (if (i == Entity.EQUIP_SLOTS.HAND_R) '' else '------') else item.name;
+
+                                                if (i <= Entity.EQUIP_SLOTS.HAND_LR) ::<= {
+                                                    @:item = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
+                                                    if (i < Entity.EQUIP_SLOTS.HAND_LR) ::<= {     
+                                                        str = str +  if (item.name == 'None') ('------') else item.name;
+                                                    } else if (item.base.equipType == Item.TYPE.TWOHANDED) ::<= {
+                                                        str = str +  if (item.name == 'None') ('') else item.name;                                                    
+                                                    }       
                                                 
+                                                } else ::<= {
+                                                    @:item = member.getEquipped(slot:i);
+                                                    str = str +  if (item.name == 'None') '------' else item.name;
+                                                }
                                                 choices->push(value:str);
                                             }
                                             return choices;
@@ -155,7 +165,8 @@ return ::{
                                             when(choice == 0) empty;
 
 
-                                            @slot = choice-1;
+                                            @slot = choice-2;
+                                            if (slot < 0) slot = 0; // left and right hand point to same slot
 
 
 
