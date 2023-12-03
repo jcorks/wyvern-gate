@@ -33,12 +33,11 @@
 
 
 
-@:battleLoot ::(party, finishEnd) {
+@:battleLoot ::(landmark, party, finishEnd) {
 
     @:Item = import(module:'game_class.item.mt');
-    @:story = import(module:'game_singleton.story.mt');
 
-    if (random.try(percentSuccess:100)) ::<= {
+    if (random.try(percentSuccess:30)) ::<= {
         windowEvent.queueMessage(text: 'What\'s this? They dropped something during the fight...');
 
         @:lootTable = [
@@ -46,7 +45,7 @@
                 func::{
                     windowEvent.queueMessage(text: 'It turned out to be junk.');
                 },
-                rarity: 100 / 50
+                rarity: 100 / 30
             },
             
             {   
@@ -56,7 +55,7 @@
                     windowEvent.queueMessage(text:'The party found ' + amount + 'G');
                     party.inventory.addGold(amount);    
                 },
-                rarity: 100 / 25
+                rarity: 100 / 30
             },
             
             {   
@@ -69,7 +68,7 @@
                     for(0, 3)::(index) {
                         @:item = Item.new(
                             base:Item.Base.database.getRandomFiltered(
-                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= story.tier+1
+                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= landmark.island.tier+1
                             ),
                             rngEnchantHint:true, from:party.members[0]
                         );
@@ -94,7 +93,7 @@
                     for(0, 3)::(index) {
                         @:item = Item.new(
                             base:Item.Base.database.getRandomFiltered(
-                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= story.tier+2
+                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= landmark.island.tier+2
                             ),
                             rngEnchantHint:true, from:party.members[0]
                         );
@@ -106,7 +105,7 @@
                         
                     }
                 },
-                rarity: 100 / 5
+                rarity: 100 / 20
             },
 
             
@@ -138,6 +137,7 @@
         @onAllyTurn_;
         @landmark_;
         @active;
+        @ended;
         @alliesWin = false;
         @entityTurn;
         @onTurn_;
@@ -181,6 +181,7 @@
         
         @:endTurn ::{
             turnIndex+=1;
+            checkRemove();  
             if (turnPoppable->keycount == 0) ::<= {      
                 foreach(turn)::(index, obj) {
                     obj.entity.endTurn(battle:this);
@@ -188,19 +189,31 @@
 
                 if (onTurn_ != empty)
                     onTurn_();            
-                when((allies_->keycount == 0) || allies_->all(condition:::(value) {
-                    return value.isIncapacitated();
-                })) ::<= {
-                    battleEnd();
-                }
-                when((enemies_->keycount == 0) || enemies_->all(condition:::(value) {
+                if((enemies_->keycount == 0) || enemies_->all(condition:::(value) {
                     return value.isIncapacitated();
                 })) ::<={
                     alliesWin = true;
-                    battleEnd();
+                    ended = true;
                 }
+
+                if((allies_->keycount == 0) || allies_->all(condition:::(value) {
+                    return value.isIncapacitated();
+                })) ::<= {
+                    alliesWin = false;
+                    ended = true;
+                }
+
+                
+                if (ended == true) ::<= {                    
+                    foreach(allies_)::(k, v) {
+                        v.battleEnd();
+                    }
+
+                    foreach(enemies_)::(k, v) {
+                        v.battleEnd();
+                    }
+                }       
             }
-            checkRemove();  
         }
         
         @:nextTurn ::{
@@ -262,7 +275,7 @@
         }
         
         @:initTurn ::{
-            
+            when(ended) empty;
             // first reset stats according to current effects 
             foreach(turn)::(index, obj) {
                 obj.entity.startTurn();
@@ -389,6 +402,7 @@
                 turn = [];
                 turnIndex = 0;
                 active = true;
+                ended = false;
                 externalRenderable = renderable;
                 
                 @:isPlayerParty = party.isMember(entity:allies[0]);
@@ -465,49 +479,47 @@
                 
 
                 battleEnd = ::{
+                    @:startEnd ::(message) {
+                        active = false;
+
+                        windowEvent.queueMessage(
+                            text: message
+                        );
+                        if (windowEvent.canJumpToTag(name:'Battle'))                                            
+                            windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);                    
+
+                    }
+                
                     @:finishEnd :: {
                         allies_ = [];
                         enemies_ = [];
-                        active = false;
-                        onEnd(result);                    
-                        if (windowEvent.canJumpToTag(name:'Battle'))                                            
-                            windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);
-                    
+                        onEnd(result);                                        
                     }
                     result = match(true) {
                       (alliesWin):      RESULTS.ALLIES_WIN,
                       default:          RESULTS.ENEMIES_WIN
                     }
-                    
-                    foreach(allies)::(k, v) {
-                        v.battleEnd();
-                    }
 
-                    foreach(enemies)::(k, v) {
-                        v.battleEnd();
-                    }
-                                
+                    
+                    
+                    
                     
                     when (npcBattle != empty) ::<= {
-                        active = false;
-                        windowEvent.queueMessage(text: 'The battle is over.');
+                        startEnd(message:'The battle is over.');
                         finishEnd();
                     } 
 
 
                     if (alliesWin == true) ::<= {            
 
+                        startEnd(
+                            message: 'The battle is won.'
+                        );
 
 
-
-                            
- 
-                        
-                        windowEvent.queueMessage(
-                            text: 'The battle is won.',
+                        windowEvent.queueNoDisplay(
+                            onEnter ::{},
                             onLeave ::{
-
-
 
 
                                 @:Entity = import(module:'game_class.entity.mt');
@@ -520,7 +532,7 @@
 
 
 
-                                if (hasWeapon && random.flipCoin()) ::<= {
+                                if (hasWeapon && random.try(percentSuccess:25)) ::<= {
                                     windowEvent.queueMessage(text:'The party feels their intuition with their weapons grow.');
                                     windowEvent.queueMessage(text:'The party must choose a way to channel this intuition.');
                                     @:fWhich = random.integer(from:0, to:2);
@@ -610,7 +622,7 @@
                                         },
                                         
                                         onChoice::(choice) {
-                                            when(random.flipCoin()) ::<= {
+                                            when(random.try(percentSuccess:30)) ::<= {
                                                 windowEvent.queueMessage(text:'The party is close to a revelation, but not quite there.');                                                                            
                                                 finishEnd();
                                             }
@@ -656,27 +668,21 @@
                                 } else ::<= {
                                 
                                     if (loot == true) ::<= {
-                                        battleLoot(party, finishEnd);
+                                        battleLoot(landmark, party, finishEnd);
                                     } else                                 
                                         finishEnd()
-                                                                    
                                 }
-                            
                             }
                         );
 
-                                       
-
                     } else ::<= {
-                        if (party.members->all(condition:::(value) <- value.isIncapacitated())) ::<= {
-                            windowEvent.queueMessage(text: 'The battle is lost.');
-                            windowEvent.queueNoDisplay(onEnter::{
-                                onEnd(result); 
-                                if (windowEvent.canJumpToTag(name:'Battle'))                                               
-                                    windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);
-                            });                       
-                            
-                        }
+                        startEnd(
+                            message: 'The battle is lost.'
+                        );
+
+                        windowEvent.queueNoDisplay(onEnter::{
+                            onEnd(result); 
+                        });                       
                     }
                 }
 
@@ -694,6 +700,16 @@
                     keep: true,
                     jumpTag: 'Battle',
                     onEnter::{
+                        when(ended) ::<= {
+                            breakpoint();
+                            if (windowEvent.hasAnyQueued() == false) ::<= {
+                                battleEnd();
+                                
+                            }
+                        }
+
+                    
+                    
                         if (!started && onStart) ::<= {
                             onStart();
                             started = true;

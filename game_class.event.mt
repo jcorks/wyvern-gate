@@ -25,7 +25,6 @@
 @:Entity = import(module:'game_class.entity.mt');
 @:Scene = import(module:'game_class.scene.mt');
 @:correctA = import(module:'game_function.correcta.mt');
-@:story = import(module:'game_singleton.story.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
@@ -247,16 +246,19 @@ Event.Base.new(
             @:party = event.party;
 
             @lackey0 = Entity.new(
+                island:         event.landmark.island,
                 speciesHint:    'Wyvern',
                 levelHint:      event.island.levelMin,
                 professionHint: 'Disciple'
             );
             @lackey1 = Entity.new(
+                island:         event.landmark.island,
                 speciesHint:    'Wyvern',
                 levelHint:      event.island.levelMin,
                 professionHint: 'Disciple'
             );
             @boss = Entity.new(
+                island:         event.landmark.island,
                 speciesHint:    'Wyvern',
                 levelHint:      event.island.levelMax,
                 professionHint: 'Keeper'
@@ -477,7 +479,7 @@ Event.Base.new(
                 for(0, itemCount)::(index) {
                     @:item = Item.new(
                         base:Item.Base.database.getRandomFiltered(
-                            filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= story.tier
+                            filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= event.landmark.island.tier
                         ),
                         rngEnchantHint:true, from:opener
                     );
@@ -905,7 +907,7 @@ Event.Base.new(
                 loot : true,
                 onEnd::(result){
                 
-                    if (Battle.RESULTS.ENEMIES_WIN)::<= {
+                    if (result == Battle.RESULTS.ENEMIES_WIN)::<= {
                         breakpoint();
                         windowEvent.jumpToTag(name:'MainMenu', clearResolve:true);
                     }

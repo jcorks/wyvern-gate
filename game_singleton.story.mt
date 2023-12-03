@@ -17,7 +17,9 @@
 */
 @:State = import(module:"game_class.state.mt");
 @:LoadableClass = import(module:"game_singleton.loadableclass.mt");
-
+@:Entity = import(module:'game_class.entity.mt');
+@:EntityQuality = import(module:'game_class.entityquality.mt');
+@:Item = import(module:'game_class.item.mt');
 @:Story = LoadableClass.new(
     name : 'Wyvern.Story',
     new ::(parent, state) {
@@ -49,14 +51,9 @@
                 // whether the player has seen the wandering gamblist
                 skieEncountered : false,
                 
-                // Whether the player has hired the gamblist ever.
-                skieInParty : false,
+                // The recurring NPCs in the game that are recruitable
+                npcs: {},
                 
-                // Whether the wool+ shopkeeper was hired.
-                meiInParty : false,
-                
-                // Whether the wandering high-value shopkeeper was hired
-                fausInParty : false,
                 
                 // progression of defeated wyverns
                 // tier 0 -> none 
@@ -93,6 +90,8 @@
 
             this.interface = interface;
         }
+        
+        
     }
 
 );

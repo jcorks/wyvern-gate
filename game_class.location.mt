@@ -497,7 +497,7 @@ Location.Base.new(data:{
             location.inventory.add(item:
                 Item.new(
                     base:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false
-                                    && value.tier <= story.tier
+                                    && value.tier <= location.landmark.island.tier
             
                     ),
                     from:location.ownedBy, rngEnchantHint:true
@@ -565,7 +565,7 @@ Location.Base.new(data:{
             location.inventory.add(
                 item:Item.new(
                     base:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false
-                                    && value.tier <= story.tier
+                                    && value.tier <= location.landmark.island.tier
             
                     ),
                     from:location.ownedBy, rngEnchantHint:true
@@ -982,7 +982,7 @@ Location.Base.new(data:{
                     base:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false &&
                                             location.ownedBy.level >= value.levelMinimum
-                                            && value.tier <= story.tier
+                                            && value.tier <= location.landmark.island.tier
                     ),
                     from:location.ownedBy, 
                     rngEnchantHint:true
@@ -1132,7 +1132,6 @@ Location.Base.new(data:{
                             value.isUnique == false && 
                             location.ownedBy.level >= value.levelMinimum &&
                             value.hasAttribute(attribute:Item.ATTRIBUTE.METAL)
-                            && value.tier <= story.tier
                         )
                     ),
                     from:location.ownedBy
@@ -1426,60 +1425,26 @@ Location.Base.new(data:{
     
     onFirstInteract ::(location) {},
     onInteract ::(location) {
-    },
-    
-    onCreate ::(location) {
-    },
-    
-    onTimeChange::(location, time) {
-    
-    }
-})
-
-
-Location.Base.new(data:{
-    name: 'Stairs Up',
-    rarity: 1000000000000,
-    ownVerb : '',
-    symbol: '/',
-    category : Location.CATEGORY.EXIT,
-    onePerLandmark : false,
-    minStructureSize : 1,
-
-    descriptions: [
-        "Decrepit stairs",
-    ],
-    interactions : [
-        'next floor',
-    ],
-    
-    aggressiveInteractions : [
-    ],
-
-
-    
-    minOccupants : 0,
-    maxOccupants : 0,
-    
-    onFirstInteract ::(location) {},
-    onInteract ::(location) {
         @open = location.isUnlockedWithPlate();
         if (!open)  
             windowEvent.queueMessage(text: 'The entry to the stairway is locked. Perhaps some lever or plate nearby can unlock it.');
         return open;            
-
     },
     
     onCreate ::(location) {
-        if (random.flipCoin()) ::<= {
-            location.lockWithPressurePlate();
-        }
+        if (location.landmark.island.tier > 0) 
+            if (random.flipCoin()) ::<= {
+                location.lockWithPressurePlate();
+            }
     },
     
     onTimeChange::(location, time) {
     
     }
 })
+
+
+
 
 Location.Base.new(data:{
     name: 'Ladder',
@@ -1592,7 +1557,7 @@ Location.Base.new(data:{
             Item.new(
                 base:Item.Base.database.getRandomFiltered(
                     filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                                            && value.tier <= story.tier
+                                            && value.tier <= location.landmark.island.tier
                 ),
                 rngEnchantHint:true, 
                 forceEnchant:true,
@@ -1678,13 +1643,12 @@ Location.Base.new(data:{
         location.lockWithPressurePlate();    
     
         @:story = import(module:'game_singleton.story.mt');
-        story.tier += 1;
         for(0, 3) ::{
             location.inventory.add(item:
                 Item.new(
                     base:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                                                && value.tier <= story.tier
+                                                && value.tier <= location.landmark.island.tier + 1
                     ),
                     rngEnchantHint:true, 
                     forceEnchant:true,
@@ -1692,7 +1656,6 @@ Location.Base.new(data:{
                 )
             );
         }
-        story.tier -= 1;
     },
     
     onTimeChange::(location, time) {
@@ -1772,6 +1735,45 @@ Location.Base.new(data:{
     
     onCreate ::(location) {
 
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+
+});
+
+
+Location.Base.new(data:{
+    name: 'Healing Circle',
+    rarity: 4,
+    ownVerb : '',
+    symbol: 'X',
+    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    onePerLandmark : true,
+    minStructureSize : 1,
+
+    descriptions: [
+        'An inscribed circle containing a one-time use healing spell.'
+    ],
+    interactions : [
+        'healing-circle'
+    ],
+    
+    aggressiveInteractions : [
+    ],
+
+
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {},
+    
+    onInteract ::(location) {
+    },
+    
+    onCreate ::(location) {
+        location.data.used = false;
     },
     
     onTimeChange::(location, time) {
@@ -1885,6 +1887,8 @@ Location.Base.new(data:{
     ],
     
     aggressiveInteractions : [
+        'steal',
+        'vandalize'         
     ],
 
     
@@ -1895,69 +1899,11 @@ Location.Base.new(data:{
         @:Profession = import(module:'game_class.profession.mt');
         @:Entity = import(module:'game_class.entity.mt');
         @:EntityQuality = import(module:'game_class.entityquality.mt');
-        location.ownedBy = Entity.new(
-            speciesHint: 'Sheep',
-            professionHint: 'Cleric',
-            personalityHint: 'Caring',
-            levelHint: 5,
-            adventurousHint: true,
-            qualities : [
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'snout'), trait0Hint:2),
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'fur'),   descriptionHint: 0, trait0Hint:8),
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'eyes'),  descriptionHint: 0, trait2Hint:0, trait1Hint: 0),
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'ears'),  descriptionHint: 2, trait0Hint:2),
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'face'),  descriptionHint: 0, trait0Hint:0),
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'tail'),  descriptionHint: 0, trait0Hint:0),
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'body'),  descriptionHint: 1, trait0Hint:0, trait1Hint:5),            
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'horns'), descriptionHint: 1, trait0Hint:2, trait1Hint:1)
-            ]
-        );
+        @:world = import(module:'game_singleton.world.mt');                
+        when(world.npcs.mei == empty || world.npcs.mei.isIncapacitated())
+            location.ownedBy = empty;
 
-
-
-        @:meiWeapon = Item.new(
-            base: Item.Base.database.find(name: 'Falchion'),
-            rngEnchantHint: true,
-            qualityHint: 'Quality',
-            materialHint: 'Dragonglass',
-            colorHint: 'pink',
-            forceEnchant: true
-        );
-        meiWeapon.maxOut();
-        
-        @:meiRobe = Item.new(
-            base: Item.Base.database.find(name: 'Robe'),
-            rngEnchantHint: true,
-            qualityHint: 'Masterwork',
-            colorHint: 'pink',
-            apparelHint: 'Wool+',
-            forceEnchant: true
-        );
-        meiRobe.maxOut();
-        
-        @:meiAcc = Item.new(
-            base: Item.Base.database.find(name: 'Mei\'s Bow'),
-            rngEnchantHint: true,
-            forceEnchant: true
-        );
-        
-        location.ownedBy.equip(item:meiWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
-        location.ownedBy.equip(item:meiRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);
-        location.ownedBy.equip(item:meiAcc,    slot:Entity.EQUIP_SLOTS.TRINKET, silent:true);
-
-        location.ownedBy.heal(
-            amount: 9999,
-            silent: true
-        );
-
-        @:learned = location.ownedBy.profession.gainSP(amount:20);
-        foreach(learned)::(index, ability) {
-            location.ownedBy.learnAbility(name:ability);
-        }                                                
-
-
-
-        location.ownedBy.name = 'Mei';
+        location.ownedBy = world.npcs.mei;
         location.inventory.maxItems = 50;
 
         @:nameGen = import(module:'game_singleton.namegen.mt');
@@ -1980,7 +1926,9 @@ Location.Base.new(data:{
     
     onInteract ::(location) {
         @:story = import(module:'game_singleton.story.mt');
-        when(story.meiInParty) ::<= {
+        @:world = import(module:'game_singleton.world.mt');    
+                    
+        when(location.ownedBy == empty) ::<= {
             windowEvent.queueMessage(
                 text: 'The shop seems empty...'
             );
@@ -1988,7 +1936,8 @@ Location.Base.new(data:{
         }
         location.ownedBy.onHire = ::{
             @:story = import(module:'game_singleton.story.mt');
-            story.meiInParty = true;            
+            location.ownedBy = empty;     
+            world.npcs.mei = empty;
         };            
     },
     
@@ -2002,7 +1951,88 @@ Location.Base.new(data:{
 
 });
 
+Location.Base.new(data:{
+    name: 'Potion Shop',
+    rarity: 4,
+    ownVerb : '',
+    symbol: 'P',
+    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    onePerLandmark : true,
+    minStructureSize : 1,
 
+    descriptions: [
+        'A makeshift wooden stand with a crude sign depecting a drake-kin selling potions.'
+    ],
+    interactions : [
+        'buy:shop',
+        'sell:shop',
+        'talk',
+        'examine'
+    ],
+    
+    aggressiveInteractions : [
+        'steal',
+        'vandalize'         
+    ],
+
+    
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {
+        @:Profession = import(module:'game_class.profession.mt');
+        @:Entity = import(module:'game_class.entity.mt');
+        @:EntityQuality = import(module:'game_class.entityquality.mt');
+        @:story = import(module:'game_singleton.story.mt');
+        @:world = import(module:'game_singleton.world.mt');                
+        when (world.npcs.sylvia == empty || world.npcs.sylvia.isIncapacitated())
+            location.ownedBy = empty;
+
+        location.ownedBy = world.npcs.sylvia;
+        location.inventory.maxItems = 50;
+
+        @:nameGen = import(module:'game_singleton.namegen.mt');
+        @:story = import(module:'game_singleton.story.mt');
+
+        for(0, 14)::(i) {
+            @:item = Item.new(
+                base:Item.Base.database.getRandomFiltered(
+                    filter:::(value) <- value.name->contains(key:'Potion')
+                ),
+                from:location.ownedBy
+            );
+            
+            // scalping is bad!
+            item.price *= 10;
+
+            location.inventory.add(item);
+        }
+    },  
+    
+    onInteract ::(location) {
+        @:story = import(module:'game_singleton.story.mt');
+        when(location.ownedBy == empty) ::<= {
+            windowEvent.queueMessage(
+                text: 'The shop seems empty...'
+            );
+            return false;
+        }
+        location.ownedBy.onHire = ::{
+            @:world = import(module:'game_singleton.world.mt');                
+            location.ownedBy = empty;     
+            world.npcs.sylvia = empty;
+        };            
+    },
+    
+    onCreate ::(location) { 
+        location.data.peaceful = true;
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+
+});
 
 Location.Base.new(data:{
     name: 'Fancy Shop',
@@ -2023,6 +2053,8 @@ Location.Base.new(data:{
     ],
     
     aggressiveInteractions : [
+        'steal',
+        'vandalize'    
     ],
 
     
@@ -2033,78 +2065,11 @@ Location.Base.new(data:{
         @:Profession = import(module:'game_class.profession.mt');
         @:Entity = import(module:'game_class.entity.mt');
         @:EntityQuality = import(module:'game_class.entityquality.mt');
-        location.ownedBy = Entity.new(
-            speciesHint: 'Rabbit',
-            professionHint: 'Summoner',
-            personalityHint: 'Caring',
-            levelHint: 5,
-            adventurousHint: true,
-            qualities : [
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'snout'), trait0Hint:0),
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'fur'),   descriptionHint: 6, trait0Hint:10, trait2Hint:3),
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'eyes'),  descriptionHint: 3, trait2Hint:6, trait1Hint: 0),
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'ears'),  descriptionHint: 1, trait0Hint:2),
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'face'),  descriptionHint: 0, trait0Hint:3),
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'tail'),  descriptionHint: 0, trait0Hint:0),
-                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'body'),  descriptionHint: 1, trait0Hint:0, trait1Hint:0),            
-            ]
-        );
-
-
-
-        @:fausWeapon = Item.new(
-            base: Item.Base.database.find(name: 'Morning Star'),
-            rngEnchantHint: false,
-            qualityHint: 'Masterwork',
-            materialHint: 'Mythril',
-            colorHint: 'gold',
-            enchantHint: 'Aura: Gold',
-            forceEnchant: true
-        );
-        fausWeapon.maxOut();
-        
-        @:fausRobe = Item.new(
-            base: Item.Base.database.find(name: 'Robe'),
-            rngEnchantHint: false,
-            qualityHint: 'Masterwork',
-            colorHint: 'black',
-            apparelHint: 'Mythril',
-            forceEnchant: true,
-            enchantHint: 'Inlet: Opal'            
-        );
-        fausRobe.maxOut();
-
-
-        @:fausCloak = Item.new(
-            base: Item.Base.database.find(name: 'Cloak'),
-            rngEnchantHint: false,
-            qualityHint: 'Masterwork',
-            colorHint: 'olive-green',
-            apparelHint: 'Mythril',
-            forceEnchant: true
-        );
-        fausCloak.maxOut();
-
-
-        
-        
-        location.ownedBy.equip(item:fausWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
-        location.ownedBy.equip(item:fausCloak,  slot:Entity.EQUIP_SLOTS.TRINKET, silent:true);
-        location.ownedBy.equip(item:fausRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);
-
-        location.ownedBy.heal(
-            amount: 9999,
-            silent: true
-        );
-
-        @:learned = location.ownedBy.profession.gainSP(amount:20);
-        foreach(learned)::(index, ability) {
-            location.ownedBy.learnAbility(name:ability);
-        }                                                
-
-
-
-        location.ownedBy.name = 'Faus';
+        @:world = import(module:'game_singleton.world.mt');                
+        when(world.npcs.faus == empty || world.npcs.faus.isIncapacitated()) empty;
+            location.ownedBy = empty
+            
+        location.ownedBy = world.npcs.faus;
         location.inventory.maxItems = 50;
 
         @:nameGen = import(module:'game_singleton.namegen.mt');
@@ -2138,7 +2103,7 @@ Location.Base.new(data:{
     
     onInteract ::(location) {
         @:story = import(module:'game_singleton.story.mt');
-        when(story.fausInParty) ::<= {
+        when(location.ownedBy == empty) ::<= {
             windowEvent.queueMessage(
                 text: 'The shop seems empty...'
             );
@@ -2146,8 +2111,9 @@ Location.Base.new(data:{
         }
         
         location.ownedBy.onHire = ::{
-            @:story = import(module:'game_singleton.story.mt');
-            story.fausInParty = true;            
+            @:world = import(module:'game_singleton.world.mt');                
+            world.npcs.faus = empty;            
+            location.ownedBy = empty;     
         };        
     },
     
@@ -2217,7 +2183,7 @@ Location.Base.new(data:{
                 Item.new(
                     base:Item.Base.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false
-                                            && value.tier <= story.tier
+                                            && value.tier <= location.landmark.island.tier
                     ),
                     from:location.landmark.island.newInhabitant(),rngEnchantHint:true
                 )

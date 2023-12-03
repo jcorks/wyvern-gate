@@ -22,7 +22,7 @@
 @:Damage = import(module:'game_class.damage.mt');
 @:Item = import(module:'game_class.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
-
+@:random = import(module:'game_singleton.random.mt');
 
 @:SCENE_NAME = 'Wyvern.Scene'
 
@@ -363,9 +363,10 @@ Scene.new(
                 if (key != empty) key = key[0];
                 // could be equipped by hooligans and jokesters
                 if (key == empty) ::<= {
+                    @:Entity = import(module:'game_class.entity.mt');
                     key = {:::} {
                         foreach(world.party.members)::(i, member) {
-                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_LR);
+                            @:wep = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
                             if (wep.name == 'Wyvern Key of Fire') ::<= {
                                 send(message:key);
                             }
@@ -453,13 +454,14 @@ Scene.new(
             ::(location, landmark, doNext) {
                 location.ownedBy.name = 'Kaedjaal, Wyvern of Ice';
                 @:world = import(module:'game_singleton.world.mt');
-                @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Fire');
+                @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Ice');
                 if (key != empty) key = key[0];
                 // could be equipped by hooligans and jokesters
                 if (key == empty) ::<= {
+                    @:Entity = import(module:'game_class.entity.mt');
                     key = {:::} {
                         foreach(world.party.members)::(i, member) {
-                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_LR);
+                            @:wep = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
                             if (wep.name == 'Wyvern Key of Ice') ::<= {
                                 send(message:key);
                             }
@@ -492,6 +494,10 @@ Scene.new(
                 
                 @:instance = import(module:'game_singleton.instance.mt');
                 // cancel and flush current VisitIsland session
+                if (key.islandEntry == empty)
+                    key.addIslandEntry(world);
+
+
                 instance.visitIsland(where:key.islandEntry);
                 if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
                     windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
@@ -679,6 +685,7 @@ Scene.new(
                 @:thunderSpawn ::{
                     @:Entity = import(module:'game_class.entity.mt');
                     @:sprite = Entity.new(
+                        island: landmark.island,
                         speciesHint: 'Thunder Spawn',
                         professionHint: 'Thunder Spawn',
                         levelHint:5
@@ -765,6 +772,247 @@ Scene.new(
         ]
     }
 ) 
+
+
+Scene.new(
+    data : {
+        name : 'scene_wyvernthunder1',
+        script: [
+            ['Juhriikaal', 'Ah you have returned? Well, welcome back.'],
+            ['Juhriikaal', 'You know... I do have a bit of a hobby that may come in handy for you.'],
+            ['Juhriikaal', 'Materialization magic. Very difficult and sought after... I have spent some time trying to master it, and have had some... mild success.'],
+            ['Juhriikaal', 'If you give me 2 items of the same quality and throw in some gold, I can make one of them of improved quality.'],        
+            ['Juhriikaal', 'This magic DOES destroy the other item, however... And there is a chance it might not be successful as well....'],
+            ['Juhriikaal', 'So there is a bit of risk. But if successful, this could let you reach new heights.'],
+            ['Juhriikaal', 'A Chosen is only as good as their tools, or so they say.'],
+            ::(location, landmark, doNext) {
+                @:world = import(module:'game_singleton.world.mt');
+                windowEvent.queueAskBoolean(
+                    prompt:'Enhance item quality?',
+                    onChoice::(which) {
+                        when(which == false) ::<= {
+                            windowEvent.queueMessage(speaker:'Juhriikaal', text:'Ah I see. That is understandable. I will still be here if you change your mind.');
+                            windowEvent.queueNoDisplay(
+                                onEnter::{},
+                                onLeave::{doNext();}                                    
+                            );
+                        }
+                        
+                        @:ItemQuality = import(module:'game_class.itemquality.mt');
+
+
+
+                        @:qualityString ::(item) {
+                            return if (item.quality == empty) 
+                                'no quality yet'
+                            else 
+                                'quality ' + item.quality.name
+                        }
+
+                        @:tryAgain = ::{
+                            windowEvent.queueAskBoolean(
+                                prompt:'Try enhancing again?',
+                                onChoice::(which) {
+                                    when(which) ::<= {
+                                        attempt();
+                                    }
+
+                                    windowEvent.queueAskBoolean(
+                                        prompt:'Teleport to island?',
+                                        onChoice::(which) {
+                                            when(which) ::<= {
+                                                when(which)
+                                                    doNext()
+                                            }
+                                        }
+                                    )
+                                }
+                            );                            
+                        }
+                        
+                        @:doSpell::(enhanced, catalyst) {
+
+                            @:newQual = ::<= {
+                                // default -> Apprentice
+
+                                @:improvementTree = {
+                                    'Apprentice\'s' : 'King\'s',
+                                    'King\'s' : 'Queen\'s',
+                                    'Queen\'s' : 'Masterwork',
+                                    'Masterwork' : 'Legendary',
+                                    'Legendary' : 'Divine',
+                                    'Divine' : 'God\'s',
+                                    'God\'s' : 'Null'
+                                };
+
+                                when(enhanced.quality == empty) 'Apprentice\'s';
+                                // TODO: mod support?
+                                when(improvementTree[enhanced.quality.name] == empty) 'Apprentice\'s';                               
+                                
+                                return improvementTree[enhanced.quality.name];
+                            }
+                            
+                            windowEvent.queueMessage(speaker:'Juhriikaal', text:'This will improve ' +enhanced.name+ ' to be of quality ' + newQual + '. This will cost you 500G.');                                
+                        
+                            windowEvent.queueAskBoolean(
+                                prompt:'Sacrifice ' + catalyst.name + ' and pay 500G?',
+                                onChoice::(which) {
+                                    when(which == false)
+                                        tryAgain();
+                                    
+                                    windowEvent.queueMessage(text:'Juhriikaal takes the gold and the items and begins to concentrate.');                                                                    
+                                    windowEvent.queueMessage(speaker:'Juhriikaal', text:'...');                                
+                                    windowEvent.queueMessage(text:'A deep blue light envelops the items...');                                
+                                    
+                                    if (random.flipCoin()) ::<= {
+                                        windowEvent.queueMessage(text:'...before flashing!');  
+                                        windowEvent.queueMessage(speaker:'Juhriikaal', text:'Ah! It looks like it was successful.');                                
+                                        @:whom = enhanced.equippedBy;
+                                        @oldStats;
+                                        @slot;
+                                        if (whom != empty) ::<= {
+                                            oldStats = StatSet.new(state:whom.stats.save());
+                                            slot = whom.unequipItem(item:enhanced, silent:true);
+                                        }
+                                        enhanced.quality = ItemQuality.database.find(name:newQual);
+                                        if (whom != empty) ::<= {
+                                            whom.equip(item:enhanced, slot, silent:true);
+                                            oldStats.printDiff(prompt: enhanced.name + ': success! ', other:whom.stats);
+                                        }
+                                    } else ::<= {
+                                        windowEvent.queueMessage(text:'The light is disrupted and the catalyst shatters violently.');                                
+                                        windowEvent.queueMessage(speaker:'Juhriikaal', text:'Well... Sometimes this happens. Materialization magic is quite volatile...');                                
+                                    }
+                                    
+                                    world.party.inventory.remove(item:catalyst);
+                                    world.party.inventory.subtractGold(amount:500);
+                                    tryAgain();
+                                }
+                            );                           
+                        }
+
+                        @:attempt = ::{
+                            @enhanced;
+                            @catalyst;
+
+
+                            when(world.party.inventory.items->keycount < 1) ::<= {
+                                windowEvent.queueMessage(speaker:'Juhriikaal', text:'Djiiroshuhzolii, Chosen. You have not enough items to let me attempt my magic.');
+                                windowEvent.queueNoDisplay(
+                                    onEnter::{},
+                                    onLeave::{doNext();} // always since no inventory anyway. cant change that.                          
+                                );
+                            }
+
+                            when(world.party.inventory.gold < 500) ::<= {
+                                windowEvent.queueMessage(speaker:'Juhriikaal', text:'Djiiroshuhzolii, Chosen. You have not enough gold for my services. You need at least 500G.');
+                                windowEvent.queueNoDisplay(
+                                    onEnter::{},
+                                    onLeave::{doNext();} // always since no inventory anyway. cant change that.                          
+                                );
+                            }
+
+
+                        
+                            @:pickItem = import(module:'game_function.pickpartyitem.mt');
+                            pickItem(
+                                canCancel: true,
+                                topWeight: 0.5,
+                                leftWeight: 0.5,
+                                prompt:'Choose an item to enhance:',
+                                onPick ::(item) {
+                                    when (item == empty) ::<= {
+                                        windowEvent.queueMessage(speaker:'Juhriikaal', text:'Ah I see. I will still be here if you change your mind.');
+                                        windowEvent.jumpToTag(name:'pickItem', goBeforeTag: true, doResolveNext:true);
+                                        windowEvent.queueNoDisplay(
+                                            onEnter::{},
+                                            onLeave::{doNext();}                                    
+                                        );                                
+                                    }
+
+                                    when (item.base.hasQuality == false) ::<= {
+                                        windowEvent.queueMessage(speaker:'Juhriikaal', text:'Chosen I am sorry, this item cannot have its quality improved.');                                
+                                    }
+                                    
+                                    
+                                    windowEvent.queueMessage(speaker:'Juhriikaal', text:'Excellent. Now, choose an item to be the catalyst for the magic.');                                
+                                    windowEvent.queueMessage(speaker:'Juhriikaal', text:'Remember, this item will be destroyed in the process and must be the same quality.');                                
+                                    
+                                    enhanced = item;
+                                    windowEvent.jumpToTag(name:'pickItem', goBeforeTag: true, doResolveNext:true);
+                                    
+                                    pickItem(
+                                        canCancel: true,
+                                        topWeight: 0.5,
+                                        leftWeight: 0.5,
+                                        prompt:'Choose an item to sacrifice:',
+                                        filter ::(item) <- item.base.hasQuality && item.quality == enhanced.quality && item != enhanced,
+                                        onPick ::(item) {
+                                            when (item == empty) ::<= {
+                                                windowEvent.queueMessage(speaker:'Juhriikaal', text:'Oh... It looks like you have no item elligible as a catalyst for this item. I am sorry. Remember: catalysts need to be the same quality as the item to enhance.');                                
+                                                tryAgain();                                            
+                                            }
+                                            catalyst = item;
+
+                                            when (catalyst == enhanced) ::<= {   
+                                                windowEvent.queueMessage(speaker:'Juhriikaal', text:'Chosen I am sorry, you cannot choose the same item as the catalyst.');                                
+                                            }
+
+
+                                            when (catalyst.base.hasQuality == false) ::<= {   
+                                                windowEvent.queueMessage(speaker:'Juhriikaal', text:'Chosen I am sorry, this item cannot be used as a catalyst for the spell.');                                
+                                            }
+                                            
+                                            when (catalyst.quality != enhanced.quality) ::<= {                                        
+                                                windowEvent.queueMessage(speaker:'Juhriikaal', text:'Chosen, I am sorry, I cannot cast my magic on these. The ' 
+                                                    + enhanced.name + ' you wish to enhance is of ' + qualityString(item:enhanced) + 
+                                                    ' while the catalyst is of ' + qualityString(item:catalyst) + '. These items must be the same quality for the spell to work.');
+                                            }
+                                           
+                                            windowEvent.queueMessage(speaker:'Juhriikaal', text:'Now. Let me cast the spell.');                                
+                                            windowEvent.jumpToTag(name:'pickItem', goBeforeTag: true, doResolveNext:true);
+                                          
+                                            doSpell(enhanced, catalyst);                                           
+                                        }
+                                    )
+                                }
+                            )                        
+                        };
+                        attempt();
+                    }
+                );
+                
+            },
+            ['Juhriikaal', 'Allow me to return you to the land that the Key of Thunder leads to.'],                     
+            ::(location, landmark, doNext) {
+                @:world = import(module:'game_singleton.world.mt');
+                @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Thunder');
+                if (key != empty) key = key[0];
+                // could be equipped by hooligans and jokesters
+                if (key == empty) ::<= {
+                    @:Entity = import(module:'game_class.entity.mt');
+                    key = {:::} {
+                        foreach(world.party.members)::(i, member) {
+                            @:wep = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
+                            if (wep.name == 'Wyvern Key of Thunder') ::<= {
+                                send(message:key);
+                            }
+                        }
+                    }
+                }
+                @:canvas = import(module:'game_singleton.canvas.mt');
+                windowEvent.queueMessage(
+                    renderable:{render::{canvas.blackout();}},
+                    text: 'You are whisked away to another island...'
+                );
+
+                @:instance = import(module:'game_singleton.instance.mt');
+                instance.visitIsland(where:key.islandEntry);
+                doNext();                    
+            }
+        ]
+    }
+)
 
 
 

@@ -418,4 +418,29 @@ ItemQuality.new(
 ) 
 
 
+ItemQuality.new(
+    data : {
+        name : 'Null',
+        description : "It is said this shouldn\'t exist.",
+        levelMinimum: 1,
+        equipMod : StatSet.new(
+            DEF: 1000,
+            ATK: 1000,
+            SPD: 1000,
+            DEX: 1000,
+            INT: 1000
+        ),
+        rarity: 1000000,
+        pricePercentMod: 1000000,
+        equipEffects : [
+        ],
+        
+        useEffects : []
+    }
+) 
+
+
+
+
+
 return ItemQuality;

@@ -484,11 +484,15 @@
                         this.step();
                         stepCount += 1;
 
-
-                        // every 5 steps, heal 1% HP
+                        
+                        // every 5 steps, heal 1% HP if below 1/5th health
                         if (stepCount % 15 == 0) ::<= {
-                            foreach(party.members)::(i, member) <- member.heal(amount:(member.stats.HP * 0.01)->ceil);
+                            foreach(party.members)::(i, member) {
+                                if (member.hp < member.stats.HP * 0.2)
+                                    member.heal(amount:(member.stats.HP * 0.01)->ceil);
+                            }
                         }
+                        
 
                         state.stepsSinceLast += 1;
                         if (this.peaceful == false) ::<= {
@@ -765,18 +769,26 @@ Landmark.Base.new(
         dungeonForceEntrance: false,
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
-            {name: 'Fountain', rarity:10},
+
+            // the standard set
+            {name: 'Fountain', rarity:18},
+            {name: 'Potion Shop', rarity: 17},
             {name: 'Enchantment Stand', rarity: 11},
             {name: 'Wyvern Statue', rarity: 15},
             {name: 'Small Chest', rarity: 16},
-            {name: 'Locked Chest', rarity: 7},
-            {name: 'Clothing Shop', rarity: 2000}
+            {name: 'Locked Chest', rarity: 11},
+
+
+            {name: 'Healing Circle', rarity:20},
+
+
+            {name: 'Clothing Shop', rarity: 300},
+            {name: 'Fancy Shop', rarity: 500}
 
         ],
         requiredLocations : [
             'Stairs Down',
-            'Stairs Down',
-            'Fancy Shop'
+            'Stairs Down'
         ],
         mapHint:{
             layoutType: DungeonMap.LAYOUT_ALPHA
@@ -796,24 +808,29 @@ Landmark.Base.new(
         rarity : 100000,      
         isUnique : true,
         minLocations : 1,
-        maxLocations : 2,
+        maxLocations : 4,
         peaceful: false,
         guarded : false,
         dungeonMap : true,
         dungeonForceEntrance: false,
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
-            {name: 'Fountain', rarity:10},
+            {name: 'Fountain', rarity:18},
+            {name: 'Potion Shop', rarity: 17},
             {name: 'Enchantment Stand', rarity: 11},
-            {name: 'Magic Chest', rarity: 15},            
-            {name: 'Wyvern Statue', rarity: 8},
-            {name: 'Clothing Shop', rarity: 500}
+            {name: 'Wyvern Statue', rarity: 15},
+            {name: 'Small Chest', rarity: 16},
+            {name: 'Locked Chest', rarity: 11},
+            {name: 'Magic Chest', rarity: 15},
 
+
+            {name: 'Healing Circle', rarity:20},
+            {name: 'Clothing Shop', rarity: 300},
+            {name: 'Fancy Shop', rarity: 500},
         ],
         requiredLocations : [
-            'Stairs Up',
+            'Stairs Down',
             'Locked Chest',
-            'Small Chest'
         ],
         mapHint:{
             layoutType: DungeonMap.LAYOUT_BETA
@@ -840,15 +857,22 @@ Landmark.Base.new(
         dungeonForceEntrance: false,
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
-            {name: 'Fountain', rarity:10},
+            {name: 'Fountain', rarity:18},
+            {name: 'Potion Shop', rarity: 17},
             {name: 'Enchantment Stand', rarity: 11},
-            {name: 'Magic Chest', rarity: 15},            
-            {name: 'Wyvern Statue', rarity: 8},
-            {name: 'Clothing Shop', rarity: 500}
+            {name: 'Wyvern Statue', rarity: 15},
+            {name: 'Small Chest', rarity: 16},
+            {name: 'Locked Chest', rarity: 11},
+            {name: 'Magic Chest', rarity: 15},
+
+            {name: 'Healing Circle', rarity:25},
+
+            {name: 'Clothing Shop', rarity: 200},
+            {name: 'Fancy Shop', rarity: 100}
 
         ],
         requiredLocations : [
-            'Stairs Up',
+            'Stairs Down',
             'Locked Chest',
             'Small Chest'
         ],
@@ -948,7 +972,7 @@ Landmark.Base.new(
         guarded : false,
         peaceful: true,
         dungeonMap : true,
-        dungeonForceEntrance: true,
+        dungeonForceEntrance: false,
         possibleLocations : [
         ],
         requiredLocations : [
@@ -981,7 +1005,7 @@ Landmark.Base.new(
         guarded : false,
         peaceful: true,
         dungeonMap : true,
-        dungeonForceEntrance: true,
+        dungeonForceEntrance: false,
         possibleLocations : [
         ],
         requiredLocations : [
@@ -1013,8 +1037,9 @@ Landmark.Base.new(
         maxLocations : 2,
         guarded : false,
         peaceful: true,
+        
         dungeonMap : true,
-        dungeonForceEntrance: true,
+        dungeonForceEntrance: false,
         possibleLocations : [
         ],
         requiredLocations : [

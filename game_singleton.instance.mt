@@ -30,7 +30,7 @@
 @:partyOptions = import(module:'game_function.partyoptions.mt');
 @:LargeMap = import(module:'game_singleton.largemap.mt');
 
-import(module:'game_function.pickequippeditem.mt');
+import(module:'game_function.pickpartyitem.mt');
 
 
 
@@ -66,6 +66,7 @@ import(module:'game_class.location.mt');
 @:JSON = import(module:'Matte.Core.JSON');
 @:VERSION = '0.1.4b';
 @world = import(module:'game_singleton.world.mt');
+world.initializeNPCs();
 
 return class(
     name: 'Wyvern.Instance',
@@ -256,34 +257,42 @@ return class(
                 // debug
                     //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
                     //).new(from:island.newInhabitant(),rngEnchantHint:true));
-
-                    //@:story = import(module:'game_singleton.story.mt');
-                    //story.foundFireKey = true;
-                    //story.foundIceKey = true;
-                    //story.tier = 3;
-                    
-                    //party.inventory.addGold(amount:2000);
-                    
-
-
                     /*
+                    @:story = import(module:'game_singleton.story.mt');
+                    story.foundFireKey = true;
+                    story.foundIceKey = true;
+                    story.foundThunderKey = true;
+                    story.tier = 4;
+                    
+                    party.inventory.addGold(amount:20000);
+                    
+
+
+                    
                     party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Ice'
+                    ), from:island.newInhabitant()));
+                    party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Thunder'
                     ), from:island.newInhabitant()));
 
                     @:story = import(module:'game_singleton.story.mt');
-                    story.tier = 1;
-                    */
+                    
 
                     
 
-                    /*
-                    [0, 20]->for(do:::(i) {
-                        party.inventory.add(item:Item.Base.database.getRandomFiltered(
-                            filter:::(value) <- value.isUnique == false && value.tier <= story.tier
-                        ).new(from:island.newInhabitant(),rngEnchantHint:true));
-                    });
-                    */
                     
+                    for(0, 20) ::(i) {
+                        party.inventory.add(
+                            item:Item.new(
+                                base:Item.Base.database.getRandomFiltered(
+                                        filter:::(value) <- value.isUnique == false && value.hasQuality
+                                ),
+                                from:island.newInhabitant(),
+                                rngEnchantHint:true
+                            )
+                        )
+                    };
+                    
+                    */
                     
 
                 for(0, 1)::(i) {
@@ -307,24 +316,27 @@ return class(
                     from:island.newInhabitant()
                 ));
 
-                
-                @:sword = Item.new(
-                    base: Item.Base.database.find(name:'Shortsword'),
-                    from:p0,
-                    materialHint: 'Ray',
-                    rngEnchantHint: false
-                );
+                    
+                    /*
+                    @:sword = Item.new(
+                        base: Item.Base.database.find(name:'Glaive'),
+                        from:p0,
+                        materialHint: 'Ray',
+                        qualityHint: 'God\'s',
+                        rngEnchantHint: false
+                    );
 
-                @:tome = Item.new(
-                    base:Item.Base.database.find(name:'Tome'),
-                    from:p0,
-                    materialHint: 'Ray',
-                    rngEnchantHint: false,
-                    abilityHint: 'Cure'
-                );
-                party.inventory.add(item:sword);
-                party.inventory.add(item:tome);
-                
+                    @:tome = Item.new(
+                        base:Item.Base.database.find(name:'Tome'),
+                        from:p0,
+                        materialHint: 'Ray',
+                        qualityHint: 'God\'s',
+                        rngEnchantHint: false,
+                        abilityHint: 'Cure'
+                    );
+                    party.inventory.add(item:sword);
+                    party.inventory.add(item:tome);
+                    */
 
 
 

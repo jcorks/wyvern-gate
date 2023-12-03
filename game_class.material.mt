@@ -235,20 +235,7 @@ Material.new(
     }
 )    
 
-Material.new(
-    data : {
-        name : 'Crystal',
-        rarity : 80,
-        description : 'The crystal used makes it semi-transparent.',
-        tier : 2,
-        statMod : StatSet.new(
-            DEF: 35,
-            INT: 35,
-            ATK: 35
-        ),
-        pricePercentMod: 150
-    }
-)   
+
 
 Material.new(
     data : {

@@ -76,6 +76,14 @@
     ALL     : 2
 }
 
+@:SIZE = {
+    SMALL : 0,
+    TINY : 1,
+    AVERAGE : 2,
+    LARGE : 3,
+    BIG : 4
+}
+
 
 
 
@@ -119,6 +127,8 @@
                 customPrefix : empty,
                 customName : empty,
                 description : empty,
+                hasEmblem : empty,
+                size : empty,
                 price : empty,
                 color : empty,
                 island : empty,
@@ -186,10 +196,19 @@
 
         }
         
+        @:sizeToString ::<- match(state.size) {
+          (SIZE.SMALL)   : 'smaller than expected',
+          (SIZE.TINY)    : 'quite small',
+          (SIZE.AVERAGE) : 'normally sized',
+          (SIZE.LARGE)   : 'larger than expected',
+          (SIZE.BIG)     : 'quite large' 
+        }
+        
         @:assignSize = ::{
-            random.pickArrayItem(list:[
-                ::{
-                    state.description = state.description + 'It is smaller than expected. ';
+            state.size = random.integer(from:0, to:4);
+            
+            (match(state.size) {
+                (SIZE.SMALL): ::{
                     state.stats.add(stats:StatSet.new(
                         ATK:-10,
                         DEF:-10,
@@ -199,8 +218,7 @@
                     state.price *= 0.85;                    
                 },
 
-                ::{
-                    state.description = state.description + 'It is quite small. ';
+                (SIZE.TINY): ::{
                     state.stats.add(stats:StatSet.new(
                         ATK:-20,
                         DEF:-20,
@@ -210,12 +228,10 @@
                     state.price *= 0.75;                    
                 },
 
-                ::{
-                    state.description = state.description + 'It is average-sized. ';
+                (SIZE.AVERAGE):::{
                 },
 
-                ::{
-                    state.description = state.description + 'It is larger than expected. ';
+                (SIZE.LARGE): ::{
                     state.stats.add(stats:StatSet.new(
                         ATK:10,
                         DEF:10,
@@ -225,8 +241,7 @@
                     state.price *= 1.15;                    
                 },
 
-                ::{
-                    state.description = state.description + 'It is quite large. ';
+                (SIZE.BIG): ::{
                     state.stats.add(stats:StatSet.new(
                         ATK:20,
                         DEF:20,
@@ -235,9 +250,31 @@
                     ));
                     state.price *= 1.25;                    
                 }
-
-            
-            ])();
+            })()
+        }
+        
+        @:recalculateDescription ::{
+            @:base = this.base;
+            state.description = String.combine(strings:[
+                base.description,
+                ' ',
+                (if (state.ability == empty) '' else 'If equipped, grants the ability: "' + state.ability + '". '),
+                if (state.size == empty) '' else 'It is ' + sizeToString() + '. ',
+                if (state.hasEmblem) (
+                    if (base.isApparel) 
+                        'The maker\'s emblem is sewn on it. '
+                    else
+                        'The maker\'s emblem is engraved on it. '
+                ) else 
+                    '',
+                if (base.hasQuality && state.quality != empty) state.quality.description + ' ' else '',
+                if (base.hasMaterial) state.material.description + ' ' else '',
+                if (base.isApparel) state.apparel.description + ' ' else ''
+            ]);
+            if (base.canBeColored) ::<= {
+                state.description = state.description->replace(key:'$color$', with:state.color.name);
+                state.description = state.description->replace(key:'$design$', with:state.design.name);
+            }
         }
         
         @:Island = import(module:'game_class.island.mt');
@@ -254,10 +291,8 @@
                 state.improvementsLeft = random.integer(from:10, to:25);
                 state.improvementsStart = state.improvementsLeft;
                 
-                state.description = base.description + ' ';
                 if (base.hasSize)   
                     assignSize();
-                state.description = state.description + (if (state.ability == empty) '' else 'If equipped, grants the ability: "' + state.ability + '". ');
                 foreach(base.equipEffects)::(i, effect) {
                     state.equipEffects->push(value:effect);
                 }
@@ -272,10 +307,7 @@
                     // random chance to have a maker's emblem on it, indicating 
                     // made with love and care
                     if (random.try(percentSuccess:15)) ::<= {
-                        if (base.isApparel) 
-                            state.description = state.description + 'The maker\'s emblem is sewn on it. '
-                        else
-                            state.description = state.description + 'The maker\'s emblem is engraved on it. ';
+                        state.hasEmblem = true;
                         state.stats.add(stats:StatSet.new(
                             ATK:10,
                             DEF:10,
@@ -284,7 +316,8 @@
                             DEX:10                    
                         ));
                         state.price *= 1.05;
-                    }
+                    } else 
+                        state.hasEmblem = false;
                     
                     
                     if (random.try(percentSuccess:30) || (qualityHint != empty)) ::<= {
@@ -293,11 +326,8 @@
                         else 
                             ItemQuality.database.find(name:qualityHint);
                         state.stats.add(stats:state.quality.equipMod);
-                        state.price += (state.price * (state.quality.pricePercentMod/100));
-                        state.description = state.description + state.quality.description + ' ';
-                        
+                        state.price += (state.price * (state.quality.pricePercentMod/100));                        
                     }
-                    recalculateName();
                 }
                 
                 @:story = import(module:'game_singleton.story.mt');
@@ -310,9 +340,7 @@
                     } else ::<= {
                         state.material = Material.database.find(name:materialHint);                
                     }
-                    state.description = state.description + state.material.description + ' ';
                     state.stats.add(stats:state.material.statMod);
-                    recalculateName();
                 }
 
                 if (base.isApparel) ::<= {
@@ -323,9 +351,7 @@
                     } else ::<= {
                         state.apparel = ApparelMaterial.database.find(name:apparelHint);                
                     }
-                    state.description = state.description + state.apparel.description + ' ';
                     state.stats.add(stats:state.apparel.statMod);
-                    recalculateName();
                 }                
 
                 
@@ -364,9 +390,6 @@
                     state.stats.add(stats:state.color.equipMod);
                     state.design = if (designHint) ItemDesign.database.find(name:designHint) else ItemDesign.database.getRandom();
                     state.stats.add(stats:state.design.equipMod);
-
-                    state.description = state.description->replace(key:'$color$', with:state.color.name);
-                    state.description = state.description->replace(key:'$design$', with:state.design.name);
                 }
                             
                 
@@ -378,7 +401,8 @@
                 state.price = (state.price)->ceil;
                 
                 base.onCreate(item:this, user:from, creationHint);
-                
+                recalculateDescription();
+                recalculateName();
                 
                 return this;
                 
@@ -399,6 +423,21 @@
                 
                 set ::(value => String)  {
                     state.customPrefix = value;
+                    recalculateName();
+                }
+            },
+            
+            quality : {
+                get ::<- state.quality,
+                set ::(value) {
+                    if (state.quality != empty) ::<= {
+                        state.stats.subtract(stats:state.quality.equipMod);
+                        state.price -= (state.price * (state.quality.pricePercentMod/100));
+                    }
+                    state.quality = value;
+                    state.stats.add(stats:state.quality.equipMod);
+                    state.price += (state.price * (state.quality.pricePercentMod/100));
+
                     recalculateName();
                 }
             },
@@ -870,7 +909,7 @@ Item.Base.new(data : {
     description: 'Pink-colored potions are known to be for recovery of injuries',
     examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
     equipType: TYPE.HAND,
-    weight : 0.5,
+    weight : 2,
     rarity : 100,
     canBeColored : false,
     keyItem : false,
@@ -911,7 +950,7 @@ Item.Base.new(data : {
     description: 'Purple-colored potions are known to combine the effects of pink and cyan potions',
     examine : 'These potions are handy, as the effects of ',
     equipType: TYPE.HAND,
-    weight : 0.5,
+    weight : 2,
     rarity : 100,
     canBeColored : false,
     hasSize : false,
@@ -952,7 +991,7 @@ Item.Base.new(data : {
     description: 'Green-colored potions are known to be toxic.',
     examine : 'Often used offensively, these potions are known to be used as poison once used and doused on a target.',
     equipType: TYPE.HAND,
-    weight : 0.5,
+    weight : 2,
     rarity : 100,
     canBeColored : false,
     keyItem : false,
@@ -992,7 +1031,7 @@ Item.Base.new(data : {
     description: 'Orange-colored potions are known to be volatile.',
     examine : 'Often used offensively, these potions are known to explode on contact.',
     equipType: TYPE.HAND,
-    weight : 0.5,
+    weight : 2,
     rarity : 100,
     canBeColored : false,
     keyItem : false,
@@ -1031,7 +1070,7 @@ Item.Base.new(data : {
     description: 'Black-colored potions are known to be toxic to all organic life.',
     examine : 'Often used offensively, these potions are known to cause instant petrification.',
     equipType: TYPE.HAND,
-    weight : 0.5,
+    weight : 2,
     rarity : 100,
     canBeColored : false,
     keyItem : false,
@@ -1074,7 +1113,7 @@ Item.Base.new(data : {
     examine : 'This potion does not have the same hue as the common recovery potion and is a bit heavier. Did you get it from a reliable source?',
     equipType: TYPE.HAND,
     rarity : 600,
-    weight : 0.5,
+    weight : 2,
     basePrice: 20,
     canBeColored : false,
     hasMaterial : false,
@@ -1116,7 +1155,7 @@ Item.Base.new(data : {
     examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
     equipType: TYPE.HAND,
     rarity : 100,
-    weight : 0.5,        
+    weight : 2,        
     basePrice: 20,
     canBeColored : false,
     tier: 0,
@@ -1705,7 +1744,7 @@ Item.Base.new(data : {
         "Stab",
         "Stun",
         "Counter",
-        "Big Sweep"
+        "Big Swing"
     ],
 
     // fatigued
@@ -2948,10 +2987,10 @@ Item.Base.new(data : {
     weight : 10,
     tier: 0,
     levelMinimum : 1,
-    canHaveEnchants : true,
+    canHaveEnchants : false,
     canHaveTriggerEnchants : false,
     enchantLimit : 0,
-    hasQuality : true,
+    hasQuality : false,
     hasMaterial : false,
     isApparel : false,
     isUnique : true,
@@ -3630,12 +3669,13 @@ Item.Base.new(data : {
     
         @:world = import(module:'game_singleton.world.mt');        
         @:nameGen = import(module:'game_singleton.namegen.mt');
+        @:story = import(module:'game_singleton.story.mt');
         @:island = {
             island : empty
         }
         breakpoint();
         item.setIslandGenAttributes(
-            levelHint:  6,//user.level => Number,
+            levelHint:  story.levelHint,//user.level => Number,
             nameHint:   nameGen.island(),
             tierHint : 1
         );
@@ -3688,12 +3728,13 @@ Item.Base.new(data : {
     
         @:world = import(module:'game_singleton.world.mt');        
         @:nameGen = import(module:'game_singleton.namegen.mt');
+        @:story = import(module:'game_singleton.story.mt');
         @:island = {
             island : empty
         }
 
         item.setIslandGenAttributes(
-            levelHint:  7,
+            levelHint:  story.levelHint+1,
             nameHint:   nameGen.island(),
             tierHint : 2
         );
@@ -3746,12 +3787,13 @@ Item.Base.new(data : {
     
         @:world = import(module:'game_singleton.world.mt');        
         @:nameGen = import(module:'game_singleton.namegen.mt');
+        @:story = import(module:'game_singleton.story.mt');
         @:island = {
             island : empty
         }
 
         item.setIslandGenAttributes(
-            levelHint:  8,
+            levelHint:  story.levelHint+2,
             nameHint:   nameGen.island(),
             tierHint : 3
         );
@@ -3804,14 +3846,15 @@ Item.Base.new(data : {
     
         @:world = import(module:'game_singleton.world.mt');        
         @:nameGen = import(module:'game_singleton.namegen.mt');
+        @:story = import(module:'game_singleton.story.mt');
         @:island = {
             island : empty
         }
 
         item.setIslandGenAttributes(
-            levelHint:  9,
+            levelHint:  story.levelHint+3,
             nameHint:   nameGen.island(),
-            tierHint : 3
+            tierHint : 4
         );
         
         item.price = 1;

@@ -273,6 +273,7 @@ EntityQuality.Base.new(
             'green',
             'blue',
             'red',
+            'purple',
         ],
         
         trait1 : [

@@ -166,8 +166,17 @@
                 LUK_ += stats.LUK;
                 SPD_ += stats.SPD;
                 DEX_ += stats.DEX;   
-                
-                         
+            },
+            
+            subtract ::(stats) {
+                HP_  -= stats.HP;
+                MP_  -= stats.AP;
+                ATK_ -= stats.ATK;
+                INT_ -= stats.INT;
+                DEF_ -= stats.DEF;
+                LUK_ -= stats.LUK;
+                SPD_ -= stats.SPD;
+                DEX_ -= stats.DEX;               
             },
             
             HP : {

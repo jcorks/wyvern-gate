@@ -1675,6 +1675,8 @@ Ability.new(
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
         onAction: ::(user, targets, turnIndex, extraData) {
+            @:world = import(module:'game_singleton.world.mt');
+
             windowEvent.queueMessage(
                 text: user.name + ' summons a Fire Sprite!'
             );
@@ -1700,6 +1702,7 @@ Ability.new(
             @:Entity = import(module:'game_class.entity.mt');
             @:Species = import(module:'game_class.species.mt');
             @:sprite = Entity.new(
+                island : world.island,
                 speciesHint: 'Fire Sprite',
                 professionHint: 'Fire Sprite',
                 levelHint:5
@@ -1753,10 +1756,14 @@ Ability.new(
                 windowEvent.queueMessage(
                     text: '...but the summoning fizzled!'
                 );
+
+
             
             @:Entity = import(module:'game_class.entity.mt');
             @:Species = import(module:'game_class.species.mt');
+            @:world = import(module:'game_singleton.world.mt');
             @:sprite = Entity.new(
+                island: world.island,
                 speciesHint: 'Ice Elemental',
                 professionHint: 'Ice Elemental',
                 levelHint:5
@@ -1813,7 +1820,9 @@ Ability.new(
             
             @:Entity = import(module:'game_class.entity.mt');
             @:Species = import(module:'game_class.species.mt');
+            @:world = import(module:'game_singleton.world.mt');
             @:sprite = Entity.new(
+                island: world.island,
                 speciesHint: 'Thunder Spawn',
                 professionHint: 'Thunder Spawn',
                 levelHint:5
@@ -1870,7 +1879,9 @@ Ability.new(
             
             @:Entity = import(module:'game_class.entity.mt');
             @:Species = import(module:'game_class.species.mt');
+            @:world = import(module:'game_singleton.world.mt');
             @:sprite = Entity.new(
+                island: world.island,
                 speciesHint: 'Guiding Light',
                 professionHint: 'Guiding Light',
                 levelHint:5

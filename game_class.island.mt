@@ -383,13 +383,19 @@
                             island:this
                         ),
 
-                    (1):// fire defeated
+                    (2):// ice defeated
                         LargeMap.addLandmark(
                             map:state.map,
                             base:Landmark.Base.database.find(name:'Shrine of Thunder'),
                             island:this
                         ),
-
+                        
+                    (3):// thunder defeated
+                        LargeMap.addLandmark(
+                            map:state.map,
+                            base:Landmark.Base.database.find(name:'Shrine of Light'),
+                            island:this
+                        ),
                         
                     default:
                         LargeMap.addLandmark(
@@ -542,6 +548,7 @@
                                     
             newInhabitant ::(professionHint, levelHint, speciesHint) {
                 @:out = Entity.new(
+                    island: this,
                     speciesHint:    if (speciesHint == empty) random.pickArrayItemWeighted(list:state.species).species else speciesHint,
                     levelHint:      if (levelHint == empty) random.integer(from:state.levelMin, to:state.levelMax) else levelHint,
                     professionHint: if (professionHint == empty) Profession.Base.database.getRandomFiltered(filter::(value)<-value.learnable).name else professionHint
@@ -560,6 +567,7 @@
             newAggressor ::(levelMaxHint) {            
                 @levelHint = random.integer(from:state.levelMin, to:if(levelMaxHint == empty) state.levelMax else levelMaxHint);
                 @:angy =  Entity.new(
+                    island: this,
                     speciesHint: random.pickArrayItemWeighted(list:state.species).species,
                     levelHint,
                     professionHint: Profession.Base.database.getRandomFiltered(filter::(value)<-value.learnable).name
@@ -572,6 +580,7 @@
             newHostileCreature ::(levelMaxHint) {
                 @levelHint = random.integer(from:state.levelMin, to:if(levelMaxHint == empty) state.levelMax else levelMaxHint);
                 @:angy =  Entity.new(
+                    island: this,
                     speciesHint: 'Creature',
                     levelHint,
                     professionHint: 'Creature'

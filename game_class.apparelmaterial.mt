@@ -154,7 +154,7 @@ ApparelMaterial.new(
     data : {
         name : 'Mythril',
         description : 'The mythril used makes it radiantly green',
-        rarity : 70,
+        rarity : 30,
         tier : 2,
         statMod : StatSet.new(
             DEF: 70,
@@ -170,7 +170,7 @@ ApparelMaterial.new(
     data : {
         name : 'Eversilk',
         description : 'The wool used is different somehow.',
-        rarity : 3,
+        rarity : 20,
         tier : 2,
         statMod : StatSet.new(
             INT: 35,
@@ -180,7 +180,7 @@ ApparelMaterial.new(
             ATK: 35,
             SPD: 35
         ),
-        pricePercentMod: 400
+        pricePercentMod: 3000
     }
 )
 
@@ -189,7 +189,7 @@ ApparelMaterial.new(
     data : {
         name : 'Soulstrand',
         description : 'The soulstrand material softly glows.',
-        rarity : 3,
+        rarity : 30,
         tier : 3,
         statMod : StatSet.new(
             INT: 105,
@@ -199,7 +199,7 @@ ApparelMaterial.new(
             SPD: 105,
             ATK: 105
         ),
-        pricePercentMod: 2000
+        pricePercentMod: 10000
     }
 )
 

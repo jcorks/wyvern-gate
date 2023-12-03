@@ -467,6 +467,7 @@ Interaction.new(
                                                     @:Species = import(module:'game_class.species.mt');
                                                     @:Entity = import(module:'game_class.entity.mt');
                                                     @:skie = Entity.new(
+                                                        island: location.landmark.island,
                                                         speciesHint:'Drake-kin',
                                                         professionHint: 'Runologist',
                                                         levelHint: 5,
@@ -512,15 +513,40 @@ Interaction.new(
                                             
                                                 @itemPrice = item.price;
                                                 @itemChoices = [];
+                                                
+                                                @itemMaterials = [
+                                                    'Gold',
+                                                    'Crystal',
+                                                    'Mythril',
+                                                    'Quicksilver',
+                                                    'Dragonglass',
+                                                    'Sunstone',
+                                                    'Moonstone',
+                                                ]
+                                                
+                                                @itemQualities = [
+                                                    'Sturdy',
+                                                    'Robust',
+                                                    'Light',
+                                                    'Durable',
+                                                    'Standard',
+                                                    'King\'s',
+                                                    'Queen\'s',
+                                                    'Masterwork'
+                                                ]
+                                                
                                                 for(0, 50)::(i) {
                                                     @newItem = Item.new(
                                                         base: Item.Base.database.getRandomFiltered(
                                                             filter::(value) <- (
-                                                                value.isUnique == false 
-                                                                && value.tier <= story.tier
+                                                                value.isUnique == false &&
+                                                                value.hasMaterial == true &&
+                                                                value.hasQuality == true
                                                             )
                                                         ),
-                                                        rngEnchantHint:true,                                                 
+                                                        rngEnchantHint:true,         
+                                                        qualityHint : random.pickArrayItem(list:itemQualities),
+                                                        materialHint : random.pickArrayItem(list:itemMaterials),                                        
                                                         from:location.ownedBy
                                                     )    
                                                     itemChoices->push(value:newItem);                                    
@@ -749,6 +775,18 @@ Interaction.new(
         displayName : 'Sell',
         name : 'sell:shop',
         onInteract ::(location, party) {
+
+            when(location.ownedBy == empty)
+                windowEvent.queueMessage(
+                    text: "No one is at the shop to sell you anything."
+                );
+                
+            when(location.ownedBy.isIncapacitated())
+                windowEvent.queueMessage(
+                    text: location.ownedBy.name + ' is incapacitated and cannot sell you anything.'
+                );
+
+
             when (location.peaceful == false && location.ownedBy != empty) ::<= {
                 windowEvent.queueMessage(
                     speaker: location.ownedBy.name,
@@ -839,6 +877,18 @@ Interaction.new(
         displayName : 'Buy',
         name : 'buy:shop',
         onInteract ::(location, party) {
+            @:world = import(module:'game_singleton.world.mt');
+            when(location.ownedBy == empty)
+                windowEvent.queueMessage(
+                    text: "No one is at the shop to sell you anything."
+                );
+                
+            when(location.ownedBy.isIncapacitated())
+                windowEvent.queueMessage(
+                    text: location.ownedBy.name + ' is incapacitated and cannot sell you anything.'
+                );
+
+
             when (location.peaceful == false && location.ownedBy != empty) ::<= {
                 windowEvent.queueMessage(
                     speaker: location.ownedBy.name,
@@ -863,7 +913,6 @@ Interaction.new(
                     }
                 );
             }
-            @:world = import(module:'game_singleton.world.mt');
             @:pickItem = import(module:'game_function.pickitem.mt');
             
             when (world.time < world.TIME.MORNING || world.time > world.TIME.EVENING)
@@ -1753,6 +1802,34 @@ Interaction.new(
     }
 ) 
 
+Interaction.new(
+    data : {
+        displayName : 'Heal',
+        name : 'healing-circle',
+        onInteract ::(location, party) {
+            when(location.data.used)
+                windowEvent.queueMessage(text:'This healing circle is no longer active.');
+                
+            @:world = import(module:'game_singleton.world.mt');
+            
+            windowEvent.queueMessage(text:'The party goes within the healing circle.');
+        
+            foreach(world.party.members) ::(index, member) {
+                member.heal(amount: member.stats.HP);
+            }
+            
+            
+            windowEvent.queueMessage(text:
+                random.pickArrayItem(list:[
+                    'The party feels refreshed.',
+                    'A welcomed rest for the party.'
+                ])
+            );
+            location.data.used = true;
+        }
+    }
+) 
+
 
 Interaction.new(
     data : {
@@ -1829,7 +1906,7 @@ Interaction.new(
                         @:Entity = import(module:'game_class.entity.mt');
                         @:Damage = import(module:'game_class.damage.mt');
 
-                        @:statue = Entity.new(levelHint: 5);
+                        @:statue = Entity.new(island:location.landmark.island, levelHint: 5);
                         statue.name = 'the Wyvern Statue';
                         @:landed = whom.damage(
                             from: statue,
@@ -1847,7 +1924,7 @@ Interaction.new(
                             windowEvent.queueMessage(text: whom.name + ' is met with a curse.');
 
                             @:oldStats = StatSet.new();
-                            oldStats.load(serialized:whom.stats());
+                            oldStats.load(serialized:whom.stats.save()());
                             @:newState = {...whom.stats.save()};
                             @:stat = random.pickArrayItem(list:statChoices);
                             newState[stat] -= 2;
@@ -1915,7 +1992,7 @@ Interaction.new(
                 onChoice::(which) {
                     when(!which) empty;
                     
-                    @:pickItem = import(module:'game_function.pickequippeditem.mt');
+                    @:pickItem = import(module:'game_function.pickpartyitem.mt');
                     pickItem(
                         canCancel:true, 
                         onGetPrompt::{
@@ -1930,14 +2007,19 @@ Interaction.new(
                                 onChoice::(which) {
                                     windowEvent.queueMessage(text:'The stand glows along with the item for a time before returning to normal.');
                                     @:whom = item.equippedBy;
-                                    @:oldStats = StatSet.new(state:whom.stats.save());
-                                    @:slot = whom.unequipItem(item, silent:true);
+                                    @oldStats;
+                                    @slot
+                                    if (whom != empty) ::<= {
+                                        oldStats = StatSet.new(state:whom.stats.save());
+                                        slot = whom.unequipItem(item, silent:true);
+                                    }
                                     item.addEnchant(mod:location.data.enchant);
                                     location.data.enchant = empty;
-                                    whom.equip(item, slot, silent:true);
-                                    if (isStatBased)
-                                        oldStats.printDiff(prompt: whom.name + ': enchanted ' + item.name, other:whom.stats);
-                                    
+                                    if (whom != empty) ::<= {
+                                        whom.equip(item, slot, silent:true);
+                                        if (isStatBased)
+                                            oldStats.printDiff(prompt: whom.name + ': enchanted ' + item.name, other:whom.stats);
+                                    }                                    
                                     windowEvent.jumpToTag(name:'pickItem', goBeforeTag: true, doResolveNext:true);
                                 }
                             );

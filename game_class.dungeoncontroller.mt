@@ -50,10 +50,9 @@
             
 
             ::<={
-                @story = import(module:'game_singleton.story.mt');
                 @:Item = import(module:'game_class.item.mt');
 
-                if (story.tier > 0)
+                if (island_.tier > 0)
                     ent.ref->push(value:landmark_.island.newInhabitant());
 
 
@@ -61,7 +60,7 @@
 
                     ref.inventory.clear();
                     @:itembase = Item.Base.database.getRandomWeightedFiltered(
-                        filter:::(value) <- value.isUnique == false && value.tier <= story.tier                    
+                        filter:::(value) <- value.isUnique == false && value.tier <= island_.tier                    
                     );
                     if (itembase.name != 'None') ::<={
                         @:itemInstance = Item.new(base:itembase, from:ref, rngEnchantHint:true);
@@ -177,8 +176,7 @@
                 
                 
                 // add additional entities out of spawn points (stairs)
-                @story = import(module:'game_singleton.story.mt');
-                if ((entities->keycount < (if (floorHint == 0) 0 else (1+(floorHint/4)->ceil))) && landmark_.base.peaceful == false && Number.random() < 0.1 / (encountersOnFloor*(10 / (story.tier+1))+1)) ::<= {
+                if ((entities->keycount < (if (floorHint == 0) 0 else (1+(floorHint/4)->ceil))) && landmark_.base.peaceful == false && Number.random() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
                     addEntity();
                     encountersOnFloor += 1;
                 }

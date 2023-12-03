@@ -830,7 +830,10 @@
                 );
             },
             
-
+            // returns any resolvable items are left queued.
+            hasAnyQueued:: {
+                return nextResolve->size != 0;
+            }
         }    
     }
 ).new();

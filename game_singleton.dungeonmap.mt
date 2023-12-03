@@ -269,11 +269,7 @@
     @cavities = [];
     @:areas = [];
     
-    @:AREA_SIZE = random.pickArrayItem(
-        list: [
-            5, 7, 9
-        ]
-    );
+    @:AREA_SIZE = 5; 
     
     @:AREA_GAP = random.pickArrayItem(
         list: [

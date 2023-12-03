@@ -34,7 +34,6 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:EntityQuality = import(module:'game_class.entityquality.mt');
 @:correctA = import(module:'game_function.correcta.mt');
-@:story = import(module:'game_singleton.story.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
@@ -102,13 +101,13 @@
    
     },
         
-    new ::(parent, speciesHint, professionHint, personalityHint, levelHint, state, adventurousHint, qualities) {
+    new ::(island, parent, speciesHint, professionHint, personalityHint, levelHint, state, adventurousHint, qualities) {
         @:this = Entity.defaultNew();
         this.initialize();
         if (state != empty)
             this.load(serialized:state)
         else 
-            this.defaultLoad(speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities);
+            this.defaultLoad(island, speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities);
 
         return this;
     },
@@ -155,11 +154,11 @@
                 personality : Personality.database.getRandom(),
                 emotionalState : empty,
                 favoritePlace : Location.Base.database.getRandom(),
-                favoriteItem : Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false && value.tier <= story.tier),
+                favoriteItem : empty,
                 growth : StatSet.new(),
                 qualityDescription : empty,
                 qualitiesHint : empty,
-                faveWeapon : Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0),
+                faveWeapon : empty,
                 adventurous : Number.random() <= 0.5,
                 battleAI : empty,
                 professions : [],
@@ -189,23 +188,10 @@
         );
         
         
-        state.inventory.addGold(amount:(Number.random() * 100)->ceil);
 
 
 
         
-        for(0, 3)::(i) {
-            state.inventory.add(item:
-                Item.new(
-                    base: Item.Base.database.getRandomFiltered(
-                        filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                                                    && value.tier <= story.tier
-                    ),
-                    rngEnchantHint:true, from:this
-                )
-            );
-        }
-
 
         @:resetEffects :: {
             effects = [];
@@ -239,13 +225,13 @@
 
         
         this.interface = {
-            initialize ::{
+            initialize :: {
                 state.battleAI = BattleAI.new(
                     user: this
                 );                
             },
 
-            defaultLoad::(speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities) {
+            defaultLoad::(island, speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities) {
                 if (adventurousHint != empty)
                     state.adventurous = adventurousHint;
                 
@@ -277,6 +263,25 @@
                 for(0, levelHint)::(i) {
                     this.autoLevel();                
                 }
+                if (island != empty)  ::<= {
+                    for(0, 3)::(i) {
+                        state.inventory.add(item:
+                            Item.new(
+                                base: Item.Base.database.getRandomFiltered(
+                                    filter:::(value) <- value.isUnique == false && value.canHaveEnchants
+                                                                && value.tier <= island.tier
+                                ),
+                                rngEnchantHint:true, from:this
+                            )
+                        );
+                    }
+                    state.faveWeapon = Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0 && value.tier <= island.tier)
+                } else 
+                    state.faveWeapon = Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0)
+
+                state.inventory.addGold(amount:(Number.random() * 100)->ceil);
+
+
 
                 /*
                 ::<={

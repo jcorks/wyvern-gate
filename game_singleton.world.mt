@@ -94,6 +94,7 @@
                                         // the sole owner of the island.
                 idPool : 0,
                 story : import(module:'game_singleton.story.mt'),
+                npcs : empty,
                 modData : {}
             }
         );
@@ -191,6 +192,10 @@
                 get :: <- state.story
             },
             
+            npcs : {
+                get ::<- state.npcs
+            },
+            
             stepTime :: {
                 state.turn += 1;
                 if (state.turn > 10) ::<={
@@ -208,6 +213,179 @@
                     state.year += 1;
                 }                
                 
+            },
+            
+            
+            // intialize NPCs if they havent been already
+            initializeNPCs ::{
+                // already loaded from file.
+                if (state.npcs != empty) empty;
+                
+                @:Entity = import(module:'game_class.entity.mt');
+                @:EntityQuality = import(module:'game_class.entityquality.mt');
+                @:Item = import(module:'game_class.item.mt');
+                @:story = import(module:'game_singleton.story.mt');
+                
+                state.npcs = {
+                    faus : ::<= {
+                        @:ent = Entity.new(
+                            speciesHint: 'Rabbit',
+                            professionHint: 'Summoner',
+                            personalityHint: 'Caring',
+                            levelHint: 5,
+                            adventurousHint: true,
+                            qualities : [
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'snout'), trait0Hint:0),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'fur'),   descriptionHint: 6, trait0Hint:10, trait2Hint:3),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'eyes'),  descriptionHint: 3, trait2Hint:6, trait1Hint: 0),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'ears'),  descriptionHint: 1, trait0Hint:2),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'face'),  descriptionHint: 0, trait0Hint:3),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'tail'),  descriptionHint: 0, trait0Hint:0),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'body'),  descriptionHint: 1, trait0Hint:0, trait1Hint:0),            
+                            ]
+                        );
+
+
+
+                        @:fausWeapon = Item.new(
+                            base: Item.Base.database.find(name: 'Morning Star'),
+                            rngEnchantHint: false,
+                            qualityHint: 'Masterwork',
+                            materialHint: 'Mythril',
+                            colorHint: 'gold',
+                            enchantHint: 'Aura: Gold',
+                            forceEnchant: true
+                        );
+                        fausWeapon.maxOut();
+                        
+                        @:fausRobe = Item.new(
+                            base: Item.Base.database.find(name: 'Robe'),
+                            rngEnchantHint: false,
+                            qualityHint: 'Masterwork',
+                            colorHint: 'black',
+                            apparelHint: 'Mythril',
+                            forceEnchant: true,
+                            enchantHint: 'Inlet: Opal'            
+                        );
+                        fausRobe.maxOut();
+
+
+                        @:fausCloak = Item.new(
+                            base: Item.Base.database.find(name: 'Cloak'),
+                            rngEnchantHint: false,
+                            qualityHint: 'Masterwork',
+                            colorHint: 'olive-green',
+                            apparelHint: 'Mythril',
+                            forceEnchant: true
+                        );
+                        fausCloak.maxOut();
+
+
+                        
+                        
+                        ent.equip(item:fausWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+                        ent.equip(item:fausCloak,  slot:Entity.EQUIP_SLOTS.TRINKET, silent:true);
+                        ent.equip(item:fausRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);
+
+                        ent.heal(
+                            amount: 9999,
+                            silent: true
+                        );
+
+                        @:learned = ent.profession.gainSP(amount:20);
+                        foreach(learned)::(index, ability) {
+                            ent.learnAbility(name:ability);
+                        }                                                
+
+
+
+                        ent.name = 'Faus';                    
+                        return ent;
+                    },
+                
+                
+                    sylvia : ::<= {
+                        @:ent = Entity.new(
+                            speciesHint: 'Kobold',
+                            professionHint: 'Alchemist',
+                            personalityHint: 'Inquisitive',
+                            levelHint: story.levelHint-1,
+                            adventurousHint: true
+                        );
+
+                        @:learned = ent.profession.gainSP(amount:20);
+                        foreach(learned)::(index, ability) {
+                            ent.learnAbility(name:ability);
+                        }                                                
+
+                        ent.name = 'Sylvia';
+                        return ent;                    
+                    },
+                    mei : ::<= {
+                        @:ent = Entity.new(
+                            speciesHint: 'Sheep',
+                            professionHint: 'Cleric',
+                            personalityHint: 'Caring',
+                            levelHint: story.levelHint-1,
+                            adventurousHint: true,
+                            qualities : [
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'snout'), trait0Hint:2),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'fur'),   descriptionHint: 0, trait0Hint:8),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'eyes'),  descriptionHint: 0, trait2Hint:0, trait1Hint: 0),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'ears'),  descriptionHint: 2, trait0Hint:2),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'face'),  descriptionHint: 0, trait0Hint:0),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'tail'),  descriptionHint: 0, trait0Hint:0),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'body'),  descriptionHint: 1, trait0Hint:0, trait1Hint:5),            
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'horns'), descriptionHint: 1, trait0Hint:2, trait1Hint:1)
+                            ]
+                        );
+
+
+
+                        @:meiWeapon = Item.new(
+                            base: Item.Base.database.find(name: 'Falchion'),
+                            rngEnchantHint: true,
+                            qualityHint: 'Quality',
+                            materialHint: 'Dragonglass',
+                            colorHint: 'pink',
+                            forceEnchant: true
+                        );
+                        meiWeapon.maxOut();
+                        
+                        @:meiRobe = Item.new(
+                            base: Item.Base.database.find(name: 'Robe'),
+                            rngEnchantHint: true,
+                            qualityHint: 'Masterwork',
+                            colorHint: 'pink',
+                            apparelHint: 'Wool+',
+                            forceEnchant: true
+                        );
+                        meiRobe.maxOut();
+                        
+                        @:meiAcc = Item.new(
+                            base: Item.Base.database.find(name: 'Mei\'s Bow'),
+                            rngEnchantHint: true,
+                            forceEnchant: true
+                        );
+                        
+                        ent.equip(item:meiWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+                        ent.equip(item:meiRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);
+                        ent.equip(item:meiAcc,    slot:Entity.EQUIP_SLOTS.TRINKET, silent:true);
+
+                        ent.heal(
+                            amount: 9999,
+                            silent: true
+                        );
+
+                        @:learned = ent.profession.gainSP(amount:20);
+                        foreach(learned)::(index, ability) {
+                            ent.learnAbility(name:ability);
+                        }                                                
+
+                        ent.name = 'Mei';
+                        return ent;
+                    }     
+                }       
             },
             
             modData : {
