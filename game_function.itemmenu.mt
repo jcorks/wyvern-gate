@@ -202,6 +202,12 @@ return ::(
                         onChoice::(which) {
                             when(which == false) empty;
                             party.inventory.remove(item);
+                            
+                            if (item.name->contains(key:'Wyvern Key of')) ::<= {
+                                @:world = import(module:'game_singleton.world.mt')
+                                world.accoladeEnable(name:'gotRidOfWyvernKey');      
+                            }
+                                                      
                             windowEvent.queueMessage(text:'The ' + item.name + ' was thrown away.');
                             if (windowEvent.canJumpToTag(name:'Item'))
                                 windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);

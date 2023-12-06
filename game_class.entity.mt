@@ -751,7 +751,14 @@
                     }
                     
                     if (state.hp == 0) ::<= {
-                        windowEvent.queueMessage(text: '' + this.name + ' has been knocked out.');                                
+                        if (this.name->contains(key:'Wyvern'))
+                            windowEvent.queueMessage(text: '' + this.name + ' is no longer able to fight.')                               
+                        else
+                            windowEvent.queueMessage(text: '' + this.name + ' has been knocked out.');                                
+
+                        if (!world.party.isMember(entity:this))
+                            world.accoladeIncrement(name:'knockouts');                                        
+
                         this.flags.add(flag:StateFlags.FALLEN);
                         from.flags.add(flag:StateFlags.DEFEATED_ENEMY);
                     }
@@ -904,7 +911,20 @@
             kill ::(silent) {
                 state.hp = 0;
                 if (silent == empty)
-                    windowEvent.queueMessage(text: '' + this.name + ' has died!');                
+                    if (this.name->contains(key:'Wyvern'))
+                        windowEvent.queueMessage(text: '' + this.name + ' has been defeated!')            
+                    else 
+                        windowEvent.queueMessage(text: '' + this.name + ' has died!');                
+
+
+                // basically if anyone dies its a bad time
+                if (world.party.isMember(entity:this))
+                    world.accoladeIncrement(name:'deadPartyMembers')
+                else ::<= {
+                    world.accoladeIncrement(name:'murders');                                        
+                    world.party.karma -= 1000;
+                }
+
                 state.flags.add(flag:StateFlags.DIED);
                 state.isDead = true;                
             },

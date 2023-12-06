@@ -79,6 +79,9 @@ return ::(this, party, location, onDone, overrideChat, skipIntro, onHire) {
                         text: this.name + ' is not currently able to chat.'
                     );                                                        
                     
+
+
+                world.party.karma += 1;
                 when (overrideChat) overrideChat();
                 
                  
@@ -131,7 +134,7 @@ return ::(this, party, location, onDone, overrideChat, skipIntro, onHire) {
                             windowEvent.queueMessage(
                                 text: this.name + ' joins the party!'
                             );     
-                            
+                        world.accoladeIncrement(name:'recruitedCount');                                        
                         if (onHire) onHire();           
 
                     }
@@ -194,6 +197,7 @@ return ::(this, party, location, onDone, overrideChat, skipIntro, onHire) {
                                     windowEvent.queueMessage(
                                         text: 'In exchange for your ' + chosenItem.name + ', ' + this.name + ' gives the party ' + correctA(word:item.name) + '.'
                                     );                                                                                                 
+                                    world.party.karma += 100;
                                     
                                     windowEvent.jumpToTag(name:'Barter', goBeforeTag:true, doResolveNext:true);
                                 }
@@ -303,6 +307,8 @@ return ::(this, party, location, onDone, overrideChat, skipIntro, onHire) {
                                     windowEvent.queueMessage(
                                         text: whom.name + ' steals ' + correctA(word:item.name) + ' from ' + this.name + '.'
                                     );                                                                                                 
+                                    world.accoladeEnable(name:'hasStolen');
+                                    world.party.karma -= 100;
                                     this.inventory.remove(item);
                                     party.inventory.add(item);                                
                                 }

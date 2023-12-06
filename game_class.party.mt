@@ -37,7 +37,8 @@
         @:state = State.new(
             items : {
                 inventory : empty,
-                members : []
+                members : [],
+                karma : 5500
             }
         );
         
@@ -104,6 +105,11 @@
             
             load ::(serialized) {
                 state.load(parent:this, serialized);
+            },
+            
+            karma : {
+                get ::<- state.karma,
+                set ::(value) <- state.karma = value
             }
         }
     }

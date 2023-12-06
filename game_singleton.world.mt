@@ -46,6 +46,95 @@
 }
 
 
+@:ACCOLADE_LIST = {
+
+    // accolades
+
+    
+    // "The true Chosen."
+    acceptedQuest : Boolean, // beat Wyvern of Darkness
+    
+    // "Let's be friends?"
+    wyvernsRevisited : Boolean,
+
+    // "I'd buy that for a dollar! Barely."
+    boughtWorthlessItem : Boolean,
+
+    // "You know, there were some pretty powerful people you didn't have in your party that would have made your quest a lot easier. Good job!"
+    recruitedOPNPC : Boolean, // if FALSE/empty is an accolade
+
+    // "Not-so-thrifty spender!"
+    boughtItemOver4000G : Boolean,
+    
+    // "Where did you find that thing?"
+    soldItemOver4000G : Boolean,
+
+    // "No really, where did you find that thing?"
+    soldWorthlessItem : Boolean,
+
+    
+    // "Lucky, lucky!"
+    wonGamblingGame : Boolean,
+    
+    // "Honestly, the Arena is a little brutal..."
+    wonArenaBet : Boolean,
+    
+    // "My pockets feel lighter..."
+    hasStolen : Boolean,
+    
+    // "Should have kicked them out a while ago."
+    foughtDrunkard : Boolean,
+    
+    // "Property destruction is hard sometimes."
+    hasVandalized : Boolean,
+
+    // "I guess it wasn't that important..."
+    gotRidOfWyvernKey : Boolean,
+
+    // "The traps were kind of fun to setup, to be honest."
+    trapsFallenFor : Number, // if over 5, is an accolade
+
+    // "Two's company but three's a crowd! ...Assuming no one died."
+    recruitedCount : Number, // if over 0, is an accolade 
+    
+    // "Top-notch boxer."
+    knockouts : Number, // if over 40, is an accolade
+    
+    // "You're so nice and not murder-y!"
+    murders : Number, // if equal to 0, is an accolade
+    
+    // "A trustworthy friend."
+    deadPartyMembers : Number, // if 0, is an accolade 
+    
+    // "Tinkerer!"
+    itemImprovements : Number, // if over 5, is an accolade 
+    
+    // "Someone was thirsty I guess."
+    drinksTaken : Number, // if above 15, is an accolade
+    
+    // "Smart fella."
+    intuitionGained : Number, // if above 5, is an accolade
+
+    // "Thrifty spender!"
+    buyCount : Number, // if above 20, is an accolade
+
+    // "Easy money."
+    sellCount : Number, // if above 20, is an accolade
+
+    // "Someone likes Roman numerals."
+    enchantmentsReceived : Number, // if above 5, is an accolade
+    
+    // "Well, that was a waste of time."
+    daysTaken : Number, // if below 10 ingame days, is an accolade
+    
+    // "Finders, keepers!"
+    chestsOpened : Number, // if above 15, is an accolade
+    
+    // "Either you've done research, or you're really adventurous. Awesome job!
+    accoladeCount : Number, // if equal to all accolades, is an accolade
+}
+
+
 @:World = LoadableClass.new(
     name: 'Wyvern.World',
     
@@ -79,6 +168,7 @@
     
         @:state = State.new(
             items : {
+                saveName : empty,
                 // 5 turns per "time"
                 // 14 times per "day"
                 // 100 days per "year"
@@ -95,6 +185,9 @@
                 idPool : 0,
                 story : import(module:'game_singleton.story.mt'),
                 npcs : empty,
+                finished : false,
+                wish : empty,
+                accolades : {},
                 modData : {}
             }
         );
@@ -129,6 +222,7 @@
         }
         
         
+        
         this.interface = {
             TIME : {
                 get ::<- TIME
@@ -143,6 +237,15 @@
                 }
             },
             
+            saveName : {
+                set ::(value) {
+                    state.saveName = value;
+                },
+                
+                get :: {
+                    return state.saveName
+                }
+            },
             
             
             discoverIsland ::(levelHint => Number, tierHint => Number, nameHint) {
@@ -196,6 +299,19 @@
                 get ::<- state.npcs
             },
             
+            setWish ::(wish) {
+                state.wish = wish;
+                state.finished = true;
+            },
+            
+            finished : {
+                get ::<- state.finished
+            },
+            
+            wish : {
+                get ::<- state.wish
+            },
+            
             stepTime :: {
                 state.turn += 1;
                 if (state.turn > 10) ::<={
@@ -206,6 +322,7 @@
                 if (state.time > 13) ::<={
                     state.time = 0;
                     state.day += 1;
+                    this.accoladeIncrement(name:'daysTaken');
                 }
                 
                 if (state.day > 99) ::<={
@@ -213,6 +330,31 @@
                     state.year += 1;
                 }                
                 
+            },
+            
+            accoladeIncrement ::(name) {
+                if (ACCOLADE_LIST[name] != Number) 
+                    error(detail:'The accolade datum ' + name + ' doesnt exist or cant be incremented.');
+                    
+                if (state.accolades[name] == empty)
+                    state.accolades[name] = 1 
+                else 
+                    state.accolades[name] += 1
+            },
+            
+            accoladeCount ::(name) => Number { 
+                return if (state.accolades[name] == empty) 0 else state.accolades[name]
+            },
+            
+            accoladeEnabled ::(name) => Boolean {
+                return if (state.accolades[name] == empty) false else state.accolades[name]
+            },
+            
+            accoladeEnable ::(name) {
+                if (ACCOLADE_LIST[name] != Boolean) 
+                    error(detail:'The accolade datum ' + name + ' doesnt exist or cant be set true.');
+                    
+                state.accolades[name] = true            
             },
             
             
@@ -310,13 +452,60 @@
                             professionHint: 'Alchemist',
                             personalityHint: 'Inquisitive',
                             levelHint: story.levelHint-1,
-                            adventurousHint: true
+                            adventurousHint: true,
+                            qualities : [
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'snout'), trait0Hint:0),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'scales'),   descriptionHint: 0, trait0Hint:5),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'eyes'),  descriptionHint: 3, trait2Hint:0, trait1Hint: 3),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'face'),  descriptionHint: 4, trait0Hint:0, trait1Hint:0),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'tail'),  descriptionHint: 0, trait0Hint:1),
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'body'),  descriptionHint: 1, trait0Hint:0, trait1Hint:2),            
+                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'horns'), descriptionHint: 6, trait0Hint:2, trait1Hint:1)
+                            ]                            
                         );
 
                         @:learned = ent.profession.gainSP(amount:20);
                         foreach(learned)::(index, ability) {
                             ent.learnAbility(name:ability);
                         }                                                
+
+
+                        @:sylvWeapon = Item.new(
+                            base: Item.Base.database.find(name: 'Tome'),
+                            rngEnchantHint: true,
+                            qualityHint: 'Durable',
+                            materialHint: 'Moonstone',
+                            colorHint: 'gold',
+                            forceEnchant: true
+                        );
+                        sylvWeapon.maxOut();
+                        
+                        @:sylvRobe = Item.new(
+                            base: Item.Base.database.find(name: 'Robe'),
+                            rngEnchantHint: true,
+                            qualityHint: 'Sturdy',
+                            colorHint: 'brown',
+                            apparelHint: 'Cloth',
+                            forceEnchant: true
+                        );
+                        sylvRobe.maxOut();
+                        
+                        @:sylvAcc = Item.new(
+                            base: Item.Base.database.find(name: 'Hat'),
+                            rngEnchantHint: true,
+                            qualityHint: 'Sturdy',
+                            colorHint: 'brown',
+                            apparelHint: 'Leather',
+                            forceEnchant: true
+                        );
+                        sylvAcc.maxOut();
+                        
+                        ent.equip(item:sylvWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+                        ent.equip(item:sylvRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);
+                        ent.equip(item:sylvAcc,    slot:Entity.EQUIP_SLOTS.TRINKET, silent:true);
+
+
+
 
                         ent.name = 'Sylvia';
                         return ent;                    
@@ -384,7 +573,60 @@
 
                         ent.name = 'Mei';
                         return ent;
-                    }     
+                    },
+                    
+                    skie : ::<= {
+                        @:ent = Entity.new(
+                            speciesHint:'Drake-kin',
+                            professionHint: 'Runologist',
+                            levelHint: story.levelHint-1,
+                            adventurousHint: true
+                        );
+                        
+                        @:skieWeapon = Item.new(
+                            base: Item.Base.database.find(name: 'Tome'),
+                            rngEnchantHint: true,
+                            qualityHint: 'Legendary',
+                            materialHint: 'Mythril',
+                            colorHint: 'gold',
+                            forceEnchant: true
+                        );
+                        skieWeapon.maxOut();
+                        
+                        @:skieRobe = Item.new(
+                            base: Item.Base.database.find(name: 'Robe'),
+                            rngEnchantHint: true,
+                            qualityHint: 'Legendary',
+                            colorHint: 'silver',
+                            apparelHint: 'Eversilk',
+                            forceEnchant: true
+                        );
+                        skieRobe.maxOut();
+
+                        @:skieCloak = Item.new(
+                            base: Item.Base.database.find(name: 'Cloak'),
+                            rngEnchantHint: false,
+                            qualityHint: 'Sturdy',
+                            colorHint: 'black',
+                            apparelHint: 'Mythril',
+                            forceEnchant: true
+                        );
+                        skieCloak.maxOut();
+
+                        
+                        
+                        ent.equip(item:skieWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+                        ent.equip(item:skieRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);
+                        ent.equip(item:skieCloak,  slot:Entity.EQUIP_SLOTS.TRINKET, silent:true);
+
+                        
+                        @:learned = ent.profession.gainSP(amount:20);
+                        foreach(learned)::(index, ability) {
+                            ent.learnAbility(name:ability);
+                        }                                                
+                        ent.name = 'Skie';
+                        return ent;                    
+                    }
                 }       
             },
             

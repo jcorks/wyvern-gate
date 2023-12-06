@@ -439,7 +439,7 @@ EntityQuality.Base.new(
         appearanceChance : 1,
         descriptions : [
             '$0',
-            '$0 and always moving',
+            '$0 and particularly expressive',
         ],
         
         trait0 : [

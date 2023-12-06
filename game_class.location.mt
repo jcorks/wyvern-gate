@@ -705,7 +705,6 @@ Location.Base.new(data:{
     ],
     
     aggressiveInteractions : [
-        'vandalize',            
     ],
 
 
@@ -788,7 +787,6 @@ Location.Base.new(data:{
     ],
     
     aggressiveInteractions : [
-        'vandalize',            
     ],
 
 
@@ -871,7 +869,6 @@ Location.Base.new(data:{
     ],
     
     aggressiveInteractions : [
-        'vandalize',            
     ],
 
 
@@ -917,9 +914,91 @@ Location.Base.new(data:{
             ATK:  15,
             INT:  10,
             DEF:  10,
-            LUK:  99,
+            LUK:  9,
             SPD:  30,
             DEX:  16
+        ).save());
+        location.ownedBy.heal(amount:9999, silent:true); 
+        location.ownedBy.healAP(amount:9999, silent:true); 
+
+        
+
+
+
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+})
+
+
+Location.Base.new(data:{
+    name: 'Wyvern Throne of Light',
+    rarity: 1,
+    ownVerb : 'owned',
+    category : Location.CATEGORY.RESIDENTIAL,
+    symbol: 'W',
+    onePerLandmark : true,
+    minStructureSize : 1,
+
+    descriptions: [
+        "What seems to be a stone throne",
+    ],
+    interactions : [
+        'talk',
+        'examine'
+    ],
+    
+    aggressiveInteractions : [
+    ],
+
+
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    
+    onFirstInteract ::(location) {
+    },
+    onInteract ::(location) {
+        return true;
+
+    },            
+    
+    onCreate ::(location) {
+        location.name = 'Wyvern Throne';
+        @:Profession = import(module:'game_class.profession.mt');
+        @:Species = import(module:'game_class.species.mt');
+        @:Story = import(module:'game_singleton.story.mt');
+        @:Scene = import(module:'game_class.scene.mt');
+        @:StatSet = import(module:'game_class.statset.mt');
+        location.ownedBy = location.landmark.island.newInhabitant();
+        location.ownedBy.name = 'Wyvern of Light';
+        location.ownedBy.species = Species.database.find(name:'Wyvern of Light');
+        location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Wyvern of Light'));               
+        location.ownedBy.clearAbilities();
+        foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
+            location.ownedBy.learnAbility(name:ability);
+        }
+
+        
+        location.ownedBy.onInteract = ::(party, location, onDone) {
+            if (Story.tier < 4) ::<= {
+                Scene.database.find(name:'scene_wyvernlight0').act(onDone::{}, location, landmark:location.landmark);
+            } else ::<= {
+                // just visiting!
+                Scene.database.find(name:'scene_wyvernlight1').act(onDone::{}, location, landmark:location.landmark);                        
+            }
+        }
+        location.ownedBy.stats.load(serialized:StatSet.new(
+            HP:   1500,
+            AP:   999,
+            ATK:  25,
+            INT:  19,
+            DEF:  15,
+            LUK:  6,
+            SPD:  100,
+            DEX:  20
         ).save());
         location.ownedBy.heal(amount:9999, silent:true); 
         location.ownedBy.healAP(amount:9999, silent:true); 
@@ -1938,6 +2017,7 @@ Location.Base.new(data:{
             @:story = import(module:'game_singleton.story.mt');
             location.ownedBy = empty;     
             world.npcs.mei = empty;
+            world.accoladeEnable(name:'recruitedOPNPC');
         };            
     },
     
@@ -2021,6 +2101,8 @@ Location.Base.new(data:{
             @:world = import(module:'game_singleton.world.mt');                
             location.ownedBy = empty;     
             world.npcs.sylvia = empty;
+            // Nerfed 'em because too common of an appearance. People can recruit if they want without penalty.
+            //world.accoladeEnable(name:'recruitedOPNPC');
         };            
     },
     
@@ -2114,6 +2196,7 @@ Location.Base.new(data:{
             @:world = import(module:'game_singleton.world.mt');                
             world.npcs.faus = empty;            
             location.ownedBy = empty;     
+            world.accoladeEnable(name:'recruitedOPNPC');
         };        
     },
     

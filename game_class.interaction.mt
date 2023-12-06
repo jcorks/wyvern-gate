@@ -112,8 +112,10 @@ Interaction.new(
         displayName : 'Vandalize',
         name : 'vandalize',
         onInteract ::(location, party) {
-            // jumps to the prev menu lock
+            // this is so silly but ill make it do something one day
             windowEvent.queueMessage(text:'You try to vandalize the location, but you do a poor job.');             
+            @:world = import(module:'game_singleton.world.mt')
+            world.accoladeEnable(name:'hasVandalized');
         }
     }
 )
@@ -154,7 +156,8 @@ Interaction.new(
                             text: 'The pressure plate was trapped!'
                         );
                         (import(module:'game_function.trap.mt'))(location, party, whom);
-                                        
+                        @:world = import(module:'game_singleton.world.mt')
+                        world.accoladeIncrement(name:'trapsFallenFor');                                        
                     } else ::<= {
                         windowEvent.queueMessage(
                             text: 'Something clicked elsewhere.'
@@ -323,6 +326,7 @@ Interaction.new(
                 windowEvent.queueMessage(text:'Not enough gold...');
             
                 party.inventory.subtractGold(amount:5);
+                world.accoladeIncrement(name:'drinksTaken');                                        
                 
                 windowEvent.queueMessage(
                     text: random.pickArrayItem(list:
@@ -364,7 +368,7 @@ Interaction.new(
                   
 
                   // gamblist
-                  (chance < 0.8 && story.gamblistInParty == false)::<= {
+                  (chance < 0.8 && world.npcs.skie != empty && !world.npcs.skie.incapacitated() && world.party.isMember(entity:world.npcs.skie))::<= {
 
                   
                   
@@ -372,7 +376,7 @@ Interaction.new(
                         text:'Someone sits next to you...'
                     );   
                     
-                    if (story.gamblistEncountered) ::<= {
+                    if (story.skieEncountered) ::<= {
                         windowEvent.queueMessage(
                             text:'... wait it\'s.. huh.'
                         );                               
@@ -384,7 +388,7 @@ Interaction.new(
 
                               
                     } else ::<= {
-                        story.gamblistEncountered = true;
+                        story.skieEncountered = true;
                         windowEvent.queueMessage(
                             speaker: '???',
                             text:'Hello, stranger.'
@@ -447,7 +451,11 @@ Interaction.new(
                                                 text: 'Ah, well. Perhaps next time. A gamble is a gamble, after all.'                                    
                                             );
                                             party.inventory.remove(item);
+                                            if (item.name->contains(key:'Wyvern Key of'))
+                                                world.accoladeEnable(name:'gotRidOfWyvernKey');      
                                         }
+                                        world.accoladeEnable(name:'wonGamblingGame');
+                                        
                                         windowEvent.queueMessage(
                                             speaker: 'Wandering Gamblist',
                                             text: 'Ah, well done. A gamble is a gamble, after all.'                                    
@@ -466,48 +474,12 @@ Interaction.new(
                                                 when(choice == 2) ::<= {
                                                     @:Species = import(module:'game_class.species.mt');
                                                     @:Entity = import(module:'game_class.entity.mt');
-                                                    @:skie = Entity.new(
-                                                        island: location.landmark.island,
-                                                        speciesHint:'Drake-kin',
-                                                        professionHint: 'Runologist',
-                                                        levelHint: 5,
-                                                        adventurousHint: true
-                                                    );
-                                                    
-                                                    @:skieWeapon = Item.new(
-                                                        base: Item.Base.database.find(name: 'Tome'),
-                                                        rngEnchantHint: true,
-                                                        qualityHint: 'Standard',
-                                                        materialHint: 'Mythril',
-                                                        colorHint: 'Gold',
-                                                        forceEnchant: true
-                                                    );
-                                                    skieWeapon.maxOut();
-                                                    
-                                                    @:skieRobe = Item.new(
-                                                        base: Item.Base.database.find(name: 'Robe'),
-                                                        rngEnchantHint: true,
-                                                        qualityHint: 'Standard',
-                                                        colorHint: 'Gold',
-                                                        apparelHint: 'Eversilk',
-                                                        forceEnchant: true
-                                                    );
-                                                    skieRobe.maxOut();
-                                                    
-                                                    
-                                                    skie.equip(item:skieWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
-                                                    skie.equip(item:skieRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);
 
-                                                    
-                                                    @:learned = skie.profession.gainSP(amount:20);
-                                                    foreach(learned)::(index, ability) {
-                                                        skie.learnAbility(name:ability);
-                                                    }                                                
-                                                    skie.name = 'Skie';
-                                                    party.add(member:skie);
                                                     windowEvent.queueMessage(
-                                                        text: skie.name + ' joins the party!'
+                                                        text: world.npcs.skie.name + ' joins the party!'
                                                     );                
+                                                    party.add(member:world.npcs.skie);
+                                                    world.accoladeEnable(name:'recruitedOPNPC');
                                                 }
                                             
                                             
@@ -525,14 +497,12 @@ Interaction.new(
                                                 ]
                                                 
                                                 @itemQualities = [
-                                                    'Sturdy',
-                                                    'Robust',
-                                                    'Light',
                                                     'Durable',
                                                     'Standard',
                                                     'King\'s',
                                                     'Queen\'s',
-                                                    'Masterwork'
+                                                    'Masterwork',
+                                                    'Legendary'
                                                 ]
                                                 
                                                 for(0, 50)::(i) {
@@ -623,6 +593,7 @@ Interaction.new(
                     );
 
                     @:world = import(module:'game_singleton.world.mt');
+                    world.accoladeEnable(name:'foughtDrunkard');
                     world.battle.start(
                         party,                            
                         allies: party.members,
@@ -830,8 +801,24 @@ Interaction.new(
                     when(item == empty) empty;
 
                     @price = (item.price * ((0.5 / 5)*0.5))->ceil;
-                    if (price < 1)
+                    if (price < 1) ::<= {
+                        windowEvent.queueMessage(
+                            speaker: location.ownedBy.name,
+                            text:'"Technically, this is worthless, but I thought I\'d do you a favor and take it off your hands."'
+                        )
+                        world.accoladeEnable(name:'soldWorthlessItem');
                         price = 1;
+                    }
+                    world.accoladeIncrement(name:'sellCount');
+
+                    if (item.name->contains(key:'Wyvern Key of'))
+                        world.accoladeEnable(name:'gotRidOfWyvernKey');      
+
+
+                    if (price > 4000) ::<= {
+                        world.accoladeEnable(name:'soldItemOver4000');
+                    }
+
                     
                     windowEvent.queueMessage(text: 'Sold the ' + item.name + ' for ' + price + 'G');
 
@@ -932,8 +919,6 @@ Interaction.new(
                 onPick::(item) {
                     when(item == empty) empty;
                     @price = (item.price * (0.5 / 5))->ceil;
-                    if (price < 1)
-                        price = 1;
                     
                     windowEvent.queueChoices(
                         prompt: item.name,
@@ -949,9 +934,23 @@ Interaction.new(
                                     windowEvent.queueMessage(text: 'The party\'s inventory is full.');
                                 }
                                     
+                                world.accoladeIncrement(name:'buyCount');
+                                if (price < 1) ::<= {
+                                    windowEvent.queueMessage(
+                                        speaker: location.ownedBy.name,
+                                        text:'"You really want this? It\'s basically worthless, but I\'ll still sell it to you if you want."'
+                                    )
+                                    world.accoladeEnable(name:'boughtWorthlessItem');
+                                    price = 1;
+                                }
+
                                 
                                 when(!party.inventory.subtractGold(amount:price)) windowEvent.queueMessage(text:'The party cannot afford this.');
                                 location.inventory.remove(item);
+
+                                if (price > 4000) ::<= {
+                                    world.accoladeEnable(name:'boughtItemOver4000');
+                                }
                                 
                                 if (item.base.name == 'Wyvern Key' && world.storyFlags.foundFirstKey == false) ::<= {
                                     location.landmark.island.world.storyFlags.foundFirstKey = true;
@@ -1305,6 +1304,8 @@ Interaction.new(
                 windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
             }
 
+            @:world = import(module:'game_singleton.world.mt')
+            world.accoladeEnable(name:'hasStolen');
 
             if (location.ownedBy != empty && !location.ownedBy.isIncapacitated()) ::<= {
                 windowEvent.queueMessage(
@@ -1624,6 +1625,7 @@ Interaction.new(
                                                 
                                                 // payout
                                                 if ((betOnA && aWon) || (!betOnA && !aWon)) ::<= {
+                                                    world.accoladeEnable(name:'wonArenaBet');
                                                     windowEvent.queueMessage(
                                                         text:'The party won ' + (bet)->floor + 'G.'
                                                     );                                    
@@ -1671,6 +1673,8 @@ Interaction.new(
             when(location.inventory.items->keycount == 0)
                 windowEvent.queueMessage(text:'The chest was empty.');
             
+            
+            world.accoladeIncrement(name:'chestsOpened');            
             windowEvent.queueMessage(text:'The party opened the chest...');
             
             when(location.inventory.items->keycount > world.party.inventory.slotsLeft) ::<= {
@@ -1747,6 +1751,9 @@ Interaction.new(
                     
                     pick3(doAfter::(items) {
                         foreach(items)::(index, item) {
+                            if (item.name->contains(key:'Wyvern Key of'))
+                                world.accoladeEnable(name:'gotRidOfWyvernKey');      
+                            
                             party.inventory.remove(item);
                         }
                         @:story = import(module:'game_singleton.story.mt');
@@ -2005,6 +2012,8 @@ Interaction.new(
                             windowEvent.queueAskBoolean(
                                 prompt: 'Continue?',
                                 onChoice::(which) {
+                                    when(which == false) empty;
+                                    world.accoladeIncrement(name:'enchantmentsReceived');
                                     windowEvent.queueMessage(text:'The stand glows along with the item for a time before returning to normal.');
                                     @:whom = item.equippedBy;
                                     @oldStats;

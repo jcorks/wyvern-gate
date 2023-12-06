@@ -532,7 +532,7 @@
 
 
 
-                                if (hasWeapon && random.try(percentSuccess:25)) ::<= {
+                                if (hasWeapon && random.try(percentSuccess:15)) ::<= {
                                     windowEvent.queueMessage(text:'The party feels their intuition with their weapons grow.');
                                     windowEvent.queueMessage(text:'The party must choose a way to channel this intuition.');
                                     @:fWhich = random.integer(from:0, to:2);
@@ -622,12 +622,13 @@
                                         },
                                         
                                         onChoice::(choice) {
-                                            when(random.try(percentSuccess:30)) ::<= {
+                                            when(random.try(percentSuccess:1)) ::<= {
                                                 windowEvent.queueMessage(text:'The party is close to a revelation, but not quite there.');                                                                            
                                                 finishEnd();
                                             }
                                             windowEvent.queueMessage(text:'The party wields the weapons better through their intuition.');                                                                            
-                                            
+                                            @:world = import(module:'game_singleton.world.mt')
+                                            world.accoladeIncrement(name:'intuitionGained');
                                             @:choice = match(choice) {
                                                 // inward -> AP, INT, DEF
                                                 (1): random.pickArrayItem(list:[1, 4, 3]),

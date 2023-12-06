@@ -94,43 +94,96 @@ canvas.onCommit = ::(lines, renderNow){
     }       
 }
 
-
-
+@enterSaveLocation ::(action) {
+    @:Filesystem = import(module:'Matte.System.Filesystem');
+    @CWD = Filesystem.cwd;
+    Filesystem.cwd = '/usr/share/Wyvern_SAVES';
+    @output;
+    {:::} {
+        output = action(filesystem:Filesystem);
+    } : {
+        onError::(detail) {
+            Filesystem.cwd = CWD;        
+            error(detail);                
+        }
+    }
+    Filesystem.cwd = CWD;        
+    return output;
+}
 instance.mainMenu(
     onSaveState :::(
         slot,
         data
     ) {
-        @:Filesystem = import(module:'Matte.System.Filesystem');
-        @:oldcwd = Filesystem.cwd;
-        Filesystem.cwd = '/usr/share/Wyvern_SAVES';
-        Filesystem.writeString(
-            path: 'saveslot' + slot,
-            string: data
+        enterSaveLocation(
+            action::(filesystem) {
+                filesystem.writeString(
+                    path: 'save_' + slot,
+                    string: data
+                );
+            }
         );
-        Filesystem.cwd = oldcwd;
+    },
+    
+    onListSlots ::{
+        return enterSaveLocation(
+            action::(filesystem) {
+                @:out = {};
+                foreach(filesystem.directoryContents) ::(k, file) {
+                    when(!file.name->contains(key:'save_')) empty; // main or junk
+                    out->push(value:file.name->split(token:'_')[1]);
+                }
 
+                return out;
+            }
+        );
     },
 
     onLoadState :::(
         slot
     ) {
-        @:Filesystem = import(module:'Matte.System.Filesystem');
-        @:oldcwd = Filesystem.cwd;
-        Filesystem.cwd = '/usr/share/Wyvern_SAVES';
         return {:::} {
-            @:out = Filesystem.readString(
-                path: 'saveslot' + slot
+            return enterSaveLocation(
+                action::(filesystem) {
+                    return filesystem.readString(
+                        path: 'save_' + slot
+                    );
+                }
             );
-            Filesystem.cwd = oldcwd;
-            return out;            
         } : {
-            onError:::(detail) {
-                Filesystem.cwd = oldcwd;
+            onError::(detail) {
                 return empty;
             }
         }
     }
+    /*
+    onLoadMain ::{
+        return {:::} {
+            return enterSaveLocation(
+                action::(filesystem) {
+                    return filesystem.readString(
+                        path: 'main'
+                    );
+                }
+            );
+        } : {
+            onError::(detail) {
+                return empty;
+            }
+        }
+    },
+    
+    onSaveMain ::(data) {
+        enterSaveLocation(
+            action::(filesystem) {
+                filesystem.writeString(
+                    path: 'main',
+                    string: data
+                );                
+            }
+        )
+    }
+    */
 
 );
 

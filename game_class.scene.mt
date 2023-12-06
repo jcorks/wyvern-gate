@@ -23,6 +23,7 @@
 @:Item = import(module:'game_class.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:random = import(module:'game_singleton.random.mt');
+@:canvas = import(module:'game_singleton.canvas.mt');
 
 @:SCENE_NAME = 'Wyvern.Scene'
 
@@ -250,6 +251,7 @@ Scene.new(
             ['Kaedjaal', 'If you give me 3 items, I will give you 1 item from my hoard.'],
             ::(location, landmark, doNext) {
                 @:world = import(module:'game_singleton.world.mt');
+                world.accoladeEnable(name:'wyvernsRevisited');
                 windowEvent.queueAskBoolean(
                     prompt:'Trade?',
                     onChoice::(which) {
@@ -524,6 +526,7 @@ Scene.new(
             ['Ziikkaettaal', 'I assure you, my weapons are well worth it.'],
             ::(location, landmark, doNext) {
                 @:world = import(module:'game_singleton.world.mt');
+                world.accoladeEnable(name:'wyvernsRevisited');
                 @:party = world.party;
                 windowEvent.queueAskBoolean(
                     prompt: 'Play dice with Ziikkaettaal?',
@@ -552,6 +555,7 @@ Scene.new(
                                         );
                                     
                                         if (partyWins) ::<= {
+                                            world.accoladeEnable(name:'wonGamblingGame');
                                             windowEvent.queueMessage(
                                                 speaker: 'Ziikkaettaal',
                                                      //Curse       earth    you       -> **** you
@@ -758,6 +762,10 @@ Scene.new(
                 
                 @:instance = import(module:'game_singleton.instance.mt');
                 // cancel and flush current VisitIsland session
+                if (key.islandEntry == empty)
+                    key.addIslandEntry(world);
+
+
                 instance.visitIsland(where:key.islandEntry);
                 if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
                     windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
@@ -786,6 +794,7 @@ Scene.new(
             ['Juhriikaal', 'So there is a bit of risk. But if successful, this could let you reach new heights.'],
             ['Juhriikaal', 'A Chosen is only as good as their tools, or so they say.'],
             ::(location, landmark, doNext) {
+                world.accoladeEnable(name:'wyvernsRevisited');
                 @:world = import(module:'game_singleton.world.mt');
                 windowEvent.queueAskBoolean(
                     prompt:'Enhance item quality?',
@@ -1013,6 +1022,222 @@ Scene.new(
         ]
     }
 )
+
+
+
+Scene.new(
+    data : {
+        name : 'scene_wyvernlight0',
+        script: [
+            ['???', '...'],
+            ['???', '... At last.'],
+            ['???', 'I have waited so long for this moment.'],
+            ['Shaarraeziil', 'Chosen... You come before me, Shaarraeziil, the Wyvern of Light.'],
+            ['Shaarraeziil', '...'],
+            ['Shaarraeziil', 'I beckoned for you, and as such I will grant you your wish as a reward...'],
+            ['Shaarraeziil', '...However.'],
+            ['Shaarraeziil', 'Before that, I must determine if you\'re worthy of my gift. If you\'re truly worthy to bear the name Chosen.'],
+            ['Shaarraeziil', 'I must feel your power for myself. My siblings may have held back, but I will not.'],
+            ['Shaarraeziil', 'Brace yourself for true power!'],
+            ::(location, landmark, doNext) {            
+            
+                @:world = import(module:'game_singleton.world.mt');
+                @:Battle = import(module:'game_class.battle.mt');
+                @:canvas = import(module:'game_singleton.canvas.mt');
+                location.ownedBy.name = 'Shaarraeziil, Wyvern of Light';
+                @:end = ::(result){
+
+                    when(result == Battle.RESULTS.ENEMIES_WIN) ::<= {
+                        windowEvent.queueMessage(
+                            speaker:'Juhriikaal',
+                            text:'Alas. Another one will come, more worthy.'
+                        );
+                        
+                        windowEvent.queueNoDisplay(
+                            onEnter::{
+                                windowEvent.jumpToTag(name:'MainMenu');                                    
+                            }
+                        );
+                    }
+                    
+                
+                    when (!location.ownedBy.isIncapacitated()) ::<= {
+                        world.battle.start(
+                            party: world.party,                            
+                            allies: world.party.members,
+                            enemies: [location.ownedBy],
+                            landmark: landmark,
+                            renderable:{render::{canvas.blackout();}},
+                            onEnd::(result) {
+                                end(result);
+                            }
+                        );                                
+                    } 
+                    
+                    doNext();
+                }
+                
+                @:lightSpawn ::{
+                    @:Entity = import(module:'game_class.entity.mt');
+                    @:sprite = Entity.new(
+                        island: landmark.island,
+                        speciesHint: 'Guiding Light',
+                        professionHint: 'Guiding Light',
+                        levelHint:5
+                    );
+                    sprite.name = 'the Guiding Light';
+                    
+                    for(0, 10)::(i) {
+                        sprite.learnNextAbility();
+                    }          
+                    return sprite;      
+                };
+                
+                world.battle.start(
+                    party:world.party,                            
+                    allies: world.party.members,
+                    enemies: [
+                        lightSpawn(),                        
+                        location.ownedBy,
+                        lightSpawn()
+                    ],
+                    landmark: landmark,
+                    renderable:{render::{canvas.blackout();}},
+                    onEnd::(result) {
+                        end(result);
+                    }
+                );                         
+            },
+            ['Shaarraeziil', 'Truly! It is you! The one I seek!'],
+            ['Shaarraeziil', 'Blessed day! Blessed day indeed.'],
+            ['Shaarraeziil', 'Chosen, you have truly earned your name, and your reward.'],
+            ['Shaarraeziil', '...However.'],
+            ['Shaarraeziil', 'I must be forward with you. The real reason I have called you here. The real reason why you had to fight, fang and claw, to me.'],
+            ['Shaarraeziil', '...We need your help.'],
+            ['Shaarraeziil', 'Another wyvern, the Wyvern of Darkness... They threaten our domain, our way of life, and the mortal realm.'],
+            ['Shaarraeziil', 'Me and my siblings... truthfully we haven\'t the power to stop them. We... are too weak.'],
+            ['Shaarraeziil', 'But you... you have power. Power we cannot best.'],
+            ['Shaarraeziil', 'I have talked to my sibblings prior to your arrival... We all feel that you are capable of defeating the one of Darkness.'],
+            ['Shaarraeziil', '... However.'],
+            ['Shaarraeziil', 'It would be unfair to lay this burden upon you. You have proven yourself beyond all.'],
+            ['Shaarraeziil', 'You may choose to take your wish, no questions asked. You have earned it.'],
+            ['Shaarraeziil', 'But, we humbly request... that you help us defeat the Wyvern of Darkness.'],
+            ['Shaarraeziil', 'I will warn you. The Wyvern of Darkness\' treachery knows no bounds. It will be dangerous in ways you\'ve not seen...'],
+            ['Shaarraeziil', 'Upon your victory, however, your wish will be waiting for you all the same.'],
+            ['Shaarraeziil', 'What say you...? Will you help us...?'],
+        
+
+            ::(location, landmark, doNext) {
+                @:world = import(module:'game_singleton.world.mt');
+                @doQuest = false;
+                @:story = import(module:'game_singleton.story.mt');
+                if (story.tier < 4)
+                    story.tier = 4;
+
+                @:ask = ::{
+                    windowEvent.queueChoices(
+                        prompt:'Do which?',
+                        canCancel: false,
+                        choices: [
+                            'Take wish',
+                            'Accept quest to defeat the Wyvern of Darkness'
+                        ],
+                        onChoice::(choice) {
+                            @doQuest = (choice == 2);
+                            
+                            windowEvent.queueAskBoolean(
+                                prompt: 'Are you sure you want to ' + if(doQuest) 'accept the quest?' else 'take the wish?',
+                                onChoice::(which) {
+                                    when(which == false) ask();
+                                    if (doQuest == false)
+                                        Scene.database.find(name:'scene_wyvernlight0_wish').act(onDone::{}, location, landmark:location.landmark)
+                                    else ::<= {
+                                        @:world = import(module:'game_singleton.world.mt');
+                                        world.accoladeEnable(name:'acceptedQuest');
+                                        Scene.database.find(name:'scene_wyvernlight0_quest').act(onDone::{}, location, landmark:location.landmark);
+                                    }
+                                }
+                            );
+                        }
+                    )          
+                }
+                ask();      
+            }
+        ]
+    }
+) 
+
+Scene.new(
+    data : {
+        name : 'scene_wyvernlight0_wish',
+        script: [
+            ['Shaarraeziil', 'I see.'],
+            ['Shaarraeziil', '...'],
+            ['Shaarraeziil', 'Alas! You have done a great job.'],
+            ['Shaarraeziil', 'Now.. What is your wish?'],
+            ::(location, landmark, doNext) {
+                @:instance = import(module:'game_singleton.instance.mt');
+                @:enter = import(module:'game_function.name.mt');
+                enter(
+                    prompt: 'What is your wish?',
+                    onDone ::(name) {
+                        @:world = import(module:'game_singleton.world.mt')
+                        world.setWish(wish:name);
+                        instance.savestate();
+                        (import(module:'game_function.newrecord.mt'))(wish:name);
+                    }
+                );
+            }
+        ]
+    }
+)
+
+
+Scene.new(
+    data : {
+        name : 'scene_wyvernlight0_quest',
+        script: [
+            ['Shaarraeziil', 'Chosen, from the bottom of my heart, thank you.'],
+            ['Shaarraeziil', '...'],
+            ::(location, landmark, doNext) {
+                windowEvent.queueNoDisplay(
+                    keep : true,
+                    onEnter ::{
+                        doNext()
+                    },
+                    renderable : {
+                        render ::{
+                            canvas.blackout()
+                        }
+                    }
+                );
+            },
+            
+            ['', '(So! Congratulations, you would have gotten to the "good" ending if you continued!)'],
+            ['', '(But, it\'s not ready yet. So let\'s just pretend you did it.)'],
+            ['Shaarraeziil', 'Now.. What is your wish?'],
+
+            ::(location, landmark, doNext) {
+                @:world = import(module:'game_singleton.world.mt')
+                world.accoladeEnable(name:'acceptedQuest');
+                @:instance = import(module:'game_singleton.instance.mt');
+                @:enter = import(module:'game_function.name.mt');
+                enter(
+                    prompt: 'What is your wish?',
+                    onDone ::(name) {
+                        world.setWish(wish:name);
+                        instance.savestate();
+                        (import(module:'game_function.newrecord.mt'))(wish:name);
+                    }
+                );
+            }
+        ]
+    }
+)
+
+
+
+
 
 
 

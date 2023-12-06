@@ -161,6 +161,16 @@ ItemColor.new(
 
 ItemColor.new(
     data : {
+        name : 'brown',
+        equipMod : StatSet.new(
+            DEF: 5,
+            DEX: 3
+        ),
+    }
+)
+
+ItemColor.new(
+    data : {
         name : 'black',
         equipMod : StatSet.new(
             ATK: 7

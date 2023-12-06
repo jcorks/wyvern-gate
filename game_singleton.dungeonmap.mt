@@ -1417,6 +1417,14 @@
                     (LAYOUT_ALPHA): areas = DungeonAlpha(map:map, mapHint),
                     (LAYOUT_BETA): areas = DungeonBeta(map:map, mapHint),
                     (LAYOUT_DELTA): areas = DungeonDelta(map:map, mapHint),
+                    (LAYOUT_GAMMA):
+                        match(random.integer(from:0, to:2)) {
+                          (0): areas = DungeonAlpha(map:map, mapHint),
+                          (1): areas = DungeonBeta(map:map, mapHint),
+                          (2): areas = DungeonDelta(map:map, mapHint)
+                        },
+                        
+                        
                     default:
                         areas = DungeonAlpha(map:map, mapHint)
                 }

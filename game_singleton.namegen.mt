@@ -141,6 +141,8 @@
         ttaal           ice / cold / snow
         kaal            thunder / lighting
         juhriil         claw / talon
+        rraeziil        horn
+        shaal           light        
         shiikohl        power / influence / strength
         
         

@@ -107,6 +107,7 @@ return ::(user, item, inBattle) {
                                             windowEvent.queueMessage(
                                                 text: 'The improvement was successful!'
                                             );                                              
+                                            world.accoladeIncrement(name:'itemImprovements');                                        
                                             
                                             @:oldStats = item.equipMod;
                                             @:newStats = StatSet.new();

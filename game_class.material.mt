@@ -118,7 +118,7 @@ Material.new(
         rarity : 30,
         tier : 1,
         statMod : StatSet.new(
-            DEF: 10,
+            DEF: 5,
             ATK: 10,
             INT: 30,
             SPD: 5

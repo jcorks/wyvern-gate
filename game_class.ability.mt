@@ -837,7 +837,7 @@ Ability.new(
                 windowEvent.queueMessage(
                     text: targets[0].name + ' shines brightly!'
                 );                                  
-                targets[0].addEffect(from:user, name: 'Greater Sol Attunement', durationTurns: 8);
+                targets[0].addEffect(from:user, name: 'Greater Sol Attunement', durationTurns: 3);
 
             } else 
                 targets[0].addEffect(from:user, name: 'Sol Attunement', durationTurns: 3);

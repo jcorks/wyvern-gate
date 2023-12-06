@@ -66,6 +66,7 @@ import(module:'game_class.location.mt');
 @:JSON = import(module:'Matte.Core.JSON');
 @:VERSION = '0.1.4b';
 @world = import(module:'game_singleton.world.mt');
+import(module:'game_function.newrecord.mt');
 world.initializeNPCs();
 
 return class(
@@ -94,23 +95,8 @@ return class(
                     match(choice-1) {
                       // save 
                       (0)::<= {
-                        windowEvent.queueChoices(
-                            prompt:'Save which slot?',
-                            choices: [
-                                'Slot 1',
-                                'Slot 2',
-                                'Slot 3',
-                            ],
-                            canCancel : true,
-                            onChoice::(choice) {
-                                when(choice == 0) empty;
-                                
-                                
-                                onSaveState(slot:choice, data:JSON.encode(object:this.save()));        
-                                windowEvent.queueMessage(text:'Saved successfully to slot ' + choice);
-                            }
-                        );
-                        
+                        this.savestate();
+                        windowEvent.queueMessage(text:'Saved successfully to slot ' + choice);                        
                       },
                       // quit
                       (1)::<= {
@@ -147,6 +133,7 @@ return class(
             mainMenu ::(
                 onSaveState => Function, // for saving,
                 onLoadState => Function,
+                onListSlots => Function
             ) {
                 this.onSaveState = onSaveState;
                 this.onLoadState = onLoadState;                
@@ -171,20 +158,18 @@ return class(
                         match(choice-1) {
                           // Load 
                           (0)::<= {
-                            @:choice = windowEvent.queueChoices(
-                                choices: [
-                                    'Slot 1',
-                                    'Slot 2',
-                                    'Slot 3',
-                                ],
+                            @:choices = onListSlots();
+                            when (choices->size == 0) ::<= {
+                                windowEvent.queueMessage(text: 'No save files were found.');
+                            }
+                            windowEvent.queueChoices(
+                                choices,
+                                prompt: 'Load which save?',
                                 canCancel: true,
                                 onChoice::(choice) {
                                     when(choice == 0) empty;
-                                    @:data = onLoadState(slot:choice);
-
-                                    when(data == empty)
-                                        windowEvent.queueMessage(text:'There is no data in this slot');
-                                        
+                                    @:data = onLoadState(slot:choices[choice-1]);
+                                                                            
                                     this.load(serialized:JSON.decode(string:data));
                                     this.startResume();
                                 
@@ -195,15 +180,44 @@ return class(
                           (1)::<= {
                             canvas.clear();
                             canvas.blackout();
-                            @:message = 'Loading...';
-                            canvas.movePen(
-                                x: canvas.width/2 - message->length/2,
-                                y: canvas.height/2
-                            );
-                            canvas.drawText(text:message);
-                            canvas.commit(renderNow:true);
-                            this.startNew();
-                            //this.startInstance();
+
+                            @:enterName = import(module:'game_function.name.mt');
+
+                            @:startNewWorld = ::(name){
+                                world.saveName = name;                        
+                                canvas.clear();
+                                canvas.blackout();
+                                @:message = 'Loading...';
+                                canvas.movePen(
+                                    x: canvas.width/2 - message->length/2,
+                                    y: canvas.height/2
+                                );
+                                canvas.drawText(text:message);
+                                canvas.commit(renderNow:true);
+                                this.startNew();
+                                onSaveState(slot:world.saveName, data:JSON.encode(object:this.save()));        
+                                //this.startInstance();                            
+                            }
+
+                           enterName(
+                                prompt: 'Enter a file name.',
+                                onDone ::(name){
+                                    @:currentFiles = onListSlots();
+
+                                    when (currentFiles->findIndex(value:name) != -1) ::<= {
+                                        windowEvent.queueMessage(text:'There\'s already a file named ' + name);
+                                        windowEvent.queueAskBoolean(
+                                            prompt: 'Overwrite ' + name + '?',
+                                            onChoice ::(which) {
+                                                when(!which) empty;
+                                                startNewWorld(name);
+                                            }
+                                        );
+                                    }
+                                
+                                    startNewWorld(name);
+                                }
+                            )
                           },
                           
                           (2)::<= {
@@ -217,6 +231,11 @@ return class(
             startResume ::{
                 island = world.island;
                 party = world.party;
+                
+                when (world.finished)
+                    (import(module:'game_function.newrecord.mt'))(wish:world.wish);
+                    
+                    
                 this.visitIsland(restorePos:true);            
             },
         
@@ -257,12 +276,13 @@ return class(
                 // debug
                     //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
                     //).new(from:island.newInhabitant(),rngEnchantHint:true));
-                    /*
+                    
                     @:story = import(module:'game_singleton.story.mt');
                     story.foundFireKey = true;
                     story.foundIceKey = true;
                     story.foundThunderKey = true;
-                    story.tier = 4;
+                    story.foundLightKey = true;
+                    story.tier = 3;
                     
                     party.inventory.addGold(amount:20000);
                     
@@ -273,13 +293,15 @@ return class(
                     ), from:island.newInhabitant()));
                     party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Thunder'
                     ), from:island.newInhabitant()));
+                    party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Light'
+                    ), from:island.newInhabitant()));
 
                     @:story = import(module:'game_singleton.story.mt');
                     
 
                     
 
-                    
+                    party.inventory.maxItems = 50
                     for(0, 20) ::(i) {
                         party.inventory.add(
                             item:Item.new(
@@ -292,7 +314,7 @@ return class(
                         )
                     };
                     
-                    */
+                    
                     
 
                 for(0, 1)::(i) {
@@ -317,12 +339,12 @@ return class(
                 ));
 
                     
-                    /*
+                    
                     @:sword = Item.new(
                         base: Item.Base.database.find(name:'Glaive'),
                         from:p0,
                         materialHint: 'Ray',
-                        qualityHint: 'God\'s',
+                        qualityHint: 'Null',
                         rngEnchantHint: false
                     );
 
@@ -330,13 +352,13 @@ return class(
                         base:Item.Base.database.find(name:'Tome'),
                         from:p0,
                         materialHint: 'Ray',
-                        qualityHint: 'God\'s',
+                        qualityHint: 'Null',
                         rngEnchantHint: false,
                         abilityHint: 'Cure'
                     );
                     party.inventory.add(item:sword);
                     party.inventory.add(item:tome);
-                    */
+                    
 
 
 
@@ -539,6 +561,10 @@ return class(
             
             currentIsland : {
                 get::<-island
+            },
+            
+            savestate ::{
+                onSaveState(slot:world.saveName, data:JSON.encode(object:this.save()));                    
             },
 
             save ::{    

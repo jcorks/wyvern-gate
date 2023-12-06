@@ -3,7 +3,7 @@
 
 
 return ::(
-    onDone,
+    onDone => Function,
     prompt => String,
     canCancel
 ) {
@@ -50,7 +50,7 @@ return ::(
                     pinch = prompt->length;
                     
                 @:centerX = canvas.width / 2;
-                @:centerY = canvas.height / 2;
+                @:centerY = canvas.height / 3;
                 @:height = 5;
                 @:width = 4 + 1 + pinch;
                 
@@ -73,7 +73,7 @@ return ::(
             windowEvent.queueChoices(
                 choices: select,
                 prompt: "",
-                leftWeight: 1,
+                leftWeight: 0.5,
                 topWeight: 1,
                 canCancel: false,
                 onChoice ::(choice) {
