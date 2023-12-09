@@ -15,7 +15,6 @@ return ::(terminal, arg, onDone) {
         @canvasChanged = false;
 
         @:rerender = ::{
-            windowEvent.commitInput(input:lastInput);
             if (canvasChanged) ::<= {
                 @:lines = currentCanvas;
                 foreach(lines)::(index, line) {
@@ -65,21 +64,44 @@ return ::(terminal, arg, onDone) {
 
         @lastInput;
         Shell.onProgramCycle = ::{
+            windowEvent.commitInput(input:lastInput);
             rerender();
-
         }
+
+        @:saveAsset = Topaz.Resources.createAsset(name:'WYVERN_SAVE', type:Topaz.Asset.Type.Data);
 
         instance.mainMenu(
             onSaveState :::(
                 slot,
                 data
             ) {
+                saveAsset.setFromString(string:data);
+                @:outputPath =  'WYVERNSAVE_' + slot;
+                if (Topaz.Resources.writeAsset(
+                    asset:saveAsset,
+                    fileType: 'text',
+                    outputPath
+                ) == 0) error(detail:outputPath + ' could not be written!');
             },
+
+            onListSlots ::{
+                @:output = [];
+                @:path = Topaz.Filesystem.getPath(node:Topaz.Filesystem.DefaultNode.Topaz);
+                foreach(path.getChildren()) ::(k, child) {
+                    if (child.getName()->contains(key:'WYVERNSAVE_'))
+                        output->push(value:child.getName()->split(token:'_')[1]);
+                }
+                return output;
+            },
+            
 
             onLoadState :::(
                 slot
             ) {
-
+                @:asset = Topaz.Resources.createDataAssetFromPath(path:'WYVERNSAVE_' + slot, name:slot);
+                @:data = asset.getAsString();
+                Topaz.Resources.removeAsset(asset);
+                return data;
             }
 
         ); 
