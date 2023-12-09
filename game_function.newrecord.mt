@@ -36,19 +36,19 @@
     {
         message: 'You know, there were some pretty powerful people you didn\'t have in your party that would have made your quest a lot easier. Good job!',
         info: 'Didn\'t recruit an over-powered party member.',
-        condition ::<- world.accoladeEnabled(name:'recruitedOPNPC')
+        condition ::<- world.accoladeEnabled(name:'recruitedOPNPC') == false
     },
     
     {
         message: "Not-so-thrifty spender!",
-        info: 'Bought an item worth over 4000G.',
-        condition::<- world.accoladeEnabled(name:'boughtItemOver4000G')
+        info: 'Bought an item worth over 2000G.',
+        condition::<- world.accoladeEnabled(name:'boughtItemOver2000G')
     },
     
     {
         message: 'Where did you find that thing?',
-        info: 'Sold an item worth over 4000G.',
-        condition::<- world.accoladeEnabled(name:'soldItemOver4000')
+        info: 'Sold an item worth over 500G.',
+        condition::<- world.accoladeEnabled(name:'soldItemOver500')
     },
     
     {

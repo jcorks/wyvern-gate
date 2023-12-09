@@ -1018,7 +1018,7 @@ Species.new(data:{
     
     special : true,
     passives : [
-        'Shock'
+        'Shimmering'
     ]
 })
 

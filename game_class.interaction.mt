@@ -383,7 +383,7 @@ Interaction.new(
 
                         windowEvent.queueMessage(
                             speaker: 'Wandering Gamblist',
-                            text:'Hello again, stranger.'
+                            text:'"Hello again, stranger."'
                         );                               
 
                               
@@ -391,7 +391,7 @@ Interaction.new(
                         story.skieEncountered = true;
                         windowEvent.queueMessage(
                             speaker: '???',
-                            text:'Hello, stranger.'
+                            text:'"Hello, stranger."'
                         );                               
 
                     }
@@ -399,12 +399,12 @@ Interaction.new(
 
                     windowEvent.queueMessage(
                         speaker: 'Wandering Gamblist',
-                        text:'May I interest you in some... Entertainment? All it costs is an item of yours. Any will do.'
+                        text:'"May I interest you in some... Entertainment? All it costs is an item of yours. Any will do."'
                     );                               
 
                     windowEvent.queueMessage(
                         speaker: 'Wandering Gamblist',
-                        text:'If you win, you get your item back and one of mine. If I win, well...'
+                        text:'"If you win, you get your item back and one of mine. If I win, well..."'
                     );                            
 
 
@@ -414,7 +414,7 @@ Interaction.new(
                             when(false) ::<= {
                                 windowEvent.queueMessage(
                                     speaker: 'Wandering Gamblist',
-                                    text:'Suit yourself. Perhaps another time.'
+                                    text:'"Suit yourself. Perhaps another time."'
                                 );                               
                             }       
 
@@ -431,7 +431,7 @@ Interaction.new(
                                     when(item == empty) ::<= {
                                         windowEvent.queueMessage(
                                             speaker: 'Wandering Gamblist',
-                                            text:'Suit yourself. Perhaps another time.'
+                                            text:'"Suit yourself. Perhaps another time."'
                                         );
                                         windowEvent.jumpToTag(name:'pickItem', doResolveNext: true, goBeforeTag: true);
                                                                                                           
@@ -439,7 +439,7 @@ Interaction.new(
                                 
                                     windowEvent.queueMessage(
                                         speaker: 'Wandering Gamblist',
-                                        text: 'Excellent. Now, we play.'                                    
+                                        text: '"Excellent. Now, we play."'                                    
                                     );
                                     windowEvent.jumpToTag(name:'pickItem', doResolveNext: true, goBeforeTag: true);
                                     
@@ -448,7 +448,7 @@ Interaction.new(
                                         when(!partyWins) ::<= {
                                             windowEvent.queueMessage(
                                                 speaker: 'Wandering Gamblist',
-                                                text: 'Ah, well. Perhaps next time. A gamble is a gamble, after all.'                                    
+                                                text: '"Ah, well. Perhaps next time. A gamble is a gamble, after all."'                                    
                                             );
                                             party.inventory.remove(item);
                                             if (item.name->contains(key:'Wyvern Key of'))
@@ -458,12 +458,12 @@ Interaction.new(
                                         
                                         windowEvent.queueMessage(
                                             speaker: 'Wandering Gamblist',
-                                            text: 'Ah, well done. A gamble is a gamble, after all.'                                    
+                                            text: '"Ah, well done. A gamble is a gamble, after all."'                                    
                                         );
                                         
                                         windowEvent.queueMessage(
                                             speaker: 'Wandering Gamblist',
-                                            text: 'Alternatively, I can offer my services...'                                    
+                                            text: '"Alternatively, I can offer my services..."'                                    
                                         );
                                         
                                         
@@ -553,7 +553,7 @@ Interaction.new(
 
                                                         windowEvent.queueMessage(
                                                             speaker: 'Wandering Gamblist',
-                                                            text: 'Until next time...'                                    
+                                                            text: '"Until next time..."'                                    
                                                         );
                                                         windowEvent.jumpToTag(name:'pickItem', doResolveNext: true, goBeforeTag: true);
                                                     }
@@ -1031,15 +1031,7 @@ Interaction.new(
                     canCancel: true,
                     onChoice::(choice) {
                         @:ore = items[choice-1];
-                        @:toMake = Item.Base.database.getAll()->filter(
-                            by:::(value) <- (
-                                value.isUnique == false &&
-                                smith.level >= value.levelMinimum &&
-                                value.hasAttribute(attribute:Item.ATTRIBUTE.METAL)
-                            )
-                        );
 
-                        @:outputBase = random.pickArrayItem(list:toMake);
                         when(windowEvent.queueAskBoolean(
                             prompt:'Smith with ' + ore.base.name + '?',
                             onChoice::(which) {
@@ -1050,28 +1042,36 @@ Interaction.new(
                         if (charge)
                             party.inventory.subtractGold(amount:300);                            
                         
-        
-                        @:output = Item.new(
-                            base:outputBase,
-                            materialHint: ore.base.name->split(token:' ')[0],
-                            from: smith
-                        );
-                        
-                        windowEvent.queueMessage(
-                            speaker: smith.name,
-                            text: 'No problem!'
-                        );
-                        
-                        windowEvent.queueMessage(
-                            text:smith.name + ' forged a ' + output.name
-                        );
-                        
-                        windowEvent.queueNoDisplay(
-                            onEnter ::{
-                                party.inventory.remove(item:ore);
-                                party.inventory.add(item:output);                                                                                                        
+                        @:canMake = smith.getCanMake();
+                        windowEvent.queueChoices(
+                            prompt:smith.name + ' - "Here\'s what I can make:"',
+                            choices: canMake,
+                            canCancel: true,
+                            onChoice::(choice) {
+                                when(choice == 0) empty;
+                                @:output = Item.new(
+                                    base:Item.Base.database.find(name:canMake[choice-1]),
+                                    materialHint: ore.base.name->split(token:' ')[0],
+                                    from: smith
+                                );
+                                
+                                windowEvent.queueMessage(
+                                    speaker: smith.name,
+                                    text: 'No problem!'
+                                );
+                                
+                                windowEvent.queueMessage(
+                                    text:smith.name + ' forged a ' + output.name
+                                );
+                                
+                                windowEvent.queueNoDisplay(
+                                    onEnter ::{
+                                        party.inventory.remove(item:ore);
+                                        party.inventory.add(item:output);                                                                                                        
+                                    }
+                                );                            
                             }
-                        );
+                        )
                     }
                 );         
             }
@@ -1483,9 +1483,9 @@ Interaction.new(
         
             @:Entity = import(module:'game_class.entity.mt');
             @:count = 3;
-            @:teamAname = 'The ' + Material.database.getRandom().name + ' ' + getAWeapon().name + 's';
+            @:teamAname = 'The ' + Material.database.getRandom().name + ' ' + getAWeapon().base.name + 's';
             @:teamA = [];
-            @:teamBname = 'The ' + Material.database.getRandom().name + ' ' + getAWeapon().name + 's';
+            @:teamBname = 'The ' + Material.database.getRandom().name + ' ' + getAWeapon().base.name + 's';
             @:teamB = [];
 
             for(0, count)::(i) {
@@ -1931,7 +1931,7 @@ Interaction.new(
                             windowEvent.queueMessage(text: whom.name + ' is met with a curse.');
 
                             @:oldStats = StatSet.new();
-                            oldStats.load(serialized:whom.stats.save()());
+                            oldStats.load(serialized:whom.stats.save());
                             @:newState = {...whom.stats.save()};
                             @:stat = random.pickArrayItem(list:statChoices);
                             newState[stat] -= 2;

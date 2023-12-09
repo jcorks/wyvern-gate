@@ -37,7 +37,7 @@
 
     @:Item = import(module:'game_class.item.mt');
 
-    if (random.try(percentSuccess:30)) ::<= {
+    if (random.try(percentSuccess:45)) ::<= {
         windowEvent.queueMessage(text: 'What\'s this? They dropped something during the fight...');
 
         @:lootTable = [
@@ -532,7 +532,7 @@
 
 
 
-                                if (hasWeapon && random.try(percentSuccess:15)) ::<= {
+                                if (hasWeapon && random.try(percentSuccess:25)) ::<= {
                                     windowEvent.queueMessage(text:'The party feels their intuition with their weapons grow.');
                                     windowEvent.queueMessage(text:'The party must choose a way to channel this intuition.');
                                     @:fWhich = random.integer(from:0, to:2);
@@ -641,8 +641,11 @@
 
                                             foreach(allies_)::(index, ally) {   
                                                 @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
-                                                when (wep.name == 'None' || !wep.canGainIntuition()) empty;
+                                                when (wep.name == 'None') empty;
 
+                                                when (!wep.canGainIntuition())
+                                                    windowEvent.queueMessage(text:ally.name + ' has already reached peak intuition with their weapon.');
+                                                ally.recalculateStats();
                                                 @:oldAllyStats = StatSet.new();
                                                 oldAllyStats.load(serialized:ally.stats.save());
                                                 @:stats = wep.stats;                             

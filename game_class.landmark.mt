@@ -27,6 +27,7 @@
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:Map = import(module:'game_class.map.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 
 
 
@@ -53,6 +54,8 @@
             parent.landmark.island
             // loc  map   landm   map   island
         ;
+        @:Island = import(module:'game_class.island.mt');
+        
         @:this = Landmark.defaultNew();
         this.initialize(island);
         if (state != empty) 
@@ -219,11 +222,43 @@
                 return this;
             },
 
-            save ::<- state.save(),
+            save :: {
+                when (state.base.canSave)
+                    state.save();
+                
+                return State.new(
+                    items: {
+                        x : state.x,
+                        y : state.y,
+                        floorHint : state.floor,
+                        base : state.base,
+                        isSparse : true
+                    }
+                ).save()
+            },
             load ::(serialized) { 
-                state.load(parent:this, serialized)
-                dungeonLogic = DungeonController.new(map:state.map, island:island_, landmark:this);
-
+                
+                if (serialized.isSparse) ::<= {
+                    @:sparse = State.new(
+                        items: {
+                            x : state.x,
+                            y : state.y,
+                            floorHint : state.floor,
+                            base : state.base,
+                            isSparse : true
+                        }
+                    );
+                    sparse.load(parent:this, serialized);
+                    this.defaultLoad(
+                        base: sparse.base,
+                        x: sparse.x,
+                        y: sparse.y,
+                        floorHint: sparse.floorHint
+                    )   
+                } else ::<= {                
+                    state.load(parent:this, serialized)
+                    dungeonLogic = DungeonController.new(map:state.map, island:island_, landmark:this);
+                }
             },
 
             worldID : {
@@ -284,6 +319,9 @@
             },
 
             step :: {
+
+                world.stepTime(isStep:true); 
+                this.map.title = this.name + ' - ' + world.timeString + '          ';
                 when(!state.base.dungeonMap) empty;
                 dungeonLogic.step();
             },
@@ -475,6 +513,7 @@
                     },
                     renderable:this.map,
                     onMove ::(choice) {
+                    
                         // move by one unit in that direction
                         // or ON it if its within one unit.
                         this.map.movePointerAdjacent(
@@ -555,13 +594,15 @@ Landmark.Base = class(
                     maxLocations : Number,
                     possibleLocations : Object,
                     requiredLocations : Object,
+                    canSave : Boolean,
                     peaceful: Boolean,
                     dungeonMap: Boolean,
                     dungeonForceEntrance : Boolean,
                     mapHint : Object,
                     onCreate : Function,
                     onVisit : Function,
-                    guarded : Boolean
+                    guarded : Boolean,
+                    pointOfNoReturn : Boolean
                 }
             );
             return {
@@ -588,6 +629,8 @@ Landmark.Base.new(
         dungeonMap : false,
         dungeonForceEntrance: false,
         guarded : true,
+        canSave : true,
+        pointOfNoReturn : false,
         possibleLocations : [
             {name:'home', rarity: 1},
             {name:'Tavern', rarity: 3},
@@ -625,6 +668,8 @@ Landmark.Base.new(
         peaceful : true,
         guarded : true,
         dungeonMap : false,
+        canSave : true,
+        pointOfNoReturn : false,
         dungeonForceEntrance: false,
         possibleLocations : [
             {name:'home', rarity: 1},
@@ -669,6 +714,8 @@ Landmark.Base.new(
         peaceful : true,
         guarded : false,
         dungeonMap : true,
+        canSave : true,
+        pointOfNoReturn : false,
         dungeonForceEntrance: true,
         possibleLocations : [
             {name:'ore vein', rarity: 1},
@@ -706,6 +753,8 @@ Landmark.Base.new(
         peaceful : true,
         guarded : false,
         dungeonMap : true,
+        canSave : true,
+        pointOfNoReturn : false,
         dungeonForceEntrance: true,
         possibleLocations : [
 
@@ -739,6 +788,8 @@ Landmark.Base.new(
         peaceful : true,
         guarded : false,
         dungeonMap : true,
+        canSave : true,
+        pointOfNoReturn : false,
         dungeonForceEntrance: true,
         possibleLocations : [                    
         ],
@@ -766,6 +817,8 @@ Landmark.Base.new(
         peaceful: false,
         guarded : false,
         dungeonMap : true,
+        canSave : false,
+        pointOfNoReturn : true,
         dungeonForceEntrance: false,
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
@@ -795,7 +848,12 @@ Landmark.Base.new(
         },
         onCreate ::(landmark, island){
         },
-        onVisit ::(landmark, island) {}
+        onVisit ::(landmark, island) {
+            if (landmark.floor == 0)
+                windowEvent.queueMessage(
+                    text:"This place seems to shift before you..."
+                );
+        }
         
     }
 )
@@ -812,6 +870,8 @@ Landmark.Base.new(
         peaceful: false,
         guarded : false,
         dungeonMap : true,
+        canSave : false,
+        pointOfNoReturn : true,
         dungeonForceEntrance: false,
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
@@ -854,6 +914,8 @@ Landmark.Base.new(
         peaceful: false,
         guarded : false,
         dungeonMap : true,
+        canSave : false,
+        pointOfNoReturn : true,
         dungeonForceEntrance: false,
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
@@ -899,6 +961,8 @@ Landmark.Base.new(
         peaceful: false,
         guarded : false,
         dungeonMap : true,
+        canSave : false,
+        pointOfNoReturn : true,
         dungeonForceEntrance: false,
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
@@ -944,6 +1008,8 @@ Landmark.Base.new(
         peaceful: true,
         guarded : false,
         dungeonMap : true,
+        canSave : false,
+        pointOfNoReturn : false,
         dungeonForceEntrance: false,
         possibleLocations : [
             {name: 'Small Chest', rarity:3},
@@ -979,6 +1045,8 @@ Landmark.Base.new(
         guarded : false,
         peaceful: true,
         dungeonMap : true,
+        canSave : false,
+        pointOfNoReturn : false,
         dungeonForceEntrance: false,
         possibleLocations : [
             {name: 'Small Chest', rarity:5},
@@ -1017,6 +1085,8 @@ Landmark.Base.new(
         guarded : false,
         peaceful: true,
         dungeonMap : true,
+        canSave : true,
+        pointOfNoReturn : false,
         dungeonForceEntrance: false,
         possibleLocations : [
         ],
@@ -1050,6 +1120,8 @@ Landmark.Base.new(
         guarded : false,
         peaceful: true,
         dungeonMap : true,
+        canSave : true,
+        pointOfNoReturn : false,
         dungeonForceEntrance: false,
         possibleLocations : [
         ],
@@ -1083,7 +1155,9 @@ Landmark.Base.new(
         guarded : false,
         peaceful: true,
         
+        canSave : true,
         dungeonMap : true,
+        pointOfNoReturn : false,
         dungeonForceEntrance: false,
         possibleLocations : [
         ],
@@ -1118,7 +1192,9 @@ Landmark.Base.new(
         guarded : false,
         peaceful: true,
         
+        canSave : true,
         dungeonMap : true,
+        pointOfNoReturn : false,
         dungeonForceEntrance: false,
         possibleLocations : [
         ],
@@ -1153,6 +1229,8 @@ Landmark.Base.new(
         isUnique : false,
         dungeonMap : false,
         guarded : true,
+        canSave : true,
+        pointOfNoReturn : false,
         dungeonForceEntrance: true,
         possibleLocations : [
             {name:'home', rarity:5},
@@ -1187,6 +1265,8 @@ Landmark.Base.new(
         maxLocations : 7,
         isUnique : false,
         dungeonMap : false,
+        canSave : true,
+        pointOfNoReturn : false,
         dungeonForceEntrance: false,
         guarded : false,
         possibleLocations : [
@@ -1216,6 +1296,8 @@ Landmark.Base.new(
         peaceful: true,                
         isUnique : false,
         dungeonMap : false,
+        canSave : true,
+        pointOfNoReturn : false,
         dungeonForceEntrance: false,
         minLocations : 5,
         maxLocations : 10,
@@ -1261,10 +1343,12 @@ Landmark.Base.new(
         peaceful: true,
         isUnique : false,
         dungeonMap : true,
+        pointOfNoReturn : false,
         dungeonForceEntrance: true,
         minLocations : 3,
         maxLocations : 5,
         guarded : false,
+        canSave : true,
         possibleLocations : [
             {name: 'Small Chest', rarity:1},
         ],
@@ -1294,10 +1378,12 @@ Landmark.Base.new(
         peaceful: true,
         isUnique : false,
         dungeonMap : true,
+        pointOfNoReturn : false,
         dungeonForceEntrance: true,
         minLocations : 0,
         maxLocations : 0,
         guarded : false,
+        canSave : true,
         possibleLocations : [],
         requiredLocations : [],
         mapHint: {},
@@ -1321,6 +1407,8 @@ Landmark.Base.new(
         minLocations : 0,
         maxLocations : 0,
         guarded : false,
+        canSave : true,
+        pointOfNoReturn : false,
         possibleLocations : [],
         requiredLocations : [],
         mapHint: {},
@@ -1338,10 +1426,12 @@ Landmark.Base.new(
         peaceful: false,
         isUnique : false,
         dungeonMap : true,
+        canSave : true,
         dungeonForceEntrance: true,
         guarded : false,
         minLocations : 0,
         maxLocations : 0,
+        pointOfNoReturn : false,
         possibleLocations : [],
         requiredLocations : [],
         mapHint: {},              

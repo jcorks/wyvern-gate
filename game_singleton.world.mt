@@ -64,10 +64,10 @@
     recruitedOPNPC : Boolean, // if FALSE/empty is an accolade
 
     // "Not-so-thrifty spender!"
-    boughtItemOver4000G : Boolean,
+    boughtItemOver2000G : Boolean,
     
     // "Where did you find that thing?"
-    soldItemOver4000G : Boolean,
+    soldItemOver500G : Boolean,
 
     // "No really, where did you find that thing?"
     soldWorthlessItem : Boolean,
@@ -169,9 +169,11 @@
         @:state = State.new(
             items : {
                 saveName : empty,
-                // 5 turns per "time"
+                // 10 steps per turn
+                // 10 turns per "time"
                 // 14 times per "day"
                 // 100 days per "year"
+                step : 0,
                 turn : 0,
                 time : TIME.LATE_MORNING,
                 day : (Number.random()*100)->floor,
@@ -312,8 +314,20 @@
                 get ::<- state.wish
             },
             
-            stepTime :: {
-                state.turn += 1;
+            stepTime ::(isStep) {
+                if (isStep == empty) ::<= {
+                    state.turn += 1;
+                    state.step = 0
+                } else ::<= { 
+                    state.step += 1;
+                }
+                
+                if (state.step > 15) ::<={
+                    state.turn += 1;
+                    state.step = 0;
+                }
+                    
+                    
                 if (state.turn > 10) ::<={
                     state.turn = 0;
                     state.time += 1;
@@ -652,7 +666,7 @@
                 }
                 
                 @:output = if (hasIsland == false) ::<= {
-                    state.orphanedIsland = island.save();
+                    state.orphanedIsland = island;
                     State.endRootSerializeGuard();
                     State.startRootSerializeGuard();
                     return state.save(); // TODO: is there a faster way that isnt messy?

@@ -135,6 +135,10 @@ return ::(this, party, location, onDone, overrideChat, skipIntro, onHire) {
                                 text: this.name + ' joins the party!'
                             );     
                         world.accoladeIncrement(name:'recruitedCount');                                        
+                        // the location is the one that has ownership over this...
+                        if (this.owns != empty)
+                            this.owns.ownedBy = empty;
+                            
                         if (onHire) onHire();           
 
                     }

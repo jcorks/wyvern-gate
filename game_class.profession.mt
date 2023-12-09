@@ -408,7 +408,7 @@ Profession.Base.new(data:{
     abilities : [
         'Convince',     //X convinces target to not do anything for 1 to 3 turns 
         'Bribe',        //X pay to leave battle
-        'Quickhand',    //X do 2 item actions, same target
+        'Quickhand Item',//X do 2 item actions, same target
     ],
     passives : [
         'Penny Picker'  //X after battle may notice dropped G

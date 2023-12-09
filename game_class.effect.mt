@@ -4228,7 +4228,7 @@ Effect.new(
             holder.damage(
                 from:holder,
                 damage : Damage.new(
-                    amount: user.stats.HP / 16,
+                    amount: holder.stats.HP / 16,
                     damageClass: Damage.CLASS.HP,
                     damageType: Damage.TYPE.NEUTRAL                                                   
                 ),dodgeable: false 

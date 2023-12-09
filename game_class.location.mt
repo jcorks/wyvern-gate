@@ -100,7 +100,7 @@
                 state.x = if (xHint == empty) (Number.random() * landmark_.width ) else xHint;  
                 state.y = if (yHint == empty) (Number.random() * landmark_.height) else yHint;
                 if (ownedByHint != empty)
-                    state.ownedBy = ownedByHint;
+                    this.ownedBy = ownedByHint;
                        
                 state.description = random.pickArrayItem(list:base.descriptions);            
                 base.onCreate(location:this);
@@ -113,6 +113,8 @@
             
             load ::(serialized) {
                 state.load(parent:this, serialized)
+                if (this.ownedBy)
+                    this.ownedBy.owns = this;
             },
 
             worldID : {
@@ -142,7 +144,13 @@
             },
             ownedBy : {
                 get ::<- state.ownedBy,
-                set ::(value) <- state.ownedBy = value
+                set ::(value) {
+                    if (state.ownedBy != empty)
+                        state.ownedBy.owns = empty;
+                    state.ownedBy = value          
+                    if (value != empty)          
+                        value.owns = this;
+                }
             },
             
             data : {
@@ -827,7 +835,7 @@ Location.Base.new(data:{
             }
         }
         location.ownedBy.stats.load(serialized:StatSet.new(
-            HP:   270,
+            HP:   200,
             AP:   999,
             ATK:  12,
             INT:  8,
@@ -909,7 +917,7 @@ Location.Base.new(data:{
             }
         }
         location.ownedBy.stats.load(serialized:StatSet.new(
-            HP:   710,
+            HP:   350,
             AP:   999,
             ATK:  15,
             INT:  10,
@@ -968,6 +976,7 @@ Location.Base.new(data:{
     onCreate ::(location) {
         location.name = 'Wyvern Throne';
         @:Profession = import(module:'game_class.profession.mt');
+        @:Entity = import(module:'game_class.entity.mt');
         @:Species = import(module:'game_class.species.mt');
         @:Story = import(module:'game_singleton.story.mt');
         @:Scene = import(module:'game_class.scene.mt');
@@ -991,15 +1000,17 @@ Location.Base.new(data:{
             }
         }
         location.ownedBy.stats.load(serialized:StatSet.new(
-            HP:   1500,
+            HP:   650,
             AP:   999,
             ATK:  25,
-            INT:  19,
-            DEF:  15,
+            INT:  10,
+            DEF:  3,
             LUK:  6,
             SPD:  100,
             DEX:  20
         ).save());
+        
+        location.ownedBy.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
         location.ownedBy.heal(amount:9999, silent:true); 
         location.ownedBy.healAP(amount:9999, silent:true); 
 
@@ -1290,7 +1301,7 @@ Location.Base.new(data:{
         "A fighting arena",
     ],
     interactions : [
-        'compete',
+        //'compete',
         'bet',
         'examine'
     ],
@@ -1511,7 +1522,7 @@ Location.Base.new(data:{
     },
     
     onCreate ::(location) {
-        if (location.landmark.island.tier > 0) 
+        if (location.landmark.island.tier > 1) 
             if (random.flipCoin()) ::<= {
                 location.lockWithPressurePlate();
             }
@@ -1587,7 +1598,13 @@ Location.Base.new(data:{
     
     onFirstInteract ::(location) {},
     onInteract ::(location) {
-
+        @:world = import(module:'game_singleton.world.mt');
+        when (world.party.inventory.slotsLeft < 1) ::<= {
+            windowEvent.queueMessage(
+                text:'You get the feeling that you should have at least one inventory slot open before continuing. Your inventory is currently full.'
+            );
+            return false;
+        }
         return true;
     },
     
@@ -2015,7 +2032,6 @@ Location.Base.new(data:{
         }
         location.ownedBy.onHire = ::{
             @:story = import(module:'game_singleton.story.mt');
-            location.ownedBy = empty;     
             world.npcs.mei = empty;
             world.accoladeEnable(name:'recruitedOPNPC');
         };            
@@ -2099,7 +2115,6 @@ Location.Base.new(data:{
         }
         location.ownedBy.onHire = ::{
             @:world = import(module:'game_singleton.world.mt');                
-            location.ownedBy = empty;     
             world.npcs.sylvia = empty;
             // Nerfed 'em because too common of an appearance. People can recruit if they want without penalty.
             //world.accoladeEnable(name:'recruitedOPNPC');
@@ -2195,7 +2210,6 @@ Location.Base.new(data:{
         location.ownedBy.onHire = ::{
             @:world = import(module:'game_singleton.world.mt');                
             world.npcs.faus = empty;            
-            location.ownedBy = empty;     
             world.accoladeEnable(name:'recruitedOPNPC');
         };        
     },
@@ -2238,30 +2252,9 @@ Location.Base.new(data:{
         @:nameGen = import(module:'game_singleton.namegen.mt');
         @:Story = import(module:'game_singleton.story.mt');
         
-        match(location.landmark.island.tier) {
-            (0):::<= { 
-                if (Story.foundFireKey == false)
-                    location.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Fire'),from:location.ownedBy));
-                Story.foundFireKey = true;
-            },
-            (1):::<= {
-                if (Story.foundIceKey == false) 
-                    location.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Ice'), from:location.ownedBy));                                            
-                Story.foundIceKey = true;
-            },
-            (2):::<= {
-                if (Story.foundThunderKey == false)                     
-                    location.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Thunder'), from:location.ownedBy));
-                Story.foundThunderKey = true;
-            },
-            (3):::<= {
-                if (Story.foundLightKey == false) 
-                    location.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Light'),from:location.ownedBy));
-                Story.foundLightKey = true;
-            }
-        }
+
         @:story = import(module:'game_singleton.story.mt');
-        for(0, 3+(Number.random()*2)->ceil)::(i) {
+        for(0, 3)::(i) {
             location.inventory.add(item:
                 Item.new(
                     base:Item.Base.database.getRandomFiltered(
@@ -2272,6 +2265,29 @@ Location.Base.new(data:{
                 )
             );
         }
+        
+        location.inventory.add(item:
+            Item.new(
+                base:Item.Base.database.getRandomFiltered(
+                    filter:::(value) <- value.isUnique == false
+                                        && value.hasQuality
+                ),
+                qualityHint : 'Masterwork',
+                from:location.landmark.island.newInhabitant(),rngEnchantHint:true
+            )
+        );        
+
+        location.inventory.add(item:
+            Item.new(
+                base:Item.Base.database.getRandomFiltered(
+                    filter:::(value) <- value.isUnique == false
+                                        && value.hasQuality
+                ),
+                qualityHint : 'Masterwork',
+                from:location.landmark.island.newInhabitant(),rngEnchantHint:true
+            )
+        ); 
+
     },
     onInteract ::(location) {
     },

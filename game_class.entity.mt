@@ -124,6 +124,7 @@
         @allies_ = [];
         @abilitiesUsedBattle = empty;
         @effects;
+        @owns;
 
 
         @:world = import(module:'game_singleton.world.mt');
@@ -162,6 +163,7 @@
                 adventurous : Number.random() <= 0.5,
                 battleAI : empty,
                 professions : [],
+                canMake : empty,
                 
 
                 equips : [
@@ -218,6 +220,14 @@
                 );
             }
             
+            foreach(this.species.passives)::(index, passiveName) {
+                this.addEffect(
+                    from:this, 
+                    name:passiveName, 
+                    durationTurns: -1
+                );
+            }
+
       
         }
 
@@ -280,6 +290,7 @@
                     state.faveWeapon = Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0)
 
                 state.inventory.addGold(amount:(Number.random() * 100)->ceil);
+                state.favoriteItem = Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
 
 
 
@@ -349,6 +360,11 @@
                 get ::<- battle_
             },
             
+            owns : {
+                get ::<- owns,
+                set ::(value) <- owns = value
+            },
+            
 
             // called to signal that a battle has started involving this entity
             battleEnd :: {
@@ -364,7 +380,7 @@
                 allies_ = [];
                 enemies_ = [];
                 abilitiesUsedBattle = empty;                
-                effects;
+                effects = empty;
             },
 
             
@@ -660,6 +676,20 @@
                         this.flags.add(flag:StateFlags.DODGED_ATTACK);
                         return false;                                                            
                     }
+                    
+                    // flat 15% chance if is Wyvern of Light! because final fight
+                    when(dodgeable && this.species.name == 'Wyvern of Light' && random.try(percentSuccess:15)) ::<= {
+                        windowEvent.queueMessage(text:random.pickArrayItem(list:[
+                            'You will have to try harder than that, Chosen!',
+                            'Come at me; do not hold back, Chosen!',
+                            'You disrespect me with such a weak attack, Chosen!',
+                            'Nice try, but it is not enough!'
+                        ]));
+                        windowEvent.queueMessage(text:this.name + ' deflected the attack!');
+                        this.flags.add(flag:StateFlags.DODGED_ATTACK);
+                        return false;                                                                                
+                    }
+                    
 
 
                     if (from.stats.DEX > this.stats.DEX)               
@@ -784,6 +814,24 @@
                 if (state.hp > state.stats.HP) state.hp = state.stats.HP;
                 if (silent == empty)
                     windowEvent.queueMessage(text: '' + this.name + ' heals ' + amount + ' HP (HP:' + this.renderHP() + ')');
+            },
+            
+            getCanMake ::{
+                when(state.canMake) state.canMake;
+
+                // was thinking about making this specific to blacksmiths, but 
+                // i dunno people can have hobbies and learn how to make stuff, thats cool
+
+                state.canMake = [];
+                for(0, if (this.profession.base.name == 'Blacksmith') 10 else 4) ::(i) {
+                    state.canMake->push(
+                        value:
+                            Item.Base.database.getRandomFiltered(
+                                filter::(value) <- value.hasMaterial == true
+                            ).name
+                    )
+                }
+                return state.canMake;
             },
             
             healAP ::(amount => Number, silent) {

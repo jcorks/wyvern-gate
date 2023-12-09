@@ -1336,8 +1336,8 @@
     
     return ::(map, mapHint) {
     
-        @:CENTER_X = 70;
-        @:CENTER_Y = 70;
+        @:CENTER_X = 140;
+        @:CENTER_Y = 140;
         @:SPACE_COUNT = 32;
     
         // first, pick an initial location

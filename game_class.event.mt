@@ -135,7 +135,7 @@
             landmark : {
                 get :: <- landmark_
             },
-            
+                        
             base : {
                 get :: <- state.base
             }
@@ -246,19 +246,19 @@ Event.Base.new(
             @:party = event.party;
 
             @lackey0 = Entity.new(
-                island:         event.landmark.island,
+                island:         event.island,
                 speciesHint:    'Wyvern',
                 levelHint:      event.island.levelMin,
                 professionHint: 'Disciple'
             );
             @lackey1 = Entity.new(
-                island:         event.landmark.island,
+                island:         event.island,
                 speciesHint:    'Wyvern',
                 levelHint:      event.island.levelMin,
                 professionHint: 'Disciple'
             );
             @boss = Entity.new(
-                island:         event.landmark.island,
+                island:         event.island,
                 speciesHint:    'Wyvern',
                 levelHint:      event.island.levelMax,
                 professionHint: 'Keeper'
@@ -383,7 +383,7 @@ Event.Base.new(
             windowEvent.queueMessage(
                 speaker: '???',
                 text: random.pickArrayItem(list:[
-                    'Well, well, well. Look who else is after the key. It\' ours!',
+                    'Well, well, well. Look who else is after the key. It\'s ours!',
                     'Get out of here, the key is ours!',
                     'Wait, no! The key is ours! Get out of here!',
                     'We will fight for that key to the death!',
@@ -407,11 +407,40 @@ Event.Base.new(
                     onEnd ::(result) {
                         match(result) {
                           (Battle.RESULTS.ALLIES_WIN): ::<= {
-                            windowEvent.queueMessage(text: 'It looks like they dropped some items during the fight...');
-                            @:item = Item.new(base:Item.Base.database.find(name:'Skill Crystal'), from:boss);
-                            @message = 'The party found a Skill Crystal!';
-                            party.inventory.add(item);
-                            windowEvent.queueMessage(text: message);
+                            //@message = 'The party found a Skill Crystal!';
+                            //party.inventory.add(item);
+                            @:Story = import(module:'game_singleton.story.mt');
+                            
+                            @:foundMessage ::(itemName){
+                                windowEvent.queueMessage(text: 'It looks like they dropped something heavy during the fight...');
+                                windowEvent.queueMessage(text: '.. is that...?');                            
+                                party.inventory.add(item:Item.new(base:Item.Base.database.find(name:itemName),from:party.members[0]));
+                                windowEvent.queueMessage(text: 'The party obtained the ' + itemName + '!');                            
+                            }
+
+
+                            match(event.island.tier) {
+                                (0):::<= { 
+                                    if (Story.foundFireKey == false)
+                                        foundMessage(itemName:'Wyvern Key of Fire');
+                                    Story.foundFireKey = true;
+                                },
+                                (1):::<= {
+                                    if (Story.foundIceKey == false) 
+                                        foundMessage(itemName:'Wyvern Key of Ice');
+                                    Story.foundIceKey = true;
+                                },
+                                (2):::<= {
+                                    if (Story.foundThunderKey == false)                     
+                                        foundMessage(itemName:'Wyvern Key of Thunder');
+                                    Story.foundThunderKey = true;
+                                },
+                                (3):::<= {
+                                    if (Story.foundLightKey == false) 
+                                        foundMessage(itemName:'Wyvern Key of Light');
+                                    Story.foundLightKey = true;
+                                }
+                            }
                           },
                           
                           (Battle.RESULTS.ENEMIES_WIN): ::<= {
@@ -479,7 +508,7 @@ Event.Base.new(
                 for(0, itemCount)::(index) {
                     @:item = Item.new(
                         base:Item.Base.database.getRandomFiltered(
-                            filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= event.landmark.island.tier
+                            filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= event.island.tier
                         ),
                         rngEnchantHint:true, from:opener
                     );

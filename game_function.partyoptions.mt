@@ -172,7 +172,7 @@ return ::{
 
                                             @equip = ::{
 
-                                                @:items = party.inventory.items->filter(by:::(value) <- member.getSlotsForItem(item:value)[0] == slot);
+                                                @:items = party.inventory.items->filter(by:::(value) <- member.getSlotsForItem(item:value)->findIndex(value:slot) != -1);
                                                 @:itemNames = [...items]->map(to:::(value) <- value.name);
                                                 itemNames->push(value:'[Nothing]');
                                             
@@ -215,7 +215,7 @@ return ::{
                                                                     // equip 
                                                                     member.equip(
                                                                         item, 
-                                                                        slot:member.getSlotsForItem(item)[0], 
+                                                                        slot, 
                                                                         inventory:party.inventory
                                                                     );
                                                                     windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);

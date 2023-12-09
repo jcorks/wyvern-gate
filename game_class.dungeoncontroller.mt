@@ -55,6 +55,10 @@
                 if (island_.tier > 0)
                     ent.ref->push(value:landmark_.island.newInhabitant());
 
+                if (island_.tier > 2)
+                    ent.ref->push(value:landmark_.island.newInhabitant());
+
+
 
                 foreach(ent.ref) ::(index, ref) {
 
@@ -121,7 +125,7 @@
                             party:island_.world.party,                            
                             allies: island_.world.party.members,
                             enemies: [...ent.ref],
-                            landmark: this,
+                            landmark: landmark_,
                             loot: true,
                             onAct ::{
                                 this.step();

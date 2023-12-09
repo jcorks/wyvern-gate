@@ -647,7 +647,7 @@ Scene.new(
             ['???', 'What is it you seek? Is it just a wish, or something more? A test of your own growth?'],
             ['???', 'Regardless, you come before me, Juhriikaal, in hopes to get to the Wyvern of Light.'],
             ['Juhriikaal', 'Congratulations on getting this far. Just blind luck will not get you past me.'],
-            ['Juhriikaal', 'You will find my electrifying methods to be most a little less forgiving than my siblings.'],
+            ['Juhriikaal', 'You will find my electrifying methods to be a little less forgiving than my siblings.'],
             ['Juhriikaal', 'Prepare yourself, Chosen!'],
             ::(location, landmark, doNext) {
                 @:world = import(module:'game_singleton.world.mt');

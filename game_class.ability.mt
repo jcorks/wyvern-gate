@@ -2288,12 +2288,12 @@ Ability.new(
             @:Effect = import(module:'game_class.effect.mt');
             targets[0].removeEffects(
                 effectBases: [
-                    Effect.databse.find(name:'Poisoned'),
-                    Effect.databse.find(name:'Paralyzed'),
-                    Effect.databse.find(name:'Petrified'),
-                    Effect.databse.find(name:'Burned'),
-                    Effect.databse.find(name:'Blind'),
-                    Effect.databse.find(name:'Frozen')                                  
+                    Effect.database.find(name:'Poisoned'),
+                    Effect.database.find(name:'Paralyzed'),
+                    Effect.database.find(name:'Petrified'),
+                    Effect.database.find(name:'Burned'),
+                    Effect.database.find(name:'Blind'),
+                    Effect.database.find(name:'Frozen')                                  
                 ]
             );
 
@@ -2340,7 +2340,7 @@ Ability.new(
             );
             targets[0].removeEffects(
                 effectBases: [
-                    Effect.databse.find(name:'Poisoned')                            
+                    Effect.database.find(name:'Poisoned')                            
                 ]
             );
         }
@@ -3556,7 +3556,7 @@ Ability.new(
             inventory.removeByName(name:'Ingredient');
             inventory.add(
                 item:Item.new(
-                    new:Item.Base.database.find(name:'Purple Potion'),
+                    base:Item.Base.database.find(name:'Purple Potion'),
                     from:user
                 )
             );                            

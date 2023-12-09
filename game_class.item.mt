@@ -1106,7 +1106,7 @@ Item.Base.new(data : {
 })    
 
 
-
+/*
 Item.Base.new(data : {
     name : "Pinkish Potion",
     description: 'Pink-colored potions are known to be for recovery of injuries',
@@ -1146,6 +1146,7 @@ Item.Base.new(data : {
 
 
 })
+*/
 
 
 
@@ -2678,7 +2679,7 @@ Item.Base.new(data : {
     examine : 'Common type of light armor',
     equipType: TYPE.TRINKET,
     rarity : 100,
-    weight : 1,
+    weight : 5,
     hasSize : false,
     canBeColored : true,
     keyItem : false,
@@ -2692,7 +2693,7 @@ Item.Base.new(data : {
     isApparel : true,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    basePrice: 55,
+    basePrice: 105,
     possibleAbilities : [],
 
     // fatigued

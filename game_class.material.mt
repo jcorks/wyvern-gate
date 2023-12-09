@@ -199,9 +199,10 @@ Material.new(
         statMod : StatSet.new(
             DEF: 50,
             ATK: 50,
-            SPD: 60
+            SPD: 60,
+            DEX: 40
         ),
-        pricePercentMod: 1100
+        pricePercentMod: 1900
     }
 )    
 
@@ -214,7 +215,8 @@ Material.new(
         statMod : StatSet.new(
             DEF: -20,
             ATK: 150,
-            SPD: 10
+            SPD: 10,
+            DEX: 60
         ),
         pricePercentMod: 1800
     }

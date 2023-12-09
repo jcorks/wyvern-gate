@@ -96,7 +96,7 @@ return class(
                       // save 
                       (0)::<= {
                         this.savestate();
-                        windowEvent.queueMessage(text:'Saved successfully to slot ' + choice);                        
+                        windowEvent.queueMessage(text:'Successfully saved world ' + world.saveName);                        
                       },
                       // quit
                       (1)::<= {
@@ -185,17 +185,7 @@ return class(
 
                             @:startNewWorld = ::(name){
                                 world.saveName = name;                        
-                                canvas.clear();
-                                canvas.blackout();
-                                @:message = 'Loading...';
-                                canvas.movePen(
-                                    x: canvas.width/2 - message->length/2,
-                                    y: canvas.height/2
-                                );
-                                canvas.drawText(text:message);
-                                canvas.commit(renderNow:true);
                                 this.startNew();
-                                onSaveState(slot:world.saveName, data:JSON.encode(object:this.save()));        
                                 //this.startInstance();                            
                             }
 
@@ -240,162 +230,205 @@ return class(
             },
         
             startNew ::{
+            
+                @:loadingScreen = ::(message, do) {
+                    windowEvent.queueNoDisplay(
+                        renderable : {
+                            render :: {
+                                canvas.blackout();
+                                canvas.clear();
+                                canvas.blackout();
+                                canvas.movePen(
+                                    x: canvas.width/2 - message->length/2,
+                                    y: canvas.height/2
+                                );
+                                canvas.drawText(text:message);
+                                canvas.commit(renderNow:true);                         
+                            }
+                        },
+                        onEnter ::{                        
+                            do();
+                        }                    
+                    )                
+                }
+
+            
+            
                 @:story = import(module:'game_singleton.story.mt');
-                @:keyhome = Item.new(
-                    base: Item.Base.database.find(name:'Wyvern Key'),
-                    creationHint: {
-                        nameHint:namegen.island(), levelHint:story.levelHint
+                
+                
+                @:initialLoad :: {
+                    @:keyhome = Item.new(
+                        base: Item.Base.database.find(name:'Wyvern Key'),
+                        creationHint: {
+                            nameHint:namegen.island(), levelHint:story.levelHint
+                        }
+                    );
+                    keyhome.name = 'Wyvern Key: Home';
+                    
+                    
+                        
+                    keyhome.addIslandEntry(world);
+                    island = keyhome.islandEntry;
+                    world.island = island;
+                    party = world.party;
+                    party.reset();
+                    party.inventory.addGold(amount:250);
+                    
+                    // debug
+                        //party.inventory.addGold(amount:100000);
+                    
+                    
+                    // since both the party members are from this island, 
+                    // they will already know all its locations
+                    foreach(island.landmarks)::(index, landmark) {
+                        landmark.discover(); 
                     }
-                );
-                keyhome.name = 'Wyvern Key: Home';
-                
-                
                     
-                keyhome.addIslandEntry(world);
-                island = keyhome.islandEntry;
-                world.island = island;
-                party = world.party;
-                party.reset();
-                party.inventory.addGold(amount:250);
-                
-                // debug
-                //party.inventory.addGold(amount:100000);
-                
-                
-                // since both the party members are from this island, 
-                // they will already know all its locations
-                foreach(island.landmarks)::(index, landmark) {
-                    landmark.discover(); 
-                }
-                
-                
-                
-                @:Species = import(module:'game_class.species.mt');
-                @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:story.levelHint);
-                @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:story.levelHint-2);
-                // debug
-                    //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
-                    //).new(from:island.newInhabitant(),rngEnchantHint:true));
                     
-                    @:story = import(module:'game_singleton.story.mt');
-                    story.foundFireKey = true;
-                    story.foundIceKey = true;
-                    story.foundThunderKey = true;
-                    story.foundLightKey = true;
-                    story.tier = 3;
                     
-                    party.inventory.addGold(amount:20000);
-                    
+                    @:Species = import(module:'game_class.species.mt');
+                    @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:story.levelHint);
+                    @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:story.levelHint-2);
+                    // debug
+                        /*
+                        //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
+                        //).new(from:island.newInhabitant(),rngEnchantHint:true));
+                        
+                        @:story = import(module:'game_singleton.story.mt');
+                        story.foundFireKey = true;
+                        story.foundIceKey = true;
+                        story.foundThunderKey = true;
+                        story.foundLightKey = true;
+                        story.tier = 3;
+                        
+                        party.inventory.addGold(amount:20000);
+                        
 
 
-                    
-                    party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Ice'
-                    ), from:island.newInhabitant()));
-                    party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Thunder'
-                    ), from:island.newInhabitant()));
-                    party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Light'
-                    ), from:island.newInhabitant()));
+                        
+                        party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Ice'
+                        ), from:island.newInhabitant()));
+                        party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Thunder'
+                        ), from:island.newInhabitant()));
+                        party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Light'
+                        ), from:island.newInhabitant()));
 
-                    @:story = import(module:'game_singleton.story.mt');
-                    
+                        @:story = import(module:'game_singleton.story.mt');
+                        
 
-                    
+                        
 
-                    party.inventory.maxItems = 50
-                    for(0, 20) ::(i) {
-                        party.inventory.add(
-                            item:Item.new(
-                                base:Item.Base.database.getRandomFiltered(
-                                        filter:::(value) <- value.isUnique == false && value.hasQuality
-                                ),
-                                from:island.newInhabitant(),
-                                rngEnchantHint:true
+                        party.inventory.maxItems = 50
+                        for(0, 20) ::(i) {
+                            party.inventory.add(
+                                item:Item.new(
+                                    base:Item.Base.database.getRandomFiltered(
+                                            filter:::(value) <- value.isUnique == false && value.hasQuality
+                                    ),
+                                    from:island.newInhabitant(),
+                                    rngEnchantHint:true
+                                )
                             )
-                        )
-                    };
-                    
-                    
-                    
+                        };
+                        */
+                        
+                        
 
-                for(0, 1)::(i) {
-                    @:crystal = Item.new(base:Item.Base.database.find(name:'Skill Crystal'), from:p0);
-                    party.inventory.add(item:crystal);
+                    for(0, 1)::(i) {
+                        @:crystal = Item.new(base:Item.Base.database.find(name:'Skill Crystal'), from:p0);
+                        party.inventory.add(item:crystal);
+                    }
+
+                    //party.inventory.add(item:keyhome);
+
+
+                    party.inventory.add(item:Item.new(
+                        base:Item.Base.database.find(name:'Pink Potion'),
+                        from:island.newInhabitant()
+                    ));
+                    party.inventory.add(item:Item.new(
+                        base:Item.Base.database.find(name:'Pink Potion'),
+                        from:island.newInhabitant()
+                    ));
+                    party.inventory.add(item:Item.new(
+                        base:Item.Base.database.find(name:'Pink Potion'),
+                        from:island.newInhabitant()
+                    ));
+
+                        
+                        /*
+                        @:sword = Item.new(
+                            base: Item.Base.database.find(name:'Glaive'),
+                            from:p0,
+                            materialHint: 'Ray',
+                            qualityHint: 'Null',
+                            rngEnchantHint: false
+                        );
+
+                        @:tome = Item.new(
+                            base:Item.Base.database.find(name:'Tome'),
+                            from:p0,
+                            materialHint: 'Ray',
+                            qualityHint: 'Null',
+                            rngEnchantHint: false,
+                            abilityHint: 'Cure'
+                        );
+                        party.inventory.add(item:sword);
+                        party.inventory.add(item:tome);
+                        
+                        */
+
+
+                    party.add(member:p0);
+                    party.add(member:p1);
+                    
+                    
+                    /*
+                    windowEvent.queueMessage(
+                        text: '... As it were, today is the beginning of a new adventure.'
+                    );
+
+
+                    windowEvent.queueMessage(
+                        text: '' + party.members[0].name + ' and their faithful companion ' + party.members[1].name + ' have decided to leave their long-time home of ' + island.name + '. Emboldened by countless tales of long lost eras, these 2 set out to discover the vast, mysterious, and treacherous world before them.'
+                    );
+
+                    windowEvent.queueMessage(
+                        text: 'Their first task is to find a way off their island.\nDue to their distances and dangerous winds, travel between sky islands is only done via the Wyvern Gates, ancient portals of seemingly-eternal magick that connect these islands.'
+                    );
+                    
+                    windowEvent.queueMessage(
+                        text: party.members[0].name + ' has done the hard part and acquired a key to the Gate.\nAll thats left is to go to it and find where it leads.'
+                    );
+                    */
                 }
-
-                party.inventory.add(item:keyhome);
-
-
-                party.inventory.add(item:Item.new(
-                    base:Item.Base.database.find(name:'Pink Potion'),
-                    from:island.newInhabitant()
-                ));
-                party.inventory.add(item:Item.new(
-                    base:Item.Base.database.find(name:'Pink Potion'),
-                    from:island.newInhabitant()
-                ));
-                party.inventory.add(item:Item.new(
-                    base:Item.Base.database.find(name:'Pink Potion'),
-                    from:island.newInhabitant()
-                ));
-
-                    
-                    
-                    @:sword = Item.new(
-                        base: Item.Base.database.find(name:'Glaive'),
-                        from:p0,
-                        materialHint: 'Ray',
-                        qualityHint: 'Null',
-                        rngEnchantHint: false
-                    );
-
-                    @:tome = Item.new(
-                        base:Item.Base.database.find(name:'Tome'),
-                        from:p0,
-                        materialHint: 'Ray',
-                        qualityHint: 'Null',
-                        rngEnchantHint: false,
-                        abilityHint: 'Cure'
-                    );
-                    party.inventory.add(item:sword);
-                    party.inventory.add(item:tome);
-                    
-
-
-
-                party.add(member:p0);
-                party.add(member:p1);
                 
-                
-                /*
-                windowEvent.queueMessage(
-                    text: '... As it were, today is the beginning of a new adventure.'
-                );
+                loadingScreen(
+                    message: 'Loading...',
+                    do ::{
+                        initialLoad();
+                        @somewhere = LargeMap.getAPosition(map:island.map);
+                        island.map.setPointer(
+                            x: somewhere.x,
+                            y: somewhere.y
+                        );               
+                        this.savestate();
+                        @:Scene = import(module:'game_class.scene.mt');
+                        Scene.database.find(name:'scene_intro').act(onDone::{                    
+                            this.visitIsland();
 
-
-                windowEvent.queueMessage(
-                    text: '' + party.members[0].name + ' and their faithful companion ' + party.members[1].name + ' have decided to leave their long-time home of ' + island.name + '. Emboldened by countless tales of long lost eras, these 2 set out to discover the vast, mysterious, and treacherous world before them.'
-                );
-
-                windowEvent.queueMessage(
-                    text: 'Their first task is to find a way off their island.\nDue to their distances and dangerous winds, travel between sky islands is only done via the Wyvern Gates, ancient portals of seemingly-eternal magick that connect these islands.'
-                );
+                            
+                            /*island.addEvent(
+                                event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
+                                    island, party, landmark //, currentTime
+                                )
+                            );*/  
+                        });
+                    }
+                )
                 
-                windowEvent.queueMessage(
-                    text: party.members[0].name + ' has done the hard part and acquired a key to the Gate.\nAll thats left is to go to it and find where it leads.'
-                );
-                */
-                
-                @:Scene = import(module:'game_class.scene.mt');
-                Scene.database.find(name:'scene_intro').act(onDone::{
-                    this.visitIsland();
-                    
-                    
-                    /*island.addEvent(
-                        event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
-                            island, party, landmark //, currentTime
-                        )
-                    );*/  
-                });
+
                 
           
                 
@@ -537,7 +570,20 @@ return class(
                               // visit landmark
                               default: ::<= {
                                 //breakpoint();
-                                visitable[choice-5].data.visit();
+                                @:landmark = visitable[choice-5].data;
+                                when (landmark.base.pointOfNoReturn == true) ::<= {
+                                    windowEvent.queueMessage(
+                                        text: "It may be difficult to return... "
+                                    );
+                                    windowEvent.queueAskBoolean(
+                                        prompt:'Enter?',
+                                        onChoice::(which) {
+                                            if (which == true)
+                                                landmark.visit();
+                                        }
+                                    )
+                                }
+                                landmark.visit();
                               }
                             }
 
