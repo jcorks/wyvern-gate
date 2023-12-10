@@ -1362,8 +1362,8 @@
         }
         
         @:span = root.getAllSpan();
-        map.width = span.x + span.width + 10;
-        map.height = span.y + span.height + 10;
+        map.width = span.x + span.width + 80;
+        map.height = span.y + span.height + 40;
 
         
         foreach(root.getAllAttached()) ::(k, space) {

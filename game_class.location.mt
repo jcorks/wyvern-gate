@@ -1380,7 +1380,7 @@ Location.Base.new(data:{
     minStructureSize : 2,
 
     descriptions: [
-        "A school",
+        "A school.",
     ],
     interactions : [
         'change profession',

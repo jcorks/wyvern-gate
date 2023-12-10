@@ -368,7 +368,7 @@ Interaction.new(
                   
 
                   // gamblist
-                  (chance < 0.8 && world.npcs.skie != empty && !world.npcs.skie.incapacitated() && world.party.isMember(entity:world.npcs.skie))::<= {
+                  (chance < 0.8 && world.npcs.skie != empty && !world.npcs.skie.isIncapacitated() && !world.party.isMember(entity:world.npcs.skie))::<= {
 
                   
                   
@@ -815,8 +815,8 @@ Interaction.new(
                         world.accoladeEnable(name:'gotRidOfWyvernKey');      
 
 
-                    if (price > 4000) ::<= {
-                        world.accoladeEnable(name:'soldItemOver4000');
+                    if (price > 500) ::<= {
+                        world.accoladeEnable(name:'soldItemOver500G');
                     }
 
                     
@@ -948,8 +948,8 @@ Interaction.new(
                                 when(!party.inventory.subtractGold(amount:price)) windowEvent.queueMessage(text:'The party cannot afford this.');
                                 location.inventory.remove(item);
 
-                                if (price > 4000) ::<= {
-                                    world.accoladeEnable(name:'boughtItemOver4000');
+                                if (price > 2000) ::<= {
+                                    world.accoladeEnable(name:'boughtItemOver2000G');
                                 }
                                 
                                 if (item.base.name == 'Wyvern Key' && world.storyFlags.foundFirstKey == false) ::<= {

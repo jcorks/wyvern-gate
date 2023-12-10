@@ -2240,7 +2240,7 @@ Effect.new(
             );
             
             windowEvent.queueNoDisplay(
-                onStart::{
+                onEnter::{
                     if (Number.random() > 0.8) ::<= {
                         holder.inventory.add(item);
                         windowEvent.queueMessage(

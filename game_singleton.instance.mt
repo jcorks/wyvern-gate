@@ -131,10 +131,13 @@ return class(
 
 
             mainMenu ::(
+                canvasWidth => Number,
+                canvasHeight=> Number,
                 onSaveState => Function, // for saving,
                 onLoadState => Function,
                 onListSlots => Function
             ) {
+                canvas.resize(width:canvasWidth, height:canvasHeight);
                 this.onSaveState = onSaveState;
                 this.onLoadState = onLoadState;                
                 

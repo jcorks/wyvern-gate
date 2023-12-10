@@ -39,8 +39,8 @@
 */
 
 @:THE_BIG_ONE = 100000000;
-@:mapSizeW  = 50;
-@:mapSizeH  = 18;
+@mapSizeW  = 50;
+@mapSizeH  = 18;
 @:SIGHT_RAY_LIMIT = 6;
 @:SIGHT_RAY_EPSILON = 0.4;
 
@@ -70,6 +70,9 @@
         @_h = 0;
         @isOccupied = false;
         
+        mapSizeH = canvas.height - 6;
+        mapSizeW = canvas.width - 26;
+
         this.interface = {
             loadDefault::(x, y, width, height) {
                 _x = x => Number;

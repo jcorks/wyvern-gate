@@ -823,14 +823,13 @@
                 // i dunno people can have hobbies and learn how to make stuff, thats cool
 
                 state.canMake = [];
-                for(0, if (this.profession.base.name == 'Blacksmith') 10 else 4) ::(i) {
-                    state.canMake->push(
-                        value:
-                            Item.Base.database.getRandomFiltered(
-                                filter::(value) <- value.hasMaterial == true
-                            ).name
-                    )
+                foreach(Item.Base.database.getRandomSet(
+                        count:if (this.profession.base.name == 'Blacksmith') 10 else 4,
+                        filter::(value) <- value.hasMaterial == true
+                )) ::(k, val) {
+                    state.canMake->push(value:val.name);
                 }
+
                 return state.canMake;
             },
             

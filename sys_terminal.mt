@@ -57,7 +57,7 @@ if (ret != empty) ::<= {
 
 
 @:RENDERER_WIDTH = 80;
-@:RENDERER_HEIGHT = 24;
+@:RENDERER_HEIGHT = 32;
 @:LINE_SPACING = 15;
 @:FONT_SIZE = 15;
 

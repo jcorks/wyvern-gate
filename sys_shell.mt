@@ -69,24 +69,24 @@ return class(
         @:checkRepeatPadInputs ::{
             @left = 
                 Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.d_left) > 0 ||
-                Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.axis_x) < -stickDeadzone ||
+                Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.axisX) < -stickDeadzone ||
                 Topaz.Input.getState(input:Topaz.Key.left) > 0
 
             @right = 
                 Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.d_right) > 0 ||
-                Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.axis_x) > stickDeadzone ||
+                Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.axisX) > stickDeadzone ||
                 Topaz.Input.getState(input:Topaz.Key.right) > 0
 
 
             @down = 
                 Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.d_down) > 0 ||
-                Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.axis_y) > stickDeadzone ||
+                Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.axisY) > stickDeadzone ||
                 Topaz.Input.getState(input:Topaz.Key.down) > 0
                 
 
             @up = 
                 Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.d_up) > 0 ||
-                Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.axis_y) < -stickDeadzone ||
+                Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.axisY) < -stickDeadzone ||
                 Topaz.Input.getState(input:Topaz.Key.up) > 0
 
 
@@ -120,6 +120,8 @@ return class(
             }
         }
         
+
+
 
 
         this.interface = {
@@ -196,26 +198,25 @@ return class(
                     padIndex: 0,
                     listener : {
                         onUpdate::(input, value) {
-                        
                             match(input) {
                               (Topaz.Pad.a): ::<={
-                                onProgramKeyboard(input:Topaz.Key.Z, value:1);
-                              },
+                                if (value > 0) ::<= {
+                                    when (programActive)
+                                        onProgramKeyboard(input:Topaz.Key.z, value:1);
 
-                              (Topaz.Pad.b): ::<={
-                                onProgramKeyboard(input:Topaz.Key.X, value:1);
-                              }
-
-
-                            }
-
-                            match(input) {
-                                (Topaz.Pad.A,
-                                 Topaz.Pad.START): ::<={
                                     currentCommand = 'start';
                                     printPrompt();                                
                                     runCommand(command:'start', arg:'');
                                 }
+                              },
+
+                              (Topaz.Pad.b): ::<={
+                                if (value > 0)
+                                    onProgramKeyboard(input:Topaz.Key.x, value:1);
+                              },
+
+                              (Topaz.Pad.start): ::<={
+                              }
                             }
                         }
                     }

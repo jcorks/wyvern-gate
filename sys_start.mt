@@ -5,6 +5,7 @@ return ::(terminal, arg, onDone) {
     terminal.clear();
     terminal.print(line:'Starting program...');
     @counter = 10;
+
     Shell.onProgramCycle = ::{
         when(counter > 0) counter-=1;
         @:canvas = import(module:'game_singleton.canvas.mt');
@@ -69,8 +70,9 @@ return ::(terminal, arg, onDone) {
         }
 
         @:saveAsset = Topaz.Resources.createAsset(name:'WYVERN_SAVE', type:Topaz.Asset.Type.Data);
-
         instance.mainMenu(
+            canvasHeight: 32,
+            canvasWidth: 80,
             onSaveState :::(
                 slot,
                 data

@@ -320,7 +320,7 @@ ItemEnchant.Base.new(
     }
 )
 
-
+/*
 ItemEnchant.Base.new(
     data : {
         name : 'Ensnare',
@@ -341,7 +341,7 @@ ItemEnchant.Base.new(
         useEffects : []
     }
 )
-
+*/
 
 
 ItemEnchant.Base.new(

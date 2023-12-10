@@ -19,8 +19,8 @@
 @:class = import(module:'Matte.Core.Class');
 
 
-@:CANVAS_WIDTH  = 80;
-@:CANVAS_HEIGHT = 24;
+@CANVAS_WIDTH  = 80;
+@CANVAS_HEIGHT = 24;
 
 @:hints = {
     // for general messages describing whats going on.
@@ -109,17 +109,21 @@ return class(
         
         @savestates = [];
         
-        ::<= {
-            @iter = 0;
-            for(0, CANVAS_HEIGHT)::(index) {
-                for(0, CANVAS_WIDTH)::(ch) {
-                    canvas[iter] = ' ';
-                    iter += 1;
-                }
-            }
-        }
+
         
         this.interface = {
+            resize ::(width, height) {
+                CANVAS_HEIGHT = height;
+                CANVAS_WIDTH = width;
+                @iter = 0;
+                for(0, CANVAS_HEIGHT)::(index) {
+                    for(0, CANVAS_WIDTH)::(ch) {
+                        canvas[iter] = ' ';
+                        iter += 1;
+                    }
+                }
+            },
+
             movePen ::(x => Number, y => Number) {
                 penx = x->floor;
                 peny = y->floor;
