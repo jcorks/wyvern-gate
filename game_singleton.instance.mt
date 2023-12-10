@@ -454,15 +454,45 @@ return class(
                 }
 
                 @enteredChoices = false;
+                @underFoot;
                 @islandTravel = ::{
                     windowEvent.queueCursorMove(
                         leftWeight: 1,
                         topWeight: 1,
                         prompt: 'Traveling...',
                         jumpTag: 'VisitIsland',
-                        renderable:island.map,
                         onMenu :: {
                             islandChoices();
+                        },
+                        
+                        renderable : {
+                            render ::{
+                                island.map.render();
+                                when(underFoot == empty || underFoot->size == 0) empty;
+
+
+                                
+                                @:lines = [];
+                                foreach(underFoot)::(i, arr) {
+
+
+                                    lines->push(value:arr.data.name);
+
+                                    arr.data.discover();
+                                    island.map.discover(data:arr.data);                                            
+                                    //island.map.setPointer(
+                                    //    x: arr.x,
+                                    //    y: arr.y
+                                    //);
+                                
+                                }
+                                canvas.renderTextFrameGeneral(
+                                    title: 'Nearby:',
+                                    topWeight : 1,
+                                    leftWeight : 1,
+                                    lines
+                                );
+                            }
                         },
                         onMove ::(choice) {
                             
@@ -480,27 +510,8 @@ return class(
                             island.incrementTime();
                             
                             // cancel if we've arrived somewhere
-                            @:arrival = island.map.getNamedItemsUnderPointerRadius(radius:5);
-                            if (arrival != empty) ::<= {
-                                foreach(arrival)::(i, arr) {
-                                    windowEvent.queueMessage(
-                                        text:"The party has arrived at the " + arr.data.name
-                                    );
-                                    windowEvent.queueNoDisplay(
-                                        onEnter::{
-                                            arr.data.discover();
-                                            island.map.discover(data:arr.data);                                            
-                                        }
-                                    );
-                                    //island.map.setPointer(
-                                    //    x: arr.x,
-                                    //    y: arr.y
-                                    //);
-                                
-                                }
-                                
-                            }                            
-
+                            underFoot = island.map.getNamedItemsUnderPointerRadius(radius:5);
+                            
                         }
                     );
                 }

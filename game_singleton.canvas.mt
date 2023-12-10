@@ -217,6 +217,50 @@ return class(
 
             },  
             
+            renderTextFrameGeneral::(
+                lines,
+                title,
+                topWeight,
+                leftWeight,
+                notchText
+            ) {
+                if (leftWeight == empty) leftWeight = 0.5;
+                if (topWeight  == empty) topWeight  = 0.5;
+
+                @width = if (title == empty) 0 else title->length;
+                foreach(lines)::(index, line) {
+                    if (line->length > width) width = line->length;
+                }
+                
+                @left   = (this.width - (width+4))*leftWeight;
+                width   = width + 4;
+                @top    = (this.height - (lines->keycount + 4)) * topWeight;
+                @height = lines->keycount + 4;
+                
+                if (top < 0) top = 0;
+                if (left < 0) left = 0;
+                
+                
+                this.renderFrame(top, left, width, height);
+
+                // render text:
+                
+                foreach(lines)::(index, line) {
+                    this.movePen(x: left+2, y: top+2+index);
+                    this.drawText(text:line);
+                }
+
+                if (title != empty) ::<= {
+                    this.movePen(x: left+2, y:top);
+                    this.drawText(text:title);
+                }
+
+                if (notchText != empty) ::<= {
+                    this.movePen(x: left+width-8, y:top+height-1);
+                    this.drawText(text:notchText);
+                }                
+            },
+            
             pushState ::{
                 @:canvasCopy = [...canvas];
                 

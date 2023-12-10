@@ -28,7 +28,7 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:Map = import(module:'game_class.map.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
-
+@:canvas = import(module:'game_singleton.canvas.mt');
 
 
 
@@ -505,13 +505,31 @@
                     );
                 }
                 
-                
+                @nearby;
                 windowEvent.queueCursorMove(
                     jumpTag: 'VisitLandmark',
                     onMenu ::{
                         landmarkChoices()
                     },
-                    renderable:this.map,
+                    renderable:{
+                        render :: {
+                            this.map.render();
+                            
+                            when(nearby == empty || nearby->size == 0) empty;
+                            
+                            @:lines = [];
+                            foreach(nearby)::(index, arr) {
+
+                                lines->push(value:arr.name);
+                            }
+                            canvas.renderTextFrameGeneral(
+                                leftWeight: 1,
+                                topWeight: 1,
+                                lines,
+                                title: 'Arrived at:'
+                            );
+                        }
+                    },
                     onMove ::(choice) {
                     
                         // move by one unit in that direction
@@ -549,19 +567,13 @@
 
                         
                         // cancel if we've arrived somewhere
-                        @:arrival = this.map.getNamedItemsUnderPointer();
-                        if (arrival != empty && arrival->keycount > 0) ::<= {
-                            foreach(arrival)::(index, arr) {
-                                windowEvent.queueMessage(
-                                    text:"The party has arrived at the " + arr.name
-                                );
-                            }
+                        nearby = this.map.getNamedItemsUnderPointer();
+
+                        if (nearby != empty && nearby->size > 0)
                             this.map.setPointer(
-                                x: arrival[0].x,
-                                y: arrival[0].y
+                                x: nearby[0].x,
+                                y: nearby[0].y
                             );
-                            
-                        }                            
 
                     }                
                 )
@@ -632,13 +644,13 @@ Landmark.Base.new(
         canSave : true,
         pointOfNoReturn : false,
         possibleLocations : [
-            {name:'home', rarity: 1},
+            {name:'Home', rarity: 1},
             {name:'Tavern', rarity: 3},
             {name:'Blacksmith', rarity: 3},
             //{name:'guild', rarity: 25}
         ],
         requiredLocations : [
-            'shop',
+            'Shop',
             'School',
             'Inn',
         ],
@@ -672,16 +684,16 @@ Landmark.Base.new(
         pointOfNoReturn : false,
         dungeonForceEntrance: false,
         possibleLocations : [
-            {name:'home', rarity: 1},
+            {name:'Home', rarity: 1},
             //{name:'inn', rarity: 3},
             //{name:'guild', rarity: 25}
             //{name:'tavern', rarity: 100}
             //{name:'school', rarity: 7}
         ],
         requiredLocations : [
-            'shop',
-            'shop',
-            'shop',
+            'Shop',
+            'Shop',
+            'Shop',
             'Tavern',
             'Arena',
             'Inn',
@@ -718,15 +730,15 @@ Landmark.Base.new(
         pointOfNoReturn : false,
         dungeonForceEntrance: true,
         possibleLocations : [
-            {name:'ore vein', rarity: 1},
+            {name:'Ore vein', rarity: 1},
             //{name:'inn', rarity: 3},
             //{name:'guild', rarity: 25}
             //{name:'tavern', rarity: 100}
             //{name:'school', rarity: 7}
         ],
         requiredLocations : [
-            'ore vein',
-            'smelter',
+            'Ore vein',
+            'Smelter',
         ],
         mapHint : {
             roomSize: 15,
@@ -809,7 +821,7 @@ Landmark.Base.new(
     data: {
         name : 'Shrine of Fire',
         legendName: 'Shrine',
-        symbol : 'O',
+        symbol : 'M',
         rarity : 100000,      
         isUnique : true,
         minLocations : 1,
@@ -1233,8 +1245,8 @@ Landmark.Base.new(
         pointOfNoReturn : false,
         dungeonForceEntrance: true,
         possibleLocations : [
-            {name:'home', rarity:5},
-            {name:'shop', rarity:40}
+            {name:'Home', rarity:5},
+            {name:'Shop', rarity:40}
             //'guild',
             //'guardpost',
         ],
@@ -1270,10 +1282,10 @@ Landmark.Base.new(
         dungeonForceEntrance: false,
         guarded : false,
         possibleLocations : [
-            {name:'home', rarity:1},
+            {name:'Home', rarity:1},
             {name:'Tavern', rarity:7},
-            {name:'shop', rarity:7},
-            {name:'farm', rarity:4}
+            {name:'Shop', rarity:7},
+            {name:'Farm', rarity:4}
         ],
         requiredLocations : [],
         mapHint : {
@@ -1303,9 +1315,9 @@ Landmark.Base.new(
         maxLocations : 10,
         guarded : false,
         possibleLocations : [
-            {name:'home', rarity:1},
+            {name:'Home', rarity:1},
             {name:'Tavern', rarity:7},
-            {name:'farm', rarity:4}
+            {name:'Farm', rarity:4}
         ],
         requiredLocations : [],
         mapHint : {

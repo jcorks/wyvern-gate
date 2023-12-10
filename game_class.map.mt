@@ -150,7 +150,7 @@
             x: 0,
             y: 0,
             discovered : true,
-            symbol: 'P',
+            symbol: 'Ø',
             name: "(Party)"
         }
 
@@ -499,7 +499,7 @@
                 y:top  + ((pointer.y - regionY*mapSizeH  + mapSizeH*0.5))->floor         
             );
             
-            canvas.drawText(text:'P');
+            canvas.drawText(text:'Ø');
                     
         }
         
@@ -634,7 +634,7 @@
                 y:top  + (mapSizeH/2)->floor         
             );
             
-            canvas.drawText(text:'P');
+            canvas.drawText(text:'Ø');
             //canvas.debugLine = 'Frame took ' + (Time.getTicks() - ticks) + 'ms';
                     
         }

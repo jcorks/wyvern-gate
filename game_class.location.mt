@@ -468,7 +468,7 @@ Location.Base.new(data:{
 })
 
 Location.Base.new(data:{
-    name: 'farm',
+    name: 'Farm',
     rarity: 100,
     ownVerb: 'owned',
     category : Location.CATEGORY.RESIDENTIAL,
@@ -535,7 +535,7 @@ Location.Base.new(data:{
 
 
 Location.Base.new(data:{
-    name: 'home',
+    name: 'Home',
     rarity: 100,
     ownVerb: 'owned',
     category : Location.CATEGORY.RESIDENTIAL,
@@ -603,7 +603,7 @@ Location.Base.new(data:{
 })
 
 Location.Base.new(data:{
-    name: 'ore vein',
+    name: 'Ore vein',
     rarity: 100,
     ownVerb: '???',
     category : Location.CATEGORY.UTILITY,
@@ -646,7 +646,7 @@ Location.Base.new(data:{
 
 
 Location.Base.new(data:{
-    name: 'smelter',
+    name: 'Smelter',
     rarity: 100,
     ownVerb: '???',
     category : Location.CATEGORY.UTILITY,
@@ -1026,7 +1026,7 @@ Location.Base.new(data:{
 })
 
 Location.Base.new(data:{
-    name: 'shop',
+    name: 'Shop',
     rarity: 100,
     ownVerb : 'run',
     category : Location.CATEGORY.BUSINESS,
@@ -1059,7 +1059,7 @@ Location.Base.new(data:{
         @:Profession = import(module:'game_class.profession.mt');
         location.ownedBy = location.landmark.island.newInhabitant();            
         location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Trader'));
-        location.name = 'shop';
+        location.name = 'Shop';
         location.inventory.maxItems = 50;
 
         @:nameGen = import(module:'game_singleton.namegen.mt');

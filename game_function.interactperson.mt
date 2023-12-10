@@ -58,7 +58,7 @@ return ::(this, party, location, onDone, overrideChat, skipIntro, onHire) {
         canCancel : true,
         prompt: 'Talking to ' + this.name,
         choices: [
-            'Chat',
+            //'Chat',
             'Hire',
             'Barter',
             'Aggress...'
@@ -73,6 +73,7 @@ return ::(this, party, location, onDone, overrideChat, skipIntro, onHire) {
             
             match(choice-1) {
               // Chat
+              /*
               (0): ::<= {
                 when(this.isIncapacitated())
                     windowEvent.queueMessage(
@@ -90,9 +91,10 @@ return ::(this, party, location, onDone, overrideChat, skipIntro, onHire) {
                     text: random.pickArrayItem(list:this.personality.phrases[Personality.SPEECH_EVENT.CHAT])
                 );                                                        
               },
+              */
               
               // hire 
-              (1): ::<= {
+              (0): ::<= {
                 when(this.isIncapacitated())
                     windowEvent.queueMessage(
                         text: this.name + ' is not currently able to talk.'
@@ -146,7 +148,7 @@ return ::(this, party, location, onDone, overrideChat, skipIntro, onHire) {
               },
               
               // barter
-              (2):::<= {
+              (1):::<= {
                 when(this.isIncapacitated())
                     windowEvent.queueMessage(
                         text: this.name + ' is not currently able to talk.'
@@ -234,7 +236,7 @@ return ::(this, party, location, onDone, overrideChat, skipIntro, onHire) {
                 );
               },
               // Aggress
-              (3):::<= {
+              (2):::<= {
                 @whom;
                     
                 // some actions result in a confrontation        

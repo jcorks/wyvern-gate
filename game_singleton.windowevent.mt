@@ -26,46 +26,8 @@
 
 
 
-@:renderText ::(limitLines, leftWeight, topWeight, lines, speaker, hasNotch) {
-    if (leftWeight == empty) leftWeight = 0.5;
-    if (topWeight  == empty) topWeight  = 0.5;
-
-    @width = if (speaker == empty) 0 else speaker->length;
-    foreach(lines)::(index, line) {
-        if (line->length > width) width = line->length;
-    }
-    
-    @left   = (canvas.width - (width+4))*leftWeight;
-    width   = width + 4;
-    @top    = (canvas.height - (lines->keycount + 4)) * topWeight;
-    @height = lines->keycount + 4;
-    
-    if (top < 0) top = 0;
-    if (left < 0) left = 0;
-    
-    
-    canvas.renderFrame(top, left, width, height);
-
-    // render text:
-    
-    foreach(lines)::(index, line) {
-        canvas.movePen(x: left+2, y: top+2+index);
-        canvas.drawText(text:line);
-    }
-
-    if (speaker != empty) ::<= {
-        canvas.movePen(x: left+2, y:top);
-        canvas.drawText(text:speaker);
-    }
-
-    if (hasNotch != empty && hasNotch == true) ::<= {
-        canvas.movePen(x: left+width-8, y:top+height-1);
-        canvas.drawText(text:'(next)');
-    }
-
-    
-    
-
+@:renderText ::(leftWeight, topWeight, lines, speaker, hasNotch) {
+    canvas.renderTextFrameGeneral(leftWeight, topWeight, lines, title:speaker, notchText:if(hasNotch != empty) "(next)" else empty)
 }
 
 @:min = ::(a, b) {
@@ -271,8 +233,7 @@
                             lines: choicesModified,
                             speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
                             leftWeight,
-                            topWeight,
-                            limitLines:14
+                            topWeight
                         ); 
                     }
                 );
@@ -474,8 +435,7 @@
                     lines: choicesModified,
                     speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
                     leftWeight,
-                    topWeight,
-                    limitLines:9
+                    topWeight
                 ); 
             });            
                 
@@ -502,7 +462,7 @@
                         topWeight: data.topWeight, 
                         lines: data.lines,
                         speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
-                        limitLines : data.pageAfter,
+                        //limitLines : data.pageAfter,
                         hasNotch: true
                     );
                 });
