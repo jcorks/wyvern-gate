@@ -1469,6 +1469,7 @@ Interaction.new(
         displayName : 'Bet',
         name : 'bet',
         onInteract ::(location, party) {
+            @:Entity = import(module:'game_class.entity.mt');
             @:getAWeapon = ::(from)<-
                 Item.new(
                     from,
@@ -1480,46 +1481,73 @@ Interaction.new(
                     )
                 )                    
             ;
+            
+            @:generateTeam ::{
+                @:count = 3;
+                @:members = [];
+
+                for(0, count)::(i) {
+                    @:combatant = location.landmark.island.newInhabitant();
+                    @:weapon = getAWeapon(from:combatant);
+                    combatant.equip(item:weapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true, inventory: combatant.inventory);
+
+                    members->push(value:combatant);
+                }            
+                return {
+                    name : 'The ' + Material.database.getRandom().name + ' ' + getAWeapon().base.name + 's',
+                    members : members
+                }
+            }
+
+            @teamA;
+            @teamB;
+            @hasChampion = false;
+            if (location.data.bet_winningTeam != empty) ::<= {
+                hasChampion = true;
+                teamA = location.data.bet_winningTeam;
+                foreach(location.data.bet_winningTeam.members) ::(k, member) {
+                    member.heal(amount:100000, silent:true);
+                    member.healAP(amount:100000, silent:true);
+                }   
+                location.data.bet_winningTeam = empty;
+            } else ::<= {
+                teamA = location.data.bet_teamA;
+            }
+
+            teamB = location.data.bet_teamB;
+            
+            
+            if (teamA == empty) teamA = generateTeam();
+            if (teamB == empty) teamB = generateTeam();
+
+            location.data.bet_teamA = teamA;
+            location.data.bet_teamB = teamB;
+                
         
-            @:Entity = import(module:'game_class.entity.mt');
-            @:count = 3;
-            @:teamAname = 'The ' + Material.database.getRandom().name + ' ' + getAWeapon().base.name + 's';
-            @:teamA = [];
-            @:teamBname = 'The ' + Material.database.getRandom().name + ' ' + getAWeapon().base.name + 's';
-            @:teamB = [];
 
-            for(0, count)::(i) {
-                @:combatant = location.landmark.island.newInhabitant();
-                @:weapon = getAWeapon(from:combatant);
-                combatant.equip(item:weapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true, inventory: combatant.inventory);
-
-                teamA->push(value:combatant);
-            }
-
-            for(0, count)::(i) {
-                @:combatant = location.landmark.island.newInhabitant();
-                @:weapon = getAWeapon(from:combatant);                        
-                combatant.equip(item:weapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true, inventory: combatant.inventory);
-
-                teamB->push(value:combatant);
-            }
 
 
             windowEvent.queueMessage(
                 text:'The croud cheers furiously as the teams get ready.'
             );
             
-            windowEvent.queueMessage(
-                speaker:'Announcer',
-                text:'The next match is about to begin! Here we have "' + teamAname + '" up against "' + teamBname + '"! Place your bets!'
-            );
-            
-            
+            if (!hasChampion) ::<= {
+                windowEvent.queueMessage(
+                    speaker:'Announcer',
+                    text:'The next match is about to begin! Here we have "' + teamA.name + '" up against "' + teamB.name + '"! Place your bets!'
+                );
+            } else ::<= {
+                windowEvent.queueMessage(
+                    speaker:'Announcer',
+                    text:'The next match is about to begin! Here we have the reigning champions "' + teamA.name + '" up against "' + teamB.name + '"! Place your bets!'
+                );            
+            }
+
 
             windowEvent.queueChoices(
                 choices: [
-                    teamAname + ' stats',
-                    teamBname + ' stats',
+                    teamA.name + ' stats',
+                    teamB.name + ' stats',
                     'place bet'
                 ],
                 canCancel: true,
@@ -1531,17 +1559,21 @@ Interaction.new(
                     match(choice-1) {
                       // team A examine
                       (0): ::<= {
-                        for(0, 3)::(i) {
-                            windowEvent.queueMessage(text:teamAname + ' - Member ' + (i+1));
-                            teamA[i].describe();
+                        @counter = 0;
+                        foreach(teamA.members)::(k, member) {
+                            windowEvent.queueMessage(text:teamA.name + ' - Member ' + (counter+1));
+                            member.describe();
+                            counter += 1
                         }
                       },
 
                       // team B examine
                       (1): ::<= {
-                        for(0, 3)::(i) {
-                            windowEvent.queueMessage(text:teamBname + ' - Member ' + (i+1));
-                            teamB[i].describe();
+                        @counter = 0;
+                        foreach(teamB.members)::(k, member) {
+                            windowEvent.queueMessage(text:teamB.name + ' - Member ' + (counter+1));
+                            member.describe();
+                            counter += 1
                         }
                       },
                       
@@ -1562,8 +1594,24 @@ Interaction.new(
                             100000,
                             1000000
                         ];
+                        
+            
+                        @:payout ::(isTeamA) {
+                            when(teamA.members->size == teamB.members->size) bet;
+                            
+                            when(isTeamA == true) ::<= {
+                                @frac = teamA.members->size / teamB.members->size;
+                                return (((1 / frac)**2) * bet)->floor
+                            }
+
+                            @frac = teamB.members->size / teamA.members->size;
+                            return (((1 / frac)**2) * bet)->floor
+
+                        }
+                                                
+                        
                         @choice = windowEvent.queueChoices(
-                            prompt: 'Bet how much? (payout - 2:1)',
+                            prompt: 'Bet how much?',
                             choices: [...bets]->map(to:::(value) <- String(from:value)),
                             canCancel: true,
                             onChoice::(choice) {
@@ -1576,8 +1624,8 @@ Interaction.new(
                                 choice = windowEvent.queueChoices(
                                     prompt: 'Bet on which team?',
                                     choices: [
-                                        teamAname,
-                                        teamBname
+                                        teamA.name + '(payout: +' + (payout(isTeamA:true)) + ')',
+                                        teamB.name + '(payout: +' + (payout(isTeamA:false)) + ')'
                                     ],
                                     canCancel: true,
                                     onChoice::(choice) {
@@ -1588,8 +1636,8 @@ Interaction.new(
                                       
                                         world.battle.start(
                                             party,                            
-                                            allies: teamA,
-                                            enemies: teamB,
+                                            allies: teamA.members,
+                                            enemies: teamB.members,
                                             landmark: {},
                                             renderable : {
                                                 render:: {
@@ -1600,7 +1648,7 @@ Interaction.new(
                                                 if (Number.random() < 0.7) ::<= {
                                                     windowEvent.queueMessage(text:random.pickArrayItem(list:[
                                                         '"YEAH, tear them limb from limb!"',
-                                                        'The croud jeers at team ' + (if (Number.random() < 0.5) teamAname else teamBname) + '.',  
+                                                        'The croud jeers at team ' + (if (Number.random() < 0.5) teamA.name else teamB.name) + '.',  
                                                         'The croud goes silent.',
                                                         'The croud goes wild in an uproar.',
                                                         'The crowd murmurs restlessly.',
@@ -1611,25 +1659,46 @@ Interaction.new(
                                             npcBattle: true,
                                             onEnd::(result) {
                                                 @aWon = result == Battle.RESULTS.ALLIES_WIN;
+                                                @win = payout(isTeamA:betOnA);
                                                 if (aWon) ::<= {
                                                     windowEvent.queueMessage(
-                                                        text: teamAname + ' wins!'
+                                                        text: teamA.name + ' wins!'
                                                     );                                    
+                                                    location.data.bet_winningTeam = teamA;
+                                                    foreach(teamA.members) ::(k, member) {
+                                                        when(!member.isIncapacitated()) empty;
+                                                        windowEvent.queueMessage(
+                                                            text:member.name + ' of team ' + teamA.name + ' was carried out of the arena...'
+                                                        );
+                                                        teamA.members->remove(key:teamA.members->findIndex(value:member));
+                                                    }
                                                 
                                                 } else ::<= {
                                                     windowEvent.queueMessage(
-                                                        text: teamBname + ' wins!'
+                                                        text: teamB.name + ' wins!'
                                                     );                                    
+                                                    location.data.bet_winningTeam = teamB;
+                                                    foreach(teamB.members) ::(k, member) {
+                                                        when(!member.isIncapacitated()) empty;
+                                                        windowEvent.queueMessage(
+                                                            text:member.name + ' of team ' + teamB.name + ' was carried out of the arena...'
+                                                        );
+                                                        teamB.members->remove(key:teamB.members->findIndex(value:member));
+                                                    }
                                                 }
+                                                
+                                                location.data.bet_teamA = empty;
+                                                location.data.bet_teamB = empty;
+                                                
                                                 
                                                 
                                                 // payout
                                                 if ((betOnA && aWon) || (!betOnA && !aWon)) ::<= {
                                                     world.accoladeEnable(name:'wonArenaBet');
                                                     windowEvent.queueMessage(
-                                                        text:'The party won ' + (bet)->floor + 'G.'
+                                                        text:'The party won ' + win + 'G.'
                                                     );                                    
-                                                    party.inventory.addGold(amount:(bet)->floor);
+                                                    party.inventory.addGold(amount:win);
                                                 } else ::<= {
                                                     windowEvent.queueMessage(
                                                         text:'The party lost ' + bet + 'G.'

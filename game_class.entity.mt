@@ -327,6 +327,7 @@
                     when(equip == empty) empty;
                     equip.equippedBy = this;
                 }
+                state.battleAI.setUser(user:this);
             },
 
             worldID : {
