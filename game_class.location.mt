@@ -611,7 +611,7 @@ Location.Base.new(data:{
     minStructureSize : 1,
 
     descriptions: [
-        "A rocky area with a clearly different color than the its surroundings."
+        "A rocky area with a clearly different color than its surroundings."
     ],
     
     interactions : [

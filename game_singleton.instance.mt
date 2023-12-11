@@ -64,7 +64,7 @@ import(module:'game_class.location.mt');
     return (xd**2 + yd**2)**0.5;
 }
 @:JSON = import(module:'Matte.Core.JSON');
-@:VERSION = '0.1.4b';
+@:VERSION = '0.1.5a';
 @world = import(module:'game_singleton.world.mt');
 import(module:'game_function.newrecord.mt');
 world.initializeNPCs();
@@ -144,9 +144,6 @@ return class(
                 windowEvent.queueMessage(
                     text: ' Wyvern Gate ' + VERSION + ' '
                 );
-                windowEvent.queueMessage(
-                    text: 'Note: this game is under heavy development. Depending on your platform, use either Number keys + Enter, gamepad up/down/left/right / confirm / cancel, or arrow keys / enter / backspace to navigate.\nGoodluck!'
-                );                
                 windowEvent.queueChoices(
                     choices : ['Load', 'New', 'Quit'],
                     topWeight: 0.75,

@@ -1919,7 +1919,7 @@ Interaction.new(
             @:approach = :: {
                 windowEvent.queueMessage(text:whom.name + ' approaches the wyvern statue slowly.');                
                 windowEvent.queueMessage(text:'They feel an energy, an aura from it...');                
-                windowEvent.queueMessage(text:'Its as if the statue calls for them. Calling for judgement...');                
+                windowEvent.queueMessage(text:'It\'s as if the statue calls for them. Calling for judgement...');                
                 windowEvent.queueAskBoolean(
                     prompt: 'Place hand on statue?',
                     onChoice::(which) {
