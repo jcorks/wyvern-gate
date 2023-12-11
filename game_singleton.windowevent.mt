@@ -140,6 +140,7 @@
             @:topWeight = data.topWeight; 
             @:defaultChoice = data.defaultChoice;
             @:onChoice = data.onChoice;
+            @:onHover = data.onHover;
             @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
 
             //if (canCancel) ::<= {
@@ -226,6 +227,10 @@
                     choice == CURSOR_ACTIONS.DOWN) ::<= {
                     data.defaultChoice = (cursorPos+1);
                 }
+                
+                if (onHover != empty)
+                    onHover(choice:cursorPos+1);
+                
                 renderThis(
                     data,
                     thisRender::{
@@ -328,6 +333,7 @@
             @:topWeight = data.topWeight;
             @:canCancel = data.canCancel;
             @:onChoice = data.onChoice;
+            @:onHover = data.onHover;
             
             @x = data.defaultX;
             @y = data.defaultY;
@@ -429,6 +435,9 @@
                 }
                 choicesModified->push(value:choice);
             }
+            
+            if (onHover != empty)
+                onHover(choice:which+1);
 
             renderThis(data, thisRender::{
                 renderText(
@@ -660,7 +669,7 @@
             // Like all UI choices, the weight can be chosen.
             // Prompt will be displayed, like speaker in the message callback
             //
-            queueChoices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, renderable, keep, onGetChoices, onGetPrompt, jumpTag, onLeave) {
+            queueChoices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetChoices, onGetPrompt, jumpTag, onLeave) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode: CHOICE_MODE.CURSOR,
@@ -671,6 +680,7 @@
                         canCancel: canCancel,
                         defaultChoice: defaultChoice,
                         onChoice: onChoice,
+                        onHover: onHover,
                         onLeave : onLeave,
                         keep: keep,
                         onGetChoices : onGetChoices,

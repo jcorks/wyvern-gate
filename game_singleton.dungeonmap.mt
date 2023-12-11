@@ -269,11 +269,11 @@
     @cavities = [];
     @:areas = [];
     
-    @:AREA_SIZE = 5; 
+    @:AREA_SIZE = 7; 
     
     @:AREA_GAP = random.pickArrayItem(
         list: [
-            1, 2, 3
+            1
         ]
     );
     
@@ -288,8 +288,8 @@
     );
     
     
-    @:AREA_WIDTH  = random.integer(from:4, to:7);
-    @:AREA_HEIGHT = random.integer(from:4, to:7);
+    @:AREA_WIDTH  = random.integer(from:3, to:6);
+    @:AREA_HEIGHT = random.integer(from:3, to:6);
 
     @gridNodes = [];    
     
@@ -722,7 +722,7 @@
                 y:centerY - 1
             ); 
             
-            if (node.waysOpen[NORTH]) ::<= {
+            if (node.waysOpen[NORTH] && y > 0) ::<= {
                 map.disableWall(x:centerX, y:centerY-1);   
 
                 for(centerY - (AREA_SIZE/2)->floor, centerY-1)::(i) {
@@ -737,7 +737,7 @@
                 }
 
             }
-            if (node.waysOpen[SOUTH]) ::<= {
+            if (node.waysOpen[SOUTH] && y < AREA_HEIGHT-1) ::<= {
                 map.disableWall(x:centerX, y:centerY+1);   
 
                 for(centerY+1, centerY+(AREA_SIZE/2)->floor+1)::(i) {
@@ -752,7 +752,7 @@
                 }
 
             }
-            if (node.waysOpen[EAST]) ::<= {
+            if (node.waysOpen[EAST] && x < AREA_WIDTH-1) ::<= {
                 map.disableWall(x:centerX+1, y:centerY);   
 
                 for(centerX+1, centerX+(AREA_SIZE/2)->floor+1)::(i) {
@@ -766,7 +766,7 @@
                     ); 
                 }
             }
-            if (node.waysOpen[WEST]) ::<= {
+            if (node.waysOpen[WEST] && x > 0) ::<= {
                 map.disableWall(x:centerX-1, y:centerY);   
                 
                 for(centerX - (AREA_SIZE/2)->floor, centerX-1)::(i) {

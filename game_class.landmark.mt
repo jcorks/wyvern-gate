@@ -326,6 +326,16 @@
                 dungeonLogic.step();
             },
             
+            wait ::(until) {
+                {:::} {
+                    forever ::{
+                        when(world.time == until) send()
+                        world.stepTime();
+                    }
+                }
+                this.map.title = this.name + ' - ' + world.timeString + '          ';
+            },
+            
             kind : {
                 get :: {
                     return state.base.name;
@@ -461,7 +471,8 @@
                         canCancel:true,
                         onGetChoices ::{
                             @choices = [                
-                                'Party'
+                                'Party',
+                                'Wait',
                             ];
                             
                             
@@ -480,7 +491,7 @@
                                 
 
                                 
-                            @:MAX_STATIC_CHOICES = 1;
+                            @:MAX_STATIC_CHOICES = 2;
                             match(choice-1) {
                               
                               (0): ::<={
@@ -488,6 +499,43 @@
                                 this.step();
                               },
                               
+                              (1): ::<= {
+                                windowEvent.queueChoices(
+                                    prompt: 'Wait until...',
+                                    choices : [
+                                        'Dawn',
+                                        'Early morning',
+                                        'Morning',
+                                        'Late morning',
+                                        'Midday',
+                                        'Afternoon',
+                                        'Late afternoon',
+                                        'Sunset',
+                                        'Early evening',
+                                        'Evening',
+                                        'Late evening',
+                                        'Midnight',
+                                        'The dead hour',
+                                        'The dead of the night',
+                                    ],
+                                    
+                                    canCancel: true,
+                                    onChoice ::(choice) {
+                                        when(choice == 0) empty;
+                                        
+                                        @:until = choice-1;
+                                        this.wait(until);
+                                        windowEvent.queueMessage(
+                                            text: 'The party waits...',
+                                            renderable : {
+                                                render ::{
+                                                    canvas.blackout();
+                                                }
+                                            }
+                                        )
+                                    }
+                                )
+                              },
                               
                               default: ::<= {
                                 when(choice == empty) empty;
@@ -892,7 +940,7 @@ Landmark.Base.new(
             {name: 'Enchantment Stand', rarity: 11},
             {name: 'Wyvern Statue', rarity: 15},
             {name: 'Small Chest', rarity: 16},
-            {name: 'Locked Chest', rarity: 11},
+            {name: 'Locked Chest', rarity: 12},
             {name: 'Magic Chest', rarity: 15},
 
 

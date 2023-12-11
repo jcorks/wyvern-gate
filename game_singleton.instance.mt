@@ -261,6 +261,7 @@ return class(
                 
                 
                 @:initialLoad :: {
+                        story.tier = 1;
                     @:keyhome = Item.new(
                         base: Item.Base.database.find(name:'Wyvern Key'),
                         creationHint: {
