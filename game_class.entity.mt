@@ -678,8 +678,8 @@
                         return false;                                                            
                     }
                     
-                    // flat 15% chance if is Wyvern of Light! because final fight
-                    when(dodgeable && this.species.name == 'Wyvern of Light' && random.try(percentSuccess:15)) ::<= {
+                    // flat 15% chance if is Wyvern! because hard
+                    when(dodgeable && this.species.name.contains(key:'Wyvern of') && random.try(percentSuccess:15)) ::<= {
                         windowEvent.queueMessage(text:random.pickArrayItem(list:[
                             'You will have to try harder than that, Chosen!',
                             'Come at me; do not hold back, Chosen!',

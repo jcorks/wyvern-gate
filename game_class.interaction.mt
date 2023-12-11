@@ -809,23 +809,32 @@ Interaction.new(
                         world.accoladeEnable(name:'soldWorthlessItem');
                         price = 1;
                     }
-                    world.accoladeIncrement(name:'sellCount');
+                    windowEvent.queueAskBoolean(
+                        prompt:'Sell the ' + item.name + ' for ' + price + 'G?',
+                        onChoice::(which) {
+                            when(which == false) empty;
 
-                    if (item.name->contains(key:'Wyvern Key of'))
-                        world.accoladeEnable(name:'gotRidOfWyvernKey');      
+                            world.accoladeIncrement(name:'sellCount');
+
+                            if (item.name->contains(key:'Wyvern Key of'))
+                                world.accoladeEnable(name:'gotRidOfWyvernKey');      
 
 
-                    if (price > 500) ::<= {
-                        world.accoladeEnable(name:'soldItemOver500G');
-                    }
+                            if (price > 500) ::<= {
+                                world.accoladeEnable(name:'soldItemOver500G');
+                            }
 
-                    
-                    windowEvent.queueMessage(text: 'Sold the ' + item.name + ' for ' + price + 'G');
+                            
+                            windowEvent.queueMessage(text: 'Sold the ' + item.name + ' for ' + price + 'G');
 
-                    party.inventory.addGold(amount:price);
-                    party.inventory.remove(item);
-                    
-                    location.inventory.add(item);
+                            party.inventory.addGold(amount:price);
+                            party.inventory.remove(item);
+                            
+                            location.inventory.add(item);
+
+
+                        }
+                    )
                 }
             );
         },
@@ -907,15 +916,31 @@ Interaction.new(
 
             
             
-            
+            @hoveredItem;
             pickItem(
                 inventory:location.inventory,
                 canCancel: true,
-                leftWeight: 0.5,
+                leftWeight: 0.6,
                 topWeight: 0.5,
                 onGetPrompt:: <-  'Buy which? (current: ' + party.inventory.gold + 'G)',
                 showGold: true,
                 goldMultiplier: (0.5 / 5),
+                onHover ::(item) {
+                    hoveredItem = item;
+                },
+                
+                renderable : {
+                    render ::{
+                        when(hoveredItem == empty) empty;
+                        canvas.renderTextFrameGeneral(
+                            title: 'Equip stats:',
+                            lines: hoveredItem.stats.getRates()->split(token:'\n'),
+                            leftWeight: 0,
+                            topWeight: 0.5
+                        )
+                    }
+                },
+                
                 onPick::(item) {
                     when(item == empty) empty;
                     @price = (item.price * (0.5 / 5))->ceil;
@@ -979,6 +1004,8 @@ Interaction.new(
                                 @:choice = windowEvent.queueChoices(
                                     prompt: 'Compare equipment for whom?',
                                     choices: memberNames,
+                                    keep:true,
+                                    canCancel: true,
                                     onChoice::(choice) {
                                         @:user = party.members[choice-1];
                                         @slot = user.getSlotsForItem(item)[0];

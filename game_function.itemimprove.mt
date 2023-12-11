@@ -128,7 +128,7 @@ return ::(user, item, inBattle) {
                                             if (item.equippedBy != empty) ::<= {
                                                 @:oldStats = StatSet.new();
                                                 @equiper = item.equippedBy;
-                                                oldStats.load(serialized:equiper.stats());
+                                                oldStats.load(serialized:equiper.stats.save());
                                                 
                                                 @slot = equiper.unequipItem(item, silent:true);
                                                 equiper.equip(item, slot, silent:true);

@@ -220,12 +220,14 @@
                 pressurePlate.data.pressed = false;
 
 
-                // for every pressure plate, there is a trapped 
-                // pressure plate.
-                @:pressurePlateFake = landmark_.addLocation(
-                    name:'Pressure Plate'
-                );
-                pressurePlateFake.data.trapped = true;
+                if (random.flipCoin()) ::<= {
+                    // for every pressure plate, there is a trapped 
+                    // pressure plate.
+                    @:pressurePlateFake = landmark_.addLocation(
+                        name:'Pressure Plate'
+                    );
+                    pressurePlateFake.data.trapped = true;
+                }
             },
             
             
@@ -1772,8 +1774,8 @@ Location.Base.new(data:{
     descriptions: [
     ],
     interactions : [
-        'press-pressure-plate',
-        'examine-plate'
+        'examine-plate',
+        'press-pressure-plate'
     ],
     
     aggressiveInteractions : [
