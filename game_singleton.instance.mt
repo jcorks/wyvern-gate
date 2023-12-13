@@ -258,7 +258,7 @@ return class(
                 
                 
                 @:initialLoad :: {
-                        story.tier = 1;
+                        //story.tier = 1;
                     @:keyhome = Item.new(
                         base: Item.Base.database.find(name:'Wyvern Key'),
                         creationHint: {
@@ -291,6 +291,8 @@ return class(
                     @:Species = import(module:'game_class.species.mt');
                     @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:story.levelHint);
                     @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:story.levelHint-2);
+                    p0.normalizeStats(min:3, max:10);
+                    p1.normalizeStats(min:2, max:7);
                     // debug
                         /*
                         //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'

@@ -20,6 +20,17 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 
+@:NAMES = [
+    'HP',
+    'AP',
+    'ATK',
+    'INT',
+    'DEF',
+    'LUK',
+    'SPD',
+    'DEX'
+]
+
 
 @:StatSet = LoadableClass.new(
     name : 'Wyvern.Entity.StatSet',
@@ -31,6 +42,14 @@
             this.defaultLoad(HP, AP, ATK, INT, DEF, LUK, SPD, DEX);
         return this;
     },
+
+    statics: {
+
+        NAMES : {
+            get ::<- NAMES
+        }
+    },
+
     define:::(this) {
         @HP_  = 0;
         @MP_  = 0;

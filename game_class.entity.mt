@@ -679,7 +679,7 @@
                     }
                     
                     // flat 15% chance if is Wyvern! because hard
-                    when(dodgeable && this.species.name.contains(key:'Wyvern of') && random.try(percentSuccess:15)) ::<= {
+                    when(dodgeable && this.species.name->contains(key:'Wyvern of') && random.try(percentSuccess:15)) ::<= {
                         windowEvent.queueMessage(text:random.pickArrayItem(list:[
                             'You will have to try harder than that, Chosen!',
                             'Come at me; do not hold back, Chosen!',
@@ -925,6 +925,25 @@
                 get :: {
                     return state.stats;
                 }
+            },
+
+            normalizeStats ::(min, max) {
+                @aMin = 9999999;
+                @aMax =-9999999;
+                @stats = state.stats.save();
+                foreach(StatSet.NAMES) ::(index, name) {
+                    when(name == 'HP' || name == 'AP') empty;
+                    @val = stats[name];
+                    if (val < aMin) aMin = val;
+                    if (val > aMax) aMax = val;
+                }
+
+                foreach(StatSet.NAMES) ::(index, name) {
+                    when(name == 'HP' || name == 'AP') empty;
+                    @val = stats[name];
+                    stats[name] = (((val - aMin) / (aMax - aMin)) * (max - min) + min)->floor;
+                }
+                state.stats.load(serialized:stats);
             },
             
             autoLevel :: {
