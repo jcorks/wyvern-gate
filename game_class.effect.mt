@@ -24,47 +24,26 @@
 @:random = import(module:'game_singleton.random.mt');
 
 
-@:EFFECT_NAME = "Wyvern.Effect";
 
-@:Effect = class(
-    name: EFFECT_NAME,
-    inherits: [Database.Item],
-    new::(data) {
-        @:this = Effect.defaultNew();
-        this.initialize(data);
-        return this;
-    },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name : EFFECT_NAME,
-                attributes : {
-                    name : String,
-                    description : String,
-                    battleOnly : Boolean,
-                    skipTurn : Boolean, // whether this effect makes the user not act for a turn
-                    stats : StatSet.type,
-                    onAffliction : Function, //Called once when first activated
-                    onPostAttackOther : Function, // Called AFTER the user has explicitly damaged a target
-                    onPreAttackOther : Function, // called when user is giving damage
-                    onAttacked : Function, // called when user is attacked, before being damaged.
-                    onRemoveEffect : Function, //Called once when removed. All effects will be removed at some point.
-                    onDamage : Function, // when the holder of the effect is hurt
-                    onNextTurn : Function, //< on end phase of turn once added as an effect. Not called if duration is 0
-                    onStatRecalculate : Function, // on start of a turn. Not called if duration is 0
-                    stackable : Boolean // whether multiple of the same effect can coexist
-                } 
-            );
-            return {
-                get ::<- db,
-            }
-        }
-    },
-    define:::(this) {
-        Effect.database.add(item:this);
-    }
+@:Effect = Database.newBase(
+    name: "Wyvern.Effect",
+    attributes : {
+        name : String,
+        description : String,
+        battleOnly : Boolean,
+        skipTurn : Boolean, // whether this effect makes the user not act for a turn
+        stats : StatSet.type,
+        onAffliction : Function, //Called once when first activated
+        onPostAttackOther : Function, // Called AFTER the user has explicitly damaged a target
+        onPreAttackOther : Function, // called when user is giving damage
+        onAttacked : Function, // called when user is attacked, before being damaged.
+        onRemoveEffect : Function, //Called once when removed. All effects will be removed at some point.
+        onDamage : Function, // when the holder of the effect is hurt
+        onNextTurn : Function, //< on end phase of turn once added as an effect. Not called if duration is 0
+        onStatRecalculate : Function, // on start of a turn. Not called if duration is 0
+        stackable : Boolean // whether multiple of the same effect can coexist
+    } 
 );
-
 
 
     ////////////////////// SPECIAL EFFECTS

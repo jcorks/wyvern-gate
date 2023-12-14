@@ -22,37 +22,17 @@
 
 @:SPECIES_NAME = 'Wyvern.Species'
 
-@:Species = class(
-    name : SPECIES_NAME,
-    inherits : [Database.Item],
-    new ::(data) {
-        @:this = Species.defaultNew();
-        this.initialize(data);
-        return this;
-    },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name : SPECIES_NAME,
-                attributes : {
-                    name : String,
-                    rarity: Number,
-                    qualities : Object,
-                    description : String,
-                    growth : StatSet.type,
-                    passives : Object,
-                    special : Boolean
-                }            
-            );
-            return {
-                get ::<- db
-            }
-        }
-    },
-    name: 'Wyvern.Species',
-    define:::(this) {
-        Species.database.add(item:this);
-    }
+@:Species = Database.newBase(
+    name : 'Wyvern.Species',
+    attributes : {
+        name : String,
+        rarity: Number,
+        qualities : Object,
+        description : String,
+        growth : StatSet.type,
+        passives : Object,
+        special : Boolean
+    }            
 );
 
 

@@ -137,38 +137,17 @@
 
 
 
-@:ENTITY_QUALITY_BASE_NAME = 'Wyvern.EntityQuality.Base';
-EntityQuality.Base = class(
-    name : ENTITY_QUALITY_BASE_NAME,
-    inherits : [Database.Item],
-    new ::(data) {
-        @:this = EntityQuality.Base.defaultNew();
-        this.initialize(data);
-        return this;
-    },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name : ENTITY_QUALITY_BASE_NAME,            
-                attributes : {
-                    name : String,
-                    plural : Boolean,
-                    appearanceChance : Number,
-                    descriptions : Object,
-                    trait0 : Object,
-                    trait1 : Object,
-                    trait2 : Object
-                }            
-            );
-            return {
-                get ::<- db
-            }
-        }
-
-    },
-    define:::(this) {
-        EntityQuality.Base.database.add(item:this);
-    }
+EntityQuality.Base = Database.newBase(
+    name : 'Wyvern.EntityQuality.Base',     
+    attributes : {
+        name : String,
+        plural : Boolean,
+        appearanceChance : Number,
+        descriptions : Object,
+        trait0 : Object,
+        trait1 : Object,
+        trait2 : Object
+    }            
 );
 
 

@@ -21,36 +21,15 @@
 
 
 
-@:ITEM_ENCHANT_CONDITION_NAME = 'Wyvern.ItemEnchantCondition';
 
 // conditions are checked at the end of turns
-@:ItemEnchantCondition = class(
-    name : ITEM_ENCHANT_CONDITION_NAME,
-    inherits : [Database.Item],
-    new ::(data) {
-        @:this = ItemEnchantCondition.defaultNew();
-        this.initialize(data);
-        return this;
-    },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name : ITEM_ENCHANT_CONDITION_NAME,
-                attributes : {
-                    name : String,
-                    description : String,
-                    isState : Boolean,
-                    onTurnCheck : Function
-                }
-            )            
-            return {
-                get ::<- db
-            }
-        }
-
-    },
-    define:::(this) {
-        ItemEnchantCondition.database.add(item:this);
+@:ItemEnchantCondition = Database.newBase(
+    name : 'Wyvern.ItemEnchantCondition',
+    attributes : {
+        name : String,
+        description : String,
+        isState : Boolean,
+        onTurnCheck : Function
     }
 );
 

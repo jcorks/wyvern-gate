@@ -30,42 +30,26 @@
     INAPPROPRIATE_TIME: 6
 }
 
-@:PERSONALITY_NAME = 'Wyvern.Personality';
-
-@:Personality = class(
-    name : PERSONALITY_NAME,
-    inherits: [Database.Item],
-    new ::(data) {
-        @:this = Personality.defaultNew();
-        this.initialize(data);
-        return this;
+@:Personality = Database.newBase(
+    name : 'Wyvern.Personality',
+    attributes : {
+        name : String,
+        growth : StatSet.type,
+        phrases : Object            
     },
+    
     statics : {
-        database  :::<= {
-            @db = Database.new(
-                name : PERSONALITY_NAME,
-                attributes : {
-                    name : String,
-                    growth : StatSet.type,
-                    phrases : Object            
-                }            
-            );
-            return {
-                get ::<- db,
-                set ::(value) <- db = value
-            }
-        },
-        SPEECH_EVENT : {get::<-SPEECH_EVENT}
+        SPEECH_EVENT : {get::<-SPEECH_EVENT}    
     },
-    define:::(this) {        
-        this.interface = {
+    
+    getInterface::(this) {
+        return {
             getPhrase ::(kind => Number) {
                 return Random.pickArrayItem(list:this.instance.phrases[kind]);
-            }
+            }        
         }
-        Personality.database.add(item:this);
     }
-);
+)
 
 Personality.new(data: {
     name: 'Calm',

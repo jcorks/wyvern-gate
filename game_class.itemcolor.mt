@@ -20,33 +20,12 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@:ITEM_COLOR_NAME = 'Wyvern.ItemColor';
-@:ItemColor = class(
-    name : ITEM_COLOR_NAME,
-    inherits : [Database.Item],
-    new ::(data) {
-        @:this = ItemColor.defaultNew();
-        this.initialize(data);
-        return this;
-    },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name : ITEM_COLOR_NAME,
-                attributes : {
-                    name : String,
-                    equipMod : StatSet.type, // percentages
-                }            
-            )
-            return {
-                get ::<- db,
-            }
-        }
-
-    },
-    define:::(this) {
-        ItemColor.database.add(item:this);
-    }
+@:ItemColor = Database.newBase(
+    name : 'Wyvern.ItemColor',
+    attributes : {
+        name : String,
+        equipMod : StatSet.type, // percentages
+    }            
 );
 
 

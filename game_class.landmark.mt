@@ -641,48 +641,28 @@
     }
 );
 
-@:LANDMARK_NAME = 'Wyvern.Landmark.Base'
-Landmark.Base = class(
-    name : LANDMARK_NAME,
-    inherits : [Database.Item],
-    new::(data) {
-        @:this = Landmark.Base.defaultNew();
-        this.initialize(data);
-        return this;
-    },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name : LANDMARK_NAME,
-                attributes : {
-                    name : String,
-                    legendName : String,
-                    symbol : String,
-                    rarity: Number,
-                    isUnique : Boolean,
-                    minLocations : Number,
-                    maxLocations : Number,
-                    possibleLocations : Object,
-                    requiredLocations : Object,
-                    startingEvents : Object,
-                    canSave : Boolean,
-                    peaceful: Boolean,
-                    dungeonMap: Boolean,
-                    dungeonForceEntrance : Boolean,
-                    mapHint : Object,
-                    onCreate : Function,
-                    onVisit : Function,
-                    guarded : Boolean,
-                    pointOfNoReturn : Boolean
-                }
-            );
-            return {
-                get ::<- db,
-            }
-        }
-    },
-    define:::(this) {
-        Landmark.Base.database.add(item:this);
+Landmark.Base = Database.newBase(
+    name : 'Wyvern.Landmark.Base',
+    attributes : {
+        name : String,
+        legendName : String,
+        symbol : String,
+        rarity: Number,
+        isUnique : Boolean,
+        minLocations : Number,
+        maxLocations : Number,
+        possibleLocations : Object,
+        requiredLocations : Object,
+        startingEvents : Object,
+        canSave : Boolean,
+        peaceful: Boolean,
+        dungeonMap: Boolean,
+        dungeonForceEntrance : Boolean,
+        mapHint : Object,
+        onCreate : Function,
+        onVisit : Function,
+        guarded : Boolean,
+        pointOfNoReturn : Boolean
     }
 );
 

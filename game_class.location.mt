@@ -348,75 +348,51 @@
 );
 
 
-@:LOCATION_NAME = 'Wyvern.Location.Base';
+Location.Base = Database.newBase(
+    name: 'Wyvern.Location.Base',
+    attributes : {
+        name: String,
+        rarity: Number,
+        descriptions : Object,
+        symbol : String,
+        
+        // List of interaction names
+        interactions : Object,
+        
+        // List of interaction names that will mark you as 
+        // hostile by the owner / occupants. Might initiate 
+        // combat
+        aggressiveInteractions : Object,
+        
+        ownVerb : String,
+        // number of people aside from the owner
+        minOccupants : Number,
+        // number of people aside from the owner
+        maxOccupants : Number,
+        
+        // Whether there can only be one per landmark.
+        // This is strictly followed in dungeons.
+        onePerLandmark: Boolean,
 
-Location.Base = class(
-    name: LOCATION_NAME,
-    inherits : [Database.Item],
-    new::(data) {
-        @:this = Location.Base.defaultNew();
-        this.initialize(data);
-        return this;    
-    },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name: LOCATION_NAME,
-                attributes : {
-                    name: String,
-                    rarity: Number,
-                    descriptions : Object,
-                    symbol : String,
-                    
-                    // List of interaction names
-                    interactions : Object,
-                    
-                    // List of interaction names that will mark you as 
-                    // hostile by the owner / occupants. Might initiate 
-                    // combat
-                    aggressiveInteractions : Object,
-                    
-                    ownVerb : String,
-                    // number of people aside from the owner
-                    minOccupants : Number,
-                    // number of people aside from the owner
-                    maxOccupants : Number,
-                    
-                    // Whether there can only be one per landmark.
-                    // This is strictly followed in dungeons.
-                    onePerLandmark: Boolean,
-
-                    // when the location is interacted with, before displaying options
-                    // The return value is whether to continue with interaction options 
-                    // or not.
-                    onInteract : Function,
-                    
-                    // Called on first time interaction is attempted. 
-                    onFirstInteract : Function,
-                    
-                    // when the location is created
-                    onCreate : Function,
-                    // called by the world when the time of day changes
-                    onTimeChange : Function,
-                    // the type of location it is
-                    category : Number,
-                    
-                    // in structural maps, this determines the structure 
-                    // size in min units.
-                    minStructureSize : Number
-                }
-            );
-
-
-            return {
-                get ::<- db
-            }
-        }
-    },
-    define:::(this) {
-        Location.Base.database.add(item:this);
+        // when the location is interacted with, before displaying options
+        // The return value is whether to continue with interaction options 
+        // or not.
+        onInteract : Function,
+        
+        // Called on first time interaction is attempted. 
+        onFirstInteract : Function,
+        
+        // when the location is created
+        onCreate : Function,
+        // called by the world when the time of day changes
+        onTimeChange : Function,
+        // the type of location it is
+        category : Number,
+        
+        // in structural maps, this determines the structure 
+        // size in min units.
+        minStructureSize : Number
     }
-
 );
 
 Location.Base.new(data:{

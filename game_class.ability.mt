@@ -24,36 +24,22 @@
 @:StateFlags = import(module:'game_class.stateflags.mt');
 
 
-@:ABILITY_NAME = 'Wyvern.Ability';
+@:Ability = Database.newBase(
+    name : 'Wyvern.Ability',
+    attributes : {
+        name : String,
+        description : String,
+        targetMode : Number,
+        usageHintAI : Number,
+        oncePerBattle : Boolean,
+        durationTurns : Number, // multiduration turns supercede the choice of action
+        apCost : Number,
+        hpCost : Number,
 
-@:Ability = class(
-    name : ABILITY_NAME,    
-    inherits: [Database.Item],
-    new ::(data) {
-        @this = Ability.defaultNew();
-        this.initialize(data);
-        return this;
+        onAction : Function
     },
+
     statics : ::<= {
-        @database = Database.new(
-            name: ABILITY_NAME,
-            attributes : {
-                name : String,
-                description : String,
-                targetMode : Number,
-                usageHintAI : Number,
-                oncePerBattle : Boolean,
-                durationTurns : Number, // multiduration turns supercede the choice of action
-                apCost : Number,
-                hpCost : Number,
-
-                onAction : Function
-            } 
-        );
-
-
-
-
         @TARGET_MODE = {
             ONE     : 0,    
             ALLALLY : 1,    
@@ -72,16 +58,9 @@
         } 
         
         return {
-            database : {
-                get ::<- database,
-            },
             TARGET_MODE : {get::<- TARGET_MODE},
             USAGE_HINT : {get::<- USAGE_HINT}  
         }       
-    },
-    define:::(this) {
-        // adds item to database and applies attributes
-        Ability.database.add(item:this);
     }
 );
 

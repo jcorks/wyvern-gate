@@ -132,39 +132,18 @@
 
 );
 
-@:ITEM_ENCHANT_BASE_NAME = 'Wyvern.ItemEnchant.Base';
-
-ItemEnchant.Base = class(
-    name : ITEM_ENCHANT_BASE_NAME,
-    inherits : [Database.Item],
-    new ::(data) {
-        @:this = ItemEnchant.Base.defaultNew();
-        this.initialize(data);
-        return this;
-    },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name : ITEM_ENCHANT_BASE_NAME,
-                attributes : {
-                    name : String,
-                    description : String,
-                    levelMinimum : Number,
-                    equipMod : StatSet.type, // percentages
-                    useEffects : Object,
-                    equipEffects : Object,
-                    triggerConditionEffects : Object,
-                    priceMod : Number,
-                    tier : Number
-                }            
-            );
-            return {
-                get ::<- db,
-            }
-        }
-    },
-    define:::(this) {
-        ItemEnchant.Base.database.add(item:this);
+ItemEnchant.Base = Database.newBase(
+    name : 'Wyvern.ItemEnchant.Base',
+    attributes : {
+        name : String,
+        description : String,
+        levelMinimum : Number,
+        equipMod : StatSet.type, // percentages
+        useEffects : Object,
+        equipEffects : Object,
+        triggerConditionEffects : Object,
+        priceMod : Number,
+        tier : Number
     }
 );
 

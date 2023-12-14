@@ -20,37 +20,20 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@:MATERIAL_NAME = 'Wyvern.Material'; 
-@:Material = class(
-    name : MATERIAL_NAME,
-    inherits : [Database.Item],
-    new ::(data) {
-        @:this = Material.defaultNew();
-        this.initialize(data);
-        return this;
-    },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name : MATERIAL_NAME,
-                attributes : {
-                    name : String,
-                    rarity : Number,
-                    tier : Number,
-                    description : String,
-                    statMod : StatSet.type, // percentages
-                    pricePercentMod : Number
-                }            
-            );
-            return {
-                get ::<- db
-            }
-        }
-    },
-    define:::(this) {
-        Material.database.add(item:this);
-    }
+@:Material = Database.newBase(
+    name : 'Wyvern.Material',
+    attributes : {
+        name : String,
+        rarity : Number,
+        tier : Number,
+        description : String,
+        statMod : StatSet.type, // percentages
+        pricePercentMod : Number
+    }            
 );
+
+
+
 
 
 Material.new(

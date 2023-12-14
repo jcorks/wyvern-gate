@@ -28,33 +28,12 @@
 @:correctA = import(module:'game_function.correcta.mt');
 
 
-@:INTERACTION_NAME = 'Wyvern.Interaction';
-
-@:Interaction = class(
-    name : INTERACTION_NAME,
-    inherits: [Database.Item],
-    new::(data) {
-        @:this = Interaction.defaultNew();
-        this.initialize(data);
-        return this;
-    },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name : INTERACTION_NAME,
-                attributes : {
-                    name : String,
-                    displayName : String,
-                    onInteract : Function
-                }
-            );
-            return {
-                get ::<- db
-            }
-        }
-    },
-    define:::(this) {
-        Interaction.database.add(item:this);
+@:Interaction = Database.newBase(
+    name : 'Wyvern.Interaction',
+    attributes : {
+        name : String,
+        displayName : String,
+        onInteract : Function
     }
 );
 

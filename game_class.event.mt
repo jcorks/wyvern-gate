@@ -146,37 +146,15 @@
 );
 
 
-@:EVENT_BASE_NAME = 'Wyvern.Event.Base';
-
-Event.Base = class(
-    name : EVENT_BASE_NAME,
-    inherits : [Database.Item],
-    new::(data) {
-        @:this = Event.Base.defaultNew();
-        this.initialize(data);
-        return this;
-    },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name : EVENT_BASE_NAME,
-                attributes : {
-                    name : String,
-                    rarity: Number,
-                    onEventStart : Function,
-                    onEventUpdate : Function,
-                    onEventEnd : Function
-                }            
-            );
-            return {
-                get ::<- db
-            }
-        }
-    },
-    define:::(this) {
-        Event.Base.database.add(item:this);
-    }
-
+Event.Base = Database.newBase(
+    name : 'Wyvern.Event.Base',
+    attributes : {
+        name : String,
+        rarity: Number,
+        onEventStart : Function,
+        onEventUpdate : Function,
+        onEventEnd : Function
+    }            
 );
 
 

@@ -53,6 +53,10 @@
                     landmark:landmark_,
                     data:state.data
                 );
+            },
+            
+            isActive ::{
+                return state.base.isActive(data:state.data);
             }
         }
     }
@@ -61,36 +65,15 @@
 
 
 
-@:LANDMARKEVENT_BASE_NAME = 'Wyvern.LandmarkEvent.Base';
-LandmarkEvent.Base = class(
-    name : LANDMARKEVENT_BASE_NAME,
-    inherits : [Database.Item],
-    new ::(data) {
-        @:this = LandmarkEvent.Base.defaultNew();
-        this.initialize(data);
-        return this;
-    },
-    statics : {
-        database  :::<= {
-            @:db = Database.new(
-                name: LANDMARKEVENT_BASE_NAME,
-                attributes : {
-                    name : String,
-                    startup : Function,
-                    step : Function
-                }
-            );
-            
-            return {
-                get ::<- db 
-            }
-        }
-    },
-    define:::(this) {
-        LandmarkEvent.Base.database.add(item:this);
+LandmarkEvent.Base = Database.newBase(
+    name:'Wyvern.LandmarkEvent.Base',
+    attributes : {
+        name : String,
+        startup : Function,
+        step : Function,
+        isActive : Function
     }
-);    
-
+);
 
 
 
@@ -109,6 +92,10 @@ LandmarkEvent.Base.new(
         
         step ::(data, landmark) {
             data.step();
+        },
+        
+        isActive ::(data) {
+            return data.isActive()
         }
     }
 );

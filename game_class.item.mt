@@ -651,64 +651,46 @@
 );
 
 
-@:ITEM_BASE_NAME = 'Wyvern.Item.Base';
-Item.Base = class(
-    name : ITEM_BASE_NAME,
-    inherits : [Database.Item],
-    new ::(data) {
-        @:this = Item.Base.defaultNew();
-        this.initialize(data);
-        return this;
+Item.Base = Database.newBase(
+    name: 'Wyvern.Item.Base',
+    attributes : {
+        name : String,
+        description : String,
+        examine : String,
+        equipType : Number,
+        rarity : Number,
+        weight : Number,
+        levelMinimum : Number,
+        equipMod : StatSet.type,
+        canHaveEnchants: Boolean,
+        canHaveTriggerEnchants : Boolean,
+        enchantLimit : Number,
+        hasQuality : Boolean,
+        hasMaterial : Boolean,
+        isApparel : Boolean,
+        isUnique : Boolean,
+        keyItem : Boolean,
+        useEffects : Object,
+        equipEffects : Object,
+        attributes : Number,
+        useTargetHint : Number,
+        onCreate : Function,
+        basePrice : Number,
+        canBeColored: Boolean,
+        hasSize : Boolean,
+        tier : Number,
+        possibleAbilities : Object
+    
     },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name: ITEM_BASE_NAME,
-                attributes : {
-                    name : String,
-                    description : String,
-                    examine : String,
-                    equipType : Number,
-                    rarity : Number,
-                    weight : Number,
-                    levelMinimum : Number,
-                    equipMod : StatSet.type,
-                    canHaveEnchants: Boolean,
-                    canHaveTriggerEnchants : Boolean,
-                    enchantLimit : Number,
-                    hasQuality : Boolean,
-                    hasMaterial : Boolean,
-                    isApparel : Boolean,
-                    isUnique : Boolean,
-                    keyItem : Boolean,
-                    useEffects : Object,
-                    equipEffects : Object,
-                    attributes : Number,
-                    useTargetHint : Number,
-                    onCreate : Function,
-                    basePrice : Number,
-                    canBeColored: Boolean,
-                    hasSize : Boolean,
-                    tier : Number,
-                    possibleAbilities : Object
-                
-                }                
-            )
-
-            return {
-                get ::<- db
-            }
-        },
-    },
-    define:::(this) {
-        this.interface = {
+    
+    getInterface::(this) {
+        return {
             hasAttribute :: (attribute) {
                 return (this.attributes & attribute) != 0;
-            }
-        }
-        Item.Base.database.add(item:this);
-    }
-);
+            }   
+        } 
+    }          
+)
 
 
 

@@ -19,37 +19,16 @@
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 
-@:APPAREL_NAME = 'Wyvern.ApparelMaterial'
-
-@:ApparelMaterial = class(
-    name : APPAREL_NAME,
-    inherits : [Database.Item],
-    new ::(data) {
-        @:this = ApparelMaterial.defaultNew();
-        this.initialize(data);
-        return this;
-    },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name: APPAREL_NAME,
-                attributes : {
-                    name : String,
-                    rarity : Number,
-                    tier : Number,
-                    description : String,
-                    statMod : StatSet.type, // percentages
-                    pricePercentMod : Number
-                }            
-            );
-            return {
-                get ::<- db
-            }
-        }
-    },
-    define:::(this) {
-        ApparelMaterial.database.add(item:this);
-    }
+@:ApparelMaterial = Database.newBase(
+    name: 'Wyvern.ApparelMaterial',
+    attributes : {
+        name : String,
+        rarity : Number,
+        tier : Number,
+        description : String,
+        statMod : StatSet.type, // percentages
+        pricePercentMod : Number
+    }            
 );
 
 

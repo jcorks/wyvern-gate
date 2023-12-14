@@ -20,33 +20,12 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@:ITEM_DESIGN_NAME = 'Wyvern.ItemDesign';
-@:ItemDesign = class(
-    name : ITEM_DESIGN_NAME,
-    inherits : [Database.Item],
-    new ::(data) {
-        @:this = ItemDesign.defaultNew();
-        this.initialize(data);
-        return this;
-    },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name : ITEM_DESIGN_NAME,
-                attributes : {
-                    name : String,
-                    equipMod : StatSet.type, // percentages
-                }            
-            )
-            return {
-                get ::<- db,
-            }
-        }
-
-    },
-    define:::(this) {
-        ItemDesign.database.add(item:this);
-    }
+@:ItemDesign = Database.newBase(
+    name : 'Wyvern.ItemDesign',
+    attributes : {
+        name : String,
+        equipMod : StatSet.type, // percentages
+    }            
 );
 
 

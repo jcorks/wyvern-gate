@@ -105,41 +105,20 @@
     }
 );
 
-@:PROFESSION_BASE_NAME = 'Wyvern.Profession.Base'
-Profession.Base = class(
-    name : PROFESSION_BASE_NAME,   
-    inherits : [Database.Item],
-    new ::(data) {
-        @:this = Profession.Base.defaultNew();
-        this.initialize(data);
-        return this;
-    },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name : PROFESSION_BASE_NAME,   
-                attributes : {
-                    name : String,
-                    description : String,
-                    growth : StatSet.type,
-                    minKarma : Number,
-                    maxKarma : Number,
-                    abilities : Object,
-                    levelMinimum : Number,
-                    passives : Object,
-                    learnable : Boolean,
-                    weaponAffinity : String
-                }            
-            );
-            return {
-                get ::<- db
-            }
-        }
-       
-    }, 
-    define:::(this) {
-        Profession.Base.database.add(item:this);
-    }
+Profession.Base = Database.newBase(
+    name : 'Wyvern.Profession.Base',   
+    attributes : {
+        name : String,
+        description : String,
+        growth : StatSet.type,
+        minKarma : Number,
+        maxKarma : Number,
+        abilities : Object,
+        levelMinimum : Number,
+        passives : Object,
+        learnable : Boolean,
+        weaponAffinity : String
+    }            
 );
 
 

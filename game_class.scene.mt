@@ -25,35 +25,14 @@
 @:random = import(module:'game_singleton.random.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 
-@:SCENE_NAME = 'Wyvern.Scene'
-
-@:Scene = class(
-    name : SCENE_NAME,
-    inherits : [Database.Item],
-    new ::(data) {
-        @:this = Scene.defaultNew();
-        this.initialize(data);
-        return this;
+@:Scene = Database.newBase(
+    name : 'Wyvern.Scene',
+    attributes : {
+        name : String,
+        script : Object
     },
-    statics : {
-        database  :::<= {
-            @db = Database.new(
-                name : SCENE_NAME,
-                attributes : {
-                    name : String,
-                    script : Object
-                }
-            );
-
-            return {
-                get ::<- db,
-            }
-        }
-    },
-    define:::(this) {
-        
-        this.interface = {
-        
+    getInterface::(this) {
+        return {
             act::(onDone => Function, location, landmark) {
                 @:left = [...this.script];
                 
@@ -77,8 +56,6 @@
                 doNext();
             }
         }
-        
-        Scene.database.add(item:this);
     }
 );
 
