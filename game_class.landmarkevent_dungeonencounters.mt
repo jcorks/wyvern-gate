@@ -7,19 +7,14 @@
 @:AGGRESSIVE_DISTANCE = 5;
 
 
-@:DungeonController = class(
+@:DungeonEncounters = class(
     name: 'Wyvern.DungeonController',
-    new::(map => Object, island => Object, landmark => Object) {
-        @:this = DungeonController.defaultNew();
-        this.initialize(map, island, landmark);
-        return this;
-    },
+
     define:::(this) {
         @:entities = [];
         @map_;
         @island_;
         @landmark_;
-        @floorHint = 0;;
         @encountersOnFloor = 0;
 
         @:Entity = import(module:'game_class.entity.mt');
@@ -89,16 +84,9 @@
 
     
         this.interface = {
-            floorHint : {
-                set ::(value) {
-                    floorHint = value;
-                    encountersOnFloor = 0;
-                }
-            },
-            
-            initialize::(map, island, landmark) {
-                map_ = map;
-                island_ = island;
+            initialize::(landmark) {
+                map_ = landmark.map;
+                island_ = landmark.island;
                 landmark_ = landmark;
                 return this;
             },
@@ -159,7 +147,7 @@
                         ); 
                     }
 
-                    when (map_.getDistanceFromItem(data:ent) < AGGRESSIVE_DISTANCE + floorHint/2) ::<= {
+                    when (map_.getDistanceFromItem(data:ent) < AGGRESSIVE_DISTANCE + landmark_.floor/2) ::<= {
                         ent.pathTo = empty;                    
                         map_.moveTowardPointer(data:ent);                    
                     }
@@ -180,7 +168,7 @@
                 
                 
                 // add additional entities out of spawn points (stairs)
-                if ((entities->keycount < (if (floorHint == 0) 0 else (1+(floorHint/4)->ceil))) && landmark_.base.peaceful == false && Number.random() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
+                if ((entities->keycount < (if (landmark_.floor == 0) 0 else (1+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && Number.random() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
                     addEntity();
                     encountersOnFloor += 1;
                 }
@@ -189,4 +177,4 @@
         }
     }
 );
-return DungeonController;
+return DungeonEncounters;

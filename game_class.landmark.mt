@@ -21,7 +21,6 @@
 @:Database = import(module:'game_class.database.mt');
 @:DungeonMap = import(module:'game_singleton.dungeonmap.mt');
 @:StructureMap = import(module:'game_class.structuremap.mt');
-@:DungeonController = import(module:'game_class.dungeoncontroller.mt');
 @:distance = import(module:'game_function.distance.mt');
 @Location = empty; // circular dep.
 @:State = import(module:'game_class.state.mt');
@@ -29,7 +28,7 @@
 @:Map = import(module:'game_class.map.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
-
+@:LandmarkEvent = import(module:'game_class.landmarkevent.mt');
 
 
 
@@ -69,7 +68,6 @@
         if (Location == empty) Location = import(module:'game_class.location.mt');
 
         @island_;
-        @dungeonLogic;
         @structureMapBuilder; // only used in initialization
 
         @:world = import(module:'game_singleton.world.mt');
@@ -86,8 +84,8 @@
                 map : empty,
                 gate : empty,
                 stepsSinceLast: 0,
-                modData : {}
-            
+                modData : {},
+                events : []
             }
         );
 
@@ -122,7 +120,6 @@
 
                 if (base.dungeonMap) ::<= {
                     state.map = DungeonMap.create(parent:this, mapHint: base.mapHint);
-                    dungeonLogic = DungeonController.new(map:state.map, island:island_, landmark:this);
                 } else ::<= {
                     structureMapBuilder = StructureMap.new();//Map.new(mapHint: base.mapHint);
                     structureMapBuilder.initialize(mapHint:base.mapHint, parent:this);
@@ -212,10 +209,17 @@
                 if (floorHint != empty) ::<= {
                     state.floor = floorHint;
                     state.floor => Number;
-                    if (state.base.dungeonMap)
-                        dungeonLogic.floorHint = state.floor;
                 }
 
+                
+                foreach(base.startingEvents) ::(k, evt) {
+                    state.events->push(value:
+                        LandmarkEvent.new(
+                            parent: this,
+                            base: LandmarkEvent.Base.database.find(name:evt)
+                        )
+                    );
+                }
                 
                 this.base.onCreate(landmark:this, island:island_);
                 
@@ -257,12 +261,16 @@
                     )   
                 } else ::<= {                
                     state.load(parent:this, serialized)
-                    dungeonLogic = DungeonController.new(map:state.map, island:island_, landmark:this);
                 }
             },
 
             worldID : {
                 get ::<- state.worldID
+            },
+            
+            // can modify
+            events : {
+                get ::<- state.events
             },
         
             description : {
@@ -323,7 +331,9 @@
                 world.stepTime(isStep:true); 
                 this.map.title = this.name + ' - ' + world.timeString + '          ';
                 when(!state.base.dungeonMap) empty;
-                dungeonLogic.step();
+                foreach(state.events) ::(k, event) {
+                    event.step();
+                }
             },
             
             wait ::(until) {
@@ -654,6 +664,7 @@ Landmark.Base = class(
                     maxLocations : Number,
                     possibleLocations : Object,
                     requiredLocations : Object,
+                    startingEvents : Object,
                     canSave : Boolean,
                     peaceful: Boolean,
                     dungeonMap: Boolean,
@@ -691,6 +702,7 @@ Landmark.Base.new(
         guarded : true,
         canSave : true,
         pointOfNoReturn : false,
+        startingEvents : [],
         possibleLocations : [
             {name:'Home', rarity: 1},
             {name:'Tavern', rarity: 3},
@@ -731,6 +743,7 @@ Landmark.Base.new(
         canSave : true,
         pointOfNoReturn : false,
         dungeonForceEntrance: false,
+        startingEvents : [],
         possibleLocations : [
             {name:'Home', rarity: 1},
             //{name:'inn', rarity: 3},
@@ -777,6 +790,7 @@ Landmark.Base.new(
         canSave : true,
         pointOfNoReturn : false,
         dungeonForceEntrance: true,
+        startingEvents : [],
         possibleLocations : [
             {name:'Ore vein', rarity: 1},
             //{name:'inn', rarity: 3},
@@ -816,6 +830,7 @@ Landmark.Base.new(
         canSave : true,
         pointOfNoReturn : false,
         dungeonForceEntrance: true,
+        startingEvents : [],
         possibleLocations : [
 
         ],
@@ -851,6 +866,7 @@ Landmark.Base.new(
         canSave : true,
         pointOfNoReturn : false,
         dungeonForceEntrance: true,
+        startingEvents : [],
         possibleLocations : [                    
         ],
         requiredLocations : [
@@ -880,6 +896,9 @@ Landmark.Base.new(
         canSave : false,
         pointOfNoReturn : true,
         dungeonForceEntrance: false,
+        startingEvents : [
+            'dungeon-encounters'
+        ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
 
@@ -933,6 +952,9 @@ Landmark.Base.new(
         canSave : false,
         pointOfNoReturn : true,
         dungeonForceEntrance: false,
+        startingEvents : [
+            'dungeon-encounters'
+        ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
             {name: 'Fountain', rarity:18},
@@ -977,6 +999,9 @@ Landmark.Base.new(
         canSave : false,
         pointOfNoReturn : true,
         dungeonForceEntrance: false,
+        startingEvents : [
+            'dungeon-encounters'
+        ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
             {name: 'Fountain', rarity:18},
@@ -1024,6 +1049,9 @@ Landmark.Base.new(
         canSave : false,
         pointOfNoReturn : true,
         dungeonForceEntrance: false,
+        startingEvents : [
+            'dungeon-encounters'
+        ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
             {name: 'Fountain', rarity:18},
@@ -1071,6 +1099,8 @@ Landmark.Base.new(
         canSave : false,
         pointOfNoReturn : false,
         dungeonForceEntrance: false,
+        startingEvents : [
+        ],
         possibleLocations : [
             {name: 'Small Chest', rarity:3},
         ],
@@ -1108,6 +1138,8 @@ Landmark.Base.new(
         canSave : false,
         pointOfNoReturn : false,
         dungeonForceEntrance: false,
+        startingEvents : [
+        ],
         possibleLocations : [
             {name: 'Small Chest', rarity:5},
         ],
@@ -1148,6 +1180,8 @@ Landmark.Base.new(
         canSave : true,
         pointOfNoReturn : false,
         dungeonForceEntrance: false,
+        startingEvents : [
+        ],
         possibleLocations : [
         ],
         requiredLocations : [
@@ -1183,6 +1217,8 @@ Landmark.Base.new(
         canSave : true,
         pointOfNoReturn : false,
         dungeonForceEntrance: false,
+        startingEvents : [
+        ],
         possibleLocations : [
         ],
         requiredLocations : [
@@ -1219,6 +1255,8 @@ Landmark.Base.new(
         dungeonMap : true,
         pointOfNoReturn : false,
         dungeonForceEntrance: false,
+        startingEvents : [
+        ],
         possibleLocations : [
         ],
         requiredLocations : [
@@ -1256,6 +1294,8 @@ Landmark.Base.new(
         dungeonMap : true,
         pointOfNoReturn : false,
         dungeonForceEntrance: false,
+        startingEvents : [
+        ],
         possibleLocations : [
         ],
         requiredLocations : [
@@ -1292,6 +1332,8 @@ Landmark.Base.new(
         canSave : true,
         pointOfNoReturn : false,
         dungeonForceEntrance: true,
+        startingEvents : [
+        ],
         possibleLocations : [
             {name:'Home', rarity:5},
             {name:'Shop', rarity:40}
@@ -1336,6 +1378,8 @@ Landmark.Base.new(
             {name:'Farm', rarity:4}
         ],
         requiredLocations : [],
+        startingEvents : [
+        ],
         mapHint : {
             roomSize: 25,
             roomAreaSize: 7,
@@ -1366,6 +1410,8 @@ Landmark.Base.new(
             {name:'Home', rarity:1},
             {name:'Tavern', rarity:7},
             {name:'Farm', rarity:4}
+        ],
+        startingEvents : [
         ],
         requiredLocations : [],
         mapHint : {
@@ -1415,6 +1461,8 @@ Landmark.Base.new(
         requiredLocations : [
             'Small Chest'
         ],
+        startingEvents : [
+        ],
         mapHint: {
             roomSize: 60,
             wallCharacter: 'Y',
@@ -1444,6 +1492,8 @@ Landmark.Base.new(
         maxLocations : 0,
         guarded : false,
         canSave : true,
+        startingEvents : [
+        ],
         possibleLocations : [],
         requiredLocations : [],
         mapHint: {},
@@ -1469,6 +1519,8 @@ Landmark.Base.new(
         guarded : false,
         canSave : true,
         pointOfNoReturn : false,
+        startingEvents : [
+        ],
         possibleLocations : [],
         requiredLocations : [],
         mapHint: {},
@@ -1492,6 +1544,8 @@ Landmark.Base.new(
         minLocations : 0,
         maxLocations : 0,
         pointOfNoReturn : false,
+        startingEvents : [
+        ],
         possibleLocations : [],
         requiredLocations : [],
         mapHint: {},              
