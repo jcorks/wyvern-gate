@@ -877,7 +877,8 @@ Landmark.Base.new(
         pointOfNoReturn : true,
         dungeonForceEntrance: false,
         startingEvents : [
-            'dungeon-encounters'
+            'dungeon-encounters',
+            'item-specter'
         ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
@@ -921,7 +922,7 @@ Landmark.Base.new(
     data: {
         name : 'Shrine of Ice',
         legendName: 'Shrine',
-        symbol : 'O',
+        symbol : 'M',
         rarity : 100000,      
         isUnique : true,
         minLocations : 1,
@@ -933,7 +934,8 @@ Landmark.Base.new(
         pointOfNoReturn : true,
         dungeonForceEntrance: false,
         startingEvents : [
-            'dungeon-encounters'
+            'dungeon-encounters',
+            'item-specter'
         ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
@@ -967,7 +969,7 @@ Landmark.Base.new(
 Landmark.Base.new(
     data: {
         name : 'Shrine of Thunder',
-        symbol : 'O',
+        symbol : 'M',
         legendName: 'Shrine',
         rarity : 100000,      
         isUnique : true,
@@ -980,7 +982,8 @@ Landmark.Base.new(
         pointOfNoReturn : true,
         dungeonForceEntrance: false,
         startingEvents : [
-            'dungeon-encounters'
+            'dungeon-encounters',
+            'item-specter'
         ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
@@ -1017,7 +1020,7 @@ Landmark.Base.new(
 Landmark.Base.new(
     data: {
         name : 'Shrine of Light',
-        symbol : 'O',
+        symbol : 'M',
         legendName: 'Shrine',
         rarity : 100000,      
         isUnique : true,
@@ -1030,7 +1033,8 @@ Landmark.Base.new(
         pointOfNoReturn : true,
         dungeonForceEntrance: false,
         startingEvents : [
-            'dungeon-encounters'
+            'dungeon-encounters',
+            'item-specter'
         ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
@@ -1067,7 +1071,7 @@ Landmark.Base.new(
 Landmark.Base.new(
     data: {
         name : 'Shrine: Lost Floor',
-        symbol : 'O',
+        symbol : 'M',
         legendName: 'Shrine',
         rarity : 100000,      
         isUnique : true,

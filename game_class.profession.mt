@@ -1280,5 +1280,40 @@ Profession.Base.new(data:{
 }) 
 
 
+Profession.Base.new(data:{
+    name: 'Wyvern Specter',
+    weaponAffinity: 'None',
+    description : "", 
+    levelMinimum : 100,
+
+    growth: StatSet.new(
+        HP:  20,
+        AP:  20,
+        ATK: 20,
+        INT: 20,
+        DEF: 20,
+        SPD: 20,
+        LUK: 20,
+        DEX: 20
+    ),
+    minKarma : 0,
+    maxKarma : 50,
+    learnable : false,
+    
+    abilities : [
+        'Headhunter',
+        'Cure',
+        //'Magic Mist', // remove all effects
+        'Wild Swing',
+        'Triplestrike',
+        'Leg Sweep',
+        'Flash',
+        'Unarm'
+    ],
+    passives : [
+    ]
+}) 
+
+
 
 return Profession;

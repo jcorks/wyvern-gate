@@ -77,7 +77,26 @@ LandmarkEvent.Base = Database.newBase(
 
 
 
+LandmarkEvent.Base.new(
+    data : {
+        name: 'item-specter',
+        startup ::(landmark) {
+            @:ItemSpecter = import(module:'game_class.landmarkevent_itemspecter.mt');
+            @:a = ItemSpecter.new();
+            a.initialize(landmark);
+            return a;
+        },
 
+        
+        step ::(data, landmark) {
+            data.step();
+        },
+        
+        isActive ::(data) {
+            return data.isActive()
+        }
+    }
+);
 
 LandmarkEvent.Base.new(
     data : {

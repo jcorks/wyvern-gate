@@ -1002,4 +1002,28 @@ Species.new(data:{
     ]
 })
 
+
+Species.new(data:{
+    name : 'Wyvern Specter',
+    rarity : 2000000000000,
+    description: 'Ancient spirit',
+    growth : StatSet.new(
+        HP : 60,
+        AP : 10,
+        ATK: 10,
+        DEF: 10,
+        INT: 10,
+        LUK: 10,
+        SPD: 10,
+        DEX: 10
+    ),
+    qualities : [
+    ],
+    
+    special : true,
+    passives : [
+        'Apparition'
+    ]
+})
+
 return Species;

@@ -8,7 +8,7 @@
 
 
 @:DungeonEncounters = class(
-    name: 'Wyvern.DungeonController',
+    name: 'Wyvern.LandmarkEvent.DungeonEncounters',
 
     define:::(this) {
         @:entities = [];
@@ -75,7 +75,6 @@
                     text:random.pickArrayItem(list:[
                         'Are those foosteps? Be careful.',
                         'Hmm. Footsteps nearby.',
-                        'It\'s not safe here.',
                         'What? Footsteps?'
                     ])
                 );

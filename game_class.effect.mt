@@ -168,7 +168,7 @@ Effect.new(
 
         onDamage : ::(user, item, holder, from, damage) {
             windowEvent.queueMessage(text:holder.name + "'s defending stance reduces damage significantly!");
-            damage.amount *= 0.9;
+            damage.amount *= 0.1;
         },
         
         onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
@@ -179,6 +179,50 @@ Effect.new(
         }
     }
 )
+
+
+Effect.new(
+    data : {
+        name : 'Apparition',
+        description: 'Ghostly apparition makes it particularly hard to hit.',
+        battleOnly : true,
+        skipTurn : false,
+        stackable: false,
+        stats: StatSet.new(
+            DEX: 10000
+        ),
+        onAffliction : ::(user, item, holder) {
+
+        },
+
+        onRemoveEffect : ::(user, item, holder) {
+        },                
+        onPostAttackOther : ::(user, item, holder, to) {
+        },
+
+        onPreAttackOther : ::(user, item, holder, to, damage) {
+        },
+
+        onAttacked : ::(user, item, holder, by, damage) {
+        
+        },
+
+        onDamage : ::(user, item, holder, from, damage) {
+            if (random.try(percentSuccess:85)) ::<= {
+                windowEvent.queueMessage(text:holder.name + "'s ghostly body bends around the attack!");
+                damage.amount = 0;
+            }
+        },
+        
+        onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+        
+        },
+        onStatRecalculate : ::(user, item, holder, stats) {
+            
+        }
+    }
+)
+
 
 Effect.new(
     data : {
