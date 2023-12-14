@@ -499,7 +499,8 @@ Location.Base.new(data:{
     onFirstInteract ::(location){
         location.ownedBy = location.landmark.island.newInhabitant();
         @:Profession = import(module:'game_class.profession.mt');
-        location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Farmer'));                
+        location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Farmer'));  
+        location.ownedBy.normalizeStats();              
         @:story = import(module:'game_singleton.story.mt');
         
         for(0, 2+(Number.random()*4)->ceil)::(i) {
@@ -568,6 +569,7 @@ Location.Base.new(data:{
     maxOccupants : 0,
     onFirstInteract ::(location) {
         location.ownedBy = location.landmark.island.newInhabitant();
+        location.ownedBy.normalizeStats();              
         @:story = import(module:'game_singleton.story.mt');
     
         for(0, 2+(Number.random()*4)->ceil)::(i) {
@@ -762,7 +764,7 @@ Location.Base.new(data:{
             DEF:  11,
             LUK:  8,
             SPD:  25,
-            DEX:  10
+            DEX:  11
         ).save());
         location.ownedBy.heal(amount:9999, silent:true); 
         location.ownedBy.healAP(amount:9999, silent:true); 
@@ -837,14 +839,14 @@ Location.Base.new(data:{
             }
         }
         location.ownedBy.stats.load(serialized:StatSet.new(
-            HP:   200,
+            HP:   230,
             AP:   999,
-            ATK:  12,
+            ATK:  16,
             INT:  8,
             DEF:  7,
             LUK:  6,
-            SPD:  20,
-            DEX:  12
+            SPD:  60,
+            DEX:  14
         ).save());
         location.ownedBy.heal(amount:9999, silent:true); 
         location.ownedBy.healAP(amount:9999, silent:true); 
@@ -919,13 +921,13 @@ Location.Base.new(data:{
             }
         }
         location.ownedBy.stats.load(serialized:StatSet.new(
-            HP:   350,
+            HP:   400,
             AP:   999,
-            ATK:  15,
+            ATK:  20,
             INT:  10,
             DEF:  10,
             LUK:  9,
-            SPD:  30,
+            SPD:  100,
             DEX:  16
         ).save());
         location.ownedBy.heal(amount:9999, silent:true); 
@@ -1004,8 +1006,8 @@ Location.Base.new(data:{
         location.ownedBy.stats.load(serialized:StatSet.new(
             HP:   650,
             AP:   999,
-            ATK:  25,
-            INT:  10,
+            ATK:  30,
+            INT:  17,
             DEF:  3,
             LUK:  6,
             SPD:  100,
@@ -1061,6 +1063,7 @@ Location.Base.new(data:{
         @:Profession = import(module:'game_class.profession.mt');
         location.ownedBy = location.landmark.island.newInhabitant();            
         location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Trader'));
+        location.ownedBy.normalizeStats();              
         location.name = 'Shop';
         location.inventory.maxItems = 50;
 
@@ -1214,6 +1217,7 @@ Location.Base.new(data:{
         location.ownedBy = location.landmark.island.newInhabitant();            
         location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Blacksmith'));
         location.name = 'Blacksmith';
+        location.ownedBy.normalizeStats();
         @:story = import(module:'game_singleton.story.mt');
         for(0, 1 + (location.ownedBy.level / 4)->ceil)::(i) {
 
@@ -1276,6 +1280,7 @@ Location.Base.new(data:{
     maxOccupants : 6,
     onFirstInteract ::(location) {
         location.ownedBy = location.landmark.island.newInhabitant();            
+        location.ownedBy.normalizeStats();              
     },
     
     onInteract ::(location) {
@@ -1406,6 +1411,7 @@ Location.Base.new(data:{
     onCreate ::(location) {
         location.ownedBy = location.landmark.island.newInhabitant();
         location.name = location.ownedBy.profession.base.name + ' school';
+        location.ownedBy.normalizeStats();              
     },
     
     onTimeChange::(location, time) {

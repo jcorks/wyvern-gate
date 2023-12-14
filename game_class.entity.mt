@@ -927,7 +927,11 @@
                 }
             },
 
-            normalizeStats ::(min, max) {
+            normalizeStats ::(min, max, maxHP) {
+                if (min == empty) min = 3;
+                if (max == empty) max = 10;
+                if (maxHP == empty) maxHP = 12;
+            
                 @aMin = 9999999;
                 @aMax =-9999999;
                 @stats = state.stats.save();
@@ -943,7 +947,13 @@
                     @val = stats[name];
                     stats[name] = (((val - aMin) / (aMax - aMin)) * (max - min) + min)->floor;
                 }
+                
+                if (stats.HP > maxHP)
+                    stats.HP = maxHP;
+                
                 state.stats.load(serialized:stats);
+                if (state.hp > maxHP)
+                    state.hp = maxHP;
             },
             
             autoLevel :: {

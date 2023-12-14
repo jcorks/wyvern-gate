@@ -351,12 +351,18 @@ Interaction.new(
                 @:chance = Number.random();
                 match(true) {
                   // normal
-                  (chance < 0.6)::<= {
+                  (chance < 0.5)::<= {
                     windowEvent.queueMessage(
                         text:'Someone sits next to you.'
                     );   
                     
                     @:talkee = location.landmark.island.newInhabitant();
+                    // Here is the wild-west of stats. You could find someone stronger than normal here 
+                    // but its up in the air whether theyll join you.
+                    if (random.flipCoin())
+                        talkee.normalizeStats();
+                    
+                    
                     talkee.interactPerson(
                         party,
                         location,
@@ -411,7 +417,7 @@ Interaction.new(
                     windowEvent.queueAskBoolean(
                         prompt:'Play a game?',
                         onChoice::(which) {
-                            when(false) ::<= {
+                            when(which == false) ::<= {
                                 windowEvent.queueMessage(
                                     speaker: 'Wandering Gamblist',
                                     text:'"Suit yourself. Perhaps another time."'

@@ -1217,7 +1217,7 @@ Profession.Base.new(data:{
         'Frozen Flame',
         'Summon: Ice Elemental',
         'Ice',
-        'Magic Mist', // remove all effects
+        //'Magic Mist', // remove all effects
         'Wild Swing',
         'Sheer Cold'
     ],
@@ -1249,7 +1249,7 @@ Profession.Base.new(data:{
     abilities : [
         'Thunder',
         'Summon: Thunder Spawn',
-        'Magic Mist', // remove all effects
+        //'Magic Mist', // remove all effects
         'Wild Swing',
         'Triplestrike',
         'Leg Sweep',
@@ -1289,7 +1289,7 @@ Profession.Base.new(data:{
         'Sol Attunement',
         'Cure',
         'Summon: Guiding Light',
-        'Magic Mist', // remove all effects
+        //'Magic Mist', // remove all effects
         'Wild Swing',
         'Triplestrike',
         'Leg Sweep',

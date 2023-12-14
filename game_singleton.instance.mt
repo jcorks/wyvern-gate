@@ -291,8 +291,10 @@ return class(
                     @:Species = import(module:'game_class.species.mt');
                     @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:story.levelHint);
                     @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:story.levelHint-2);
-                    p0.normalizeStats(min:3, max:10);
-                    p1.normalizeStats(min:2, max:7);
+                    // theyre just normal people so theyll have some trouble against 
+                    // professionals.
+                    p0.normalizeStats();
+                    p1.normalizeStats();
                     // debug
                         /*
                         //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'

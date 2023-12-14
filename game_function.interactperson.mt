@@ -117,9 +117,22 @@ return ::(this, party, location, onDone, overrideChat, skipIntro, onHire) {
                     text: random.pickArrayItem(list:this.personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_ACCEPT])
                 );                
 
-                @:cost = 50+((this.stats.sum/3 + this.level)*2.5)->ceil;
+                @highestStat = 0;
+                if (this.stats.ATK > highestStat) highestStat = this.stats.ATK;
+                if (this.stats.DEF > highestStat) highestStat = this.stats.DEF;
+                if (this.stats.INT > highestStat) highestStat = this.stats.INT;
+                if (this.stats.SPD > highestStat) highestStat = this.stats.SPD;
+                if (this.stats.LUK > highestStat) highestStat = this.stats.LUK;
+                if (this.stats.DEX > highestStat) highestStat = this.stats.DEX;
 
 
+
+                @cost;
+                
+                if (highestStat <= 10)
+                    cost = 50+((this.stats.sum/3 + this.level)*2.5)->ceil
+                else
+                    cost = 200 + this.stats.sum*13; // bigger and better stats come at a premium
                 this.describe();
 
                 windowEvent.queueAskBoolean(
