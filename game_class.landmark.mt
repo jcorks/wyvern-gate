@@ -32,8 +32,6 @@
 
 
 
-
-
 @:Landmark = LoadableClass.new(  
     name : 'Wyvern.Landmark',
     statics : {
@@ -65,6 +63,8 @@
     },
     
     define :::(this) {
+        @:MapEntity = import(module:'game_class.mapentity.mt');
+        
         if (Location == empty) Location = import(module:'game_class.location.mt');
 
         @island_;
@@ -85,7 +85,8 @@
                 gate : empty,
                 stepsSinceLast: 0,
                 modData : {},
-                events : []
+                events : [],
+                mapEntityController : empty
             }
         );
 
@@ -221,8 +222,8 @@
                     );
                 }
                 
+                state.mapEntityController = MapEntity.Controller.new(parent:this);
                 this.base.onCreate(landmark:this, island:island_);
-                
                 return this;
             },
 
@@ -330,10 +331,15 @@
 
                 world.stepTime(isStep:true); 
                 this.map.title = this.name + ' - ' + world.timeString + '          ';
+                state.mapEntityController.step();
                 when(!state.base.dungeonMap) empty;
                 foreach(state.events) ::(k, event) {
                     event.step();
                 }
+            },
+            
+            mapEntityController : {
+                get ::<- state.mapEntityController
             },
             
             wait ::(until) {
@@ -379,7 +385,7 @@
             },
             
             locations : {
-                get :: <- state.map.getAllItems() 
+                get :: <- state.map.getAllItemData() 
             },
             
             island : {

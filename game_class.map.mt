@@ -170,36 +170,43 @@
         @renderOutOfBounds = true;
         @isDark = false;
         @parent_;
-
+        @neighbors = [];
         @aStarPQCompareTable;
 
         
         @:isWalled ::(x, y) {
-            @at = x+y*width;
-            return (scenery[at] & IS_WALLED_MASK) != 0;
+            @:id = x + y*width;
+            return (scenery[id] & IS_WALLED_MASK) != 0;
         }
         
+        @:isWalledID ::(id) {
+            return (scenery[id] & IS_WALLED_MASK) != 0;
+        }
 
-        @:aStarHeuristicH::(from, to) <-
-            distance(x0:from.x, y0:from.y, x1:to.x, y1:to.y)
-        ;
+        @:aStarHeuristicH::(from, to) {
+            @fromX = from%width;
+            @fromY = (from/width)->floor
+            
+            @toX = to%width;
+            @toY = (to/width)->floor
+            return distance(x0:fromX, y0:fromY, x1:toX, y1:toY)
+        }
 
         @:aStarMapEmplace::(map, key, value) {
-            //when(map.index[key.id] != empty) empty;
-            map.index[String(from:key.id)] = value;
-            //map.list->push(value:value);
+            map.index[key] = value;
         }
         @:aStarMapFind::(map, key) {
-            return map.index[String(from:key.id)];
+            return map.index[key];
         }
         @:aStarMapRemove::(map, key) {
-            map.index->remove(key:String(from:key.id));
-            //map.list->remove(key:map->findIndex(value:key));
+            map.index[key] = empty;
         }
         @:aStarMapNew :: {
+            @:presized = [];
+            presized[width*height] = 1;
             return {
                 //list: [],
-                index: []
+                index: presized
             }
         }
         
@@ -212,9 +219,12 @@
             @:path = [];
             return {:::} {
                 forever ::{
-                    path->push(value:current);
+                    path->push(value:{
+                        x: current%width,
+                        y:(current/width)->floor
+                    });
                     @:contains = aStarMapFind(map:cameFrom, key:current);
-                    when(contains.id == start.id) send(message:path);
+                    when(contains == start) send(message:path);
                     current = contains;
                 }
             }
@@ -226,21 +236,27 @@
         }
 
         @:aStarNewNode::(x, y) {
-            when (!isWalled(x, y) && x >= 0 && y >= 0 && x < width && y < height)
-                {x:x, y:y, id:x + y*width}
+            @id = x + y*width;
+            when (!isWalledID(id) && x >= 0 && y >= 0 && x < width && y < height)
+                id;
         }
 
-        @:aStarGetNeighbors::(current) {
-            return [
-                aStarNewNode(x:current.x-1, y:current.y),
-                aStarNewNode(x:current.x-1, y:current.y+1),
-                aStarNewNode(x:current.x-1, y:current.y-1),
-                aStarNewNode(x:current.x+1, y:current.y  ),
-                aStarNewNode(x:current.x+1, y:current.y+1),
-                aStarNewNode(x:current.x+1, y:current.y-1),
-                aStarNewNode(x:current.x  , y:current.y+1),
-                aStarNewNode(x:current.x  , y:current.y-1)
-            ]->filter(by::(value) <- value != empty);
+        @:aStarGetNeighbors::(neighbors, current) {
+            neighbors->setSize(size:0);
+            @:x = current%width;
+            @:y = (current/width)->floor
+            
+            @i;
+            i = aStarNewNode(x:x+1, y:y+1); if (i != empty) neighbors->push(value:i);
+            i = aStarNewNode(x:x+1, y:y-1); if (i != empty) neighbors->push(value:i);
+            i = aStarNewNode(x:x-1, y:y+1); if (i != empty) neighbors->push(value:i);
+            i = aStarNewNode(x:x-1, y:y-1); if (i != empty) neighbors->push(value:i);
+
+            i = aStarNewNode(x:x-1, y:y  ); if (i != empty) neighbors->push(value:i);
+            i = aStarNewNode(x:x+1, y:y  ); if (i != empty) neighbors->push(value:i);
+            i = aStarNewNode(x:x  , y:y+1); if (i != empty) neighbors->push(value:i);
+            i = aStarNewNode(x:x  , y:y-1); if (i != empty) neighbors->push(value:i);
+            return neighbors;
         }
         
         @:aStarGetScore::(value) <- if (value == empty) THE_BIG_ONE else value;
@@ -296,7 +312,7 @@
             start = aStarNewNode(x:start.x, y:start.y);
             goal = aStarNewNode(x:goal.x, y:goal.y);
             
-            when(start.id == goal.id) empty;
+            when(start == goal) empty;
             // The set of discovered nodes that may need to be (re-)expanded.
             // Initially, only the start node is known.
             // This is usually implemented as a min-heap or priority queue rather than a hash-set.
@@ -327,13 +343,13 @@
                     // This operation can occur in O(Log(N)) time if openSet is a min-heap or a priority queue
                     @current = openSet[0];
                     //@current = aStarFindLowestFscore(fScore, openSet);
-                    if (current.id == goal.id) ::<= {
+                    if (current == goal) ::<= {
                         @out = aStarReconstructPath(cameFrom, current, start);
                         send(message:out);
                         
                     }
                     openSet->remove(key:0);
-                    foreach(aStarGetNeighbors(current))::(i, neighbor) {
+                    foreach(aStarGetNeighbors(neighbors, current))::(i, neighbor) {
                         // d(current,neighbor) is the weight of the edge from current to neighbor
                         // tentative_gScore is the distance from start to the neighbor through current
                         @:tentative_gScore = aStarMapFind(map:gScore, key:current) + 1;//d(current, neighbor)
@@ -349,52 +365,58 @@
             }
         }
         
-        
-        @:bfsPathNext::(start, goal) {
+        @:bfsQ = [];
+        @:bfsPath::(start, goal) {
             start = aStarNewNode(x:start.x, y:start.y);
             goal = aStarNewNode(x:goal.x, y:goal.y);
             
-            when(start.id == goal.id) empty;
-            @:q = [];
+            when(start == goal) empty;
+            @:q = bfsQ;
+            @qIter = 0;
             @:visited = {}
-            visited[start.id] = true;
+            @:neighbors = [];
+            visited[start] = start;
             q->push(value:start);
             
             return {:::} {
                 forever ::{
                     when(q->keycount == 0) empty;
                     
-                    @v = q[0];
-                    q->remove(key:0);
+                    @v = q[qIter];
+                    qIter +=1;
 
 
-                    when(v.id == goal.id) ::<= {
+                    when(v == goal) ::<= {
                         // build path
                         send(message: ::<={
-                            return {:::} {
+                            @:path = [];
+                            {:::} {
                                 @a = v;
                                 @last;
                                 forever ::{
-                                    when(a.parent.id == start.id) ::<= {
-                                        
-                                        
+                                    @:next = {
+                                        x: a%width,
+                                        y: (a/width)->floor
+                                    };
+                                    path->push(value:next);            
+                                    when(visited[a] == start) ::<= {
                                         send(message:a);                
-                                    }                
-                                    a = a.parent; 
+                                    }    
+
+                                    a = visited[a]; 
                                 }
                             }
+                            q->setSize(size:0);
+                            return path;
                         })
                     }
 
-                    foreach(aStarGetNeighbors(current:v))::(i, w) {
-                        when(visited[w.id] == true) empty;
+                    foreach(aStarGetNeighbors(neighbors, current:v))::(i, w) {
+                        when(visited[w] != empty) empty;
                         
-                        visited[w.id] = true;
-                        w.parent = v;
+                        visited[w] = v; // parent
                         q->push(value:w);
                     }
-
-                
                 }
             }
         }
@@ -828,12 +850,16 @@
                 return retrieveItem(data);
             },
             
-            getAllItems::{
+            getAllItemData::{
                 @:out = {};
                 foreach(items) ::(k, val) {
                     out[val.data] = true;
                 }
                 return out->keys;
+            },
+            
+            getAllItems ::{
+                return items;
             },
             
             itemsAt::(x, y) {
@@ -935,8 +961,8 @@
                 
             },
 
-            moveTowardPointer::(data) {
-                @:path = this.getPathTo(data, x:pointer.x, y:pointer.y);
+            moveTowardPointer::(data, useBFS) {
+                @:path = this.getPathTo(data, x:pointer.x, y:pointer.y, useBFS);
                 when(path == empty || path->keycount == 0) empty;
                 this.moveItem(
                     data, 
@@ -945,9 +971,11 @@
                 )
             },
 
-            getPathTo::(data, x, y) {
+            getPathTo::(data, x, y, useBFS) {
                 @:ent = retrieveItem(data);            
 
+                when(useBFS != empty)
+                    bfsPath(start:ent, goal:{x:x, y:y});
                 @:path = aStarPath(start:ent, goal:{x:x, y:y});
                 when(path == empty || path->keycount == 0) empty;
                 return path;
@@ -1072,11 +1100,13 @@
                 return this.itemsAt(x:pointer.x, y:pointer.y);
             },
 
-            getItemsUnderPointerRadius ::(radius) {
+            getItemsUnderPointerRadius ::(radius) <- this.getItemsWithinRadius(x:pointer.x, y:pointer.y, radius),
+            
+            getItemsWithinRadius ::(x, y, radius) {
                 @out = [];
-                for(pointer.x - (radius / 2)->floor, pointer.x + (radius / 2)->ceil)::(x) {
-                    for(pointer.y - (radius / 2)->floor, pointer.y + (radius / 2)->ceil)::(y) {
-                        @:at = this.itemsAt(x, y);
+                for(x - (radius / 2)->floor, x + (radius / 2)->ceil)::(xa) {
+                    for(y - (radius / 2)->floor, y + (radius / 2)->ceil)::(ya) {
+                        @:at = this.itemsAt(x:xa, y:ya);
                         when(at == empty) empty;
                         foreach(at)::(key, value) {
                             out->push(value);
@@ -1084,7 +1114,7 @@
                     }
                 }
                 
-                return out;     
+                return out;                 
             },
 
             getNamedItemsUnderPointer :: {
@@ -1152,6 +1182,8 @@
             setAreas ::(new) {
                 areas = {...new};
             },
+            
+            'isWalled' : ::(x, y) <- isWalled(x, y),
             
             addToRandomArea ::(item, symbol, name) {
                 return putArea(

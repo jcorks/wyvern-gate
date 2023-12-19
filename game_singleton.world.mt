@@ -390,6 +390,9 @@
                             personalityHint: 'Caring',
                             levelHint: 5,
                             adventurousHint: true,
+                            innateEffects : [
+                                'Seasoned Adventurer'
+                            ],
                             qualities : [
                                 EntityQuality.new(base: EntityQuality.Base.database.find(name: 'snout'), trait0Hint:0),
                                 EntityQuality.new(base: EntityQuality.Base.database.find(name: 'fur'),   descriptionHint: 6, trait0Hint:10, trait2Hint:3),
@@ -531,6 +534,9 @@
                             personalityHint: 'Caring',
                             levelHint: story.levelHint-1,
                             adventurousHint: true,
+                            innateEffects : [
+                                'Seasoned Adventurer'
+                            ],
                             qualities : [
                                 EntityQuality.new(base: EntityQuality.Base.database.find(name: 'snout'), trait0Hint:2),
                                 EntityQuality.new(base: EntityQuality.Base.database.find(name: 'fur'),   descriptionHint: 0, trait0Hint:8),
@@ -594,7 +600,10 @@
                             speciesHint:'Drake-kin',
                             professionHint: 'Runologist',
                             levelHint: story.levelHint-1,
-                            adventurousHint: true
+                            adventurousHint: true,
+                            innateEffects : [
+                                'Seasoned Adventurer'
+                            ]
                         );
                         
                         @:skieWeapon = Item.new(

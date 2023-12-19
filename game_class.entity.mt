@@ -101,13 +101,13 @@
    
     },
         
-    new ::(island, parent, speciesHint, professionHint, personalityHint, levelHint, state, adventurousHint, qualities) {
+    new ::(island, parent, speciesHint, professionHint, personalityHint, levelHint, state, adventurousHint, qualities, innateEffects) {
         @:this = Entity.defaultNew();
         this.initialize();
         if (state != empty)
             this.load(serialized:state)
         else 
-            this.defaultLoad(island, speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities);
+            this.defaultLoad(island, speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities, innateEffects);
 
         return this;
     },
@@ -162,8 +162,9 @@
                 faveWeapon : empty,
                 adventurous : Number.random() <= 0.5,
                 battleAI : empty,
-                professions : [],
+                professions : empty,
                 canMake : empty,
+                innateEffects : empty,
                 
 
                 equips : [
@@ -182,7 +183,7 @@
                 ], // active that can choose in combat
                 abilitiesLearned : [], // abilities that can choose outside battle.
                 
-                inventory : Inventory.new(size:10),
+                inventory : empty,
                 expNext : 10,
                 level : 0,
                 modData : {}
@@ -197,6 +198,14 @@
 
         @:resetEffects :: {
             effects = [];
+            
+            foreach(state.innateEffects) ::(k, name) {
+                this.addEffect(
+                    from:this, 
+                    name, 
+                    durationTurns: -1
+                );                
+            }
             
             for(0, EQUIP_SLOTS.RING_R+1)::(slot) {
                 when(slot == EQUIP_SLOTS.HAND_R) empty;
@@ -241,7 +250,7 @@
                 );                
             },
 
-            defaultLoad::(island, speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities) {
+            defaultLoad::(island, speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities, innateEffects) {
                 if (adventurousHint != empty)
                     state.adventurous = adventurousHint;
                 
@@ -264,7 +273,7 @@
                 if (speciesHint != empty) ::<= {
                     state.species = Species.database.find(name:speciesHint);
                 }
-                state.professions->push(value:profession);
+                state.professions = [profession]
                 state.profession = 0;
                 
                 state.growth.mod(stats:state.species.growth);
@@ -273,6 +282,7 @@
                 for(0, levelHint)::(i) {
                     this.autoLevel();                
                 }
+                state.inventory = Inventory.new(size:10);
                 if (island != empty)  ::<= {
                     for(0, 3)::(i) {
                         state.inventory.add(item:
@@ -291,7 +301,9 @@
 
                 state.inventory.addGold(amount:(Number.random() * 100)->ceil);
                 state.favoriteItem = Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
-
+                state.innateEffects = innateEffects;
+                if (state.innateEffects == empty)  
+                    state.innateEffects = [];
 
 
                 /*

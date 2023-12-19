@@ -52,12 +52,9 @@ return ::(user, item, inBattle) {
             }
                             
             @:statChoices = [
-                'HP',
-                'AP',
                 'ATK',
                 'INT',
                 'DEF',
-                'LUK',
                 'SPD',
                 'DEX'
             ];               

@@ -226,6 +226,54 @@ Effect.new(
 
 Effect.new(
     data : {
+        name : 'Seasoned Adventurer',
+        description: 'Is considerably harder to hit, as they are an experienced fighter.',
+        battleOnly : true,
+        skipTurn : false,
+        stackable: false,
+        stats: StatSet.new(
+        ),
+        onAffliction : ::(user, item, holder) {
+
+        },
+
+        onRemoveEffect : ::(user, item, holder) {
+        },                
+        onPostAttackOther : ::(user, item, holder, to) {
+        },
+
+        onPreAttackOther : ::(user, item, holder, to, damage) {
+        },
+
+        onAttacked : ::(user, item, holder, by, damage) {
+        
+        },
+
+        onDamage : ::(user, item, holder, from, damage) {
+            if (!holder.isIncapacitated() && random.try(percentSuccess:60)) ::<= {
+                windowEvent.queueMessage(text:
+                    random.pickArrayItem(list: [
+                        holder.name + " predicts and avoids the attack!",
+                        holder.name + " easily avoids the attack!",
+                        holder.name + " seems to have no trouble avoiding the attack!",
+                    ])
+                );
+                damage.amount = 0;
+            }
+        },
+        
+        onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+        
+        },
+        onStatRecalculate : ::(user, item, holder, stats) {
+            
+        }
+    }
+)
+
+
+Effect.new(
+    data : {
         name : 'Defensive Stance',
         description: 'ATK -50%, DEF +75%',
         battleOnly : true,

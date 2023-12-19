@@ -532,143 +532,49 @@
 
 
 
-                                if (hasWeapon && random.try(percentSuccess:25)) ::<= {
+                                if (hasWeapon && random.try(percentSuccess:10)) ::<= {
                                     windowEvent.queueMessage(text:'The party feels their intuition with their weapons grow.');
-                                    windowEvent.queueMessage(text:'The party must choose a way to channel this intuition.');
-                                    @:fWhich = random.integer(from:0, to:2);
+
+                                    @:world = import(module:'game_singleton.world.mt')
+                                    world.accoladeIncrement(name:'intuitionGained');
+                                    @:choice = match(random.integer(from:1, to:3)) {
+                                        // inward -> AP, INT, DEF
+                                        (1): random.pickArrayItem(list:[1, 4, 3]),
+                                        // skyward -> DEX, SPD, LUK 
+                                        (2): random.pickArrayItem(list:[6, 7, 5]),
+                                        // forward -> ATK, HP 
+                                        (3): random.pickArrayItem(list:[2, 0])
+                                    };
 
 
-                                    @:renderTextBox ::(leftWeight, topWeight, lines, prompt) {
+                                    foreach(allies_)::(index, ally) {   
+                                        @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
+                                        when (wep.name == 'None') empty;
 
-                                        @width = if (prompt == empty) 0 else prompt->length;
-                                        foreach(lines)::(index, line) {
-                                            if (line->length > width) width = line->length;
-                                        }
+                                        when (!wep.canGainIntuition())
+                                            windowEvent.queueMessage(text:ally.name + ' has already reached peak intuition with their weapon.');
+                                        ally.recalculateStats();
+                                        @:oldAllyStats = StatSet.new();
+                                        oldAllyStats.load(serialized:ally.stats.save());
+                                        @:stats = wep.stats;                             
+                                        @:oldStats = StatSet.new();
+                                        oldStats.add(stats);
+                                        stats.add(stats:StatSet.new(
+                                            HP: if (choice == 0) 7 else 0,
+                                            AP: if (choice == 1) 7 else 0,
+                                            ATK: if (choice == 2) 7 else 0,
+                                            DEF: if (choice == 3) 7 else 0,
+                                            INT: if (choice == 4) 7 else 0,
+                                            LUK: if (choice == 5) 7 else 0,
+                                            DEX: if (choice == 6) 7 else 0,
+                                            SPD: if (choice == 7) 7 else 0
+                                        ));
                                         
-                                        @left   = (canvas.width - (width+4))*leftWeight;
-                                        width   = width + 4;
-                                        @top    = (canvas.height - (lines->keycount + 4)) * topWeight;
-                                        @height = lines->keycount + 4;
-                                        
-                                        if (top < 0) top = 0;
-                                        if (left < 0) left = 0;
-                                        
-                                        
-                                        canvas.renderFrame(top, left, width, height);
-
-                                        // render text:
-                                        
-                                        foreach(lines)::(index, line) {
-                                            canvas.movePen(x: left+2, y: top+2+index);
-                                            canvas.drawText(text:line);
-                                        }
-                                        if (prompt != empty) ::<= {
-                                            canvas.movePen(x: left+2, y:top);
-                                            canvas.drawText(text:prompt);
-                                        }
-
+                                        oldStats.printDiffRate(other:stats, prompt:wep.name);
+                                        ally.recalculateStats();
+                                        oldAllyStats.printDiff(other:ally.stats, prompt:ally.name);
                                     }
-
-
-
-
-                                    windowEvent.queueChoices(
-                                        prompt: 'Which way?',
-                                        choices : [
-                                            'Inward',
-                                            'Skyward',
-                                            'Forward'
-                                        ],
-                                        canCancel: false,
-                                        leftWeight: 1,
-                                        topWeight : 1,
-                                        
-                                        renderable : {
-                                            render ::{
-
-
-
-
-                                                renderTextBox(
-                                                    prompt:'Inward Intuition', 
-                                                    lines:[
-                                                        'The way inward focuses your inner perception',
-                                                        'your awareness of self when wielding the weapon. ',
-                                                    ],
-                                                    leftWeight: 0.5,
-                                                    topWeight: 0.0
-                                                );
-
-                                                renderTextBox(prompt:'Skyward Intuition',
-                                                    lines: [
-                                                        'The way skyward focuses your perception of the   ',
-                                                        'world around you, making the weapon a better ',
-                                                        'extension of the self.',
-                                                    ],
-                                                    leftWeight: 0.5,
-                                                    topWeight: 0.4
-                                                );
-
-                                                renderTextBox(prompt:'Forward Intuition', 
-                                                    lines: [
-                                                        'The way forward focuses your perception of a   ',
-                                                        'better future, striving to work to meet tomorrows',
-                                                        'challenges better with the weapon.'
-                                                    ],
-                                                    leftWeight: 0.5,
-                                                    topWeight: 0.8
-                                                );
-                                            }
-                                        },
-                                        
-                                        onChoice::(choice) {
-                                            when(random.try(percentSuccess:1)) ::<= {
-                                                windowEvent.queueMessage(text:'The party is close to a revelation, but not quite there.');                                                                            
-                                                finishEnd();
-                                            }
-                                            windowEvent.queueMessage(text:'The party wields the weapons better through their intuition.');                                                                            
-                                            @:world = import(module:'game_singleton.world.mt')
-                                            world.accoladeIncrement(name:'intuitionGained');
-                                            @:choice = match(choice) {
-                                                // inward -> AP, INT, DEF
-                                                (1): random.pickArrayItem(list:[1, 4, 3]),
-                                                // skyward -> DEX, SPD, LUK 
-                                                (2): random.pickArrayItem(list:[6, 7, 5]),
-                                                // forward -> ATK, HP 
-                                                (3): random.pickArrayItem(list:[2, 0])
-                                            };
-
-
-                                            foreach(allies_)::(index, ally) {   
-                                                @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
-                                                when (wep.name == 'None') empty;
-
-                                                when (!wep.canGainIntuition())
-                                                    windowEvent.queueMessage(text:ally.name + ' has already reached peak intuition with their weapon.');
-                                                ally.recalculateStats();
-                                                @:oldAllyStats = StatSet.new();
-                                                oldAllyStats.load(serialized:ally.stats.save());
-                                                @:stats = wep.stats;                             
-                                                @:oldStats = StatSet.new();
-                                                oldStats.add(stats);
-                                                stats.add(stats:StatSet.new(
-                                                    HP: if (choice == 0) 15 else 0,
-                                                    AP: if (choice == 1) 15 else 0,
-                                                    ATK: if (choice == 2) 15 else 0,
-                                                    DEF: if (choice == 3) 15 else 0,
-                                                    INT: if (choice == 4) 15 else 0,
-                                                    LUK: if (choice == 5) 15 else 0,
-                                                    DEX: if (choice == 6) 15 else 0,
-                                                    SPD: if (choice == 7) 15 else 0
-                                                ));
-                                                
-                                                oldStats.printDiffRate(other:stats, prompt:wep.name);
-                                                ally.recalculateStats();
-                                                oldAllyStats.printDiff(other:ally.stats, prompt:ally.name);
-                                            }
-                                            finishEnd();
-                                        }
-                                    )
+                                    finishEnd();
                                 } else ::<= {
                                 
                                     if (loot == true) ::<= {

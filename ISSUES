@@ -1,36 +1,45 @@
 Known bugs / concerns:
 
-- Time of day is still listed in dungeons when time of day doesnt change. Need to display 
-  level and other useful information in,stead
+
+
 - Some time of day displays go offscreen when the island name 
   is too long.
-- Saving + Loading is broken
-- Beta dungeon layouts can sometimes have the top-left corner connect to nothing if its a pathway 
 - Sleeping at an inn doesnt apply the change of day until you leave and re-enter the town / city / etc.
-- post victory drop doesnt display properly
+- If encountering 2 enemy groups in dungeon and knocking / killing them, the second group will rejoin after the battle 
+- HP / AP dont rescale properly when equipment changes it.
+- In battle, some frames display a previous background image rather than the most current one
+- In topaz builds, fullscreen disabling doesnt come with window decoration and resizing is impossible
+- Some abilities are not properly implemented currently.
+- Fancy Shop (and likely other speciality shops) are missing their run by verb
+- Sometimes, using items will not consume them when they will sometimes be consumed normally. Likely due to either entiering or leaving the battle state, or save/loading an inventory.
+
 Coming changes:
+  . "Freaks of Nature"
+        - Effect to certain npcs that flatly negates damage a percent of the time.
+        - OPNPCs: 50%
+        - Wyverns: 20%
+        - Beast / Specter: 80%
+  . reduction of 3rd dungeon sprawling size as well as expension of hallways to be 2 wide rather than 1
+  . music and cues in topaz builds 
+  . If multiple groups join a battle, it will become a team vs team vs team rather than all vs party
+    all against the party 
+  . The Beast 
+        - Roams around on certain floors of dungeons at half speed 
+        - if comes close to party or other NPC, will chase and fight them 
+        - is VERY difficult to beat, so is best avoided
+
+  . The Mirror 
+        - Roams around on certain floors with the party symbol 
+        - Consists of a clone of the entire party including equipment 
+
+        
   . Post-Post game: endless mode 
     - Introduces EXP and leveling 
     - Keys to new islands buyable 
     - Level scaling for new islands
     - tier set to max constantly
-      
-  . Thunder key dungeon layout 
-    - connecting room network of differing sizes
-  . display of party members HP on side if in dungeon or towns 
-    - walking heals them without interrupting walking
 
-  . Add secret "score" stat thats calculated at the end
-    - minus for kills
-    - Battle victory count
-    - minus for deaths
-    - Items improved
-    - minus for special NPC recruiting since theyre OP
-    
-  . Add wish entering text, old school style
-  . High score list with wish displayed
   . Locations
-
       . Soul Orb dungeon location 
         - Possible dungeon location.
         - If currently not having a soul orb (story flag), 
@@ -70,19 +79,8 @@ Coming changes:
     
   . Additional dungeon random locations
     - Wyvern statue with tablet. one time.
-    
    
-  . Stratum keys are pre-defined:
-    - First dunegon yields the FIRE key. Enemies here do not use skills and do not have equips
-    - ICE key second. Enemies here use skills (1-2) but have no weapon equips
-    - THUNDER key third. Enemies here use skills (1-2) and have weapons 
-    - LIGHT key last. Enemies here have all skills learned and have equips
-    - Using each key on a gate triggers a special element-themed "boss dragon" 
-      that must be fought to progress to the next island.
-    - After the last dragon, credits and post game.
 
-
-- Post Game
 
 - Research Hall
     . Tablet exchange. Tablets are rare finds and can be exchanged for 

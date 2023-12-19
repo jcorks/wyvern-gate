@@ -51,9 +51,11 @@
         @isCursor = true;
         @choiceStack = [];
         @nextResolve = [];
+        @requestAutoSkip = false;
 
     
         @:renderThis ::(data => Object, thisRender) {
+            when (requestAutoSkip) empty; 
             if (data.pushedCanvasState == empty) ::<= {
                 canvas.pushState();      
                 data.pushedCanvasState = true;
@@ -142,6 +144,9 @@
             @:onChoice = data.onChoice;
             @:onHover = data.onHover;
             @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
+
+            if (requestAutoSkip)
+                error(detail:'Requested auto skip when a cursor input was pending');
 
             //if (canCancel) ::<= {
             //    choicesModified->push(value:'(Cancel)');
@@ -272,6 +277,10 @@
             @:choice = input;         
             @:onMenu = data.onMenu;            
 
+            if (requestAutoSkip)
+                error(detail:'Requested auto skip when a cursor input was pending');
+
+
             when(choice == CURSOR_ACTIONS.CANCEL ||
                  choice == CURSOR_ACTIONS.CONFIRM) ::<= {
                 onMenu();
@@ -325,6 +334,9 @@
             
             when(input == empty && data.rendered != empty) false;
             @choice = input;                   
+
+            if (requestAutoSkip)
+                error(detail:'Requested auto skip when a cursor input was pending');
             
             
             @:prompt = data.prompt;
@@ -464,6 +476,9 @@
         }
         
         @:commitInput_display ::(data, input) {
+            when (requestAutoSkip) true;
+        
+        
             if (data.rendered == empty) ::<= {
                 renderThis(data, thisRender::{
                     renderText(
@@ -778,8 +793,23 @@
                 }]);
             },  
             
-                         
-
+              
+            // request to not render or wait for nodisplay and display 
+            // events. If auto skip is enabled and any of the other events 
+            // are queued, an error is thrown.           
+            autoSkip :: {
+                requestAutoSkip = true;
+                {:::} {
+                    forever ::{
+                        if (nextResolve->keycount == 0)
+                            send()
+                            
+                        resolveNext();
+                        commitInput();
+                    }
+                }                
+                requestAutoSkip = false;
+            },
             
             CURSOR_ACTIONS : {
                 get::<- CURSOR_ACTIONS

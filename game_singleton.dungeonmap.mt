@@ -1338,7 +1338,7 @@
     
         @:CENTER_X = 140;
         @:CENTER_Y = 140;
-        @:SPACE_COUNT = 32;
+        @:SPACE_COUNT = 17;//32;
     
         // first, pick an initial location
         @:root = random.pickArrayItem(list:areaSpaces)();

@@ -668,14 +668,15 @@ Event.Base.new(
                             }
             
                             foreach(event.party.members)::(index, member) {
-                                @oldStats = StatSet.new();
-                                oldStats.load(serialized:member.stats.save());
-                                member.stats.add(stats:StatSet.new(HP:(oldStats.HP*0.1)->ceil, AP:(oldStats.AP*0.1)->ceil));
-                                oldStats.printDiff(other:member.stats, prompt:member.name + ': I feel refreshed!');
+                                if (random.try(percentSuccess:5)) ::<= {
+                                    @oldStats = StatSet.new();
+                                    oldStats.load(serialized:member.stats.save());
+                                    member.stats.add(stats:StatSet.new(HP:(oldStats.HP*0.1)->ceil, AP:(oldStats.AP*0.1)->ceil));
+                                    oldStats.printDiff(other:member.stats, prompt:member.name + ': I feel refreshed!');
+                                }
 
-
-                                member.heal(amount:member.stats.HP * 0.3);
-                                member.healAP(amount:member.stats.AP * 0.3);
+                                member.heal(amount:member.stats.HP);
+                                member.healAP(amount:member.stats.AP);
                             }
                         },
                         

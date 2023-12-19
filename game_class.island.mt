@@ -593,11 +593,11 @@
 
             
             getLandmarkIndex ::(landmark => Landmark.type) {
-                return state.map.getAllItems()->findIndex(value:landmark);
+                return state.map.getAllItemData()->findIndex(value:landmark);
             },
             
             landmarks : {
-                get ::<- state.map.getAllItems()
+                get ::<- state.map.getAllItemData()
             },
             
             levelMin : {
