@@ -400,7 +400,7 @@
                                     };
                                     path->push(value:next);            
                                     when(visited[a] == start) ::<= {
-                                        send(message:a);                
+                                        send();                
                                     }    
 
                                     a = visited[a]; 
@@ -885,12 +885,12 @@
             ) {
                 @item = retrieveItem(data);
             
-                @items = itemIndex[item.x + (item.y)*(width)];
-                when(items == empty) empty;
+                @itemsA = itemIndex[item.x + (item.y)*(width)];
+                when(itemsA == empty) empty;
                 {:::} {
-                    foreach(items)::(key, v) {
+                    foreach(itemsA)::(key, v) {
                         when(v.data == data) ::<= {
-                            items->remove(key);
+                            itemsA->remove(key);
                             send();
                         }
                     }
@@ -907,7 +907,7 @@
                 }
 
 
-                if(items->keycount == 0)
+                if(itemsA->keycount == 0)
                     itemIndex[item.x + (item.y)*(width)] = empty;    
                     
                 items = items->filter(by::(value) <- value.data != data);

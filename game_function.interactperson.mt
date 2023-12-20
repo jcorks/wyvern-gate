@@ -270,7 +270,7 @@ return ::(this, party, location, onDone, overrideChat, skipIntro, onHire) {
                         enemies: [this],
                         landmark: {},
                         onEnd::(result) {
-                            when(result == Battle.RESULTS.ENEMIES_WIN)
+                            when(!world.battle.partyWon())
                                 windowEvent.jumpToTag(name:'MainMenu');
                             finish();
                         }

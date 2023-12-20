@@ -259,7 +259,7 @@ Interaction.new(
                                 enemies: [talkee],
                                 landmark: {},
                                 onEnd::(result) {
-                                    when(result == Battle.RESULTS.ENEMIES_WIN)
+                                    when(!world.battle.partyWon())
                                         windowEvent.jumpToTag(name:'MainMenu', clearResolve:true);
                                 
                                     location.ownedBy = empty;                                                                        
@@ -585,8 +585,7 @@ Interaction.new(
                         enemies: [talkee],
                         landmark: {},
                         onEnd::(result) {
-                            breakpoint();
-                            when(result == Battle.RESULTS.ENEMIES_WIN)
+                            when(!world.battle.partyWon())
                                 windowEvent.jumpToTag(name:'MainMenu');
                         
                             if (talkee.isDead) ::<= {
@@ -754,16 +753,8 @@ Interaction.new(
                     enemies: [location.ownedBy],
                     landmark: {},
                     onEnd::(result) {
-                        match(result) {
-                          (Battle.RESULTS.ALLIES_WIN,
-                           Battle.RESULTS.NOONE_WIN): ::<= {
-                            location.ownedBy = empty;                          
-                          },
-                          
-                          (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                        if (!world.battle.partyWon()) 
                             windowEvent.jumpToTag(name:'MainMenu');
-                          }
-                        }
                     }
                 );
             }
@@ -881,16 +872,8 @@ Interaction.new(
                     enemies: [location.ownedBy],
                     landmark: {},
                     onEnd::(result) {
-                        match(result) {
-                          (Battle.RESULTS.ALLIES_WIN,
-                           Battle.RESULTS.NOONE_WIN): ::<= {
-                            location.ownedBy = empty;                          
-                          },
-                          
-                          (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                        if (!world.battle.partyWon()) 
                             windowEvent.jumpToTag(name:'MainMenu');
-                          }
-                        }
                     }
                 );
             }
@@ -1331,15 +1314,9 @@ Interaction.new(
                     enemies: [location.ownedBy],
                     landmark: {},
                     onEnd::(result) {
-                      match(result) {
-                          (Battle.RESULTS.ALLIES_WIN,
-                           Battle.RESULTS.NOONE_WIN): ::<= {
-                          },
-                          
-                          (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                        if (!world.battle.partyWon()) 
                             windowEvent.jumpToTag(name:'MainMenu');
-                          }
-                      }
+
                     }
                 );
                 
@@ -1670,7 +1647,15 @@ Interaction.new(
                                             },
                                             npcBattle: true,
                                             onEnd::(result) {
-                                                @aWon = result == Battle.RESULTS.ALLIES_WIN;
+                                                @aWon = {:::} {
+                                                    foreach(result) ::(k ,entity) {
+                                                        foreach(teamA.members) ::(i, member) {
+                                                            if (member == entity) send(message:true);
+                                                        }
+                                                    }
+                                                    return false;
+                                                }
+                                            
                                                 @win = payout(isTeamA:betOnA);
                                                 if (aWon) ::<= {
                                                     windowEvent.queueMessage(

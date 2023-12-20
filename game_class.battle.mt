@@ -25,11 +25,6 @@
 @:correctA = import(module:'game_function.correcta.mt');
 @:StateFlags = import(module:'game_class.stateflags.mt');
 
-@: RESULTS = {
-    ALLIES_WIN: 0,
-    ENEMIES_WIN: 1,
-    NOONE_WIN: 2, // not everyone incapacitated
-}
 
 
 
@@ -125,20 +120,22 @@
 
 
 @:Battle = class(
-    statics : {
-        RESULTS : {get::<-RESULTS}
-    },
-    
-    define:::(this) {
-        @allies_;
-        @enemies_;
+
+    define:::(this) {    
+        // array of arrays of entities 
+        // each group is a set of allies. all other group members are 
+        // potential enemies    
+        @groups;
+        @ent2group;
+        @group2party;
+        @winningGroup;
+        
         @:enemyAIs = [];
         @onEnemyTurn_;
         @onAllyTurn_;
         @landmark_;
         @active;
         @ended;
-        @alliesWin = false;
         @entityTurn;
         @onTurn_;
         @onAct_;
@@ -157,69 +154,100 @@
         @externalRenderable;
         @battleEnd;
         
+        @:getAllies::(ent) {
+            return [...ent2group[ent]];
+        }
+
+        @:getEnemies::(ent) {   
+            @:out = [];
+            foreach(groups->filter(by::(value) <- value->findIndex(value:ent) == -1)) ::(k, group) {
+                foreach(group) ::(i, ent) {
+                    out->push(value:ent);
+                }
+            }   
+            return out;
+        }
+
+        
         @:checkRemove :: {
             // see if anyone died
-            foreach(turn)::(index, obj) {                    
-                when(obj.entity.isDead == false && obj.entity.requestsRemove == false) empty;
-                if (obj.isAlly && obj.entity.isDead) party_.remove(member:obj.entity);
+            foreach(turn)::(index, entity) {                    
+                when(entity.isDead == false && entity.requestsRemove == false) empty;
+                if (group2party[ent2group[entity]] && entity.isDead) party_.remove(member:entity);
                 
-                @index = allies_->findIndex(value:obj.entity);
-                if (index != -1) allies_->remove(key:index);
-                index = enemies_->findIndex(value:obj.entity);
-                if (index != -1) enemies_->remove(key:index);
-                turn = [
-                    ...([...allies_]->map(to:::(value)<- {isAlly:true, entity:value})), 
-                    ...([...enemies_]->map(to:::(value)<- {isAlly:false, entity:value}))
-                ];
+                @:group  = ent2group[entity];
                 
-                index = turnPoppable->findIndex(value:obj);
-                if (index != -1) turnPoppable->remove(key:index);
+                @index = group->findIndex(value:entity);
+                if (index != -1) group->remove(key:index);
+                
+                if (group->size == 0)
+                    groups->remove(key:groups->findIndex(value:group));
 
-                
+                index = turnPoppable->findIndex(value:entity);
+                if (index != -1) turnPoppable->remove(key:index);
             }
+            
+            turn->setSize(size:0);
+            foreach(groups) ::(k, group) {
+                foreach(group) ::(i, ent) {
+                    turn->push(value:ent);
+                }
+            }            
         }
         
         @:endTurn ::{
             turnIndex+=1;
             checkRemove();  
             if (turnPoppable->keycount == 0) ::<= {      
-                foreach(turn)::(index, obj) {
-                    obj.entity.endTurn(battle:this);
+                foreach(turn)::(index, entity) {
+                    entity.endTurn(battle:this);
                 }
 
-                if (onTurn_ != empty)
-                    onTurn_();            
-                if((enemies_->keycount == 0) || enemies_->all(condition:::(value) {
-                    return value.isIncapacitated();
-                })) ::<={
-                    alliesWin = true;
-                    ended = true;
+
+                winningGroup = empty;
+                @everyoneWipedOut = true;
+                {:::} {
+                    foreach(groups) ::(k, group) {
+                        @groupAlive = {:::} {
+                            foreach(group) ::(i, entity) {
+                                if (!entity.isIncapacitated())
+                                    send(message:true);
+                            }
+                            return false;
+                        }
+                        
+                        
+                        
+                        if (groupAlive) ::<= {
+                            everyoneWipedOut = false;
+                        
+                            if (winningGroup == empty)
+                                winningGroup = group
+                            // more than one group still alive, no winning team.
+                            else ::<= {
+                                winningGroup = empty;
+                                send();
+                            }
+                        }
+                    }
                 }
 
-                if((allies_->keycount == 0) || allies_->all(condition:::(value) {
-                    return value.isIncapacitated();
-                })) ::<= {
-                    alliesWin = false;
-                    ended = true;
-                }
 
                 
-                if (ended == true) ::<= {                    
-                    foreach(allies_)::(k, v) {
-                        v.battleEnd();
-                    }
-
-                    foreach(enemies_)::(k, v) {
-                        v.battleEnd();
-                    }
+                if (winningGroup != empty || everyoneWipedOut) ::<= {
+                    ended = true;
+                    foreach(groups) ::(k, group) {
+                        foreach(group) ::(i, ent) {
+                            ent.battleEnd();
+                        }
+                    }                    
                 }       
             }
         }
         
         @:nextTurn ::{
             when (turnPoppable->keycount == 0) empty;
-            @:obj = turnPoppable[0];
-            @:ent = obj.entity;
+            @:ent = turnPoppable[0];
             turnPoppable->remove(key:0);
             entityTurn = ent;
             
@@ -242,8 +270,8 @@
                 
                 ent.useAbility(
                     ability:action.ability,
-                    allies:  if(obj.isAlly) allies_  else enemies_,
-                    enemies: if(obj.isAlly) enemies_ else allies_,
+                    allies:  getAllies(ent),
+                    enemies: getEnemies(ent),
                     targets:action.targets,
                     turnIndex : action.turnIndex,
                     extraData : action.extraData
@@ -260,13 +288,13 @@
 
                 // normal turn: request action from the act function
                 // given by the caller
-                @:act = if (obj.isAlly) onAllyTurn_ else onEnemyTurn_;
+                @:act = if (group2party[ent2group[ent]]) onAllyTurn_ else onEnemyTurn_;
                 act(
                     battle:this,
                     user:ent,
                     landmark:landmark_,
-                    allies:allies_,
-                    enemies:enemies_
+                    allies:getAllies(ent),
+                    enemies:getEnemies(ent)
                 );
                 if (onAct_) onAct_();
                 
@@ -277,15 +305,18 @@
         @:initTurn ::{
             when(ended) empty;
             // first reset stats according to current effects 
-            foreach(turn)::(index, obj) {
-                obj.entity.startTurn();
+            foreach(turn)::(index, entity) {
+                entity.startTurn(
+                    enemies: this.getEnemies(entity),
+                    allies: this.getAllies(entity)
+                );
             }
             
             // then resort based on speed
             turn->sort(
                 comparator:::(a, b) {
-                    return a.entity.stats.SPD <
-                           b.entity.stats.SPD;
+                    return a.stats.SPD <
+                           b.stats.SPD;
                 }
             );
             
@@ -303,8 +334,8 @@
         @:renderTurnOrder  :: {
             @:lines = [];
             @width = 0;
-            foreach(turn)::(index, obj) {
-                @line = (if(turnIndex == index) '--> ' else '    ') + obj.entity.name + (if(obj.entity.isIncapacitated()) ' (down)' else '');
+            foreach(turn)::(index, entity) {
+                @line = (if(turnIndex == index) '--> ' else '    ') + entity.name + (if(entity.isIncapacitated()) ' (down)' else '');
                 lines->push(value:line);                
                 if (width < line->length)
                     width = line->length;
@@ -332,18 +363,30 @@
             
                 
             @lines = [];
-            foreach(allies_)::(index, ally) {
-                lines->push(value:ally.renderHP() + '  ' + ally.name);// + ' - Lv ' + ally.level);
-                lines->push(value:'HP: ' + ally.hp + ' / ' + ally.stats.HP + '    AP: ' + ally.ap + ' / ' + ally.stats.AP);
+            
+            foreach(groups) ::(k, group) {
+                if (k != 0) ::<= {
+                    if (groups->size <= 2) ::<= {
+                        lines->push(value:'');
+                        lines->push(value:'  - vs -   ');
+                        lines->push(value:''); 
+                    } else ::<= {
+                        lines->push(value:'  - vs -   ');                    
+                    }
+                                   
+                }
+                foreach(group)::(index, ally) {
+                    lines->push(value:ally.renderHP() + '  ' + ally.name);// + ' - Lv ' + ally.level);
+                    lines->push(value:'HP: ' + ally.hp + ' / ' + ally.stats.HP + '    AP: ' + ally.ap + ' / ' + ally.stats.AP);
+                }
             }
-            lines->push(value:'');
-            lines->push(value:'  - vs -   ');
-            lines->push(value:'');
+            
 
+            /*
             foreach(enemies_)::(index, enemy) {
                 lines->push(value:enemy.renderHP() + '  ' + enemy.name);// + ' - Lv ' + enemy.level);
                 lines->push(value:'HP: ' + enemy.hp + ' / ' + enemy.stats.HP);
-            }
+            }*/
 
 
             @:height = lines->keycount+4;
@@ -375,6 +418,16 @@
         
         
         this.interface = {
+            partyWon :: {
+                when(result == empty) false;
+                return {:::} {
+                    foreach(result) ::(k, ent) {
+                        if (party_.isMember(entity:ent))
+                            send(message:true);
+                    }
+                    return false;
+                }  
+            },
         
             start ::(
                 party => Party.type,
@@ -396,31 +449,39 @@
             ) {
                 onTurn_ = onTurn;
                 onAct_ = onAct;
-                allies = [...allies];
-                enemies = [...enemies];
+                groups = [
+                    [...allies],
+                    [...enemies]
+                ];
+                ent2group = [];
+                group2party = [];
+                
+                foreach(allies) ::(i, ally) {
+                    ent2group[ally] = groups[0];
+                }
+
+                foreach(enemies) ::(i, enemy) {
+                    ent2group[enemy] = groups[1];
+                }
+                
+                if (npcBattle == empty)
+                    group2party[groups[0]] = true;
+
+                
                 canvas.pushState();
                 turn = [];
                 turnIndex = 0;
                 active = true;
                 ended = false;
                 externalRenderable = renderable;
-                
-                @:isPlayerParty = party.isMember(entity:allies[0]);
-            
+                            
                 party_ = party;
-                foreach(enemies)::(index, enemy) {
-                    enemy.battleStart(
-                        battle: this,
-                        allies: enemies,
-                        enemies: allies
-                    );
-                }
-                foreach(allies)::(index, ally) {
-                    ally.battleStart(
-                        battle: this,
-                        enemies: enemies,
-                        allies: allies
-                    );
+                foreach(groups) ::(i, group) {
+                    foreach(group)::(index, ent) {
+                        ent.battleStart(
+                            battle: this
+                        );
+                    }
                 }
 
                 @:onAllyTurn = ::(battle, user, landmark, allies, enemies) {
@@ -439,42 +500,34 @@
                 }
                 
                 
-                @:onEnemyTurn = ::(battle, user, landmark, allies, enemies) {
-                    user.battleAI.takeTurn(battle);
+                @:onEnemyTurn = ::(battle, user, landmark, allies, enemies) {                        
+                    user.battleAI.takeTurn(battle, enemies, allies);
                 }
 
                 if (npcBattle == empty) ::<= {
                     windowEvent.queueMessage(
-                        text: if (enemies->keycount == 1) 
+                        text: if (groups[1]->keycount == 1) 
                             "You're confronted by someone!"
                         else 
-                            "You're confronted by " + enemies->keycount + ' enemies!'
+                            "You're confronted by " + groups[1]->keycount + ' enemies!'
                     );    
                     
-                    foreach(enemies)::(index, enemy) {
+                    foreach(groups[1])::(index, enemy) {
                         windowEvent.queueMessage(
                             text: enemy.name + '(' + enemy.stats.HP + ' HP) blocks your path!'
                         );                    
                     }
                 }
-                allies_ = allies;
-                enemies_ = enemies;
                 onAllyTurn_ = onAllyTurn;
                 onEnemyTurn_ = onEnemyTurn;
                 landmark_ = landmark;
                 
-                foreach(allies)::(k, v) {
-                    turn->push(value:{
-                        isAlly: true,
-                        entity: v
-                    });
-                }
-
-                foreach(enemies)::(k, v) {
-                    turn->push(value:{
-                        isAlly: false,
-                        entity: v
-                    });
+                
+                
+                foreach(groups) ::(i, group) {
+                    foreach(group)::(index, ent) {
+                        turn->push(value:ent);
+                    }
                 }
                 
 
@@ -491,15 +544,10 @@
                     }
                 
                     @:finishEnd :: {
-                        allies_ = [];
-                        enemies_ = [];
+                        groups = [];
                         onEnd(result);                                        
                     }
-                    result = match(true) {
-                      (alliesWin):      RESULTS.ALLIES_WIN,
-                      default:          RESULTS.ENEMIES_WIN
-                    }
-
+                    result = winningGroup;
                     
                     
                     
@@ -510,7 +558,7 @@
                     } 
 
 
-                    if (alliesWin == true) ::<= {            
+                    if (this.partyWon()) ::<= {            
 
                         startEnd(
                             message: 'The battle is won.'
@@ -524,7 +572,7 @@
 
                                 @:Entity = import(module:'game_class.entity.mt');
                                 @hasWeapon = false;
-                                foreach(allies_)::(index, ally) {   
+                                foreach(party_.members)::(index, ally) {   
                                     @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
                                     if (wep.name != 'None' && wep.canGainIntuition()) 
                                         hasWeapon = true;
@@ -547,7 +595,7 @@
                                     };
 
 
-                                    foreach(allies_)::(index, ally) {   
+                                    foreach(party_.members)::(index, ally) {   
                                         @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
                                         when (wep.name == 'None') empty;
 
@@ -638,48 +686,41 @@
                 get ::<- result
             },
             
-            enemies : {
-                get ::<- [...enemies_]
+            getAllies ::(entity) {
+                return getAllies(ent:entity)
             },
 
-            allies : {
-                get ::<- [...allies_]
+            getEnemies ::(entity) {
+                return getEnemies(ent:entity)
             },
+
             
             isActive : {
                 get ::<- active
             },
             
-            join ::(enemy, ally) {
-                if (enemy != empty) ::<= {
-                    when (enemies_->findIndex(value:enemy) != -1) empty;
-                    windowEvent.queueMessage(text:enemy.name + ' joins the fray!');
-                    enemy.battleStart(
-                        battle: this,
-                        allies: enemies_,
-                        enemies: allies_
-                    );
-                    enemies_->push(value:enemy);
-                    turn->push(value:{
-                        isAlly: false,
-                        entity: enemy
-                    });
+            join ::(group, sameGroupAs) {
+                foreach(group) ::(i, entity) {
+                    when(turn->findIndex(value:entity) != -1) 
+                        error(detail: 'Tried to join battle when was already a part of the battle');
+                    windowEvent.queueMessage(text:entity.name + ' joins the fray!');
+                    entity.battleStart(battle:this);
                 }
-                if (ally != empty) ::<= {
-                    when (allies_->findIndex(value:ally) != -1) empty;
-                    windowEvent.queueMessage(text:ally.name + ' joins the fray!');
-                    allies_->push(value:ally);
-                    ally.battleStart(
-                        battle: this,
-                        enemies: enemies_,
-                        allies: allies_
-                    );
-                    turn->push(value:{
-                        isAlly: true,
-                        entity: ally
-                    });
-                }
+
+                @:newGroup = if (sameGroupAs != empty)
+                    ent2group[sameGroupAs]
+                else 
+                    []
                     
+
+                if (party_.isMember(entity:group[0]))
+                    group2party[newGroup] = true;
+
+                foreach(group) ::(i, entity) {
+                    newGroup->push(value:entity);
+                    ent2group[entity] = newGroup;
+                }
+                groups->push(value:newGroup);
             },
             
             render :: {

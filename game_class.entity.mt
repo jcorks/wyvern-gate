@@ -120,8 +120,8 @@
         // requests removal from battle
         @requestsRemove = false;
         @onHire;
-        @enemies_ = [];
-        @allies_ = [];
+        @enemies_;
+        @allies_;
         @abilitiesUsedBattle = empty;
         @effects;
         @owns;
@@ -350,20 +350,16 @@
             // start of a new turn in general.
             // This does things like reset stats according to 
             // effects and such.
-            startTurn :: {
+            startTurn ::(allies, enemies) {
+                allies_ = allies;
+                enemies_ = enemies;
                 this.recalculateStats();             
                 this.flags.reset();
             },
             
             // called to signal that a battle has started involving this entity
-            battleStart ::(battle, allies, enemies) {
+            battleStart ::(battle) {
                 battle_ = battle;
-                state.battleAI.reset(
-                    enemies: enemies,
-                    allies: allies
-                );            
-                enemies_ = enemies;
-                allies_ = allies;
                 requestsRemove = false;
                 abilitiesUsedBattle = {}
                 resetEffects();              
@@ -390,8 +386,8 @@
                         item:effect.item
                     );
                 }
-                allies_ = [];
-                enemies_ = [];
+                allies_ = empty;
+                enemies_ = empty;
                 abilitiesUsedBattle = empty;                
                 effects = empty;
             },

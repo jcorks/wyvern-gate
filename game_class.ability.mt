@@ -2578,7 +2578,8 @@ Ability.new(
             // NICE
             if (Number.random() > 0.31) ::<= {
                 targets[0].unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
-                
+                if (world.party.isMember(entity:targets[0]))
+                    world.party.inventory.add(item:equipped);
                 windowEvent.queueMessage(text:targets[0].name + ' lost grip of their ' + equipped.name + '!');
             } else ::<= {
                 windowEvent.queueMessage(text:targets[0].name + " swiftly dodged and retaliated!");                        

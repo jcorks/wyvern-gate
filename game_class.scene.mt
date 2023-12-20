@@ -96,7 +96,7 @@ Scene.new(
                 location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
                 @:end = ::(result){
 
-                    when(result == Battle.RESULTS.ENEMIES_WIN) ::<= {
+                    when(world.battle.partyWon() == false) ::<= {
                         windowEvent.queueMessage(
                             speaker:'Kaedjaal',
                             text:'Perhaps it was not meant to be...'
@@ -385,7 +385,7 @@ Scene.new(
                 location.ownedBy.name = 'Ziikkaettaal, Wyvern of Ice';
                 @:end = ::(result){
 
-                    when(result == Battle.RESULTS.ENEMIES_WIN) ::<= {
+                    when(world.battle.partyWon() == false) ::<= {
                         windowEvent.queueMessage(
                             speaker:'Ziikkaettaal',
                             text:'Hm. As expected.'
@@ -633,7 +633,7 @@ Scene.new(
                 location.ownedBy.name = 'Juhriikaal, Wyvern of Thunder';
                 @:end = ::(result){
 
-                    when(result == Battle.RESULTS.ENEMIES_WIN) ::<= {
+                    when(world.battle.partyWon() == false) ::<= {
                         windowEvent.queueMessage(
                             speaker:'Juhriikaal',
                             text:'Djiirohshuhlo jiin.'
@@ -1024,7 +1024,7 @@ Scene.new(
                 location.ownedBy.name = 'Shaarraeziil, Wyvern of Light';
                 @:end = ::(result){
 
-                    when(result == Battle.RESULTS.ENEMIES_WIN) ::<= {
+                    when(world.battle.partyWon() == false) ::<= {
                         windowEvent.queueMessage(
                             speaker:'Juhriikaal',
                             text:'Alas. Another one will come, more worthy.'

@@ -15,10 +15,11 @@
         @island_;
         @landmark_;
         @encountersOnFloor = 0;
+        @isBusy = false;
 
         @:Entity = import(module:'game_class.entity.mt');
         @:Location = import(module:'game_class.location.mt');
-
+        
     
     
         @:addEntity ::{
@@ -92,6 +93,7 @@
                 map_ = landmark.map;
                 island_ = landmark.island;
                 landmark_ = landmark;
+                isBusy = random.try(percentSuccess:10);
                 return this;
             },
             
@@ -100,7 +102,24 @@
             
             
                 // add additional entities out of spawn points (stairs)
-                if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && Number.random() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
+                @recCount = if (isBusy) 
+                    5
+                else 
+                    (if (landmark_.floor == 0) 
+                        0 
+                    else 
+                        (2+(landmark_.floor/4)->ceil)
+                    )
+                ;                                    
+
+                if (entities->keycount < recCount && 
+                    landmark_.base.peaceful == false && 
+                        (   
+                            isBusy 
+                                || 
+                            (Number.random() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1))
+                        )
+                    ) ::<= {
                     addEntity();
                 }
             }

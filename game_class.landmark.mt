@@ -884,7 +884,8 @@ Landmark.Base.new(
         dungeonForceEntrance: false,
         startingEvents : [
             'dungeon-encounters',
-            'item-specter'
+            'item-specter',
+            'the-beast'
         ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
@@ -941,7 +942,8 @@ Landmark.Base.new(
         dungeonForceEntrance: false,
         startingEvents : [
             'dungeon-encounters',
-            'item-specter'
+            'item-specter',
+            'the-beast'
         ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
@@ -989,7 +991,8 @@ Landmark.Base.new(
         dungeonForceEntrance: false,
         startingEvents : [
             'dungeon-encounters',
-            'item-specter'
+            'item-specter',
+            'the-beast'
         ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
@@ -1040,7 +1043,8 @@ Landmark.Base.new(
         dungeonForceEntrance: false,
         startingEvents : [
             'dungeon-encounters',
-            'item-specter'
+            'item-specter',
+            'the-beast'
         ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},

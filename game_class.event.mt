@@ -279,9 +279,7 @@ Event.Base.new(
                     },
                     
                     onEnd ::(result){
-                        match(result) {
-                          (Battle.RESULTS.ALLIES_WIN): ::<= {
-                            canvas.clear();
+                        when(world.battle.partyWon()) ::<= {
                             windowEvent.queueMessage(speaker: '???', text:'You are worthy of this key\'s use.');                              
                             windowEvent.queueMessage(text:'The world around you warps until you are brought to your feet on a new land.');                              
                             windowEvent.queueMessage(text:'Something falls to your feet.');                              
@@ -304,20 +302,8 @@ Event.Base.new(
                             }
                             
                             party.inventory.add(item);
-
-
-                          },
-                          
-                          (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                            windowEvent.jumpToTag(name:'MainMenu');
-                          },
-                          
-                          
-                          (Battle.RESULTS.NOONE_WIN): ::<= {
-                            windowEvent.queueMessage(speaker: '???', text:'Judgement shall be brought forth.');                              
-                            battleStart();
-                          }         
-                        }                      
+                        }                          
+                        windowEvent.jumpToTag(name:'MainMenu');
                     }
                 );
             }
@@ -383,8 +369,7 @@ Event.Base.new(
                     onStart :: {
                     },
                     onEnd ::(result) {
-                        match(result) {
-                          (Battle.RESULTS.ALLIES_WIN): ::<= {
+                        when(world.battle.partyWon()) ::<= { 
                             //@message = 'The party found a Skill Crystal!';
                             //party.inventory.add(item);
                             @:Story = import(module:'game_singleton.story.mt');
@@ -419,20 +404,11 @@ Event.Base.new(
                                     Story.foundLightKey = true;
                                 }
                             }
-                          },
+                        };
                           
-                          (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                            windowEvent.jumpToTag(name:'MainMenu');
-                          },
-                          
-                          
-                          (Battle.RESULTS.NOONE_WIN): ::<= {
-                            windowEvent.queueMessage(text:boss.name + ' corners you!');                              
-                            battleStart();
-                          }
-                        }
-                       }
-                  );
+                        windowEvent.jumpToTag(name:'MainMenu');
+                    }
+                );
             }
             battleStart();
             return 0;  
@@ -915,7 +891,7 @@ Event.Base.new(
                 loot : true,
                 onEnd::(result){
                 
-                    if (result == Battle.RESULTS.ENEMIES_WIN)::<= {
+                    if (!world.battle.partyWon())::<= {
                         breakpoint();
                         windowEvent.jumpToTag(name:'MainMenu', clearResolve:true);
                     }

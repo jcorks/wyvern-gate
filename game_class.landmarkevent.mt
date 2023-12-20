@@ -119,4 +119,25 @@ LandmarkEvent.Base.new(
     }
 );
 
+LandmarkEvent.Base.new(
+    data : {
+        name: 'the-beast',
+        startup ::(landmark) {
+            @:ItemSpecter = import(module:'game_class.landmarkevent_thebeast.mt');
+            @:a = ItemSpecter.new();
+            a.initialize(landmark);
+            return a;
+        },
+
+        
+        step ::(data, landmark) {
+            data.step();
+        },
+        
+        isActive ::(data) {
+            return data.isActive()
+        }
+    }
+);
+
 return LandmarkEvent;

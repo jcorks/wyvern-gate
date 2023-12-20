@@ -35,8 +35,6 @@
     define:::(this) {
         @user_;
         
-        @enemies_;
-        @allies_;
     
             
         this.interface = {
@@ -50,16 +48,8 @@
             load ::(serialized) {
             
             },
-            reset ::(
-                allies,
-                enemies,
-            ) {
-                enemies_ = enemies;
-                allies_ = allies;
-                
-            },
             
-            takeTurn ::(battle){
+            takeTurn ::(battle, enemies, allies){
                 @:defaultAttack = ::{
                     battle.entityCommitAction(action:BattleAction.new(
                         state : {
@@ -67,14 +57,14 @@
                                 Ability.database.find(name:'Attack'),
 
                             targets: [
-                                Random.pickArrayItem(list:enemies_)
+                                Random.pickArrayItem(list:enemies)
                             ],
                             extraData: {}                        
                         }
                     ));                  
                 }
             
-                when(enemies_->keycount == 0)
+                when(enemies->keycount == 0)
                     battle.entityCommitAction(action:BattleAction.new(
                         state : {
                             ability: Ability.database.find(name:'Wait'),
@@ -110,18 +100,18 @@
                 match(ability.targetMode) {
                   (Ability.TARGET_MODE.ONE) :::<= {
                     if (atEnemy) 
-                        targets->push(value:Random.pickArrayItem(list:enemies_))
+                        targets->push(value:Random.pickArrayItem(list:enemies))
                     else 
-                        targets->push(value:Random.pickArrayItem(list:allies_))
+                        targets->push(value:Random.pickArrayItem(list:allies))
                     ;
                   },
                   
                   (Ability.TARGET_MODE.ALLALLY) :::<= {
-                    targets = [...allies_];
+                    targets = [...allies];
                   },                  
 
                   (Ability.TARGET_MODE.ALLENEMY) :::<= {
-                    targets = [...enemies_];
+                    targets = [...enemies];
                   },                  
 
                   (Ability.TARGET_MODE.NONE) :::<= {
@@ -130,9 +120,9 @@
 
                   (Ability.TARGET_MODE.RANDOM) :::<= {
                     if (Number.random() < 0.5) 
-                        targets->push(value:Random.pickArrayItem(list:enemies_))
+                        targets->push(value:Random.pickArrayItem(list:enemies))
                     else 
-                        targets->push(value:Random.pickArrayItem(list:allies_))
+                        targets->push(value:Random.pickArrayItem(list:allies))
                     ;                    
                   }
 

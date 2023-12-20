@@ -123,7 +123,7 @@
             enemies,
             landmark: {},
             onEnd::(result){
-                if (result == Battle.RESULTS.ENEMIES_WIN)::<= {
+                if (!world.battle.partyWon())::<= {
                     windowEvent.jumpToTag(name:'MainMenu', clearResolve:true);
                 }            
             }

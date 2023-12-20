@@ -23,6 +23,12 @@ Coming changes:
   . music and cues in topaz builds 
   . If multiple groups join a battle, it will become a team vs team vs team rather than all vs party
     all against the party 
+
+  . Fighting rooms
+        - 10+ groups of enemies all fighting with each other 
+        - constant 10+ spawn
+        - chaos
+
   . The Beast 
         - Roams around on certain floors of dungeons at half speed 
         - if comes close to party or other NPC, will chase and fight them 

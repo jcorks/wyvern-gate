@@ -33,7 +33,7 @@
 
 
             @:specter = island_.newInhabitant();
-            specter.name = 'Wyvern Specter';
+            specter.name = 'the Wyvern Specter';
             specter.species = Species.database.find(name:'Wyvern Specter');
             specter.profession = Profession.new(base:Profession.Base.database.find(name:'Wyvern Specter'));               
             specter.clearAbilities();

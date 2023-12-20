@@ -59,7 +59,7 @@
     
 
         @controller_;
-        
+        @isRemoved = false;
         @:state = State.new(
             items : {
                 tag : empty,
@@ -97,6 +97,7 @@
             },
         
             step :: {
+                when(isRemoved) empty;
                 state.steps += 1;
                 foreach(state.onStepSet) ::(k, task) {
                     task.do(mapEntity:this);
@@ -106,7 +107,7 @@
                 @path = state.path;
                 when(path == empty) empty;
                 when(state.steps % state.speed != 0) empty;
-
+                when(isRemoved) empty;
                 when (
                     distance(x0:state.targetX,
                              y0:state.targetY,
@@ -125,6 +126,7 @@
                     state.path = empty;
                 }
 
+                when(isRemoved) empty;
 
 
                 @:next = path[path->size-1];
@@ -168,25 +170,55 @@
             // each member does a blow to a random other member who is 
             // not incapacitated. Simplified attacks.
             squabble ::(other => MapEntity.type) {
-                @:allies = state.entities->filter(by::(value) <- !value.isIncapacitated());
-                @:enemies = other.entities->filter(by::(value) <- !value.isIncapacitated());
-                if (enemies->size > 0)  ::<= {
-                    foreach(allies) ::(i, ally) {
-                        @target = random.pickArrayItem(list:enemies);
-                        ally.attack(
-                            target,
-                            amount:ally.stats.ATK * (0.5),
-                            damageType : Damage.TYPE.PHYS,
-                            damageClass: Damage.CLASS.HP
-                        );       
-                    }
-                } else
-                    other.remove();
 
-                windowEvent.autoSkip();
+                windowEvent.autoSkip = true;
+                
+                    @:allies = state.entities->filter(by::(value) <- !value.isIncapacitated());
+                    @:enemies = other.entities->filter(by::(value) <- !value.isIncapacitated());
+                    if (enemies->size > 0)  ::<= {
+                        foreach(allies) ::(i, ally) {
+                            @target = random.pickArrayItem(list:enemies);
+                            ally.attack(
+                                target,
+                                amount:ally.stats.ATK * (0.5),
+                                damageType : Damage.TYPE.PHYS,
+                                damageClass: Damage.CLASS.HP
+                            );       
+                        }
+                    }
+                    
+                    @defeated = true;
+                    foreach(enemies) ::(i, enemy) {
+                        if (!enemy.isIncapacitated())
+                            defeated = false;
+                    }
+
+                windowEvent.autoSkip = false;
+                
+                
+                if (defeated) ::<= {
+                    @:otherItem = controller_.map.getItem(data:other);
+                    other.remove();
+                    if (distance(   
+                        x0: controller_.map.pointerX,
+                        y0: controller_.map.pointerY,
+                        x1: otherItem.x,
+                        y1: otherItem.y
+                    ) < 15)
+                        windowEvent.queueMessage(
+                            text: random.pickArrayItem(list : [
+                                'Was that a scream...?',
+                                'Something definitely happened to someone nearby...',
+                                '...That did not sound good.',
+                                'A battle of some kind just ended.'
+                            ])
+                        );
+                }
             },
             
             remove :: {
+                when(isRemoved) empty;
+                isRemoved = true;
                 controller_.remove(entity:this);
             },
             
@@ -196,8 +228,9 @@
 
             // sets a new place to go to
             newPathTo ::(x => Number, y => Number, onArrive, onCancel, speed) {
+                when(isRemoved) empty;
                 this.clearPath();
-                state.speed = if (speed != empty) speed else 1;
+                state.speed = if (speed != empty) (1/speed)->round else 1;
                 state.targetX = x;
                 state.targetY = y;
                 state.onArrive = onArrive;
@@ -211,6 +244,7 @@
             },
             
             clearPath ::{
+                when(isRemoved) empty;
                 if (state.onCancel != empty) ::<= {
                     @:task = MapEntity.Task.new(
                         base:MapEntity.Task.Base.database.find(name:state.onArrive)
@@ -294,10 +328,7 @@ MapEntity.Controller = LoadableClass.new(
             },
             
             remove::(entity => MapEntity.type) {
-                @:es = this.mapEntities;
-                @:index = es->findIndex(value:entity);
-                when (index < 0) empty;
-                es->remove(key:index);
+                map_.removeItem(data:entity);
             },
             
             step ::{
@@ -387,8 +418,6 @@ MapEntity.Task.Base = Database.newBase(
 
 // roams to random areas with the following triggers:
 // if within interest distance, stairs down locations will 
-@:DUNGEONENCOUNTERS__INTEREST_DISTANCE = 5;
-@:DUNGEONENCOUNTERS__CONTACT_DISTANCE = 2;
 MapEntity.Task.Base.new(
     data : {
         name: 'dungeonencounters-roam',
@@ -413,7 +442,29 @@ MapEntity.Task.Base.new(
 );
 
 
+MapEntity.Task.Base.new(
+    data : {
+        name: 'thebeast-roam',
+        startup ::{
+            
+        },
+        
+        do ::(data, mapEntity) {
+            @:map = mapEntity.controller.map;
 
+        
+            // go to a random area.
+            if (!mapEntity.hasPath) ::<= {
+                @:ar = map.getRandomArea();
+                mapEntity.newPathTo(
+                    x:(ar.x + ar.width/2)->floor,
+                    y:(ar.y + ar.height/2)->floor,
+                    speed: 1/2
+                );
+            }
+        }
+    }
+);
 
 
 
@@ -454,7 +505,11 @@ MapEntity.Task.Base.new(
 
                     @:landmark = mapEntity.controller.landmark;
 
-
+                    when (world.battle.isActive) ::<= {
+                        world.battle.join(group: mapEntity.entities);
+                    }
+                    
+                    
                     world.battle.start(
                         party:  landmark.island.world.party,                            
                         allies: landmark.island.world.party.members,
@@ -466,11 +521,7 @@ MapEntity.Task.Base.new(
                         },
                         
                         onEnd::(result) {
-                            match(result) {
-                              (Battle.RESULTS.ALLIES_WIN):::<= {
-                              },
-                              
-                              (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                            when(!world.battle.partyWon()) ::<= {
                                 @:windowEvent = import(module:'game_singleton.windowevent.mt');
                                 windowEvent.queueMessage(text:'Perhaps these Chosen were not ready...',
                                     renderable : {
@@ -487,7 +538,6 @@ MapEntity.Task.Base.new(
                                         windowEvent.jumpToTag(name:'MainMenu');                                        
                                     }
                                 );
-                              }
                             }
                         }
                     ); 
@@ -500,7 +550,7 @@ MapEntity.Task.Base.new(
                 @:item = map.getItem(data:mapEntity);
                 @:nearby = getAllNearby(mapEntity, map);
                 @closestDist = 1000000;
-                @closest;
+                @closest = empty;
                 @squabbled = false;
                 foreach(nearby) ::(i, itemOther) {
                     
@@ -515,14 +565,16 @@ MapEntity.Task.Base.new(
                         closest = itemOther;
                     }
                                         
-                    if (dist < CONTACT_DISTANCE)
+                    if (dist < CONTACT_DISTANCE) ::<= {
                         mapEntity.squabble(other:itemOther.data);
-                    squabbled = true;
+                        squabbled = true;
+                    }
                 }
                 
                 // busy!
                 when(squabbled)
                     mapEntity.clearPath();
+                
 
                 when (closestDist < INTEREST_DISTANCE) ::<= {
                     mapEntity.newPathTo(
@@ -620,6 +672,9 @@ MapEntity.Task.Base.new(
                     );
 
     
+                    when (world.battle.isActive) ::<= {
+                        world.battle.join(group: mapEntity.entities);
+                    }
                     
 
                     world.battle.start(
@@ -633,32 +688,28 @@ MapEntity.Task.Base.new(
                         },
                         
                         onEnd::(result) {
-                            match(result) {
-                              (Battle.RESULTS.ALLIES_WIN):::<= {
+                            when(world.battle.partyWon()) ::<= {
                                 windowEvent.queueMessage(
                                     text: 'The apparitions vanished...'
                                 );
-                              },
-                              
-                              (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                                @:windowEvent = import(module:'game_singleton.windowevent.mt');
-                                windowEvent.queueMessage(text:'The Wyvern Specter claims the items as the Shrine\'s possessions.',
-                                    renderable : {
-                                        render :: {
-                                            @:canvas = import(module:'game_singleton.canvas.mt');
-                                            canvas.blackout();
-                                            canvas.commit();
-                                        }
-                                    }
-                                );
-                                
-                                windowEvent.queueNoDisplay(
-                                    onEnter :: {                                        
-                                        windowEvent.jumpToTag(name:'MainMenu');                                        
-                                    }
-                                );
-                              }
                             }
+                              
+                            @:windowEvent = import(module:'game_singleton.windowevent.mt');
+                            windowEvent.queueMessage(text:'The Wyvern Specter claims the items as the Shrine\'s possessions.',
+                                renderable : {
+                                    render :: {
+                                        @:canvas = import(module:'game_singleton.canvas.mt');
+                                        canvas.blackout();
+                                        canvas.commit();
+                                    }
+                                }
+                            );
+                            
+                            windowEvent.queueNoDisplay(
+                                onEnter :: {                                        
+                                    windowEvent.jumpToTag(name:'MainMenu');                                        
+                                }
+                            );
                         }
                     );
                     
@@ -768,10 +819,10 @@ MapEntity.Task.Base.new(
                 
                 when (map.getDistanceFromItem(data:mapEntity) < CONTACT_DISTANCE) ::<= {
                     foreach(specters) ::(k, specter) {
-                        mapEntity.remove();
+                        specter.remove();
                     }
 
-                    encounterSpecter();
+                    encounterSpecter(mapEntity);
                 }
 
 

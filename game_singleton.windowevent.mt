@@ -52,6 +52,7 @@
         @choiceStack = [];
         @nextResolve = [];
         @requestAutoSkip = false;
+        @autoSkipIndex = empty;
 
     
         @:renderThis ::(data => Object, thisRender) {
@@ -81,7 +82,10 @@
                 if (data.keep) ::<= {
                     choiceStack->push(value:data);
                 } else ::<= {
-                    canvas.popState();
+                    if (!requestAutoSkip) 
+                        canvas.popState();
+                    
+                    
                     if (data.onLeave)
                         data.onLeave();
                     if (choiceStack->keycount > 0)
@@ -145,8 +149,7 @@
             @:onHover = data.onHover;
             @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
 
-            if (requestAutoSkip)
-                error(detail:'Requested auto skip when a cursor input was pending');
+            when (requestAutoSkip) false;
 
             //if (canCancel) ::<= {
             //    choicesModified->push(value:'(Cancel)');
@@ -277,9 +280,7 @@
             @:choice = input;         
             @:onMenu = data.onMenu;            
 
-            if (requestAutoSkip)
-                error(detail:'Requested auto skip when a cursor input was pending');
-
+            when (requestAutoSkip) false;
 
             when(choice == CURSOR_ACTIONS.CANCEL ||
                  choice == CURSOR_ACTIONS.CONFIRM) ::<= {
@@ -335,8 +336,7 @@
             when(input == empty && data.rendered != empty) false;
             @choice = input;                   
 
-            if (requestAutoSkip)
-                error(detail:'Requested auto skip when a cursor input was pending');
+            when (requestAutoSkip) false;
             
             
             @:prompt = data.prompt;
@@ -632,6 +632,9 @@
             //
             // lines should be an array of strings.
             queueDisplay::(prompt, lines, pageAfter, leftWeight, topWeight, renderable, onLeave) {
+                when(requestAutoSkip) ::<= {
+                    if (onLeave) onLeave();
+                }
                 nextResolve->push(value:[::{
                     if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
                     @iter = lines->keycount - pageAfter;
@@ -662,6 +665,11 @@
             // in order, or for rendering graphics.
             // onEnter runs whenever the display is entered.
             queueNoDisplay::(renderable, keep, onEnter => Function, jumpTag, onLeave) {
+                when(requestAutoSkip) ::<= {
+                    if (onEnter) onEnter();
+                    if (onLeave) onLeave();
+                }
+
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode: CHOICE_MODE.NODISPLAY,
@@ -685,6 +693,7 @@
             // Prompt will be displayed, like speaker in the message callback
             //
             queueChoices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetChoices, onGetPrompt, jumpTag, onLeave) {
+
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
                         mode: CHOICE_MODE.CURSOR,
@@ -797,18 +806,9 @@
             // request to not render or wait for nodisplay and display 
             // events. If auto skip is enabled and any of the other events 
             // are queued, an error is thrown.           
-            autoSkip :: {
-                requestAutoSkip = true;
-                {:::} {
-                    forever ::{
-                        if (nextResolve->keycount == 0)
-                            send()
-                            
-                        resolveNext();
-                        commitInput();
-                    }
-                }                
-                requestAutoSkip = false;
+            autoSkip  : {
+                get ::<- requestAutoSkip,
+                set ::(value) <- requestAutoSkip = value
             },
             
             CURSOR_ACTIONS : {
