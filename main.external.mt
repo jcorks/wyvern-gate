@@ -55,6 +55,11 @@
 // return: state (string)
 @:external_onLoadState     = getExternalFunction(name:'external_onLoadState');
 
+// Called when querying available save files.
+// return: array of strings
+@:external_onListSlots   = getExternalFunction(name:'external_onListSlots');
+
+
 // Called when getting input.
 // Will hold thread until an input is ready from the device.
 // 
@@ -97,13 +102,20 @@ canvas.onCommit = ::(lines, renderNow){
 
 
 instance.mainMenu(
-    
+    canvasHeight: 20,
+    canvasWidth: 80,
+        
     onSaveState :::(
         slot,
         data
     ) {
         external_onSaveState(a:slot, b:data);
     },
+
+    onListSlots ::{
+        return external_onListSlots();
+    },
+
 
     onLoadState :::(
         slot

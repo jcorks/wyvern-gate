@@ -19,6 +19,10 @@ mergeInto(LibraryManager.library, {
     return allocate(intArrayFromString(WYVERN_onLoadState(slot)), 'i8', ALLOC_NORMAL);
   },
 
+  external_on_list_slots: function(slot) {
+    return WYVERN_onListSlots();
+  },
+
   external_get_input: function() {
     return WYVERN_getInput();
   },

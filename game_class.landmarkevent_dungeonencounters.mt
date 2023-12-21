@@ -93,7 +93,7 @@
                 map_ = landmark.map;
                 island_ = landmark.island;
                 landmark_ = landmark;
-                isBusy = random.try(percentSuccess:10);
+                isBusy = if (landmark_.floor == 0) false else random.try(percentSuccess:10);
                 return this;
             },
             

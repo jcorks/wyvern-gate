@@ -30,13 +30,13 @@
 
     const matteList = [
         'game_class.ability.mt',
+        'game_class.apparelmaterial.mt',
         'game_class.battleai.mt',
         'game_class.battle.mt',
-        'game_function.correcta.mt',
         'game_class.damage.mt',
         'game_class.database.mt',
-        'game_class.dungeoncontroller.mt',
-        'game_class.dungeonmap.mt',
+        'game_class.deck.mt',
+        'game_class.die.mt',
         'game_class.effect.mt',
         'game_class.entity.mt',
         'game_class.entityquality.mt',
@@ -45,17 +45,20 @@
         'game_class.inventory.mt',
         'game_class.island.mt',
         'game_class.itemcolor.mt',
-        'game_class.itemenchant.mt',
+        'game_class.itemdesign.mt',
         'game_class.itemenchantcondition.mt',
+        'game_class.itemenchant.mt',
         'game_class.item.mt',
         'game_class.itemquality.mt',
+        'game_class.landmarkevent_dungeonencounters.mt',
+        'game_class.landmarkevent_itemspecter.mt',
+        'game_class.landmarkevent.mt',
+        'game_class.landmarkevent_thebeast.mt',
         'game_class.landmark.mt',
-        'game_class.largemap.mt',
         'game_class.location.mt',
         'game_class.logtimer.mt',
-        'game_class.mapbase.mt',
+        'game_class.mapentity.mt',
         'game_class.map.mt',
-        'game_class.structuremap.mt',
         'game_class.material.mt',
         'game_class.party.mt',
         'game_class.personality.mt',
@@ -63,27 +66,37 @@
         'game_class.scene.mt',
         'game_class.species.mt',
         'game_class.stateflags.mt',
+        'game_class.state.mt',
         'game_class.statset.mt',
-        'game_class.die.mt',
-        'game_class.deck.mt',
+        'game_class.structuremap.mt',
         'game_function.battlemenu.mt',
+        'game_function.correcta.mt',
+        'game_function.dice.mt',
         'game_function.distance.mt',
+        'game_function.interactperson.mt',
+        'game_function.itemimprove.mt',
         'game_function.itemmenu.mt',
+        'game_function.name.mt',
+        'game_function.newrecord.mt',
         'game_function.partyoptions.mt',
         'game_function.pickitem.mt',
-    	'game_function.dice.mt',
-        'main.external.mt',
+        'game_function.pickpartyitem.mt',
+        'game_function.trap.mt',
         'game_singleton.canvas.mt',
-        'game_singleton.windowevent.mt',
+        'game_singleton.dungeonmap.mt',
+        'game_singleton.gamblist.mt',
         'game_singleton.instance.mt',
+        'game_singleton.largemap.mt',
+        'game_singleton.loadableclass.mt',
         'game_singleton.namegen.mt',
         'game_singleton.random.mt',
         'game_singleton.story.mt',
+        'game_singleton.windowevent.mt',
         'game_singleton.world.mt',
-        'game_singleton.gamblist.mt',
         'game_struct.battleaction.mt',
         'game_struct.mt',
-        
+
+        'main.external.mt',
         'Matte.Core.Class',
         'Matte.Core',
         'Matte.Core.JSON',
@@ -127,14 +140,36 @@
         return matte.store.createEmpty();        
     });
 
-    matte.setExternalFunction('external_onSaveState', ['a'], function(fn, args) {
-        //var storage = window['localStorage'];
-        storage['wyvernslot'+slot] = args[0].data;
+    matte.setExternalFunction('external_onSaveState', ['a', 'b'], function(fn, args) {
+        var storage = window['localStorage'];
+        const slot = args[0].data;
+        storage['wyvernslot'+slot] = args[1].data;
         return matte.store.createEmpty();            
     });
+
+    matte.setExternalFunction('external_onListSlots', ['a', 'b'], function(fn, args) {
+        var storage = window['localStorage'];
+        const names = Object.keys(storage);
+        const argsA = [];
+        
+        for(var i = 0; i < names.length; ++i) {
+            if (names[i].indexOf('wyvernslot' !=-1)) {
+                argsA.push(
+                    matte.store.createString(
+                        names[i].substring(
+                            10,
+                            names[i].length-1
+                        )
+                    )
+                )
+            }
+        }
+        return matte.store.createObjectArray(argsA);            
+    });
+
       
     matte.setExternalFunction('external_onLoadState', ['a'], function(fn, args) {
-        //var storage = window['localStorage'];
+        var storage = window['localStorage'];
         return matte.store.createString(storage['wyvernslot'+args[0].data]);    
     });      
 
