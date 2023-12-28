@@ -24,43 +24,46 @@
 
 
 return ::{
+
+    @:menuRenderable = {
+        render ::{
+            canvas.blackout();
+            // Name (species, class)
+            // HP, AP,
+            // Weapon
+            @:Entity = import(module:'game_class.entity.mt');
+            
+            @:party = import(module:'game_singleton.world.mt').party;
+            @top = 1;
+            @:height = 7;
+            @:width = canvas.width*(2/3);
+            foreach(party.members)::(index, member) {
+                @x = (canvas.width - width) / 2;
+                canvas.renderFrame(top, left: (canvas.width - width) / 2, width, height);
+                
+                canvas.movePen(x: x+3, y: top + 2);
+                canvas.drawText(text: member.name + ' - (' + member.species.name + ' ' + member.profession.base.name + ')');
+                canvas.movePen(x: x+3, y: top + 3);
+                canvas.drawText(text: member.renderHP() + 'HP: ' + member.hp + ' / ' + member.stats.HP + '    AP: ' + member.ap + ' / ' + member.stats.AP + '\n');
+                canvas.movePen(x: x+3, y: top + 4);
+                canvas.drawText(text: 'Weapon: ' + member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).name);
+                
+                top += height;
+                
+            }
+            canvas.movePen(x: ((canvas.width - width) / 2)+1, y: 1);    
+            canvas.drawText(text:'Party: (' + party.inventory.gold + 'G, ' + party.inventory.items->keycount + ' items)');     
+        
+        }
+    }
+
     windowEvent.queueChoices(
         leftWeight: 1,
         topWeight: 1,
         prompt: 'Party Options',
         keep: true,
         canCancel: true,
-        renderable : {
-            render ::{
-                canvas.clear();
-                // Name (species, class)
-                // HP, AP,
-                // Weapon
-                @:Entity = import(module:'game_class.entity.mt');
-                
-                @:party = import(module:'game_singleton.world.mt').party;
-                @top = 1;
-                @:height = 7;
-                @:width = canvas.width*(2/3);
-                foreach(party.members)::(index, member) {
-                    @x = (canvas.width - width) / 2;
-                    canvas.renderFrame(top, left: (canvas.width - width) / 2, width, height);
-                    
-                    canvas.movePen(x: x+3, y: top + 2);
-                    canvas.drawText(text: member.name + ' - (' + member.species.name + ' ' + member.profession.base.name + ')');
-                    canvas.movePen(x: x+3, y: top + 3);
-                    canvas.drawText(text: member.renderHP() + 'HP: ' + member.hp + ' / ' + member.stats.HP + '    AP: ' + member.ap + ' / ' + member.stats.AP + '\n');
-                    canvas.movePen(x: x+3, y: top + 4);
-                    canvas.drawText(text: 'Weapon: ' + member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).name);
-                    
-                    top += height;
-                    
-                }
-                canvas.movePen(x: ((canvas.width - width) / 2)+1, y: 1);    
-                canvas.drawText(text:'Party: (' + party.inventory.gold + 'G, ' + party.inventory.items->keycount + ' items)');     
-            
-            }
-        },
+        renderable : menuRenderable,
         choices: [
             //'Manage',
             'Members',
@@ -87,6 +90,7 @@ return ::{
                     topWeight: 1,
                     choices: names,
                     prompt: 'Whom?',
+                    renderable : menuRenderable,
                     keep: true,
                     canCancel: true,
                     onChoice ::(choice) {
@@ -104,6 +108,7 @@ return ::{
                             prompt: names[choice-1],
                             keep: true,
                             canCancel: true,
+                            renderable : menuRenderable,
                             onChoice ::(choice) {
                                 when(choice == 0) empty;
                                 
@@ -139,6 +144,7 @@ return ::{
                                         topWeight: 1,
                                         prompt: member.name + ': Equips',
                                         keep:true,
+                                        renderable : menuRenderable,
                                         canCancel: true,
                                         onGetChoices:: {
                                             @:choices = [];
@@ -184,6 +190,7 @@ return ::{
                                                     canCancel: true,
                                                     keep:true,
                                                     jumpTag: 'EquipWhich',
+                                                    renderable : menuRenderable,
                                                     
                                                     onChoice:::(choice) {
                                                         @:index = choice -1;
@@ -208,6 +215,7 @@ return ::{
                                                             canCancel: true,
                                                             leftWeight: 1,
                                                             topWeight: 1,
+                                                            renderable : menuRenderable,
                                                             onChoice::(choice) {
                                                                 when (choice == 0) empty;
                                                                 when(choice == 1) ::<= {
@@ -275,6 +283,7 @@ return ::{
                                                 onGetPrompt::{
                                                     return member.name + ': ' + member.getEquipped(slot).name + '';
                                                 },
+                                                renderable : menuRenderable,
                                                 canCancel: true,
                                                 keep: true,
                                                 onChoice:::(choice) {
@@ -336,6 +345,7 @@ return ::{
                     prompt: "Who's looking?",
                     choices: names,
                     canCancel : true,
+                    renderable : menuRenderable,
                     onChoice::(choice) {
                         when(choice == 0) empty;
                         
@@ -344,6 +354,7 @@ return ::{
                             user:world.party.members[choice-1], 
                             party:world.party, 
                             enemies:[],
+                            renderable : menuRenderable,
                             onAct::(action) {
                                 when(action == empty) empty;
                                 world.party.members[choice-1].useAbility(

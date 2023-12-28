@@ -409,13 +409,10 @@ Interaction.new(
                                 );                               
                             }       
 
-                            @:pickItem = import(module:'game_function.pickitem.mt');
+                            @:pickItem = import(module:'game_function.pickpartyitem.mt');
                             pickItem(
-                                inventory:party.inventory, 
                                 canCancel:true, 
-                                onGetPrompt::{
-                                    return 'Wager which?'
-                                },
+                                prompt: 'Wager which?',
                                 topWeight : 0.5,
                                 leftWeight : 0.5,
                                 onPick::(item) {
@@ -427,6 +424,7 @@ Interaction.new(
                                         windowEvent.jumpToTag(name:'pickItem', doResolveNext: true, goBeforeTag: true);
                                                                                                           
                                     }
+                                    
                                 
                                     windowEvent.queueMessage(
                                         speaker: 'Wandering Gamblist',
@@ -442,6 +440,9 @@ Interaction.new(
                                                 text: '"Ah, well. Perhaps next time. A gamble is a gamble, after all."'                                    
                                             );
                                             party.inventory.remove(item);
+                                            if (item.equippedBy != empty)
+                                                item.equippedBy.unequipItem(item:item);
+                                                
                                             if (item.name->contains(key:'Wyvern Key of'))
                                                 world.accoladeEnable(name:'gotRidOfWyvernKey');      
                                         }

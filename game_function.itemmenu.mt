@@ -28,6 +28,7 @@ return ::(
     user,
     party,
     enemies,
+    renderable,
     onAct => Function,
     inBattle => Boolean
 ) {
@@ -38,88 +39,108 @@ return ::(
     }
     
 
-    pickItem(inventory:party.inventory, canCancel:true, onPick::(item) {
-        when(item == empty) empty;
-        windowEvent.queueChoices(
-            leftWeight: 1,
-            topWeight: 1,
-            prompt: '[' + item.name + ']',
-            canCancel : true,
-            keep:true,
-            jumpTag: 'Item',
-            choices: [
-                'Use',
-                'Check',
-                'Equip',
-                'Compare',
-                'Rename',
-                'Improve',
-                'Toss'
-            ],
-            onChoice::(choice) {
-                when (choice == 0) empty;              
-                
-                match(choice-1) {
-                  // item: use
-                  (0): ::<={
-                    match(item.base.useTargetHint) {
-                      (Item.USE_TARGET_HINT.ONE): ::<={
-                        @:all = [];
-                        foreach(party.members)::(index, ally) {
-                            all->push(value:ally);
-                        }
-                        foreach(enemies)::(index, enemy) {
-                            all->push(value:enemy);
-                        }
-                        
-                        
-                        @:allNames = [];
-                        foreach(all)::(index, person) {
-                            allNames->push(value:person.name);
-                        }
-                      
-                      
-                        choice = windowEvent.queueChoices(
-                          leftWeight: 1,
-                          topWeight: 1,
-                          prompt: 'On whom?',
-                          choices: allNames,
-                          canCancel: true,
-                          keep: true,
-                          onChoice ::(choice) {
-                            when(choice == 0) empty;                      
-                            commitAction(action:BattleAction.new(state:{
-                                    ability: Ability.database.find(name:'Use Item'),
-                                    targets: [all[choice-1]],
-                                    extraData : [item]
-                                }) 
-                            );                            
-                            if (windowEvent.canJumpToTag(name:'Item'))
-                                windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
+    pickItem(
+        inventory:party.inventory,
+        renderable, 
+        canCancel:true, 
+        prompt: user.name + ' - Choosing...',
+        onPick::(item) {
+            when(item == empty) empty;
+            windowEvent.queueChoices(
+                leftWeight: 1,
+                topWeight: 1,
+                prompt: '[' + item.name + ']',
+                canCancel : true,
+                keep:true,
+                jumpTag: 'Item',
+                renderable,
+                choices: [
+                    'Use',
+                    'Check',
+                    'Equip',
+                    'Compare',
+                    'Rename',
+                    'Improve',
+                    'Toss'
+                ],
+                onChoice::(choice) {
+                    when (choice == 0) empty;              
+                    
+                    match(choice-1) {
+                      // item: use
+                      (0): ::<={
+                        match(item.base.useTargetHint) {
+                          (Item.USE_TARGET_HINT.ONE): ::<={
+                            @:all = [];
+                            foreach(party.members)::(index, ally) {
+                                all->push(value:ally);
+                            }
+                            foreach(enemies)::(index, enemy) {
+                                all->push(value:enemy);
+                            }
+                            
+                            
+                            @:allNames = [];
+                            foreach(all)::(index, person) {
+                                allNames->push(value:person.name);
+                            }
+                          
+                          
+                            choice = windowEvent.queueChoices(
+                              leftWeight: 1,
+                              topWeight: 1,
+                              prompt: 'On whom?',
+                              choices: allNames,
+                              canCancel: true,
+                              keep: true,
+                              onChoice ::(choice) {
+                                when(choice == 0) empty;                      
+                                commitAction(action:BattleAction.new(state:{
+                                        ability: Ability.database.find(name:'Use Item'),
+                                        targets: [all[choice-1]],
+                                        extraData : [item]
+                                    }) 
+                                );                            
+                                if (windowEvent.canJumpToTag(name:'Item'))
+                                    windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
 
-                          }
-                        );
-                        
-                
-                      },
-                      
-                      (Item.USE_TARGET_HINT.GROUP): ::<={
-                        choice = windowEvent.queueChoices(
-                          leftWeight: 1,
-                          topWeight: 1,
-                          prompt: 'On whom?',
-                          choices: [
-                            'Allies',
-                            'Enemies'
-                          ],
-                          canCancel: true,
-                          keep : true,
-                          onChoice ::(choice) {
-                       
-                            when(choice == 0) empty;                                                  
+                              }
+                            );
+                            
+                    
+                          },
+                          
+                          (Item.USE_TARGET_HINT.GROUP): ::<={
+                            choice = windowEvent.queueChoices(
+                              leftWeight: 1,
+                              topWeight: 1,
+                              prompt: 'On whom?',
+                              choices: [
+                                'Allies',
+                                'Enemies'
+                              ],
+                              canCancel: true,
+                              keep : true,
+                              onChoice ::(choice) {
+                           
+                                when(choice == 0) empty;                                                  
+                                commitAction(action:BattleAction.new(state:{
+                                        ability: Ability.database.find(name:'Use Item'),
+                                        targets: if (choice == 1) party.members else enemies,
+                                        extraData : [item]
+                                    }) 
+                                );                  
+                                if (windowEvent.canJumpToTag(name:'Item'))
+                                    windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
+                              
+                              }
+                            );
+                          },
+
+                          (Item.USE_TARGET_HINT.ALL): ::<= {
                             commitAction(action:BattleAction.new(state:{
                                     ability: Ability.database.find(name:'Use Item'),
-                                    targets: if (choice == 1) party.members else enemies,
+                                    targets: [...party.members, ...enemies],
                                     extraData : [item]
                                 }) 
                             );                  
@@ -127,96 +148,83 @@ return ::(
                                 windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
                           
                           }
-                        );
+
+
+
+                        }
+                      
                       },
 
-                      (Item.USE_TARGET_HINT.ALL): ::<= {
+                      
+                      (1): ::<={ // inventory
+                        item.describe(
+                            by:user
+                        );
+                        
+                      },
+                      
+                      (2): ::<= {
                         commitAction(action:BattleAction.new(state:{
-                                ability: Ability.database.find(name:'Use Item'),
-                                targets: [...party.members, ...enemies],
-                                extraData : [item]
-                            }) 
-                        );                  
+                            ability: Ability.database.find(name:'Equip Item'),
+                            targets: [user],
+                            extraData : [item, party.inventory]
+                        }));           
                         if (windowEvent.canJumpToTag(name:'Item'))
                             windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
+                      },
                       
-                      }
-
-
-
-                    }
-                  
-                  },
-
-                  
-                  (1): ::<={ // inventory
-                    item.describe(
-                        by:user
-                    );
-                    
-                  },
-                  
-                  (2): ::<= {
-                    commitAction(action:BattleAction.new(state:{
-                        ability: Ability.database.find(name:'Equip Item'),
-                        targets: [user],
-                        extraData : [item, party.inventory]
-                    }));           
-                    if (windowEvent.canJumpToTag(name:'Item'))
-                        windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
-                  },
-                  
-                  // compare
-                  (3)::<= {
-                    @slot = user.getSlotsForItem(item)[0];
-                    @currentEquip = user.getEquipped(slot);
-                    
-                    currentEquip.equipMod.printDiffRate(
-                        prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
-                        other:item.equipMod
-                    ); 
-                  },
-                  // rename
-                  (4)::<= {
-                    when (!item.base.canHaveEnchants)
-                        windowEvent.queueMessage(text:item.name + ' cannot be renamed.');
-                  
-                    @:name = import(module:"game_function.name.mt");
-                    name(
-                        prompt: 'New item name:',
-                        onDone::(name) {
-                            item.name = name;
-                            if (windowEvent.canJumpToTag(name:'Item'))
-                                windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
-                        }
-                    );
-                  },
-                  // improve
-                  (5)::<= {
-                    (import(module:'game_function.itemimprove.mt'))(user, item, inBattle); 
-                  },               
-                  // Toss
-                  (6)::<= {
-                    windowEvent.queueAskBoolean(
-                        prompt:'Are you sure you wish to throw away the ' + item.name + '?',
-                        onChoice::(which) {
-                            when(which == false) empty;
-                            party.inventory.remove(item);
-                            
-                            if (item.name->contains(key:'Wyvern Key of')) ::<= {
-                                @:world = import(module:'game_singleton.world.mt')
-                                world.accoladeEnable(name:'gotRidOfWyvernKey');      
+                      // compare
+                      (3)::<= {
+                        @slot = user.getSlotsForItem(item)[0];
+                        @currentEquip = user.getEquipped(slot);
+                        
+                        currentEquip.equipMod.printDiffRate(
+                            prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
+                            other:item.equipMod
+                        ); 
+                      },
+                      // rename
+                      (4)::<= {
+                        when (!item.base.canHaveEnchants)
+                            windowEvent.queueMessage(text:item.name + ' cannot be renamed.');
+                      
+                        @:name = import(module:"game_function.name.mt");
+                        name(
+                            prompt: 'New item name:',
+                            onDone::(name) {
+                                item.name = name;
+                                if (windowEvent.canJumpToTag(name:'Item'))
+                                    windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
                             }
-                                                      
-                            windowEvent.queueMessage(text:'The ' + item.name + ' was thrown away.');
-                            if (windowEvent.canJumpToTag(name:'Item'))
-                                windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
-                        }
-                    );
-                  }
-                }              
-            
-            }
-        );
-    });    
+                        );
+                      },
+                      // improve
+                      (5)::<= {
+                        (import(module:'game_function.itemimprove.mt'))(user, item, inBattle); 
+                      },               
+                      // Toss
+                      (6)::<= {
+                        windowEvent.queueAskBoolean(
+                            prompt:'Are you sure you wish to throw away the ' + item.name + '?',
+                            onChoice::(which) {
+                                when(which == false) empty;
+                                party.inventory.remove(item);
+                                
+                                if (item.name->contains(key:'Wyvern Key of')) ::<= {
+                                    @:world = import(module:'game_singleton.world.mt')
+                                    world.accoladeEnable(name:'gotRidOfWyvernKey');      
+                                }
+                                                          
+                                windowEvent.queueMessage(text:'The ' + item.name + ' was thrown away.');
+                                if (windowEvent.canJumpToTag(name:'Item'))
+                                    windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
+                            }
+                        );
+                      }
+                    }              
+                
+                }
+            );
+        }
+    );    
 }
