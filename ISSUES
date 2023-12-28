@@ -5,38 +5,13 @@ Known bugs / concerns:
 - Some time of day displays go offscreen when the island name 
   is too long.
 - Sleeping at an inn doesnt apply the change of day until you leave and re-enter the town / city / etc.
-- If encountering 2 enemy groups in dungeon and knocking / killing them, the second group will rejoin after the battle 
-- HP / AP dont rescale properly when equipment changes it.
 - In battle, some frames display a previous background image rather than the most current one
 - In topaz builds, fullscreen disabling doesnt come with window decoration and resizing is impossible
 - Some abilities are not properly implemented currently.
-- Fancy Shop (and likely other speciality shops) are missing their run by verb
 - Sometimes, using items will not consume them when they will sometimes be consumed normally. Likely due to either entiering or leaving the battle state, or save/loading an inventory.
 
 Coming changes:
-  . "Freaks of Nature"
-        - Effect to certain npcs that flatly negates damage a percent of the time.
-        - OPNPCs: 50%
-        - Wyverns: 20%
-        - Beast / Specter: 80%
-  . reduction of 3rd dungeon sprawling size as well as expension of hallways to be 2 wide rather than 1
   . music and cues in topaz builds 
-  . If multiple groups join a battle, it will become a team vs team vs team rather than all vs party
-    all against the party 
-
-  . Fighting rooms
-        - 10+ groups of enemies all fighting with each other 
-        - constant 10+ spawn
-        - chaos
-
-  . The Beast 
-        - Roams around on certain floors of dungeons at half speed 
-        - if comes close to party or other NPC, will chase and fight them 
-        - is VERY difficult to beat, so is best avoided
-
-  . The Mirror 
-        - Roams around on certain floors with the party symbol 
-        - Consists of a clone of the entire party including equipment 
 
         
   . Post-Post game: endless mode 

@@ -208,7 +208,7 @@ Effect.new(
         },
 
         onDamage : ::(user, item, holder, from, damage) {
-            if (random.try(percentSuccess:85)) ::<= {
+            if (!holder.isIncapacitated() && random.try(percentSuccess:85)) ::<= {
                 windowEvent.queueMessage(text:holder.name + "'s ghostly body bends around the attack!");
                 damage.amount = 0;
             }
@@ -252,7 +252,7 @@ Effect.new(
         },
 
         onDamage : ::(user, item, holder, from, damage) {
-            if (random.try(percentSuccess:75)) ::<= {
+            if (!holder.isIncapacitated() && random.try(percentSuccess:75)) ::<= {
                 windowEvent.queueMessage(text:holder.name + " repels the attack in their rage!");
                 damage.amount = 0;
             }
@@ -3677,6 +3677,58 @@ Effect.new(
         }
     }
 )   
+
+
+Effect.new(
+    data : {
+        name : 'Auto-Life',
+        description: '50% chance to fully revive if damaged while at 0 HP. This breaks the item.',
+        battleOnly : true,
+        skipTurn : false,
+        stackable: true,
+        stats: StatSet.new(),
+        onAffliction : ::(user, item, holder) {
+        },
+        
+        onRemoveEffect : ::(user, item, holder) {
+        },                
+        onPostAttackOther : ::(user, item, holder, to) {
+        },
+
+        onPreAttackOther : ::(user, item, holder, to, damage) {
+        },
+        onAttacked : ::(user, item, holder, by, damage) {
+        
+        },
+        
+        onDamage : ::(user, item, holder, from, damage) {
+            if (holder.hp == 0) ::<= {
+                windowEvent.queueMessage(text:holder.name + " glows!");
+                if (random.try(percentSuccess:50)) ::<= {
+
+                    @:Entity = import(module:'game_class.entity.mt');
+                
+                    damage.amount = 0;
+                    holder.heal(amount:holder.stats.HP);
+
+                    holder.unequipItem(item, silent:true);
+                    windowEvent.queueMessage(text:'The ' + item.name + " shatters after reviving " + holder.name + "!");
+                    item.throwOut();                      
+                } else ::<= {
+                    windowEvent.queueMessage(text:'The ' + item.name + " failed to revive " + holder.name + "!");
+                    
+                }
+            }
+        },
+        
+        onNextTurn : ::(user, item, holder, turnIndex, turnCount) {                
+        },
+        onStatRecalculate : ::(user, item, holder, stats) {
+        
+        }
+    }
+)   
+
 
 Effect.new(
     data : {

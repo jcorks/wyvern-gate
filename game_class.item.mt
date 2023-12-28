@@ -803,6 +803,44 @@ Item.Base.new(data : {
     attributes : ATTRIBUTE.FRAGILE    
 })
 
+Item.Base.new(data : {
+    name : "Life Crystal",
+    description: 'A shimmering amulet. The metal enclosure has a $color$ tint. If death befalls the holder, has a 50% chance to revive them and break.',
+    examine : '',
+    equipType: TYPE.AMULET,
+    rarity : 30000,
+    basePrice : 5000,
+    keyItem : false,
+    weight : 2,
+    levelMinimum : 1,
+    tier: 0,
+    canHaveEnchants : true,
+    canHaveTriggerEnchants : true,
+    enchantLimit : 10,
+    hasQuality : true,
+    hasMaterial : true,
+    isApparel : false,
+    isUnique : true,
+    canBeColored : true,
+    useTargetHint : USE_TARGET_HINT.ONE,
+    hasSize : false,
+    onCreate ::(item, user, creationHint) {},
+    possibleAbilities : [],
+    
+    equipMod : StatSet.new(
+        HP: 10,
+        DEF: 10
+    ),
+    useEffects : [
+        'Fling',
+        'Break Item'
+    ],
+    equipEffects : [
+        'Auto-Life',
+    ],
+    attributes : ATTRIBUTE.FRAGILE    
+})
+
 
 Item.Base.new(data : {
     name : "Bracelet of Luna",
@@ -2852,7 +2890,7 @@ Item.Base.new(data : {
     tier: 1,
     canHaveEnchants : false,
     canHaveTriggerEnchants : false,
-    enchantLimit : 1,
+    enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
     isApparel : false,
@@ -2890,7 +2928,7 @@ Item.Base.new(data : {
     levelMinimum : 1,
     canHaveEnchants : false,
     canHaveTriggerEnchants : false,
-    enchantLimit : 1,
+    enchantLimit : 10,
     hasQuality : true,
     tier: 2,
     hasMaterial : true,
@@ -2931,7 +2969,7 @@ Item.Base.new(data : {
     tier: 3,
     canHaveEnchants : false,
     canHaveTriggerEnchants : false,
-    enchantLimit : 1,
+    enchantLimit : 10,
     hasQuality : true,
     hasMaterial : true,
     isApparel : false,

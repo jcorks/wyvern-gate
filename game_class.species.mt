@@ -31,7 +31,8 @@
         description : String,
         growth : StatSet.type,
         passives : Object,
-        special : Boolean
+        special : Boolean,
+        swarms : Boolean
     }            
 );
 
@@ -63,7 +64,8 @@ Species.new(data:{
     ],
     special : false,
     passives : [
-    ]
+    ],
+    swarms : false
 })
 
 Species.new(data:{
@@ -89,6 +91,7 @@ Species.new(data:{
         'body',
         'tail'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -119,6 +122,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -149,6 +153,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -178,6 +183,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -207,6 +213,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -236,6 +243,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -267,6 +275,7 @@ Species.new(data:{
         'body',
         'horns'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -298,6 +307,7 @@ Species.new(data:{
         'body',
         'horns'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -326,6 +336,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -356,6 +367,7 @@ Species.new(data:{
         'horns',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -386,6 +398,7 @@ Species.new(data:{
         'horns',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -415,6 +428,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -445,6 +459,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -474,6 +489,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -502,6 +518,7 @@ Species.new(data:{
         'face',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -531,6 +548,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -557,6 +575,7 @@ Species.new(data:{
         'face',
         'body'
     ],        
+    swarms : false,
     special : false,
     passives : [
     ]
@@ -583,6 +602,7 @@ Species.new(data:{
         'face',
         'body'
     ],        
+    swarms : false,
     
     special : false,
     passives : [
@@ -614,6 +634,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -643,6 +664,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -672,6 +694,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -702,6 +725,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -732,6 +756,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     passives : [
     ]
@@ -761,6 +786,7 @@ Species.new(data:{
         'tail',
         'body'
     ],
+    swarms : false,
     
     special : false,
     passives : [
@@ -784,6 +810,7 @@ Species.new(data:{
     ),
     qualities : [
     ],
+    swarms : true,
     
     special : true,
     passives : [
@@ -809,6 +836,7 @@ Species.new(data:{
     qualities : [
 
     ],
+    swarms : false,
     
     special : true,
     passives : [
@@ -832,6 +860,7 @@ Species.new(data:{
     qualities : [
 
     ],
+    swarms : false,
     
     special : true,
     passives : [
@@ -855,6 +884,7 @@ Species.new(data:{
     qualities : [
 
     ],
+    swarms : false,
     
     special : true,
     passives : [
@@ -879,6 +909,7 @@ Species.new(data:{
     qualities : [
 
     ],
+    swarms : false,
     
     special : true,
     passives : [
@@ -903,6 +934,7 @@ Species.new(data:{
     ),
     qualities : [
     ],
+    swarms : false,
     
     special : true,
     passives : [
@@ -925,6 +957,7 @@ Species.new(data:{
     ),
     qualities : [
     ],
+    swarms : false,
     
     special : true,
     passives : [
@@ -947,6 +980,7 @@ Species.new(data:{
     ),
     qualities : [
     ],
+    swarms : false,
     
     special : true,
     passives : [
@@ -971,6 +1005,7 @@ Species.new(data:{
     ),
     qualities : [
     ],
+    swarms : false,
     
     special : true,
     passives : [
@@ -995,6 +1030,7 @@ Species.new(data:{
     ),
     qualities : [
     ],
+    swarms : false,
     
     special : true,
     passives : [
@@ -1019,7 +1055,7 @@ Species.new(data:{
     ),
     qualities : [
     ],
-    
+    swarms: true,
     special : true,
     passives : [
         'Apparition'
@@ -1043,6 +1079,7 @@ Species.new(data:{
     ),
     qualities : [
     ],
+    swarms : true,
     
     special : true,
     passives : [
@@ -1050,4 +1087,51 @@ Species.new(data:{
     ]
 })
 
+
+Species.new(data:{
+    name : 'Treasure Golem',
+    rarity : 2000000000000,
+    description: 'Looks like a chest! Not as friendly though.',
+    growth : StatSet.new(
+        HP : 60,
+        AP : 10,
+        ATK: 10,
+        DEF: 10,
+        INT: 10,
+        LUK: 10,
+        SPD: 10,
+        DEX: 10
+    ),
+    qualities : [
+    ],
+    swarms : true,
+    
+    special : true,
+    passives : [
+    ]
+})
+
+
+Species.new(data:{
+    name : 'Cave Bat',
+    rarity : 2000000000000,
+    description: 'Large, wild bat.',
+    growth : StatSet.new(
+        HP : 60,
+        AP : 10,
+        ATK: 10,
+        DEF: 10,
+        INT: 10,
+        LUK: 10,
+        SPD: 10,
+        DEX: 10
+    ),
+    qualities : [
+    ],
+    swarms : true,
+    
+    special : true,
+    passives : [
+    ]
+})
 return Species;

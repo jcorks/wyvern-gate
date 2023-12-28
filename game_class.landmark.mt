@@ -263,6 +263,7 @@
                 } else ::<= {                
                     state.load(parent:this, serialized)
                 }
+                state.mapEntityController.initialize(landmark:this);
             },
 
             worldID : {
@@ -385,7 +386,7 @@
             },
             
             locations : {
-                get :: <- state.map.getAllItemData() 
+                get :: <- state.map.getAllItemData()->filter(by:::(value) <- value->type == Location.type)
             },
             
             island : {
@@ -885,7 +886,9 @@ Landmark.Base.new(
         startingEvents : [
             'dungeon-encounters',
             'item-specter',
-            'the-beast'
+            'the-beast',
+            'treasure-golem',
+            'cave-bat'
         ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
@@ -902,7 +905,7 @@ Landmark.Base.new(
             {name: 'Healing Circle', rarity:20},
 
 
-            {name: 'Clothing Shop', rarity: 300},
+            {name: 'Clothing Shop', rarity: 100},
             {name: 'Fancy Shop', rarity: 500}
 
         ],
@@ -943,7 +946,10 @@ Landmark.Base.new(
         startingEvents : [
             'dungeon-encounters',
             'item-specter',
-            'the-beast'
+            'the-beast',
+            'the-mirror',
+            'treasure-golem',
+            'cave-bat'
         ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
@@ -992,7 +998,10 @@ Landmark.Base.new(
         startingEvents : [
             'dungeon-encounters',
             'item-specter',
-            'the-beast'
+            'the-beast',
+            'the-mirror',
+            'treasure-golem',
+            'cave-bat'
         ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},
@@ -1006,7 +1015,7 @@ Landmark.Base.new(
 
             {name: 'Healing Circle', rarity:25},
 
-            {name: 'Clothing Shop', rarity: 200},
+            {name: 'Clothing Shop', rarity: 80},
             {name: 'Fancy Shop', rarity: 100}
 
         ],
@@ -1044,7 +1053,10 @@ Landmark.Base.new(
         startingEvents : [
             'dungeon-encounters',
             'item-specter',
-            'the-beast'
+            'the-beast',
+            'the-mirror',
+            'treasure-golem',
+            'cave-bat'
         ],
         possibleLocations : [
 //                    {name: 'Stairs Down', rarity:1},

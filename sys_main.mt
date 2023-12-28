@@ -23,6 +23,7 @@ term.setPosition(value:{
 });
 display.getViewport().attach(child:term);
 
+
 display.setParameter(
     param:Topaz.Display.Parameter.Fullscreen,
     value:true

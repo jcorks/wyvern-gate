@@ -41,10 +41,10 @@ MASK_TYPE defines what, if any, shadow mask to use. MASK_BRIGHTNESS defines how 
 #define MULTISAMPLE
 #define GAMMA
 #define FAKE_GAMMA
-#define CURVATURE
+//#define CURVATURE
 //#define SHARPER
 // MASK_TYPE: 0 = none, 1 = green/magenta, 2 = trinitron(ish)
-#define MASK_TYPE 1
+#define MASK_TYPE 2
 
 
 #ifdef GL_ES

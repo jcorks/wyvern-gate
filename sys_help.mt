@@ -7,6 +7,7 @@ return ::(terminal, arg, onDone) {
     terminal.print(line:' ls [filter]         lists files in the current directory');
     terminal.print(line:' edit [file]         opens a file for editing');
     terminal.print(line:' fullscreen [on|off] enables or disables fullscreen');
+    terminal.print(line:' pad-config          configures non-default gamepads.');
     terminal.print(line:' shutdown            powers off the machine');
 
     onDone();

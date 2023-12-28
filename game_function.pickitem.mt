@@ -20,7 +20,9 @@
 
 
 
-return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, showGold, goldMultiplier, onHover, renderable) {
+return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, showGold, goldMultiplier, onHover, renderable, filter) {
+    @names = []
+    @items = []
     windowEvent.queueChoices(
         leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
         topWeight:  if (topWeight == empty)  1 else topWeight => Number,
@@ -37,7 +39,14 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
             empty,
         renderable : renderable,
         onGetChoices ::{
-            @:names = [...inventory.items]->map(to:::(value) {
+        
+            items = if (filter != empty)
+                inventory.items->filter(by:filter)
+            else    
+                [...inventory.items]
+            ;
+        
+            names = [...items]->map(to:::(value) {
                 when(showGold) ::<= {
                     @g = value.price * goldMultiplier;
                     g = g->ceil;
@@ -56,7 +65,7 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
         keep:true,
         onChoice ::(choice) {
             when(choice == 0) onPick();
-            onPick(item:inventory.items[choice-1]);
+            onPick(item:items[choice-1]);
         }
     );
 }

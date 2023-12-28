@@ -95,6 +95,12 @@ Interaction.new(
             windowEvent.queueMessage(text:'You try to vandalize the location, but you do a poor job.');             
             @:world = import(module:'game_singleton.world.mt')
             world.accoladeEnable(name:'hasVandalized');
+
+
+            if (location.landmark.peaceful) ::<= {
+                location.landmark.peaceful = false;
+                windowEvent.queueMessage(text:'Even though you did a poor job, the people here are now aware of your aggression.');
+            }                
         }
     }
 )
@@ -464,7 +470,9 @@ Interaction.new(
                                                         text: world.npcs.skie.name + ' joins the party!'
                                                     );                
                                                     party.add(member:world.npcs.skie);
+                                                    world.npcs.skie = empty;
                                                     world.accoladeEnable(name:'recruitedOPNPC');
+                                                    
                                                 }
                                             
                                             
@@ -1285,6 +1293,7 @@ Interaction.new(
         displayName : 'Steal',
         name : 'steal',
         onInteract ::(location, party) {
+            @:Entity = import(module:'game_class.entity.mt');
         
             // the steal attempt happens first before items 
             //
@@ -1303,15 +1312,67 @@ Interaction.new(
             world.accoladeEnable(name:'hasStolen');
 
             if (location.ownedBy != empty && !location.ownedBy.isIncapacitated()) ::<= {
+                when (random.flipCoin()) ::<= {
+                    windowEvent.queueMessage(
+                        text: "The stealing goes unnoticed."
+                    );                
+                }
                 windowEvent.queueMessage(
                     speaker: location.ownedBy.name,
                     text: "What do you think you're doing?!"
                 );
+                windowEvent.queueMessage(
+                    speaker: location.ownedBy.name,
+                    text: "Guards!!!"
+                );
+
+
+                @:e = [
+                    location.landmark.island.newInhabitant(professionHint:'Guard'),
+                    location.landmark.island.newInhabitant(professionHint:'Guard')                        
+                ];
+                
+                foreach(e)::(index, guard) {
+                    guard.equip(
+                        item:Item.new(
+                            base:Item.Base.database.find(
+                                name:'Halberd'
+                            ),
+                            from:guard, 
+                            qualityHint:'Standard',
+                            materialHint: 'Mythril',
+                            rngEnchantHint: true
+                        ),
+                        slot: Entity.EQUIP_SLOTS.HAND_R,
+                        silent:true, 
+                        inventory:guard.inventory
+                    );
+
+                    guard.equip(
+                        item:Item.new(
+                            base: Item.Base.database.find(
+                                name:'Plate Armor'
+                            ),
+                            from:guard, 
+                            qualityHint:'Standard',
+                            materialHint: 'Mythril',
+                            rngEnchantHint: true
+                        ),
+                        slot: Entity.EQUIP_SLOTS.ARMOR,
+                        silent:true, 
+                        inventory:guard.inventory
+                    );
+                    guard.name = 'Bodyguard ' + (index+1);
+                }
+                
+                e->push(value:location.ownedBy);
+
+
                 @:world = import(module:'game_singleton.world.mt');
                 world.battle.start(
                     party,                            
                     allies: party.members,
-                    enemies: [location.ownedBy],
+                    enemies: e,
                     landmark: {},
                     onEnd::(result) {
                         if (!world.battle.partyWon()) 
@@ -1319,7 +1380,13 @@ Interaction.new(
 
                     }
                 );
-                
+                                    
+                if (location.landmark.peaceful) ::<= {
+                    location.landmark.peaceful = false;
+                    windowEvent.queueMessage(text:'The people here are now aware of your aggression.');
+                }                
+
+
             }
             
 
@@ -2073,6 +2140,10 @@ Interaction.new(
                         },
                         topWeight : 0.5,
                         leftWeight : 0.5,
+                        filter::(item) <-
+                            item.base.canHaveEnchants &&
+                            item.enchantsCount < item.base.enchantLimit
+                        ,
                         onPick::(item) {
                             windowEvent.queueMessage(text:'This will add the enchant ' + location.data.enchant.name + ' to the ' + item.name + '. This change is permanent.');
                             windowEvent.queueAskBoolean(

@@ -158,7 +158,7 @@
             },
             
             description : {
-                get ::<- state.description + (if (state.ownedBy != empty) ' This ' + state.base.name + ' is ' + state.base.ownVerb + ' by ' + state.ownedBy.name + '.' else '')
+                get ::<- state.description + (if (state.ownedBy != empty && state.base.ownVerb != '') ' This ' + state.base.name + ' is ' + state.base.ownVerb + ' by ' + state.ownedBy.name + '.' else '')
             },
             
             contested : {
@@ -278,13 +278,7 @@
                                 prompt: 'Are you sure?',
                                 onChoice::(which) {
                                     when(which == false) empty;
-                                    interaction.onInteract(location, party);                    
-                                    
-                                    if (location.landmark.peaceful) ::<= {
-                                        location.landmark.peaceful = false;
-                                        windowEvent.queueMessage(text:'The people here are now aware of your aggression.');
-                                    }                
-                                                            
+                                    interaction.onInteract(location, party);                                                                                
                                 }
                             );
                         }
@@ -1828,7 +1822,7 @@ Location.Base.new(data:{
     name: 'Healing Circle',
     rarity: 4,
     ownVerb : '',
-    symbol: 'X',
+    symbol: 'O',
     category : Location.CATEGORY.DUNGEON_SPECIAL,
     onePerLandmark : true,
     minStructureSize : 1,
@@ -1951,7 +1945,7 @@ Location.Base.new(data:{
 Location.Base.new(data:{
     name: 'Clothing Shop',
     rarity: 4,
-    ownVerb : '',
+    ownVerb : 'run',
     symbol: '%',
     category : Location.CATEGORY.DUNGEON_SPECIAL,
     onePerLandmark : true,
@@ -1962,6 +1956,7 @@ Location.Base.new(data:{
     ],
     interactions : [
         'buy:shop',
+        'sell:shop',
         'talk',
         'examine'
     ],
@@ -2034,7 +2029,7 @@ Location.Base.new(data:{
 Location.Base.new(data:{
     name: 'Potion Shop',
     rarity: 4,
-    ownVerb : '',
+    ownVerb : 'run',
     symbol: 'P',
     category : Location.CATEGORY.DUNGEON_SPECIAL,
     onePerLandmark : true,
@@ -2118,7 +2113,7 @@ Location.Base.new(data:{
 Location.Base.new(data:{
     name: 'Fancy Shop',
     rarity: 4,
-    ownVerb : '',
+    ownVerb : 'run',
     symbol: '$',
     category : Location.CATEGORY.DUNGEON_SPECIAL,
     onePerLandmark : true,
@@ -2129,6 +2124,7 @@ Location.Base.new(data:{
     ],
     interactions : [
         'buy:shop',
+        'sell:shop',
         'talk',
         'examine'
     ],
@@ -2289,7 +2285,7 @@ Location.Base.new(data:{
     name: 'Body',
     rarity: 1000000000000,
     ownVerb : 'owned',
-    symbol: 'x',
+    symbol: '-',
     category : Location.CATEGORY.UTILITY,
     minStructureSize : 1,
     onePerLandmark : false,

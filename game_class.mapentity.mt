@@ -194,11 +194,16 @@
                     }
 
                 windowEvent.autoSkip = false;
+                @:Location = import(module:'game_class.location.mt');
                 
                 
                 if (defeated) ::<= {
                     @:otherItem = controller_.map.getItem(data:other);
                     other.remove();
+                    
+                    // Not really needed it seems since we have Bodies appearing 
+                    // for fallen teams.
+                    /*
                     if (distance(   
                         x0: controller_.map.pointerX,
                         y0: controller_.map.pointerY,
@@ -213,6 +218,35 @@
                                 'A battle of some kind just ended.'
                             ])
                         );
+                    */
+                        
+                    @coversEntranceExit = {:::} {
+                        foreach(controller_.map.getItemsWithinRadius(
+                            x:otherItem.x,
+                            y:otherItem.y,
+                            radius: 2
+                        )) ::(i, item) {
+                            if (item.data->type == Location.type && (
+                                item.data.base.category == Location.CATEGORY.ENTRANCE ||
+                                item.data.base.category == Location.CATEGORY.EXIT
+                            ))
+                                send(message:true);
+                        
+                        }
+                        
+                        return false;
+                    }
+                    
+                    if (!coversEntranceExit) ::<= {
+                        foreach(other.entities) ::(i, entity) {
+                            controller_.landmark.addLocation(
+                                x:otherItem.x,
+                                y:otherItem.y,
+                                ownedByHint: entity,
+                                name: 'Body'
+                            );
+                        }
+                    }
                 }
             },
             
@@ -468,6 +502,39 @@ MapEntity.Task.Base.new(
 
 
 
+MapEntity.Task.Base.new(
+
+    data : {
+        name: 'exit',
+        startup ::{},
+        do ::(data, mapEntity) {
+            @:Location = import(module:'game_class.location.mt');
+            @item = mapEntity.controller.map.getItem(data:mapEntity);
+            when(item == empty) empty;
+            if ({:::} {
+                foreach(mapEntity.controller.map.getItemsWithinRadius(
+                    x:item.x,
+                    y:item.y,
+                    radius: 2
+                )) ::(i, item) {
+                    if (item.data->type == Location.type && (
+                        item.data.base.category == Location.CATEGORY.ENTRANCE ||
+                        item.data.base.category == Location.CATEGORY.EXIT
+                    ))
+                        send(message:true);
+                
+                }
+                
+                return false;
+            }) 
+                mapEntity.remove();
+            
+        
+        }
+    }
+)
+
+
 ::<= {
     @:INTEREST_DISTANCE = 4;
     @:CONTACT_DISTANCE = 2;
@@ -502,14 +569,28 @@ MapEntity.Task.Base.new(
                 @:map = mapEntity.controller.map;
                 when (map.getDistanceFromItem(data:mapEntity) < CONTACT_DISTANCE) ::<= {
                     mapEntity.remove();
-
                     @:landmark = mapEntity.controller.landmark;
 
                     when (world.battle.isActive) ::<= {
-                        world.battle.join(group: mapEntity.entities);
+                        if (mapEntity.entities[0].species.swarms) ::<= {
+                            // swarming will group them in the same 
+                            // team as the currently swarmed enemy
+                            @:all = world.battle.getMembers();
+                            {:::} {
+                                foreach(all) ::(k, member) {
+                                    if (member.species.name == mapEntity.entities[0].species.name) ::<= {
+                                        world.battle.join(group: mapEntity.entities, sameGroupAs:member);                        
+                                        send();
+                                    }
+                                }   
+                                world.battle.join(group: mapEntity.entities);                        
+                            }
+                        } else ::<= {
+                            world.battle.join(group: mapEntity.entities);                        
+                        }
                     }
-                    
-                    
+
+
                     world.battle.start(
                         party:  landmark.island.world.party,                            
                         allies: landmark.island.world.party.members,
@@ -553,6 +634,12 @@ MapEntity.Task.Base.new(
                 @closest = empty;
                 @squabbled = false;
                 foreach(nearby) ::(i, itemOther) {
+
+                    // swarming enemies dont attack each other
+                    when (itemOther.data != empty && // filter out pointer
+                          mapEntity.entities[0].species.swarms && 
+                          mapEntity.entities[0].species.name == itemOther.data.entities[0].species.name)
+                        empty;
                     
                     @dist = distance(
                         x0: item.x,
@@ -560,12 +647,15 @@ MapEntity.Task.Base.new(
                         x1: itemOther.x,
                         y1: itemOther.y 
                     );
+
+
                     if (dist < closestDist) ::<= {
                         closestDist = dist;
                         closest = itemOther;
                     }
                                         
                     if (dist < CONTACT_DISTANCE) ::<= {
+
                         mapEntity.squabble(other:itemOther.data);
                         squabbled = true;
                     }

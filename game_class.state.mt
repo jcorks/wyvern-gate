@@ -32,8 +32,8 @@
 @:TAG__SPARSE_ARRAY = '$sa';
 
 
-@DEBUG_SERIALIZED = [];
-@DEBUG_SERIALIZED_REV = [];
+@DEBUG_SERIALIZED = empty;
+@DEBUG_SERIALIZED_REV = empty;
 
 @:serialize = ::(value) {
     return match(value->type) {
@@ -42,7 +42,7 @@
       (Function): error(detail:'Functions are not allowed to be serialized'),
       
       default: ::<= {
-        if (DEBUG_SERIALIZED[value] != empty)
+        if (DEBUG_SERIALIZED != empty && DEBUG_SERIALIZED[value] != empty)
             error(detail:'Already serialized object! likely infinite recursion (or at the very least erroneous instance copies)');
 
       
@@ -54,9 +54,10 @@
                 name : value.name
             };
 
-        DEBUG_SERIALIZED[value] = DEBUG_SERIALIZED_REV->size;
-        DEBUG_SERIALIZED_REV->push(value);
-
+        if (DEBUG_SERIALIZED != empty) ::<= {
+            DEBUG_SERIALIZED[value] = DEBUG_SERIALIZED_REV->size;
+            DEBUG_SERIALIZED_REV->push(value);
+        }
 
         // tagged classes get instantiated and loaded with their state
         when (LoadableClass.isLoadable(name:String(from:value->type))) ::<= {

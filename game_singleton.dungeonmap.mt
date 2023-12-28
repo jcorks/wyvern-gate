@@ -839,7 +839,7 @@
 
 
 
-@:DungeonDelta = ::<= {
+@:DungeonBlock = ::<= {
 
     @:DIRECTION = {
         NORTH : 0,
@@ -862,7 +862,7 @@
 
 
     
-    @:DeltaSpace = class(
+    @:BlockSpace = class(
         define ::(this) {
             @:openings = [
                 [],
@@ -1085,7 +1085,7 @@
                 
                 // attempts to place a space next to this space.
                 // success is returned.
-                placeAdjacent ::(other => DeltaSpace.type) {
+                placeAdjacent ::(other => BlockSpace.type) {
                     
                     @:otherWidth = other.width;
                     @:otherHeight = other.height;
@@ -1163,6 +1163,72 @@
         }
     );
     
+    @areaSpaces_;
+    @hallSpaces_;
+    @chanceArea_;
+    
+    @:getASpace = ::{
+        when(random.try(percentSuccess:chanceArea_)) random.pickArrayItem(list:areaSpaces_)();
+        return random.pickArrayItem(list:hallSpaces_)();
+    }
+    
+    return {
+    
+        make::(map, mapHint, areaSpaces, hallSpaces, chanceArea) {
+        
+            areaSpaces_ = areaSpaces;
+            hallSpaces_ = hallSpaces;
+            chanceArea_ = chanceArea;
+        
+            @:CENTER_X = 140;
+            @:CENTER_Y = 140;
+            @:SPACE_COUNT = random.integer(from:10, to:20);//32;
+        
+            // first, pick an initial location
+            @:root = random.pickArrayItem(list:areaSpaces)();
+            root.anchorRoot(x:CENTER_X, y:CENTER_Y);
+            
+            @:areas = [];
+            
+            for(0, SPACE_COUNT) ::(i) {
+                // either area or a hallway
+                @:next = getASpace();
+                
+                // find where it should go and keep trying till it fits.
+                @:list = random.scrambled(list:root.getAllAttached());
+                {:::} {
+                    foreach(list) ::(k, existing) {
+                        if (existing.placeAdjacent(other:next))
+                            send();
+                    }
+                }
+                
+            }
+            
+            @:span = root.getAllSpan();
+            map.width = span.x + span.width + 80;
+            map.height = span.y + span.height + 40;
+
+            
+            foreach(root.getAllAttached()) ::(k, space) {
+                @:area = space.getArea();
+                if (area != empty)
+                    areas->push(value:area);
+                space.finalize(map);
+                space.cap(map);
+            }
+
+            map.obscure();
+            return areas;
+        },
+        BlockSpace : BlockSpace,
+        DIRECTION : DIRECTION
+    }
+}
+
+
+
+@:DungeonDelta = ::<= {
     
     // true area layouts.
     // Only these can be anchors
@@ -1178,12 +1244,12 @@
                 0, 6, 1, 6, 2, 6,     4, 6, 5, 6, 6, 6,
             ];
             return ::{
-                @:area = DeltaSpace.new();
+                @:area = DungeonBlock.BlockSpace.new();
                 area.setup(width:7, height:7);
-                area.addOpening(dir:DIRECTION.WEST, space:3);
-                area.addOpening(dir:DIRECTION.EAST, space:3);
-                area.addOpening(dir:DIRECTION.NORTH, space:3);
-                area.addOpening(dir:DIRECTION.SOUTH, space:3);
+                area.addOpening(dir:DungeonBlock.DIRECTION.WEST, space:3);
+                area.addOpening(dir:DungeonBlock.DIRECTION.EAST, space:3);
+                area.addOpening(dir:DungeonBlock.DIRECTION.NORTH, space:3);
+                area.addOpening(dir:DungeonBlock.DIRECTION.SOUTH, space:3);
                 area.setWalls(coords);
                 area.markAsArea(
                     x:2,
@@ -1205,21 +1271,21 @@
                                   3, 0,       5, 0,
                       1, 1, 2, 1, 3, 1,       5, 1, 6, 1, 7, 1,
                       1, 2,                               7, 2,
-                0, 3, 1, 3,       3, 3, 4, 3, 5, 3,       7, 3, 8, 3,
-                                  3, 4,       5, 4,
-                0, 5, 1, 5,       3, 5, 4, 5, 5, 5,       7, 5, 8, 5,
+                0, 3, 1, 3,                               7, 3, 8, 3,
+                                        4, 4,    
+                0, 5, 1, 5,                               7, 5, 8, 5,
                       1, 6,                               7, 6,
                       1, 7, 2, 7, 3, 7,       5, 7, 6, 7, 7, 7,
                                   3, 8,       5, 8
 
             ];
             return ::{
-                @:hall = DeltaSpace.new();
+                @:hall = DungeonBlock.BlockSpace.new();
                 hall.setup(width:9, height:9);
-                hall.addOpening(dir:DIRECTION.WEST, space:4);
-                hall.addOpening(dir:DIRECTION.EAST, space:4);
-                hall.addOpening(dir:DIRECTION.NORTH, space:4);
-                hall.addOpening(dir:DIRECTION.SOUTH, space:4);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.WEST, space:4);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.EAST, space:4);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.NORTH, space:4);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.SOUTH, space:4);
                 hall.setWalls(coords);
                 return hall;
             }
@@ -1228,24 +1294,24 @@
         
         ::<= {
             @:coords = [
-                                  3, 0,       5, 0,
-                                  3, 1,       5, 1,
-                            2, 2, 3, 2,       5, 2, 6, 2,
-                      1, 3, 2, 3,                   6, 3, 7, 3,
-                0, 4, 1, 4,                               7, 4, 8, 4,
-                0, 5,             3, 5, 4, 5, 5, 5,             8, 5,
-                0, 6,       2, 6, 3, 6,       5, 6, 6, 6,       8, 6,
-                0, 7,       2, 7,                   6, 7,       8, 7,
-                0, 8,       2, 8,                   6, 8,       8, 8,
-                0, 9,       2, 9,                   6, 9,       8, 9
+                            2, 0, 3, 0,       5, 0, 6, 0,
+                      1, 1, 2, 1,                   6, 1, 7, 1, 
+                0, 2, 1, 2,                               7, 2, 8, 2,
+                0, 3,                                           8, 3,
+                0, 4,                                           8, 4,
+                0, 5,                                           8, 5,
+                0, 6,                                           8, 6,
+                0, 7,                   4, 7,                   8, 7,
+                0, 8,             3, 8, 4, 8, 5, 8,             8, 8,
+                0, 9,       2, 9, 3, 9,       5, 9, 6, 9,       8, 9
             ];
             
             return ::{
-                @:hall = DeltaSpace.new();
+                @:hall = DungeonBlock.BlockSpace.new();
                 hall.setup(width:9, height:10);
-                hall.addOpening(dir:DIRECTION.NORTH, space:4);
-                hall.addOpening(dir:DIRECTION.SOUTH, space:7);
-                hall.addOpening(dir:DIRECTION.SOUTH, space:1);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.NORTH, space:4);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.SOUTH, space:7);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.SOUTH, space:1);
                 hall.setWalls(coords);
                 return hall;
             }
@@ -1254,24 +1320,24 @@
 
         ::<= {
             @:coords = [
-                0, 0,       2, 0,                   6, 0,       8, 0,
-                0, 1,       2, 1,                   6, 1,       8, 1,
-                0, 2,       2, 2,                   6, 2,       8, 2,
-                0, 3,       2, 3, 3, 3,       5, 3, 6, 3,       8, 3,
-                0, 4,             3, 4, 4, 4, 5, 4,             8, 4,
-                0, 5, 1, 5,                               7, 5, 8, 5,
-                      1, 6, 2, 6,                   6, 6, 7, 6,
-                            2, 7, 3, 7,       5, 7, 6, 7,
-                                  3, 8,       5, 8,
-                                  3, 9,       5, 9
+                0, 0,       2, 0, 3, 0,       5, 0, 6, 0,       8, 0,
+                0, 1,             3, 1, 4, 1, 5, 1,             8, 1,
+                0, 2,                   4, 2,                   8, 2,
+                0, 3,                                           8, 3,
+                0, 4,                                           8, 4,
+                0, 5,                                           8, 5,
+                0, 6,                                           8, 6,
+                0, 7, 1, 7,                               7, 7, 8, 7,
+                      1, 8, 2, 8,                   6, 8, 7, 8, 
+                            2, 9, 3, 9,       5, 9, 6, 9,
             ];
             
             return ::{
-                @:hall = DeltaSpace.new();
+                @:hall = DungeonBlock.BlockSpace.new();
                 hall.setup(width:9, height:10);
-                hall.addOpening(dir:DIRECTION.SOUTH, space:4);
-                hall.addOpening(dir:DIRECTION.NORTH, space:7);
-                hall.addOpening(dir:DIRECTION.NORTH, space:1);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.SOUTH, space:4);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.NORTH, space:7);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.NORTH, space:1);
                 hall.setWalls(coords);
                 return hall;
             }
@@ -1279,23 +1345,23 @@
         
         ::<= {
             @:coords = [
-                0, 0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0,
-                                              5, 1, 6, 1, 
-                0, 2, 1, 2, 2, 2, 3, 2,             6, 2, 7, 2,
-                                  3, 3, 4, 3,             7, 3, 8, 3, 9, 3,
-                                        4, 4,
-                                  3, 5, 4, 5,             7, 5, 8, 5, 9, 5,
-                0, 6, 1, 6, 2, 6, 3, 6,             6, 6, 7, 6,
-                                              5, 7, 6, 7,
-                0, 8, 1, 8, 2, 8, 3, 8, 4, 8, 5, 8
+                0, 0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0,
+                                                          7, 1, 8, 1,
+                0, 2,                                           8, 2, 9, 2,
+                0, 3, 1, 3,                                           9, 3,
+                      1, 4, 2, 4,
+                0, 5, 1, 5,                                           9, 5,
+                0, 6,                                           8, 6, 9, 6,
+                                                          7, 7, 8, 7,
+                0, 8, 1, 8, 2, 8, 3, 8, 4, 8, 5, 8, 6, 8, 7, 8
             ];
             
             return ::{
-                @:hall = DeltaSpace.new();
+                @:hall = DungeonBlock.BlockSpace.new();
                 hall.setup(width:10, height:9);
-                hall.addOpening(dir:DIRECTION.EAST, space:4);
-                hall.addOpening(dir:DIRECTION.WEST, space:7);
-                hall.addOpening(dir:DIRECTION.WEST, space:1);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.EAST, space:4);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.WEST, space:7);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.WEST, space:1);
                 hall.setWalls(coords);
                 return hall;
             }
@@ -1304,23 +1370,24 @@
 
         ::<= {
             @:coords = [
-                                        4, 0, 5, 0, 6, 0, 7, 0, 8, 0, 9, 0,
-                                  3, 1, 4, 1, 
-                            2, 2, 3, 2,             6, 2, 7, 2, 8, 2, 9, 2,
-                0, 3, 1, 3, 2, 3,             5, 3, 6, 3,             
-                                              5, 4,
-                0, 5, 1, 5, 2, 5,             5, 5, 6, 5,            
-                            2, 6, 3, 6,             6, 6, 7, 6, 8, 6, 9, 6,
-                                  3, 7, 4, 7,
-                                        4, 8, 5, 8, 6, 8, 7, 8, 8, 8, 9, 8
+                            2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 8, 0, 9, 0,
+                      1, 1, 2, 1,                         
+                0, 2, 1, 2,                                           9, 2,
+                0, 3,                                           8, 3, 9, 3,
+                                                          7, 4, 8, 4,
+                0, 5,                                           8, 5, 9, 5,
+                0, 6, 1, 6,                                           9, 6,
+                      1, 7, 2, 7,                         
+                            2, 8, 3, 8, 4, 8, 5, 8, 6, 8, 7, 8, 8, 8, 9, 8
+
             ];
             
             return ::{
-                @:hall = DeltaSpace.new();
+                @:hall = DungeonBlock.BlockSpace.new();
                 hall.setup(width:10, height:9);
-                hall.addOpening(dir:DIRECTION.WEST, space:4);
-                hall.addOpening(dir:DIRECTION.EAST, space:7);
-                hall.addOpening(dir:DIRECTION.EAST, space:1);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.WEST, space:4);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.EAST, space:7);
+                hall.addOpening(dir:DungeonBlock.DIRECTION.EAST, space:1);
                 hall.setWalls(coords);
                 return hall;
             }
@@ -1328,60 +1395,18 @@
 
         
     ];
-    
-    @:getASpace = ::{
-        when(random.flipCoin()) random.pickArrayItem(list:areaSpaces)();
-        return random.pickArrayItem(list:hallSpaces)();
-    }
-    
+
+
     return ::(map, mapHint) {
-    
-        @:CENTER_X = 140;
-        @:CENTER_Y = 140;
-        @:SPACE_COUNT = 17;//32;
-    
-        // first, pick an initial location
-        @:root = random.pickArrayItem(list:areaSpaces)();
-        root.anchorRoot(x:CENTER_X, y:CENTER_Y);
-        
-        @:areas = [];
-        
-        for(0, SPACE_COUNT) ::(i) {
-            // either area or a hallway
-            @:next = getASpace();
-            
-            // find where it should go and keep trying till it fits.
-            @:list = random.scrambled(list:root.getAllAttached());
-            {:::} {
-                foreach(list) ::(k, existing) {
-                    if (existing.placeAdjacent(other:next))
-                        send();
-                }
-            }
-            
-        }
-        
-        @:span = root.getAllSpan();
-        map.width = span.x + span.width + 80;
-        map.height = span.y + span.height + 40;
-
-        
-        foreach(root.getAllAttached()) ::(k, space) {
-            @:area = space.getArea();
-            if (area != empty)
-                areas->push(value:area);
-            space.finalize(map);
-            space.cap(map);
-        }
-
-        map.obscure();
-        return areas;
+        return DungeonBlock.make(
+            map, 
+            mapHint,
+            areaSpaces,
+            hallSpaces,
+            chanceArea: 70
+        );
     }
 }
-
-
-
-
 
 
 

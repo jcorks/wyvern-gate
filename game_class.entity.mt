@@ -165,8 +165,7 @@
                 professions : empty,
                 canMake : empty,
                 innateEffects : empty,
-                
-
+                forceDrop : empty,
                 equips : [
                     empty, // handl
                     empty, // handr
@@ -214,6 +213,7 @@
                 foreach(equip.equipEffects)::(index, effect) {
                     this.addEffect(
                         from:this, 
+                        item:equip,
                         name:effect, 
                         durationTurns: -1
                     );
@@ -393,8 +393,17 @@
             },
 
             
-            recalculateStats :: {
+            recalculateStats :: {                
+                @oldHP = this.hp;
+                @:oldHPmax = this.stats.HP;
+                @oldAP = this.ap;
+                @:oldAPmax = this.stats.AP;
+                if (oldHP > oldHPmax) oldHP = oldHPmax;
+                if (oldAP > oldAPmax) oldAP = oldAPmax;
+                
+                
                 state.stats.resetMod();
+                
                 if (this.effects != empty) ::<= {
                     foreach(this.effects)::(index, effect) {
                         effect.effect.onStatRecalculate(user:effect.user, stats:state.stats, holder:this);
@@ -426,6 +435,10 @@
                     when(index == EQUIP_SLOTS.HAND_R) empty;
                     state.stats.modRate(stats:equip.equipMod);
                 }
+                
+                state.hp = (state.stats.HP * (oldHP / oldHPmax))->round
+                state.ap = (state.stats.AP * (oldAP / oldAPmax))->round;
+                
             },
             
             personality : {
@@ -453,8 +466,10 @@
                         );
                         effects->remove(key:index);
                     } else ::<= {
-                        if (effect.effect.skipTurn == true)
+                        if (effect.effect.skipTurn == true) ::<= {
+                            windowEvent.queueMessage(text:this.name + ' is unable to act due to their ' + effect.effect.name + ' status!');                            
                             act = false;
+                        }
                         effect.effect.onNextTurn(user:effect.from, turnIndex:effect.turnIndex, turnCount: effect.duration, holder:this, item:effect.item);                    
                         effect.turnIndex += 1;
                     }
@@ -610,11 +625,6 @@
                     
 
                     when(dmg.amount <= 0) empty;
-                    when(target.hp == 0) ::<= {
-                        this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
-                        target.flags.add(flag:StateFlags.DIED);
-                        target.kill();                
-                    }
 
                     @critChance = 0.999 - (this.stats.LUK - state.level) / 100;
                     @isCrit = false;
@@ -624,7 +634,9 @@
                         isCrit = true;
                     }
 
+                    @:hpWas0 = if (target.hp == 0) true else false;
                     when(!target.damage(from:this, damage:dmg, dodgeable:true, critical:isCrit)) empty;
+
 
 
                     this.flags.add(flag:StateFlags.ATTACKED);
@@ -634,6 +646,13 @@
                     foreach(effects)::(index, effect) {
                         effect.effect.onPostAttackOther(user:effect.from, item:effect.item, holder:this, to:target);
                     }
+
+                    when(hpWas0 && target.hp == 0) ::<= {
+                        this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
+                        target.flags.add(flag:StateFlags.DIED);
+                        target.kill();                
+                    }
+
                     return true;
                 }
                 
@@ -643,6 +662,10 @@
             },
             
             damage ::(from => Entity.type, damage => Damage.type, dodgeable => Boolean, critical, exact) {
+                @:alreadyKnockedOut = this.hp == 0;
+                if (alreadyKnockedOut)
+                    dodgeable = false;
+                    
                 @:inBattle = effects != empty;
                 if (!inBattle)
                     this.battleStart(); // dummy battle for effect shells.
@@ -718,14 +741,13 @@
 
 
                     foreach(effects)::(index, effect) {
-                        effect.effect.onDamage(user:effect.from, holder:this, from, damage);
+                        effect.effect.onDamage(user:effect.from, item:effect.item, holder:this, from, damage);
                     }
 
                     if (exact)
                         damage.amount = originalAmount;
 
                     when (damage.amount == 0) false;
-                    when(state.hp == 0) false;
 
                     
                     if (critical == true)
@@ -789,7 +811,7 @@
                         );
                     }
                     
-                    if (state.hp == 0) ::<= {
+                    if (!alreadyKnockedOut && state.hp == 0) ::<= {
                         if (this.name->contains(key:'Wyvern'))
                             windowEvent.queueMessage(text: '' + this.name + ' is no longer able to fight.')                               
                         else
@@ -815,7 +837,13 @@
                 get ::<- state.favoritePlace
             },
             
+            forceDrop : {
+                get ::<- state.forceDrop,
+                set ::(value) <- state.forceDrop = value
+            },
+            
             heal ::(amount => Number, silent) {
+                if (state.hp > state.stats.HP) state.hp = state.stats.HP;
                 when(state.hp >= state.stats.HP) empty;
                 amount = amount->ceil;
                 state.hp += amount;

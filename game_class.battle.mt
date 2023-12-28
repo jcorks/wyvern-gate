@@ -28,11 +28,31 @@
 
 
 
-@:battleLoot ::(landmark, party, finishEnd) {
+@:battleLoot ::(rngLoot, defeated, landmark, party, finishEnd) {
 
     @:Item = import(module:'game_class.item.mt');
 
-    if (random.try(percentSuccess:45)) ::<= {
+
+    @:forcedAcquisition = [];
+    foreach(defeated) ::(k, enemy) {
+        @:inv = enemy.forceDrop;
+        if (inv != empty)
+            forcedAcquisition->push(value:inv);
+    }
+
+
+    foreach(forcedAcquisition) ::(i, inv) {
+        foreach(inv.items) ::(n, item) {
+            windowEvent.queueMessage(text: 'The party acquired ' + item.name + '.');
+            party.inventory.add(item);
+        }
+        windowEvent.queueMessage(text: 'The party acquired ' + inv.gold + 'G.');
+        if (inv.gold > 0)
+            party.inventory.addGold(amount:inv.gold);
+    }
+
+
+    if (rngLoot && random.try(percentSuccess:45)) ::<= {
         windowEvent.queueMessage(text: 'What\'s this? They dropped something during the fight...');
 
         @:lootTable = [
@@ -108,13 +128,18 @@
         
 
         random.pickArrayItemWeighted(list:lootTable).func();
-        windowEvent.queueNoDisplay(
-            onEnter ::{},
-            onLeave ::{
-                finishEnd();            
-            }
-        );
     }
+        
+        
+        
+        
+        
+    windowEvent.queueNoDisplay(
+        onEnter ::{},
+        onLeave ::{
+            finishEnd();            
+        }
+    );
 
 }
 
@@ -134,11 +159,12 @@
         @onEnemyTurn_;
         @onAllyTurn_;
         @landmark_;
-        @active;
+        @active = false;
         @ended;
         @entityTurn;
         @onTurn_;
         @onAct_;
+        @defeated;
         
     
         // some actions last multiple turns.
@@ -168,6 +194,19 @@
             return out;
         }
 
+        // defeated enemies were removed from their active groups
+        //
+        @:getEnemiesDefeated::(ent) {
+            when(winningGroup == empty)
+                error(detail:'This can only be called upon a team winning');
+            @:out = getEnemies(ent);
+            foreach(defeated->keys) ::(k, enemy) {
+                if (ent2group[enemy] != ent2group[ent])
+                    out->push(value:enemy);
+            }
+            return out;
+        }
+
         
         @:checkRemove :: {
             // see if anyone died
@@ -178,8 +217,10 @@
                 @:group  = ent2group[entity];
                 
                 @index = group->findIndex(value:entity);
-                if (index != -1) group->remove(key:index);
-                
+                if (index != -1) ::<= {
+                    defeated[group[index]] = true;
+                    group->remove(key:index);
+                }
                 if (group->size == 0)
                     groups->remove(key:groups->findIndex(value:group));
 
@@ -447,6 +488,7 @@
                 onStart,
                 onEnd => Function
             ) {
+                defeated = {};
                 onTurn_ = onTurn;
                 onAct_ = onAct;
                 groups = [
@@ -622,14 +664,16 @@
                                         ally.recalculateStats();
                                         oldAllyStats.printDiff(other:ally.stats, prompt:ally.name);
                                     }
-                                    finishEnd();
-                                } else ::<= {
-                                
-                                    if (loot == true) ::<= {
-                                        battleLoot(landmark, party, finishEnd);
-                                    } else                                 
-                                        finishEnd()
                                 }
+
+                                battleLoot(
+                                    rngLoot : loot,
+                                    defeated:getEnemiesDefeated(ent:party.members[0]),
+                                    landmark, 
+                                    party, 
+                                    finishEnd
+                                );
+
                             }
                         );
 
@@ -693,6 +737,16 @@
             getEnemies ::(entity) {
                 return getEnemies(ent:entity)
             },
+            
+            getMembers :: {
+                @:out = [];
+                foreach(groups) ::(k, group) {
+                    foreach(group) ::(i, ent) {
+                        out->push(value:ent);
+                    }
+                }   
+                return out;
+            },
 
             
             isActive : {
@@ -720,7 +774,8 @@
                     newGroup->push(value:entity);
                     ent2group[entity] = newGroup;
                 }
-                groups->push(value:newGroup);
+                if (sameGroupAs == empty)
+                    groups->push(value:newGroup);
             },
             
             render :: {

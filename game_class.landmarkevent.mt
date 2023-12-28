@@ -123,8 +123,73 @@ LandmarkEvent.Base.new(
     data : {
         name: 'the-beast',
         startup ::(landmark) {
-            @:ItemSpecter = import(module:'game_class.landmarkevent_thebeast.mt');
-            @:a = ItemSpecter.new();
+            @:b = import(module:'game_class.landmarkevent_thebeast.mt');
+            @:a = b.new();
+            a.initialize(landmark);
+            return a;
+        },
+
+        
+        step ::(data, landmark) {
+            data.step();
+        },
+        
+        isActive ::(data) {
+            return data.isActive()
+        }
+    }
+);
+
+LandmarkEvent.Base.new(
+    data : {
+        name: 'the-mirror',
+        startup ::(landmark) {
+            @:b = import(module:'game_class.landmarkevent_themirror.mt');
+            @:a = b.new();
+            a.initialize(landmark);
+            return a;
+        },
+
+        
+        step ::(data, landmark) {
+            data.step();
+        },
+        
+        isActive ::(data) {
+            return data.isActive()
+        }
+    }
+);
+
+
+LandmarkEvent.Base.new(
+    data : {
+        name: 'treasure-golem',
+        startup ::(landmark) {
+            @:b = import(module:'game_class.landmarkevent_treasuregolem.mt');
+            @:a = b.new();
+            a.initialize(landmark);
+            return a;
+        },
+
+        
+        step ::(data, landmark) {
+            data.step();
+        },
+        
+        isActive ::(data) {
+            return data.isActive()
+        }
+    }
+);
+
+
+LandmarkEvent.Base.new(
+    data : {
+        name: 'cave-bat',
+        startup ::(landmark) {
+            @:b = import(module:'game_class.landmarkevent_cavebat.mt');
+            @:a = b.new();
             a.initialize(landmark);
             return a;
         },

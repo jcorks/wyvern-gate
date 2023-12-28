@@ -1,10 +1,12 @@
 @:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
 @:distance = import(module:'game_function.distance.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 
 @:ROOM_MAX_ENTITY = 6;
 @:REACHED_DISTANCE = 1.5;
 @:AGGRESSIVE_DISTANCE = 5;
+@:MAX_ENCOUNTERS = 30;
 
 
 @:DungeonEncounters = class(
@@ -23,7 +25,7 @@
     
     
         @:addEntity ::{
-            @:windowEvent = import(module:'game_singleton.windowevent.mt');
+            when (encountersOnFloor > MAX_ENCOUNTERS) empty;
 
             @ar = map_.getRandomArea();;
             @:tileX = ar.x + (ar.width /2)->floor;
@@ -75,7 +77,8 @@
             );
             ref.addUpkeepTask(name:'dungeonencounters-roam');
             ref.addUpkeepTask(name:'aggressive');
-            
+            ref.addUpkeepTask(name:'exit');
+
             if (encountersOnFloor == 1)
                 windowEvent.queueMessage(
                     text:random.pickArrayItem(list:[
@@ -94,6 +97,15 @@
                 island_ = landmark.island;
                 landmark_ = landmark;
                 isBusy = if (landmark_.floor == 0) false else random.try(percentSuccess:10);
+
+                if (isBusy)
+                    windowEvent.queueMessage(
+                        text:random.pickArrayItem(list:[
+                            'There seems to be a lot of commotion around on this floor...',
+                            'What? It sounds like a large battle nearby...'
+                        ])
+                    );
+                    
                 return this;
             },
             
@@ -112,7 +124,10 @@
                     )
                 ;                                    
 
-                if (entities->keycount < recCount && 
+                @:world = import(module:'game_singleton.world.mt');
+    
+                if (!world.battle.isActive &&
+                    entities->keycount < recCount && 
                     landmark_.base.peaceful == false && 
                         (   
                             isBusy 
@@ -120,6 +135,7 @@
                             (Number.random() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1))
                         )
                     ) ::<= {
+                    
                     addEntity();
                 }
             }

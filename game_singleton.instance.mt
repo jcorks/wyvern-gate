@@ -258,7 +258,7 @@ return class(
                 
                 
                 @:initialLoad :: {
-                        //story.tier = 1;
+                        //story.tier = 2;
                     @:keyhome = Item.new(
                         base: Item.Base.database.find(name:'Wyvern Key'),
                         creationHint: {
@@ -275,10 +275,17 @@ return class(
                     party = world.party;
                     party.reset();
                     party.inventory.addGold(amount:250);
+
+                    party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Life Crystal'
+                    ), from:island.newInhabitant()));
+                    party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Life Crystal'
+                    ), from:island.newInhabitant()));
+
+
                     
                     // debug
                         //party.inventory.addGold(amount:100000);
-                    
+
                     
                     // since both the party members are from this island, 
                     // they will already know all its locations

@@ -90,7 +90,7 @@ if (ret != empty) ::<= {
 
         
         @:bg = Topaz.Shape2D.create();
-
+        @requestStringMappings = false;
         @:lines = [];
 
 
@@ -163,6 +163,11 @@ if (ret != empty) ::<= {
 
             WIDTH : {
                 get ::<- RENDERER_WIDTH
+            },
+            
+            requestStringMappings : {
+                get ::<- requestStringMappings,
+                set ::(value) <- requestStringMappings = value
             },
 
             'print'::(line => String) {
