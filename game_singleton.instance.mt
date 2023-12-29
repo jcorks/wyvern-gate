@@ -135,7 +135,8 @@ return class(
                 canvasHeight=> Number,
                 onSaveState => Function, // for saving,
                 onLoadState => Function,
-                onListSlots => Function
+                onListSlots => Function,
+                onQuit => Function
             ) {
                 canvas.resize(width:canvasWidth, height:canvasHeight);
                 this.onSaveState = onSaveState;
@@ -211,7 +212,7 @@ return class(
                           },
                           
                           (2)::<= {
-                            windowEvent.popChoice();
+                            onQuit();
                           }
                         }                            
                     }

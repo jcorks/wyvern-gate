@@ -138,6 +138,10 @@ return ::(terminal, arg, onDone) {
 
                 Topaz.Resources.setPath(path:oldPath);
 
+            },
+            
+            onQuit ::{
+                Topaz.quit();            
             }
 
         ); 

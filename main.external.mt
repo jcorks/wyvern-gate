@@ -115,6 +115,8 @@ instance.mainMenu(
     onListSlots ::{
         return external_onListSlots();
     },
+    
+    onQuit ::{},
 
 
     onLoadState :::(

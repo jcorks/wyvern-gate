@@ -82,16 +82,21 @@ canvas.onCommit = ::(lines, renderNow){
     return val;   
 }
 
+@LOOP_DONE = false;
 @:mainLoop = ::{
     // standard event loop
-    forever ::{
-        @val = pollInput();
-        windowEvent.commitInput(input:val);
-        
-        if (canvasChanged) ::<= {
-            rerender();  
-        }
-    }       
+    {:::} {
+        forever ::{
+            when(LOOP_DONE) send();
+            
+            @val = pollInput();
+            windowEvent.commitInput(input:val);
+            
+            if (canvasChanged) ::<= {
+                rerender();  
+            }
+        }      
+    } 
 }
 
 @enterSaveLocation ::(action) {
@@ -157,6 +162,10 @@ instance.mainMenu(
                 return empty;
             }
         }
+    },
+    
+    onQuit :: {
+        LOOP_DONE = true;
     }
     /*
     onLoadMain ::{
