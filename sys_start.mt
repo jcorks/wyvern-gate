@@ -1,6 +1,27 @@
 @:Topaz = import(module:'Topaz');
 @Shell = import(module:'sys_shell.mt');
 
+
+@:SAVEPATH = ::<= {
+    return {:::} {
+        foreach(Topaz.getArguments()) ::(k, arg) {
+            if (arg->contains(key:'savelocation:'))
+                send(
+                    message:arg->substr(
+                        from:'savelocation:'->length, 
+                        to:arg->length-1
+                    )
+                ) 
+                    
+        }
+        
+        return Topaz.Resources.getPath();
+    }
+}
+
+
+
+
 return ::(terminal, arg, onDone) {
     terminal.clear();
     terminal.print(line:'Starting program...');
@@ -77,6 +98,9 @@ return ::(terminal, arg, onDone) {
                 slot,
                 data
             ) {
+                @:oldPath = Topaz.Resources.getPath();
+                Topaz.Resources.setPath(path:SAVEPATH);
+                
                 saveAsset.setFromString(string:data);
                 @:outputPath =  'WYVERNSAVE_' + slot;
                 if (Topaz.Resources.writeAsset(
@@ -84,11 +108,14 @@ return ::(terminal, arg, onDone) {
                     fileType: 'text',
                     outputPath
                 ) == 0) error(detail:outputPath + ' could not be written!');
+
+
+                Topaz.Resources.setPath(path:oldPath);
             },
 
             onListSlots ::{
                 @:output = [];
-                @:path = Topaz.Filesystem.getPath(node:Topaz.Filesystem.DefaultNode.Topaz);
+                @:path = Topaz.Filesystem.getPathFromString(path:SAVEPATH);
                 foreach(path.getChildren()) ::(k, child) {
                     if (child.getName()->contains(key:'WYVERNSAVE_'))
                         output->push(value:child.getName()->split(token:'_')[1]);
@@ -100,10 +127,17 @@ return ::(terminal, arg, onDone) {
             onLoadState :::(
                 slot
             ) {
+                @:oldPath = Topaz.Resources.getPath();
+                Topaz.Resources.setPath(path:SAVEPATH);
+
+
                 @:asset = Topaz.Resources.createDataAssetFromPath(path:'WYVERNSAVE_' + slot, name:slot);
                 @:data = asset.getAsString();
                 Topaz.Resources.removeAsset(asset);
                 return data;
+
+                Topaz.Resources.setPath(path:oldPath);
+
             }
 
         ); 
