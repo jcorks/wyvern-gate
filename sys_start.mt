@@ -134,9 +134,9 @@ return ::(terminal, arg, onDone) {
                 @:asset = Topaz.Resources.createDataAssetFromPath(path:'WYVERNSAVE_' + slot, name:slot);
                 @:data = asset.getAsString();
                 Topaz.Resources.removeAsset(asset);
-                return data;
 
                 Topaz.Resources.setPath(path:oldPath);
+                return data;
 
             },
             

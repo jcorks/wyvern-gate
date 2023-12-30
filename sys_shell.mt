@@ -5,6 +5,9 @@ return class(
     define::(this) {
         @location = [''];
 
+        this.constructor = ::{
+            this.enablePad(padIndex:0);
+        }
 
         @term;
         @currentCommand = '';
@@ -13,6 +16,8 @@ return class(
         @onProgramUnicode = ::(unicode){}
         @onProgramKeyboard = ::(input, value){}
         @programActive = false;
+        @padHint = 0;
+        @padListener;
 
 
         @:printPrompt ::{
@@ -67,11 +72,12 @@ return class(
         @:HOLD_TIME_MIN = 0.4;
         @:HOLD_TIME_REPEAT = 0.08;
         @:checkRepeatPadInputs ::{
+            @padIndex = padHint;
             @left = 
                 Topaz.Input.getState(input:Topaz.Key.left) > 0 ||
                 (if (!term.requestStringMappings)
-                    Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.d_left) > 0 ||
-                    Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.axisX) < -stickDeadzone
+                    Topaz.Input.getPadState(padIndex, input:Topaz.Pad.d_left) > 0 ||
+                    Topaz.Input.getPadState(padIndex, input:Topaz.Pad.axisX) < -stickDeadzone
                 else
                     Topaz.Input.getMappedState(name:'left') < -stickDeadzone
                 )
@@ -79,8 +85,8 @@ return class(
             @right = 
                 Topaz.Input.getState(input:Topaz.Key.right) > 0 ||
                 (if (!term.requestStringMappings)
-                    Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.d_right) > 0 ||
-                    Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.axisX) > stickDeadzone
+                    Topaz.Input.getPadState(padIndex, input:Topaz.Pad.d_right) > 0 ||
+                    Topaz.Input.getPadState(padIndex, input:Topaz.Pad.axisX) > stickDeadzone
                 else
                     Topaz.Input.getMappedState(name:'right') > stickDeadzone
                 )
@@ -89,8 +95,8 @@ return class(
             @down = 
                 Topaz.Input.getState(input:Topaz.Key.down) > 0 ||
                 (if (!term.requestStringMappings)
-                    Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.d_down) > 0 ||
-                    Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.axisY) > stickDeadzone
+                    Topaz.Input.getPadState(padIndex, input:Topaz.Pad.d_down) > 0 ||
+                    Topaz.Input.getPadState(padIndex, input:Topaz.Pad.axisY) > stickDeadzone
                 else
                     Topaz.Input.getMappedState(name:'down') > stickDeadzone
                 )
@@ -99,8 +105,8 @@ return class(
             @up = 
                 Topaz.Input.getState(input:Topaz.Key.up) > 0 ||
                 (if (!term.requestStringMappings)
-                    Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.d_up) > 0 ||
-                    Topaz.Input.getPadState(padIndex:0, input:Topaz.Pad.axisY) < -stickDeadzone 
+                    Topaz.Input.getPadState(padIndex, input:Topaz.Pad.d_up) > 0 ||
+                    Topaz.Input.getPadState(padIndex, input:Topaz.Pad.axisY) < -stickDeadzone 
                 else
                     Topaz.Input.getMappedState(name:'up') < -stickDeadzone 
                 )
@@ -155,7 +161,8 @@ return class(
                     'edit',
                     'shutdown',
                     'fullscreen',
-                    'pad-config'
+                    'pad-config',
+                    'pad-select'
                 ]
             },
 
@@ -174,6 +181,47 @@ return class(
             programActive : {
                 get ::<- programActive
             },
+            
+            currentEnabledPad : {
+                get ::<- padHint
+            },
+
+            enablePad ::(padIndex) {
+                if (padListener != empty)
+                    Topaz.Input.removeListener(id:padListener);
+                    
+                padHint = padIndex;
+                padListener = Topaz.Input.addPadListener(
+                    padIndex: padHint,
+                    listener : {
+                        onPress::(input, value) {
+                            when(term.requestStringMappings) empty;
+                            match(input) {
+                              (Topaz.Pad.a): ::<={
+                                when (programActive)
+                                    onProgramKeyboard(input:Topaz.Key.z, value:1);
+
+                                currentCommand = 'start';
+                                printPrompt();                                
+                                runCommand(command:'start', arg:'');
+                              },
+    
+                              (Topaz.Pad.b): ::<={
+                                onProgramKeyboard(input:Topaz.Key.x, value:1);
+                              },
+
+                              (Topaz.Pad.start): ::<={
+                              }
+                            }
+                        }
+                    }
+                );            
+            },
+            
+            terminal : {
+                get ::<- term
+            },  
+
 
             start:::(terminal) {
                 term = terminal;
@@ -211,34 +259,8 @@ return class(
                 @lastLeftStickX = 0;
                 @lastLeftStickY = 0;
                 @:stickDeadzone = 0.35;
-                Topaz.Input.addPadListener(
-                    padIndex: 0,
-                    listener : {
-                        onUpdate::(input, value) {
-                            when(term.requestStringMappings) empty;
-                            match(input) {
-                              (Topaz.Pad.a): ::<={
-                                if (value > 0) ::<= {
-                                    when (programActive)
-                                        onProgramKeyboard(input:Topaz.Key.z, value:1);
+                @registeredPadIndex = -1;
 
-                                    currentCommand = 'start';
-                                    printPrompt();                                
-                                    runCommand(command:'start', arg:'');
-                                }
-                              },
-
-                              (Topaz.Pad.b): ::<={
-                                if (value > 0)
-                                    onProgramKeyboard(input:Topaz.Key.x, value:1);
-                              },
-
-                              (Topaz.Pad.start): ::<={
-                              }
-                            }
-                        }
-                    }
-                );
                 
                 Topaz.Input.addMappedListener(
                     mappedName: 'confirm',

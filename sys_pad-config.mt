@@ -10,7 +10,8 @@
         positive: positive,
         input: input
     }
-    Topaz.Input.mapPad(name, pad:0, input);
+    @:Shell = import(module:'sys_shell.mt');
+    Topaz.Input.mapPad(name, pad:Shell.currentEnabledPad, input);
 }
 
 @:DEADZONE = 0.35;
@@ -34,13 +35,14 @@
 // Runs the given function once an input from pad 0 is registered
 @:pollInput ::(terminal, axis, name, onDone) {
     @:idState = [];
+    @:Shell = import(module:'sys_shell.mt');
  
  
     @done = false;
     @lastInput;
     @lastValue;
     @:pollID = Topaz.Input.addPadListener(
-        padIndex: 0,
+        padIndex: Shell.currentEnabledPad,
         listener : {
             onUpdate ::(input, value) {
                 when(done) empty;
