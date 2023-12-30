@@ -54,7 +54,7 @@
                 DEF:  3,
                 LUK:  6,
                 SPD:  100,
-                DEX:  100
+                DEX:  10
             ).save());
             
             beast.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);

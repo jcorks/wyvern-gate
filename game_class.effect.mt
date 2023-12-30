@@ -189,7 +189,6 @@ Effect.new(
         skipTurn : false,
         stackable: false,
         stats: StatSet.new(
-            DEX: 10000
         ),
         onAffliction : ::(user, item, holder) {
 
@@ -208,7 +207,7 @@ Effect.new(
         },
 
         onDamage : ::(user, item, holder, from, damage) {
-            if (!holder.isIncapacitated() && random.try(percentSuccess:85)) ::<= {
+            if (!holder.isIncapacitated() && random.try(percentSuccess:75)) ::<= {
                 windowEvent.queueMessage(text:holder.name + "'s ghostly body bends around the attack!");
                 damage.amount = 0;
             }
@@ -233,7 +232,6 @@ Effect.new(
         skipTurn : false,
         stackable: false,
         stats: StatSet.new(
-            DEX: 10000
         ),
         onAffliction : ::(user, item, holder) {
 
@@ -252,7 +250,7 @@ Effect.new(
         },
 
         onDamage : ::(user, item, holder, from, damage) {
-            if (!holder.isIncapacitated() && random.try(percentSuccess:75)) ::<= {
+            if (!holder.isIncapacitated() && random.try(percentSuccess:65)) ::<= {
                 windowEvent.queueMessage(text:holder.name + " repels the attack in their rage!");
                 damage.amount = 0;
             }

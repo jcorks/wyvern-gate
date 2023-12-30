@@ -212,10 +212,10 @@ return ::{
 
                                                         windowEvent.queueChoices(
                                                             choices: ['Equip', 'Check', 'Rename', 'Compare'],
+                                                            prompt: item.name,
                                                             canCancel: true,
                                                             leftWeight: 1,
                                                             topWeight: 1,
-                                                            renderable : menuRenderable,
                                                             onChoice::(choice) {
                                                                 when (choice == 0) empty;
                                                                 when(choice == 1) ::<= {

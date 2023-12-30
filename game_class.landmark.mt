@@ -896,7 +896,6 @@ Landmark.Base.new(
             // the standard set
             {name: 'Fountain', rarity:18},
             {name: 'Potion Shop', rarity: 17},
-            {name: 'Enchantment Stand', rarity: 11},
             {name: 'Wyvern Statue', rarity: 15},
             {name: 'Small Chest', rarity: 16},
             {name: 'Locked Chest', rarity: 11},
@@ -910,6 +909,7 @@ Landmark.Base.new(
 
         ],
         requiredLocations : [
+            'Enchantment Stand',
             'Stairs Down',
             'Stairs Down'
         ],
@@ -967,6 +967,7 @@ Landmark.Base.new(
             {name: 'Fancy Shop', rarity: 500},
         ],
         requiredLocations : [
+            'Enchantment Stand',
             'Stairs Down',
             'Locked Chest',
         ],
@@ -1020,6 +1021,7 @@ Landmark.Base.new(
 
         ],
         requiredLocations : [
+            'Enchantment Stand',
             'Stairs Down',
             'Locked Chest',
             'Small Chest'
@@ -1075,6 +1077,7 @@ Landmark.Base.new(
 
         ],
         requiredLocations : [
+            'Enchantment Stand',
             'Stairs Down',
             'Locked Chest',
             'Small Chest'
