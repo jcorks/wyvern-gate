@@ -786,19 +786,19 @@
 
                     state.flags.add(flag:StateFlags.HURT);
                     
-                    if (damage.damageType == Damage.TYPE.FIRE && Number.random() > 0.9)
+                    if (damage.damageType == Damage.TYPE.FIRE && Number.random() > 0.98)
                         this.addEffect(from, name:'Burned',durationTurns:5);
-                    if (damage.damageType == Damage.TYPE.ICE && Number.random() > 0.9)
+                    if (damage.damageType == Damage.TYPE.ICE && Number.random() > 0.98)
                         this.addEffect(from, name:'Frozen',durationTurns:2);
-                    if (damage.damageType == Damage.TYPE.THUNDER && Number.random() > 0.9)
+                    if (damage.damageType == Damage.TYPE.THUNDER && Number.random() > 0.98)
                         this.addEffect(from, name:'Paralyzed',durationTurns:2);
                     if (damage.damageType == Damage.TYPE.PHYS && Number.random() > 0.99) 
                         this.addEffect(from, name:'Bleeding',durationTurns:5);
-                    if (damage.damageType == Damage.TYPE.POISON && Number.random() > 0.9) 
+                    if (damage.damageType == Damage.TYPE.POISON && Number.random() > 0.98) 
                         this.addEffect(from, name:'Poisoned',durationTurns:5);
-                    if (damage.damageType == Damage.TYPE.DARK && Number.random() > 0.9)
+                    if (damage.damageType == Damage.TYPE.DARK && Number.random() > 0.98)
                         this.addEffect(from, name:'Blind',durationTurns:2);
-                    if (damage.damageType == Damage.TYPE.LIGHT && Number.random() > 0.9)
+                    if (damage.damageType == Damage.TYPE.LIGHT && Number.random() > 0.98)
                         this.addEffect(from, name:'Petrified',durationTurns:2);
                     
                     

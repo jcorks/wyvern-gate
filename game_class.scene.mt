@@ -1308,7 +1308,7 @@ Scene.new(
             ['', 'Opening the box reveals items inside!'],
             ['', 'The party receives 250G.'],
             ['', 'The party receives 3 Pink Potions.'],
-            ['', 'The party receives 2 Life Crystals.'],
+            ['', 'The party receives a Life Crystal.'],
             ['', 'The party receives a Skill Crystal.'],
             ['', 'The party also receives an equippable Tome.'],
             ['', 'There\'s also a note here...'],
@@ -1331,8 +1331,6 @@ Scene.new(
                 @:world = import(module:'game_singleton.world.mt');
                 world.party.inventory.addGold(amount:250);
 
-                world.party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Life Crystal'
-                ), from:someone));
                 world.party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Life Crystal'
                 ), from:someone));
                 

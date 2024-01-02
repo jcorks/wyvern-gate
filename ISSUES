@@ -12,7 +12,12 @@ Known bugs / concerns:
 
 Coming changes:
   . music and cues in topaz builds 
-
+  . Add: Cure Staff
+    - Heals anyone attacked by it 
+  . Map Entity: Slime
+    - If attacked, 50% chance for weapon to get stuck in its ooze, then 50% chance for whether the weapon
+      can be removed 
+    - Has beast movement and stats comparable to the treasure golem
         
   . Post-Post game: endless mode 
     - Introduces EXP and leveling 

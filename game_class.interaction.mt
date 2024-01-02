@@ -446,6 +446,7 @@ Interaction.new(
                                             if (item.name->contains(key:'Wyvern Key of'))
                                                 world.accoladeEnable(name:'gotRidOfWyvernKey');      
                                         }
+                                        @:alreadyWon = world.accoladeEnabled(name:'wonGamblingGame');
                                         world.accoladeEnable(name:'wonGamblingGame');
                                         
                                         windowEvent.queueMessage(
@@ -453,15 +454,21 @@ Interaction.new(
                                             text: '"Ah, well done. A gamble is a gamble, after all."'                                    
                                         );
                                         
-                                        windowEvent.queueMessage(
-                                            speaker: 'Wandering Gamblist',
-                                            text: '"Alternatively, I can offer my services..."'                                    
-                                        );
-                                        
+                                        if (alreadyWon) 
+                                            windowEvent.queueMessage(
+                                                speaker: 'Wandering Gamblist',
+                                                text: '"Alternatively, I can offer my services..."'                                    
+                                            );
+                                            
                                         
                                         windowEvent.queueChoices(
                                             canCancel: false,
-                                            choices: ['Get Prize', 'Join Party'],
+                                            choices: 
+                                                if (alreadyWon)
+                                                    ['Get Prize', 'Join Party']
+                                                else 
+                                                    ['Get Prize']
+                                            ,
                                             onChoice::(choice) {
                                                 when(choice == 2) ::<= {
                                                     @:Species = import(module:'game_class.species.mt');
@@ -532,7 +539,8 @@ Interaction.new(
                                                     inv.add(item:it);
                                                 }
                                                 
-                                                pickItem(
+                                                @:pickItemInv = (import(module:'game_function.pickitem.mt'));
+                                                pickItemInv(
                                                     canCancel : false,
                                                     onGetPrompt ::<- 'Pick a prize!',
                                                     topWeight : 0.5,
