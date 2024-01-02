@@ -395,14 +395,14 @@
                             map:state.map,
                             base:Landmark.Base.database.find(name:'Shrine of Light'),
                             island:this
-                        ),
-                        
-                    default:
+                        )
+                    /*
                         LargeMap.addLandmark(
                             map:state.map,
                             base:Landmark.Base.database.find(name:'Lost Shrine'),
                             island:this
                         )
+                    */
                 }                        
 
                 

@@ -2257,16 +2257,6 @@ Location.Base.new(data:{
             )
         );        
 
-        location.inventory.add(item:
-            Item.new(
-                base:Item.Base.database.getRandomFiltered(
-                    filter:::(value) <- value.isUnique == false
-                                        && value.hasQuality
-                ),
-                qualityHint : 'Masterwork',
-                from:location.landmark.island.newInhabitant(),rngEnchantHint:true
-            )
-        ); 
 
     },
     onInteract ::(location) {

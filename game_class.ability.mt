@@ -880,11 +880,11 @@ Ability.new(
             
                 @help = instance.island.newHostileCreature();
                 @battle = user.battle;
-                if (battle.allies->findIndex(value:user) == -1) ::<= {
-                    battle.join(enemy:help);
-                } else ::<= {
-                    battle.join(ally:help);
-                }
+                
+                battle.join(
+                    group: [help],
+                    sameGroupAs:user
+                );
                 
             } else ::<= {
                 windowEvent.queueMessage(
@@ -1693,15 +1693,11 @@ Ability.new(
             }
             
             @:battle = user.battle;
-            if (battle.allies->findIndex(value:user) != -1)
-                battle.join(
-                    ally: sprite                               
-                )
-            else
-                battle.join(
-                    enemy: sprite                                                                                       
-                )
-            ;
+            battle.join(
+                group: [sprite],
+                sameGroupAs:user
+            );
+
         }
     }
 )
@@ -1754,15 +1750,10 @@ Ability.new(
             }
             
             @:battle = user.battle;
-            if (battle.allies->findIndex(value:user) != -1)
-                battle.join(
-                    ally: sprite                               
-                )
-            else
-                battle.join(
-                    enemy: sprite                                                                                       
-                )
-            ;
+            battle.join(
+                group: [sprite],
+                sameGroupAs:user
+            );
         }
     }
 )            
@@ -1813,15 +1804,11 @@ Ability.new(
             }
             
             @:battle = user.battle;
-            if (battle.allies->findIndex(value:user) != -1)
-                battle.join(
-                    ally: sprite                               
-                )
-            else
-                battle.join(
-                    enemy: sprite                                                                                       
-                )
-            ;
+            battle.join(
+                group: [sprite],
+                sameGroupAs:user
+            );
+
         }
     }
 )       
@@ -1872,15 +1859,11 @@ Ability.new(
             }
             
             @:battle = user.battle;
-            if (battle.allies->findIndex(value:user) != -1)
-                battle.join(
-                    ally: sprite                               
-                )
-            else
-                battle.join(
-                    enemy: sprite                                                                                       
-                )
-            ;
+            battle.join(
+                group: [sprite],
+                sameGroupAs:user
+            );
+
         }
     }
 )                   
@@ -2966,12 +2949,12 @@ Ability.new(
 Ability.new(
     data: {
         name: 'Green Thumb',
-        targetMode : TARGET_MODE.NONE,
+        targetMode : TARGET_MODE.ONE,
         description: "Any growing roots grow instantly on the target.",
         durationTurns: 0,
         hpCost : 0,
         apCost : 3,
-        usageHintAI: USAGE_HINT.BUFF,
+        usageHintAI: USAGE_HINT.DONTUSE,
         oncePerBattle : false,
         onAction: ::(user, targets, turnIndex, extraData) {
             @:effects = targets[0].effects;

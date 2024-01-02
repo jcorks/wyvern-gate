@@ -2397,7 +2397,43 @@ Effect.new(
         
         }
     }
-)      
+)    
+
+Effect.new(
+    data : {
+        name : 'Sentimental Box',
+        description: 'Opens the box.',
+        battleOnly : true,
+        skipTurn : false,
+        stackable: true,
+        stats: StatSet.new(),
+        onAffliction : ::(user, item, holder) {
+            Scene.database.find(name:'scene_sentimentalbox').act(onDone::{});            
+        },
+        
+        onRemoveEffect : ::(user, item, holder) {
+        },                
+        onPostAttackOther : ::(user, item, holder, to) {
+        },
+
+        onPreAttackOther : ::(user, item, holder, to, damage) {
+        },
+        onAttacked : ::(user, item, holder, by, damage) {
+        
+        },
+        
+        onDamage : ::(user, item, holder, from, damage) {
+        },
+        
+        onNextTurn : ::(user, item, holder, turnIndex, turnCount) {
+        
+        },
+        onStatRecalculate : ::(user, item, holder, stats) {
+        
+        }
+    }
+)
+  
 
 Effect.new(
     data : {

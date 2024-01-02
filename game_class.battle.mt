@@ -210,6 +210,7 @@
         
         @:checkRemove :: {
             // see if anyone died
+            @removed = [];
             foreach(turn)::(index, entity) {                    
                 when(entity.isDead == false && entity.requestsRemove == false) empty;
                 if (group2party[ent2group[entity]] && entity.isDead) party_.remove(member:entity);
@@ -226,14 +227,15 @@
 
                 index = turnPoppable->findIndex(value:entity);
                 if (index != -1) turnPoppable->remove(key:index);
+                removed->push(value:entity);
             }
             
-            turn->setSize(size:0);
-            foreach(groups) ::(k, group) {
-                foreach(group) ::(i, ent) {
-                    turn->push(value:ent);
-                }
-            }            
+            foreach(removed) ::(i, ent) {
+                @:ind = turn->findIndex(value:ent);
+                if (ind != -1)
+                    turn->remove(key:ind);
+            }
+                                
         }
         
         @:endTurn ::{
@@ -354,6 +356,13 @@
             }
             
             // then resort based on speed
+            turn->setSize(size:0);
+            foreach(groups) ::(k, group) {
+                foreach(group) ::(i, ent) {
+                    turn->push(value:ent);
+                }
+            }    
+
             turn->sort(
                 comparator:::(a, b) {
                     return a.stats.SPD <
@@ -572,7 +581,13 @@
                     }
                 }
                 
-
+                turn->sort(
+                    comparator:::(a, b) {
+                        return a.stats.SPD <
+                               b.stats.SPD;
+                    }
+                );
+ 
                 battleEnd = ::{
                     @:startEnd ::(message) {
                         active = false;
@@ -703,7 +718,6 @@
                     jumpTag: 'Battle',
                     onEnter::{
                         when(ended) ::<= {
-                            breakpoint();
                             if (windowEvent.hasAnyQueued() == false) ::<= {
                                 battleEnd();
                                 

@@ -3960,6 +3960,51 @@ Item.Base.new(data : {
     
 })    
 
+
+Item.Base.new(data : {
+    name : "Sentimental Box",
+    description: 'A box of sentimental value. You feel like you should open it right away.',
+    examine : '',
+    equipType: TYPE.TWOHANDED,
+    rarity : 100,
+    weight : 10,
+    canBeColored : false,
+    basePrice: 100,
+    keyItem : false,
+    hasSize : false,
+    tier: 0,
+    levelMinimum : 1000000000,
+    canHaveEnchants : false,
+    canHaveTriggerEnchants : false,
+    enchantLimit : 0,
+    hasQuality : false,
+    hasMaterial : false,
+    isApparel : false,    isUnique : true,
+    useTargetHint : USE_TARGET_HINT.ONE,
+    possibleAbilities : [
+    ],
+
+    // fatigued
+    equipMod : StatSet.new(
+        ATK: 15,
+        SPD: -5,
+        DEX: -5
+    ),
+    useEffects : [
+        'Sentimental Box',
+    ],
+    equipEffects : [],
+    attributes : 
+        ATTRIBUTE.SHARP  |
+        ATTRIBUTE.METAL
+    ,
+    onCreate ::(item, user, creationHint) {     
+
+    }
+    
+})    
+
+
     
 
 

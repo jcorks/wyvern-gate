@@ -264,9 +264,7 @@
                 @:profession = Profession.new(
                     base:
                         if (professionHint == empty) 
-                            Profession.Base.database.getRandomFiltered(
-                                filter:::(value) <- levelHint >= value.levelMinimum
-                            ) 
+                            Profession.Base.database.getRandom() 
                         else 
                             Profession.Base.database.find(name:professionHint)
                 );

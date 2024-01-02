@@ -21,7 +21,7 @@
 @:class = import(module:'Matte.Core.Class');
 
 
-@:MAX_LINES_TEXTBOX = 5;
+@:MAX_LINES_TEXTBOX = 10;
 @:MAX_COLUMNS = canvas.width - 4;
 
 

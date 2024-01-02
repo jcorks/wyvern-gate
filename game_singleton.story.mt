@@ -47,6 +47,8 @@
                 // whether the dark key has been given to the party
                 hasDarkKey : false,
                 
+                // Whether the initial box has been opened.
+                openedSentimentalBox : false,
                 
                 // whether the player has seen the wandering gamblist
                 skieEncountered : false,

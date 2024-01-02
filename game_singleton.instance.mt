@@ -275,12 +275,7 @@ return class(
                     world.island = island;
                     party = world.party;
                     party.reset();
-                    party.inventory.addGold(amount:250);
 
-                    party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Life Crystal'
-                    ), from:island.newInhabitant()));
-                    party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Life Crystal'
-                    ), from:island.newInhabitant()));
 
 
                     
@@ -303,6 +298,14 @@ return class(
                     // professionals.
                     p0.normalizeStats();
                     p1.normalizeStats();
+
+                    party.inventory.add(item:Item.new(
+                        base:Item.Base.database.find(name:'Sentimental Box'),
+                        from:p0
+                    ));
+
+
+
                     // debug
                         /*
                         //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
@@ -348,26 +351,6 @@ return class(
                         
                         
 
-                    for(0, 1)::(i) {
-                        @:crystal = Item.new(base:Item.Base.database.find(name:'Skill Crystal'), from:p0);
-                        party.inventory.add(item:crystal);
-                    }
-
-                    //party.inventory.add(item:keyhome);
-
-
-                    party.inventory.add(item:Item.new(
-                        base:Item.Base.database.find(name:'Pink Potion'),
-                        from:island.newInhabitant()
-                    ));
-                    party.inventory.add(item:Item.new(
-                        base:Item.Base.database.find(name:'Pink Potion'),
-                        from:island.newInhabitant()
-                    ));
-                    party.inventory.add(item:Item.new(
-                        base:Item.Base.database.find(name:'Pink Potion'),
-                        from:island.newInhabitant()
-                    ));
 
                         
                         /*

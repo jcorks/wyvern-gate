@@ -2146,6 +2146,7 @@ Interaction.new(
                             item.enchantsCount < item.base.enchantLimit
                         ,
                         onPick::(item) {
+                            when(item == empty) empty;
                             windowEvent.queueMessage(text:'This will add the enchant ' + location.data.enchant.name + ' to the ' + item.name + '. This change is permanent.');
                             windowEvent.queueAskBoolean(
                                 prompt: 'Continue?',

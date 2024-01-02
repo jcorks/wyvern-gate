@@ -140,8 +140,9 @@ Scene.new(
             ['Kaedjaal', 'However, be cautious: you are not the first to have triumphed over me.'],
             ['Kaedjaal', 'There are many with their own goals and ambitions, and some will be more skilled that you currently are.'],
             ['Kaedjaal', 'Well, I hope you enjoyed this little visit. Come and see me any time.'],
-            ['Kaedjaal', 'Please hand me the key and I will send you on your way.'],
-            ['', 'The party hands over the Wyvern Key of Fire.'],
+            ['Kaedjaal', 'Along with leading you to me, each of these keys leads to a different island using magic we Wyverns know...'],
+            ['Kaedjaal', 'I will use it to bring you to the next island where you may find the next shrine.'],
+            ['', 'The Wyvern Key of Fire glows.'],
             ['Kaedjaal', 'May you find peace and prosperity in your heart. Remember: seek the shrine to find the Key.'],
             ::(location, landmark, doNext) {
                 location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
@@ -428,7 +429,7 @@ Scene.new(
             ['Ziikkaettaal', 'I... I see. Kaedjaal was perhaps right to let you continue.'],
             ['Ziikkaettaal', 'It has been some time since I have let another Chosen pass.'],
             ['Ziikkaettaal', 'You have handled yourself well.'],
-            ['', 'The party hands over the Wyvern Key of Ice.'],
+            ['', 'The Wyvern Key of Ice glows.'],
             ['Ziikkaettaal', 'May you find peace and prosperity in your heart. Remember: seek the shrine to find the Key.'],
             ::(location, landmark, doNext) {
                 location.ownedBy.name = 'Kaedjaal, Wyvern of Ice';
@@ -696,7 +697,7 @@ Scene.new(
             },
             ['Juhriikaal', 'You\'ve got something special with you. The way you fight and prove yourself... You\'ve got potential.'],
             ['Juhriikaal', 'Ah... it\'s refreshing.'],
-            ['', 'The party hands over the Wyvern Key of Thunder.'],
+            ['', 'The Wyvern Key of Thunder glows.'],
             ['Juhriikaal', 'May you find peace and prosperity in your heart. Remember: seek the shrine to find the Key.'],
             ::(location, landmark, doNext) {
                 location.ownedBy.name = 'Juhriikaal, Wyvern of Thunder';
@@ -1176,6 +1177,29 @@ Scene.new(
         script: [
             ['Shaarraeziil', 'Chosen, from the bottom of my heart, thank you.'],
             ['Shaarraeziil', '...'],
+            ['Shaarraeziil', 'You will need to prepare for the struggle ahead.'],
+            ['Shaarraeziil', 'When you are ready, come to me once more.'],
+            ['Shaarraeziil', 'Also... This may help with your battle.'],
+            ::(location, landmark, doNext) {
+                @:item = Item.new(
+                    base: Item.Base.database.find(name:'Greatsword'),
+                    qualityHint: 'Divine',
+                    materialHint: 'Dragonglass',
+                    colorHint: 'Gold',
+                    designHint: 'striking',
+                    abilityHint: 'Greater Cure'
+                );
+                item.name = 'Wyvern\'s Hope';
+                @:world = import(module:'game_singleton.world.mt');
+                world.party.inventory.add(item);                                
+                windowEvent.queueMessage(text:'The party was given the ' + item.name + '.');
+                doNext();
+            },
+            ['Shaarraeziil', 'I forged this in hopes that our Chosen would be able to wield it.'],
+            ['Shaarraeziil', 'Perhaps you don\'t need it, but it is for you regardless. Do with it as you like.'],
+
+
+
             ::(location, landmark, doNext) {
                 windowEvent.queueNoDisplay(
                     keep : true,
@@ -1208,11 +1232,147 @@ Scene.new(
                     }
                 );
             }
+
+            /*
+            ::(location, landmark, doNext) {
+                location.ownedBy.name = 'Shaarraeziil';
+                @:world = import(module:'game_singleton.world.mt');
+                @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Light');
+                if (key != empty) key = key[0];
+                // could be equipped by hooligans and jokesters
+                if (key == empty) ::<= {
+                    key = {:::} {
+                        foreach(world.party.members)::(i, member) {
+                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_LR);
+                            if (wep.name == 'Wyvern Key of Light') ::<= {
+                                send(message:key);
+                            }
+                        }
+                    }
+                }
+                // you can technically throw it out or Literally Throw It.
+                when(key == empty) ::<= {
+                    windowEvent.queueMessage(
+                        speaker: 'Shaarraeziil',
+                        text: 'Uhm. Where\'s the light key..?'
+                    );
+
+                    windowEvent.queueMessage(
+                        speaker: 'Shaarraeziil',
+                        text: 'While I admit that it is impressive that you so casually got rid of an important artifact, please do not do that in the future.'
+                    );
+
+                    
+                    @:item = Item.new(base:Item.Base.database.find(name:'Wyvern Key of Light'),
+                             from:location.ownedBy);
+                    windowEvent.queueMessage(text:'The party was given a ' + item.name + '.');
+                    world.party.inventory.add(item);
+                    key = item;
+                }
+                
+                
+                @:instance = import(module:'game_singleton.instance.mt');
+                // cancel and flush current VisitIsland session
+                if (key.islandEntry == empty)
+                    key.addIslandEntry(world);
+
+
+                instance.visitIsland(where:key.islandEntry);
+                if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
+                    windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
+                }
+
+                breakpoint();
+                doNext();
+            },  
+            */
+            
+
         ]
     }
 )
 
+Scene.new(
+    data : {
+        name : 'scene_sentimentalbox',
+        script: [
+            ::(location, landmark, doNext) {
+                @:story = import(module:'game_singleton.story.mt');
+                when(story.openedSentimentalBox) 
+                    windowEvent.queueMessage(text:
+                        "The box is empty."
+                    );
+                story.openedSentimentalBox = true;
+                doNext();
+            },
+            ['', 'Opening the box reveals items inside!'],
+            ['', 'The party receives 250G.'],
+            ['', 'The party receives 3 Pink Potions.'],
+            ['', 'The party receives 2 Life Crystals.'],
+            ['', 'The party receives a Skill Crystal.'],
+            ['', 'The party also receives an equippable Tome.'],
+            ['', 'There\'s also a note here...'],
+            ::(location, landmark, doNext) {
+                @:Entity = import(module:'game_class.entity.mt');
+                @:someone = Entity.new(levelHint:5);
+                windowEvent.queueMessage(text:
+                    (random.pickArrayItem(
+                        list : [
+                            '"I know we haven\'t always seen eye-to-eye; I know that we argue a lot. But when I heard you were leaving on your big adventure or whatever, I knew that I had to help. Here\'s some stuff I gathered over the years. I figure you\'ll get more use out of it than I ever will. Stay safe out there, and come back alive!"',
+                            '"Well, I didn\'t think the day would come, but here we are. I don\'t know about this \"Chosen\" nonsense, but I do know you well enough to know when you\'re determined to do something. I hope you find this stuff useful for your journey. I\'ll miss you."',
+                            '"You know, you\'re a real pain. All of a sudden you want to go on a big adventure, huh? Whatever. Just take this stuff. Put it to good use and stay alive. You might find it hard to believe, but I\'ll miss you. Do good out there."',
+                            '"There comes a time when someone has to take action and do something big. I saw it in your eyes the moment you told me. I could tell it was hard for you, too. Just know that you have my blessing. Let the items in this box be proof of that. I\'m proud of you. Stay alive out there."',
+                            '"So, it\'s finally time. We always knew you were an adventurer at heart. We prepared for the day you would finally go out into the world on your own. It might be tough, but we truly think you can overcome anything. Hopefully you\'ll find these useful on your journey. Be strong."',
+                            '"Ever since '+(Entity.new(levelHint:10).name)+' left, you\'ve never been the same. Always looking out there thinking of a way to find them. I think that this "Chosen" thing is just another excuse to go out and look, but I can\'t blame you. I miss them too. Either way, stay safe and come back in one piece. Hopefully these will come in handy."' 
+                        ]
+                    )) + '\n\n - ' + someone.name
+                );
 
+                @:world = import(module:'game_singleton.world.mt');
+                world.party.inventory.addGold(amount:250);
+
+                world.party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Life Crystal'
+                ), from:someone));
+                world.party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Life Crystal'
+                ), from:someone));
+                
+                
+                for(0, 1)::(i) {
+                    @:crystal = Item.new(base:Item.Base.database.find(name:'Skill Crystal'), from:someone);
+                    world.party.inventory.add(item:crystal);
+                }
+
+                //party.inventory.add(item:keyhome);
+
+
+                world.party.inventory.add(item:Item.new(
+                    base:Item.Base.database.find(name:'Pink Potion'),
+                    from:someone
+                ));
+                world.party.inventory.add(item:Item.new(
+                    base:Item.Base.database.find(name:'Pink Potion'),
+                    from:someone
+                ));
+                world.party.inventory.add(item:Item.new(
+                    base:Item.Base.database.find(name:'Pink Potion'),
+                    from:someone
+                ));
+                
+                @tome = Item.new(
+                    base:Item.Base.database.find(name:'Tome'),
+                    abilityHint: 'Cure',
+                    materialHint: 'Hardstone',
+                    qualityHint: 'Worn'
+                );
+                world.party.inventory.add(item:tome);                
+
+                
+                doNext();
+                
+            }
+        ]
+    }
+)
 
 
 

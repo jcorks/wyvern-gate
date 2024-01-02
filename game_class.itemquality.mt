@@ -359,7 +359,7 @@ ItemQuality.new(
 ItemQuality.new(
     data : {
         name : 'Divine',
-        description : "It is said the origin of this is of mythical.",
+        description : "It is said the origin of this is mythical.",
         levelMinimum: 1,
         equipMod : StatSet.new(
             DEF: 200,

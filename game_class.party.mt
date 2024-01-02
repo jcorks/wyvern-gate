@@ -47,7 +47,7 @@
         this.interface = {    
             reset ::{
                 state.members = [];
-                state.inventory = Inventory.new(size:30);
+                state.inventory = Inventory.new(size:40);
             },
         
             add::(member => Entity.type) {

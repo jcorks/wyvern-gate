@@ -79,7 +79,7 @@
             ref.addUpkeepTask(name:'aggressive');
             ref.addUpkeepTask(name:'exit');
 
-            if (encountersOnFloor == 1)
+            if (encountersOnFloor == 1) ::<= {
                 windowEvent.queueMessage(
                     text:random.pickArrayItem(list:[
                         'Are those foosteps? Be careful.',
@@ -87,6 +87,17 @@
                         'What? Footsteps?'
                     ])
                 );
+
+                if (isBusy)
+                    windowEvent.queueMessage(
+                        text:random.pickArrayItem(list:[
+                            'There seems to be a lot of commotion around on this floor...',
+                            'What? It sounds like a large battle nearby...'
+                        ])
+                    );
+
+
+            }
         }
         
 
@@ -98,13 +109,6 @@
                 landmark_ = landmark;
                 isBusy = if (landmark_.floor == 0) false else random.try(percentSuccess:10);
 
-                if (isBusy)
-                    windowEvent.queueMessage(
-                        text:random.pickArrayItem(list:[
-                            'There seems to be a lot of commotion around on this floor...',
-                            'What? It sounds like a large battle nearby...'
-                        ])
-                    );
                     
                 return this;
             },
