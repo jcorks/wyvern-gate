@@ -11,7 +11,78 @@ Known bugs / concerns:
 - Sometimes, using items will not consume them when they will sometimes be consumed normally. Likely due to either entiering or leaving the battle state, or save/loading an inventory.
 
 Coming changes:
+  . SCENARIOS. The game will be split up into "scenarios" which have different 
+    goals. The default scenario is "The Chosen", which is the current game. 
+    Each scenario ends up with a Wyvern's Wish at the end. 
+    
+    The Trader
+        - This game scenario features a wyvern's request to get 100k (then 700k, then 2M) in exchange for 
+          a wish. 
+        - Each day you decide whether to Explore (normal game) or Shopkeep (sell and buy items)
+        - You start off as one person (always a trader)
+          Shopkeeping 
+            . You choose from your inv what youre stocking the store with. At first this number is low (10)
+              because the shop starts small. You can pay to expand it.
+        - Hiring adventurers results in a hiring wage. Each person you hire goes into a hiring 
+          reserve. At the start of the day, you decide whether to have the adventurer go exploring on 
+          your behalf, or have them join you.
+            . Exploring: An NPC will fight locals ("squabble") and will accrue items from successful fights.
+              If their health is below 50%, they'll finish for the day. You get half of what they bring back 
+              (the lowest value stuff).
+        - Each day, you have to pay rent. THe rent increases based on how much youre making (evil)
+        - Shopkeep mode has NPCs come up to you asking whether to sell or buy. Anywhere from 15-30
+          NPCs may come up to you, with 80% asking to buy something and 20% asking to sell, more or less.
+            . Each item has a base price, and customers will tolerate a certain deviation from the base price 
+              its up to the player to try to guess that and be reasonable.
+            . Haggling has up to 3 turns, First the customer asks how much to buy / sell. Then the player 
+              gives a G amount with a custom deviation from the base price. If within the tolerable range of 
+              an NPC, they will accept the price. Else they will request a lower or higher amount. As days go on, 
+              this range will tighten.
+        - Every 2 days, 5 item types will have their base price doubled (quality and material ignored) and their base price 
+          halved based on current demand. tier sensitive
+        - Every 5 days, tier increases. Message announced that the shrine section has been discovered or something like that and new goods are available
+        - At last tier: Thieving is possible every day. Body guard assignments can be made from hirees
+
+    The Warrior
+        - This game scenario features a Wyvern's challenge to defeat it 
+        - This is a gauntlet with no saving
+        - Features level-ups
+        - Long dungeon... after 3 floors gets to choose a perk. 2 of 4.
+            Some perks include:
+                - Getting an Ally (same level)
+                - Getting a masterwork item
+                - Fully healing
+                - A PERMANENT stat rebalance
+                - A PERMANENT effect  
+                - encountering a shopkeep (normal shop)
+    
+        - Every 3 sets (so 9 floors) theres a boss. There are 2 bosses then the final.
+
+          
+
+  . Native implementation for path searching
+    
+    
   . music and cues in topaz builds 
+  . New profession: Artificer
+    - Build Auto. takes 3 AP
+        . Creates an automaton from a weapon. Inherits the quality and material, and the 
+          weapon's stats determine the base stats of the automaton (base stat (likely 4 or 5) + percent mod)
+        . Has the profession Automaton which makes it so it cant heal
+    - Repair Auto. takes 1 AP
+        . Use a weapon to repair an automaton 
+    - Improve Auto. takes 2 AP
+        . Use a weapon to improve an automaton's stats 
+    - Install Ability takes 3 AP 
+        . Use a weapon to teach that weapons ability to the automaton 
+    - Make Perpetual takes 3 AP
+        . Use a weapon to make the automaton persist outside the battle
+  . Runestone intent:
+    - If used, summons a Rune Golem (high HP, DEF, ATK, low DEX low SPD, kinda like treasure golem)
+  . Dungeon teleports
+  . Hazard tiles
+    - Holes
+    - Elemental damage tiles
   . Add: Cure Staff
     - Heals anyone attacked by it 
   . Map Entity: Slime

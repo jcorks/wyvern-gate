@@ -21,6 +21,13 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:State = import(module:'game_class.state.mt');
 
+
+@BFS_NATIVE;
+{:::} { 
+    BFS_NATIVE = getExternalFunction(name:"wyvern_gate__native__bfs");
+} : {
+    onError::(detail) {}
+}
 //@:MemoryBuffer = import(module:'Matte.Core.MemoryBuffer');
 
 
@@ -368,7 +375,31 @@
         @:bfsQ = [];
         @:bfsPath::(start, goal) {
             start = aStarNewNode(x:start.x, y:start.y);
-            goal = aStarNewNode(x:goal.x, y:goal.y);
+            goal = aStarNewNode(x:goal.x, y:goal.y);        
+        
+            when (BFS_NATIVE!=empty) ::<= {
+                @:result = BFS_NATIVE(
+                    width,
+                    height,
+                    scenery,
+                    start,
+                    goal
+                );
+                when(result == empty) empty;
+                @:out = [];
+                for(0, result->size) ::(i) {
+                    @:a = result[i];
+                    out->push(value:{
+                        x: a%width,
+                        y: (a/width)->floor
+                    });
+                }
+                return out;
+            }
+            
+            
+            // fallback on slow version
+
             
             when(start == goal) empty;
             @:q = bfsQ;
