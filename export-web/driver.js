@@ -29,72 +29,76 @@
     };
 
     const matteList = [
-        'game_class.ability.mt',
-        'game_class.apparelmaterial.mt',
-        'game_class.battleai.mt',
-        'game_class.battle.mt',
-        'game_class.damage.mt',
-        'game_class.database.mt',
-        'game_class.deck.mt',
-        'game_class.die.mt',
-        'game_class.effect.mt',
-        'game_class.entity.mt',
-        'game_class.entityquality.mt',
-        'game_class.event.mt',
-        'game_class.interaction.mt',
-        'game_class.inventory.mt',
-        'game_class.island.mt',
-        'game_class.itemcolor.mt',
-        'game_class.itemdesign.mt',
-        'game_class.itemenchantcondition.mt',
-        'game_class.itemenchant.mt',
-        'game_class.item.mt',
-        'game_class.itemquality.mt',
-        'game_class.landmarkevent_dungeonencounters.mt',
-        'game_class.landmarkevent_itemspecter.mt',
-        'game_class.landmarkevent.mt',
-        'game_class.landmarkevent_thebeast.mt',
-        'game_class.landmark.mt',
-        'game_class.location.mt',
-        'game_class.logtimer.mt',
-        'game_class.mapentity.mt',
-        'game_class.map.mt',
-        'game_class.material.mt',
-        'game_class.party.mt',
-        'game_class.personality.mt',
-        'game_class.profession.mt',
-        'game_class.scene.mt',
-        'game_class.species.mt',
-        'game_class.stateflags.mt',
-        'game_class.state.mt',
-        'game_class.statset.mt',
-        'game_class.structuremap.mt',
-        'game_function.battlemenu.mt',
-        'game_function.correcta.mt',
-        'game_function.dice.mt',
-        'game_function.distance.mt',
-        'game_function.interactperson.mt',
-        'game_function.itemimprove.mt',
-        'game_function.itemmenu.mt',
-        'game_function.name.mt',
-        'game_function.newrecord.mt',
-        'game_function.partyoptions.mt',
-        'game_function.pickitem.mt',
-        'game_function.pickpartyitem.mt',
-        'game_function.trap.mt',
-        'game_singleton.canvas.mt',
-        'game_singleton.dungeonmap.mt',
-        'game_singleton.gamblist.mt',
-        'game_singleton.instance.mt',
-        'game_singleton.largemap.mt',
-        'game_singleton.loadableclass.mt',
-        'game_singleton.namegen.mt',
-        'game_singleton.random.mt',
-        'game_singleton.story.mt',
-        'game_singleton.windowevent.mt',
-        'game_singleton.world.mt',
-        'game_struct.battleaction.mt',
-        'game_struct.mt',
+        "game_changelog",
+        "game_class.ability.mt",
+        "game_class.apparelmaterial.mt",
+        "game_class.battleai.mt",
+        "game_class.battle.mt",
+        "game_class.damage.mt",
+        "game_class.database.mt",
+        "game_class.deck.mt",
+        "game_class.die.mt",
+        "game_class.effect.mt",
+        "game_class.entity.mt",
+        "game_class.entityquality.mt",
+        "game_class.event.mt",
+        "game_class.interaction.mt",
+        "game_class.inventory.mt",
+        "game_class.island.mt",
+        "game_class.itemcolor.mt",
+        "game_class.itemdesign.mt",
+        "game_class.itemenchantcondition.mt",
+        "game_class.itemenchant.mt",
+        "game_class.item.mt",
+        "game_class.itemquality.mt",
+        "game_class.landmarkevent_cavebat.mt",
+        "game_class.landmarkevent_dungeonencounters.mt",
+        "game_class.landmarkevent_itemspecter.mt",
+        "game_class.landmarkevent.mt",
+        "game_class.landmarkevent_thebeast.mt",
+        "game_class.landmarkevent_themirror.mt",
+        "game_class.landmarkevent_treasuregolem.mt",
+        "game_class.landmark.mt",
+        "game_class.location.mt",
+        "game_class.logtimer.mt",
+        "game_class.mapentity.mt",
+        "game_class.map.mt",
+        "game_class.material.mt",
+        "game_class.party.mt",
+        "game_class.personality.mt",
+        "game_class.profession.mt",
+        "game_class.scene.mt",
+        "game_class.species.mt",
+        "game_class.stateflags.mt",
+        "game_class.state.mt",
+        "game_class.statset.mt",
+        "game_class.structuremap.mt",
+        "game_function.battlemenu.mt",
+        "game_function.correcta.mt",
+        "game_function.dice.mt",
+        "game_function.distance.mt",
+        "game_function.interactperson.mt",
+        "game_function.itemimprove.mt",
+        "game_function.itemmenu.mt",
+        "game_function.name.mt",
+        "game_function.newrecord.mt",
+        "game_function.partyoptions.mt",
+        "game_function.pickitem.mt",
+        "game_function.pickpartyitem.mt",
+        "game_function.trap.mt",
+        "game_singleton.canvas.mt",
+        "game_singleton.dungeonmap.mt",
+        "game_singleton.gamblist.mt",
+        "game_singleton.instance.mt",
+        "game_singleton.largemap.mt",
+        "game_singleton.loadableclass.mt",
+        "game_singleton.namegen.mt",
+        "game_singleton.random.mt",
+        "game_singleton.story.mt",
+        "game_singleton.windowevent.mt",
+        "game_singleton.world.mt",
+        "game_struct.battleaction.mt",
+        "game_struct.mt",
 
         'main.external.mt',
         'Matte.Core.Class',
@@ -157,8 +161,7 @@
                 argsA.push(
                     matte.store.createString(
                         names[i].substring(
-                            10,
-                            names[i].length-1
+                            10
                         )
                     )
                 )
@@ -180,6 +183,107 @@
         LAST_INPUT = -1;
         return matte.store.createNumber(out);
     });
+
+
+
+    ////////// BFS_NATIVE ///////////
+    
+    const bfs_q = [];
+    const bfs_visited = [];
+    matte.setExternalFunction('wyvern_gate__native__bfs', [
+        "width",    
+        "height",
+        "scenery",
+        "start",
+        "goal"        
+    ], function(fn, args) {
+        const store = matte.store;
+
+        const width  = store.valueAsNumber(args[0]);
+        const height = store.valueAsNumber(args[1]);
+        const scenery = args[2];
+        const start = store.valueAsNumber(args[3]);
+        const goal = store.valueAsNumber(args[4]);
+    
+    
+        const aStarNewNode = function(x, y) {
+            const id = x + y*width;
+            const sceneryValue = store.valueObjectArrayAtUnsafe(scenery, id);
+            const sceneryValueNumber = store.valueAsNumber(sceneryValue);
+            if (!(sceneryValueNumber & 0x010000) && x >= 0 && y >= 0 && x < width && y < height)
+                return id;
+        }
+
+        const aStarGetNeighbors = function(neighbors, current) {
+            neighbors.length = 0;
+            const x = current%width;
+            const y = Math.floor(current/width);
+            
+            var i;
+            i = aStarNewNode(x+1, y+1); if (i != undefined) neighbors.push(i);
+            i = aStarNewNode(x+1, y-1); if (i != undefined) neighbors.push(i);
+            i = aStarNewNode(x-1, y+1); if (i != undefined) neighbors.push(i);
+            i = aStarNewNode(x-1, y-1); if (i != undefined) neighbors.push(i);
+
+            i = aStarNewNode(x-1, y  ); if (i != undefined) neighbors.push(i);
+            i = aStarNewNode(x+1, y  ); if (i != undefined) neighbors.push(i);
+            i = aStarNewNode(x  , y+1); if (i != undefined) neighbors.push(i);
+            i = aStarNewNode(x  , y-1); if (i != undefined) neighbors.push(i);
+            return neighbors;
+        }    
+    
+    
+        const q = bfs_q;
+        q.length = 0;
+        
+        const visited = bfs_visited;
+        visited.length = 0;
+        
+
+            
+        if (start == goal) return store.createEmpty();
+        var qIter = 0;
+        const neighbors = [];
+        visited[start] = start;
+        q.push(start);
+        
+        while(qIter < q.length) {
+            const v = q[qIter];
+            qIter +=1;
+
+
+            if (v == goal) {
+                // build path
+                var a = v;
+                var last;
+                const returnOut = [];
+                for(;;) {
+                    const aValue = store.createNumber(a);
+                    returnOut.push(aValue);
+                    
+                    if (visited[a] == start) {
+                        return store.createObjectArray(returnOut);
+                    }                    
+                    
+                    a = visited[a];
+                }
+            }
+            aStarGetNeighbors(neighbors, v)
+            for(var i = 0; i < neighbors.length; ++i) {
+                const w = neighbors[i];
+                if (visited[w]) continue;
+                
+                visited[w] = v; // parent
+                q.push(w);
+            }
+        }
+        
+        return store.createEmpty();
+    });
+
+//////////////////////////////////////////
+
+
 
 
       

@@ -411,7 +411,7 @@
             
             return {:::} {
                 forever ::{
-                    when(q->keycount == 0) empty;
+                    when(qIter >= q->size) send();
                     
                     @v = q[qIter];
                     qIter +=1;

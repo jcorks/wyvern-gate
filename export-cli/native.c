@@ -151,7 +151,7 @@ static matteValue_t wyvern_gate__native__bfs(
     visited[start] = start;
     wyvern_gate__native__bfs__q_push(start);
     
-    while(qLen != 0) {
+    while(qIter < qLen) {
         int v = q[qIter];
         qIter++;
         
@@ -185,6 +185,7 @@ static matteValue_t wyvern_gate__native__bfs(
         int i;
         for(i = 0; i < neighborCount; ++i) {
             int w = neighbors[i];
+            // this will exclude 0,0 and is a bug, by the way.
             if (visited[w]) continue;
             visited[w] = v;
             wyvern_gate__native__bfs__q_push(w);
