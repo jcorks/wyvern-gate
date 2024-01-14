@@ -20,7 +20,7 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@:ItemDesign = Database.newBase(
+@:ItemDesign = Database.create(
     name : 'Wyvern.ItemDesign',
     attributes : {
         name : String,
@@ -29,7 +29,7 @@
 );
 
 
-ItemDesign.new(
+ItemDesign.newEntry(
     data : {
         name : 'complicated',
         equipMod : StatSet.new(
@@ -39,7 +39,7 @@ ItemDesign.new(
     }
 )
 
-ItemDesign.new(
+ItemDesign.newEntry(
     data : {
         name : 'humble',
         equipMod : StatSet.new(
@@ -49,7 +49,7 @@ ItemDesign.new(
     }
 )
 
-ItemDesign.new(
+ItemDesign.newEntry(
     data : {
         name : 'practical',
         equipMod : StatSet.new(
@@ -59,7 +59,7 @@ ItemDesign.new(
     }
 )
 
-ItemDesign.new(
+ItemDesign.newEntry(
     data : {
         name : 'sharp',
         equipMod : StatSet.new(
@@ -69,7 +69,7 @@ ItemDesign.new(
     }
 )
 
-ItemDesign.new(
+ItemDesign.newEntry(
     data : {
         name : 'striking',
         equipMod : StatSet.new(
@@ -79,7 +79,7 @@ ItemDesign.new(
     }
 )
 
-ItemDesign.new(
+ItemDesign.newEntry(
     data : {
         name : 'simple',
         equipMod : StatSet.new(
@@ -92,7 +92,7 @@ ItemDesign.new(
     }
 )
 
-ItemDesign.new(
+ItemDesign.newEntry(
     data : {
         name : 'ornate',
         equipMod : StatSet.new(
@@ -103,7 +103,7 @@ ItemDesign.new(
 )
 
 
-ItemDesign.new(
+ItemDesign.newEntry(
     data : {
         name : 'weighty',
         equipMod : StatSet.new(
@@ -113,7 +113,7 @@ ItemDesign.new(
     }
 )
 
-ItemDesign.new(
+ItemDesign.newEntry(
     data : {
         name : 'minimalist',
         equipMod : StatSet.new(

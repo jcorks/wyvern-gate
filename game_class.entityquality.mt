@@ -26,7 +26,7 @@
 
 
 
-@:EntityQuality = LoadableClass.new(
+@:EntityQuality = LoadableClass.create(
     name : 'Wyvern.EntityQuality',
     statics : {
         Base  :::<= {
@@ -37,30 +37,20 @@
             }
         }
     },
-    
-    new ::(parent, base, descriptionHint, trait0Hint, trait1Hint, trait2Hint, state) {
-        @:this = EntityQuality.defaultNew();
-        if (state != empty)
-            this.load(serialized:state)
-        else
-            this.defaultLoad(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint);
-        return this;
+    items : {
+        trait0 : empty,
+        trait1 : empty,
+        trait2 : empty,
+        descIndex : empty,
+        base : empty
     },
     
-    define:::(this) {
-        @:state = State.new(
-            items : {
-                trait0 : 0,
-                trait1 : 0,
-                trait2 : 0,
-                descIndex : 0,
-                base : empty
-            }
-        );
+    define:::(this, state) {
         
         
         
         this.interface = {
+            initialize ::{},
             defaultLoad::(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint) {
                 state.base = base;            
                 
@@ -120,15 +110,7 @@
                     if (base->contains(key:'$2')) base = base->replace(key:'$2', with:state.base.trait2[state.trait2]);
                     return base;
                 }
-            },
-            
-            save ::{
-                return state.save();
-            },
-            
-            load ::(serialized) {
-                state.load(parent:this, serialized);
-            }
+            }           
         }
     
     }
@@ -137,7 +119,7 @@
 
 
 
-EntityQuality.Base = Database.newBase(
+EntityQuality.Base = Database.create(
     name : 'Wyvern.EntityQuality.Base',     
     attributes : {
         name : String,
@@ -151,7 +133,7 @@ EntityQuality.Base = Database.newBase(
 );
 
 
-EntityQuality.Base.new(
+EntityQuality.Base.newEntry(
     data : {
         name : 'fur',
         appearanceChance : 1,
@@ -199,7 +181,7 @@ EntityQuality.Base.new(
     }
 )
 
-EntityQuality.Base.new(
+EntityQuality.Base.newEntry(
     data : {
         name : 'face',
         appearanceChance : 0.3,
@@ -232,7 +214,7 @@ EntityQuality.Base.new(
 )
 
 
-EntityQuality.Base.new(
+EntityQuality.Base.newEntry(
     data : {
         name : 'scales',
         appearanceChance : 1,
@@ -272,7 +254,7 @@ EntityQuality.Base.new(
 )        
 
 
-EntityQuality.Base.new(
+EntityQuality.Base.newEntry(
     data : {
         name : 'feathers',
         appearanceChance : 1,
@@ -311,7 +293,7 @@ EntityQuality.Base.new(
     }
 )   
 
-EntityQuality.Base.new(
+EntityQuality.Base.newEntry(
     data : {
         name : 'eyes',
         appearanceChance : 1,
@@ -352,7 +334,7 @@ EntityQuality.Base.new(
     }
 )
 
-EntityQuality.Base.new(
+EntityQuality.Base.newEntry(
     data : {
         name : 'ears',
         plural : true,
@@ -377,7 +359,7 @@ EntityQuality.Base.new(
     }
 )        
 
-EntityQuality.Base.new(
+EntityQuality.Base.newEntry(
     data : {
         name : 'horns',
         plural : true,
@@ -411,7 +393,7 @@ EntityQuality.Base.new(
 )        
 
 
-EntityQuality.Base.new(
+EntityQuality.Base.newEntry(
     data : {
         name : 'tail',
         plural : false,
@@ -436,7 +418,7 @@ EntityQuality.Base.new(
 ) 
 
 
-EntityQuality.Base.new(
+EntityQuality.Base.newEntry(
     data : {
         name : 'snout',
         appearanceChance : 1,
@@ -460,7 +442,7 @@ EntityQuality.Base.new(
 )        
 
 
-EntityQuality.Base.new(
+EntityQuality.Base.newEntry(
     data : {
         name : 'body',
         appearanceChance : 1,

@@ -40,23 +40,19 @@
         TYPE : {get::<-TYPE},
         CLASS : {get::<-CLASS}
     },
-    new ::(amount => Number, damageType => Number, damageClass => Number) {
-        @this = Damage.defaultNew();
-        this.initialize(amount, damageType, damageClass);
-        return this;
-    },
     define:::(this) {
         @type_;
         @amount_;
         @dclass;
+        
+        this.constructor = ::(amount => Number, damageType => Number, damageClass => Number) {
+            amount_ = (amount)->ceil;
+            if (amount_ <= 0) amount_ = 1;// minimum of 1 damage
+            type_ = damageType;
+            dclass = damageClass;
+        };
+        
         this.interface = {
-            initialize ::(amount => Number, damageType => Number, damageClass => Number) {
-                amount_ = (amount)->ceil;
-                if (amount_ <= 0) amount_ = 1;// minimum of 1 damage
-                type_ = damageType;
-                dclass = damageClass;
-                return this;
-            },
         
             reduce ::(byRatio) {
                 amount_ *= byRatio;

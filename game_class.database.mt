@@ -25,7 +25,7 @@
     name : 'Wyvern.Database',
     statics : {
         // creates a new base class with standard features
-        newBase ::(name, attributes, statics, getInterface) {
+        create ::(name, attributes, statics, getInterface) {
             if (statics == empty)
                 statics = {};
 
@@ -36,15 +36,16 @@
             statics.database = {
                 get ::<- db 
             }
+            
+            statics.newEntry = ::(data) {
+                @:this = Base.new();
+                this.initialize(data);
+                return this;
+            }
 
             @:Base = class(
                 name,
                 inherits : [Database.Item],
-                new ::(data) {
-                    @:this = Base.defaultNew();
-                    this.initialize(data);
-                    return this;
-                },
                 statics,
                 define:::(this) {
                     if (getInterface != empty)
@@ -112,20 +113,15 @@
     
    
     },
-    new ::(attributes, name) {
-        @this = Database.defaultNew();
-        LOOKUP[name] = this;
-        this.initialize(attributes);
-        return this;
-    },
     define:::(this) {
         @:items_ = {}
         @attributes_;
+        this.constructor = ::(attributes, name) {
+            LOOKUP[name] = this;
+            attributes_ = attributes;
+        };
+
         this.interface = {
-            initialize::(attributes => Object) {
-                attributes_ = attributes;
-                return this;
-            },
             
             attributes : {
                 get::<- attributes_

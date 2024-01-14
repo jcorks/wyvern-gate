@@ -6,7 +6,7 @@
 
 // essentially an opaque wrapper for custom per-step 
 // controllers of landmarks.
-@:LandmarkEvent = LoadableClass.new(
+@:LandmarkEvent = LoadableClass.create(
     name : 'Wyvern.LandmarkEvent',
     statics : {
         Base  :::<= {
@@ -16,33 +16,20 @@
                 set ::(value) <- db = value
             }
         },    
+    },    
+    items : {
+        base : empty,
+        data : empty // maintained    
     },
-    new ::(parent, base, state) {
-        @:this = LandmarkEvent.defaultNew();
-        
-        this.initialize(landmark:parent);
-        
-        if (state != empty)
-            this.load(serialized:state)
-        else 
-            this.defaultLoad(base)
-        return this;
-    },
-    
-    define::(this) {
+    define::(this, state) {
         
         @landmark_;
-        @state = State.new(
-            items : {
-                base : empty,
-                data : empty // maintained
-            }
-        );
+                
         this.interface = {
-            initialize ::(landmark) {
-                landmark_ = landmark;
+            initialize ::(parent) {
+                landmark_ = parent;
             },
-            
+                        
             defaultLoad ::(base) {
                 state.base = base;
                 state.data = base.startup(landmark:landmark_);
@@ -65,7 +52,7 @@
 
 
 
-LandmarkEvent.Base = Database.newBase(
+LandmarkEvent.Base = Database.create(
     name:'Wyvern.LandmarkEvent.Base',
     attributes : {
         name : String,
@@ -77,7 +64,7 @@ LandmarkEvent.Base = Database.newBase(
 
 
 
-LandmarkEvent.Base.new(
+LandmarkEvent.Base.newEntry(
     data : {
         name: 'item-specter',
         startup ::(landmark) {
@@ -98,7 +85,7 @@ LandmarkEvent.Base.new(
     }
 );
 
-LandmarkEvent.Base.new(
+LandmarkEvent.Base.newEntry(
     data : {
         name: 'dungeon-encounters',
         startup ::(landmark) {
@@ -119,7 +106,7 @@ LandmarkEvent.Base.new(
     }
 );
 
-LandmarkEvent.Base.new(
+LandmarkEvent.Base.newEntry(
     data : {
         name: 'the-beast',
         startup ::(landmark) {
@@ -140,7 +127,7 @@ LandmarkEvent.Base.new(
     }
 );
 
-LandmarkEvent.Base.new(
+LandmarkEvent.Base.newEntry(
     data : {
         name: 'the-mirror',
         startup ::(landmark) {
@@ -162,7 +149,7 @@ LandmarkEvent.Base.new(
 );
 
 
-LandmarkEvent.Base.new(
+LandmarkEvent.Base.newEntry(
     data : {
         name: 'treasure-golem',
         startup ::(landmark) {
@@ -184,7 +171,7 @@ LandmarkEvent.Base.new(
 );
 
 
-LandmarkEvent.Base.new(
+LandmarkEvent.Base.newEntry(
     data : {
         name: 'cave-bat',
         startup ::(landmark) {

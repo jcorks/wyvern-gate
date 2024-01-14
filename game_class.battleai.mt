@@ -21,32 +21,22 @@
 @:Ability = import(module:'game_class.ability.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-@:BattleAI = LoadableClass.new(
+@:BattleAI = LoadableClass.create(
     name: 'Wyvern.BattleAI',
-    new::(state, parent, user) {
-        @:this = BattleAI.defaultNew();
-        this.setUser(user);
-        
-        if (state != empty)
-            this.load(serialized:state);
-        
-        return this;
-    },
-    define:::(this) {
+    items : [],
+    define:::(this, state) {
         @user_;
         
-    
             
         this.interface = {
+            initialize::(user) {
+                this.setUser(user);
+            },
+            
+            defaultLoad ::{},
+
             setUser ::(user) {
                 user_ = user;
-            },
-            save ::{
-                return {}
-            },
-            
-            load ::(serialized) {
-            
             },
             
             takeTurn ::(battle, enemies, allies){

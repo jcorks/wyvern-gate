@@ -25,7 +25,7 @@
 
 
 
-@:Effect = Database.newBase(
+@:Effect = Database.create(
     name: "Wyvern.Effect",
     attributes : {
         name : String,
@@ -48,7 +48,7 @@
 
     ////////////////////// SPECIAL EFFECTS
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'EVENTEFFECT::scene0_0_sylviaenter',
         description: '',
@@ -93,7 +93,7 @@ Effect.new(
 
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Defend',
         description: 'Reduces damage by 40%',
@@ -139,7 +139,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Guard',
         description: 'Reduces damage by 90%',
@@ -181,7 +181,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Apparition',
         description: 'Ghostly apparition makes it particularly hard to hit.',
@@ -224,7 +224,7 @@ Effect.new(
 
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'The Beast',
         description: 'The ferocity of this creature makes it particularly hard to hit.',
@@ -266,7 +266,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Seasoned Adventurer',
         description: 'Is considerably harder to hit, as they are an experienced fighter.',
@@ -314,7 +314,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Defensive Stance',
         description: 'ATK -50%, DEF +75%',
@@ -354,7 +354,7 @@ Effect.new(
 )        
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Offsensive Stance',
         description: 'DEF -50%, ATK +75%',
@@ -393,7 +393,7 @@ Effect.new(
     }
 ) 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Light Stance',
         description: 'ATK -50%, SPD +75%',
@@ -432,7 +432,7 @@ Effect.new(
     }
 ) 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Heavy Stance',
         description: 'SPD -50%, DEF +75%',
@@ -472,7 +472,7 @@ Effect.new(
 )         
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Meditative Stance',
         description: 'SPD -50%, INT +75%',
@@ -512,7 +512,7 @@ Effect.new(
 )         
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Striking Stance',
         description: 'SPD -30%, DEF -30%, ATK +100%',
@@ -551,7 +551,7 @@ Effect.new(
     }
 ) 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Reflective Stance',
         description: 'Attack retaliation',
@@ -605,7 +605,7 @@ Effect.new(
     }
 )                 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Counter',
         description: 'Dodges attacks and retaliates.',
@@ -658,7 +658,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Evasive Stance',
         description: '%50 chance damage nullify when from others.',
@@ -705,7 +705,7 @@ Effect.new(
     }
 )               
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Sneaked',
         description: 'Guarantees next damage from user is x3',
@@ -748,7 +748,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Mind Focused',
         description: 'INT +100%',
@@ -787,7 +787,7 @@ Effect.new(
 )        
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Protect',
         description: 'DEF +100%',
@@ -825,7 +825,7 @@ Effect.new(
     }
 )  
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Shield',
         description: 'DEF +10%, 30% chance to block',
@@ -867,7 +867,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger Protect',
         description: 'Casts Protect',
@@ -907,7 +907,7 @@ Effect.new(
     }
 ) 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger Evade',
         description: 'Allows the user to evade all attacks for the next turn.',
@@ -946,7 +946,7 @@ Effect.new(
     }
 ) 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Evade',
         description: 'Allows the user to evade all attacks.',
@@ -984,7 +984,7 @@ Effect.new(
 ) 
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger Regen',
         description: 'Slightly heals wounds.',
@@ -1024,7 +1024,7 @@ Effect.new(
     }
 ) 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger Hurt Chance',
         description: '10% chance to hurt for 1HP.',
@@ -1071,7 +1071,7 @@ Effect.new(
     }
 ) 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger Fatigue Chance',
         description: '10% chance to hurt for 1AP.',
@@ -1118,7 +1118,7 @@ Effect.new(
     }
 ) 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger Break Chance',
         description: '5% chance to break item.',
@@ -1158,7 +1158,7 @@ Effect.new(
     }
 ) 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger Spikes',
         description: 'Casts Spikes',
@@ -1198,7 +1198,7 @@ Effect.new(
     }
 ) 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Spikes',
         description: 'DEF +10%, light damage when attacked.',
@@ -1242,7 +1242,7 @@ Effect.new(
 ) 
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger Spikes',
         description: 'Casts Spikes',
@@ -1282,7 +1282,7 @@ Effect.new(
     }
 ) 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Spikes',
         description: 'DEF +10%, light damage when attacked.',
@@ -1326,7 +1326,7 @@ Effect.new(
 ) 
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger AP Regen',
         description: 'Slightly recovers AP.',
@@ -1365,7 +1365,7 @@ Effect.new(
     }
 ) 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger Shield',
         description: 'Casts Shield',
@@ -1406,7 +1406,7 @@ Effect.new(
 )         
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger Strength Boost',
         description: 'Triggers a boost in strength.',
@@ -1445,7 +1445,7 @@ Effect.new(
     }
 )   
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Strength Boost',
         description: 'ATK +70%',
@@ -1483,7 +1483,7 @@ Effect.new(
     }
 )  
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger Defense Boost',
         description: 'Triggers a boost in defense.',
@@ -1522,7 +1522,7 @@ Effect.new(
     }
 )   
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Defense Boost',
         description: 'DEF +70%',
@@ -1560,7 +1560,7 @@ Effect.new(
     }
 )  
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger Mind Boost',
         description: 'Triggers a boost in mental acuity.',
@@ -1599,7 +1599,7 @@ Effect.new(
     }
 )   
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Mind Boost',
         description: 'INT +70%',
@@ -1637,7 +1637,7 @@ Effect.new(
     }
 )  
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger Dex Boost',
         description: 'Triggers a boost in dexterity.',
@@ -1676,7 +1676,7 @@ Effect.new(
     }
 )   
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Dex Boost',
         description: 'DEX +70%',
@@ -1714,7 +1714,7 @@ Effect.new(
     }
 )  
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trigger Speed Boost',
         description: 'Triggers a boost in speed.',
@@ -1753,7 +1753,7 @@ Effect.new(
     }
 )   
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Speed Boost',
         description: 'SPD +70%',
@@ -1794,7 +1794,7 @@ Effect.new(
 
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Night Veil',
         description: 'DEF +40%',
@@ -1831,7 +1831,7 @@ Effect.new(
     }
 )  
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Dayshroud',
         description: 'DEF +40%',
@@ -1868,7 +1868,7 @@ Effect.new(
     }
 )  
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Call of the Night',
         description: 'ATK +40%',
@@ -1906,7 +1906,7 @@ Effect.new(
 )  
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Lunacy',
         description: 'Skips turn and, instead, attacks a random enemy. ATK,DEF +70%.',
@@ -1953,7 +1953,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Greater Call of the Night',
         description: 'ATK +100%',
@@ -1990,7 +1990,7 @@ Effect.new(
     }
 )  
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Greater Night Veil',
         description: 'DEF +100%',
@@ -2028,7 +2028,7 @@ Effect.new(
 )  
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Greater Dayshroud',
         description: 'DEF +100%',
@@ -2065,7 +2065,7 @@ Effect.new(
     }
 )  
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Moonsong',
         description: 'Heals 5% HP every turn',
@@ -2102,7 +2102,7 @@ Effect.new(
     }
 )  
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Sol Attunement',
         description: 'Heals 5% HP every turn',
@@ -2139,7 +2139,7 @@ Effect.new(
     }
 )          
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Greater Moonsong',
         description: 'Heals 15% HP every turn',
@@ -2176,7 +2176,7 @@ Effect.new(
     }
 )       
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Greater Sol Attunement',
         description: 'Heals 15% HP every turn',
@@ -2213,7 +2213,7 @@ Effect.new(
     }
 )          
    
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Grace',
         description: 'If hurt while HP is 0, the damage is nullified and this effect disappears.',
@@ -2261,7 +2261,7 @@ Effect.new(
 )     
    
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Consume Item',
         description: 'The item is destroyed in the process of its effects',
@@ -2299,7 +2299,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Break Item',
         description: 'The item is destroyed in the process of misuse or strain',
@@ -2339,7 +2339,7 @@ Effect.new(
     }
 )        
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Fling',
         description: 'The item is violently lunged at a target, likely causing damage. The target may catch the item.',
@@ -2399,7 +2399,7 @@ Effect.new(
     }
 )    
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Sentimental Box',
         description: 'Opens the box.',
@@ -2435,7 +2435,7 @@ Effect.new(
 )
   
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'HP Recovery: All',
         description: 'Heals 100% of HP.',
@@ -2470,7 +2470,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'AP Recovery: All',
         description: 'Heals 100% of AP.',
@@ -2505,7 +2505,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Treasure I',
         description: 'Opening gives a fair number of G.',
@@ -2543,7 +2543,7 @@ Effect.new(
     }
 )        
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Field Cook',
         description: 'Chance to cook a meal after battle.',
@@ -2593,7 +2593,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Penny Picker',
         description: 'Looks on the ground for G after battle.',
@@ -2642,7 +2642,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Alchemist\'s Scavenging',
         description: 'Scavenges for alchemist ingredients.',
@@ -2697,7 +2697,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Trained Hand',
         description: 'ATK +30%',
@@ -2733,7 +2733,7 @@ Effect.new(
 
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Focus Perception',
         description: 'ATK +30%',
@@ -2767,7 +2767,7 @@ Effect.new(
     }
 )   
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Cheered',
         description: 'ATK +25%',
@@ -2801,7 +2801,7 @@ Effect.new(
     }
 )           
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Poisonroot Growing',
         description: 'Vines grow on target. SPD -10%',
@@ -2837,7 +2837,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Poisonroot',
         description: 'Every turn takes poison damage. SPD -10%',
@@ -2877,7 +2877,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Triproot Growing',
         description: 'Vines grow on target. SPD -10%',
@@ -2913,7 +2913,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Triproot',
         description: 'Every turn 40% chance to trip. SPD -10%',
@@ -2952,7 +2952,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Healroot Growing',
         description: 'Vines grow on target. SPD -10%',
@@ -2988,7 +2988,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Healroot',
         description: 'Every turn heal 5% HP. SPD -10%',
@@ -3027,7 +3027,7 @@ Effect.new(
 
      
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Defend Other',
         description: 'Takes hits for another.',
@@ -3076,7 +3076,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Perfect Guard',
         description: 'All damage is nullified.',
@@ -3115,7 +3115,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Convinced',
         description: 'Unable to act.',
@@ -3152,7 +3152,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Grappled',
         description: 'Unable to act.',
@@ -3189,7 +3189,7 @@ Effect.new(
     }
 )   
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Ensnared',
         description: 'Unable to act.',
@@ -3226,7 +3226,7 @@ Effect.new(
     }
 )  
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Grappling',
         description: 'Unable to act.',
@@ -3260,7 +3260,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Ensnaring',
         description: 'Unable to act.',
@@ -3296,7 +3296,7 @@ Effect.new(
 
       
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Bribed',
         description: 'Unable to act.',
@@ -3330,7 +3330,7 @@ Effect.new(
         }
     }
 )
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Stunned',
         description: 'Unable to act.',
@@ -3365,7 +3365,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Sharpen',
         description: 'ATK +20%',
@@ -3400,7 +3400,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Weaken Armor',
         description: 'DEF -20%',
@@ -3435,7 +3435,7 @@ Effect.new(
     }
 )        
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Dull Weapon',
         description: 'ATK -20%',
@@ -3470,7 +3470,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Strengthen Armor',
         description: 'DEF +20%',
@@ -3506,7 +3506,7 @@ Effect.new(
 )  
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Lunar Affinity',
         description: 'INT,DEF,ATK +40% if night time.',
@@ -3550,7 +3550,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Coordinated',
         description: 'SPD,DEF,ATK +35%',
@@ -3587,7 +3587,7 @@ Effect.new(
         }
     }
 )
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Proceed with Caution',
         description: 'DEF + 50%',
@@ -3625,7 +3625,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Solar Affinity',
         description: 'INT,DEF,ATK +40% if day time.',
@@ -3670,7 +3670,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Non-combat Weapon',
         description: '20% chance to deflect attack then break weapon.',
@@ -3713,7 +3713,7 @@ Effect.new(
 )   
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Auto-Life',
         description: '50% chance to fully revive if damaged while at 0 HP. This breaks the item.',
@@ -3764,7 +3764,7 @@ Effect.new(
 )   
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Flight',
         description: 'Dodges attacks.',
@@ -3802,7 +3802,7 @@ Effect.new(
     }
 )        
    
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Assassin\'s Pride',
         description: 'SPD, ATK +25% for each slain.',
@@ -3841,7 +3841,7 @@ Effect.new(
         }
     }
 )        
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Pride',
         description: 'SPD, ATK +25%',
@@ -3881,7 +3881,7 @@ Effect.new(
     }
 )        
   
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Dueled',
         description: 'If attacked by user, 1.5x damage.',
@@ -3917,7 +3917,7 @@ Effect.new(
         }
     }
 )  
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Consume Item Partially',
         description: 'The item has a chance of being used up',
@@ -3961,7 +3961,7 @@ Effect.new(
     }
 )  
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Bleeding',
         description: 'Damage every turn to holder. ATK,DEF,SPD -20%.',
@@ -4012,7 +4012,7 @@ Effect.new(
     }
 )     
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Learn Skill',
         description: 'Acquire a new skill',
@@ -4055,7 +4055,7 @@ Effect.new(
         }
     }
 ) 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Explode',
         description: 'Damage to holder.',
@@ -4099,7 +4099,7 @@ Effect.new(
         }
     }
 )        
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Poison Rune',
         description: 'Damage every turn to holder.',
@@ -4146,7 +4146,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Destruction Rune',
         description: 'Causes INT-based damage when rune is released.',
@@ -4183,7 +4183,7 @@ Effect.new(
         }
     }
 )
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Regeneration Rune',
         description: 'Heals holder every turn.',
@@ -4222,7 +4222,7 @@ Effect.new(
         }
     }
 )        
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Shield Rune',
         description: '+100% DEF while active.',
@@ -4263,7 +4263,7 @@ Effect.new(
 )        
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Cure Rune',
         description: 'Cures the holder when the rune is released.',
@@ -4305,7 +4305,7 @@ Effect.new(
 //////////////////////////////
 /// STATUS AILMENTS
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Poisoned',
         description: 'Damage every turn to holder.',
@@ -4352,7 +4352,7 @@ Effect.new(
     }
 )     
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Blind',
         description: '50% chance to miss attacks.',
@@ -4394,7 +4394,7 @@ Effect.new(
 )             
   
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Burned',
         description: '50% chance to get damage each turn.',
@@ -4440,7 +4440,7 @@ Effect.new(
         }
     }
 ) 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Frozen',
         description: 'Unable to act.',
@@ -4477,7 +4477,7 @@ Effect.new(
     }
 )         
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Paralyzed',
         description: 'SPD,ATK -100%',
@@ -4517,7 +4517,7 @@ Effect.new(
     }
 ) 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Petrified',
         description: 'Unable to act. DEF -50%',
@@ -4556,7 +4556,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Elemental Tag',
         description: 'Weakness to Fire, Ice, and Thunder damage by 100%',
@@ -4600,7 +4600,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Elemental Shield',
         description: 'Nullify ',
@@ -4650,7 +4650,7 @@ Effect.new(
 )
 
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Burning',
         description: 'Gives fire damage and gives 50% ice resist',
@@ -4692,7 +4692,7 @@ Effect.new(
     }
 )         
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Icy',
         description: 'Gives ice damage and gives 50% fire resist',
@@ -4734,7 +4734,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Shock',
         description: 'Gives thunder damage and gives 50% thunder resist',
@@ -4776,7 +4776,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Toxic',
         description: 'Gives poison damage and gives 50% poison resist',
@@ -4820,7 +4820,7 @@ Effect.new(
     }
 )
 
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Shimmering',
         description: 'Gives light damage and gives 50% dark resist',
@@ -4861,7 +4861,7 @@ Effect.new(
         }
     }
 )        
-Effect.new(
+Effect.newEntry(
     data : {
         name : 'Dark',
         description: 'Gives dark damage and gives 50% light resist',

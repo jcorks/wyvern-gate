@@ -23,7 +23,6 @@
 
 
 @:Database = import(module:'game_class.database.mt');
-@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 @:SPARSE_THRESHOLD = 30;
 
@@ -36,6 +35,7 @@
 @DEBUG_SERIALIZED_REV = empty;
 
 @:serialize = ::(value) {
+    @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
     return match(value->type) {
       (Number, String, Boolean, Empty): value,
       
@@ -111,6 +111,7 @@
 
 
 @:deserialize = ::(parent, output, key, value) {
+    @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
     match(value->type) {
       (Number, String, Boolean, Empty):::<= {
         output[key] = value
@@ -180,6 +181,7 @@ return {
         DEBUG_SERIALIZED_REV = empty;    
     },
     new ::(items)  {
+        items = {...items};
         @:keys = {'save':true, 'load':true};
         foreach(items) ::(k => String, value) {
             keys[k] = true;

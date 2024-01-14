@@ -22,7 +22,7 @@
 
 @:SPECIES_NAME = 'Wyvern.Species'
 
-@:Species = Database.newBase(
+@:Species = Database.create(
     name : 'Wyvern.Species',
     attributes : {
         name : String,
@@ -39,7 +39,7 @@
 
 // 36 points
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Wolf',
     rarity : 10,
     description: 'A common canid race.',
@@ -68,7 +68,7 @@ Species.new(data:{
     swarms : false
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Lynx',
     rarity : 10,
     description: 'A felid race.',
@@ -99,7 +99,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Rabbit',
     rarity : 10,
     description: 'A mammal race of medium stature.',
@@ -130,7 +130,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Fox',
     rarity : 10,
     description: 'A canid race.',
@@ -160,7 +160,7 @@ Species.new(data:{
     ]
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Kitsune',
     rarity : 10,
     description: 'A canid race.',
@@ -190,7 +190,7 @@ Species.new(data:{
     ]
 })    
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Tiger',
     description: 'A common felid race.',
     rarity : 45,
@@ -220,7 +220,7 @@ Species.new(data:{
     ]
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Deer',
     description: 'A common ungulate race.',
     rarity : 10,
@@ -251,7 +251,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Goat',
     description: 'A common ungulate race.',
     rarity : 10,
@@ -283,7 +283,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Sheep',
     description: 'A common ungulate race.',
     rarity : 10,
@@ -313,7 +313,7 @@ Species.new(data:{
     passives : [
     ]
 })
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Gazelle',
     description: 'A tall ungulate race.',
     rarity : 40,
@@ -344,7 +344,7 @@ Species.new(data:{
 })    
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Kobold',
     description: 'A common dragon-like race of small stature.',
     rarity : 30,
@@ -375,7 +375,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Drake-kin',
     description: 'A common dragon-like race of medium stature with fur.',
     rarity : 30,
@@ -405,7 +405,7 @@ Species.new(data:{
     ]
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Serval',
     description: 'A felid race of medium stature.',
     rarity : 30,
@@ -436,7 +436,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Jackal',
     rarity : 30,
     description: 'A slender canid race.',
@@ -466,7 +466,7 @@ Species.new(data:{
     ]
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Possum',
     rarity : 40,
     description: 'A marsupial race of medium stature.',
@@ -496,7 +496,7 @@ Species.new(data:{
     ]
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Bear',
     rarity : 100,
     description: 'A large mammal race.',
@@ -525,7 +525,7 @@ Species.new(data:{
     ]
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Kangaroo',
     rarity : 100,
     description: 'A large mammal race.',
@@ -555,7 +555,7 @@ Species.new(data:{
     ]
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Raven',
     rarity : 100,
     description: 'A bird race of medium stature',
@@ -582,7 +582,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Pigeon',
     rarity : 100,
     description: 'A bird race of medium stature',
@@ -611,10 +611,10 @@ Species.new(data:{
 
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Rat',
     rarity : 100,
-    description: 'A mammal race of medium stature',
+    description: 'A rodent race of medium stature',
     growth : StatSet.new(
         HP : 5,
         AP : 5,
@@ -641,7 +641,7 @@ Species.new(data:{
     ]
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Caracal',
     rarity : 40,
     description: 'A felid race of medium stature',
@@ -671,7 +671,7 @@ Species.new(data:{
     ]
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Tanuki',
     rarity : 40,
     description: 'A canid race of medium stature',
@@ -702,7 +702,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Werewolf',
     rarity : 200,
     description: 'Canid race thought to be blessed by the moon.',
@@ -732,7 +732,7 @@ Species.new(data:{
     ]
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Hyena',
     rarity: 100,
     description: 'A mammal race of medium stature.',
@@ -763,7 +763,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Gnoll',
     rarity : 200,
     description: 'A mammal race of medium stature.',
@@ -794,7 +794,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Creature',
     rarity : 200000000000,
     description: '',
@@ -819,7 +819,7 @@ Species.new(data:{
 
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Fire Sprite',
     rarity : 2000000000000,
     description: 'Hot n\' spicy!',
@@ -843,7 +843,7 @@ Species.new(data:{
     ]
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Ice Elemental',
     rarity : 2000000000000,
     description: 'Brrr that\'s cold!',
@@ -867,7 +867,7 @@ Species.new(data:{
     ]
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Thunder Spawn',
     rarity : 2000000000000,
     description: 'Shocking!',
@@ -892,7 +892,7 @@ Species.new(data:{
 })    
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Guiding Light',
     rarity : 2000000000000,
     description: 'Oh!',
@@ -918,7 +918,7 @@ Species.new(data:{
 
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Wyvern',
     rarity : 2000000000000,
     description: 'Keepers of the gates',
@@ -941,7 +941,7 @@ Species.new(data:{
     ]
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Wyvern of Fire',
     rarity : 2000000000000,
     description: 'Keepers of the gates',
@@ -964,7 +964,7 @@ Species.new(data:{
     ]
 })
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Wyvern of Ice',
     rarity : 2000000000000,
     description: 'Keepers of the gates',
@@ -989,7 +989,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Wyvern of Thunder',
     rarity : 2000000000000,
     description: 'Keepers of the gates',
@@ -1014,7 +1014,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Wyvern of Light',
     rarity : 2000000000000,
     description: 'Keepers of the gates',
@@ -1039,7 +1039,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Wyvern Specter',
     rarity : 2000000000000,
     description: 'Ancient spirit',
@@ -1063,7 +1063,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Beast',
     rarity : 2000000000000,
     description: 'Force of nature',
@@ -1088,7 +1088,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Treasure Golem',
     rarity : 2000000000000,
     description: 'Looks like a chest! Not as friendly though.',
@@ -1112,7 +1112,7 @@ Species.new(data:{
 })
 
 
-Species.new(data:{
+Species.newEntry(data:{
     name : 'Cave Bat',
     rarity : 2000000000000,
     description: 'Large, wild bat.',

@@ -135,19 +135,35 @@
 }
 
 
-@:World = LoadableClass.new(
+@:World = LoadableClass.create(
     name: 'Wyvern.World',
-    
-    // not used due to singleton nature.
-    new ::(parent, state) {
-        @:this = World.defaultNew();
-        
-        if (state != empty)
-            this.load(serialized:state);
-            
-        return this;
-    },
-    define:::(this) {
+    items : {
+        saveName : empty,
+        // 10 steps per turn
+        // 10 turns per "time"
+        // 14 times per "day"
+        // 100 days per "year"
+        step : 0,
+        turn : 0,
+        time : TIME.LATE_MORNING,
+        day : empty,
+        year : 1033,
+        party : empty,
+        islandID : empty,
+        orphanedIsland : empty, // IN THE CASE that a user has tossed or otherwise 
+                                // lost the key to the island they are residing in 
+                                // the island becomes orphaned. The world becomes 
+                                // the sole owner of the island.
+        idPool : 0,
+        story : empty,
+        npcs : empty,
+        finished : false,
+        wish : empty,
+        scenario : empty,
+        accolades : empty,
+        modData : empty
+    },  
+    define:::(this, state) {
 
         @battle = Battle.new();
         @island = empty;
@@ -165,34 +181,6 @@
                 error(detail: 'Internal error: Could not find loadable island.');
             }
         }
-    
-        @:state = State.new(
-            items : {
-                saveName : empty,
-                // 10 steps per turn
-                // 10 turns per "time"
-                // 14 times per "day"
-                // 100 days per "year"
-                step : 0,
-                turn : 0,
-                time : TIME.LATE_MORNING,
-                day : (Number.random()*100)->floor,
-                year : 1033,
-                party : Party.new(),
-                islandID : empty,
-                orphanedIsland : empty, // IN THE CASE that a user has tossed or otherwise 
-                                        // lost the key to the island they are residing in 
-                                        // the island becomes orphaned. The world becomes 
-                                        // the sole owner of the island.
-                idPool : 0,
-                story : import(module:'game_singleton.story.mt'),
-                npcs : empty,
-                finished : false,
-                wish : empty,
-                accolades : {},
-                modData : {}
-            }
-        );
 
         
         @:getDayString = ::{
@@ -224,8 +212,17 @@
         }
         
         
-        
         this.interface = {
+            initialize :: {
+                state.story = import(module:'game_singleton.story.mt');
+            },
+            defaultLoad ::{
+                state.day = (Number.random()*100)->floor;
+                state.party = Party.new();
+                state.accolades = {};
+                state.modData = {};
+            },        
+        
             TIME : {
                 get ::<- TIME
             },
@@ -281,6 +278,11 @@
                     state.islandID = value.worldID;
                     island = value;
                 }
+            },
+            
+            scenario : {
+                get ::<- state.scenario,
+                set ::(value)<- state.scenario = value
             },
 
             

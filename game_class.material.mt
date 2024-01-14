@@ -20,7 +20,7 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@:Material = Database.newBase(
+@:Material = Database.create(
     name : 'Wyvern.Material',
     attributes : {
         name : String,
@@ -36,7 +36,7 @@
 
 
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Hardstone',
         description : 'The polished hardstone it\'s made of is dark and shiny.',
@@ -51,7 +51,7 @@ Material.new(
     }
 )
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Copper',
         description : 'The copper material used gives off a radiant brown color.',
@@ -65,7 +65,7 @@ Material.new(
     }
 )
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Steel',
         description : 'The steel used gives a persistent shine.',
@@ -79,7 +79,7 @@ Material.new(
     }
 )
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Iron',
         description : 'The iron used gives it a solid grey color.',
@@ -94,7 +94,7 @@ Material.new(
     }
 )
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Gold',
         description : 'The gold used gives a radiant glow.',
@@ -111,7 +111,7 @@ Material.new(
 )
 
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Crystal',
         description : 'The crystal material grants a haunting translucency.',
@@ -128,7 +128,7 @@ Material.new(
 )
 
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Tungsten',
         description : 'The tungsten used gives it a whitish-grey color.',
@@ -144,7 +144,7 @@ Material.new(
 )
 
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Mythril',
         description : 'The mythril used makes it radiantly green',
@@ -159,7 +159,7 @@ Material.new(
     }
 )
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Adamantine',
         description : 'The adamantine used makes it earthly',
@@ -173,7 +173,7 @@ Material.new(
     }
 )    
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Quicksilver',
         description : 'The quicksilver used makes it remarkably shiny.',
@@ -189,7 +189,7 @@ Material.new(
     }
 )    
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Dragonglass',
         description : 'The dragonglass used gives it a deep black color.',
@@ -205,7 +205,7 @@ Material.new(
     }
 )    
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Composite',
         rarity : 20,
@@ -222,7 +222,7 @@ Material.new(
 
 
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Ray',
         rarity : 150,
@@ -238,7 +238,7 @@ Material.new(
     }
 )  
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Sunstone',
         rarity : 50,
@@ -253,7 +253,7 @@ Material.new(
     }
 )   
 
-Material.new(
+Material.newEntry(
     data : {
         name : 'Moonstone',
         rarity : 50,

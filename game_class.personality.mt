@@ -30,7 +30,7 @@
     INAPPROPRIATE_TIME: 6
 }
 
-@:Personality = Database.newBase(
+@:Personality = Database.create(
     name : 'Wyvern.Personality',
     attributes : {
         name : String,
@@ -51,7 +51,7 @@
     }
 )
 
-Personality.new(data: {
+Personality.newEntry(data: {
     name: 'Calm',
     growth : StatSet.new(
         HP : 0,
@@ -113,7 +113,7 @@ Personality.new(data: {
 
 })
 
-Personality.new(data: {
+Personality.newEntry(data: {
     name: 'Friendly',
     growth : StatSet.new(
         HP : 1,
@@ -176,7 +176,7 @@ Personality.new(data: {
 })
 
 
-Personality.new(data:{
+Personality.newEntry(data:{
     name: 'Short-tempered',
     growth : StatSet.new(
         HP : 2,
@@ -234,7 +234,7 @@ Personality.new(data:{
 
 })
 
-Personality.new(data:{
+Personality.newEntry(data:{
     name: 'Quiet',
     growth : StatSet.new(
         HP : 1,
@@ -286,7 +286,7 @@ Personality.new(data:{
 
 })
 
-Personality.new(data:{
+Personality.newEntry(data:{
     name: 'Charismatic',
     growth : StatSet.new(
         HP : -2,
@@ -338,7 +338,7 @@ Personality.new(data:{
 
 })
 
-Personality.new(data:{
+Personality.newEntry(data:{
     name: 'Caring',
     growth : StatSet.new(
         HP : 1,
@@ -386,7 +386,7 @@ Personality.new(data:{
 
 })
 
-Personality.new(data:{
+Personality.newEntry(data:{
     name: 'Cold',
     growth : StatSet.new(
         HP : 0,
@@ -435,7 +435,7 @@ Personality.new(data:{
 
 })
 
-Personality.new(data:{
+Personality.newEntry(data:{
     name: 'Disconnected',
     growth : StatSet.new(
         HP : -4,
@@ -479,7 +479,7 @@ Personality.new(data:{
 
 })
 /*
-Personality.new(data:{
+Personality.newEntry(data:{
     name: 'Unpredictable',
     growth : StatSet.new(
         HP : 1,
@@ -530,7 +530,7 @@ Personality.new(data:{
 })
 */
 
-Personality.new(data:{
+Personality.newEntry(data:{
     name: 'Inquisitive',
     growth : StatSet.new(
         HP : 2,
@@ -576,7 +576,7 @@ Personality.new(data:{
 
 })
 
-Personality.new(data:{
+Personality.newEntry(data:{
     name: 'Curious',
     growth : StatSet.new(
         HP : 2,

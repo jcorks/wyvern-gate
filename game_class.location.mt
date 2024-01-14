@@ -26,7 +26,7 @@
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
-@:Location = LoadableClass.new(
+@:Location = LoadableClass.create(
     name: 'Wyvern.Location',
     statics : {
         Base  :::<= {
@@ -50,51 +50,43 @@
             }
         }
     },
-    
-    new::(base, parent, landmark, xHint, yHint, state, ownedByHint) {
-        @:landmark = if (landmark) landmark else parent.parent; // parents of locations are always maps
-        @:this = Location.defaultNew();
-        this.initialize(landmark);
-
-        if (state != empty)
-            this.load(serialized:state)
-        else 
-            this.defaultLoad(base, xHint, yHint, ownedByHint);
-        return this;
+    items : {
+        worldID : empty,
+        targetLandmark : empty, // where this location could take the party. Could be a different island in theory
+        targetLandmarkEntry : empty, // where in the landmark to take to. Should be an X-Y if populated, else its the locations responsibility to populate as needed.
+        base : empty,
+        occupants : empty, // entities. non-owners can shift
+        ownedBy : empty,// entity
+        description : empty,
+        inventory : empty,
+        x : 0,
+        y : 0,
+        contested : false,
+        name : empty,
+        data : empty, // simple table
+        visited : false,
+        modData : empty
     },
-    
-    define:::(this) {
+    define:::(this, state) {
 
 
         @landmark_;
         @world = import(module:'game_singleton.world.mt');    
-        @:state = State.new(
-            items : {
-                worldID : world.getNextID(),
-                targetLandmark : empty, // where this location could take the party. Could be a different island in theory
-                targetLandmarkEntry : empty, // where in the landmark to take to. Should be an X-Y if populated, else its the locations responsibility to populate as needed.
-                base : empty,
-                occupants : [], // entities. non-owners can shift
-                ownedBy : empty,// entity
-                description : empty,
-                inventory : Inventory.new(size:30),
-                x : 0,
-                y : 0,
-                contested : false,
-                name : empty,
-                data : {}, // simple table
-                visited : false,
-                modData : {}
-            }
-        );
-        
+
+                
         
         this.interface = {
-            initialize ::(landmark) {
+            initialize ::(landmark, parent) {
+                @:landmark = if (landmark) landmark else parent.parent; // parents of locations are always maps
                 landmark_ = landmark;     
             },
-
             defaultLoad ::(base, xHint, yHint, ownedByHint) {
+                state.worldID = world.getNextID();
+                state.occupants = []; // entities. non-owners can shift
+                state.inventory = Inventory.new(size:30);
+                state.data = {}; // simple table
+                state.modData = {};
+
 
                 state.base = base;
                 state.x = if (xHint == empty) (Number.random() * landmark_.width ) else xHint;  
@@ -106,13 +98,8 @@
                 base.onCreate(location:this);
                 return this;
             },
-
-            save ::{
-                return state.save()
-            },
             
-            load ::(serialized) {
-                state.load(parent:this, serialized)
+            afterLoad ::{
                 if (this.ownedBy)
                     this.ownedBy.owns = this;
             },
@@ -342,7 +329,7 @@
 );
 
 
-Location.Base = Database.newBase(
+Location.Base = Database.create(
     name: 'Wyvern.Location.Base',
     attributes : {
         name: String,
@@ -389,7 +376,7 @@ Location.Base = Database.newBase(
     }
 );
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Entrance',
     rarity: 100000000,
     ownVerb: '',
@@ -439,7 +426,7 @@ Location.Base.new(data:{
     }
 })
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Farm',
     rarity: 100,
     ownVerb: 'owned',
@@ -507,7 +494,7 @@ Location.Base.new(data:{
 })
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Home',
     rarity: 100,
     ownVerb: 'owned',
@@ -576,7 +563,7 @@ Location.Base.new(data:{
 
 })
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Ore vein',
     rarity: 100,
     ownVerb: '???',
@@ -619,7 +606,7 @@ Location.Base.new(data:{
 })
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Smelter',
     rarity: 100,
     ownVerb: '???',
@@ -669,7 +656,7 @@ Location.Base.new(data:{
 })
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Wyvern Throne of Fire',
     rarity: 1,
     ownVerb : 'owned',
@@ -718,7 +705,7 @@ Location.Base.new(data:{
         }
 
         
-        location.ownedBy.onInteract = ::(party, location, onDone) {
+        location.ownedBy.overrideInteract = ::(party, location, onDone) {
             if (Story.tier < 1) ::<= {
                 Scene.database.find(name:'scene_wyvernfire0').act(onDone::{}, location, landmark:location.landmark);
             } else ::<= {
@@ -751,7 +738,7 @@ Location.Base.new(data:{
 })
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Wyvern Throne of Ice',
     rarity: 1,
     ownVerb : 'owned',
@@ -800,7 +787,7 @@ Location.Base.new(data:{
         }
 
         
-        location.ownedBy.onInteract = ::(party, location, onDone) {
+        location.ownedBy.overrideInteract = ::(party, location, onDone) {
             if (Story.tier < 2) ::<= {
                 Scene.database.find(name:'scene_wyvernice0').act(onDone::{}, location, landmark:location.landmark);
             } else ::<= {
@@ -833,7 +820,7 @@ Location.Base.new(data:{
 })
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Wyvern Throne of Thunder',
     rarity: 1,
     ownVerb : 'owned',
@@ -882,7 +869,7 @@ Location.Base.new(data:{
         }
 
         
-        location.ownedBy.onInteract = ::(party, location, onDone) {
+        location.ownedBy.overrideInteract = ::(party, location, onDone) {
             if (Story.tier < 3) ::<= {
                 Scene.database.find(name:'scene_wyvernthunder0').act(onDone::{}, location, landmark:location.landmark);
             } else ::<= {
@@ -915,7 +902,7 @@ Location.Base.new(data:{
 })
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Wyvern Throne of Light',
     rarity: 1,
     ownVerb : 'owned',
@@ -965,7 +952,7 @@ Location.Base.new(data:{
         }
 
         
-        location.ownedBy.onInteract = ::(party, location, onDone) {
+        location.ownedBy.overrideInteract = ::(party, location, onDone) {
             if (Story.tier < 4) ::<= {
                 Scene.database.find(name:'scene_wyvernlight0').act(onDone::{}, location, landmark:location.landmark);
             } else ::<= {
@@ -999,7 +986,7 @@ Location.Base.new(data:{
     }
 })
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Shop',
     rarity: 100,
     ownVerb : 'run',
@@ -1085,7 +1072,7 @@ Location.Base.new(data:{
 })
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Enchant Stand',
     rarity: 100,
     ownVerb : 'run',
@@ -1153,7 +1140,7 @@ Location.Base.new(data:{
     }
 })
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Blacksmith',
     rarity: 100,
     ownVerb : 'run',
@@ -1222,7 +1209,7 @@ Location.Base.new(data:{
 })        
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Tavern',
     rarity: 100,
     ownVerb : 'run',
@@ -1265,7 +1252,7 @@ Location.Base.new(data:{
     }
 })
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Arena',
     rarity: 100,
     ownVerb : 'run',
@@ -1306,7 +1293,7 @@ Location.Base.new(data:{
     }
 })
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Inn',
     rarity: 100,
     ownVerb : 'run',
@@ -1347,7 +1334,7 @@ Location.Base.new(data:{
     }
 })
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'School',
     rarity: 100,
     ownVerb : 'run',
@@ -1389,7 +1376,7 @@ Location.Base.new(data:{
     }
 })
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Library',
     rarity: 100,
     ownVerb : '',
@@ -1429,7 +1416,7 @@ Location.Base.new(data:{
 })
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Gate',
     rarity: 100,
     ownVerb : '',
@@ -1467,7 +1454,7 @@ Location.Base.new(data:{
     }
 })
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Stairs Down',
     rarity: 1000000000000,
     ownVerb : '',
@@ -1514,7 +1501,7 @@ Location.Base.new(data:{
 
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Ladder',
     rarity: 1000000000000,
     ownVerb : '',
@@ -1550,7 +1537,7 @@ Location.Base.new(data:{
     }
 })        
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: '?????',
     rarity: 1000000000000,
     ownVerb : '',
@@ -1598,7 +1585,7 @@ Location.Base.new(data:{
 
 
         
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Small Chest',
     rarity: 1000000000000,
     ownVerb : '',
@@ -1646,7 +1633,7 @@ Location.Base.new(data:{
 }) 
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Magic Chest',
     rarity: 1000000000000,
     ownVerb : '',
@@ -1682,7 +1669,7 @@ Location.Base.new(data:{
 }) 
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Locked Chest',
     rarity: 1000000000000,
     ownVerb : '',
@@ -1738,7 +1725,7 @@ Location.Base.new(data:{
 }) 
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Pressure Plate',
     rarity: 1000000000000,
     ownVerb : '',
@@ -1779,7 +1766,7 @@ Location.Base.new(data:{
 
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Fountain',
     rarity: 4,
     ownVerb : '',
@@ -1818,7 +1805,7 @@ Location.Base.new(data:{
 });
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Healing Circle',
     rarity: 4,
     ownVerb : '',
@@ -1857,7 +1844,7 @@ Location.Base.new(data:{
 });
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Wyvern Statue',
     rarity: 4,
     ownVerb : '',
@@ -1899,7 +1886,7 @@ Location.Base.new(data:{
 });
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Enchantment Stand',
     rarity: 4,
     ownVerb : '',
@@ -1942,7 +1929,7 @@ Location.Base.new(data:{
 });
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Clothing Shop',
     rarity: 4,
     ownVerb : 'run',
@@ -2009,7 +1996,8 @@ Location.Base.new(data:{
             );
             return false;
         }
-        location.ownedBy.onHire = ::{
+        location.ownedBy.onInteract = ::(interaction) {
+            when(interaction != 'hire') empty;
             @:story = import(module:'game_singleton.story.mt');
             world.npcs.mei = empty;
             world.accoladeEnable(name:'recruitedOPNPC');
@@ -2026,7 +2014,7 @@ Location.Base.new(data:{
 
 });
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Potion Shop',
     rarity: 4,
     ownVerb : 'run',
@@ -2092,7 +2080,8 @@ Location.Base.new(data:{
             );
             return false;
         }
-        location.ownedBy.onHire = ::{
+        location.ownedBy.onInteract = ::(interaction) {
+            when(interaction != 'hire') empty;
             @:world = import(module:'game_singleton.world.mt');                
             world.npcs.sylvia = empty;
             // Nerfed 'em because too common of an appearance. People can recruit if they want without penalty.
@@ -2110,7 +2099,7 @@ Location.Base.new(data:{
 
 });
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Fancy Shop',
     rarity: 4,
     ownVerb : 'run',
@@ -2187,7 +2176,8 @@ Location.Base.new(data:{
             return false;
         }
         
-        location.ownedBy.onHire = ::{
+        location.ownedBy.onInteract = ::(interaction) {
+            when(interaction != 'hire') empty;
             @:world = import(module:'game_singleton.world.mt');                
             world.npcs.faus = empty;            
             world.accoladeEnable(name:'recruitedOPNPC');
@@ -2205,7 +2195,7 @@ Location.Base.new(data:{
 });
 
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Large Chest',
     rarity: 1000000000000,
     ownVerb : '',
@@ -2271,7 +2261,7 @@ Location.Base.new(data:{
     }
 })
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Body',
     rarity: 1000000000000,
     ownVerb : 'owned',
@@ -2310,7 +2300,7 @@ Location.Base.new(data:{
     }
 })        
 
-Location.Base.new(data:{
+Location.Base.newEntry(data:{
     name: 'Sylvia\'s Library',
     rarity: 1000000000000,
     ownVerb : '',

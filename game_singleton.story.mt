@@ -20,80 +20,66 @@
 @:Entity = import(module:'game_class.entity.mt');
 @:EntityQuality = import(module:'game_class.entityquality.mt');
 @:Item = import(module:'game_class.item.mt');
-@:Story = LoadableClass.new(
+
+
+@:ITEM_SOURCE = {
+    // whether the Fire Key is has been given to the party
+    foundFireKey : false,
+
+    // whether the Ice Key has been given to the party
+    foundIceKey : false,
+
+    // whether the thunder key has been given to the party
+    foundThunderKey : false,
+
+    // whether the light key has been given to the party        
+    foundLightKey : false,
+    
+    // whether the dark key has been given to the party
+    hasDarkKey : false,
+    
+    // Whether the initial box has been opened.
+    openedSentimentalBox : false,
+    
+    // whether the player has seen the wandering gamblist
+    skieEncountered : false,
+    
+    // The recurring NPCs in the game that are recruitable
+    npcs: {},
+    
+    
+    // progression of defeated wyverns
+    // tier 0 -> none 
+    // tier 1 -> fire 
+    // tier 2 -> ice 
+    // tier 3 -> thunder 
+    // tier 4 -> light 
+    tier : 0,
+    
+    levelHint : 6,
+    
+    // Number of discovered locations
+    data_locationsDiscovered : 0,
+    
+    data_locationsNeeded : 25
+}
+
+@:Story = LoadableClass.create(
     name : 'Wyvern.Story',
-    new ::(parent, state) {
-        @:this = Story.defaultNew();
-        if (state != empty)
-            this.load(serialized:state);
-        return this;
-    },
-    define::(this) {
-        @state;
-        ::<= {
-            @:items = {
-                // whether the Fire Key is has been given to the party
-                foundFireKey : false,
+    items : ITEM_SOURCE,
 
-                // whether the Ice Key has been given to the party
-                foundIceKey : false,
-
-                // whether the thunder key has been given to the party
-                foundThunderKey : false,
-
-                // whether the light key has been given to the party        
-                foundLightKey : false,
-                
-                // whether the dark key has been given to the party
-                hasDarkKey : false,
-                
-                // Whether the initial box has been opened.
-                openedSentimentalBox : false,
-                
-                // whether the player has seen the wandering gamblist
-                skieEncountered : false,
-                
-                // The recurring NPCs in the game that are recruitable
-                npcs: {},
-                
-                
-                // progression of defeated wyverns
-                // tier 0 -> none 
-                // tier 1 -> fire 
-                // tier 2 -> ice 
-                // tier 3 -> thunder 
-                // tier 4 -> light 
-                tier : 0,
-                
-                levelHint : 6,
-                
-                // Number of discovered locations
-                data_locationsDiscovered : 0,
-                
-                data_locationsNeeded : 25
+    define::(this, state) {
+        @:interface = {
+            defaultLoad::{}
+        };
+        foreach(ITEM_SOURCE) ::(item, val) {
+            interface[item] = {
+                get ::<- state[item],
+                set ::(value) <- state[item] = value
             }
-            @:interface = {
-                save ::{
-                    return state.save()
-                },
-                
-                load::(serialized) {
-                    state.load(parent:this, serialized);
-                }
-            
-            };
-            foreach(items) ::(item, val) {
-                interface[item] = {
-                    get ::<- state[item],
-                    set ::(value) <- state[item] = value
-                }
-            }
-            state = State.new(items);
-
-            this.interface = interface;
         }
-        
-        
+
+        this.interface = interface;
     }
 
 );

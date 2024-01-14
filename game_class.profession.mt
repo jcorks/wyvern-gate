@@ -27,7 +27,7 @@
     //return (((spLevel+1)*0.75 * 10) + (spLevel+1) * 5)->ceil;
 }
 
-@:Profession = LoadableClass.new(
+@:Profession = LoadableClass.create(
     statics : {
         Base  :::<= {
             @db;
@@ -37,40 +37,25 @@
             }
         }
     },
-    new ::(base, parent, state) {
-        @:this = Profession.defaultNew();
-
-        if (state != empty)
-            this.load(serialized:state)
-        else 
-            this.defaultLoad(base);
-
-        return this;
-    },
     name : 'Wyvern.Profession.Instance',
-    define :::(this) {
-        @:state = State.new(
-            items : {
-                base : empty,
-                sp : 0,
-                spNext : 1,
-                spLevel : 0
-            }
-        );
+
+    items : {
+        base : empty,
+        sp : 0,
+        spNext : 1,
+        spLevel : 0
+    },
+
+    define :::(this, state) {
         
+
         this.interface = {
+            initialize ::{},
             defaultLoad ::(base) {
                 state.base = base;
                 return this;
             },
 
-            save ::{
-                return state.save()
-            },
-            
-            load ::(serialized) {
-                state.load(parent:this, serialized);
-            },
             base : {
                 get ::{
                     return state.base;
@@ -105,7 +90,7 @@
     }
 );
 
-Profession.Base = Database.newBase(
+Profession.Base = Database.create(
     name : 'Wyvern.Profession.Base',   
     attributes : {
         name : String,
@@ -135,7 +120,7 @@ Profession.Base = Database.newBase(
 
 */
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Adventurer',
     description : 'General, well-rounded profession. Learns abilities on-the-fly to stay alive.', 
     weaponAffinity : 'Shortsword',
@@ -167,7 +152,7 @@ Profession.Base.new(data:{
     passives : []
 })
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Martial Artist',
     weaponAffinity: 'Staff',
     description : 'A fighter that uses various stances to bend to the flow of battle.', 
@@ -202,7 +187,7 @@ Profession.Base.new(data:{
 
 })
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Field Mage',
     description : 'A this-taught mage. Knows a variety of magicks.', 
     weaponAffinity: 'Wand',
@@ -236,7 +221,7 @@ Profession.Base.new(data:{
 })
 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Cleric',
     description : 'A this-taught healing mage. Knows a variety of magicks.', 
     weaponAffinity: 'Mage-rod',
@@ -269,7 +254,7 @@ Profession.Base.new(data:{
     passives : []
 })
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Divine Lunist',
     weaponAffinity: 'Tome',
     description : 'Blessed by the moon, their magicks are entwined with the night.', 
@@ -302,7 +287,7 @@ Profession.Base.new(data:{
     ]
 })
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Divine Solist',
     weaponAffinity: 'Tome',
     description : 'Blessed by the sun, their magicks are entwined with daylight.', 
@@ -336,7 +321,7 @@ Profession.Base.new(data:{
 })
 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Blacksmith',
     weaponAffinity: 'Smithing Hammer',
     description : 'Skilled with metalworking, their skills are revered.', 
@@ -365,7 +350,7 @@ Profession.Base.new(data:{
     ]
 })
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Trader',
     weaponAffinity: 'Dagger',
     description : 'A silver tongue and a quick hand make this profession both lauded and loathed.', 
@@ -394,7 +379,7 @@ Profession.Base.new(data:{
     ]
 })
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Warrior',
     weaponAffinity: 'Greatsword',
     description : "Excelling in raw strength and technique, users of this profession are fearsome.", 
@@ -426,7 +411,7 @@ Profession.Base.new(data:{
     ]
 }) 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Guard',
     weaponAffinity: 'Polearm',
     description : "Standard profession excelling in defending others, for better or for worse.", 
@@ -459,7 +444,7 @@ Profession.Base.new(data:{
     ]
 }) 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Summoner',
     weaponAffinity: 'Tome',
     description : "Amagick-user who is able to temporarily materialize allies.", 
@@ -493,7 +478,7 @@ Profession.Base.new(data:{
 
 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Arcanist',
     weaponAffinity: 'Tome',
     description : "A scholar first, their large knowledge of the arcane yields interesting magicks for any situation.", 
@@ -525,7 +510,7 @@ Profession.Base.new(data:{
     ]
 }) 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Runologist',
     weaponAffinity: 'Tome',                
     description : "An arcanist scholar who focuses on runes.", 
@@ -560,7 +545,7 @@ Profession.Base.new(data:{
 }) 
 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Elementalist',
     weaponAffinity: 'Shortsword',                
     description : "Capable of infusing magicks into normal objects for combat.", 
@@ -593,7 +578,7 @@ Profession.Base.new(data:{
 })
 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Farmer',
     weaponAffinity: 'Shovel',
     description : "Skilled individual who knows their way around the fields.", 
@@ -622,7 +607,7 @@ Profession.Base.new(data:{
     ]
 })
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Alchemist',
     weaponAffinity: 'Dagger',
     description : "Skilled at brewing potions for all sorts of purposes.", 
@@ -654,7 +639,7 @@ Profession.Base.new(data:{
     ]
 })
 /*
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Cook',
     weaponAffinity: 'Butcher\'s Knife',
     description : "Skilled individual who can cook a mean meal.", 
@@ -684,7 +669,7 @@ Profession.Base.new(data:{
 })
 */
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Ranger',
     weaponAffinity: 'Bow & Quiver',
     description : "", 
@@ -717,7 +702,7 @@ Profession.Base.new(data:{
 })
 
 /*
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Blood Mage',
     weaponAffinity: 'Tome',
     description : "", 
@@ -754,7 +739,7 @@ Profession.Base.new(data:{
 */
 
 /*
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Thief',
     weaponAffinity: 'Dagger',
     description : "Efficient, silent movements are this profession's assets.", 
@@ -791,7 +776,7 @@ Profession.Base.new(data:{
 
 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Assassin',
     weaponAffinity: 'Dagger',                
     description : "Unparalleled in their ability to take down a target, this profession is respected for its abilities.", 
@@ -827,7 +812,7 @@ Profession.Base.new(data:{
 
 
 /*
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Mercenary',
     weaponAffinity: 'Shortsword',                
     description : "", 
@@ -854,7 +839,7 @@ Profession.Base.new(data:{
 }) 
 */
 /*
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Bounty Hunter',
     weaponAffinity: 'Shortsword',
     description : "", 
@@ -881,7 +866,7 @@ Profession.Base.new(data:{
 }) 
 */
 /*
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Necromancer',
     weaponAffinity: 'Mage-rod',                
     description : "", 
@@ -909,7 +894,7 @@ Profession.Base.new(data:{
 */
 
 /*
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Pyromancer',
     weaponAffinity: 'Shortsword',                
     description : "", 
@@ -936,7 +921,7 @@ Profession.Base.new(data:{
 })  
 */          
 /*
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Witch',
     weaponAffinity: 'Tome',                
     description : "", 
@@ -964,7 +949,7 @@ Profession.Base.new(data:{
 */
 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Keeper',
     weaponAffinity: 'Glaive',                
     description : "", 
@@ -994,7 +979,7 @@ Profession.Base.new(data:{
 })
 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Creature',
     weaponAffinity: 'Shortsword',
     description : "", 
@@ -1021,7 +1006,7 @@ Profession.Base.new(data:{
     ]
 })
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Fire Sprite',
     weaponAffinity: 'Shortsword',
     description : "", 
@@ -1049,7 +1034,7 @@ Profession.Base.new(data:{
     ]
 })
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Ice Elemental',
     weaponAffinity: 'Shortsword',
     description : "", 
@@ -1078,7 +1063,7 @@ Profession.Base.new(data:{
     ]
 })            
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Thunder Spawn',
     weaponAffinity: 'Shortsword',
     description : "", 
@@ -1108,7 +1093,7 @@ Profession.Base.new(data:{
     ]
 })
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Guiding Light',
     weaponAffinity: 'Shortsword',
     description : "", 
@@ -1139,7 +1124,7 @@ Profession.Base.new(data:{
     ]
 })            
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Wyvern of Fire',
     weaponAffinity: 'None',
     description : "", 
@@ -1172,7 +1157,7 @@ Profession.Base.new(data:{
     ]
 })
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Wyvern of Ice',
     weaponAffinity: 'None',
     description : "", 
@@ -1205,7 +1190,7 @@ Profession.Base.new(data:{
 })            
 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Wyvern of Thunder',
     weaponAffinity: 'None',
     description : "", 
@@ -1240,7 +1225,7 @@ Profession.Base.new(data:{
     ]
 })       
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Wyvern of Light',
     weaponAffinity: 'None',
     description : "", 
@@ -1280,7 +1265,7 @@ Profession.Base.new(data:{
 }) 
 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Wyvern Specter',
     weaponAffinity: 'None',
     description : "", 
@@ -1313,7 +1298,7 @@ Profession.Base.new(data:{
     ]
 }) 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Beast',
     weaponAffinity: 'None',
     description : "", 
@@ -1347,7 +1332,7 @@ Profession.Base.new(data:{
 }) 
 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Treasure Golem',
     weaponAffinity: 'None',
     description : "", 
@@ -1379,7 +1364,7 @@ Profession.Base.new(data:{
 }) 
 
 
-Profession.Base.new(data:{
+Profession.Base.newEntry(data:{
     name: 'Cave Bat',
     weaponAffinity: 'None',
     description : "", 

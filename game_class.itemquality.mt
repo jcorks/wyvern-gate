@@ -20,7 +20,7 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 @:ITEM_QUALITY_NAME = 'Wyvern.ItemQuality';
-@:ItemQuality = Database.newBase(
+@:ItemQuality = Database.create(
     name : 'Wyvern.ItemQuality',
     attributes : {
         name : String,
@@ -35,7 +35,7 @@
 );
 
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Worn',
         description : 'The surface appears worn out; it might not be able to last much longer.',
@@ -59,7 +59,7 @@ ItemQuality.new(
 
 
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Cheap',
         description : 'It is of poor quality.',
@@ -81,7 +81,7 @@ ItemQuality.new(
 )
 
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Sturdy',
         description : 'It is unusually sturdy.',
@@ -103,7 +103,7 @@ ItemQuality.new(
 )                
 
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Robust',
         description : 'It has been shown that this is resistant to even heavy use.',
@@ -125,7 +125,7 @@ ItemQuality.new(
 )
 
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Quality',
         description : 'The quality of this is remarkable.',
@@ -145,7 +145,7 @@ ItemQuality.new(
     }
 )
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Light',
         description : 'It appears to be lighter than expected.',
@@ -165,7 +165,7 @@ ItemQuality.new(
     }
 )
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Decorative',
         description : 'It appears a bit more ornate than the usual.',
@@ -185,7 +185,7 @@ ItemQuality.new(
     }
 )
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Apprentice\'s',
         description : "This seems to be the work of a master's apprentice.",
@@ -206,7 +206,7 @@ ItemQuality.new(
     }
 )
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Reinforced',
         description : "Extra care has been taken to assure that this will last a long time.",
@@ -226,7 +226,7 @@ ItemQuality.new(
     }
 )
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Durable',
         description : "At the intersection of good quality materials and workmanship.",
@@ -247,7 +247,7 @@ ItemQuality.new(
     }
 )
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Standard',
         description : 'The quality of this seems to meet some sort of standard stock, perhaps of military grade.',
@@ -267,7 +267,7 @@ ItemQuality.new(
     }
 )
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'King\'s',
         description : "The quality of this is as if it were meant for a king.",
@@ -288,7 +288,7 @@ ItemQuality.new(
     }
 )
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Queen\'s',
         description : "The quality of this is as if it were meant for a queen.",
@@ -309,7 +309,7 @@ ItemQuality.new(
     }
 )
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Masterwork',
         description : "A crowning achievement by a craftsperson representing a life's work.",
@@ -334,7 +334,7 @@ ItemQuality.new(
 
 
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Legendary',
         description : "It is said that this is part of some legend.",
@@ -356,7 +356,7 @@ ItemQuality.new(
 ) 
 
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Divine',
         description : "It is said the origin of this is mythical.",
@@ -377,7 +377,7 @@ ItemQuality.new(
     }
 ) 
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'God\'s',
         description : "It is said this was created by a deity.",
@@ -399,7 +399,7 @@ ItemQuality.new(
 ) 
 
 
-ItemQuality.new(
+ItemQuality.newEntry(
     data : {
         name : 'Null',
         description : "It is said this shouldn\'t exist.",

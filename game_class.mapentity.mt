@@ -23,7 +23,7 @@
 */
 
 
-@:MapEntity = LoadableClass.new(
+@:MapEntity = LoadableClass.create(
     name : 'Wyvern.MapEntity',
     statics : {
         Controller :::<= {
@@ -42,43 +42,30 @@
             }
         }        
     },
-    new ::(parent, state, x, y, symbol, entities, tag) {
-        parent => MapEntity.Controller.type
-        @:this = MapEntity.defaultNew();
-
-        this.initialize(controller:parent);
-
-        if (state != empty)
-            this.load(serialized:state)
-        else 
-            this.defaultLoad(x, y, symbol, entities, tag);
-            
-        return this;
+    items : {
+        tag : empty,
+        entities : empty,
+        targetX : empty,
+        targetY : empty,
+        path : empty,
+        onArrive : empty, // MapEntity.Task to do when arriving 
+        onCancel : empty, // MapEntity.Task to do when cancelling.
+        onStepSet: empty, // MapEntity.Task array to do each step
+        steps : 0,
+        speed : 1
     },
-    define:::(this) {
+    define:::(this, state) {
     
 
         @controller_;
         @isRemoved = false;
-        @:state = State.new(
-            items : {
-                tag : empty,
-                entities : empty,
-                targetX : empty,
-                targetY : empty,
-                path : empty,
-                onArrive : empty, // MapEntity.Task to do when arriving 
-                onCancel : empty, // MapEntity.Task to do when cancelling.
-                onStepSet: empty, // MapEntity.Task array to do each step
-                steps : 0,
-                speed : 1
-            }
-        )
+
         
         
         this.interface = {
-            initialize ::(controller) {
-                controller_ = controller;
+            initialize ::(parent) {
+                parent => MapEntity.Controller.type
+                controller_ = parent;
             },
             
             defaultLoad::(x, y, symbol, entities => Object, tag) {
@@ -292,52 +279,30 @@
             
             hasPath : {
                 get ::<- state.path != empty
-            },
-            
-            save :: {
-                return state.save();
-            },
-            
-            load::(serialized) {
-                state.load(parent:this, serialized);
-            }            
+            }         
         }
     }
 )
 
 
 
-MapEntity.Controller = LoadableClass.new(
+MapEntity.Controller = LoadableClass.create(
     name : 'Wyvern.MapEntity.Controller',
-    new ::(parent => Landmark.type, state) {
-        @:this = MapEntity.Controller.defaultNew();
-
-        this.initialize(landmark: parent);
-
-        if (state != empty)
-            this.load(serialized:state)
-        else 
-            this.defaultLoad();
-            
-        return this;
+    items : {
+        // it used to be mapEntities, but the map will own all instances, 
+        // and we cant have reference copies anywhere.
     },
-    define:::(this) {
+    define:::(this, state) {
     
         @map_;
         @landmark_;
         
-        @:state = State.new(
-            items : {
-                // it used to be mapEntities, but the map will own all instances, 
-                // and we cant have reference copies anywhere.
-            }
-        );
-        
+
         
         this.interface = {
-            initialize ::(landmark) {
-                landmark_ = landmark;
-                map_ = landmark.map;
+            initialize ::(parent) {
+                landmark_ = parent => Landmark.type;
+                map_ = parent.map;
             },
             
             defaultLoad ::{},
@@ -369,21 +334,13 @@ MapEntity.Controller = LoadableClass.new(
                 foreach(this.mapEntities) ::(k, ent) {
                     ent.step();
                 }
-            },
-            
-            save :: {
-                return state.save();
-            },
-            
-            load::(serialized) {
-                state.load(parent:this, serialized);
             }
         }
     }
 );
 
 
-MapEntity.Task = LoadableClass.new(
+MapEntity.Task = LoadableClass.create(
     name : "Wyvern.MapEntity.Task",
     statics : {
         Base :::<= {
@@ -394,38 +351,16 @@ MapEntity.Task = LoadableClass.new(
             }
         }
     },
-    
-    new ::(parent, state, base) {
-        @:this = MapEntity.Task.defaultNew();
-    
-        if (state != empty) 
-            this.load(serialized:state)
-        else 
-            this.defaultLoad(base);
-        return this;
-    },
-    
-    define::(this) {
-        @:state = State.new(
-            items : {
-                data : empty,
-                base : empty,
-            }
-        );
-    
+    items : {
+        data : empty,
+        base : empty,
+    },    
+    define::(this, state) {    
     
         this.interface = {
             defaultLoad ::(base) {
                 state.base = base;
                 state.data = base.startup();
-            },
-            
-            load ::(serialized) {
-                state.load(parent:this, serialized);
-            },
-            
-            save ::{
-                return state.save();
             },
             
             do ::(mapEntity => MapEntity.type) {
@@ -438,7 +373,7 @@ MapEntity.Task = LoadableClass.new(
     }
 );
 
-MapEntity.Task.Base = Database.newBase(
+MapEntity.Task.Base = Database.create(
     name : 'Wyvern.MapEntity.Task.Base',
     attributes : {
         name : String,
@@ -452,7 +387,7 @@ MapEntity.Task.Base = Database.newBase(
 
 // roams to random areas with the following triggers:
 // if within interest distance, stairs down locations will 
-MapEntity.Task.Base.new(
+MapEntity.Task.Base.newEntry(
     data : {
         name: 'dungeonencounters-roam',
         startup ::{
@@ -476,7 +411,7 @@ MapEntity.Task.Base.new(
 );
 
 
-MapEntity.Task.Base.new(
+MapEntity.Task.Base.newEntry(
     data : {
         name: 'thebeast-roam',
         startup ::{
@@ -502,7 +437,7 @@ MapEntity.Task.Base.new(
 
 
 
-MapEntity.Task.Base.new(
+MapEntity.Task.Base.newEntry(
 
     data : {
         name: 'exit',
@@ -556,7 +491,7 @@ MapEntity.Task.Base.new(
     }
 
 
-    MapEntity.Task.Base.new(
+    MapEntity.Task.Base.newEntry(
         data : {
             name: 'aggressive',
             startup ::{
@@ -862,7 +797,7 @@ MapEntity.Task.Base.new(
     }
 
 
-    MapEntity.Task.Base.new(
+    MapEntity.Task.Base.newEntry(
         data : {
             name: 'specter',
             startup ::{

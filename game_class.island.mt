@@ -63,7 +63,7 @@
 // todo: database.
 
 
-@:Island = LoadableClass.new(
+@:Island = LoadableClass.create(
     name: 'Wyvern.Island',
     statics : {
         CLIMATE : {get::<-CLIMATE},
@@ -92,24 +92,57 @@
          }
     },
     
-    new::(parent, levelHint, nameHint, state, tierHint) {
-        @:this = Island.defaultNew();
+    items : {
+        name : empty,
+
+        // minimum level of encountered individuals
+        levelMin : empty,
+
+        // maximum level of encountered individuals
+        levelMax : empty,
+
+        // how often encounters happen between turns.
+        encounterRate: empty,        
+
+        // Size of the island... Islands are always square-ish
+        sizeW : empty,
+        sizeH : empty,
+
+        // steps since the last event
+        stepsSinceLastEvent : empty,
+
+        // map of the region
+        map : empty,
+
+        worldID : empty,
 
 
-        // parent is usually a key
-        @:world = import(module:'game_singleton.world.mt');
-        @:party = world.party;
+        climate : empty,
 
-        this.initialize(world, party);
+        events : empty,
 
-        if (state != empty)
-            this.load(serialized:state)
-        else
-            this.defaultLoad(levelHint, nameHint, tierHint);
-        return this;
+
+        // the tier of the island. This determines the difficulty
+        // tier 0-> enemies have no skills or equips. Large chests drop Fire keys 
+        // tier 1-> enemies have 1 to 2 skills, but have no equips. Large chests drop Ice keys 
+        // tier 2-> enemies have 1 to 2 skills and have weapons. Large chests drop Thunder keys 
+        // tier 3-> enemies have all skills and have equips. Large chests drop Light keys
+        // tier 4-> enemies have a random set of all skills and have full equip sets.
+        tier : empty,
+
+
+        // every island has hostile creatures.
+        nativeCreatures : empty,
+
+        //Within these, there are 2-6 predominant races per island,
+        //usually in order of population distribution
+        species : empty,
+
+        modData : empty
     },
     
-    define:::(this) {
+    
+    define:::(this, state) {
    
         // the world
         @world_;
@@ -117,89 +150,8 @@
         // current party
         @party_;
 
-
-
-
-
-        @state;
         
-        ::<= {
-            @factor = Number.random()*50 + 80;
-            @sizeW  = (factor)->floor;
-            @sizeH  = (factor*0.5)->floor;
-            @:world = import(module:'game_singleton.world.mt');
-            state = State.new(
-                items : {
-                    name : NameGen.island(),
-
-                    // minimum level of encountered individuals
-                    levelMin : 0,
-                    
-                    // maximum level of encountered individuals
-                    levelMax : 0,
-                    
-                    // how often encounters happen between turns.
-                    encounterRate : Number.random(),        
-                    
-                    // Size of the island... Islands are always square-ish
-                    sizeW  : sizeW,
-                    sizeH  : sizeH,
-                    
-                    // steps since the last event
-                    stepsSinceLastEvent : 0,
-                    
-                    // map of the region
-                    map : LargeMap.create(parent:this, sizeW, sizeH),
-                    
-                    worldID : world.getNextID(),
-
-                    
-                    climate : random.integer(
-                        from:Island.CLIMATE.WARM, 
-                        to  :Island.CLIMATE.COLD
-                    ),
-                    
-                    events : [], //array of Events
-                    
-                    
-                    // the tier of the island. This determines the difficulty
-                    // tier 0-> enemies have no skills or equips. Large chests drop Fire keys 
-                    // tier 1-> enemies have 1 to 2 skills, but have no equips. Large chests drop Ice keys 
-                    // tier 2-> enemies have 1 to 2 skills and have weapons. Large chests drop Thunder keys 
-                    // tier 3-> enemies have all skills and have equips. Large chests drop Light keys
-                    // tier 4-> enemies have a random set of all skills and have full equip sets.
-                    tier : 0,
-
-
-                    // every island has hostile creatures.
-                    nativeCreatures : [
-                        NameGen.creature(),
-                        NameGen.creature(),
-                        NameGen.creature()
-                    ],
-                    
-                    //Within these, there are 2-6 predominant races per island,
-                    //usually in order of population distribution
-                    species : ::<={
-                        @rarity = 1;
-                        return [
-                            ... Species.database.getRandomSet(
-                                    count : (5+Number.random()*5)->ceil,
-                                    filter:::(value) <- value.special == false
-                                )
-                        ]->map(
-                            to:::(value) <- {
-                                species: value.name, 
-                                rarity: rarity *= 1.4
-                            }
-                        );
-                    },
-                    
-                    modData : {}
-                }
-            );
-        };
-
+        
 
         // augments an entity based on the current tier
         @augmentTiered = ::(entity) {
@@ -318,19 +270,61 @@
             }        
         }
 
-
-
-        
-
-
         
         this.interface = {
-            initialize ::(world, party) {
+            intialize:: { 
+                @:world = import(module:'game_singleton.world.mt');
+                @:party = world.party;
+
                 world_ = world;            
                 party_ = party;
             
             },
             defaultLoad::(levelHint, nameHint, tierHint) {
+                ::<= {
+                    @factor = Number.random()*50 + 80;
+                    @sizeW  = (factor)->floor;
+                    @sizeH  = (factor*0.5)->floor;
+                    @:world = import(module:'game_singleton.world.mt');
+                    
+                    state.name = NameGen.island();
+                    state.levelMin = 0;
+                    state.levelMax = 0;
+                    state.encounterRate = Number.random();
+                    state.sizeW  = sizeW;
+                    state.sizeH  = sizeH;
+                    state.stepsSinceLastEvent = 0;
+                    state.map = LargeMap.create(parent:this, sizeW, sizeH);
+                    state.worldID = world.getNextID();
+                    state.climate = random.integer(
+                        from:Island.CLIMATE.WARM, 
+                        to  :Island.CLIMATE.COLD
+                    );
+                    state.events = []; //array of Events
+                    state.tier = 0;
+                    state.nativeCreatures = [
+                        NameGen.creature(),
+                        NameGen.creature(),
+                        NameGen.creature()
+                    ];
+                    state.species = ::<={
+                        @rarity = 1;
+                        return [
+                            ... Species.database.getRandomSet(
+                                    count : (5+Number.random()*5)->ceil,
+                                    filter:::(value) <- value.special == false
+                                )
+                        ]->map(
+                            to:::(value) <- {
+                                species: value.name, 
+                                rarity: rarity *= 1.4
+                            }
+                        );
+                    };
+                };
+                
+            
+            
                 state.tier = tierHint;
 
                 state.levelMin = (levelHint - Number.random() * (levelHint * 0.4))->ceil;

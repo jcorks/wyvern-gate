@@ -19,7 +19,7 @@
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 
-@:ApparelMaterial = Database.newBase(
+@:ApparelMaterial = Database.create(
     name: 'Wyvern.ApparelMaterial',
     attributes : {
         name : String,
@@ -32,7 +32,7 @@
 );
 
 
-ApparelMaterial.new(
+ApparelMaterial.newEntry(
     data : {
         name : 'Cloth',
         description : 'The cloth used is generic and nondescript, but comfortable.',
@@ -47,7 +47,7 @@ ApparelMaterial.new(
 )
 
 
-ApparelMaterial.new(
+ApparelMaterial.newEntry(
     data : {
         name : 'Leather',
         description : 'The rough leather of the item makes it quite sturdy.',
@@ -63,7 +63,7 @@ ApparelMaterial.new(
     }
 )
 
-ApparelMaterial.new(
+ApparelMaterial.newEntry(
     data : {
         name : 'Linen',
         description : 'The linen used offers durability mixed with comfort.',
@@ -79,7 +79,7 @@ ApparelMaterial.new(
     }
 )
 
-ApparelMaterial.new(
+ApparelMaterial.newEntry(
     data : {
         name : 'Silk',
         description : 'The silk material feels lavishly soft.',
@@ -94,7 +94,7 @@ ApparelMaterial.new(
     }
 )
 
-ApparelMaterial.new(
+ApparelMaterial.newEntry(
     data : {
         name : 'Wool',
         description : 'The wool material feels warm and soft.',
@@ -112,7 +112,7 @@ ApparelMaterial.new(
 
 
 
-ApparelMaterial.new(
+ApparelMaterial.newEntry(
     data : {
         name : 'Wool+',
         description : 'The wool used is different somehow.',
@@ -129,7 +129,7 @@ ApparelMaterial.new(
     }
 )
 
-ApparelMaterial.new(
+ApparelMaterial.newEntry(
     data : {
         name : 'Mythril',
         description : 'The mythril used makes it radiantly green',
@@ -145,7 +145,7 @@ ApparelMaterial.new(
 )
 
 
-ApparelMaterial.new(
+ApparelMaterial.newEntry(
     data : {
         name : 'Eversilk',
         description : 'The wool used is different somehow.',
@@ -164,7 +164,7 @@ ApparelMaterial.new(
 )
 
 
-ApparelMaterial.new(
+ApparelMaterial.newEntry(
     data : {
         name : 'Soulstrand',
         description : 'The soulstrand material softly glows.',

@@ -19,14 +19,20 @@
 /*
     Solution for standard serialization.
     Loadable classes can be revived automatically from serialization loading
+
+    Includes a state instance (initialized with the create() items argument)
+    and provides default for saving / loading (through save() and load()) if desired.
+    These can be overridden.
     
-    
-    All loadable classes are assumed to have certain features:
-        - a new() override that includes AT LEAST the parameters "state" and "parent"
-        - save() and load(serialized) methods
+    Also provides 2 initialization mechanisms. Construction is wrapped to 
+    facilitate loadable behavior. When loading from a state, only this.initialize() 
+    is called. When loading with no state, initialize() is called followed by 
+    defaultLoad() with arguments pulled from the main constructor as needed.
+
 */
 
 @:class = import(module:'Matte.Core.Class');
+@:State = import(module:'game_class.state.mt');
 
 
 
@@ -36,19 +42,55 @@
 
 
 return {
-    new ::(
+    create ::(
         define,
+        items => Object,
         name => String,
         inherits,
-        statics,
-        new => Function
+        statics
     ) {
         @:output = class(
-            define,
+            define ::(this) {
+                @:state = State.new(items);
+                
+                define(this, state);
+                if (this.interface == empty)
+                    this.interface = {};
+                @:interface = this.interface;
+                
+                
+                @:afterLoad = interface.afterLoad;
+                @:overrideSave = interface.save;
+                @:overrideLoad = interface.load;
+                @:initialize = interface.initialize;
+                
+                this.constructor = ::(*args) {
+                        
+                    if (initialize != empty)
+                        initialize(*args);
+                    
+                    if (args.state != empty) 
+                        this.load(serialized:state)
+                    else 
+                        this.defaultLoad(*args);
+                }
+
+                interface.afterLoad = empty;
+
+                interface.load = if (overrideLoad) overrideLoad else ::(serialized) {
+                    state.load(parent:this, serialized);
+                    if (afterLoad != empty)
+                        afterLoad();
+                }
+
+                interface.save = if (overrideSave) overrideSave else ::(serialized) {
+                    return state.save();
+                }
+
+            },
             name,
             inherits,
-            statics,
-            new
+            statics
         )
         NAME_TO_CLASS[name] = output;
         return output;

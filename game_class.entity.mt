@@ -94,32 +94,54 @@
 
 @none;
 
-@:Entity = LoadableClass.new(
+@:Entity = LoadableClass.create(
     name : 'Wyvern.Entity', 
     statics : {
         EQUIP_SLOTS : {get::<- EQUIP_SLOTS}
    
     },
-        
-    new ::(island, parent, speciesHint, professionHint, personalityHint, levelHint, state, adventurousHint, qualities, innateEffects) {
-        @:this = Entity.defaultNew();
-        this.initialize();
-        if (state != empty)
-            this.load(serialized:state)
-        else 
-            this.defaultLoad(island, speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities, innateEffects);
-
-        return this;
+    items : {
+        worldID : empty,
+        stats  : empty,
+        hp  : empty,
+        ap  : empty,
+        flags  : empty,
+        isDead  : empty,
+        name  : empty,
+        nickname  : empty,
+        species   : empty,
+        profession  : empty,
+        personality   : empty,
+        emotionalState  : empty,
+        favoritePlace  : empty,
+        favoriteItem : empty,
+        growth : empty,
+        qualityDescription : empty,
+        qualitiesHint : empty,
+        faveWeapon : empty,
+        adventurous : empty,
+        battleAI : empty,
+        professions : empty,
+        canMake : empty,
+        innateEffects : empty,
+        forceDrop : empty,
+        equips : empty,
+        abilitiesAvailable : empty,
+        abilitiesLearned : empty,
+        inventory : empty,
+        expNext : empty,
+        level : empty,
+        modData : empty
     },
     
     
-    define :::(this) {
+    define :::(this, state) {
         if (none == empty) none = Item.new(base:Item.Base.database.find(name:'None'));
         @battle_;
-        @onInteract = empty;
+        @overrideInteract = empty;
         // requests removal from battle
         @requestsRemove = false;
-        @onHire;
+        @onInteract;
         @enemies_;
         @allies_;
         @abilitiesUsedBattle = empty;
@@ -128,67 +150,6 @@
 
 
         @:world = import(module:'game_singleton.world.mt');
-        @state = State.new(
-            items : {
-                worldID : world.getNextID(),
-                stats : StatSet.new(
-                    HP:1,
-                    AP:1,
-                    ATK:1,
-                    DEX:1,
-                    INT:1,
-                    DEF:1,
-                    // LUK can be zero. some people are just unlucky!
-                    SPD:1    
-                ),
-
-
-
-                hp : 1,
-                ap : 1,
-                flags : StateFlags.new(),
-                isDead : false,
-                name : NameGen.person(),
-                nickname : empty,
-                species : Species.database.getRandom(),
-                profession : empty,
-                personality : Personality.database.getRandom(),
-                emotionalState : empty,
-                favoritePlace : Location.Base.database.getRandom(),
-                favoriteItem : empty,
-                growth : StatSet.new(),
-                qualityDescription : empty,
-                qualitiesHint : empty,
-                faveWeapon : empty,
-                adventurous : Number.random() <= 0.5,
-                battleAI : empty,
-                professions : empty,
-                canMake : empty,
-                innateEffects : empty,
-                forceDrop : empty,
-                equips : [
-                    empty, // handl
-                    empty, // handr
-                    empty, // armor
-                    empty, // amulet
-                    empty, // ringl
-                    empty, // ringr
-                    empty
-                ],
-                abilitiesAvailable : [
-                    Ability.database.find(name:'Attack'),
-                    Ability.database.find(name:'Defend'),
-
-                ], // active that can choose in combat
-                abilitiesLearned : [], // abilities that can choose outside battle.
-                
-                inventory : empty,
-                expNext : 10,
-                level : 0,
-                modData : {}
-            }
-        );
-        
         
 
 
@@ -244,13 +205,62 @@
 
         
         this.interface = {
-            initialize :: {
-                state.battleAI = BattleAI.new(
-                    user: this
-                );                
+            initialize ::{
+                BattleAI.new(user:this);                
             },
-
+            
+            
+        
             defaultLoad::(island, speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities, innateEffects) {
+                state.worldID = world.getNextID();
+                state.stats = StatSet.new(
+                    HP:1,
+                    AP:1,
+                    ATK:1,
+                    DEX:1,
+                    INT:1,
+                    DEF:1,
+                    // LUK can be zero. some people are just unlucky!
+                    SPD:1    
+                );
+
+
+
+                state.hp = 1;
+                state.ap = 1;
+                state.flags = StateFlags.new();
+                state.isDead = false;
+                state.name = NameGen.person();
+                state.species = Species.database.getRandom();
+                state.personality = Personality.database.getRandom();
+                state.favoritePlace = Location.Base.database.getRandom();
+                state.growth = StatSet.new();
+                state.adventurous = Number.random() <= 0.5;
+                state.equips = [
+                    empty, // handl
+                    empty, // handr
+                    empty, // armor
+                    empty, // amulet
+                    empty, // ringl
+                    empty, // ringr
+                    empty
+                ];
+                state.abilitiesAvailable = [
+                    Ability.database.find(name:'Attack'),
+                    Ability.database.find(name:'Defend'),
+
+                ]; // active that can choose in combat
+                state.abilitiesLearned = []; // abilities that can choose outside battle.
+                
+                state.expNext = 10;
+                state.level = 0;
+                state.modData = {};
+
+
+
+
+
+
                 if (adventurousHint != empty)
                     state.adventurous = adventurousHint;
                 
@@ -327,12 +337,8 @@
                 return this;
             },     
         
-            save :: {
-                return state.save()
-            },
-            
-            load ::(serialized) {
-                state.load(parent:this, serialized);
+
+            afterLoad :: {
                 foreach(state.equips) ::(k, equip) {
                     when(equip == empty) empty;
                     equip.equippedBy = this;
@@ -583,9 +589,9 @@
                 get ::<- [...effects]
             },
             
-            onHire : {
+            overrideInteract : {
                 set ::(value) {
-                    onHire = value;
+                    overrideInteract = value;
                 }
             },
             
@@ -1330,10 +1336,10 @@
             
             // interacts with this entity
             interactPerson ::(party, location, onDone, overrideChat, skipIntro) {
-                when(onInteract) onInteract(party, location, onDone);
+                when(overrideInteract) overrideInteract(party, location, onDone);
                 
                 (import(module:'game_function.interactperson.mt'))(
-                    this, party, location, onDone, overrideChat, skipIntro, onHire
+                    this, party, location, onDone, overrideChat, skipIntro
                 );
             },
             
@@ -1354,7 +1360,8 @@
             onInteract : {
                 set ::(value) {
                     onInteract = value;
-                }
+                },
+                get :: <- onInteract
             },
             
             describeQualities ::{

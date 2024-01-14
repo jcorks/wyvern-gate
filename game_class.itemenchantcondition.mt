@@ -23,7 +23,7 @@
 
 
 // conditions are checked at the end of turns
-@:ItemEnchantCondition = Database.newBase(
+@:ItemEnchantCondition = Database.create(
     name : 'Wyvern.ItemEnchantCondition',
     attributes : {
         name : String,
@@ -36,7 +36,7 @@
 
 
 
-ItemEnchantCondition.new(
+ItemEnchantCondition.newEntry(
     data : {
         name : 'On Defend',
         description : 'After the wielder defends',
@@ -47,7 +47,7 @@ ItemEnchantCondition.new(
     }
 )
 
-ItemEnchantCondition.new(
+ItemEnchantCondition.newEntry(
     data : {
         name : 'On Attack',
         description : 'After the wielder attacks',
@@ -58,7 +58,7 @@ ItemEnchantCondition.new(
     }
 )
 
-ItemEnchantCondition.new(
+ItemEnchantCondition.newEntry(
     data : {
         name : 'On Ability',
         description : 'After the wielder uses an ability',
@@ -69,7 +69,7 @@ ItemEnchantCondition.new(
     }
 )
 
-ItemEnchantCondition.new(
+ItemEnchantCondition.newEntry(
     data : {
         name : 'On Heal',
         description : 'After the wielder heals',                
@@ -80,7 +80,7 @@ ItemEnchantCondition.new(
     }
 )
 
-ItemEnchantCondition.new(
+ItemEnchantCondition.newEntry(
     data : {
         name : 'On Hurt',
         description : 'After the wielder is hurt',                
@@ -91,7 +91,7 @@ ItemEnchantCondition.new(
     }
 )
 
-ItemEnchantCondition.new(
+ItemEnchantCondition.newEntry(
     data : {
         name : 'On Defeat Enemy',
         description : 'After the wielder defeats an enemy',                
@@ -102,7 +102,7 @@ ItemEnchantCondition.new(
     }
 )        
 
-ItemEnchantCondition.new(
+ItemEnchantCondition.newEntry(
     data : {
         name : 'On Dodge Attack', // Dex build!
         description : 'After the wielder dodges an attack',                
@@ -113,7 +113,7 @@ ItemEnchantCondition.new(
     }
 )   
 
-ItemEnchantCondition.new(
+ItemEnchantCondition.newEntry(
     data : {
         name : 'End Of Turn',
         description : 'At the end of the wielder\'s turn',                

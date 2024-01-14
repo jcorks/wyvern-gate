@@ -20,27 +20,27 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 
-@:Inventory = LoadableClass.new(
+@:Inventory = LoadableClass.create(
     name: 'Wyvern.Inventory',
-    new ::(size, parent, state) {
-        @:this = Inventory.defaultNew();
-        this.maxItems = size;
-        
-        if (state != empty)
-            this.load(serialized:state);
-        
-        return this;
+    items : {
+        items : empty,
+        gold : empty,
+        maxItems : empty
     },
-    define:::(this) {
-        @:state = State.new(
-            items : {
-                items : [],
-                gold : 0,
-                maxItems : 0
-            }
-        );
+    define:::(this, state) {
    
         this.interface = {
+            initialize ::{
+            },
+            
+            defaultLoad::(size) {
+                state.maxItems = 0;
+                if (size != empty)
+                    this.maxItems = size;                        
+                state.items = [];
+                state.gold = 0;
+            },
+            
             add::(item) {
                 when (item.base.name == 'None') false; // never accept None as a real item
                 when (state.items->keycount == state.maxItems) false;
@@ -122,9 +122,7 @@
                 get ::<- state.maxItems - state.items->keycount
             },
             
-            save ::<- state.save(),
-            load ::(serialized) { 
-                state.load(parent:this, serialized);
+            afterLoad ::{ 
                 foreach(state.items) ::(k, item) {
                     item.container = this;                
                 }

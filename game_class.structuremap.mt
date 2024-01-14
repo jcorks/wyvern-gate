@@ -52,12 +52,6 @@
 
 @Zone = class(
     name: 'Wyvern.StructureMap.Zone',
-    
-    new ::(map, category => Number) {
-        @:this = Zone.defaultNew();
-        this.initialize(map, category);
-        return this;
-    },
     define::(this) {
         @_x;
         @_y;
@@ -433,42 +427,38 @@
 
         @:Location = import(module:'game_class.location.mt');
 
+        this.constructor = ::(map, category => Number) {
+            unitsWide = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
+            unitsHigh = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
 
+            if (unitsWide > ZONE_MAXIMUM_SPAN ||
+                unitsHigh > ZONE_MAXIMUM_SPAN)
+                error(detail:' uhhh RNG brokey.');
+
+            blockSceneryIndex = map.addScenerySymbol(character:'▓');
+
+            // if category is Entrance, the area is 2x2 
+            if (category == Location.CATEGORY.ENTRANCE) ::<= {
+                unitsWide = 1;
+                unitsHigh = 1;
+            }
+
+            _map = map;
+            _category = category;
+            _w = unitsWide * ZONE_BUILDING_MINIMUM_WIDTH +ZONE_CONTENT_PADDING*2;
+            _h = unitsHigh * ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING*2;
+            
+            for(0, unitsWide)::(x) {
+                slots[x] = [];
+                for(0, unitsHigh)::(y) {
+                    slots[x][y] = false;
+                    freeSpaces->push(value:{x:x, y:y});
+                } 
+            }
+            
+        };
         
         this.interface = {
-            initialize::(map, category) {
-                unitsWide = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
-                unitsHigh = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
-
-                if (unitsWide > ZONE_MAXIMUM_SPAN ||
-                    unitsHigh > ZONE_MAXIMUM_SPAN)
-                    error(detail:' uhhh RNG brokey.');
-
-                blockSceneryIndex = map.addScenerySymbol(character:'▓');
-
-                // if category is Entrance, the area is 2x2 
-                if (category == Location.CATEGORY.ENTRANCE) ::<= {
-                    unitsWide = 1;
-                    unitsHigh = 1;
-                }
-
-                _map = map;
-                _category = category;
-                _w = unitsWide * ZONE_BUILDING_MINIMUM_WIDTH +ZONE_CONTENT_PADDING*2;
-                _h = unitsHigh * ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING*2;
-                
-                for(0, unitsWide)::(x) {
-                    slots[x] = [];
-                    for(0, unitsHigh)::(y) {
-                        slots[x][y] = false;
-                        freeSpaces->push(value:{x:x, y:y});
-                    } 
-                }
-                
-                
-                
-                return this;
-            },      
         
         
             left : {get::<-_x},        
@@ -914,6 +904,10 @@
                     zone.addLocation(location);
                 }
                 locations->push(value:location);
+            },
+            
+            locations : {
+                get ::<- locations
             },
             
             getWidth ::<- map.width,

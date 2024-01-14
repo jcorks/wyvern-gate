@@ -19,7 +19,7 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:State = import(module:'game_class.state.mt');
 
-@:StateFlags = LoadableClass.new(
+@:StateFlags = LoadableClass.create(
     name : 'Wyvern.StateFlag',
     statics : {
         HURT : {get::<-0},
@@ -34,29 +34,17 @@
         ATTACKED : {get::<-9},
         ABILITY : {get::<-10}
     },
-    
-    new ::(state, parent) {
-        @:this = StateFlags.defaultNew();
-        
-        if (state != empty)
-            this.load(serialized:state);
-        return this;
+    items: {
+        set : empty
     },
+
     
-    define :::(this) {
-        @:state = State.new(
-            items: {
-                set : []
-            }
-        );
+    define :::(this, state) {
+        
         
         this.interface = {
-            save ::{
-                return state.save();
-            },
-            
-            load ::(serialized) {
-                state.load(parent:this, serialized);
+            defaultLoad ::{
+                state.set = [];
             },
         
             add::(flag, flags) {

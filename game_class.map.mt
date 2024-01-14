@@ -60,17 +60,10 @@
 @:distance = import(module:'game_function.distance.mt');
 
 
-@Area = LoadableClass.new(
+@Area = LoadableClass.create(
     name: 'Wyvern.Map.Area',
-    new::(state, parent, x, y, width, height) {
-        @:this = Area.defaultNew();
-        if (state != empty)
-            this.load(serialized:state)
-        else
-            this.loadDefault(x, y, width, height);
-        return this;
-    },
-    define::(this) {
+    items : {},
+    define::(this, state) {
         @_x = 0;
         @_y = 0;
         @_w = 0;
@@ -81,13 +74,12 @@
         mapSizeW = canvas.width - 26;
 
         this.interface = {
-            loadDefault::(x, y, width, height) {
+            defaultLoad::(x, y, width, height) {
                 _x = x => Number;
                 _y = y => Number;
                 _w = width => Number;
                 _h = height => Number;
                 isOccupied = false;
-                return this;
             },
 
             x : {get::<-_x},        
@@ -125,7 +117,7 @@
 );
 
 
-@:Map =  LoadableClass.new(
+@:Map =  LoadableClass.create(
     name: 'Wyvern.Map',
 
     statics : {
@@ -133,18 +125,9 @@
             get::<-Area
         } 
     },
-    
-    new ::(parent, state) {
-        @:this = Map.defaultNew();
-        this.initialize(parent);
-        if (state != empty)
-            this.load(serialized:state)
-        // no default load. Maps are empty and defined 
-        // externally when first created.
-        return this;
-    },
+    items : {},
   
-    define:::(this) {
+    define:::(this, state) {
     
     
         @itemIndex = [];
@@ -752,6 +735,7 @@
             initialize ::(parent) {
                 parent_ = parent;
             },
+            defaultLoad ::{},
             width : {
                 get ::<- width,
                 set ::(value) {

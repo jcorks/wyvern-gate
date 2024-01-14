@@ -25,7 +25,7 @@
 @:random = import(module:'game_singleton.random.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 
-@:Scene = Database.newBase(
+@:Scene = Database.create(
     name : 'Wyvern.Scene',
     attributes : {
         name : String,
@@ -59,7 +59,7 @@
     }
 );
 
-Scene.new(
+Scene.newEntry(
     data : {
         name : 'scene_intro',
         script: [
@@ -76,7 +76,7 @@ Scene.new(
 
 
 
-Scene.new(
+Scene.newEntry(
     data : {
         name : 'scene_wyvernfire0',
         script: [
@@ -219,7 +219,7 @@ Scene.new(
     }
 ) 
 
-Scene.new(
+Scene.newEntry(
     data : {
         name : 'scene_wyvernfire1',
         script: [
@@ -368,7 +368,7 @@ Scene.new(
 )
 
 
-Scene.new(
+Scene.newEntry(
     data : {
         name : 'scene_wyvernice0',
         script: [
@@ -493,7 +493,7 @@ Scene.new(
     }
 ) 
 
-Scene.new(
+Scene.newEntry(
     data : {
         name : 'scene_wyvernice1',
         script: [
@@ -614,7 +614,7 @@ Scene.new(
 )
 
 
-Scene.new(
+Scene.newEntry(
     data : {
         name : 'scene_wyvernthunder0',
         script: [
@@ -760,7 +760,7 @@ Scene.new(
 ) 
 
 
-Scene.new(
+Scene.newEntry(
     data : {
         name : 'scene_wyvernthunder1',
         script: [
@@ -1003,7 +1003,7 @@ Scene.new(
 
 
 
-Scene.new(
+Scene.newEntry(
     data : {
         name : 'scene_wyvernlight0',
         script: [
@@ -1145,7 +1145,7 @@ Scene.new(
     }
 ) 
 
-Scene.new(
+Scene.newEntry(
     data : {
         name : 'scene_wyvernlight0_wish',
         script: [
@@ -1171,7 +1171,7 @@ Scene.new(
 )
 
 
-Scene.new(
+Scene.newEntry(
     data : {
         name : 'scene_wyvernlight0_quest',
         script: [
@@ -1292,7 +1292,7 @@ Scene.new(
     }
 )
 
-Scene.new(
+Scene.newEntry(
     data : {
         name : 'scene_sentimentalbox',
         script: [

@@ -37,14 +37,22 @@
         WIDTH : {get::<- CARD_WIDTH},
         HEIGHT : {get::<- CARD_HEIGHT}
     },
-    new ::(suit => Number, value => Number) {
-        @:this = Card.defaultNew();
-        this.initialize(suit, value);
-        return this;
-    },
     define:::(this) {
         @suit_;
         @value_;
+        
+        this.constructor = ::(suit => Number, value => Number) {
+            if (suit < 0 || suit >= SUITS_TEXT->keycount)
+                error(message:'Card was made with invalid suit.');
+
+            if (value < 0 || value >= VALUES_TEXT->keycount )
+                error(message:'Card was made with invalid value.');
+
+
+            suit_ = suit;
+            value_ = value;
+            return this;
+        },
         
         
         this.interface = {
@@ -55,18 +63,6 @@
                 get ::<- VALUES_TEXT[value_] + ' ' + SUITS_TEXT[suit_]
             },
             
-            initialize::(suit, value) {
-                if (suit < 0 || suit >= SUITS_TEXT->keycount)
-                    error(message:'Card was made with invalid suit.');
-
-                if (value < 0 || value >= VALUES_TEXT->keycount )
-                    error(message:'Card was made with invalid value.');
-
-
-                suit_ = suit;
-                value_ = value;
-                return this;
-            },
 
             /*
                 ┌──────┐

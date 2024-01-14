@@ -28,7 +28,7 @@
 @:correctA = import(module:'game_function.correcta.mt');
 
 
-@:Interaction = Database.newBase(
+@:Interaction = Database.create(
     name : 'Wyvern.Interaction',
     attributes : {
         name : String,
@@ -37,7 +37,7 @@
     }
 );
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         name : 'exit',
         displayName : 'Exit',
@@ -75,7 +75,7 @@ Interaction.new(
         }
     }
 )
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Examine',
         name : 'examine',
@@ -86,7 +86,7 @@ Interaction.new(
     }
 )
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Vandalize',
         name : 'vandalize',
@@ -106,7 +106,7 @@ Interaction.new(
 )
 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         name : 'Stairs',
         displayName : 'Stairs',
@@ -117,7 +117,7 @@ Interaction.new(
     }
 )
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         name : 'press-pressure-plate',
         displayName : 'Press',
@@ -157,7 +157,7 @@ Interaction.new(
 )
 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         name : 'examine-plate',
         displayName : 'Is this a trap...?',
@@ -214,7 +214,7 @@ Interaction.new(
 
 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         name : 'talk',
         displayName : 'Talk',
@@ -289,7 +289,7 @@ Interaction.new(
 
 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName: 'Buy Drink',
         name : 'drink:tavern',
@@ -645,7 +645,7 @@ Interaction.new(
     }
 )
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Mine',
         name : 'mine',
@@ -719,7 +719,7 @@ Interaction.new(
     }
 )
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Smelt Ore',
         name : 'smelt ore',
@@ -742,7 +742,7 @@ Interaction.new(
 )        
 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Sell',
         name : 'sell:shop',
@@ -836,7 +836,7 @@ Interaction.new(
         
     }
 )
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Expand Bag',
         name : 'bag:shop',
@@ -861,7 +861,7 @@ Interaction.new(
 );
 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Buy',
         name : 'buy:shop',
@@ -1017,7 +1017,7 @@ Interaction.new(
     }
 )
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Forge',
         name : 'forge',
@@ -1141,7 +1141,7 @@ Interaction.new(
     }
 )
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Enter Gate',
         name : 'enter gate',
@@ -1204,7 +1204,7 @@ Interaction.new(
 )
     
 // specifically for exploring different areas of dungeons.
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Next Floor',
         name : 'next floor',
@@ -1246,7 +1246,7 @@ Interaction.new(
 )  
 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Climb Up',
         name : 'climb up',
@@ -1260,7 +1260,7 @@ Interaction.new(
 
 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Explore Pit',
         name : 'explore pit',
@@ -1297,7 +1297,7 @@ Interaction.new(
 )          
           
     
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Steal',
         name : 'steal',
@@ -1409,7 +1409,7 @@ Interaction.new(
 
 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Rest',
         name : 'rest',
@@ -1463,7 +1463,7 @@ Interaction.new(
     }
 )
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Change Profession',
         name : 'change profession',
@@ -1529,7 +1529,7 @@ Interaction.new(
     }
 )        
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Bet',
         name : 'bet',
@@ -1806,7 +1806,7 @@ Interaction.new(
     
                 
 ) 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Open Chest',
         name : 'open-chest',
@@ -1841,7 +1841,7 @@ Interaction.new(
     }
 )              
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Open Chest',
         name : 'open-magic-chest',
@@ -1923,7 +1923,7 @@ Interaction.new(
 )  
 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Drink Water',
         name : 'drink-fountain',
@@ -1951,7 +1951,7 @@ Interaction.new(
     }
 ) 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Heal',
         name : 'healing-circle',
@@ -1980,7 +1980,7 @@ Interaction.new(
 ) 
 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Approach',
         name : 'pray-statue',
@@ -2109,7 +2109,7 @@ Interaction.new(
     }
 ) 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Enchant',
         name : 'enchant-once',
@@ -2188,7 +2188,7 @@ Interaction.new(
     }
 ) 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Loot',
         name : 'loot',
@@ -2218,7 +2218,7 @@ Interaction.new(
 ) 
 
 
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Compete',
         name : 'compete',
@@ -2226,7 +2226,7 @@ Interaction.new(
         }
     }
 )
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Rune Research',
         name : 'sylvia-research',
@@ -2243,7 +2243,7 @@ Interaction.new(
         }
     }
 )        
-Interaction.new(
+Interaction.newEntry(
     data : {
         displayName : 'Tablet Trading',
         name : 'sylvia-tablet',

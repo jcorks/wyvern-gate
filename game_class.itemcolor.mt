@@ -20,7 +20,7 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@:ItemColor = Database.newBase(
+@:ItemColor = Database.create(
     name : 'Wyvern.ItemColor',
     attributes : {
         name : String,
@@ -29,7 +29,7 @@
 );
 
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'red',
         equipMod : StatSet.new(
@@ -40,7 +40,7 @@ ItemColor.new(
     }
 )
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'blue',
         equipMod : StatSet.new(
@@ -52,7 +52,7 @@ ItemColor.new(
 )
 
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'purple',
         equipMod : StatSet.new(
@@ -65,7 +65,7 @@ ItemColor.new(
 )
 
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'pink',
         equipMod : StatSet.new(
@@ -75,7 +75,7 @@ ItemColor.new(
     }
 )
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'white',
         equipMod : StatSet.new(
@@ -86,7 +86,7 @@ ItemColor.new(
 
 
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'green',
         equipMod : StatSet.new(
@@ -97,7 +97,7 @@ ItemColor.new(
     }
 )
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'olive-green',
         equipMod : StatSet.new(
@@ -108,7 +108,7 @@ ItemColor.new(
     }
 )
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'yellow',
         equipMod : StatSet.new(
@@ -118,7 +118,7 @@ ItemColor.new(
     }
 )
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'orange',
         equipMod : StatSet.new(
@@ -128,7 +128,7 @@ ItemColor.new(
     }
 )
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'grey',
         equipMod : StatSet.new(
@@ -138,7 +138,7 @@ ItemColor.new(
     }
 )
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'brown',
         equipMod : StatSet.new(
@@ -148,7 +148,7 @@ ItemColor.new(
     }
 )
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'black',
         equipMod : StatSet.new(
@@ -157,7 +157,7 @@ ItemColor.new(
     }
 )
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'silver',
         equipMod : StatSet.new(
@@ -167,7 +167,7 @@ ItemColor.new(
     }
 )
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'aquamarine',
         equipMod : StatSet.new(
@@ -178,7 +178,7 @@ ItemColor.new(
 )        
 
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'teal',
         equipMod : StatSet.new(
@@ -189,7 +189,7 @@ ItemColor.new(
 )        
 
 
-ItemColor.new(
+ItemColor.newEntry(
     data : {
         name : 'gold',
         equipMod : StatSet.new(

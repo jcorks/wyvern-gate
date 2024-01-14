@@ -32,25 +32,16 @@
 ]
 
 
-@:StatSet = LoadableClass.new(
+@:StatSet = LoadableClass.create(
     name : 'Wyvern.Entity.StatSet',
-    new ::(parent, state, HP, AP, ATK, INT, DEF, LUK, SPD, DEX) {
-        @:this = StatSet.defaultNew();
-        if (state != empty)
-            this.load(serialized:state)
-        else
-            this.defaultLoad(HP, AP, ATK, INT, DEF, LUK, SPD, DEX);
-        return this;
-    },
-
     statics: {
 
         NAMES : {
             get ::<- NAMES
         }
     },
-
-    define:::(this) {
+    items : {},
+    define:::(this, state) {
         @HP_  = 0;
         @MP_  = 0;
         @ATK_ = 0;
@@ -69,6 +60,7 @@
         @LUKmod = 0;
         @DEXmod = 0;
         ;
+        
         
         this.interface = {
             defaultLoad::(HP, AP, ATK, INT, DEF, LUK, SPD, DEX) {

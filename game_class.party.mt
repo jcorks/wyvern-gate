@@ -22,29 +22,21 @@
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
-@:Party = LoadableClass.new(
+@:Party = LoadableClass.create(
     name: 'Wyvern.Party',
-    new ::(parent, state) {
-        @:this = Party.defaultNew();
-        
-        
-        if (state != empty)
-            this.load(serialized:state);
-            
-        return this;
+    items : {
+        inventory : empty,
+        members : empty,
+        karma : 5500
     },
-    define:::(this) {   
-        @:state = State.new(
-            items : {
-                inventory : empty,
-                members : [],
-                karma : 5500
-            }
-        );
-        
-        
-        
+
+    define:::(this, state) {   
+                
         this.interface = {    
+            initialize :: {},
+            defaultLoad ::{            
+                state.members = [];
+            },
             reset ::{
                 state.members = [];
                 state.inventory = Inventory.new(size:40);
@@ -97,14 +89,6 @@
             clear :: {
                 state.inventory.clear();
                 state.members = [];            
-            },
-            
-            save ::{
-                return state.save()
-            },
-            
-            load ::(serialized) {
-                state.load(parent:this, serialized);
             },
             
             karma : {

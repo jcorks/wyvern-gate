@@ -29,7 +29,7 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 
-@:Event = LoadableClass.new(
+@:Event = LoadableClass.create(
     name: 'Wyvern.Event',
     statics : {
         Base  :::<= {
@@ -40,56 +40,38 @@
             }
         }
     },
-    
-    new ::(parent, base, currentTime, state) {
-        @:this = Event.defaultNew();
-
-        @:world = import(module:'game_singleton.world.mt');
-        
-        @:Island = import(module:'game_class.island.mt');
-        @:Landmark = import(module:'game_class.landmark.mt');
-        
-        @landmark;
-        @island;
-        
-        if (parent->type == Island.type) ::<= {
-            landmark = empty;
-            island = parent;
-        } else if (parent->type == Landmark.type) ::<= {
-            landmark = parent;
-            island = landmark.island;
-        } else 
-            error(detail:'Parents of Events can only be either Landmarks or Islands');
-        
-        @:party = world.party;
-        
-        this.initialize(party, island, landmark);
-
-        if (state != empty)
-            this.load(serialized:state)
-        else
-            this.defaultLoad(base, currentTime);
-        return this;
+    items : {
+        timeLeft : empty,
+        base : empty,
+        duration : empty,
+        startAt : empty   
     },
-    
-    define:::(this) {
-        @:state = State.new(
-            items : {
-                timeLeft : 0,
-                base : empty,
-                duration : 0,
-                startAt : 0                  
-            }
-        );
         
+    define:::(this, state) {        
     
         @party_;
         @island_;
         @landmark_;
-
-
         this.interface = {
-            initialize ::(party, island, landmark) {
+            initialize ::(parent, base, currentTime, state) {
+                @:world = import(module:'game_singleton.world.mt');
+                
+                @:Island = import(module:'game_class.island.mt');
+                @:Landmark = import(module:'game_class.landmark.mt');
+                
+                @landmark;
+                @island;
+                
+                if (parent->type == Island.type) ::<= {
+                    landmark = empty;
+                    island = parent;
+                } else if (parent->type == Landmark.type) ::<= {
+                    landmark = parent;
+                    island = landmark.island;
+                } else 
+                    error(detail:'Parents of Events can only be either Landmarks or Islands');
+                
+                @:party = world.party;                
                 island_ = island;
                 party_ = party;
                 landmark_ = landmark;
@@ -101,14 +83,6 @@
                 state.duration = base.onEventStart(event:this);
                 state.timeLeft = state.duration;
                 return this;
-            },
-
-            save ::{
-                return state.save();
-            },
-            
-            load ::(serialized) {
-                state.load(parent:this, serialized);
             },
         
             expired : {
@@ -146,7 +120,7 @@
 );
 
 
-Event.Base = Database.newBase(
+Event.Base = Database.create(
     name : 'Wyvern.Event.Base',
     attributes : {
         name : String,
@@ -159,7 +133,7 @@ Event.Base = Database.newBase(
 
 
 
-Event.Base.new(
+Event.Base.newEntry(
     data: {
         name : 'Weather:1',
         rarity: 10,        
@@ -208,7 +182,7 @@ Event.Base.new(
     }
 )
 
-Event.Base.new(
+Event.Base.newEntry(
     data: {
         name : 'Encounter:GateBoss',
         rarity: 10000000,        
@@ -323,7 +297,7 @@ Event.Base.new(
     }
 )
 
-Event.Base.new(
+Event.Base.newEntry(
     data: {
         name : 'Encounter:TreasureBoss',
         rarity: 10000000,        
@@ -423,7 +397,7 @@ Event.Base.new(
     }
 )        
 
-Event.Base.new(
+Event.Base.newEntry(
     data: {
         name : 'Chest:Normal',
         rarity: 1, //5        
@@ -511,7 +485,7 @@ Event.Base.new(
 )
 
 
-Event.Base.new(
+Event.Base.newEntry(
     data: {
         name : 'BBQ',
         rarity: 1, //5        
@@ -591,7 +565,7 @@ Event.Base.new(
     }
 )
 
-Event.Base.new(
+Event.Base.newEntry(
     data: {
         name : 'Camp out',
         rarity: 1, //5        
@@ -679,7 +653,7 @@ Event.Base.new(
 
 
 
-Event.Base.new(
+Event.Base.newEntry(
     data: {
         name : 'Encounter:Normal',
         rarity: 2,        
@@ -786,7 +760,7 @@ Event.Base.new(
 )
 
 
-Event.Base.new(
+Event.Base.newEntry(
     data: {
         name : 'Encounter:Non-peaceful',
         rarity: 20000000,        

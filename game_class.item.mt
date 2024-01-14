@@ -87,7 +87,7 @@
 
 
 
-@:Item = LoadableClass.new(
+@:Item = LoadableClass.create(
     name : 'Wyvern.Item',
     statics : {
         Base  :::<= {
@@ -101,51 +101,40 @@
         ATTRIBUTE : {get::<-ATTRIBUTE},
         USE_TARGET_HINT : {get::<-USE_TARGET_HINT}
     },
-    new ::(parent, base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, state, colorHint, abilityHint, forceEnchant) {
-        @:this = Item.defaultNew();
-
-        if (state != empty)
-            this.load(serialized:state)
-        else 
-            this.defaultLoad(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, abilityHint, forceEnchant);
-            
-        return this;
+    
+    items : {
+        base : empty,
+        enchants : empty, // ItemMod
+        quality : empty,
+        material : empty,
+        apparel : empty,
+        customPrefix : empty,
+        customName : empty,
+        description : empty,
+        hasEmblem : empty,
+        size : empty,
+        price : empty,
+        color : empty,
+        island : empty,
+        islandLevelHint : empty,
+        islandNameHint : empty,
+        islandTierHint : empty,
+        improvementsLeft : empty,
+        improvementsStart : empty,
+        equipEffects : empty,
+        useEffects : empty,
+        intuition : 0,
+        ability : empty,
+        stats : empty,
+        design : empty,
+        modData : empty    
     },
-    define:::(this) {
+    
+    define:::(this, state) {
     
 
         @container = empty;
         @equippedBy = empty;
-        
-        @:state = State.new(
-            items : {
-                base : empty,
-                enchants : [], // ItemMod
-                quality : empty,
-                material : empty,
-                apparel : empty,
-                customPrefix : empty,
-                customName : empty,
-                description : empty,
-                hasEmblem : empty,
-                size : empty,
-                price : empty,
-                color : empty,
-                island : empty,
-                islandLevelHint : empty,
-                islandNameHint : empty,
-                islandTierHint : empty,
-                improvementsLeft : empty,
-                improvementsStart : empty,
-                equipEffects : [],
-                useEffects : [],
-                intuition : 0,
-                ability : empty,
-                stats : StatSet.new(),
-                design : empty,
-                modData : {}
-            }
-        );
     
 
         
@@ -280,9 +269,15 @@
         @:Island = import(module:'game_class.island.mt');
         @:world = import(module:'game_singleton.world.mt');
         
+        
         this.interface = {
+            initialize ::{},
             defaultLoad::(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, abilityHint, forceEnchant) {
-                
+
+                state.enchants = []; // ItemMod
+                state.equipEffects = [];
+                state.useEffects = [];
+                state.stats = StatSet.new();
                 state.ability = if (abilityHint) abilityHint else random.pickArrayItem(list:base.possibleAbilities);
                 state.base = base;
                 state.stats.add(stats:base.equipMod);
@@ -290,6 +285,7 @@
                 state.price *= 1.05 * state.base.weight;
                 state.improvementsLeft = random.integer(from:10, to:25);
                 state.improvementsStart = state.improvementsLeft;
+                state.modData = {};
                 
                 if (base.hasSize)   
                     assignSize();
@@ -642,16 +638,13 @@
             maxOut ::{
                 state.intuition = 20;
                 state.improvementsLeft = 0;
-            },
-            
-            save ::<- state.save(),
-            load ::(serialized) <- state.load(parent:this, serialized)
+            }
         }
     }
 );
 
 
-Item.Base = Database.newBase(
+Item.Base = Database.create(
     name: 'Wyvern.Item.Base',
     attributes : {
         name : String,
@@ -694,7 +687,7 @@ Item.Base = Database.newBase(
 
 
 
-Item.Base.new(
+Item.Base.newEntry(
     data : {
         name : 'None',
         description : '',
@@ -724,7 +717,7 @@ Item.Base.new(
         possibleAbilities : [],
     }
 )
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Cat of Bea",
     description: 'A small, white figurine depicting a cat. It smells faintly of strawberry pastries.',
     examine : 'It appears to be entirely white and oddly angular. The bottom side is engraved with the number \'IX\'.',
@@ -766,7 +759,7 @@ Item.Base.new(data : {
     attributes : ATTRIBUTE.FRAGILE
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Mei\'s Bow",
     description: 'A neck accessory featuring an ornate bell and bow.',
     examine : '',
@@ -803,7 +796,7 @@ Item.Base.new(data : {
     attributes : ATTRIBUTE.FRAGILE    
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Life Crystal",
     description: 'A shimmering amulet. The metal enclosure has a $color$ tint. If death befalls the holder, has a 50% chance to revive them and break.',
     examine : '',
@@ -842,7 +835,7 @@ Item.Base.new(data : {
 })
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Bracelet of Luna",
     description: 'A bracelet inset with an opal in the shape of a crescent moon.',
     examine : "Once the greatest treasure in a dragons' hoard, it softly gleams in the moonlight with incredible power.",
@@ -881,7 +874,7 @@ Item.Base.new(data : {
     onCreate ::(item, user, creationHint) {}
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Skie's Ring",
     description: 'A simple ring said to have been worn by a great dragon.',
     examine : 'Wearers appear to feel a bit tired from wearing it, but feel their potential profoundly grow.',
@@ -924,7 +917,7 @@ Item.Base.new(data : {
     onCreate ::(item, user, creationHint) {}
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Pink Potion",
     description: 'Pink-colored potions are known to be for recovery of injuries',
     examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
@@ -965,7 +958,7 @@ Item.Base.new(data : {
 })
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Purple Potion",
     description: 'Purple-colored potions are known to combine the effects of pink and cyan potions',
     examine : 'These potions are handy, as the effects of ',
@@ -1006,7 +999,7 @@ Item.Base.new(data : {
 
 })    
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Green Potion",
     description: 'Green-colored potions are known to be toxic.',
     examine : 'Often used offensively, these potions are known to be used as poison once used and doused on a target.',
@@ -1046,7 +1039,7 @@ Item.Base.new(data : {
 
 })    
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Orange Potion",
     description: 'Orange-colored potions are known to be volatile.',
     examine : 'Often used offensively, these potions are known to explode on contact.',
@@ -1085,7 +1078,7 @@ Item.Base.new(data : {
 })    
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Black Potion",
     description: 'Black-colored potions are known to be toxic to all organic life.',
     examine : 'Often used offensively, these potions are known to cause instant petrification.',
@@ -1127,7 +1120,7 @@ Item.Base.new(data : {
 
 
 /*
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Pinkish Potion",
     description: 'Pink-colored potions are known to be for recovery of injuries',
     examine : 'This potion does not have the same hue as the common recovery potion and is a bit heavier. Did you get it from a reliable source?',
@@ -1170,7 +1163,7 @@ Item.Base.new(data : {
 
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Cyan Potion",
     description: 'Cyan-colored potions are known to be for recovery of mental fatigue.',
     examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
@@ -1210,7 +1203,7 @@ Item.Base.new(data : {
 
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Pitchfork",
     description: 'A common farming implement.',
     examine : 'Quite sturdy and pointy, some people use these as weapons.',
@@ -1256,7 +1249,7 @@ Item.Base.new(data : {
 
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Shovel",
     description: 'A common farming implement.',
     examine : 'Quite sturdy and pointy, some people use these as weapons.',
@@ -1304,7 +1297,7 @@ Item.Base.new(data : {
 
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Pickaxe",
     description: 'A common mining implement.',
     examine : 'Quite sturdy and pointy, some people use these as weapons.',
@@ -1355,7 +1348,7 @@ Item.Base.new(data : {
 })
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Butcher's Knife",
     description: 'Common knife meant for cleaving meat.',
     examine : 'Quite sharp.',
@@ -1402,7 +1395,7 @@ Item.Base.new(data : {
 
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Bludgeon",
     description: 'A basic blunt weapon. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Clubs and bludgeons seem primitive, but are quite effective.',
@@ -1448,7 +1441,7 @@ Item.Base.new(data : {
 
 })    
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Shortsword",
     description: 'A basic sword. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
@@ -1497,7 +1490,7 @@ Item.Base.new(data : {
 })
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Longsword",
     description: 'A basic sword. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
@@ -1544,7 +1537,7 @@ Item.Base.new(data : {
 })
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Blade & Shield",
     description: 'A matching medium-length blade and shield. They feature a $color$, $design$ design.',
     examine : 'Weapons with shields seem to block more than they let on.',
@@ -1594,7 +1587,7 @@ Item.Base.new(data : {
 })
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Wall Shield",
     description: 'A large shield that can be used for defending.',
     examine : 'Weapons with shields seem to block more than they let on.',
@@ -1643,7 +1636,7 @@ Item.Base.new(data : {
 
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Chakram",
     description: 'A pair of round blades. The handles have a $color$ trim with a $design$ design..',
     examine : '.',
@@ -1691,7 +1684,7 @@ Item.Base.new(data : {
 })    
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Falchion",
     description: 'A basic sword with a large blade. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
@@ -1740,7 +1733,7 @@ Item.Base.new(data : {
 })    
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Morning Star",
     description: 'A spiked weapon. The hilt has a $color$ trim with a $design$ design.',
     examine : '',
@@ -1787,7 +1780,7 @@ Item.Base.new(data : {
 
 })     
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Scimitar",
     description: 'A basic sword with a curved blade. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
@@ -1836,7 +1829,7 @@ Item.Base.new(data : {
 }) 
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Rapier",
     description: 'A slender sword excellent for thrusting. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
@@ -1885,7 +1878,7 @@ Item.Base.new(data : {
 })    
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Bow & Quiver",
     description: 'A basic bow and quiver full of arrows. The bow features a $design$ design and has a streak of $color$ across it.',
     examine : '',
@@ -1933,7 +1926,7 @@ Item.Base.new(data : {
 })
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Crossbow",
     description: 'A mechanical device that launches bolts. It features a $color$, $design$ design design.',
     examine : '',
@@ -1978,7 +1971,7 @@ Item.Base.new(data : {
 
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Greatsword",
     description: 'A basic, large sword. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Not as common as shortswords, but rather easy to find. Favored by larger warriors.',
@@ -2025,7 +2018,7 @@ Item.Base.new(data : {
 
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Dagger",
     description: 'A basic knife. The handle has an $color$ trim with a $design$ design.',
     examine : 'Commonly favored by both swift warriors and common folk for their easy handling and easiness to produce.',
@@ -2071,7 +2064,7 @@ Item.Base.new(data : {
 
 })    
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Smithing Hammer",
     description: 'A basic hammer meant for smithing.',
     examine : 'Easily available, this hammer is common as a general tool for metalworking.',
@@ -2116,7 +2109,7 @@ Item.Base.new(data : {
 })
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Halberd",
     description: 'A weapon with long reach and deadly power. The handle has a $color$ trim with a $design$ design.',
     examine : '',
@@ -2163,7 +2156,7 @@ Item.Base.new(data : {
 
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Lance",
     description: 'A weapon with long reach and deadly power. The handle has a $color$ trim with a $design$ design.',
     examine : '',
@@ -2210,7 +2203,7 @@ Item.Base.new(data : {
 
 })    
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Glaive",
     description: 'A weapon with long reach and deadly power. The handle has a $color$ trim with a $design$ design.',
     examine : '',
@@ -2258,7 +2251,7 @@ Item.Base.new(data : {
 })    
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Staff",
     description: 'A combat staff. Promotes fluid movement when used well. The ends are tied with a $color$ fabric, featuring a $design$ design.',
     examine : '',
@@ -2305,7 +2298,7 @@ Item.Base.new(data : {
 })    
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Mage-Staff",
     description: 'Similar to a wand, promotes mental acuity. The handle has a $color$ trim with a $design$ design.',
     examine : '',
@@ -2360,7 +2353,7 @@ Item.Base.new(data : {
 
 }) 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Wand",
     description: 'The handle has a $color$ trim with a $design$ design.',
     examine : '',
@@ -2415,7 +2408,7 @@ Item.Base.new(data : {
 
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Warhammer",
     description: 'A hammer meant for combat with a $design$ design. The end is tied with a $color$ fabric.',
     examine : 'A common choice for those who wish to cause harm and have the arm to back it up.',
@@ -2463,7 +2456,7 @@ Item.Base.new(data : {
 })
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Tome",
     description: 'A plated book for magick-users in the heat of battle. It is covered with a $color$ fabric featuring a $design$ design.',
     examine : 'A lightly enchanted book meant to both be used as reference on-the-fly and meant to increase the mental acquity of the holder.',
@@ -2510,7 +2503,7 @@ Item.Base.new(data : {
     
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Tunic",
     description: 'Simple cloth for the body with a $design$ design. It is predominantly $color$.',
     examine : 'Common type of light armor',
@@ -2547,7 +2540,7 @@ Item.Base.new(data : {
 })
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Robe",
     description: 'Simple cloth favored by scholars. It features a $color$, $design$ design.',
     examine : 'Common type of light armor',
@@ -2583,7 +2576,7 @@ Item.Base.new(data : {
     
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Scarf",
     description: 'Simple cloth accessory. It is $color$ with a $design$ design.',
     examine : 'Common type of light armor',
@@ -2619,7 +2612,7 @@ Item.Base.new(data : {
 })    
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Headband",
     description: 'Simple cloth accessory. It is $color$ with a $design$ design.',
     examine : 'Common type of light armor',
@@ -2653,7 +2646,7 @@ Item.Base.new(data : {
     onCreate ::(item, user, creationHint) {}
     
 })        
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Ring",
     description: 'A metallic ring. The inset gem is $color$ and features a $design$ design.',
     examine : '',
@@ -2693,7 +2686,7 @@ Item.Base.new(data : {
 
 })  
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Cape",
     description: 'Simple cloth accessory. It features a $color$-based design with a $design$ pattern.',
     examine : 'Common type of light armor',
@@ -2729,7 +2722,7 @@ Item.Base.new(data : {
 })    
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Cloak",
     description: 'Simple cloth accessory that covers the entire body and includes a hood. It features a $color$-based design with a $design$ pattern.',
     examine : 'Stylish!',
@@ -2765,7 +2758,7 @@ Item.Base.new(data : {
     
 })   
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Hat",
     description: 'Simple cloth accessory. It is predominantly $color$ with a $design$ design.',
     examine : 'Common type of light armor',
@@ -2800,7 +2793,7 @@ Item.Base.new(data : {
     
 })           
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Fortified Cape",
     description: 'A cape fortified with metal. It is a bit heavy. It features a $color$ trim and a $design$ design.',
     examine : 'Common type of light armor',
@@ -2839,7 +2832,7 @@ Item.Base.new(data : {
 })   
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Light Robe",
     description: 'Enchanted light wear favored by mages. It features a $color$, $design$ design.',
     examine : 'Common type of light armor',
@@ -2876,7 +2869,7 @@ Item.Base.new(data : {
 })    
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Chainmail",
     description: 'Mail made of linked chains. It bears an emblem colored $color$ with a $design$ design.',
     examine : 'Common type of light armor',
@@ -2915,7 +2908,7 @@ Item.Base.new(data : {
     
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Filigree Armor",
     description: 'Hardened material with a fancy $color$ trim and a $design$ design.',
     examine : 'Common type of light armor',
@@ -2955,7 +2948,7 @@ Item.Base.new(data : {
     
 })
     
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Plate Armor",
     description: 'Extremely protective armor of a high-grade. It has a $color$ trim with a $design$ design.',
     examine : 'Highly skilled craftspeople are required to make this work.',
@@ -2995,7 +2988,7 @@ Item.Base.new(data : {
     
 })    
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Edrosae's Key",
     description: 'The gateway to the domain of the Elders.',
     examine : '',
@@ -3040,7 +3033,7 @@ Item.Base.new(data : {
 ////// RAW_METALS
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Copper Ingot",
     description: 'Copper Ingot',
     examine : 'Pure copper ingot.',
@@ -3082,7 +3075,7 @@ Item.Base.new(data : {
 
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Iron Ingot",
     description: 'Iron Ingot',
     examine : 'Pure iron ingot',
@@ -3122,7 +3115,7 @@ Item.Base.new(data : {
 
 })   
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Steel Ingot",
     description: 'Steel Ingot',
     examine : 'Pure Steel ingot.',
@@ -3164,7 +3157,7 @@ Item.Base.new(data : {
 
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Mythril Ingot",
     description: 'Mythril Ingot',
     examine : 'Pure iron ingot',
@@ -3204,7 +3197,7 @@ Item.Base.new(data : {
 
 })   
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Quicksilver Ingot",
     description: 'Quicksilver Ingot',
     examine : 'Pure quicksilver alloy ingot',
@@ -3244,7 +3237,7 @@ Item.Base.new(data : {
 
 })   
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Adamantine Ingot",
     description: 'Adamantine Ingot',
     examine : 'Pure adamantine ingot',
@@ -3285,7 +3278,7 @@ Item.Base.new(data : {
 }) 
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Sunstone Ingot",
     description: 'Sunstone alloy ingot',
     examine : 'An alloy with mostly sunstone, it dully shines with a soft yellow gleam',
@@ -3325,7 +3318,7 @@ Item.Base.new(data : {
 
 }) 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Moonstone Ingot",
     description: 'Sunstone alloy ingot',
     examine : 'An alloy with mostly moonstone, it dully shines with a soft teal',
@@ -3365,7 +3358,7 @@ Item.Base.new(data : {
 
 }) 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Dragonglass Ingot",
     description: 'Dragonglass alloy ingot',
     examine : 'An alloy with mostly dragonglass, it sharply shines black.',
@@ -3404,7 +3397,7 @@ Item.Base.new(data : {
     onCreate ::(item, user, creationHint) {}
 
 }) 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Ore",
     description: "Raw ore. It's hard to tell exactly what kind of metal it is.",
     examine : 'Could be smelted into',
@@ -3443,7 +3436,7 @@ Item.Base.new(data : {
 
 }) 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Gold Pouch",
     description: "A pouch of coins.",
     examine : '',
@@ -3483,7 +3476,7 @@ Item.Base.new(data : {
 
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Skill Crystal",
     description: "Irridescent crystal that imparts knowledge when used.",
     examine : 'Quite sought after, highly skilled mages usually produce them for the public',
@@ -3527,7 +3520,7 @@ Item.Base.new(data : {
 
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Runestone",
     description: "Resonates with certain locations and can reveal runes.",
     examine : '',
@@ -3567,7 +3560,7 @@ Item.Base.new(data : {
 
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Tablet",
     description: "A tablet with carved with runes in Draconic. Arcanists might find this valuable.",
     examine : 'Might have been used for some highly specialized purpose. These seem very rare.',
@@ -3608,7 +3601,7 @@ Item.Base.new(data : {
 }) 
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Ingredient",
     description: "A pack of ingredients used for potions and brews.",
     examine : 'Common ingredients used by alchemists.',
@@ -3647,7 +3640,7 @@ Item.Base.new(data : {
 }) 
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Wyvern Key of Fire",
     description: 'A key to another island. Its quite big and warm to the touch.',
     examine : '',
@@ -3706,7 +3699,7 @@ Item.Base.new(data : {
     
 })
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Wyvern Key of Ice",
     description: 'A key to another island. Its quite big and cold to the touch.',
     examine : '',
@@ -3765,7 +3758,7 @@ Item.Base.new(data : {
     
 })    
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Wyvern Key of Thunder",
     description: 'A key to another island. Its quite big and softly hums.',
     examine : '',
@@ -3824,7 +3817,7 @@ Item.Base.new(data : {
     
 })    
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Wyvern Key of Light",
     description: 'A key to another island. Its quite big and faintly glows.',
     examine : '',
@@ -3883,7 +3876,7 @@ Item.Base.new(data : {
     
 })       
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Wyvern Key",
     description: 'A key to another island.',
     examine : '',
@@ -3961,7 +3954,7 @@ Item.Base.new(data : {
 })    
 
 
-Item.Base.new(data : {
+Item.Base.newEntry(data : {
     name : "Sentimental Box",
     description: 'A box of sentimental value. You feel like you should open it right away.',
     examine : '',
