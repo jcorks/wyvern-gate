@@ -18,7 +18,7 @@
 @:Random = import(module:'game_singleton.random.mt');
 @:BattleAction = import(module:'game_struct.battleaction.mt');
 @:class  = import(module:'Matte.Core.Class');
-@:Ability = import(module:'game_class.ability.mt');
+@:Ability = import(module:'game_database.ability.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:BattleAI = LoadableClass.create(
@@ -44,7 +44,7 @@
                     battle.entityCommitAction(action:BattleAction.new(
                         state : {
                             ability: 
-                                Ability.database.find(name:'Attack'),
+                                Ability.find(name:'Attack'),
 
                             targets: [
                                 Random.pickArrayItem(list:enemies)
@@ -57,7 +57,7 @@
                 when(enemies->keycount == 0)
                     battle.entityCommitAction(action:BattleAction.new(
                         state : {
-                            ability: Ability.database.find(name:'Wait'),
+                            ability: Ability.find(name:'Wait'),
                             targets: [],
                             extraData: {}                        
                         }

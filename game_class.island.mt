@@ -18,15 +18,15 @@
 @:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
 @:NameGen = import(module:'game_singleton.namegen.mt');
-@:Species = import(module:'game_class.species.mt');
+@:Species = import(module:'game_database.species.mt');
 @:Entity = import(module:'game_class.entity.mt');
-@:Landmark = import(module:'game_class.landmark.mt');
+@:Landmark = import(module:'game_mutator.landmark.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:LargeMap = import(module:'game_singleton.largemap.mt');
 @:Party = import(module:'game_class.party.mt');
-@:Profession = import(module:'game_class.profession.mt');
-@:Event = import(module:'game_class.event.mt');
+@:Profession = import(module:'game_mutator.profession.mt');
+@:Event = import(module:'game_mutator.event.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
@@ -173,9 +173,9 @@
                 if (Number.random() > 0.5)
                     entity.learnNextAbility();
               
-                @:Item = import(module:'game_class.item.mt');
+                @:Item = import(module:'game_mutator.item.mt');
                 // add a weapon
-                @:wep = Item.Base.database.getRandomFiltered(
+                @:wep = Item.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
                         value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
@@ -201,9 +201,9 @@
                 }
 
               
-                @:Item = import(module:'game_class.item.mt');
+                @:Item = import(module:'game_mutator.item.mt');
                 // add a weapon
-                @:wep = Item.Base.database.getRandomFiltered(
+                @:wep = Item.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
                         value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
@@ -228,9 +228,9 @@
                 }
 
               
-                @:Item = import(module:'game_class.item.mt');
+                @:Item = import(module:'game_mutator.item.mt');
                 // add a weapon
-                @:wep = Item.Base.database.getRandomFiltered(
+                @:wep = Item.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
                         value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
@@ -248,7 +248,7 @@
 
 
                 // add some armor!
-                @:wep = Item.Base.database.getRandomFiltered(
+                @:wep = Item.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
                         value.type == Item.TYPE.ARMOR
@@ -310,7 +310,7 @@
                     state.species = ::<={
                         @rarity = 1;
                         return [
-                            ... Species.database.getRandomSet(
+                            ... Species.getRandomSet(
                                     count : (5+Number.random()*5)->ceil,
                                     filter:::(value) <- value.special == false
                                 )
@@ -344,7 +344,7 @@
                 for(0, locationCount)::(i) {
                     LargeMap.addLandmark(
                         map:state.map,
-                        base:Landmark.Base.database.getRandomWeightedFiltered(
+                        base:Landmark.database.getRandomWeightedFiltered(
                             filter:::(value) <- value.isUnique == false
                         ),
                         island:this
@@ -354,7 +354,7 @@
                 // guaranteed gate
                 LargeMap.addLandmark(
                     map:state.map,
-                    base:Landmark.Base.database.find(name:'Wyvern Gate'),
+                    base:Landmark.database.find(name:'Wyvern Gate'),
                     island:this
                 )
                 
@@ -366,34 +366,34 @@
                     (0):// nothign defeated
                         LargeMap.addLandmark(
                             map:state.map,
-                            base:Landmark.Base.database.find(name:'Shrine of Fire'),
+                            base:Landmark.database.find(name:'Shrine of Fire'),
                             island:this
                         ),
 
                     (1):// fire defeated
                         LargeMap.addLandmark(
                             map:state.map,
-                            base:Landmark.Base.database.find(name:'Shrine of Ice'),
+                            base:Landmark.database.find(name:'Shrine of Ice'),
                             island:this
                         ),
 
                     (2):// ice defeated
                         LargeMap.addLandmark(
                             map:state.map,
-                            base:Landmark.Base.database.find(name:'Shrine of Thunder'),
+                            base:Landmark.database.find(name:'Shrine of Thunder'),
                             island:this
                         ),
                         
                     (3):// thunder defeated
                         LargeMap.addLandmark(
                             map:state.map,
-                            base:Landmark.Base.database.find(name:'Shrine of Light'),
+                            base:Landmark.database.find(name:'Shrine of Light'),
                             island:this
                         )
                     /*
                         LargeMap.addLandmark(
                             map:state.map,
-                            base:Landmark.Base.database.find(name:'Lost Shrine'),
+                            base:Landmark.database.find(name:'Lost Shrine'),
                             island:this
                         )
                     */
@@ -402,7 +402,7 @@
                 
                 LargeMap.addLandmark(
                     map:state.map,
-                    base:Landmark.Base.database.find(name:'Town'),
+                    base:Landmark.database.find(name:'Town'),
                     island:this
                 )
 
@@ -413,7 +413,7 @@
 
                 LargeMap.addLandmark(
                     map:state.map,
-                    base:Landmark.Base.database.find(name:'City'),
+                    base:Landmark.database.find(name:'City'),
                     island:this
                 )
 
@@ -487,14 +487,14 @@
                         if (Number.random() < 0.001) ::<= {
                             this.addEvent(
                                 event:Event.new(
-                                    base:Event.Base.database.find(name:'Encounter:Normal'),
+                                    base:Event.database.find(name:'Encounter:Normal'),
                                     parent:this 
                                 )
                             );
                         } else ::<= {
                             this.addEvent(
                                 event:Event.new(
-                                    base:Event.Base.database.getRandomFiltered(
+                                    base:Event.database.getRandomFiltered(
                                         filter:::(value) <- !value.name->contains(key:'Encounter')
                                     ),
                                     parent:this
@@ -545,7 +545,7 @@
                     island: this,
                     speciesHint:    if (speciesHint == empty) random.pickArrayItemWeighted(list:state.species).species else speciesHint,
                     levelHint:      if (levelHint == empty) random.integer(from:state.levelMin, to:state.levelMax) else levelHint,
-                    professionHint: if (professionHint == empty) Profession.Base.database.getRandomFiltered(filter::(value)<-value.learnable).name else professionHint
+                    professionHint: if (professionHint == empty) Profession.database.getRandomFiltered(filter::(value)<-value.learnable).name else professionHint
                 );
                 
                 augmentTiered(entity:out);
@@ -564,7 +564,7 @@
                     island: this,
                     speciesHint: random.pickArrayItemWeighted(list:state.species).species,
                     levelHint,
-                    professionHint: Profession.Base.database.getRandomFiltered(filter::(value)<-value.learnable).name
+                    professionHint: Profession.database.getRandomFiltered(filter::(value)<-value.learnable).name
                 );       
                 
                 augmentTiered(entity:angy);                       

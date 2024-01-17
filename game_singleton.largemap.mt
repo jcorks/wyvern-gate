@@ -18,7 +18,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
-@:Landmark = import(module:'game_class.landmark.mt');
+@:Landmark = import(module:'game_mutator.landmark.mt');
 @:Map = import(module:'game_class.map.mt');
 
 @:mapSizeW  = 38;

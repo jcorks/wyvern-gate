@@ -23,7 +23,7 @@
 
 
 // conditions are checked at the end of turns
-@:ItemEnchantCondition = Database.create(
+@:ItemEnchantCondition = Database.new(
     name : 'Wyvern.ItemEnchantCondition',
     attributes : {
         name : String,

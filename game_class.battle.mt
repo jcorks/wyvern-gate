@@ -30,7 +30,7 @@
 
 @:battleLoot ::(rngLoot, defeated, landmark, party, finishEnd) {
 
-    @:Item = import(module:'game_class.item.mt');
+    @:Item = import(module:'game_mutator.item.mt');
 
 
     @:forcedAcquisition = [];
@@ -82,7 +82,7 @@
                     }
                     for(0, 3)::(index) {
                         @:item = Item.new(
-                            base:Item.Base.database.getRandomFiltered(
+                            base:Item.database.getRandomFiltered(
                                 filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= landmark.island.tier+1
                             ),
                             rngEnchantHint:true, from:party.members[0]
@@ -107,7 +107,7 @@
                     }
                     for(0, 3)::(index) {
                         @:item = Item.new(
-                            base:Item.Base.database.getRandomFiltered(
+                            base:Item.database.getRandomFiltered(
                                 filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= landmark.island.tier+2
                             ),
                             rngEnchantHint:true, from:party.members[0]

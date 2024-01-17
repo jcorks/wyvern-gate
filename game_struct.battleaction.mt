@@ -16,14 +16,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:struct = import(module:'game_struct.mt');
-@:Ability = import(module:'game_class.ability.mt');
+@:Ability = import(module:'game_database.ability.mt');
+@:Database = import(module:'game_class.database.mt');
 
 
 return struct(
     name: 'Wyvern.Battle.Action',
     
     items : {
-        ability: Ability.type,
+        ability: Database.type,
         targets: Object,
         turnIndex: Number,
         extraData: Object

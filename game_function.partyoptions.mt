@@ -137,7 +137,7 @@ return ::{
                                         }                                    
                                     }
 
-                                    @:Item = import(module:'game_class.item.mt');
+                                    @:Item = import(module:'game_mutator.item.mt');
      
                                     windowEvent.queueChoices(
                                         leftWeight: 1,

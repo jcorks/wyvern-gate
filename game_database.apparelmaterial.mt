@@ -19,7 +19,7 @@
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 
-@:ApparelMaterial = Database.create(
+@:ApparelMaterial = Database.new(
     name: 'Wyvern.ApparelMaterial',
     attributes : {
         name : String,

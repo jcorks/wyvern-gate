@@ -19,7 +19,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:Random = import(module:'game_singleton.random.mt');
 @:BattleAction = import(module:'game_struct.battleaction.mt');
-@:Ability = import(module:'game_class.ability.mt');
+@:Ability = import(module:'game_database.ability.mt');
 @:itemmenu = import(module:'game_function.itemmenu.mt');
 
 
@@ -274,7 +274,7 @@ return ::(
                 commitAction(action:
                     BattleAction.new(
                         state : {
-                            ability: Ability.database.find(name:'Wait'),
+                            ability: Ability.find(name:'Wait'),
                             targets: [],
                             extraData: {}
                         }
@@ -294,7 +294,7 @@ return ::(
                 commitAction(action:
                     BattleAction.new(
                         state : {
-                            ability: Ability.database.find(name:'Wyvern Prayer'),
+                            ability: Ability.find(name:'Wyvern Prayer'),
                             targets: [...enemies, ...allies],
                             extraData: {}
                         }

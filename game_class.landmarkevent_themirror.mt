@@ -1,11 +1,11 @@
 @:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
 @:distance = import(module:'game_function.distance.mt');
-@:Species = import(module:'game_class.species.mt');
-@:Profession = import(module:'game_class.profession.mt');
+@:Species = import(module:'game_database.species.mt');
+@:Profession = import(module:'game_mutator.profession.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
-@:Item = import(module:'game_class.item.mt');
+@:Item = import(module:'game_mutator.item.mt');
 
 @:ROOM_MAX_ENTITY = 6;
 @:REACHED_DISTANCE = 1.5;
@@ -23,7 +23,7 @@
         @hasBeast = false;
 
         @:Entity = import(module:'game_class.entity.mt');
-        @:Location = import(module:'game_class.location.mt');
+        @:Location = import(module:'game_mutator.location.mt');
 
     
     
@@ -56,7 +56,7 @@
             }  
             
             @:inv = Inventory.new();
-            inv.add(item:Item.new(base:Item.Base.database.find(name:'Life Crystal'
+            inv.add(item:Item.new(base:Item.database.find(name:'Life Crystal'
             ), from:partyCopy[0]));                        
             partyCopy[0].forceDrop = inv;
 

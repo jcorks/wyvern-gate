@@ -20,7 +20,7 @@
         @isBusy = false;
 
         @:Entity = import(module:'game_class.entity.mt');
-        @:Location = import(module:'game_class.location.mt');
+        @:Location = import(module:'game_mutator.location.mt');
         
     
     
@@ -45,7 +45,7 @@
             
 
             ::<={
-                @:Item = import(module:'game_class.item.mt');
+                @:Item = import(module:'game_mutator.item.mt');
 
                 if (island_.tier > 0)
                     ents->push(value:landmark_.island.newInhabitant());
@@ -58,7 +58,7 @@
                 foreach(ents) ::(index, ref) {
 
                     ref.inventory.clear();
-                    @:itembase = Item.Base.database.getRandomWeightedFiltered(
+                    @:itembase = Item.database.getRandomWeightedFiltered(
                         filter:::(value) <- value.isUnique == false && value.tier <= island_.tier                    
                     );
                     if (itembase.name != 'None') ::<={

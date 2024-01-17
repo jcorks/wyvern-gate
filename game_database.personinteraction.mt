@@ -5,15 +5,15 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:Battle = import(module:'game_class.battle.mt');
 @:random = import(module:'game_singleton.random.mt');
-@:Material = import(module:'game_class.material.mt');
-@:Profession = import(module:'game_class.profession.mt');
-@:Item = import(module:'game_class.item.mt');
+@:Material = import(module:'game_database.material.mt');
+@:Profession = import(module:'game_mutator.profession.mt');
+@:Item = import(module:'game_mutator.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:Personality = import(module:'game_class.personality.mt');
 @:Damage = import(module:'game_class.damage.mt');
 
 
-@:PersonInteraction = Database.create(
+@:PersonInteraction = Database.new(
     name : 'Wyvern.PersonInteraction',
     attributes : {
         name : String,

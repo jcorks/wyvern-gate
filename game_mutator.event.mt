@@ -21,31 +21,32 @@
 @:random = import(module:'game_singleton.random.mt');
 @:Battle = import(module:'game_class.battle.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
-@:Item = import(module:'game_class.item.mt');
+@:Item = import(module:'game_mutator.item.mt');
 @:Entity = import(module:'game_class.entity.mt');
-@:Scene = import(module:'game_class.scene.mt');
+@:Scene = import(module:'game_database.scene.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
 
 
-@:Event = LoadableClass.create(
+@:Event = databaseItemMutatorClass(
     name: 'Wyvern.Event',
-    statics : {
-        Base  :::<= {
-            @db;
-            return {
-                get ::<- db,
-                set ::(value) <- db = value
-            }
-        }
-    },
     items : {
         timeLeft : empty,
-        base : empty,
         duration : empty,
         startAt : empty   
     },
+    database: Database.new(
+        name : 'Wyvern.Event.Base',
+        attributes : {
+            name : String,
+            rarity: Number,
+            onEventStart : Function,
+            onEventUpdate : Function,
+            onEventEnd : Function
+        }            
+    ),
         
     define:::(this, state) {        
     
@@ -57,7 +58,7 @@
                 @:world = import(module:'game_singleton.world.mt');
                 
                 @:Island = import(module:'game_class.island.mt');
-                @:Landmark = import(module:'game_class.landmark.mt');
+                @:Landmark = import(module:'game_mutator.landmark.mt');
                 
                 @landmark;
                 @island;
@@ -108,32 +109,14 @@
             
             landmark : {
                 get :: <- landmark_
-            },
-                        
-            base : {
-                get :: <- state.base
             }
-            
         }
     }
 
 );
 
 
-Event.Base = Database.create(
-    name : 'Wyvern.Event.Base',
-    attributes : {
-        name : String,
-        rarity: Number,
-        onEventStart : Function,
-        onEventUpdate : Function,
-        onEventEnd : Function
-    }            
-);
-
-
-
-Event.Base.newEntry(
+Event.database.newEntry(
     data: {
         name : 'Weather:1',
         rarity: 10,        
@@ -182,13 +165,13 @@ Event.Base.newEntry(
     }
 )
 
-Event.Base.newEntry(
+Event.database.newEntry(
     data: {
         name : 'Encounter:GateBoss',
         rarity: 10000000,        
         onEventStart ::(event) {
-            @:Species = import(module:'game_class.species.mt');
-            @:Profession = import(module:'game_class.profession.mt');
+            @:Species = import(module:'game_database.species.mt');
+            @:Profession = import(module:'game_mutator.profession.mt');
 
             windowEvent.queueMessage(speaker: '???', text:'The gates of wyverns are only for use by the chosen.');
             windowEvent.queueMessage(speaker: '???', text:'You shall be judged.');
@@ -261,12 +244,12 @@ Event.Base.newEntry(
                             /*
                             @message = 'The party was given a Tablet.';
                             @:item = Item.new(
-                                base: Item.Base.database.find(name:'Tablet')
+                                base: Item.database.find(name:'Tablet')
                             );
                             */
                             @message = 'The party picks it up and puts it in their inventory.';
                             @:item = Item.new(
-                                base: Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique)
+                                base: Item.database.getRandomFiltered(filter::(value) <- value.isUnique)
                             );
                             
                             windowEvent.queueMessage(text: message);
@@ -297,7 +280,7 @@ Event.Base.newEntry(
     }
 )
 
-Event.Base.newEntry(
+Event.database.newEntry(
     data: {
         name : 'Encounter:TreasureBoss',
         rarity: 10000000,        
@@ -351,7 +334,7 @@ Event.Base.newEntry(
                             @:foundMessage ::(itemName){
                                 windowEvent.queueMessage(text: 'It looks like they dropped something heavy during the fight...');
                                 windowEvent.queueMessage(text: '.. is that...?');                            
-                                party.inventory.add(item:Item.new(base:Item.Base.database.find(name:itemName),from:party.members[0]));
+                                party.inventory.add(item:Item.new(base:Item.database.find(name:itemName),from:party.members[0]));
                                 windowEvent.queueMessage(text: 'The party obtained the ' + itemName + '!');                            
                             }
 
@@ -397,7 +380,7 @@ Event.Base.newEntry(
     }
 )        
 
-Event.Base.newEntry(
+Event.database.newEntry(
     data: {
         name : 'Chest:Normal',
         rarity: 1, //5        
@@ -435,7 +418,7 @@ Event.Base.newEntry(
                 }                
                 for(0, itemCount)::(index) {
                     @:item = Item.new(
-                        base:Item.Base.database.getRandomFiltered(
+                        base:Item.database.getRandomFiltered(
                             filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= event.island.tier
                         ),
                         rngEnchantHint:true, from:opener
@@ -485,7 +468,7 @@ Event.Base.newEntry(
 )
 
 
-Event.Base.newEntry(
+Event.database.newEntry(
     data: {
         name : 'BBQ',
         rarity: 1, //5        
@@ -565,7 +548,7 @@ Event.Base.newEntry(
     }
 )
 
-Event.Base.newEntry(
+Event.database.newEntry(
     data: {
         name : 'Camp out',
         rarity: 1, //5        
@@ -653,7 +636,7 @@ Event.Base.newEntry(
 
 
 
-Event.Base.newEntry(
+Event.database.newEntry(
     data: {
         name : 'Encounter:Normal',
         rarity: 2,        
@@ -760,7 +743,7 @@ Event.Base.newEntry(
 )
 
 
-Event.Base.newEntry(
+Event.database.newEntry(
     data: {
         name : 'Encounter:Non-peaceful',
         rarity: 20000000,        
@@ -794,7 +777,7 @@ Event.Base.newEntry(
                     foreach(e)::(index, guard) {
                         guard.equip(
                             item:Item.new(
-                                base:Item.Base.database.find(
+                                base:Item.database.find(
                                     name:'Halberd'
                                 ),
                                 from:guard, 
@@ -809,7 +792,7 @@ Event.Base.newEntry(
 
                         guard.equip(
                             item:Item.new(
-                                base: Item.Base.database.find(
+                                base: Item.database.find(
                                     name:'Plate Armor'
                                 ),
                                 from:guard, 

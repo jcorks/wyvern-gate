@@ -3,15 +3,16 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:State = import(module:'game_class.state.mt');
 @:class = import(module:'Matte.Core.Class');
-@:Item = import(module:'game_class.item.mt');
+@:Item = import(module:'game_mutator.item.mt');
 @:distance = import(module:'game_function.distance.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:Damage = import(module:'game_class.damage.mt');
-@:Landmark = import(module:'game_class.landmark.mt');
+@:Landmark = import(module:'game_mutator.landmark.mt');
 @:world = import(module:'game_singleton.world.mt');
 @:Battle = import(module:'game_class.battle.mt');
 @:Entity = import(module:'game_class.entity.mt');
+@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
 
 /*
     Some tasks to implement:
@@ -105,7 +106,7 @@
                     state.onCancel = empty;
                     if (state.onArrive) ::<= {
                         @:task = MapEntity.Task.new(
-                            base:MapEntity.Task.Base.database.find(name:state.onArrive)
+                            base:MapEntity.Task.database.find(name:state.onArrive)
                         );
                         task.do(mapEntity:this);
                         
@@ -138,7 +139,7 @@
             addUpkeepTask ::(name) {
                 state.onStepSet->push(
                     value: MapEntity.Task.new(
-                        base:MapEntity.Task.Base.database.find(name)
+                        base:MapEntity.Task.database.find(name)
                     )
                 );
             },
@@ -181,7 +182,7 @@
                     }
 
                 windowEvent.autoSkip = false;
-                @:Location = import(module:'game_class.location.mt');
+                @:Location = import(module:'game_mutator.location.mt');
                 
                 
                 if (defeated) ::<= {
@@ -268,7 +269,7 @@
                 when(isRemoved) empty;
                 if (state.onCancel != empty) ::<= {
                     @:task = MapEntity.Task.new(
-                        base:MapEntity.Task.Base.database.find(name:state.onArrive)
+                        base:MapEntity.Task.database.find(name:state.onArrive)
                     );
                     task.do(mapEntity:this);
                 }
@@ -340,26 +341,22 @@ MapEntity.Controller = LoadableClass.create(
 );
 
 
-MapEntity.Task = LoadableClass.create(
+MapEntity.Task = databaseItemMutatorClass(
     name : "Wyvern.MapEntity.Task",
-    statics : {
-        Base :::<= {
-            @a;
-            return {
-                get ::<- a,
-                set ::(value) <- a = value
-            }
-        }
-    },
     items : {
-        data : empty,
-        base : empty,
+        data : empty
     },    
+    database : Database.new(
+        name : 'Wyvern.MapEntity.Task.Base',
+        attributes : {
+            name : String,
+            startup : Function,
+            do : Function
+        }
+    ),
     define::(this, state) {    
-    
         this.interface = {
             defaultLoad ::(base) {
-                state.base = base;
                 state.data = base.startup();
             },
             
@@ -373,21 +370,12 @@ MapEntity.Task = LoadableClass.create(
     }
 );
 
-MapEntity.Task.Base = Database.create(
-    name : 'Wyvern.MapEntity.Task.Base',
-    attributes : {
-        name : String,
-        startup : Function,
-        do : Function
-    }
-);
-
 
 
 
 // roams to random areas with the following triggers:
 // if within interest distance, stairs down locations will 
-MapEntity.Task.Base.newEntry(
+MapEntity.Task.database.newEntry(
     data : {
         name: 'dungeonencounters-roam',
         startup ::{
@@ -411,7 +399,7 @@ MapEntity.Task.Base.newEntry(
 );
 
 
-MapEntity.Task.Base.newEntry(
+MapEntity.Task.database.newEntry(
     data : {
         name: 'thebeast-roam',
         startup ::{
@@ -437,13 +425,13 @@ MapEntity.Task.Base.newEntry(
 
 
 
-MapEntity.Task.Base.newEntry(
+MapEntity.Task.database.newEntry(
 
     data : {
         name: 'exit',
         startup ::{},
         do ::(data, mapEntity) {
-            @:Location = import(module:'game_class.location.mt');
+            @:Location = import(module:'game_mutator.location.mt');
             @item = mapEntity.controller.map.getItem(data:mapEntity);
             when(item == empty) empty;
             if ({:::} {
@@ -491,7 +479,7 @@ MapEntity.Task.Base.newEntry(
     }
 
 
-    MapEntity.Task.Base.newEntry(
+    MapEntity.Task.database.newEntry(
         data : {
             name: 'aggressive',
             startup ::{
@@ -797,7 +785,7 @@ MapEntity.Task.Base.newEntry(
     }
 
 
-    MapEntity.Task.Base.newEntry(
+    MapEntity.Task.database.newEntry(
         data : {
             name: 'specter',
             startup ::{

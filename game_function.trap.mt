@@ -1,10 +1,10 @@
 @:Database = import(module:'game_class.database.mt');
 @:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
-@Landmark = import(module:'game_class.landmark.mt');
-@:Item = import(module:'game_class.item.mt');
+@Landmark = import(module:'game_mutator.landmark.mt');
+@:Item = import(module:'game_mutator.item.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
-@:Scene = import(module:'game_class.scene.mt');
+@:Scene = import(module:'game_database.scene.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:StatSet = import(module:'game_class.statset.mt');
@@ -17,11 +17,11 @@
     ::(location, party, whom) {
         if (location.targetLandmark == empty) ::<={
    
-            @:Landmark = import(module:'game_class.landmark.mt');
+            @:Landmark = import(module:'game_mutator.landmark.mt');
             
             location.targetLandmark = 
                 location.landmark.island.newLandmark(
-                    base:Landmark.Base.database.find(name:location.landmark.base.name),
+                    base:Landmark.database.find(name:location.landmark.base.name),
                     floorHint:location.landmark.floor+1
                 )
             ;

@@ -1,8 +1,8 @@
 @:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
 @:distance = import(module:'game_function.distance.mt');
-@:Species = import(module:'game_class.species.mt');
-@:Profession = import(module:'game_class.profession.mt');
+@:Species = import(module:'game_database.species.mt');
+@:Profession = import(module:'game_mutator.profession.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
 
@@ -22,7 +22,7 @@
         @hasBeast = false;
 
         @:Entity = import(module:'game_class.entity.mt');
-        @:Location = import(module:'game_class.location.mt');
+        @:Location = import(module:'game_mutator.location.mt');
 
     
     
@@ -40,8 +40,8 @@
 
             @:beast = island_.newInhabitant();
             beast.name = 'the Treasure Golem';
-            beast.species = Species.database.find(name:'Treasure Golem');
-            beast.profession = Profession.new(base:Profession.Base.database.find(name:'Treasure Golem'));               
+            beast.species = Species.find(name:'Treasure Golem');
+            beast.profession = Profession.new(base:Profession.database.find(name:'Treasure Golem'));               
             @:inv = Inventory.new();
             inv.addGold(amount:900 + (Number.random()*200)->floor);
             beast.forceDrop = inv;

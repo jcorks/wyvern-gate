@@ -2,18 +2,18 @@
 @:random = import(module:'game_singleton.random.mt');
 @:distance = import(module:'game_function.distance.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
-@:Species = import(module:'game_class.species.mt');
-@:Profession = import(module:'game_class.profession.mt');
+@:Species = import(module:'game_database.species.mt');
+@:Profession = import(module:'game_mutator.profession.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:Battle = import(module:'game_class.battle.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
-@:Item = import(module:'game_class.item.mt');
+@:Item = import(module:'game_mutator.item.mt');
 
 @:ROOM_SPECTER_COUNT = 3;
 @:ItemSpecter = class(
     define::(this) {
         @:Entity = import(module:'game_class.entity.mt');
-        @:Location = import(module:'game_class.location.mt');
+        @:Location = import(module:'game_mutator.location.mt');
 
         @map_;
         @island_;
@@ -36,11 +36,11 @@
 
             @:specter = island_.newInhabitant();
             specter.name = 'the Wyvern Specter';
-            specter.species = Species.database.find(name:'Wyvern Specter');
-            specter.profession = Profession.new(base:Profession.Base.database.find(name:'Wyvern Specter'));               
+            specter.species = Species.find(name:'Wyvern Specter');
+            specter.profession = Profession.new(base:Profession.database.find(name:'Wyvern Specter'));               
 
             @:inv = Inventory.new();
-            inv.add(item:Item.new(base:Item.Base.database.find(name:'Life Crystal'
+            inv.add(item:Item.new(base:Item.database.find(name:'Life Crystal'
             ), from:specter));            
             specter.forceDrop = inv;
             

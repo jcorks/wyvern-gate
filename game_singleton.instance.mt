@@ -21,15 +21,15 @@
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Battle = import(module:'game_class.battle.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
-@:Landmark = import(module:'game_class.landmark.mt');
+@:Landmark = import(module:'game_mutator.landmark.mt');
 @:Island = import(module:'game_class.island.mt');
-@:Event  = import(module:'game_class.event.mt');
-@:Interaction = import(module:'game_class.interaction.mt');
-@:Item = import(module:'game_class.item.mt');
+@:Event  = import(module:'game_mutator.event.mt');
+@:Interaction = import(module:'game_database.interaction.mt');
+@:Item = import(module:'game_mutator.item.mt');
 @:namegen = import(module:'game_singleton.namegen.mt');
 @:partyOptions = import(module:'game_function.partyoptions.mt');
 @:LargeMap = import(module:'game_singleton.largemap.mt');
-@:Scenario = import(module:'game_class.scenario.mt');
+@:Scenario = import(module:'game_mutator.scenario.mt');
 
 import(module:'game_function.pickpartyitem.mt');
 
@@ -39,21 +39,21 @@ import(module:'game_function.pickpartyitem.mt');
 
 import(module:'game_class.statset.mt');
 import(module:'game_class.battleai.mt');
-import(module:'game_class.entityquality.mt');
+import(module:'game_mutator.entityquality.mt');
 import(module:'game_class.inventory.mt');
-import(module:'game_class.itemenchant.mt');
+import(module:'game_mutator.itemenchant.mt');
 import(module:'game_class.map.mt');
 import(module:'game_class.party.mt');
-import(module:'game_class.profession.mt');
+import(module:'game_mutator.profession.mt');
 import(module:'game_class.stateflags.mt');
 
 
-import(module:'game_class.item.mt');
+import(module:'game_mutator.item.mt');
 import(module:'game_class.entity.mt');
-import(module:'game_class.event.mt');
+import(module:'game_mutator.event.mt');
 import(module:'game_class.island.mt');
-import(module:'game_class.landmark.mt');
-import(module:'game_class.location.mt');
+import(module:'game_mutator.landmark.mt');
+import(module:'game_mutator.location.mt');
 
 
 
@@ -183,7 +183,7 @@ return class(
                             @:enterName = import(module:'game_function.name.mt');
 
 
-                            @:choices = Scenario.Base.database.getAll();
+                            @:choices = Scenario.database.getAll();
                             @:choiceNames = [...choices]->map(to::(value) <- value.name);
                             
                             

@@ -28,25 +28,16 @@
 @:Map = import(module:'game_class.map.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
-@:LandmarkEvent = import(module:'game_class.landmarkevent.mt');
+@:LandmarkEvent = import(module:'game_mutator.landmarkevent.mt');
+@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
 
 
 
-@:Landmark = LoadableClass.create(  
+@:Landmark = databaseItemMutatorClass(  
     name : 'Wyvern.Landmark',
-    statics : {
-        Base  :::<= {
-            @db;
-            return {
-                get ::<- db,
-                set ::(value) <- db = value
-            }
-        }
-    },
     items : {
         worldID : empty,
         name : empty,
-        base : empty,
         x : 0,
         y : 0,
         discovered : false,
@@ -59,10 +50,36 @@
         mapEntityController : empty
     },
     
+    database : Database.new(
+        name : 'Wyvern.Landmark.Base',
+        attributes : {
+            name : String,
+            legendName : String,
+            symbol : String,
+            rarity: Number,
+            isUnique : Boolean,
+            minLocations : Number,
+            maxLocations : Number,
+            possibleLocations : Object,
+            requiredLocations : Object,
+            startingEvents : Object,
+            canSave : Boolean,
+            peaceful: Boolean,
+            dungeonMap: Boolean,
+            dungeonForceEntrance : Boolean,
+            mapHint : Object,
+            onCreate : Function,
+            onVisit : Function,
+            guarded : Boolean,
+            pointOfNoReturn : Boolean
+        }
+    ),
+
+    
     define :::(this, state) {
-        @:MapEntity = import(module:'game_class.mapentity.mt');
+        @:MapEntity = import(module:'game_mutator.mapentity.mt');
         
-        if (Location == empty) Location = import(module:'game_class.location.mt');
+        if (Location == empty) Location = import(module:'game_mutator.location.mt');
 
         @island_;
         @structureMapBuilder; // only used in initialization
@@ -208,7 +225,7 @@
                     state.events->push(value:
                         LandmarkEvent.new(
                             parent: this,
-                            base: LandmarkEvent.Base.database.find(name:evt)
+                            base: LandmarkEvent.database.find(name:evt)
                         )
                     );
                 }
@@ -278,10 +295,6 @@
                     }
                     return out;
                 }
-            },
-
-            base : {
-                get ::<- state.base
             },
             
             name : {
@@ -414,7 +427,7 @@
             addLocation ::(name, ownedByHint, x, y) {
             
                 @loc = Location.new(
-                    base:Location.Base.database.find(name:name),
+                    base:Location.database.find(name:name),
                     landmark:this, ownedByHint,
                     xHint: x,
                     yHint: y
@@ -458,7 +471,7 @@
                 @:partyOptions = import(module:'game_function.partyoptions.mt');
                 @:world = import(module:'game_singleton.world.mt');
                 @:Island = import(module:'game_class.island.mt');
-                @:Event  = import(module:'game_class.event.mt');
+                @:Event  = import(module:'game_mutator.event.mt');
 
                 @:party = world.party;
                 
@@ -612,7 +625,7 @@
                             if (state.stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
                                 this.island.addEvent(
                                     event:Event.new(
-                                        base:Event.Base.database.find(name:'Encounter:Non-peaceful'),
+                                        base:Event.database.find(name:'Encounter:Non-peaceful'),
                                         parent:this //, currentTime
                                     )
                                 );
@@ -639,33 +652,8 @@
     }
 );
 
-Landmark.Base = Database.create(
-    name : 'Wyvern.Landmark.Base',
-    attributes : {
-        name : String,
-        legendName : String,
-        symbol : String,
-        rarity: Number,
-        isUnique : Boolean,
-        minLocations : Number,
-        maxLocations : Number,
-        possibleLocations : Object,
-        requiredLocations : Object,
-        startingEvents : Object,
-        canSave : Boolean,
-        peaceful: Boolean,
-        dungeonMap: Boolean,
-        dungeonForceEntrance : Boolean,
-        mapHint : Object,
-        onCreate : Function,
-        onVisit : Function,
-        guarded : Boolean,
-        pointOfNoReturn : Boolean
-    }
-);
 
-
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Town',
         legendName : 'Town',
@@ -706,7 +694,7 @@ Landmark.Base.newEntry(
     }
 )
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'City',
         legendName : 'City',
@@ -753,7 +741,7 @@ Landmark.Base.newEntry(
 )
 
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Mine',
         legendName: 'Mine',
@@ -793,7 +781,7 @@ Landmark.Base.newEntry(
 )
 
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Wyvern Gate',
         legendName: 'Gate',
@@ -829,7 +817,7 @@ Landmark.Base.newEntry(
     }
 )
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Wyvern Temple',
         legendName: 'Temple',
@@ -859,7 +847,7 @@ Landmark.Base.newEntry(
 
 
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Shrine of Fire',
         legendName: 'Shrine',
@@ -919,7 +907,7 @@ Landmark.Base.newEntry(
     }
 )
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Shrine of Ice',
         legendName: 'Shrine',
@@ -972,7 +960,7 @@ Landmark.Base.newEntry(
     }
 )
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Shrine of Thunder',
         symbol : 'M',
@@ -1028,7 +1016,7 @@ Landmark.Base.newEntry(
 )
 
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Shrine of Light',
         symbol : 'M',
@@ -1084,7 +1072,7 @@ Landmark.Base.newEntry(
 )
 
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Shrine: Lost Floor',
         symbol : 'M',
@@ -1123,7 +1111,7 @@ Landmark.Base.newEntry(
 )
 
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Treasure Room',
         legendName: 'T. Room',
@@ -1165,7 +1153,7 @@ Landmark.Base.newEntry(
     }
 )
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Fire Wyvern Dimension',
         legendName: '???',
@@ -1202,7 +1190,7 @@ Landmark.Base.newEntry(
     }
 )        
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Ice Wyvern Dimension',
         legendName: '???',
@@ -1239,7 +1227,7 @@ Landmark.Base.newEntry(
     }
 ) 
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Thunder Wyvern Dimension',
         legendName: '???',
@@ -1278,7 +1266,7 @@ Landmark.Base.newEntry(
 ) 
 
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Light Wyvern Dimension',
         legendName: '???',
@@ -1317,7 +1305,7 @@ Landmark.Base.newEntry(
 ) 
 
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Port',
         legendName: 'Port',
@@ -1356,7 +1344,7 @@ Landmark.Base.newEntry(
     }
 )
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Village',
         legendName: 'Village',
@@ -1391,7 +1379,7 @@ Landmark.Base.newEntry(
     }
 )
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Villa',
         legendName: 'Villa',
@@ -1426,7 +1414,7 @@ Landmark.Base.newEntry(
     }
 )
 
-/*Landmark.Base.newEntry(
+/*Landmark.database.newEntry(
     data: {
         name : 'Outpost',
         symbol : '[]',
@@ -1440,7 +1428,7 @@ Landmark.Base.newEntry(
     }
 )*/
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Forest',
         legendName: 'Forest',
@@ -1477,7 +1465,7 @@ Landmark.Base.newEntry(
     }
 )
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Cave',
         legendName: 'Cave',
@@ -1503,7 +1491,7 @@ Landmark.Base.newEntry(
     }
 )
 
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Abandoned Castle',
         legendName: 'Castle',
@@ -1529,7 +1517,7 @@ Landmark.Base.newEntry(
         
     }
 )
-Landmark.Base.newEntry(
+Landmark.database.newEntry(
     data: {
         name : 'Abandoned Town',
         legendName: 'Town',

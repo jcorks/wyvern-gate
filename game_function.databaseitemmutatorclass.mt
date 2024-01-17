@@ -48,15 +48,15 @@ return ::(
     define => Function,
     
     /// The database class upon which this Mutator is based on.
-    databaseClass
+    database
     
 ) {
     @:staticsOut = if (statics) {
         ...statics
     } else {}
     
-    staticsOut.Base = {
-        get ::<- databaseClass
+    staticsOut.database = {
+        get ::<- database
     };
     items.base = empty;
     

@@ -20,7 +20,7 @@
 @:StatSet = import(module:'game_class.statset.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Damage = import(module:'game_class.damage.mt');
-@:Item = import(module:'game_class.item.mt');
+@:Item = import(module:'game_mutator.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
@@ -34,8 +34,8 @@
     items : {
         data : empty
     },
-    databaseClass : 
-        Database.create(
+    database : 
+        Database.new(
             name : 'Wyvern.Scenario.Base',
             attributes : {
                 name : String,
@@ -60,7 +60,7 @@
 
 
 
-Scenario.Base.newEntry(
+Scenario.database.newEntry(
     data : {
         name : 'The Chosen',
         begin :: {
@@ -72,7 +72,7 @@ Scenario.Base.newEntry(
         
                 //story.tier = 2;
             @:keyhome = Item.new(
-                base: Item.Base.database.find(name:'Wyvern Key'),
+                base: Item.database.find(name:'Wyvern Key'),
                 creationHint: {
                     nameHint:namegen.island(), levelHint:story.levelHint
                 }
@@ -102,7 +102,7 @@ Scenario.Base.newEntry(
             
             
             
-            @:Species = import(module:'game_class.species.mt');
+            @:Species = import(module:'game_database.species.mt');
             @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:story.levelHint);
             @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:story.levelHint-2);
             // theyre just normal people so theyll have some trouble against 
@@ -111,7 +111,7 @@ Scenario.Base.newEntry(
             p1.normalizeStats();
 
             party.inventory.add(item:Item.new(
-                base:Item.Base.database.find(name:'Sentimental Box'),
+                base:Item.database.find(name:'Sentimental Box'),
                 from:p0
             ));
 
@@ -119,7 +119,7 @@ Scenario.Base.newEntry(
 
             // debug
                 /*
-                //party.inventory.add(item:Item.Base.database.find(name:'Pickaxe'
+                //party.inventory.add(item:Item.database.find(name:'Pickaxe'
                 //).new(from:island.newInhabitant(),rngEnchantHint:true));
                 
                 @:story = import(module:'game_singleton.story.mt');
@@ -134,11 +134,11 @@ Scenario.Base.newEntry(
 
 
                 
-                party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Ice'
+                party.inventory.add(item:Item.new(base:Item.database.find(name:'Wyvern Key of Ice'
                 ), from:island.newInhabitant()));
-                party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Thunder'
+                party.inventory.add(item:Item.new(base:Item.database.find(name:'Wyvern Key of Thunder'
                 ), from:island.newInhabitant()));
-                party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Wyvern Key of Light'
+                party.inventory.add(item:Item.new(base:Item.database.find(name:'Wyvern Key of Light'
                 ), from:island.newInhabitant()));
 
                 @:story = import(module:'game_singleton.story.mt');
@@ -150,7 +150,7 @@ Scenario.Base.newEntry(
                 for(0, 20) ::(i) {
                     party.inventory.add(
                         item:Item.new(
-                            base:Item.Base.database.getRandomFiltered(
+                            base:Item.database.getRandomFiltered(
                                     filter:::(value) <- value.isUnique == false && value.hasQuality
                             ),
                             from:island.newInhabitant(),
@@ -166,7 +166,7 @@ Scenario.Base.newEntry(
                 
                 /*
                 @:sword = Item.new(
-                    base: Item.Base.database.find(name:'Glaive'),
+                    base: Item.database.find(name:'Glaive'),
                     from:p0,
                     materialHint: 'Ray',
                     qualityHint: 'Null',
@@ -174,7 +174,7 @@ Scenario.Base.newEntry(
                 );
 
                 @:tome = Item.new(
-                    base:Item.Base.database.find(name:'Tome'),
+                    base:Item.database.find(name:'Tome'),
                     from:p0,
                     materialHint: 'Ray',
                     qualityHint: 'Null',
@@ -220,12 +220,12 @@ Scenario.Base.newEntry(
                 y: somewhere.y
             );               
             instance.savestate();
-            @:Scene = import(module:'game_class.scene.mt');
-            Scene.database.find(name:'scene_intro').act(onDone::{                    
+            @:Scene = import(module:'game_database.scene.mt');
+            Scene.start(name:'scene_intro', onDone::{                    
                 instance.visitIsland();
                 
                 /*island.addEvent(
-                    event:Event.Base.database.find(name:'Encounter:Non-peaceful').new(
+                    event:Event.database.find(name:'Encounter:Non-peaceful').new(
                         island, party, landmark //, currentTime
                     )
                 );*/  

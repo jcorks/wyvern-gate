@@ -19,7 +19,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:BattleAction = import(module:'game_struct.battleaction.mt');
-@:Ability = import(module:'game_class.ability.mt');
+@:Ability = import(module:'game_database.ability.mt');
 @:pickItem = import(module:'game_function.pickitem.mt');
 
 
@@ -32,7 +32,7 @@ return ::(
     onAct => Function,
     inBattle => Boolean
 ) {
-    @:Item = import(module:'game_class.item.mt');
+    @:Item = import(module:'game_mutator.item.mt');
     
     @:commitAction ::(action) {
         onAct(action);    
@@ -96,7 +96,7 @@ return ::(
                               onChoice ::(choice) {
                                 when(choice == 0) empty;                      
                                 commitAction(action:BattleAction.new(state:{
-                                        ability: Ability.database.find(name:'Use Item'),
+                                        ability: Ability.find(name:'Use Item'),
                                         targets: [all[choice-1]],
                                         extraData : [item]
                                     }) 
@@ -125,7 +125,7 @@ return ::(
                            
                                 when(choice == 0) empty;                                                  
                                 commitAction(action:BattleAction.new(state:{
-                                        ability: Ability.database.find(name:'Use Item'),
+                                        ability: Ability.find(name:'Use Item'),
                                         targets: if (choice == 1) party.members else enemies,
                                         extraData : [item]
                                     }) 
@@ -139,7 +139,7 @@ return ::(
 
                           (Item.USE_TARGET_HINT.ALL): ::<= {
                             commitAction(action:BattleAction.new(state:{
-                                    ability: Ability.database.find(name:'Use Item'),
+                                    ability: Ability.find(name:'Use Item'),
                                     targets: [...party.members, ...enemies],
                                     extraData : [item]
                                 }) 
@@ -165,7 +165,7 @@ return ::(
                       
                       (2): ::<= {
                         commitAction(action:BattleAction.new(state:{
-                            ability: Ability.database.find(name:'Equip Item'),
+                            ability: Ability.find(name:'Equip Item'),
                             targets: [user],
                             extraData : [item, party.inventory]
                         }));           

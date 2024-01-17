@@ -18,8 +18,8 @@
 @:State = import(module:"game_class.state.mt");
 @:LoadableClass = import(module:"game_singleton.loadableclass.mt");
 @:Entity = import(module:'game_class.entity.mt');
-@:EntityQuality = import(module:'game_class.entityquality.mt');
-@:Item = import(module:'game_class.item.mt');
+@:EntityQuality = import(module:'game_mutator.entityquality.mt');
+@:Item = import(module:'game_mutator.item.mt');
 
 
 @:ITEM_SOURCE = {

@@ -20,98 +20,17 @@
 
 @:Item2Database = {};
 @:LOOKUP = {};
+@:ItemType = Object.newType(name:'Wyvern.Database.Item');
 
 @:Database = class(
     name : 'Wyvern.Database',
     statics : {
-        // creates a new base class with standard features
-        create ::(name, attributes, statics, getInterface) {
-            if (statics == empty)
-                statics = {};
-
-            @:db = Database.new(
-                name,
-                attributes
-            );
-            statics.database = {
-                get ::<- db 
-            }
-            
-            statics.newEntry = ::(data) {
-                @:this = Base.new();
-                this.initialize(data);
-                return this;
-            }
-
-            @:Base = class(
-                name,
-                inherits : [Database.Item],
-                statics,
-                define:::(this) {
-                    if (getInterface != empty)
-                        this.interface = getInterface(this);
-                    Base.database.add(item:this);
-                }
-            );
-            return Base;    
-        },
         Lookup : {
             get::<-LOOKUP
         },
-        Item : ::<= {
-            @:Item = class(
-                define::(this) {
-                    @data_;
-                    @database_;
-                    @attribs;
-                    this.interface = {
-                    
-                        initialize ::(data) {
-                            if (database_ == empty)
-                                error(detail:'Internal error: database not bound to item. Maybe didnt call database.bind in item define()?');
-
-                            // preflight                            
-                            foreach(attribs) ::(key, typ) {
-
-                                @val = data[key];
-                                when(val == empty)
-                                    error(detail:'Internal error: database item is missing property ' + key);
-
-                                when(key->type != String)
-                                    error(detail:'Internal error: database attribute property key isnt a string!');
-                                    
-                                when(typ->type != Type)
-                                    error(detail:'Internal error: database attribute property isnt a type!');
-
-                                when(typ != val->type)
-                                    error(detail:'Internal error: database item property should be of type ' + attribs[key] + ', but received item of type ' + val->type);
-                            }                         
-                            data_ = data;
-                            database_.bind(item:this);
-                        },
-                        
-                        // gathers the expected interface of attributes in the database item,
-                        // setting up the interface with getters for those properties.
-                        bindData ::(database => Database.type) {
-                            database_ = database;
-                            attribs = database.attributes;
-                            
-                            if (this.interface == empty)
-                                this.interface = {};
-
-                            foreach(attribs) ::(key, val) {
-                                this.interface[key] = {
-                                    get ::<- data_[key]
-                                }
-                            }
-                        }
-                    }
-                }
-            );
-            return {get::<-Item};
-        },
-    
-   
+        ItemType : {
+            get ::<- ItemType
+        }
     },
     define:::(this) {
         @:items_ = {}
@@ -127,11 +46,38 @@
                 get::<- attributes_
             },
             
-            bind::(item) {
+            newEntry ::(data) {
+                // preflight                            
+                @:item = Object.instantiate(type:ItemType);
+
+                foreach(attributes_) ::(key, typ) {
+                    @val = data[key];
+                    when(val == empty)
+                        error(detail:'Internal error: database item is missing property ' + key);
+
+                    when(key->type != String)
+                        error(detail:'Internal error: database attribute property key isnt a string!');
+                        
+                    when(typ->type != Type)
+                        error(detail:'Internal error: database attribute property isnt a type!');
+
+                    when(typ != val->type)
+                        error(detail:'Internal error: database item property should be of type ' + attributes_[key] + ', but received item of type ' + val->type);
+
+                    
+                    if (typ == Function)
+                        item[key] = val
+                    else 
+                        item[key] = {get::<-val}
+                }                         
+
+                item->setIsInterface(enabled:true);
+                
                 items_[item.name] = item;
-            },            
-            add::(item) {
-                item.bindData(database:this);
+            },
+
+            remove ::(name) {
+                items_->remove(key:name);
             },
         
             find ::(name) {

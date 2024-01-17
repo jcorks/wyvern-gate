@@ -18,21 +18,21 @@
 @:class = import(module:'Matte.Core.Class');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:StatSet = import(module:'game_class.statset.mt');
-@:Species = import(module:'game_class.species.mt');
-@:Personality = import(module:'game_class.personality.mt');
-@:Profession = import(module:'game_class.profession.mt');
+@:Species = import(module:'game_database.species.mt');
+@:Personality = import(module:'game_database.personality.mt');
+@:Profession = import(module:'game_mutator.profession.mt');
 @:NameGen = import(module:'game_singleton.namegen.mt');
-@:Item = import(module:'game_class.item.mt');
+@:Item = import(module:'game_mutator.item.mt');
 @:Damage = import(module:'game_class.damage.mt');
-@:Ability = import(module:'game_class.ability.mt');
-@:Effect = import(module:'game_class.effect.mt');
+@:Ability = import(module:'game_database.ability.mt');
+@:Effect = import(module:'game_database.effect.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
 @:BattleAI = import(module:'game_class.battleai.mt');
 @:StateFlags = import(module:'game_class.stateflags.mt');
-@:Location = import(module:'game_class.location.mt');
+@:Location = import(module:'game_mutator.location.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
-@:EntityQuality = import(module:'game_class.entityquality.mt');
+@:EntityQuality = import(module:'game_mutator.entityquality.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
@@ -136,7 +136,7 @@
     
     
     define :::(this, state) {
-        if (none == empty) none = Item.new(base:Item.Base.database.find(name:'None'));
+        if (none == empty) none = Item.new(base:Item.database.find(name:'None'));
         @battle_;
         @overrideInteract = empty;
         // requests removal from battle
@@ -231,9 +231,9 @@
                 state.flags = StateFlags.new();
                 state.isDead = false;
                 state.name = NameGen.person();
-                state.species = Species.database.getRandom();
-                state.personality = Personality.database.getRandom();
-                state.favoritePlace = Location.Base.database.getRandom();
+                state.species = Species.getRandom();
+                state.personality = Personality.getRandom();
+                state.favoritePlace = Location.database.getRandom();
                 state.growth = StatSet.new();
                 state.adventurous = Number.random() <= 0.5;
                 state.equips = [
@@ -246,8 +246,8 @@
                     empty
                 ];
                 state.abilitiesAvailable = [
-                    Ability.database.find(name:'Attack'),
-                    Ability.database.find(name:'Defend'),
+                    Ability.find(name:'Attack'),
+                    Ability.find(name:'Defend'),
 
                 ]; // active that can choose in combat
                 state.abilitiesLearned = []; // abilities that can choose outside battle.
@@ -265,7 +265,7 @@
                     state.adventurous = adventurousHint;
                 
                 if (personalityHint != empty)
-                    state.personality = Personality.database.find(name:personalityHint);
+                    state.personality = Personality.find(name:personalityHint);
 
                 state.qualitiesHint = qualities;
 
@@ -274,12 +274,12 @@
                 @:profession = Profession.new(
                     base:
                         if (professionHint == empty) 
-                            Profession.Base.database.getRandom() 
+                            Profession.database.getRandom() 
                         else 
-                            Profession.Base.database.find(name:professionHint)
+                            Profession.database.find(name:professionHint)
                 );
                 if (speciesHint != empty) ::<= {
-                    state.species = Species.database.find(name:speciesHint);
+                    state.species = Species.find(name:speciesHint);
                 }
                 state.professions = [profession]
                 state.profession = 0;
@@ -295,7 +295,7 @@
                     for(0, 3)::(i) {
                         state.inventory.add(item:
                             Item.new(
-                                base: Item.Base.database.getRandomFiltered(
+                                base: Item.database.getRandomFiltered(
                                     filter:::(value) <- value.isUnique == false && value.canHaveEnchants
                                                                 && value.tier <= island.tier
                                 ),
@@ -303,12 +303,12 @@
                             )
                         );
                     }
-                    state.faveWeapon = Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0 && value.tier <= island.tier)
+                    state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0 && value.tier <= island.tier)
                 } else 
-                    state.faveWeapon = Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0)
+                    state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0)
 
                 state.inventory.addGold(amount:(Number.random() * 100)->ceil);
-                state.favoriteItem = Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
+                state.favoriteItem = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
                 state.innateEffects = innateEffects;
                 if (state.innateEffects == empty)  
                     state.innateEffects = [];
@@ -317,7 +317,7 @@
                 /*
                 ::<={
                     [0, 1+(Number.random()*3)->floor]->for(do:::(i) {
-                        @:item = Item.Base.database.getRandomWeightedFiltered(
+                        @:item = Item.database.getRandomWeightedFiltered(
                             filter:::(value) <- level >= value.levelMinimum &&
                                                 value.isUnique == false
                             
@@ -864,7 +864,7 @@
                 // i dunno people can have hobbies and learn how to make stuff, thats cool
 
                 state.canMake = [];
-                foreach(Item.Base.database.getRandomSet(
+                foreach(Item.database.getRandomSet(
                         count:if (this.profession.base.name == 'Blacksmith') 10 else 4,
                         filter::(value) <- value.hasMaterial == true
                 )) ::(k, val) {
@@ -1113,7 +1113,7 @@
                     @out = [...state.abilitiesAvailable];
                     foreach(EQUIP_SLOTS)::(i, val) {
                         if (state.equips[val] != empty && state.equips[val].ability != empty) ::<= {
-                            @:ab = Ability.database.find(name:state.equips[val].ability);
+                            @:ab = Ability.find(name:state.equips[val].ability);
                             when(out->findIndex(value:ab) != -1) empty;
                             out->push(value:ab);
                         }
@@ -1125,7 +1125,7 @@
             learnAbility::(name => String) {
                 when (name == empty) empty;
 
-                @:ability = Ability.database.find(name);
+                @:ability = Ability.find(name);
                 if (state.abilitiesAvailable->keycount < 7)
                     state.abilitiesAvailable->push(value:ability);
                     
@@ -1142,8 +1142,8 @@
             
             clearAbilities::{
                 state.abilitiesAvailable = [
-                    Ability.database.find(name:'Attack'),
-                    Ability.database.find(name:'Defend'),
+                    Ability.find(name:'Attack'),
+                    Ability.find(name:'Defend'),
                 ];
                 state.abilitiesLearned = [];
             },
@@ -1372,7 +1372,7 @@
                 if (qualities == empty) ::<= {
                     qualities = [];
                     foreach(state.species.qualities)::(i, qual) {
-                        @:q = EntityQuality.Base.database.find(name:qual);
+                        @:q = EntityQuality.database.find(name:qual);
                         if (q.appearanceChance == 1 || Number.random() < q.appearanceChance)
                             qualities->push(value:EntityQuality.new(base:q));
                     }

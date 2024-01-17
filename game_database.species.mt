@@ -20,9 +20,8 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@:SPECIES_NAME = 'Wyvern.Species'
 
-@:Species = Database.create(
+@:Species = Database.new(
     name : 'Wyvern.Species',
     attributes : {
         name : String,

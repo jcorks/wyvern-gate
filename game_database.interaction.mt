@@ -22,13 +22,13 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:Battle = import(module:'game_class.battle.mt');
 @:random = import(module:'game_singleton.random.mt');
-@:Material = import(module:'game_class.material.mt');
-@:Profession = import(module:'game_class.profession.mt');
-@:Item = import(module:'game_class.item.mt');
+@:Material = import(module:'game_database.material.mt');
+@:Profession = import(module:'game_mutator.profession.mt');
+@:Item = import(module:'game_mutator.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 
 
-@:Interaction = Database.create(
+@:Interaction = Database.new(
     name : 'Wyvern.Interaction',
     attributes : {
         name : String,
@@ -245,14 +245,14 @@ Interaction.newEntry(
 
 
                     if (location.peaceful == false && !talkee.isIncapacitated()) ::<= {
-                        @:Event = import(module:'game_class.event.mt');
+                        @:Event = import(module:'game_mutator.event.mt');
 
 
                         if (location.landmark.base.guarded == true) ::<= {
                             windowEvent.queueMessage(speaker:talkee.name, text:'Guards! Guards! Help!');
                             location.landmark.island.addEvent(
                                 event:Event.new(
-                                    base: Event.Base.database.find(name:'Encounter:Non-peaceful'),
+                                    base: Event.database.find(name:'Encounter:Non-peaceful'),
                                     parent:location.landmark //, currentTime
                                 )
                             );
@@ -471,7 +471,7 @@ Interaction.newEntry(
                                             ,
                                             onChoice::(choice) {
                                                 when(choice == 2) ::<= {
-                                                    @:Species = import(module:'game_class.species.mt');
+                                                    @:Species = import(module:'game_database.species.mt');
                                                     @:Entity = import(module:'game_class.entity.mt');
 
                                                     windowEvent.queueMessage(
@@ -508,7 +508,7 @@ Interaction.newEntry(
                                                 
                                                 for(0, 50)::(i) {
                                                     @newItem = Item.new(
-                                                        base: Item.Base.database.getRandomFiltered(
+                                                        base: Item.database.getRandomFiltered(
                                                             filter::(value) <- (
                                                                 value.isUnique == false &&
                                                                 value.hasMaterial == true &&
@@ -675,7 +675,7 @@ Interaction.newEntry(
                 if (Number.random() > 0.9) ::<= {
                     windowEvent.queueMessage(speaker:miner.name, text:'Oh...?');
 
-                    @:item = Item.new(base:Item.Base.database.find(name:'Ore'), from:miner);
+                    @:item = Item.new(base:Item.database.find(name:'Ore'), from:miner);
                     
                     windowEvent.queueMessage(text:'The party obtained some Ore!');     
 
@@ -732,7 +732,7 @@ Interaction.newEntry(
             party.inventory.remove(item:ores[0]);
             party.inventory.remove(item:ores[1]);
             
-            @:metal = Item.new(base:Item.Base.database.getRandomWeightedFiltered(filter:::(value) <- value.hasAttribute(attribute:Item.ATTRIBUTE.RAW_METAL)));                        
+            @:metal = Item.new(base:Item.database.getRandomWeightedFiltered(filter:::(value) <- value.hasAttribute(attribute:Item.ATTRIBUTE.RAW_METAL)));                        
             windowEvent.queueMessage(text: 'Smelted 2 ore chunks into ' + correctA(word:metal.name) + '!');
             party.inventory.add(item:metal);                    
                 
@@ -1062,7 +1062,7 @@ Interaction.newEntry(
                             onChoice::(choice) {
                                 when(choice == 0) empty;
                                 @:output = Item.new(
-                                    base:Item.Base.database.find(name:canMake[choice-1]),
+                                    base:Item.database.find(name:canMake[choice-1]),
                                     materialHint: ore.base.name->split(token:' ')[0],
                                     from: smith
                                 );
@@ -1174,13 +1174,13 @@ Interaction.newEntry(
                     
                     windowEvent.queueNoDisplay( 
                         onEnter::{
-                        @:Event = import(module:'game_class.event.mt');
-                        @:Landmark = import(module:'game_class.landmark.mt');
+                        @:Event = import(module:'game_mutator.event.mt');
+                        @:Landmark = import(module:'game_mutator.landmark.mt');
                         @:world = import(module:'game_singleton.world.mt');
                         @:instance = import(module:'game_singleton.instance.mt');
 
                         @:d = location.landmark.island.newLandmark(
-                            base:Landmark.Base.database.find(name:match(keys[choice-1].name) {
+                            base:Landmark.database.find(name:match(keys[choice-1].name) {
                                 ('Wyvern Key of Fire'):    'Fire Wyvern Dimension',
                                 ('Wyvern Key of Ice'):     'Ice Wyvern Dimension',
                                 ('Wyvern Key of Thunder'): 'Thunder Wyvern Dimension',
@@ -1213,19 +1213,19 @@ Interaction.newEntry(
             if (location.targetLandmark == empty) ::<={
             
                 if (location.landmark.floor > 5 && Number.random() > 0.5 - (0.2*(location.landmark.floor - 5))) ::<= {
-                    @:Landmark = import(module:'game_class.landmark.mt');
+                    @:Landmark = import(module:'game_mutator.landmark.mt');
                     
                     location.targetLandmark = 
                         location.landmark.island.newLandmark(
-                            base:Landmark.Base.database.find(name:'Shrine: Lost Floor')
+                            base:Landmark.database.find(name:'Shrine: Lost Floor')
                         )
                     ;
                 } else ::<= {
-                    @:Landmark = import(module:'game_class.landmark.mt');
+                    @:Landmark = import(module:'game_mutator.landmark.mt');
                     
                     location.targetLandmark = 
                         location.landmark.island.newLandmark(
-                            base:Landmark.Base.database.find(name:location.landmark.base.name),
+                            base:Landmark.database.find(name:location.landmark.base.name),
                             floorHint:location.landmark.floor+1
                         )
                     ;
@@ -1266,23 +1266,23 @@ Interaction.newEntry(
         name : 'explore pit',
         onInteract ::(location, party) {
             @:world = import(module:'game_singleton.world.mt');
-            @:Event = import(module:'game_class.event.mt');
+            @:Event = import(module:'game_mutator.event.mt');
 
             if (location.contested == true) ::<= {
                 @:event = Event.new(
-                    base:Event.Base.database.find(name:'Encounter:TreasureBoss'),
+                    base:Event.database.find(name:'Encounter:TreasureBoss'),
                     currentTime:0, // TODO,
                     parent:location.landmark
                 );  
                 location.contested = false;
             } else ::<= {
                 if (location.targetLandmark == empty) ::<={
-                    @:Landmark = import(module:'game_class.landmark.mt');
+                    @:Landmark = import(module:'game_mutator.landmark.mt');
                     
 
                     location.targetLandmark = 
                         location.landmark.island.newLandmark(
-                            base:Landmark.Base.database.find(name:'Treasure Room')
+                            base:Landmark.database.find(name:'Treasure Room')
                         )
                     ;
                     location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
@@ -1344,7 +1344,7 @@ Interaction.newEntry(
                 foreach(e)::(index, guard) {
                     guard.equip(
                         item:Item.new(
-                            base:Item.Base.database.find(
+                            base:Item.database.find(
                                 name:'Halberd'
                             ),
                             from:guard, 
@@ -1359,7 +1359,7 @@ Interaction.newEntry(
 
                     guard.equip(
                         item:Item.new(
-                            base: Item.Base.database.find(
+                            base: Item.database.find(
                                 name:'Plate Armor'
                             ),
                             from:guard, 
@@ -1515,7 +1515,7 @@ Interaction.newEntry(
                         onChoice:::(which) {
                             when(which == false) empty;
                             party.inventory.subtractGold(amount:cost);       
-                            whom.profession = Profession.new(base:Profession.Base.database.find(name: location.ownedBy.profession.base.name));
+                            whom.profession = Profession.new(base:Profession.database.find(name: location.ownedBy.profession.base.name));
 
                             windowEvent.queueMessage(
                                 text: '' + whom.name + " is now " + correctA(word:whom.profession.base.name) + '.'
@@ -1538,7 +1538,7 @@ Interaction.newEntry(
             @:getAWeapon = ::(from)<-
                 Item.new(
                     from,
-                    base:Item.Base.database.getRandomFiltered(
+                    base:Item.database.getRandomFiltered(
                         filter:::(value) <- (
                             value.isUnique == false &&
                             value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
@@ -1559,7 +1559,7 @@ Interaction.newEntry(
                     members->push(value:combatant);
                 }            
                 return {
-                    name : 'The ' + Material.database.getRandom().name + ' ' + getAWeapon().base.name + 's',
+                    name : 'The ' + Material.getRandom().name + ' ' + getAWeapon().base.name + 's',
                     members : members
                 }
             }
@@ -1904,7 +1904,7 @@ Interaction.newEntry(
                         windowEvent.queueMessage(text:'Something is rising out...');
                         
                         @:item = Item.new(
-                            base:Item.Base.database.getRandomFiltered(
+                            base:Item.database.getRandomFiltered(
                                 filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= story.tier+2
                             ),
                             rngEnchantHint:true, from:party.members[0]
@@ -2285,7 +2285,7 @@ Interaction.newEntry(
                 );
                 
                 windowEvent.queueMessage(speaker: 'Sylvia', text: '"Here! Thanks again."');
-                item = Item.Base.database.getRandomFiltered(filter:::(value) <- 
+                item = Item.database.getRandomFiltered(filter:::(value) <- 
                     value.name->contains(key:' Potion') ||
                     value.name->contains(key:'Ingot')
                 );
@@ -2300,7 +2300,7 @@ Interaction.newEntry(
                 );
                 
                 windowEvent.queueMessage(speaker: 'Sylvia', text: '"Here! Thanks again."');
-                item = Item.Base.database.getRandomFiltered(filter:::(value) <- 
+                item = Item.database.getRandomFiltered(filter:::(value) <- 
                     value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON) &&
                     !value.isUnique
                 );
@@ -2315,7 +2315,7 @@ Interaction.newEntry(
                 );
                 
                 windowEvent.queueMessage(speaker: 'Sylvia', text: '"Here! Thanks again."');
-                item = Item.Base.database.getRandomFiltered(filter:::(value) <- 
+                item = Item.database.getRandomFiltered(filter:::(value) <- 
                     (value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON) ||
                      value.equipType == Item.TYPE.RING ||
                      value.equipType == Item.TYPE.TRINKET) &&

@@ -21,30 +21,33 @@
 @:random = import(module:'game_singleton.random.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
 
 
 
 
 
-@:EntityQuality = LoadableClass.create(
+@:EntityQuality = databaseItemMutatorClass(
     name : 'Wyvern.EntityQuality',
-    statics : {
-        Base  :::<= {
-            @db;
-            return {
-                get ::<- db,
-                set ::(value) <- db = value
-            }
-        }
-    },
     items : {
         trait0 : empty,
         trait1 : empty,
         trait2 : empty,
-        descIndex : empty,
-        base : empty
+        descIndex : empty
     },
-    
+    database : Database.new(
+        name : 'Wyvern.EntityQuality.Base',     
+        attributes : {
+            name : String,
+            plural : Boolean,
+            appearanceChance : Number,
+            descriptions : Object,
+            trait0 : Object,
+            trait1 : Object,
+            trait2 : Object
+        }            
+    ),
+
     define:::(this, state) {
         
         
@@ -77,14 +80,7 @@
                 
                 return this;
                 
-            },
-        
-            base : {
-                get :: {
-                    return state.base;
-                }
-            },
-            
+            },            
             
             name : {
                 get :: {
@@ -119,21 +115,8 @@
 
 
 
-EntityQuality.Base = Database.create(
-    name : 'Wyvern.EntityQuality.Base',     
-    attributes : {
-        name : String,
-        plural : Boolean,
-        appearanceChance : Number,
-        descriptions : Object,
-        trait0 : Object,
-        trait1 : Object,
-        trait2 : Object
-    }            
-);
 
-
-EntityQuality.Base.newEntry(
+EntityQuality.database.newEntry(
     data : {
         name : 'fur',
         appearanceChance : 1,
@@ -181,7 +164,7 @@ EntityQuality.Base.newEntry(
     }
 )
 
-EntityQuality.Base.newEntry(
+EntityQuality.database.newEntry(
     data : {
         name : 'face',
         appearanceChance : 0.3,
@@ -214,7 +197,7 @@ EntityQuality.Base.newEntry(
 )
 
 
-EntityQuality.Base.newEntry(
+EntityQuality.database.newEntry(
     data : {
         name : 'scales',
         appearanceChance : 1,
@@ -254,7 +237,7 @@ EntityQuality.Base.newEntry(
 )        
 
 
-EntityQuality.Base.newEntry(
+EntityQuality.database.newEntry(
     data : {
         name : 'feathers',
         appearanceChance : 1,
@@ -293,7 +276,7 @@ EntityQuality.Base.newEntry(
     }
 )   
 
-EntityQuality.Base.newEntry(
+EntityQuality.database.newEntry(
     data : {
         name : 'eyes',
         appearanceChance : 1,
@@ -334,7 +317,7 @@ EntityQuality.Base.newEntry(
     }
 )
 
-EntityQuality.Base.newEntry(
+EntityQuality.database.newEntry(
     data : {
         name : 'ears',
         plural : true,
@@ -359,7 +342,7 @@ EntityQuality.Base.newEntry(
     }
 )        
 
-EntityQuality.Base.newEntry(
+EntityQuality.database.newEntry(
     data : {
         name : 'horns',
         plural : true,
@@ -393,7 +376,7 @@ EntityQuality.Base.newEntry(
 )        
 
 
-EntityQuality.Base.newEntry(
+EntityQuality.database.newEntry(
     data : {
         name : 'tail',
         plural : false,
@@ -418,7 +401,7 @@ EntityQuality.Base.newEntry(
 ) 
 
 
-EntityQuality.Base.newEntry(
+EntityQuality.database.newEntry(
     data : {
         name : 'snout',
         appearanceChance : 1,
@@ -442,7 +425,7 @@ EntityQuality.Base.newEntry(
 )        
 
 
-EntityQuality.Base.newEntry(
+EntityQuality.database.newEntry(
     data : {
         name : 'body',
         appearanceChance : 1,

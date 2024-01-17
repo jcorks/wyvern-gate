@@ -425,7 +425,7 @@
         }
         
 
-        @:Location = import(module:'game_class.location.mt');
+        @:Location = import(module:'game_mutator.location.mt');
 
         this.constructor = ::(map, category => Number) {
             unitsWide = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
@@ -868,7 +868,7 @@
             return zone;
         }
         
-        @Location = import(module:'game_class.location.mt');
+        @Location = import(module:'game_mutator.location.mt');
         @:locations = [];
         this.interface = {
             initialize::(mapHint => Object, parent) {

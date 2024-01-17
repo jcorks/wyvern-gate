@@ -20,7 +20,7 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@:Material = Database.create(
+@:Material = Database.new(
     name : 'Wyvern.Material',
     attributes : {
         name : String,

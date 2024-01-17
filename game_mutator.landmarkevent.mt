@@ -2,25 +2,27 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:State = import(module:'game_class.state.mt');
 @:class = import(module:'Matte.Core.Class');
+@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
 
 
 // essentially an opaque wrapper for custom per-step 
 // controllers of landmarks.
-@:LandmarkEvent = LoadableClass.create(
+@:LandmarkEvent = databaseItemMutatorClass(
     name : 'Wyvern.LandmarkEvent',
-    statics : {
-        Base  :::<= {
-            @db;
-            return {
-                get ::<- db,
-                set ::(value) <- db = value
-            }
-        },    
-    },    
     items : {
-        base : empty,
         data : empty // maintained    
     },
+    
+    database : Database.new(
+        name:'Wyvern.LandmarkEvent.Base',
+        attributes : {
+            name : String,
+            startup : Function,
+            step : Function,
+            isActive : Function
+        }
+    ),
+    
     define::(this, state) {
         
         @landmark_;
@@ -52,19 +54,10 @@
 
 
 
-LandmarkEvent.Base = Database.create(
-    name:'Wyvern.LandmarkEvent.Base',
-    attributes : {
-        name : String,
-        startup : Function,
-        step : Function,
-        isActive : Function
-    }
-);
 
 
 
-LandmarkEvent.Base.newEntry(
+LandmarkEvent.database.newEntry(
     data : {
         name: 'item-specter',
         startup ::(landmark) {
@@ -85,7 +78,7 @@ LandmarkEvent.Base.newEntry(
     }
 );
 
-LandmarkEvent.Base.newEntry(
+LandmarkEvent.database.newEntry(
     data : {
         name: 'dungeon-encounters',
         startup ::(landmark) {
@@ -106,7 +99,7 @@ LandmarkEvent.Base.newEntry(
     }
 );
 
-LandmarkEvent.Base.newEntry(
+LandmarkEvent.database.newEntry(
     data : {
         name: 'the-beast',
         startup ::(landmark) {
@@ -127,7 +120,7 @@ LandmarkEvent.Base.newEntry(
     }
 );
 
-LandmarkEvent.Base.newEntry(
+LandmarkEvent.database.newEntry(
     data : {
         name: 'the-mirror',
         startup ::(landmark) {
@@ -149,7 +142,7 @@ LandmarkEvent.Base.newEntry(
 );
 
 
-LandmarkEvent.Base.newEntry(
+LandmarkEvent.database.newEntry(
     data : {
         name: 'treasure-golem',
         startup ::(landmark) {
@@ -171,7 +164,7 @@ LandmarkEvent.Base.newEntry(
 );
 
 
-LandmarkEvent.Base.newEntry(
+LandmarkEvent.database.newEntry(
     data : {
         name: 'cave-bat',
         startup ::(landmark) {

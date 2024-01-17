@@ -30,24 +30,19 @@
     INAPPROPRIATE_TIME: 6
 }
 
-@:Personality = Database.create(
+@:Personality = class(
+    inherits:[Database],
+    define ::(this) {
+        this.interface = {
+            SPEECH_EVENT : {get::<-SPEECH_EVENT}
+        }    
+    }
+).new(
     name : 'Wyvern.Personality',
     attributes : {
         name : String,
         growth : StatSet.type,
         phrases : Object            
-    },
-    
-    statics : {
-        SPEECH_EVENT : {get::<-SPEECH_EVENT}    
-    },
-    
-    getInterface::(this) {
-        return {
-            getPhrase ::(kind => Number) {
-                return Random.pickArrayItem(list:this.instance.phrases[kind]);
-            }        
-        }
     }
 )
 

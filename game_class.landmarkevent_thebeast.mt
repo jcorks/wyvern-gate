@@ -1,8 +1,8 @@
 @:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
 @:distance = import(module:'game_function.distance.mt');
-@:Species = import(module:'game_class.species.mt');
-@:Profession = import(module:'game_class.profession.mt');
+@:Species = import(module:'game_database.species.mt');
+@:Profession = import(module:'game_mutator.profession.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 
 @:ROOM_MAX_ENTITY = 6;
@@ -21,7 +21,7 @@
         @hasBeast = false;
 
         @:Entity = import(module:'game_class.entity.mt');
-        @:Location = import(module:'game_class.location.mt');
+        @:Location = import(module:'game_mutator.location.mt');
 
     
     
@@ -39,8 +39,8 @@
 
             @:beast = island_.newInhabitant();
             beast.name = 'the Beast';
-            beast.species = Species.database.find(name:'Beast');
-            beast.profession = Profession.new(base:Profession.Base.database.find(name:'Beast'));               
+            beast.species = Species.find(name:'Beast');
+            beast.profession = Profession.new(base:Profession.database.find(name:'Beast'));               
             beast.clearAbilities();
             foreach(beast.profession.gainSP(amount:10))::(i, ability) {
                 beast.learnAbility(name:ability);

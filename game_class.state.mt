@@ -47,7 +47,7 @@
 
       
         // database items are always saved as strings.
-        when (value->isa(type:Database.Item.type))
+        when (value->isa(type:Database.ItemType))
             {
                 (TAG__IS_DATABASE) : true,
                 database : '' + value->type,

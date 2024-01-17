@@ -18,24 +18,18 @@
 @:Database = import(module:'game_class.database.mt');
 @:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
-@Landmark = import(module:'game_class.landmark.mt');
-@:Item = import(module:'game_class.item.mt');
+@Landmark = import(module:'game_mutator.landmark.mt');
+@:Item = import(module:'game_mutator.item.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
-@:Scene = import(module:'game_class.scene.mt');
+@:Scene = import(module:'game_database.scene.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
 
-@:Location = LoadableClass.create(
+@:Location = databaseItemMutatorClass(
     name: 'Wyvern.Location',
     statics : {
-        Base  :::<= {
-            @db;
-            return {
-                get ::<- db,
-                set ::(value) <- db = value
-            }
-        },
         CATEGORY ::<= {  
             @:ct = {
                 ENTRANCE : 0,
@@ -67,6 +61,54 @@
         visited : false,
         modData : empty
     },
+    
+    database : Database.new(
+        name: 'Wyvern.Location.Base',
+        attributes : {
+            name: String,
+            rarity: Number,
+            descriptions : Object,
+            symbol : String,
+            
+            // List of interaction names
+            interactions : Object,
+            
+            // List of interaction names that will mark you as 
+            // hostile by the owner / occupants. Might initiate 
+            // combat
+            aggressiveInteractions : Object,
+            
+            ownVerb : String,
+            // number of people aside from the owner
+            minOccupants : Number,
+            // number of people aside from the owner
+            maxOccupants : Number,
+            
+            // Whether there can only be one per landmark.
+            // This is strictly followed in dungeons.
+            onePerLandmark: Boolean,
+
+            // when the location is interacted with, before displaying options
+            // The return value is whether to continue with interaction options 
+            // or not.
+            onInteract : Function,
+            
+            // Called on first time interaction is attempted. 
+            onFirstInteract : Function,
+            
+            // when the location is created
+            onCreate : Function,
+            // called by the world when the time of day changes
+            onTimeChange : Function,
+            // the type of location it is
+            category : Number,
+            
+            // in structural maps, this determines the structure 
+            // size in min units.
+            minStructureSize : Number
+        }
+    ),
+    
     define:::(this, state) {
 
 
@@ -106,13 +148,6 @@
 
             worldID : {
                 get ::<- state.worldID
-            },
-
-                
-            base : {
-                get :: {
-                    return state.base;
-                }
             },
             
             targetLandmark : {
@@ -232,7 +267,7 @@
             interact ::{
                 @world = import(module:'game_singleton.world.mt');
                 @party = world.party;            
-                @:Interaction = import(module:'game_class.interaction.mt');
+                @:Interaction = import(module:'game_database.interaction.mt');
                 
 
             
@@ -329,54 +364,8 @@
 );
 
 
-Location.Base = Database.create(
-    name: 'Wyvern.Location.Base',
-    attributes : {
-        name: String,
-        rarity: Number,
-        descriptions : Object,
-        symbol : String,
-        
-        // List of interaction names
-        interactions : Object,
-        
-        // List of interaction names that will mark you as 
-        // hostile by the owner / occupants. Might initiate 
-        // combat
-        aggressiveInteractions : Object,
-        
-        ownVerb : String,
-        // number of people aside from the owner
-        minOccupants : Number,
-        // number of people aside from the owner
-        maxOccupants : Number,
-        
-        // Whether there can only be one per landmark.
-        // This is strictly followed in dungeons.
-        onePerLandmark: Boolean,
 
-        // when the location is interacted with, before displaying options
-        // The return value is whether to continue with interaction options 
-        // or not.
-        onInteract : Function,
-        
-        // Called on first time interaction is attempted. 
-        onFirstInteract : Function,
-        
-        // when the location is created
-        onCreate : Function,
-        // called by the world when the time of day changes
-        onTimeChange : Function,
-        // the type of location it is
-        category : Number,
-        
-        // in structural maps, this determines the structure 
-        // size in min units.
-        minStructureSize : Number
-    }
-);
-
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Entrance',
     rarity: 100000000,
     ownVerb: '',
@@ -426,7 +415,7 @@ Location.Base.newEntry(data:{
     }
 })
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Farm',
     rarity: 100,
     ownVerb: 'owned',
@@ -455,8 +444,8 @@ Location.Base.newEntry(data:{
     maxOccupants : 0,
     onFirstInteract ::(location){
         location.ownedBy = location.landmark.island.newInhabitant();
-        @:Profession = import(module:'game_class.profession.mt');
-        location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Farmer'));  
+        @:Profession = import(module:'game_mutator.profession.mt');
+        location.ownedBy.profession = Profession.new(base:Profession.database.find(name:'Farmer'));  
         location.ownedBy.normalizeStats();              
         @:story = import(module:'game_singleton.story.mt');
         
@@ -464,7 +453,7 @@ Location.Base.newEntry(data:{
             // no weight, as the value scales
             location.inventory.add(item:
                 Item.new(
-                    base:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false
+                    base:Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false
                                     && value.tier <= location.landmark.island.tier
             
                     ),
@@ -494,7 +483,7 @@ Location.Base.newEntry(data:{
 })
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Home',
     rarity: 100,
     ownVerb: 'owned',
@@ -533,7 +522,7 @@ Location.Base.newEntry(data:{
             // no weight, as the value scales
             location.inventory.add(
                 item:Item.new(
-                    base:Item.Base.database.getRandomFiltered(filter::(value) <- value.isUnique == false
+                    base:Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false
                                     && value.tier <= location.landmark.island.tier
             
                     ),
@@ -563,7 +552,7 @@ Location.Base.newEntry(data:{
 
 })
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Ore vein',
     rarity: 100,
     ownVerb: '???',
@@ -606,7 +595,7 @@ Location.Base.newEntry(data:{
 })
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Smelter',
     rarity: 100,
     ownVerb: '???',
@@ -656,7 +645,7 @@ Location.Base.newEntry(data:{
 })
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Wyvern Throne of Fire',
     rarity: 1,
     ownVerb : 'owned',
@@ -690,15 +679,15 @@ Location.Base.newEntry(data:{
     
     onCreate ::(location) {
         location.name = 'Wyvern Throne';
-        @:Profession = import(module:'game_class.profession.mt');
-        @:Species = import(module:'game_class.species.mt');
+        @:Profession = import(module:'game_mutator.profession.mt');
+        @:Species = import(module:'game_database.species.mt');
         @:Story = import(module:'game_singleton.story.mt');
-        @:Scene = import(module:'game_class.scene.mt');
+        @:Scene = import(module:'game_database.scene.mt');
         @:StatSet = import(module:'game_class.statset.mt');
         location.ownedBy = location.landmark.island.newInhabitant();
         location.ownedBy.name = 'Wyvern of Fire';
-        location.ownedBy.species = Species.database.find(name:'Wyvern of Fire');
-        location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Wyvern of Fire'));               
+        location.ownedBy.species = Species.find(name:'Wyvern of Fire');
+        location.ownedBy.profession = Profession.new(base:Profession.database.find(name:'Wyvern of Fire'));               
         location.ownedBy.clearAbilities();
         foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
             location.ownedBy.learnAbility(name:ability);
@@ -707,10 +696,10 @@ Location.Base.newEntry(data:{
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
             if (Story.tier < 1) ::<= {
-                Scene.database.find(name:'scene_wyvernfire0').act(onDone::{}, location, landmark:location.landmark);
+                Scene.start(name:'scene_wyvernfire0', onDone::{}, location, landmark:location.landmark);
             } else ::<= {
                 // just visiting!
-                Scene.database.find(name:'scene_wyvernfire1').act(onDone::{}, location, landmark:location.landmark);                        
+                Scene.start(name:'scene_wyvernfire1', onDone::{}, location, landmark:location.landmark);                        
             }
         }
         location.ownedBy.stats.load(serialized:StatSet.new(
@@ -738,7 +727,7 @@ Location.Base.newEntry(data:{
 })
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Wyvern Throne of Ice',
     rarity: 1,
     ownVerb : 'owned',
@@ -772,15 +761,15 @@ Location.Base.newEntry(data:{
     
     onCreate ::(location) {
         location.name = 'Wyvern Throne';
-        @:Profession = import(module:'game_class.profession.mt');
-        @:Species = import(module:'game_class.species.mt');
+        @:Profession = import(module:'game_mutator.profession.mt');
+        @:Species = import(module:'game_database.species.mt');
         @:Story = import(module:'game_singleton.story.mt');
-        @:Scene = import(module:'game_class.scene.mt');
+        @:Scene = import(module:'game_database.scene.mt');
         @:StatSet = import(module:'game_class.statset.mt');
         location.ownedBy = location.landmark.island.newInhabitant();
         location.ownedBy.name = 'Wyvern of Ice';
-        location.ownedBy.species = Species.database.find(name:'Wyvern of Ice');
-        location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Wyvern of Ice'));               
+        location.ownedBy.species = Species.find(name:'Wyvern of Ice');
+        location.ownedBy.profession = Profession.new(base:Profession.database.find(name:'Wyvern of Ice'));               
         location.ownedBy.clearAbilities();
         foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
             location.ownedBy.learnAbility(name:ability);
@@ -789,10 +778,10 @@ Location.Base.newEntry(data:{
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
             if (Story.tier < 2) ::<= {
-                Scene.database.find(name:'scene_wyvernice0').act(onDone::{}, location, landmark:location.landmark);
+                Scene.start(name:'scene_wyvernice0', onDone::{}, location, landmark:location.landmark);
             } else ::<= {
                 // just visiting!
-                Scene.database.find(name:'scene_wyvernice1').act(onDone::{}, location, landmark:location.landmark);                        
+                Scene.start(name:'scene_wyvernice1', onDone::{}, location, landmark:location.landmark);                        
             }
         }
         location.ownedBy.stats.load(serialized:StatSet.new(
@@ -820,7 +809,7 @@ Location.Base.newEntry(data:{
 })
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Wyvern Throne of Thunder',
     rarity: 1,
     ownVerb : 'owned',
@@ -854,15 +843,15 @@ Location.Base.newEntry(data:{
     
     onCreate ::(location) {
         location.name = 'Wyvern Throne';
-        @:Profession = import(module:'game_class.profession.mt');
-        @:Species = import(module:'game_class.species.mt');
+        @:Profession = import(module:'game_mutator.profession.mt');
+        @:Species = import(module:'game_database.species.mt');
         @:Story = import(module:'game_singleton.story.mt');
-        @:Scene = import(module:'game_class.scene.mt');
+        @:Scene = import(module:'game_database.scene.mt');
         @:StatSet = import(module:'game_class.statset.mt');
         location.ownedBy = location.landmark.island.newInhabitant();
         location.ownedBy.name = 'Wyvern of Thunder';
-        location.ownedBy.species = Species.database.find(name:'Wyvern of Thunder');
-        location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Wyvern of Thunder'));               
+        location.ownedBy.species = Species.find(name:'Wyvern of Thunder');
+        location.ownedBy.profession = Profession.new(base:Profession.database.find(name:'Wyvern of Thunder'));               
         location.ownedBy.clearAbilities();
         foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
             location.ownedBy.learnAbility(name:ability);
@@ -871,10 +860,10 @@ Location.Base.newEntry(data:{
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
             if (Story.tier < 3) ::<= {
-                Scene.database.find(name:'scene_wyvernthunder0').act(onDone::{}, location, landmark:location.landmark);
+                Scene.start(name:'scene_wyvernthunder0', onDone::{}, location, landmark:location.landmark);
             } else ::<= {
                 // just visiting!
-                Scene.database.find(name:'scene_wyvernthunder1').act(onDone::{}, location, landmark:location.landmark);                        
+                Scene.start(name:'scene_wyvernthunder1', onDone::{}, location, landmark:location.landmark);                        
             }
         }
         location.ownedBy.stats.load(serialized:StatSet.new(
@@ -902,7 +891,7 @@ Location.Base.newEntry(data:{
 })
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Wyvern Throne of Light',
     rarity: 1,
     ownVerb : 'owned',
@@ -936,16 +925,16 @@ Location.Base.newEntry(data:{
     
     onCreate ::(location) {
         location.name = 'Wyvern Throne';
-        @:Profession = import(module:'game_class.profession.mt');
+        @:Profession = import(module:'game_mutator.profession.mt');
         @:Entity = import(module:'game_class.entity.mt');
-        @:Species = import(module:'game_class.species.mt');
+        @:Species = import(module:'game_database.species.mt');
         @:Story = import(module:'game_singleton.story.mt');
-        @:Scene = import(module:'game_class.scene.mt');
+        @:Scene = import(module:'game_database.scene.mt');
         @:StatSet = import(module:'game_class.statset.mt');
         location.ownedBy = location.landmark.island.newInhabitant();
         location.ownedBy.name = 'Wyvern of Light';
-        location.ownedBy.species = Species.database.find(name:'Wyvern of Light');
-        location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Wyvern of Light'));               
+        location.ownedBy.species = Species.find(name:'Wyvern of Light');
+        location.ownedBy.profession = Profession.new(base:Profession.database.find(name:'Wyvern of Light'));               
         location.ownedBy.clearAbilities();
         foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
             location.ownedBy.learnAbility(name:ability);
@@ -954,10 +943,10 @@ Location.Base.newEntry(data:{
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
             if (Story.tier < 4) ::<= {
-                Scene.database.find(name:'scene_wyvernlight0').act(onDone::{}, location, landmark:location.landmark);
+                Scene.start(name:'scene_wyvernlight0', onDone::{}, location, landmark:location.landmark);
             } else ::<= {
                 // just visiting!
-                Scene.database.find(name:'scene_wyvernlight1').act(onDone::{}, location, landmark:location.landmark);                        
+                Scene.start(name:'scene_wyvernlight1', onDone::{}, location, landmark:location.landmark);                        
             }
         }
         location.ownedBy.stats.load(serialized:StatSet.new(
@@ -986,7 +975,7 @@ Location.Base.newEntry(data:{
     }
 })
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Shop',
     rarity: 100,
     ownVerb : 'run',
@@ -1017,9 +1006,9 @@ Location.Base.newEntry(data:{
     minOccupants : 0,
     maxOccupants : 0,
     onFirstInteract ::(location) {
-        @:Profession = import(module:'game_class.profession.mt');
+        @:Profession = import(module:'game_mutator.profession.mt');
         location.ownedBy = location.landmark.island.newInhabitant();            
-        location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Trader'));
+        location.ownedBy.profession = Profession.new(base:Profession.database.find(name:'Trader'));
         location.ownedBy.normalizeStats();              
         location.name = 'Shop';
         location.inventory.maxItems = 50;
@@ -1031,7 +1020,7 @@ Location.Base.newEntry(data:{
             // no weight, as the value scales
             location.inventory.add(item:
                 Item.new(
-                    base:Item.Base.database.getRandomFiltered(
+                    base:Item.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false &&
                                             location.ownedBy.level >= value.levelMinimum
                                             && value.tier <= location.landmark.island.tier
@@ -1044,16 +1033,16 @@ Location.Base.newEntry(data:{
 
 
 
-        location.inventory.add(item:Item.new(base:Item.Base.database.find(
+        location.inventory.add(item:Item.new(base:Item.database.find(
             name: 'Skill Crystal'
         ), from:location.ownedBy));                
-        location.inventory.add(item:Item.new(base:Item.Base.database.find(
+        location.inventory.add(item:Item.new(base:Item.database.find(
             name: 'Skill Crystal'
         ), from:location.ownedBy));                
-        location.inventory.add(item:Item.new(base:Item.Base.database.find(
+        location.inventory.add(item:Item.new(base:Item.database.find(
             name: 'Pickaxe'
         ), from:location.ownedBy));                
-        location.inventory.add(item:Item.new(base:Item.Base.database.find(
+        location.inventory.add(item:Item.new(base:Item.database.find(
             name: 'Smithing Hammer'
         ), from:location.ownedBy));                
     },
@@ -1072,7 +1061,7 @@ Location.Base.newEntry(data:{
 })
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Enchant Stand',
     rarity: 100,
     ownVerb : 'run',
@@ -1104,7 +1093,7 @@ Location.Base.newEntry(data:{
         location.ownedBy = location.landmark.island.newInhabitant();
     
     
-        @:ItemEnchant = import(module:'game_class.itemenchant.mt');
+        @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
     
         location.data.enchants = [
             ItemEnchant.database.getRandom().name,
@@ -1140,7 +1129,7 @@ Location.Base.newEntry(data:{
     }
 })
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Blacksmith',
     rarity: 100,
     ownVerb : 'run',
@@ -1170,9 +1159,9 @@ Location.Base.newEntry(data:{
     minOccupants : 0,
     maxOccupants : 0,
     onFirstInteract ::(location) {
-        @:Profession = import(module:'game_class.profession.mt');
+        @:Profession = import(module:'game_mutator.profession.mt');
         location.ownedBy = location.landmark.island.newInhabitant();            
-        location.ownedBy.profession = Profession.new(base:Profession.Base.database.find(name:'Blacksmith'));
+        location.ownedBy.profession = Profession.new(base:Profession.database.find(name:'Blacksmith'));
         location.name = 'Blacksmith';
         location.ownedBy.normalizeStats();
         @:story = import(module:'game_singleton.story.mt');
@@ -1180,7 +1169,7 @@ Location.Base.newEntry(data:{
 
             location.inventory.add(
                 item:Item.new(
-                    base: Item.Base.database.getRandomFiltered(
+                    base: Item.database.getRandomFiltered(
                         filter::(value) <- (
                             value.isUnique == false && 
                             location.ownedBy.level >= value.levelMinimum &&
@@ -1209,7 +1198,7 @@ Location.Base.newEntry(data:{
 })        
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Tavern',
     rarity: 100,
     ownVerb : 'run',
@@ -1252,7 +1241,7 @@ Location.Base.newEntry(data:{
     }
 })
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Arena',
     rarity: 100,
     ownVerb : 'run',
@@ -1293,7 +1282,7 @@ Location.Base.newEntry(data:{
     }
 })
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Inn',
     rarity: 100,
     ownVerb : 'run',
@@ -1334,7 +1323,7 @@ Location.Base.newEntry(data:{
     }
 })
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'School',
     rarity: 100,
     ownVerb : 'run',
@@ -1376,7 +1365,7 @@ Location.Base.newEntry(data:{
     }
 })
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Library',
     rarity: 100,
     ownVerb : '',
@@ -1416,7 +1405,7 @@ Location.Base.newEntry(data:{
 })
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Gate',
     rarity: 100,
     ownVerb : '',
@@ -1454,7 +1443,7 @@ Location.Base.newEntry(data:{
     }
 })
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Stairs Down',
     rarity: 1000000000000,
     ownVerb : '',
@@ -1501,7 +1490,7 @@ Location.Base.newEntry(data:{
 
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Ladder',
     rarity: 1000000000000,
     ownVerb : '',
@@ -1537,7 +1526,7 @@ Location.Base.newEntry(data:{
     }
 })        
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: '?????',
     rarity: 1000000000000,
     ownVerb : '',
@@ -1585,7 +1574,7 @@ Location.Base.newEntry(data:{
 
 
         
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Small Chest',
     rarity: 1000000000000,
     ownVerb : '',
@@ -1616,7 +1605,7 @@ Location.Base.newEntry(data:{
         @:story = import(module:'game_singleton.story.mt');
         location.inventory.add(item:
             Item.new(
-                base:Item.Base.database.getRandomFiltered(
+                base:Item.database.getRandomFiltered(
                     filter:::(value) <- value.isUnique == false && value.canHaveEnchants
                                             && value.tier <= location.landmark.island.tier
                 ),
@@ -1633,7 +1622,7 @@ Location.Base.newEntry(data:{
 }) 
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Magic Chest',
     rarity: 1000000000000,
     ownVerb : '',
@@ -1669,7 +1658,7 @@ Location.Base.newEntry(data:{
 }) 
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Locked Chest',
     rarity: 1000000000000,
     ownVerb : '',
@@ -1707,7 +1696,7 @@ Location.Base.newEntry(data:{
         for(0, 3) ::{
             location.inventory.add(item:
                 Item.new(
-                    base:Item.Base.database.getRandomFiltered(
+                    base:Item.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false && value.canHaveEnchants
                                                 && value.tier <= location.landmark.island.tier + 1
                     ),
@@ -1725,7 +1714,7 @@ Location.Base.newEntry(data:{
 }) 
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Pressure Plate',
     rarity: 1000000000000,
     ownVerb : '',
@@ -1766,7 +1755,7 @@ Location.Base.newEntry(data:{
 
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Fountain',
     rarity: 4,
     ownVerb : '',
@@ -1805,7 +1794,7 @@ Location.Base.newEntry(data:{
 });
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Healing Circle',
     rarity: 4,
     ownVerb : '',
@@ -1844,7 +1833,7 @@ Location.Base.newEntry(data:{
 });
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Wyvern Statue',
     rarity: 4,
     ownVerb : '',
@@ -1886,7 +1875,7 @@ Location.Base.newEntry(data:{
 });
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Enchantment Stand',
     rarity: 4,
     ownVerb : '',
@@ -1916,9 +1905,9 @@ Location.Base.newEntry(data:{
     },
     
     onCreate ::(location) { 
-        @:ItemEnchant = import(module:'game_class.itemenchant.mt');
+        @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
         location.data.enchant = ItemEnchant.new(
-            base:ItemEnchant.Base.database.getRandom()
+            base:ItemEnchant.database.getRandom()
         )
     },
     
@@ -1929,7 +1918,7 @@ Location.Base.newEntry(data:{
 });
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Clothing Shop',
     rarity: 4,
     ownVerb : 'run',
@@ -1958,9 +1947,9 @@ Location.Base.newEntry(data:{
     minOccupants : 0,
     maxOccupants : 0,
     onFirstInteract ::(location) {
-        @:Profession = import(module:'game_class.profession.mt');
+        @:Profession = import(module:'game_mutator.profession.mt');
         @:Entity = import(module:'game_class.entity.mt');
-        @:EntityQuality = import(module:'game_class.entityquality.mt');
+        @:EntityQuality = import(module:'game_mutator.entityquality.mt');
         @:world = import(module:'game_singleton.world.mt');                
         when(world.npcs.mei == empty || world.npcs.mei.isIncapacitated())
             location.ownedBy = empty;
@@ -1975,7 +1964,7 @@ Location.Base.newEntry(data:{
             // no weight, as the value scales
             location.inventory.add(item:
                 Item.new(
-                    base:Item.Base.database.getRandomFiltered(
+                    base:Item.database.getRandomFiltered(
                         filter:::(value) <- value.isApparel == true
                     ),
                     apparelHint: 'Wool+',
@@ -2014,7 +2003,7 @@ Location.Base.newEntry(data:{
 
 });
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Potion Shop',
     rarity: 4,
     ownVerb : 'run',
@@ -2043,9 +2032,9 @@ Location.Base.newEntry(data:{
     minOccupants : 0,
     maxOccupants : 0,
     onFirstInteract ::(location) {
-        @:Profession = import(module:'game_class.profession.mt');
+        @:Profession = import(module:'game_mutator.profession.mt');
         @:Entity = import(module:'game_class.entity.mt');
-        @:EntityQuality = import(module:'game_class.entityquality.mt');
+        @:EntityQuality = import(module:'game_mutator.entityquality.mt');
         @:story = import(module:'game_singleton.story.mt');
         @:world = import(module:'game_singleton.world.mt');                
         when (world.npcs.sylvia == empty || world.npcs.sylvia.isIncapacitated())
@@ -2059,7 +2048,7 @@ Location.Base.newEntry(data:{
 
         for(0, 14)::(i) {
             @:item = Item.new(
-                base:Item.Base.database.getRandomFiltered(
+                base:Item.database.getRandomFiltered(
                     filter:::(value) <- value.name->contains(key:'Potion')
                 ),
                 from:location.ownedBy
@@ -2099,7 +2088,7 @@ Location.Base.newEntry(data:{
 
 });
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Fancy Shop',
     rarity: 4,
     ownVerb : 'run',
@@ -2128,9 +2117,9 @@ Location.Base.newEntry(data:{
     minOccupants : 0,
     maxOccupants : 0,
     onFirstInteract ::(location) {
-        @:Profession = import(module:'game_class.profession.mt');
+        @:Profession = import(module:'game_mutator.profession.mt');
         @:Entity = import(module:'game_class.entity.mt');
-        @:EntityQuality = import(module:'game_class.entityquality.mt');
+        @:EntityQuality = import(module:'game_mutator.entityquality.mt');
         @:world = import(module:'game_singleton.world.mt');                
         when(world.npcs.faus == empty || world.npcs.faus.isIncapacitated()) empty;
             location.ownedBy = empty
@@ -2156,7 +2145,7 @@ Location.Base.newEntry(data:{
             // no weight, as the value scales
             location.inventory.add(item:
                 Item.new(
-                    base:Item.Base.database.getRandomFiltered(
+                    base:Item.database.getRandomFiltered(
                         filter:::(value) <- value.hasQuality == true
                     ),
                     qualityHint: random.pickArrayItem(list:qualities),
@@ -2195,7 +2184,7 @@ Location.Base.newEntry(data:{
 });
 
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Large Chest',
     rarity: 1000000000000,
     ownVerb : '',
@@ -2227,7 +2216,7 @@ Location.Base.newEntry(data:{
         for(0, 3)::(i) {
             location.inventory.add(item:
                 Item.new(
-                    base:Item.Base.database.getRandomFiltered(
+                    base:Item.database.getRandomFiltered(
                         filter:::(value) <- value.isUnique == false
                                             && value.tier <= location.landmark.island.tier
                     ),
@@ -2238,7 +2227,7 @@ Location.Base.newEntry(data:{
         
         location.inventory.add(item:
             Item.new(
-                base:Item.Base.database.getRandomFiltered(
+                base:Item.database.getRandomFiltered(
                     filter:::(value) <- value.isUnique == false
                                         && value.hasQuality
                 ),
@@ -2261,7 +2250,7 @@ Location.Base.newEntry(data:{
     }
 })
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Body',
     rarity: 1000000000000,
     ownVerb : 'owned',
@@ -2300,7 +2289,7 @@ Location.Base.newEntry(data:{
     }
 })        
 
-Location.Base.newEntry(data:{
+Location.database.newEntry(data:{
     name: 'Sylvia\'s Library',
     rarity: 1000000000000,
     ownVerb : '',
@@ -2329,12 +2318,12 @@ Location.Base.newEntry(data:{
     onInteract ::(location) {
         @:world = import(module:'game_singleton.world.mt');                
         if (world.storyFlags.action_interactedSylviaLibrary == false) ::<= {
-            Scene.database.find(name:'scene1_0_sylvialibraryfirst').act(location);
+            Scene.find(name:'scene1_0_sylvialibraryfirst').act(location);
             world.storyFlags.action_interactedSylviaLibrary = true;
         }
         
         if (world.party.inventory.items->all(condition:::(value) <- !value.name->contains(key:'Key to'))) ::<= {
-            Scene.database.find(name:'scene2_0_sylviakeyout').act(location);
+            Scene.find(name:'scene2_0_sylviakeyout').act(location);
         }
     },
     

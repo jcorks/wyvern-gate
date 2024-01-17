@@ -18,13 +18,39 @@
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
-@:Item = import(module:'game_class.item.mt');
+@:Item = import(module:'game_mutator.item.mt');
 @:Damage = import(module:'game_class.damage.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:StateFlags = import(module:'game_class.stateflags.mt');
 
 
-@:Ability = Database.create(
+@TARGET_MODE = {
+    ONE     : 0,    
+    ALLALLY : 1,    
+    RANDOM  : 2,    
+    NONE    : 3,
+    ALLENEMY: 4,
+    ALL     : 5
+}
+
+@USAGE_HINT = {
+    OFFENSIVE : 0,
+    HEAL    : 1,
+    BUFF    : 2,
+    DEBUFF  : 3,
+    DONTUSE : 4,
+} 
+
+
+@:Ability = class(
+    inherits: [Database],
+    define::(this) {
+        this.interface = {        
+            TARGET_MODE : {get::<- TARGET_MODE},
+            USAGE_HINT : {get::<- USAGE_HINT}  
+        }
+    }    
+).new(
     name : 'Wyvern.Ability',
     attributes : {
         name : String,
@@ -37,36 +63,10 @@
         hpCost : Number,
 
         onAction : Function
-    },
-
-    statics : ::<= {
-        @TARGET_MODE = {
-            ONE     : 0,    
-            ALLALLY : 1,    
-            RANDOM  : 2,    
-            NONE    : 3,
-            ALLENEMY: 4,
-            ALL     : 5
-        }
-        
-        @USAGE_HINT = {
-            OFFENSIVE : 0,
-            HEAL    : 1,
-            BUFF    : 2,
-            DEBUFF  : 3,
-            DONTUSE : 4,
-        } 
-        
-        return {
-            TARGET_MODE : {get::<- TARGET_MODE},
-            USAGE_HINT : {get::<- USAGE_HINT}  
-        }       
     }
 );
 
 
-@:TARGET_MODE  = Ability.TARGET_MODE;
-@:USAGE_HINT   = Ability.USAGE_HINT;
 
 
 
@@ -1679,7 +1679,7 @@ Ability.newEntry(
 
 
             @:Entity = import(module:'game_class.entity.mt');
-            @:Species = import(module:'game_class.species.mt');
+            @:Species = import(module:'game_database.species.mt');
             @:sprite = Entity.new(
                 island : world.island,
                 speciesHint: 'Fire Sprite',
@@ -1735,7 +1735,7 @@ Ability.newEntry(
 
             
             @:Entity = import(module:'game_class.entity.mt');
-            @:Species = import(module:'game_class.species.mt');
+            @:Species = import(module:'game_database.species.mt');
             @:world = import(module:'game_singleton.world.mt');
             @:sprite = Entity.new(
                 island: world.island,
@@ -1789,7 +1789,7 @@ Ability.newEntry(
                 );
             
             @:Entity = import(module:'game_class.entity.mt');
-            @:Species = import(module:'game_class.species.mt');
+            @:Species = import(module:'game_database.species.mt');
             @:world = import(module:'game_singleton.world.mt');
             @:sprite = Entity.new(
                 island: world.island,
@@ -1844,7 +1844,7 @@ Ability.newEntry(
                 );
             
             @:Entity = import(module:'game_class.entity.mt');
-            @:Species = import(module:'game_class.species.mt');
+            @:Species = import(module:'game_database.species.mt');
             @:world = import(module:'game_singleton.world.mt');
             @:sprite = Entity.new(
                 island: world.island,
@@ -3352,7 +3352,7 @@ Ability.newEntry(
 
             windowEvent.queueMessage(text: '... and made a Pink Potion!');
             inventory.removeByName(name:'Ingredient');
-            inventory.add(item:Item.new(base:Item.Base.database.find(name:'Pink Potion'), from:user));                            
+            inventory.add(item:Item.new(base:Item.database.find(name:'Pink Potion'), from:user));                            
         }
     }
 )
@@ -3391,7 +3391,7 @@ Ability.newEntry(
             inventory.removeByName(name:'Ingredient');
             inventory.add(item:
                 Item.new(
-                    base:Item.Base.database.find(name:'Cyan Potion'),
+                    base:Item.database.find(name:'Cyan Potion'),
                     from:user
                 )
             );                            
@@ -3434,7 +3434,7 @@ Ability.newEntry(
             inventory.removeByName(name:'Ingredient');
             inventory.add(
                 item:Item.new(
-                    base:Item.Base.database.find(name:'Green Potion'),
+                    base:Item.database.find(name:'Green Potion'),
                     from:user
             ));                            
         }
@@ -3477,7 +3477,7 @@ Ability.newEntry(
             inventory.removeByName(name:'Ingredient');
             inventory.add(item:
                 Item.new(
-                    base:Item.Base.database.find(name:'Orange Potion'),
+                    base:Item.database.find(name:'Orange Potion'),
                     from:user
                 )
             );                            
@@ -3519,7 +3519,7 @@ Ability.newEntry(
             inventory.removeByName(name:'Ingredient');
             inventory.add(
                 item:Item.new(
-                    base:Item.Base.database.find(name:'Purple Potion'),
+                    base:Item.database.find(name:'Purple Potion'),
                     from:user
                 )
             );                            
@@ -3562,7 +3562,7 @@ Ability.newEntry(
             inventory.removeByName(name:'Ingredient');
             inventory.add(
                 item:Item.new(
-                    base:Item.Base.database.find(name:'Black Potion'),
+                    base:Item.database.find(name:'Black Potion'),
                     from:user
                 )
             );                            

@@ -18,10 +18,11 @@
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
-@:ItemEnchantCondition = import(module:'game_class.itemenchantcondition.mt');
+@:ItemEnchantCondition = import(module:'game_database.itemenchantcondition.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
 
 @:CONDITION_CHANCES = [
     10,
@@ -42,23 +43,28 @@
 
 
 
-@:ItemEnchant = LoadableClass.create(
+@:ItemEnchant = databaseItemMutatorClass(
     name : 'Wyvern.ItemEnchant',
-    statics : {
-        Base  :::<= {
-            @db;
-            return {
-                get ::<- db,
-                set ::(value) <- db = value
-            }
-        }
-    },
     items : {
-        base : empty,
         condition : empty,
         conditionChance : empty,
         conditionChanceName  : empty   
     },
+
+    database: Database.new(
+        name : 'Wyvern.ItemEnchant.Base',
+        attributes : {
+            name : String,
+            description : String,
+            levelMinimum : Number,
+            equipMod : StatSet.type, // percentages
+            useEffects : Object,
+            equipEffects : Object,
+            triggerConditionEffects : Object,
+            priceMod : Number,
+            tier : Number
+        }
+    ),
 
     define:::(this, state) {
         
@@ -69,9 +75,9 @@
                 
                 if (base.triggerConditionEffects->keycount > 0) ::<= {
                     if (conditionHint != empty) ::<= {
-                        state.condition = ItemEnchantCondition.database.find(name:conditionHint);
+                        state.condition = ItemEnchantCondition.find(name:conditionHint);
                     } else ::<= {
-                        state.condition = ItemEnchantCondition.database.getRandom();
+                        state.condition = ItemEnchantCondition.getRandom();
                     }
                     @conditionIndex = random.pickArrayItem(list:CONDITION_CHANCES->keys);
                     state.conditionChance = CONDITION_CHANCES[conditionIndex];
@@ -97,10 +103,6 @@
                 }
             },
             
-            base : {
-                get ::<- state.base
-            },
-            
             onTurnCheck ::(wielder, item, battle) {
                 when(state.condition == empty) empty;
                 if (state.condition.onTurnCheck(wielder, item, battle) == true) ::<= {
@@ -118,23 +120,8 @@
 
 );
 
-ItemEnchant.Base = Database.create(
-    name : 'Wyvern.ItemEnchant.Base',
-    attributes : {
-        name : String,
-        description : String,
-        levelMinimum : Number,
-        equipMod : StatSet.type, // percentages
-        useEffects : Object,
-        equipEffects : Object,
-        triggerConditionEffects : Object,
-        priceMod : Number,
-        tier : Number
-    }
-);
 
-
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Protect',
         description : ', will $1 cast Protect on the wielder for a while, which greatly increases defense.',
@@ -155,7 +142,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Evade',
         description : ', will $1 allow the wielder to evade attacks the next turn.',
@@ -178,7 +165,7 @@ ItemEnchant.Base.newEntry(
 
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Regen',
         description : ', will $1 slightly recover the users wounds.',
@@ -199,7 +186,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Chance to Break',
         description : ', will $1 break.',
@@ -221,7 +208,7 @@ ItemEnchant.Base.newEntry(
 )
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Chance to Hurt',
         description : ', will $1 hurt the wielder.',
@@ -242,7 +229,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Chance to Fatigue',
         description : ', will $1 fatigue the wielder.',
@@ -264,7 +251,7 @@ ItemEnchant.Base.newEntry(
 )
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Spikes',
         description : ', will $1 cast a spell that damages an enemy when attacked for a few turns.',
@@ -286,7 +273,7 @@ ItemEnchant.Base.newEntry(
 )
 
 /*
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Ensnare',
         description : ', will $1 cast a spell to cause the wielder and the attacker to get ensnared.',
@@ -309,7 +296,7 @@ ItemEnchant.Base.newEntry(
 */
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Ease',
         description : ', will $1 recover from mental fatigue.',
@@ -330,7 +317,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Shield',
         description : ', will $1 cast Shield for a while, which may block attacks.',
@@ -351,7 +338,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Boost Strength',
         description : ', will $1 boost the wielder\'s power for a while.',
@@ -372,7 +359,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Boost Defense',
         description : ', will $1 boost the wielder\'s defense for a while.',
@@ -393,7 +380,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Boost Mind',
         description : ', will $1 boost the wielder\'s mental acquity for a while.',
@@ -414,7 +401,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Boost Dex',
         description : ', will $1 boost the wielder\'s dexterity for a while.',
@@ -435,7 +422,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Boost Speed',
         description : ', will $1 boost the wielder\'s speed for a while.',
@@ -458,7 +445,7 @@ ItemEnchant.Base.newEntry(
 
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Burning',
         description : 'The material its made of is warm to the touch. Grants a fire aspect to attacks and gives ice resistance when used as armor.',
@@ -479,7 +466,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Icy',
         description : 'The material its made of is cold to the touch. Grants an ice aspect to attacks and gives fire resistance when used as armor.',
@@ -500,7 +487,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Shock',
         description : 'The material its made of gently hums. Grants a thunder aspect to attacks and gives thunder resistance when used as armor.',
@@ -521,7 +508,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Toxic',
         description : 'The material its made has been made poisonous. Grants a poison aspect to attacks and gives poison resistance when used as armor.',
@@ -542,7 +529,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Shimmering',
         description : 'The material its made of glows softly. Grants a light aspect to attacks and gives dark resistance when used as armor.',
@@ -563,7 +550,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Dark',
         description : 'The material its made of is very dark. Grants a dark aspect to attacks and gives light resistance when used as armor.',
@@ -586,7 +573,7 @@ ItemEnchant.Base.newEntry(
 
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Rune: Power',
         description : 'Imbued with a potent rune of power.',
@@ -611,7 +598,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Rune: Shield',
         description : 'Imbued with a potent rune of shielding.',
@@ -636,7 +623,7 @@ ItemEnchant.Base.newEntry(
     }
 )        
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Rune: Reflex',
         description : 'Imbued with a potent rune of reflex.',
@@ -661,7 +648,7 @@ ItemEnchant.Base.newEntry(
     }
 ) 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Rune: Speed',
         description : 'Imbued with a potent rune of speed.',
@@ -686,7 +673,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Rune: Mind',
         description : 'Imbued with a potent rune of mind.',
@@ -714,7 +701,7 @@ ItemEnchant.Base.newEntry(
 
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Teal Crystal',
         description : 'Set with a simple, enchanted teal crystal of alchemical origin, which alters the stats of the item.',
@@ -738,7 +725,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Lavender Crystal',
         description : 'Set with a simple, enchanted lavender crystal of alchemical origin, which alters the stats of the item.',
@@ -762,7 +749,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Orange Crystal',
         description : 'Set with a simple, enchanted orange crystal of alchemical origin, which alters the stats of the item.',
@@ -786,7 +773,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Indigo Crystal',
         description : 'Set with a simple, enchanted indigo crystal of alchemical origin, which alters the stats of the item.',
@@ -811,7 +798,7 @@ ItemEnchant.Base.newEntry(
 )
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Rose Crystal',
         description : 'Set with a simple, enchanted rose crystal of alchemical origin, which alters the stats of the item.',
@@ -835,7 +822,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Cyan Crystal',
         description : 'Set with a simple, enchanted cyan crystal of alchemical origin, which alters the stats of the item.',
@@ -859,7 +846,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: White Crystal',
         description : 'Set with a simple, enchanted white crystal of alchemical origin, which alters the stats of the item.',
@@ -883,7 +870,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Violet Crystal',
         description : 'Set with a simple, enchanted violet crystal of alchemical origin, which alters the stats of the item.',
@@ -907,7 +894,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Scarlet Crystal',
         description : 'Set with a simple, enchanted scarlet crystal of alchemical origin, which alters the stats of the item.',
@@ -931,7 +918,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Maroon Crystal',
         description : 'Set with a simple, enchanted maroon crystal of alchemical origin, which alters the stats of the item.',
@@ -955,7 +942,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Crimson Crystal',
         description : 'Set with a simple, enchanted crimson crystal of alchemical origin, which alters the stats of the item.',
@@ -991,7 +978,7 @@ ItemEnchant.Base.newEntry(
 
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Morion',
         description : 'Set with an enchanted morion stone, which greatly alters the stats of the item.',
@@ -1015,7 +1002,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Amethyst',
         description : 'Set with an enchanted amethyst, which greatly alters the stats of the item.',
@@ -1039,7 +1026,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Citrine',
         description : 'Set with an enchanted citrine stone, which greatly alters the stats of the item.',
@@ -1063,7 +1050,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Garnet',
         description : 'Set with an enchanted garnet stone, which greatly alters the stats of the item.',
@@ -1088,7 +1075,7 @@ ItemEnchant.Base.newEntry(
 )
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Praesolite',
         description : 'Set with an enchanted praesolite stone, which greatly alters the stats of the item.',
@@ -1112,7 +1099,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Aquamarine',
         description : 'Set with an enchanted aquamarine stone, which greatly alters the stats of the item.',
@@ -1136,7 +1123,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Diamond',
         description : 'Set with an enchanted diamond stone, which greatly alters the stats of the item.',
@@ -1160,7 +1147,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Pearl',
         description : 'Set with an enchanted pearl, which greatly alters the stats of the item.',
@@ -1184,7 +1171,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Ruby',
         description : 'Set with an enchanted ruby, which greatly alters the stats of the item.',
@@ -1208,7 +1195,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Sapphire',
         description : 'Set with an enchanted sapphire, which greatly alters the stats of the item.',
@@ -1232,7 +1219,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Opal',
         description : 'Set with an enchanted opal stone, which greatly alters the stats of the item.',
@@ -1257,7 +1244,7 @@ ItemEnchant.Base.newEntry(
 )
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Cursed',
         description : 'Somehow, cursed magicks have seeped into this, which greatly alters the stats of the item.',
@@ -1282,7 +1269,7 @@ ItemEnchant.Base.newEntry(
 )
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Bloodstone',
         description : 'Set with a large bloodstone, shining sinisterly. This greatly alters the stats of the item.',
@@ -1307,7 +1294,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Inlet: Soulstone',
         description : 'Set with a large soulstone, shining sinisterly. This greatly alters the stats of the item.',
@@ -1333,7 +1320,7 @@ ItemEnchant.Base.newEntry(
 )
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Aura: Green',
         description : 'Imbued with a stamina aura; it softly glows green.',
@@ -1354,7 +1341,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Aura: Red',
         description : 'Imbued with a stamina aura; it softly glows red.',
@@ -1375,7 +1362,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Aura: Blue',
         description : 'Imbued with a stamina aura; it softly glows blue with a glimmer.',
@@ -1397,7 +1384,7 @@ ItemEnchant.Base.newEntry(
 )
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Aura: Yellow',
         description : 'Imbued with a stamina aura; it softly glows yellow.',
@@ -1418,7 +1405,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Aura: Orange',
         description : 'Imbued with a stamina aura; it softly glows orange.',
@@ -1439,7 +1426,7 @@ ItemEnchant.Base.newEntry(
     }
 )
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Aura: Silver',
         description : 'Imbued with a stamina aura; it softly glows silver.',
@@ -1461,7 +1448,7 @@ ItemEnchant.Base.newEntry(
 )
 
 
-ItemEnchant.Base.newEntry(
+ItemEnchant.database.newEntry(
     data : {
         name : 'Aura: Gold',
         description : 'Imbued with a stamina aura; it softly glows gold.',

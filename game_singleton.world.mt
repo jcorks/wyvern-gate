@@ -380,8 +380,8 @@
                 if (state.npcs != empty) empty;
                 
                 @:Entity = import(module:'game_class.entity.mt');
-                @:EntityQuality = import(module:'game_class.entityquality.mt');
-                @:Item = import(module:'game_class.item.mt');
+                @:EntityQuality = import(module:'game_mutator.entityquality.mt');
+                @:Item = import(module:'game_mutator.item.mt');
                 @:story = import(module:'game_singleton.story.mt');
                 
                 state.npcs = {
@@ -396,20 +396,20 @@
                                 'Seasoned Adventurer'
                             ],
                             qualities : [
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'snout'), trait0Hint:0),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'fur'),   descriptionHint: 6, trait0Hint:10, trait2Hint:3),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'eyes'),  descriptionHint: 3, trait2Hint:6, trait1Hint: 0),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'ears'),  descriptionHint: 1, trait0Hint:2),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'face'),  descriptionHint: 0, trait0Hint:3),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'tail'),  descriptionHint: 0, trait0Hint:0),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'body'),  descriptionHint: 1, trait0Hint:0, trait1Hint:0),            
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'snout'), trait0Hint:0),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'fur'),   descriptionHint: 6, trait0Hint:10, trait2Hint:3),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'eyes'),  descriptionHint: 3, trait2Hint:6, trait1Hint: 0),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'ears'),  descriptionHint: 1, trait0Hint:2),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'face'),  descriptionHint: 0, trait0Hint:3),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'tail'),  descriptionHint: 0, trait0Hint:0),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'body'),  descriptionHint: 1, trait0Hint:0, trait1Hint:0),            
                             ]
                         );
 
 
 
                         @:fausWeapon = Item.new(
-                            base: Item.Base.database.find(name: 'Morning Star'),
+                            base: Item.database.find(name: 'Morning Star'),
                             rngEnchantHint: false,
                             qualityHint: 'Masterwork',
                             materialHint: 'Mythril',
@@ -420,7 +420,7 @@
                         fausWeapon.maxOut();
                         
                         @:fausRobe = Item.new(
-                            base: Item.Base.database.find(name: 'Robe'),
+                            base: Item.database.find(name: 'Robe'),
                             rngEnchantHint: false,
                             qualityHint: 'Masterwork',
                             colorHint: 'black',
@@ -432,7 +432,7 @@
 
 
                         @:fausCloak = Item.new(
-                            base: Item.Base.database.find(name: 'Cloak'),
+                            base: Item.database.find(name: 'Cloak'),
                             rngEnchantHint: false,
                             qualityHint: 'Masterwork',
                             colorHint: 'olive-green',
@@ -473,13 +473,13 @@
                             levelHint: story.levelHint-1,
                             adventurousHint: true,
                             qualities : [
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'snout'), trait0Hint:0),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'scales'),   descriptionHint: 0, trait0Hint:5),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'eyes'),  descriptionHint: 3, trait2Hint:0, trait1Hint: 3),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'face'),  descriptionHint: 4, trait0Hint:0, trait1Hint:0),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'tail'),  descriptionHint: 0, trait0Hint:1),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'body'),  descriptionHint: 1, trait0Hint:0, trait1Hint:2),            
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'horns'), descriptionHint: 6, trait0Hint:2, trait1Hint:1)
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'snout'), trait0Hint:0),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'scales'),   descriptionHint: 0, trait0Hint:5),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'eyes'),  descriptionHint: 3, trait2Hint:0, trait1Hint: 3),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'face'),  descriptionHint: 4, trait0Hint:0, trait1Hint:0),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'tail'),  descriptionHint: 0, trait0Hint:1),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'body'),  descriptionHint: 1, trait0Hint:0, trait1Hint:2),            
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'horns'), descriptionHint: 6, trait0Hint:2, trait1Hint:1)
                             ]                            
                         );
 
@@ -490,7 +490,7 @@
 
 
                         @:sylvWeapon = Item.new(
-                            base: Item.Base.database.find(name: 'Tome'),
+                            base: Item.database.find(name: 'Tome'),
                             rngEnchantHint: true,
                             qualityHint: 'Durable',
                             materialHint: 'Moonstone',
@@ -500,7 +500,7 @@
                         sylvWeapon.maxOut();
                         
                         @:sylvRobe = Item.new(
-                            base: Item.Base.database.find(name: 'Robe'),
+                            base: Item.database.find(name: 'Robe'),
                             rngEnchantHint: true,
                             qualityHint: 'Sturdy',
                             colorHint: 'brown',
@@ -510,7 +510,7 @@
                         sylvRobe.maxOut();
                         
                         @:sylvAcc = Item.new(
-                            base: Item.Base.database.find(name: 'Hat'),
+                            base: Item.database.find(name: 'Hat'),
                             rngEnchantHint: true,
                             qualityHint: 'Sturdy',
                             colorHint: 'brown',
@@ -540,21 +540,21 @@
                                 'Seasoned Adventurer'
                             ],
                             qualities : [
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'snout'), trait0Hint:2),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'fur'),   descriptionHint: 0, trait0Hint:8),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'eyes'),  descriptionHint: 0, trait2Hint:0, trait1Hint: 0),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'ears'),  descriptionHint: 2, trait0Hint:2),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'face'),  descriptionHint: 0, trait0Hint:0),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'tail'),  descriptionHint: 0, trait0Hint:0),
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'body'),  descriptionHint: 1, trait0Hint:0, trait1Hint:5),            
-                                EntityQuality.new(base: EntityQuality.Base.database.find(name: 'horns'), descriptionHint: 1, trait0Hint:2, trait1Hint:1)
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'snout'), trait0Hint:2),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'fur'),   descriptionHint: 0, trait0Hint:8),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'eyes'),  descriptionHint: 0, trait2Hint:0, trait1Hint: 0),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'ears'),  descriptionHint: 2, trait0Hint:2),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'face'),  descriptionHint: 0, trait0Hint:0),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'tail'),  descriptionHint: 0, trait0Hint:0),
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'body'),  descriptionHint: 1, trait0Hint:0, trait1Hint:5),            
+                                EntityQuality.new(base: EntityQuality.database.find(name: 'horns'), descriptionHint: 1, trait0Hint:2, trait1Hint:1)
                             ]
                         );
 
 
 
                         @:meiWeapon = Item.new(
-                            base: Item.Base.database.find(name: 'Falchion'),
+                            base: Item.database.find(name: 'Falchion'),
                             rngEnchantHint: true,
                             qualityHint: 'Quality',
                             materialHint: 'Dragonglass',
@@ -564,7 +564,7 @@
                         meiWeapon.maxOut();
                         
                         @:meiRobe = Item.new(
-                            base: Item.Base.database.find(name: 'Robe'),
+                            base: Item.database.find(name: 'Robe'),
                             rngEnchantHint: true,
                             qualityHint: 'Masterwork',
                             colorHint: 'pink',
@@ -574,7 +574,7 @@
                         meiRobe.maxOut();
                         
                         @:meiAcc = Item.new(
-                            base: Item.Base.database.find(name: 'Mei\'s Bow'),
+                            base: Item.database.find(name: 'Mei\'s Bow'),
                             rngEnchantHint: true,
                             forceEnchant: true
                         );
@@ -609,7 +609,7 @@
                         );
                         
                         @:skieWeapon = Item.new(
-                            base: Item.Base.database.find(name: 'Tome'),
+                            base: Item.database.find(name: 'Tome'),
                             rngEnchantHint: true,
                             qualityHint: 'Legendary',
                             materialHint: 'Mythril',
@@ -619,7 +619,7 @@
                         skieWeapon.maxOut();
                         
                         @:skieRobe = Item.new(
-                            base: Item.Base.database.find(name: 'Robe'),
+                            base: Item.database.find(name: 'Robe'),
                             rngEnchantHint: true,
                             qualityHint: 'Legendary',
                             colorHint: 'silver',
@@ -629,7 +629,7 @@
                         skieRobe.maxOut();
 
                         @:skieCloak = Item.new(
-                            base: Item.Base.database.find(name: 'Cloak'),
+                            base: Item.database.find(name: 'Cloak'),
                             rngEnchantHint: false,
                             qualityHint: 'Sturdy',
                             colorHint: 'black',

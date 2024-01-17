@@ -20,21 +20,21 @@
 @:StatSet = import(module:'game_class.statset.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Damage = import(module:'game_class.damage.mt');
-@:Item = import(module:'game_class.item.mt');
+@:Item = import(module:'game_mutator.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 
-@:Scene = Database.create(
-    name : 'Wyvern.Scene',
-    attributes : {
-        name : String,
-        script : Object
-    },
-    getInterface::(this) {
-        return {
-            act::(onDone => Function, location, landmark) {
-                @:left = [...this.script];
+@:Scene = class(
+    inherits:[Database],
+    define::(this) {
+        this.interface = {
+            start::(name, onDone => Function, location, landmark) {
+                @:scene = this.find(name);
+                if (scene == empty)
+                    error(detail:'No such scene ' + name);
+                    
+                @:left = [...scene.script];
                 
                 @:doNext ::{
                     when(left->keycount == 0) onDone();
@@ -54,8 +54,14 @@
                 }
                 
                 doNext();
-            }
+            }    
         }
+    }
+).new(
+    name : 'Wyvern.Scene',
+    attributes : {
+        name : String,
+        script : Object
     }
 );
 
@@ -173,7 +179,7 @@ Scene.newEntry(
                     );
                     
                     @:item = Item.new(
-                        base:Item.Base.database.find(name:'Wyvern Key of Fire'
+                        base:Item.database.find(name:'Wyvern Key of Fire'
                                 ),
                         from:location.ownedBy
                     );
@@ -280,7 +286,7 @@ Scene.newEntry(
                             when(items->keycount == 3) ::<= {
                                 windowEvent.queueMessage(speaker:'Kaedjaal', text:'Excellent. Let me, in exchange, give you this.');   
                                 @:item = Item.new(
-                                    base:Item.Base.database.getRandomFiltered(
+                                    base:Item.database.getRandomFiltered(
                                         filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial
                                     ),
                                     rngEnchantHint:true, 
@@ -288,9 +294,9 @@ Scene.newEntry(
                                     colorHint:'red', 
                                     materialHint: 'Gold'
                                 );
-                                @:ItemEnchant = import(module:'game_class.itemenchant.mt');
-                                item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.Base.database.find(name:'Burning')));
-                                item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.Base.database.find(name:'Burning')));
+                                @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
+                                item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(name:'Burning')));
+                                item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(name:'Burning')));
 
 
                                 windowEvent.queueMessage(text:'In exchange, the party was given ' + correctA(word:item.name) + '.');
@@ -456,7 +462,7 @@ Scene.newEntry(
                         text: '*tells you off in dragonish*'
                     );
                     
-                    @:item = Item.new(base:Item.Base.database.find(name:'Wyvern Key of Ice'),
+                    @:item = Item.new(base:Item.database.find(name:'Wyvern Key of Ice'),
                              from:location.ownedBy);
                     windowEvent.queueMessage(text:'The party was given a ' + item.name + '.');
                     world.party.inventory.add(item);
@@ -545,7 +551,7 @@ Scene.newEntry(
                                             );                              
                                             
                                             @:prize = Item.new(
-                                                base: Item.Base.database.getRandomFiltered(
+                                                base: Item.database.getRandomFiltered(
                                                     filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial && value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
                                                 ),
                                                 rngEnchantHint:true, 
@@ -554,8 +560,8 @@ Scene.newEntry(
                                                 materialHint: 'Mythril', 
                                                 qualityHint: 'Masterwork'
                                             );
-                                            @:ItemEnchant = import(module:'game_class.itemenchant.mt');
-                                            prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.Base.database.find(name:'Icy')));
+                                            @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
+                                            prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(name:'Icy')));
 
                                             party.inventory.add(item:prize);
                                             windowEvent.queueMessage(text:'The party was given a ' + prize.name + '.',
@@ -722,7 +728,7 @@ Scene.newEntry(
                         text: 'Uhm. Where\'s the thunder key..?'
                     );
                     
-                    @:item = Item.new(base:Item.Base.database.find(name:'Wyvern Key of Thunder'),
+                    @:item = Item.new(base:Item.database.find(name:'Wyvern Key of Thunder'),
                              from:location.ownedBy);
                     windowEvent.queueMessage(text:'The party was given a ' + item.name + '.');
                     world.party.inventory.add(item);
@@ -785,7 +791,7 @@ Scene.newEntry(
                             );
                         }
                         
-                        @:ItemQuality = import(module:'game_class.itemquality.mt');
+                        @:ItemQuality = import(module:'game_database.itemquality.mt');
 
 
 
@@ -861,7 +867,7 @@ Scene.newEntry(
                                             oldStats = StatSet.new(state:whom.stats.save());
                                             slot = whom.unequipItem(item:enhanced, silent:true);
                                         }
-                                        enhanced.quality = ItemQuality.database.find(name:newQual);
+                                        enhanced.quality = ItemQuality.find(name:newQual);
                                         if (whom != empty) ::<= {
                                             whom.equip(item:enhanced, slot, silent:true);
                                             oldStats.printDiff(prompt: enhanced.name + ': success! ', other:whom.stats);
@@ -1128,11 +1134,11 @@ Scene.newEntry(
                                 onChoice::(which) {
                                     when(which == false) ask();
                                     if (doQuest == false)
-                                        Scene.database.find(name:'scene_wyvernlight0_wish').act(onDone::{}, location, landmark:location.landmark)
+                                        Scene.start(name:'scene_wyvernlight0_wish', onDone::{}, location, landmark:location.landmark)
                                     else ::<= {
                                         @:world = import(module:'game_singleton.world.mt');
                                         world.accoladeEnable(name:'acceptedQuest');
-                                        Scene.database.find(name:'scene_wyvernlight0_quest').act(onDone::{}, location, landmark:location.landmark);
+                                        Scene.start(name:'scene_wyvernlight0_quest', onDone::{}, location, landmark:location.landmark);
                                     }
                                 }
                             );
@@ -1182,7 +1188,7 @@ Scene.newEntry(
             ['Shaarraeziil', 'Also... This may help with your battle.'],
             ::(location, landmark, doNext) {
                 @:item = Item.new(
-                    base: Item.Base.database.find(name:'Greatsword'),
+                    base: Item.database.find(name:'Greatsword'),
                     qualityHint: 'Divine',
                     materialHint: 'Dragonglass',
                     colorHint: 'Gold',
@@ -1263,7 +1269,7 @@ Scene.newEntry(
                     );
 
                     
-                    @:item = Item.new(base:Item.Base.database.find(name:'Wyvern Key of Light'),
+                    @:item = Item.new(base:Item.database.find(name:'Wyvern Key of Light'),
                              from:location.ownedBy);
                     windowEvent.queueMessage(text:'The party was given a ' + item.name + '.');
                     world.party.inventory.add(item);
@@ -1331,12 +1337,12 @@ Scene.newEntry(
                 @:world = import(module:'game_singleton.world.mt');
                 world.party.inventory.addGold(amount:250);
 
-                world.party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Life Crystal'
+                world.party.inventory.add(item:Item.new(base:Item.database.find(name:'Life Crystal'
                 ), from:someone));
                 
                 
                 for(0, 1)::(i) {
-                    @:crystal = Item.new(base:Item.Base.database.find(name:'Skill Crystal'), from:someone);
+                    @:crystal = Item.new(base:Item.database.find(name:'Skill Crystal'), from:someone);
                     world.party.inventory.add(item:crystal);
                 }
 
@@ -1344,20 +1350,20 @@ Scene.newEntry(
 
 
                 world.party.inventory.add(item:Item.new(
-                    base:Item.Base.database.find(name:'Pink Potion'),
+                    base:Item.database.find(name:'Pink Potion'),
                     from:someone
                 ));
                 world.party.inventory.add(item:Item.new(
-                    base:Item.Base.database.find(name:'Pink Potion'),
+                    base:Item.database.find(name:'Pink Potion'),
                     from:someone
                 ));
                 world.party.inventory.add(item:Item.new(
-                    base:Item.Base.database.find(name:'Pink Potion'),
+                    base:Item.database.find(name:'Pink Potion'),
                     from:someone
                 ));
                 
                 @tome = Item.new(
-                    base:Item.Base.database.find(name:'Tome'),
+                    base:Item.database.find(name:'Tome'),
                     abilityHint: 'Cure',
                     materialHint: 'Hardstone',
                     qualityHint: 'Worn'

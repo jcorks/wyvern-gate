@@ -19,8 +19,7 @@
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 
-@:ITEM_QUALITY_NAME = 'Wyvern.ItemQuality';
-@:ItemQuality = Database.create(
+@:ItemQuality = Database.new(
     name : 'Wyvern.ItemQuality',
     attributes : {
         name : String,

@@ -20,12 +20,12 @@
 @:StatSet = import(module:'game_class.statset.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Damage = import(module:'game_class.damage.mt');
-@:Scene = import(module:'game_class.scene.mt');
+@:Scene = import(module:'game_database.scene.mt');
 @:random = import(module:'game_singleton.random.mt');
 
 
 
-@:Effect = Database.create(
+@:Effect = Database.new(
     name: "Wyvern.Effect",
     attributes : {
         name : String,
@@ -60,7 +60,7 @@ Effect.newEntry(
         },
 
         onRemoveEffect : ::(user, item, holder) {
-            Scene.database.find(name:'scene0_0_sylviaenter').act();
+            Scene.find(name:'scene0_0_sylviaenter').act();
         },                
         onPostAttackOther : ::(user, item, holder, to) {
         },
@@ -2408,7 +2408,7 @@ Effect.newEntry(
         stackable: true,
         stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
-            Scene.database.find(name:'scene_sentimentalbox').act(onDone::{});            
+            Scene.find(name:'scene_sentimentalbox').act(onDone::{});            
         },
         
         onRemoveEffect : ::(user, item, holder) {
@@ -2655,7 +2655,7 @@ Effect.newEntry(
         
         onRemoveEffect : ::(user, item, holder) {
             @:world = import(module:'game_singleton.world.mt');
-            @:Item  = import(module:'game_class.item.mt');
+            @:Item  = import(module:'game_mutator.item.mt');
             
             when(user.isIncapacitated()) empty;
             when(!world.party.isMember(entity:holder)) empty;
@@ -2671,7 +2671,7 @@ Effect.newEntry(
             );
 
             for(0, amt)::(i) {                    
-                world.party.inventory.add(item:Item.new(base:Item.Base.database.find(name:'Ingredient'),from:holder));
+                world.party.inventory.add(item:Item.new(base:Item.database.find(name:'Ingredient'),from:holder));
             }
             
         },                

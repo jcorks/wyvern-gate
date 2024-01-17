@@ -20,7 +20,7 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@:ItemColor = Database.create(
+@:ItemColor = Database.new(
     name : 'Wyvern.ItemColor',
     attributes : {
         name : String,
