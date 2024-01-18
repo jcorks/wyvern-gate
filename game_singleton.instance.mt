@@ -75,7 +75,8 @@ return class(
     define:::(this) {
         @onSaveState;
         @onLoadState;
-
+        @island_;
+        @landmark_;
         
         
 
@@ -270,7 +271,7 @@ return class(
                 loadingScreen(
                     message: 'Loading...',
                     do ::{
-                        world.scenario.base.begin();
+                        world.scenario.base.begin(world.scenario.data);
                     }
                 )
                 
@@ -284,6 +285,7 @@ return class(
                     world.island = island;
                 }
                 @:island = world.island;
+                island_ = island;
                 
                 // check if we're AT a location.
                 island.map.title = "(Map of " + island.name + ')';
@@ -453,7 +455,181 @@ return class(
                 islandTravel();
 
 
-            },      
+            },  
+            
+            visitLandmark ::(landmark) {
+                landmark_ = landmark;
+                if (where != empty)
+                    state.map.setPointer(
+                        x:where.x,
+                        y:where.y
+                    );                    
+                
+                @:windowEvent = import(module:'game_singleton.windowevent.mt');
+                @:partyOptions = import(module:'game_function.partyoptions.mt');
+                @:world = import(module:'game_singleton.world.mt');
+                @:Island = import(module:'game_class.island.mt');
+                @:Event  = import(module:'game_mutator.event.mt');
+
+                @:party = world.party;
+                
+                landmark.map.title = this.name + ' - ' + world.timeString + '          ';
+                landmark.base.onVisit(landmark:this, island:this.island);
+
+
+                
+                @stepCount = 0;
+
+
+                @:landmarkChoices = ::{
+                    windowEvent.queueChoices(
+                        leftWeight: 1,
+                        topWeight: 1,
+                        prompt: 'What next?',
+                        keep:true,
+                        canCancel:true,
+                        onGetChoices ::{
+                            @choices = [                
+                                'Party',
+                                'Wait',
+                            ];
+                            
+                            
+                            @locationAt = landmark.map.getNamedItemsUnderPointer();
+                            if (locationAt != empty) ::<= {
+                                foreach(locationAt)::(i, loc) {
+                                    choices->push(value:'Check ' + loc.name);
+                                }
+                            }
+
+                            return choices;                
+                        },
+                        renderable:landmark.map,
+                        onChoice::(choice) {
+                            @locationAt = landmark.map.getNamedItemsUnderPointer();
+                                
+
+                                
+                            @:MAX_STATIC_CHOICES = 2;
+                            match(choice-1) {
+                              
+                              (0): ::<={
+                                partyOptions();
+                                this.step();
+                              },
+                              
+                              (1): ::<= {
+                                windowEvent.queueChoices(
+                                    prompt: 'Wait until...',
+                                    choices : [
+                                        'Dawn',
+                                        'Early morning',
+                                        'Morning',
+                                        'Late morning',
+                                        'Midday',
+                                        'Afternoon',
+                                        'Late afternoon',
+                                        'Sunset',
+                                        'Early evening',
+                                        'Evening',
+                                        'Late evening',
+                                        'Midnight',
+                                        'The dead hour',
+                                        'The dead of the night',
+                                    ],
+                                    
+                                    canCancel: true,
+                                    onChoice ::(choice) {
+                                        when(choice == 0) empty;
+                                        
+                                        @:until = choice-1;
+                                        landmark.wait(until);
+                                        windowEvent.queueMessage(
+                                            text: 'The party waits...',
+                                            renderable : {
+                                                render ::{
+                                                    canvas.blackout();
+                                                }
+                                            }
+                                        )
+                                    }
+                                )
+                              },
+                              
+                              default: ::<= {
+                                when(choice == empty) empty;
+                                choice -= MAX_STATIC_CHOICES + 1;
+                                when(choice >= locationAt->keycount) empty;
+                                locationAt = locationAt[choice].data;
+                                
+                                
+                                locationAt.interact();
+
+                              }
+                            
+                            }
+                        }
+                    );
+                }
+                
+                @nearby;
+                windowEvent.queueCursorMove(
+                    jumpTag: 'VisitLandmark',
+                    onMenu ::{
+                        landmarkChoices()
+                    },
+                    renderable:{
+                        render :: {
+                            landmark.map.render();
+                            
+                            when(nearby == empty || nearby->size == 0) empty;
+                            
+                            @:lines = [];
+                            foreach(nearby)::(index, arr) {
+
+                                lines->push(value:arr.name);
+                            }
+                            canvas.renderTextFrameGeneral(
+                                leftWeight: 1,
+                                topWeight: 1,
+                                lines,
+                                title: 'Arrived at:'
+                            );
+                        }
+                    },
+                    onMove ::(choice) {
+                    
+                        // move by one unit in that direction
+                        // or ON it if its within one unit.
+                        landmark.map.movePointerAdjacent(
+                            x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
+                            y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
+                        );
+                        landmark.step();
+                        stepCount += 1;
+
+                        
+                        // every 5 steps, heal 1% HP if below 1/5th health
+                        if (stepCount % 15 == 0) ::<= {
+                            foreach(party.members)::(i, member) {
+                                if (member.hp < member.stats.HP * 0.2)
+                                    member.heal(amount:(member.stats.HP * 0.01)->ceil);
+                            }
+                        }
+                        
+                        // cancel if we've arrived somewhere
+                        nearby = landmark.map.getNamedItemsUnderPointer();
+
+                        if (nearby != empty && nearby->size > 0)
+                            landmark.map.setPointer(
+                                x: nearby[0].x,
+                                y: nearby[0].y
+                            );
+
+                    }                
+                )
+            },
+                
             
             onSaveState : {
                 set ::(value) <- onSaveState = value
@@ -470,6 +646,19 @@ return class(
                 @:State = import(module:'game_class.state.mt');
                 @:w = world.save();
                 return w;
+            },
+            
+            landmark : {
+                get ::{
+                    when(windowEvent.canJumpToTag(name:'VisitLandmark')) landmark_;
+                    landmark_ = empty;
+                    return empty;
+                }
+                
+            },
+
+            island : {
+                get ::<- island_;
             },
             
             load ::(serialized) {

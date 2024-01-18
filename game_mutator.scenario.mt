@@ -50,6 +50,10 @@
         this.interface = {
             defaultLoad ::{
                 state.data = {};
+            },
+            
+            data : {
+                get ::<- state.data
             }
         }
     }
@@ -63,7 +67,7 @@
 Scenario.database.newEntry(
     data : {
         name : 'The Chosen',
-        begin :: {
+        begin ::(data) {
             @:instance = import(module:'game_singleton.instance.mt');
             @:story = import(module:'game_singleton.story.mt');
             @world = import(module:'game_singleton.world.mt');
@@ -240,5 +244,165 @@ Scenario.database.newEntry(
     }
 )   
 
+
+::<= {
+
+@:traderActions = {
+    startDay::{
+        @:instance = import(module:'game_singleton.instance.mt');
+        @world = import(module:'game_singleton.world.mt');
+        @party = world.party;            
+
+
+
+        @:currentLandmark = instance.landmark;
+        when (currentLandmark != empty && currentLandmark.base.pointOfNoReturn == true) ::<= {
+            windowEvent.queueMessage(
+                speaker: party.members[0].name,
+                text: '"What a terrible night to be stuck here. Guess I won\'t open shop today"'.
+            );
+        }
+
+        windowEvent.queueChoices(
+            prompt:'Today I will...',
+            choices : [
+                'Open shop',
+                'Explore'
+            ],
+            onChoice::(choice) {
+                when(choice == 2) ::<={
+                    windowEvent.queueChoices(
+                        prompt: 'What next?',
+                        choices : [
+                            'Dispatch hirees',
+                            'Bring hiree',
+                            'Start exploring!'
+                        ],
+                        
+                        onChoice::(choice) {
+                            
+                        }
+                    );
+                }        
+                traderActions.openShop();
+            }
+        );
+
+
+        instance.visitIsland();
+    
+    },
+    
+    
+    openShop ::{
+        windowEvent.queueChoices(
+            prompt: 'What next?',
+            choices : [
+                'Dispatch hirees',
+                'Stock up shop', // inv to shop 
+                'Upgrade shop', // stock, starts at 15 
+            ]
+        );
+    }
+};
+Scenario.database.newEntry(
+    data : {
+        name : 'The Trader',
+        begin ::(data) {
+            @:instance = import(module:'game_singleton.instance.mt');
+            @:story = import(module:'game_singleton.story.mt');
+            @world = import(module:'game_singleton.world.mt');
+            @:LargeMap = import(module:'game_singleton.largemap.mt');
+            @party = world.party;            
+        
+            @:keyhome = Item.new(
+                base: Item.database.find(name:'Wyvern Key'),
+                creationHint: {
+                    nameHint:namegen.island(), levelHint:story.levelHint
+                }
+            );
+            keyhome.name = 'Wyvern Key: Home';
+            
+            
+                
+            keyhome.addIslandEntry(world);
+            world.island = keyhome.islandEntry;
+            @:island = world.island;
+            party = world.party;
+            party.reset();
+            party.inventory.maxItems = 70;
+
+
+
+            
+            // debug
+                //party.inventory.addGold(amount:100000);
+
+            
+            // since both the party members are from this island, 
+            // they will already know all its locations
+            foreach(island.landmarks)::(index, landmark) {
+                landmark.discover(); 
+            }
+            
+            
+            
+            @:Species = import(module:'game_database.species.mt');
+            @:p0 = island.newInhabitant(professionHint: 'Trader', levelHint:story.levelHint);
+            p0.normalizeStats();
+
+            
+
+            // Add initial inventory.
+            for(0, 15)::(i) {
+                party.inventory.add(item:
+                    Item.new(
+                        base:Item.database.getRandomFiltered(
+                            filter:::(value) <- value.isUnique == false &&
+                                                location.ownedBy.level >= value.levelMinimum
+                                                && value.tier <= location.landmark.island.tier
+                        ),
+                        from:p0, 
+                        rngEnchantHint:true
+                    )
+                );
+            }
+
+            party.add(member:p0);
+            
+            
+            // setup shop
+            @:city = island.landmarks->filter(by::(value) <- value.base.name == 'City')[0];
+            data.cityID = city.worldID;
+            
+            @:shop = city.locations->filter(by::(value) <- value.base.name == 'Shop');
+            data.shopID = shop.worldID;
+            
+            shop.ownedBy = p0;
+
+
+            @somewhere = LargeMap.getAPosition(map:island.map);
+            island.map.setPointer(
+                x: somewhere.x,
+                y: somewhere.y
+            );               
+            instance.savestate();
+            @:Scene = import(module:'game_database.scene.mt');
+            Scene.start(name:'scene_intro', onDone::{                    
+                traderActions.startDay();                
+                /*island.addEvent(
+                    event:Event.database.find(name:'Encounter:Non-peaceful').new(
+                        island, party, landmark //, currentTime
+                    )
+                );*/  
+            });        
+        },
+        
+        personInteractions : [
+            'barter'
+        ]
+    }
+)   
+}
 return Scenario;
 

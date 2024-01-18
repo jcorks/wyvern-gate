@@ -28,7 +28,7 @@ Coming changes:
           your behalf, or have them join you.
             . Exploring: An NPC will fight locals ("squabble") and will accrue items from successful fights.
               If their health is below 50%, they'll finish for the day. You get half of what they bring back 
-              (the lowest value stuff).
+              (the lowest value stuff). If they die or get knocked out, they will no longer work for you.
         - Each day, you have to pay rent. THe rent increases based on how much youre making (evil)
         - Shopkeep mode has NPCs come up to you asking whether to sell or buy. Anywhere from 15-30
           NPCs may come up to you, with 80% asking to buy something and 20% asking to sell, more or less.
