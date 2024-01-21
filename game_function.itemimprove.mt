@@ -21,7 +21,7 @@ return ::(user, item, inBattle) {
     }
     if (inBattle == true) ::<= {
         @:complainer = random.pickArrayItem(list:party.members->filter(by::(value) <- value != user));
-        @:Personality = import(module:'game_class.personality.mt');
+        @:Personality = import(module:'game_database.personality.mt');
         @:personality = complainer.personality;
         windowEvent.queueMessage(
             speaker: complainer.name,

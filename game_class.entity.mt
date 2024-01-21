@@ -29,13 +29,14 @@
 @:Inventory = import(module:'game_class.inventory.mt');
 @:BattleAI = import(module:'game_class.battleai.mt');
 @:StateFlags = import(module:'game_class.stateflags.mt');
-@:Location = import(module:'game_mutator.location.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:EntityQuality = import(module:'game_mutator.entityquality.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+
+
 
 // returns EXP recommended for next level
 @:levelUp ::(level, stats => StatSet.type, growthPotential => StatSet.type, whichStat) {
@@ -224,6 +225,7 @@
                     SPD:1    
                 );
 
+                @:Location = import(module:'game_mutator.location.mt');
 
 
                 state.hp = 1;
@@ -299,7 +301,7 @@
                                     filter:::(value) <- value.isUnique == false && value.canHaveEnchants
                                                                 && value.tier <= island.tier
                                 ),
-                                rngEnchantHint:true, from:this
+                                rngEnchantHint:true
                             )
                         );
                     }
@@ -323,7 +325,7 @@
                             
                         );
                         if (item.name != 'None') ::<={
-                            @:itemInstance = item.new(from:this);
+                            @:itemInstance = item.new();
                             if (itemInstance.enchantsCount == 0) 
                                 inventory.add(item:itemInstance);
                         }
@@ -705,7 +707,7 @@
 
                     // flat 15% chance to avoid damage with a shield 
                     // pretty nifty!
-                    when (dodgeable && this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).base.hasAttribute(attribute:Item.ATTRIBUTE.SHIELD) && random.try(percentSuccess:15)) ::<= {
+                    when (dodgeable && this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).hasAttribute(attribute:Item.ATTRIBUTE.SHIELD) && random.try(percentSuccess:15)) ::<= {
                         windowEvent.queueMessage(text:random.pickArrayItem(list:[
                             this.name + ' defends against ' + from.name + '\'s attack with their shield!',                 
                         ]));
@@ -1055,7 +1057,7 @@
 
                 if (durationTurns == empty) durationTurns = -1;
                 
-                @:effect = Effect.database.find(name);
+                @:effect = Effect.find(name);
                 @:existingEffectIndex = effects->findIndex(query::(value) <- value.effect.name == name);               
                 when (effect.stackable == false && existingEffectIndex != -1) ::<= {
                     // reset duration of effect and source.

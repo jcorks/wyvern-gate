@@ -9,7 +9,7 @@
 @:Profession = import(module:'game_mutator.profession.mt');
 @:Item = import(module:'game_mutator.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
-@:Personality = import(module:'game_class.personality.mt');
+@:Personality = import(module:'game_database.personality.mt');
 @:Damage = import(module:'game_class.damage.mt');
 
 
@@ -188,7 +188,6 @@ PersonInteraction.newEntry(
                     if (this.owns != empty)
                         this.owns.ownedBy = empty;
                         
-                    if (onHire) onHire();           
 
                 }
             );        
@@ -229,7 +228,6 @@ PersonInteraction.newEntry(
                     onEnd::(result) {
                         when(!world.battle.partyWon())
                             windowEvent.jumpToTag(name:'MainMenu');
-                        finish();
                     }
                 );                  
             }
@@ -350,6 +348,80 @@ PersonInteraction.newEntry(
                     aggress();
                 }
             )                            
+        }
+    }
+)
+
+
+
+PersonInteraction.newEntry(
+    data : {
+        name : 'trader.hire-with-contract',
+        displayName : 'Hire with contract',
+        onInteract ::(this, location) {
+            when(this.isIncapacitated())
+                windowEvent.queueMessage(
+                    text: this.name + ' is not currently able to talk.'
+                );                                                        
+            @:world = import(module:'game_singleton.world.mt');
+            @:party = world.party;
+            @:trader = world.scenario.data.trader;
+
+            when(trader.isHired(entity:this))
+                windowEvent.queueMessage(
+                    text: this.name + ' is already employed by you.'
+                );                
+          
+            when (party.members->keycount >= 3 || !this.adventurous)
+                windowEvent.queueMessage(
+                    speaker: this.name,
+                    text: random.pickArrayItem(list:this.personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_DENY])
+                );                
+                
+            windowEvent.queueMessage(
+                speaker: this.name,
+                text: random.pickArrayItem(list:this.personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_ACCEPT])
+            );                
+
+            @highestStat = 0;
+            if (this.stats.ATK > highestStat) highestStat = this.stats.ATK;
+            if (this.stats.DEF > highestStat) highestStat = this.stats.DEF;
+            if (this.stats.INT > highestStat) highestStat = this.stats.INT;
+            if (this.stats.SPD > highestStat) highestStat = this.stats.SPD;
+            if (this.stats.LUK > highestStat) highestStat = this.stats.LUK;
+            if (this.stats.DEX > highestStat) highestStat = this.stats.DEX;
+
+
+
+            @cost;
+            
+            if (highestStat <= 10)
+                cost = 50+((this.stats.sum/3 + this.level)*2.5)->ceil
+            else
+                cost = 200 + this.stats.sum*13; // bigger and better stats come at a premium
+            this.describe();
+
+            windowEvent.queueAskBoolean(
+                prompt: 'Hire for ' + cost + 'G?',
+                onChoice::(which) {
+                    when(which == false) empty;
+
+                    trader.addHiree(
+                        entity:this,
+                        rate: cost
+                    );
+                        
+                    windowEvent.queueMessage(
+                        text: this.name + ' was hired! They\'ll start working for you tomorrow.'
+                    );     
+
+                    world.accoladeIncrement(name:'recruitedCount');                                        
+                    // the location is the one that has ownership over this...
+                    if (this.owns != empty)
+                        this.owns.ownedBy = empty;
+                        
+                }
+            );        
         }
     }
 )

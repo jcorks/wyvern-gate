@@ -517,8 +517,7 @@ Interaction.newEntry(
                                                         ),
                                                         rngEnchantHint:true,         
                                                         qualityHint : random.pickArrayItem(list:itemQualities),
-                                                        materialHint : random.pickArrayItem(list:itemMaterials),                                        
-                                                        from:location.ownedBy
+                                                        materialHint : random.pickArrayItem(list:itemMaterials)
                                                     )    
                                                     itemChoices->push(value:newItem);                                    
                                                 }
@@ -675,7 +674,7 @@ Interaction.newEntry(
                 if (Number.random() > 0.9) ::<= {
                     windowEvent.queueMessage(speaker:miner.name, text:'Oh...?');
 
-                    @:item = Item.new(base:Item.database.find(name:'Ore'), from:miner);
+                    @:item = Item.new(base:Item.database.find(name:'Ore'));
                     
                     windowEvent.queueMessage(text:'The party obtained some Ore!');     
 
@@ -1025,7 +1024,7 @@ Interaction.newEntry(
         
             @:Entity = import(module:'game_class.entity.mt');
 
-            @:items = party.inventory.items->filter(by:::(value) <- value.base.hasAttribute(attribute:Item.ATTRIBUTE.RAW_METAL));
+            @:items = party.inventory.items->filter(by:::(value) <- value.hasAttribute(attribute:Item.ATTRIBUTE.RAW_METAL));
             when(items->keycount == 0)
                 windowEvent.queueMessage(text:'No suitable ingots or materials were found in the party inventory.');
 
@@ -1063,8 +1062,7 @@ Interaction.newEntry(
                                 when(choice == 0) empty;
                                 @:output = Item.new(
                                     base:Item.database.find(name:canMake[choice-1]),
-                                    materialHint: ore.base.name->split(token:' ')[0],
-                                    from: smith
+                                    materialHint: ore.base.name->split(token:' ')[0]
                                 );
                                 
                                 windowEvent.queueMessage(
@@ -1347,7 +1345,6 @@ Interaction.newEntry(
                             base:Item.database.find(
                                 name:'Halberd'
                             ),
-                            from:guard, 
                             qualityHint:'Standard',
                             materialHint: 'Mythril',
                             rngEnchantHint: true
@@ -1362,7 +1359,6 @@ Interaction.newEntry(
                             base: Item.database.find(
                                 name:'Plate Armor'
                             ),
-                            from:guard, 
                             qualityHint:'Standard',
                             materialHint: 'Mythril',
                             rngEnchantHint: true
@@ -1537,7 +1533,6 @@ Interaction.newEntry(
             @:Entity = import(module:'game_class.entity.mt');
             @:getAWeapon = ::(from)<-
                 Item.new(
-                    from,
                     base:Item.database.getRandomFiltered(
                         filter:::(value) <- (
                             value.isUnique == false &&
@@ -1907,7 +1902,7 @@ Interaction.newEntry(
                             base:Item.database.getRandomFiltered(
                                 filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= story.tier+2
                             ),
-                            rngEnchantHint:true, from:party.members[0]
+                            rngEnchantHint:true
                         );
                         @message = 'The party received ' + correctA(word:item.name);
                         windowEvent.queueMessage(text: message);
@@ -2325,7 +2320,7 @@ Interaction.newEntry(
             
             }
 
-            item = Item.new(base:item, from:location.ownedBy);                    
+            item = Item.new(base:item);                    
             world.party.inventory.add(item);
             windowEvent.queueMessage(speaker:'', text:'The party received ' + correctA(word:item.name) + '!');
             

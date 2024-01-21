@@ -41,7 +41,7 @@
 
             @:inv = Inventory.new();
             inv.add(item:Item.new(base:Item.database.find(name:'Life Crystal'
-            ), from:specter));            
+            )));            
             specter.forceDrop = inv;
             
             specter.clearAbilities();

@@ -2247,15 +2247,15 @@ Ability.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' casts Cleanse on ' + targets[0].name + '!'
             );
-            @:Effect = import(module:'game_class.effect.mt');
+            @:Effect = import(module:'game_database.effect.mt');
             targets[0].removeEffects(
                 effectBases: [
-                    Effect.database.find(name:'Poisoned'),
-                    Effect.database.find(name:'Paralyzed'),
-                    Effect.database.find(name:'Petrified'),
-                    Effect.database.find(name:'Burned'),
-                    Effect.database.find(name:'Blind'),
-                    Effect.database.find(name:'Frozen')                                  
+                    Effect.find(name:'Poisoned'),
+                    Effect.find(name:'Paralyzed'),
+                    Effect.find(name:'Petrified'),
+                    Effect.find(name:'Burned'),
+                    Effect.find(name:'Blind'),
+                    Effect.find(name:'Frozen')                                  
                 ]
             );
 
@@ -2296,13 +2296,13 @@ Ability.newEntry(
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
         onAction: ::(user, targets, turnIndex, extraData) {
-            @:Effect = import(module:'game_class.effect.mt');
+            @:Effect = import(module:'game_database.effect.mt');
             windowEvent.queueMessage(
                 text: user.name + ' casts Antidote on ' + targets[0].name + '!'
             );
             targets[0].removeEffects(
                 effectBases: [
-                    Effect.database.find(name:'Poisoned')                            
+                    Effect.find(name:'Poisoned')                            
                 ]
             );
         }
@@ -2735,8 +2735,8 @@ Ability.newEntry(
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
         onAction: ::(user, targets, turnIndex, extraData) {
-            @:Effect = import(module:'game_class.effect.mt');
-            @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
+            @:Effect = import(module:'game_database.effect.mt');
+            @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
             user.addEffect(from:user, name: 'Defensive Stance', durationTurns:1000);
         }
@@ -2754,8 +2754,8 @@ Ability.newEntry(
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
         onAction: ::(user, targets, turnIndex, extraData) {
-            @:Effect = import(module:'game_class.effect.mt');
-            @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
+            @:Effect = import(module:'game_database.effect.mt');
+            @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
             user.addEffect(from:user, name: 'Offsensive Stance', durationTurns:1000);
         }
@@ -2773,8 +2773,8 @@ Ability.newEntry(
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
         onAction: ::(user, targets, turnIndex, extraData) {
-            @:Effect = import(module:'game_class.effect.mt');
-            @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
+            @:Effect = import(module:'game_database.effect.mt');
+            @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
             user.addEffect(from:user, name: 'Light Stance', durationTurns:1000);
         }
@@ -2792,8 +2792,8 @@ Ability.newEntry(
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
         onAction: ::(user, targets, turnIndex, extraData) {
-            @:Effect = import(module:'game_class.effect.mt');
-            @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
+            @:Effect = import(module:'game_database.effect.mt');
+            @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
             user.addEffect(from:user, name: 'Heavy Stance', durationTurns:1000);
         }
@@ -2811,8 +2811,8 @@ Ability.newEntry(
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
         onAction: ::(user, targets, turnIndex, extraData) {
-            @:Effect = import(module:'game_class.effect.mt');
-            @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
+            @:Effect = import(module:'game_database.effect.mt');
+            @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
             user.addEffect(from:user, name: 'Meditative Stance', durationTurns:1000);
         }
@@ -2830,8 +2830,8 @@ Ability.newEntry(
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
         onAction: ::(user, targets, turnIndex, extraData) {
-            @:Effect = import(module:'game_class.effect.mt');
-            @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
+            @:Effect = import(module:'game_database.effect.mt');
+            @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
             user.addEffect(from:user, name: 'Striking Stance', durationTurns:1000);
         }
@@ -2850,8 +2850,8 @@ Ability.newEntry(
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
         onAction: ::(user, targets, turnIndex, extraData) {
-            @:Effect = import(module:'game_class.effect.mt');
-            @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
+            @:Effect = import(module:'game_database.effect.mt');
+            @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
             user.addEffect(from:user, name: 'Reflective Stance', durationTurns:1000);
         }
@@ -2869,8 +2869,8 @@ Ability.newEntry(
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
         onAction: ::(user, targets, turnIndex, extraData) {
-            @:Effect = import(module:'game_class.effect.mt');
-            @:stances = Effect.database.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
+            @:Effect = import(module:'game_database.effect.mt');
+            @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
             user.addEffect(from:user, name: 'Evasive Stance', durationTurns:1000);
         }
@@ -3352,7 +3352,7 @@ Ability.newEntry(
 
             windowEvent.queueMessage(text: '... and made a Pink Potion!');
             inventory.removeByName(name:'Ingredient');
-            inventory.add(item:Item.new(base:Item.database.find(name:'Pink Potion'), from:user));                            
+            inventory.add(item:Item.new(base:Item.database.find(name:'Pink Potion')));                            
         }
     }
 )
@@ -3391,8 +3391,7 @@ Ability.newEntry(
             inventory.removeByName(name:'Ingredient');
             inventory.add(item:
                 Item.new(
-                    base:Item.database.find(name:'Cyan Potion'),
-                    from:user
+                    base:Item.database.find(name:'Cyan Potion')
                 )
             );                            
         }
@@ -3434,8 +3433,7 @@ Ability.newEntry(
             inventory.removeByName(name:'Ingredient');
             inventory.add(
                 item:Item.new(
-                    base:Item.database.find(name:'Green Potion'),
-                    from:user
+                    base:Item.database.find(name:'Green Potion')
             ));                            
         }
     }
@@ -3477,8 +3475,7 @@ Ability.newEntry(
             inventory.removeByName(name:'Ingredient');
             inventory.add(item:
                 Item.new(
-                    base:Item.database.find(name:'Orange Potion'),
-                    from:user
+                    base:Item.database.find(name:'Orange Potion')
                 )
             );                            
         }
@@ -3519,8 +3516,7 @@ Ability.newEntry(
             inventory.removeByName(name:'Ingredient');
             inventory.add(
                 item:Item.new(
-                    base:Item.database.find(name:'Purple Potion'),
-                    from:user
+                    base:Item.database.find(name:'Purple Potion')
                 )
             );                            
         }
@@ -3562,8 +3558,7 @@ Ability.newEntry(
             inventory.removeByName(name:'Ingredient');
             inventory.add(
                 item:Item.new(
-                    base:Item.database.find(name:'Black Potion'),
-                    from:user
+                    base:Item.database.find(name:'Black Potion')
                 )
             );                            
         }

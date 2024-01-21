@@ -184,8 +184,7 @@
                 entity.equip(
                     slot:Entity.EQUIP_SLOTS.HAND_LR, 
                     item:Item.new(
-                        base:wep,
-                        from: entity
+                        base:wep
                     ), 
                     inventory:entity.inventory, 
                     silent:true
@@ -212,8 +211,7 @@
                 entity.equip(
                     slot:Entity.EQUIP_SLOTS.HAND_LR, 
                     item:Item.new(
-                        base: wep,
-                        from: entity
+                        base: wep
                     ), 
                     inventory:entity.inventory, 
                     silent:true
@@ -239,8 +237,7 @@
                 entity.equip(
                     slot:Entity.EQUIP_SLOTS.HAND_LR, 
                     item:Item.new(
-                        base:wep,
-                        from: entity
+                        base:wep
                     ), 
                     inventory:entity.inventory, 
                     silent:true
@@ -257,8 +254,7 @@
                 entity.equip(
                     slot:Entity.EQUIP_SLOTS.ARMOR, 
                     item:Item.new(
-                        base: wep,
-                        from: entity
+                        base: wep
                     ), 
                     inventory:entity.inventory, 
                     silent:true

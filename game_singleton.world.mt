@@ -338,6 +338,7 @@
                 if (state.time > 13) ::<={
                     state.time = 0;
                     state.day += 1;
+                    this.scenario.newDay();
                     this.accoladeIncrement(name:'daysTaken');
                 }
                 

@@ -26,7 +26,7 @@
 {:::} { 
     BFS_NATIVE = getExternalFunction(name:"wyvern_gate__native__bfs");
 } : {
-    onError::(detail) {}
+    onError::(message) {}
 }
 //@:MemoryBuffer = import(module:'Matte.Core.MemoryBuffer');
 

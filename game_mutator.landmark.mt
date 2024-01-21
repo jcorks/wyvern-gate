@@ -30,7 +30,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:LandmarkEvent = import(module:'game_mutator.landmarkevent.mt');
 @:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
-
+@:Event = import(module:'game_mutator.event.mt');
 
 
 @:Landmark = databaseItemMutatorClass(  
@@ -470,15 +470,7 @@
             
             map : {
                 get ::<- state.map
-            },
-            
-            
-            // TODO: Sort of in between controller and internal action 
-            // should probably move back to instance
-            visit ::(where) {
-                
             }
-            
         }
     }
 );

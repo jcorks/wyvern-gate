@@ -334,7 +334,7 @@ Event.database.newEntry(
                             @:foundMessage ::(itemName){
                                 windowEvent.queueMessage(text: 'It looks like they dropped something heavy during the fight...');
                                 windowEvent.queueMessage(text: '.. is that...?');                            
-                                party.inventory.add(item:Item.new(base:Item.database.find(name:itemName),from:party.members[0]));
+                                party.inventory.add(item:Item.new(base:Item.database.find(name:itemName)));
                                 windowEvent.queueMessage(text: 'The party obtained the ' + itemName + '!');                            
                             }
 
@@ -421,7 +421,7 @@ Event.database.newEntry(
                         base:Item.database.getRandomFiltered(
                             filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= event.island.tier
                         ),
-                        rngEnchantHint:true, from:opener
+                        rngEnchantHint:true
                     );
                     @message = 'The party found ' + correctA(word:item.name);
                     windowEvent.queueMessage(text: message);
@@ -780,7 +780,6 @@ Event.database.newEntry(
                                 base:Item.database.find(
                                     name:'Halberd'
                                 ),
-                                from:guard, 
                                 qualityHint:'Standard',
                                 materialHint: 'Mythril',
                                 rngEnchantHint: true
@@ -795,7 +794,6 @@ Event.database.newEntry(
                                 base: Item.database.find(
                                     name:'Plate Armor'
                                 ),
-                                from:guard, 
                                 qualityHint:'Standard',
                                 materialHint: 'Mythril',
                                 rngEnchantHint: true

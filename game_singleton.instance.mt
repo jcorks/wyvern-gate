@@ -271,7 +271,7 @@ return class(
                 loadingScreen(
                     message: 'Loading...',
                     do ::{
-                        world.scenario.base.begin(world.scenario.data);
+                        world.scenario.base.begin(data:world.scenario.data);
                     }
                 )
                 
@@ -442,7 +442,7 @@ return class(
                                         }
                                     )
                                 }
-                                landmark.visit();
+                                this.visitLandmark(landmark);
                               }
                             }
 
@@ -457,10 +457,10 @@ return class(
 
             },  
             
-            visitLandmark ::(landmark) {
+            visitLandmark ::(landmark, where) {
                 landmark_ = landmark;
                 if (where != empty)
-                    state.map.setPointer(
+                    landmark.map.setPointer(
                         x:where.x,
                         y:where.y
                     );                    
@@ -473,8 +473,8 @@ return class(
 
                 @:party = world.party;
                 
-                landmark.map.title = this.name + ' - ' + world.timeString + '          ';
-                landmark.base.onVisit(landmark:this, island:this.island);
+                landmark.map.title = landmark.name + ' - ' + world.timeString + '          ';
+                landmark.base.onVisit(landmark, island:landmark.island);
 
 
                 
@@ -515,7 +515,7 @@ return class(
                               
                               (0): ::<={
                                 partyOptions();
-                                this.step();
+                                landmark.step();
                               },
                               
                               (1): ::<= {
@@ -658,7 +658,7 @@ return class(
             },
 
             island : {
-                get ::<- island_;
+                get ::<- island_
             },
             
             load ::(serialized) {

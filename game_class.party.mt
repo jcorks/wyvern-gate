@@ -22,6 +22,7 @@
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
+
 @:Party = LoadableClass.create(
     name: 'Wyvern.Party',
     items : {

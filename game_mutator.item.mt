@@ -299,7 +299,7 @@
         
         this.interface = {
             initialize ::{},
-            defaultLoad::(base, from, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, abilityHint, forceEnchant) {
+            defaultLoad::(base, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, abilityHint, forceEnchant) {
 
                 state.enchants = []; // ItemMod
                 state.equipEffects = [];
@@ -423,7 +423,7 @@
                     
                 state.price = (state.price)->ceil;
                 
-                base.onCreate(item:this, user:from, creationHint);
+                base.onCreate(item:this, creationHint);
                 recalculateDescription();
                 recalculateName();
                 
@@ -583,7 +583,7 @@
             },
             
             describe ::(by) {
-                @:Effect = import(module:'game_class.effect.mt');
+                @:Effect = import(module:'game_database.effect.mt');
                 windowEvent.queueMessage(
                     speaker:this.name,
                     text:state.description,
@@ -622,7 +622,7 @@
                             @out = '';
                             when (state.equipEffects->keycount == 0) 'None.';
                             foreach(state.equipEffects)::(i, effect) {
-                                out = out + '. ' + Effect.database.find(name:effect).description + '\n';
+                                out = out + '. ' + Effect.find(name:effect).description + '\n';
                             }
                             return out;
                         }
@@ -638,7 +638,7 @@
                         @out = '';
                         when (state.useEffects->keycount == 0) 'None.';
                         foreach(state.useEffects)::(i, effect) {
-                            out = out + '. ' + Effect.database.find(name:effect).description + '\n';
+                            out = out + '. ' + Effect.find(name:effect).description + '\n';
                         }
                         return out;
                     }
@@ -704,7 +704,7 @@ Item.database.newEntry(
         attributes : 0,
         canBeColored : false,
         hasSize : false,
-        onCreate ::(item, user, creationHint) {},
+        onCreate ::(item, creationHint) {},
         possibleAbilities : [],
     }
 )
@@ -729,7 +729,7 @@ Item.database.newEntry(data : {
     canBeColored : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     hasSize : false,
-    onCreate ::(item, user, creationHint) {},
+    onCreate ::(item, creationHint) {},
     possibleAbilities : [],
     
     equipMod : StatSet.new(
@@ -771,7 +771,7 @@ Item.database.newEntry(data : {
     canBeColored : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     hasSize : false,
-    onCreate ::(item, user, creationHint) {},
+    onCreate ::(item, creationHint) {},
     possibleAbilities : [],
     
     equipMod : StatSet.new(
@@ -808,7 +808,7 @@ Item.database.newEntry(data : {
     canBeColored : true,
     useTargetHint : USE_TARGET_HINT.ONE,
     hasSize : false,
-    onCreate ::(item, user, creationHint) {},
+    onCreate ::(item, creationHint) {},
     possibleAbilities : [],
     
     equipMod : StatSet.new(
@@ -862,7 +862,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 })
 
 Item.database.newEntry(data : {
@@ -905,7 +905,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 })
 
 Item.database.newEntry(data : {
@@ -943,7 +943,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.FRAGILE
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 
 })
@@ -985,7 +985,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.FRAGILE
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 
 })    
@@ -1025,7 +1025,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.FRAGILE
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 
 })    
@@ -1065,7 +1065,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.FRAGILE
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 })    
 
 
@@ -1104,7 +1104,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.FRAGILE
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 
 })    
@@ -1146,7 +1146,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.FRAGILE
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 
 })
@@ -1189,7 +1189,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.FRAGILE
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 
 })
@@ -1236,7 +1236,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -1284,7 +1284,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -1334,7 +1334,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -1382,7 +1382,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -1428,7 +1428,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })    
 
@@ -1476,7 +1476,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -1523,7 +1523,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -1573,7 +1573,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHIELD |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -1623,7 +1623,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHIELD |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -1670,7 +1670,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })    
 
@@ -1719,7 +1719,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })    
 
@@ -1767,7 +1767,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })     
 
@@ -1815,7 +1815,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 }) 
 
@@ -1864,7 +1864,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })    
 
@@ -1912,7 +1912,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.WEAPON            
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -1958,7 +1958,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.WEAPON            
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -2005,7 +2005,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON    
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -2051,7 +2051,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.WEAPON
 
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })    
 
@@ -2095,7 +2095,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL
 
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -2143,7 +2143,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -2190,7 +2190,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })    
 
@@ -2237,7 +2237,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })    
 
@@ -2284,7 +2284,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })    
 
@@ -2340,7 +2340,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 }) 
 
@@ -2393,7 +2393,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })    
 
@@ -2442,7 +2442,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -2490,7 +2490,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL |
         ATTRIBUTE.WEAPON
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
     
 })
 
@@ -2526,7 +2526,7 @@ Item.database.newEntry(data : {
     ],
     equipEffects : [],
     attributes : 0,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
     
 })
 
@@ -2563,7 +2563,7 @@ Item.database.newEntry(data : {
     ],
     equipEffects : [],
     attributes : 0,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
     
 })
 
@@ -2598,7 +2598,7 @@ Item.database.newEntry(data : {
     ],
     equipEffects : [],
     attributes : 0,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
     
 })    
 
@@ -2634,7 +2634,7 @@ Item.database.newEntry(data : {
     ],
     equipEffects : [],
     attributes : 0,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
     
 })        
 Item.database.newEntry(data : {
@@ -2673,7 +2673,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })  
 
@@ -2708,7 +2708,7 @@ Item.database.newEntry(data : {
     ],
     equipEffects : [],
     attributes : 0,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
     
 })    
 
@@ -2745,7 +2745,7 @@ Item.database.newEntry(data : {
     ],
     equipEffects : [],
     attributes : 0,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
     
 })   
 
@@ -2780,7 +2780,7 @@ Item.database.newEntry(data : {
     ],
     equipEffects : [],
     attributes : 0,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
     
 })           
 
@@ -2818,7 +2818,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
     
 })   
 
@@ -2855,7 +2855,7 @@ Item.database.newEntry(data : {
     ],
     equipEffects : [],
     attributes : 0,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
     
 })    
 
@@ -2895,7 +2895,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.BLUNT |
         ATTRIBUTE.METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
     
 })
 
@@ -2935,7 +2935,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.BLUNT |
         ATTRIBUTE.METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
     
 })
     
@@ -2975,7 +2975,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.BLUNT |
         ATTRIBUTE.METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
     
 })    
 
@@ -3016,7 +3016,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
     
 })
 
@@ -3060,7 +3060,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })      
 
@@ -3102,7 +3102,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })   
 
@@ -3142,7 +3142,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })      
 
@@ -3184,7 +3184,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })   
 
@@ -3224,7 +3224,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })   
 
@@ -3264,7 +3264,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 }) 
 
@@ -3305,7 +3305,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 }) 
 
@@ -3345,7 +3345,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 }) 
 
@@ -3385,7 +3385,7 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 }) 
 Item.database.newEntry(data : {
@@ -3423,7 +3423,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.SHARP
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 }) 
 
@@ -3463,7 +3463,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.SHARP
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
 
@@ -3503,7 +3503,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.SHARP
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })
     
@@ -3545,7 +3545,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.SHARP
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 })  
 
@@ -3587,7 +3587,7 @@ Item.database.newEntry(data : {
     attributes : 
         ATTRIBUTE.SHARP
     ,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 }) 
 
@@ -3626,7 +3626,7 @@ Item.database.newEntry(data : {
     ],
     equipEffects : [],
     attributes : 0,
-    onCreate ::(item, user, creationHint) {}
+    onCreate ::(item, creationHint) {}
 
 }) 
 

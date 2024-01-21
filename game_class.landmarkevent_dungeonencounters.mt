@@ -62,7 +62,7 @@
                         filter:::(value) <- value.isUnique == false && value.tier <= island_.tier                    
                     );
                     if (itembase.name != 'None') ::<={
-                        @:itemInstance = Item.new(base:itembase, from:ref, rngEnchantHint:true);
+                        @:itemInstance = Item.new(base:itembase, rngEnchantHint:true);
                         ref.inventory.add(item:itemInstance);
                     }
                     ref.anonymize();

@@ -610,7 +610,6 @@ MapEntity.Task.database.newEntry(
         
         foreach(party.members) ::(i, member) {
             foreach(Entity.EQUIP_SLOTS) ::(k, slot) {
-                when(slot == Entity.EQUIP_SLOTS.HAND_R) empty;
                 @:item = member.getEquipped(slot);
                 when(item == empty) empty;
                 when(item.name == 'None') empty;

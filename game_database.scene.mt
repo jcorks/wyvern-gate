@@ -180,8 +180,7 @@ Scene.newEntry(
                     
                     @:item = Item.new(
                         base:Item.database.find(name:'Wyvern Key of Fire'
-                                ),
-                        from:location.ownedBy
+                                )
                     );
                     windowEvent.queueMessage(text:'The party was given a ' + item.name + '.');
                     world.party.inventory.add(item);
@@ -290,7 +289,6 @@ Scene.newEntry(
                                         filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial
                                     ),
                                     rngEnchantHint:true, 
-                                    from:location.landmark.island.newInhabitant(), 
                                     colorHint:'red', 
                                     materialHint: 'Gold'
                                 );
@@ -462,8 +460,7 @@ Scene.newEntry(
                         text: '*tells you off in dragonish*'
                     );
                     
-                    @:item = Item.new(base:Item.database.find(name:'Wyvern Key of Ice'),
-                             from:location.ownedBy);
+                    @:item = Item.new(base:Item.database.find(name:'Wyvern Key of Ice'));
                     windowEvent.queueMessage(text:'The party was given a ' + item.name + '.');
                     world.party.inventory.add(item);
                     key = item;
@@ -555,7 +552,6 @@ Scene.newEntry(
                                                     filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial && value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
                                                 ),
                                                 rngEnchantHint:true, 
-                                                from:location.landmark.island.newInhabitant(), 
                                                 colorHint:'blue', 
                                                 materialHint: 'Mythril', 
                                                 qualityHint: 'Masterwork'
@@ -728,8 +724,7 @@ Scene.newEntry(
                         text: 'Uhm. Where\'s the thunder key..?'
                     );
                     
-                    @:item = Item.new(base:Item.database.find(name:'Wyvern Key of Thunder'),
-                             from:location.ownedBy);
+                    @:item = Item.new(base:Item.database.find(name:'Wyvern Key of Thunder'));
                     windowEvent.queueMessage(text:'The party was given a ' + item.name + '.');
                     world.party.inventory.add(item);
                     key = item;
@@ -1338,11 +1333,11 @@ Scene.newEntry(
                 world.party.inventory.addGold(amount:250);
 
                 world.party.inventory.add(item:Item.new(base:Item.database.find(name:'Life Crystal'
-                ), from:someone));
+                )));
                 
                 
                 for(0, 1)::(i) {
-                    @:crystal = Item.new(base:Item.database.find(name:'Skill Crystal'), from:someone);
+                    @:crystal = Item.new(base:Item.database.find(name:'Skill Crystal'));
                     world.party.inventory.add(item:crystal);
                 }
 
@@ -1350,16 +1345,13 @@ Scene.newEntry(
 
 
                 world.party.inventory.add(item:Item.new(
-                    base:Item.database.find(name:'Pink Potion'),
-                    from:someone
+                    base:Item.database.find(name:'Pink Potion')
                 ));
                 world.party.inventory.add(item:Item.new(
-                    base:Item.database.find(name:'Pink Potion'),
-                    from:someone
+                    base:Item.database.find(name:'Pink Potion')
                 ));
                 world.party.inventory.add(item:Item.new(
-                    base:Item.database.find(name:'Pink Potion'),
-                    from:someone
+                    base:Item.database.find(name:'Pink Potion')
                 ));
                 
                 @tome = Item.new(
@@ -1378,6 +1370,24 @@ Scene.newEntry(
     }
 )
 
+
+
+
+
+
+Scene.newEntry(
+    data : {
+        name : 'trader.scene_intro',
+        script: [
+            ['???', '...Greetings, mortal.'],
+            ['???', 'Congratulations! For I have chosen YOU for a once-in-alifetime opportunity.'],
+            ['???', 'You see, my hoard of treasure is looking a bit... small. I require riches.'],
+            ['???', 'If you bring me gold, I will grant you a wish. Anything you like. Doesn\'t that sound wonderful?'],
+            ['???', 'Your meager, drag existence as a simple trader is no more! Now you have something to drive you!'],
+            ['???', 'Go forth, mortal! Your wish awaits!'],
+        ]
+    }
+)     
 
 
 

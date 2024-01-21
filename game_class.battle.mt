@@ -85,7 +85,7 @@
                             base:Item.database.getRandomFiltered(
                                 filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= landmark.island.tier+1
                             ),
-                            rngEnchantHint:true, from:party.members[0]
+                            rngEnchantHint:true
                         );
                         @message = 'The party found ' + correctA(word:item.name);
                         windowEvent.queueMessage(text: message);
@@ -110,7 +110,7 @@
                             base:Item.database.getRandomFiltered(
                                 filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= landmark.island.tier+2
                             ),
-                            rngEnchantHint:true, from:party.members[0]
+                            rngEnchantHint:true
                         );
                         @message = 'The party found ' + correctA(word:item.name);
                         windowEvent.queueMessage(text: message);

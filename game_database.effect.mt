@@ -2244,7 +2244,7 @@ Effect.newEntry(
                 windowEvent.queueMessage(text:holder.name + ' is protected from death!');
                 holder.removeEffects(
                     effectBases : [
-                        Effect.database.find(name:'Grace')
+                        Effect.find(name:'Grace')
                     ]
                 );
             }
@@ -2671,7 +2671,7 @@ Effect.newEntry(
             );
 
             for(0, amt)::(i) {                    
-                world.party.inventory.add(item:Item.new(base:Item.database.find(name:'Ingredient'),from:holder));
+                world.party.inventory.add(item:Item.new(base:Item.database.find(name:'Ingredient')));
             }
             
         },                

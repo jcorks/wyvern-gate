@@ -329,7 +329,7 @@
                 when(canInteract == false) empty;
               
                 @:interactionNames = [...this.base.interactions]->map(to:::(value) {
-                    return Interaction.database.find(name:value).displayName;
+                    return Interaction.find(name:value).displayName;
                 });
                     
                 @:choices = [...interactionNames];
@@ -351,7 +351,7 @@
                             aggress(location:this, party);
                         }
                         
-                        Interaction.database.find(name:this.base.interactions[choice-1]).onInteract(
+                        Interaction.find(name:this.base.interactions[choice-1]).onInteract(
                             location: this,
                             party
                         );
@@ -457,7 +457,7 @@ Location.database.newEntry(data:{
                                     && value.tier <= location.landmark.island.tier
             
                     ),
-                    from:location.ownedBy, rngEnchantHint:true
+                    rngEnchantHint:true
                 )
             );
         }
@@ -526,7 +526,7 @@ Location.database.newEntry(data:{
                                     && value.tier <= location.landmark.island.tier
             
                     ),
-                    from:location.ownedBy, rngEnchantHint:true
+                    rngEnchantHint:true
                 )
             );
         }
@@ -1025,7 +1025,6 @@ Location.database.newEntry(data:{
                                             location.ownedBy.level >= value.levelMinimum
                                             && value.tier <= location.landmark.island.tier
                     ),
-                    from:location.ownedBy, 
                     rngEnchantHint:true
                 )
             );
@@ -1035,16 +1034,16 @@ Location.database.newEntry(data:{
 
         location.inventory.add(item:Item.new(base:Item.database.find(
             name: 'Skill Crystal'
-        ), from:location.ownedBy));                
+        )));                
         location.inventory.add(item:Item.new(base:Item.database.find(
             name: 'Skill Crystal'
-        ), from:location.ownedBy));                
+        )));                
         location.inventory.add(item:Item.new(base:Item.database.find(
             name: 'Pickaxe'
-        ), from:location.ownedBy));                
+        )));                
         location.inventory.add(item:Item.new(base:Item.database.find(
             name: 'Smithing Hammer'
-        ), from:location.ownedBy));                
+        )));                
     },
     onInteract ::(location) {
         return true;
@@ -1175,8 +1174,7 @@ Location.database.newEntry(data:{
                             location.ownedBy.level >= value.levelMinimum &&
                             value.hasAttribute(attribute:Item.ATTRIBUTE.METAL)
                         )
-                    ),
-                    from:location.ownedBy
+                    )
                 )
             );
 
@@ -1610,8 +1608,7 @@ Location.database.newEntry(data:{
                                             && value.tier <= location.landmark.island.tier
                 ),
                 rngEnchantHint:true, 
-                forceEnchant:true,
-                from:location.landmark.island.newInhabitant()
+                forceEnchant:true
             )
         );
     },
@@ -1701,8 +1698,7 @@ Location.database.newEntry(data:{
                                                 && value.tier <= location.landmark.island.tier + 1
                     ),
                     rngEnchantHint:true, 
-                    forceEnchant:true,
-                    from:location.landmark.island.newInhabitant()
+                    forceEnchant:true
                 )
             );
         }
@@ -1968,7 +1964,6 @@ Location.database.newEntry(data:{
                         filter:::(value) <- value.isApparel == true
                     ),
                     apparelHint: 'Wool+',
-                    from:location.ownedBy, 
                     rngEnchantHint:true
                 )
             );
@@ -2050,8 +2045,7 @@ Location.database.newEntry(data:{
             @:item = Item.new(
                 base:Item.database.getRandomFiltered(
                     filter:::(value) <- value.name->contains(key:'Potion')
-                ),
-                from:location.ownedBy
+                )
             );
             
             // scalping is bad!
@@ -2149,7 +2143,6 @@ Location.database.newEntry(data:{
                         filter:::(value) <- value.hasQuality == true
                     ),
                     qualityHint: random.pickArrayItem(list:qualities),
-                    from:location.ownedBy, 
                     rngEnchantHint:true
                 )
             );
@@ -2220,7 +2213,7 @@ Location.database.newEntry(data:{
                         filter:::(value) <- value.isUnique == false
                                             && value.tier <= location.landmark.island.tier
                     ),
-                    from:location.landmark.island.newInhabitant(),rngEnchantHint:true
+                    rngEnchantHint:true
                 )
             );
         }
@@ -2232,7 +2225,7 @@ Location.database.newEntry(data:{
                                         && value.hasQuality
                 ),
                 qualityHint : 'Masterwork',
-                from:location.landmark.island.newInhabitant(),rngEnchantHint:true
+                rngEnchantHint:true
             )
         );        
 

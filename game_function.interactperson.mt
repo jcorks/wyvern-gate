@@ -18,11 +18,11 @@
 
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:random = import(module:'game_singleton.random.mt');
-@:Personality = import(module:'game_class.personality.mt');
+@:Personality = import(module:'game_database.personality.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:Battle = import(module:'game_class.battle.mt');
 @:Damage = import(module:'game_class.damage.mt');
-@:PersonInteraction = import(module:'game_class.personinteraction.mt');
+@:PersonInteraction = import(module:'game_database.personinteraction.mt');
 
 // interacts with this entity
 return ::(this, party, location, onDone, overrideChat, skipIntro) {
@@ -35,7 +35,7 @@ return ::(this, party, location, onDone, overrideChat, skipIntro) {
     }
     
     @:interactions = [...world.scenario.base.personInteractions]->map(
-        to ::(value) <- PersonInteraction.database.find(name:value)
+        to ::(value) <- PersonInteraction.find(name:value)
     );
     
     @:interactionNames = [...interactions]->map(
@@ -70,7 +70,7 @@ return ::(this, party, location, onDone, overrideChat, skipIntro) {
         jumpTag: 'InteractPerson',
         onChoice::(choice) {
             when(choice == 0) empty;
-            interactions[choice-1].base.onInteract(
+            interactions[choice-1].onInteract(
                 this,
                 location
             );

@@ -24,7 +24,7 @@ return struct(
     name: 'Wyvern.Battle.Action',
     
     items : {
-        ability: Database.type,
+        ability: Database.ItemType,
         targets: Object,
         turnIndex: Number,
         extraData: Object

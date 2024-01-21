@@ -12,6 +12,37 @@
 
 @:TheBeast = class(
     name: 'Wyvern.LandmarkEvent.DungeonEncounters',
+    
+    statics : {
+        createBeast ::{
+            @:Entity = import(module:'game_class.entity.mt');
+            @world = import(module:'game_singleton.world.mt');
+            @:beast = world.island.newInhabitant();
+            beast.name = 'the Beast';
+            beast.species = Species.find(name:'Beast');
+            beast.profession = Profession.new(base:Profession.database.find(name:'Beast'));               
+            beast.clearAbilities();
+            foreach(beast.profession.gainSP(amount:10))::(i, ability) {
+                beast.learnAbility(name:ability);
+            }
+
+            beast.stats.load(serialized:StatSet.new(
+                HP:   75,
+                AP:   999,
+                ATK:  14,
+                INT:  30,
+                DEF:  3,
+                LUK:  6,
+                SPD:  100,
+                DEX:  10
+            ).save());
+            
+            beast.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+            beast.heal(amount:9999, silent:true); 
+            beast.healAP(amount:9999, silent:true);   
+            return beast;        
+        }
+    },
 
     define:::(this) {
         @map_;
@@ -37,29 +68,7 @@
             when (map_.isLocationVisible(x:tileX, y:tileY)) empty;
             
 
-            @:beast = island_.newInhabitant();
-            beast.name = 'the Beast';
-            beast.species = Species.find(name:'Beast');
-            beast.profession = Profession.new(base:Profession.database.find(name:'Beast'));               
-            beast.clearAbilities();
-            foreach(beast.profession.gainSP(amount:10))::(i, ability) {
-                beast.learnAbility(name:ability);
-            }
-
-            beast.stats.load(serialized:StatSet.new(
-                HP:   75,
-                AP:   999,
-                ATK:  14,
-                INT:  30,
-                DEF:  3,
-                LUK:  6,
-                SPD:  100,
-                DEX:  10
-            ).save());
-            
-            beast.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
-            beast.heal(amount:9999, silent:true); 
-            beast.healAP(amount:9999, silent:true);     
+            @beast = TheBeast.createBeast();
 
             
             // who knows whos down here. Can be anything and anyone, regardless of 
