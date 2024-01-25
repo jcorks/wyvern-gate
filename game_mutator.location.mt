@@ -338,8 +338,10 @@
                     
                 @:choices = [
                     ...interactionNames,
-                    [...scenarioInteractions]->map(to:::(value) <- value.displayName)    
+                    ...([...scenarioInteractions]->map(to:::(value) <- value.displayName))    
                 ];
+                
+                breakpoint();
 
                 if (this.base.aggressiveInteractions->keycount)
                     choices->push(value: 'Aggress');
@@ -354,7 +356,7 @@
                         when(choice == 0) empty;
 
                         // aggress
-                        when(this.base.aggressiveInteractions->keycount > 0 && choice-1 == choices->len) ::<= {
+                        when(this.base.aggressiveInteractions->keycount > 0 && choice-1 == choices->size) ::<= {
                             aggress(location:this, party);
                         }
                         

@@ -103,7 +103,7 @@ canvas.onCommit = ::(lines, renderNow){
 @enterSaveLocation ::(action) {
     @:Filesystem = import(module:'Matte.System.Filesystem');
     @CWD = Filesystem.cwd;
-    Filesystem.cwd = '/usr/share/Wyvern_SAVES';
+    Filesystem.cwd = './';
     @output;
     {:::} {
         output = action(filesystem:Filesystem);

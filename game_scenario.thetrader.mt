@@ -548,6 +548,7 @@
 
                 // return to pool
                 foreach(state.hirees) ::(i, hiree) {
+                    when(hiree.entity == empty) empty;
                     if (world.party.isMember(entity:hiree.entity))
                         hiree.returnFromParty();
                 }

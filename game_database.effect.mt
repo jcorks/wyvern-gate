@@ -60,7 +60,7 @@ Effect.newEntry(
         },
 
         onRemoveEffect : ::(user, item, holder) {
-            Scene.find(name:'scene0_0_sylviaenter').act();
+            Scene.start(name:'scene0_0_sylviaenter');
         },                
         onPostAttackOther : ::(user, item, holder, to) {
         },
@@ -2408,7 +2408,7 @@ Effect.newEntry(
         stackable: true,
         stats: StatSet.new(),
         onAffliction : ::(user, item, holder) {
-            Scene.find(name:'scene_sentimentalbox').act(onDone::{});            
+            Scene.start(name:'scene_sentimentalbox', onDone::{});            
         },
         
         onRemoveEffect : ::(user, item, holder) {
