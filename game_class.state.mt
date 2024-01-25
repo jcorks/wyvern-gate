@@ -50,7 +50,7 @@
         when (value->isa(type:Database.ItemType))
             {
                 (TAG__IS_DATABASE) : true,
-                database : '' + value->type,
+                database : value.databaseName,
                 name : value.name
             };
 

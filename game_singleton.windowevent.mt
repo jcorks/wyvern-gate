@@ -111,7 +111,8 @@
                   (CHOICE_MODE.COLUMN_CURSOR):  commitInput_columnCursor(data:val, input),
                   (CHOICE_MODE.DISPLAY):        commitInput_display(data:val, input),
                   (CHOICE_MODE.CURSOR_MOVE):    commitInput_cursorMove(data:val, input),
-                  (CHOICE_MODE.NODISPLAY):      commitInput_noDisplay(data:val, input)
+                  (CHOICE_MODE.NODISPLAY):      commitInput_noDisplay(data:val, input),
+                  (CHOICE_MODE.SLIDER):         commitInput_slider(data:val, input)
                 }        
                 
                 // event callbacks mightve bonked out 
@@ -269,6 +270,92 @@
                 
             return false;
         }
+
+
+        @:commitInput_slider ::(data => Object, input) {
+            @choice = input;
+            @:canCancel = data.canCancel;
+            @:prompt = data.prompt; 
+            @:leftWeight = data.leftWeight; 
+            @:topWeight = data.topWeight; 
+            @:onChoice = data.onChoice;
+            @:onHover = data.onHover;
+            @:increments = data.increments;
+            @cursorPos = data.defaultValue;
+
+            when (requestAutoSkip) false;
+
+            //if (canCancel) ::<= {
+            //    choicesModified->push(value:'(Cancel)');
+            //}
+            @exitEmpty = false;
+
+            
+            
+            if (data.rendered == empty || choice != empty) ::<= {
+                
+                if (choice == CURSOR_ACTIONS.LEFT) ::<= {
+                    cursorPos -= 1 / increments;
+                }
+                if(choice == CURSOR_ACTIONS.RIGHT) ::<= {
+                    cursorPos += 1 / increments;
+                }             
+                
+                if (cursorPos < 0) cursorPos = 0;
+                if (cursorPos > 1) cursorPos = 1;
+                
+                if (choice == CURSOR_ACTIONS.LEFT||
+                    choice == CURSOR_ACTIONS.RIGHT) ::<= {
+                    data.defaultValue = cursorPos;
+                }
+                
+                if (onHover != empty)
+                    onHover(fraction:cursorPos);
+                
+                renderThis(
+                    data,
+                    thisRender::{
+                        @line = '[';
+                        for(0, 50) ::(i) {
+                            if ((cursorPos * 50)->floor == i)
+                                line = line + 'I'
+                            else
+                                line = line + '-'
+                            ;
+                        }
+                        line = line + ']'
+                        renderText(
+                            lines: [
+                                '',
+                                line,
+                                ''
+                            ],
+                            speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+                            leftWeight,
+                            topWeight
+                        ); 
+                    }
+                );
+            }
+            when(exitEmpty) ::<= {
+                data.keep = empty;
+                return true;            
+            }
+                
+            when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
+                data.keep = empty;
+                return true;
+            }
+            
+            when(choice == CURSOR_ACTIONS.CONFIRM) ::<= {
+                onChoice(fraction:cursorPos);
+                data.rendered = empty;
+                return true;
+            }
+                
+            return false;
+        }
+
 
 
         @:commitInput_cursorMove ::(data => Object, input) {
@@ -509,7 +596,8 @@
             COLUMN_NUMBER : 3,
             CURSOR_MOVE: 4,
             DISPLAY: 5,
-            NODISPLAY: 6
+            NODISPLAY: 6,
+            SLIDER : 7
         }
         
         
@@ -714,6 +802,29 @@
                     });
                 }]);
             },
+            
+            
+            queueSlider::(defaultValue => Number, increments => Number, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetPrompt, jumpTag, onLeave) {
+
+                nextResolve->push(value:[::{
+                    choiceStack->push(value:{
+                        mode: CHOICE_MODE.SLIDER,
+                        increments : increments,
+                        prompt: prompt,
+                        leftWeight: leftWeight,
+                        topWeight: topWeight,
+                        canCancel: canCancel,
+                        defaultValue: defaultValue,
+                        onChoice: onChoice,
+                        onHover: onHover,
+                        onLeave : onLeave,
+                        keep: keep,
+                        onGetPrompt : onGetPrompt,
+                        renderable:renderable,
+                        jumpTag : jumpTag
+                    });
+                }]);
+            },            
 
             canJumpToTag::(name => String) {
                 @:cs = [...choiceStack];

@@ -114,11 +114,9 @@ return ::(
                                 
                                 commitAction(action:
                                     BattleAction.new(
-                                        state : {
-                                            ability: ability,
-                                            targets: [all[choice-1]],
-                                            extraData: {}
-                                        }
+                                        ability: ability,
+                                        targets: [all[choice-1]],
+                                        extraData: {}
                                     )
                                 );
                               
@@ -129,22 +127,18 @@ return ::(
                           (Ability.TARGET_MODE.ALLALLY): ::<={
                             commitAction(action:
                                 BattleAction.new(
-                                    state : {
-                                        ability: ability,
-                                        targets: allies,
-                                        extraData: {}
-                                    }
+                                    ability: ability,
+                                    targets: allies,
+                                    extraData: {}
                                 )
                             );                          
                           },
                           (Ability.TARGET_MODE.ALLENEMY): ::<={
                             commitAction(action:
                                 BattleAction.new(
-                                    state : {
-                                        ability: ability,
-                                        targets: enemies,
-                                        extraData: {}                                
-                                    }
+                                    ability: ability,
+                                    targets: enemies,
+                                    extraData: {}                                
                                 )
                             );
                           },
@@ -152,11 +146,9 @@ return ::(
                           (Ability.TARGET_MODE.ALL): ::<={
                             commitAction(action:
                                 BattleAction.new(
-                                    state : {
-                                        ability: ability,
-                                        targets: [...allies, ...enemies],
-                                        extraData: {}                                
-                                    }
+                                    ability: ability,
+                                    targets: [...allies, ...enemies],
+                                    extraData: {}                                
                                 )
                             );
                           },
@@ -166,11 +158,9 @@ return ::(
                           (Ability.TARGET_MODE.NONE): ::<={
                             commitAction(action:
                                 BattleAction.new(
-                                    state : {
-                                        ability: ability,
-                                        targets: [],
-                                        extraData: {}                                
-                                    }
+                                    ability: ability,
+                                    targets: [],
+                                    extraData: {}                                
                                 )
                             );
                           },
@@ -186,11 +176,9 @@ return ::(
                 
                             commitAction(action:
                                 BattleAction.new(
-                                    state : {
-                                        ability: ability,
-                                        targets: Random.pickArrayItem(list:all),
-                                        extraData: {}                                
-                                    }
+                                    ability: ability,
+                                    targets: Random.pickArrayItem(list:all),
+                                    extraData: {}                                
                                 )
                             );
                           }
@@ -273,11 +261,9 @@ return ::(
               (2): ::<={
                 commitAction(action:
                     BattleAction.new(
-                        state : {
-                            ability: Ability.find(name:'Wait'),
-                            targets: [],
-                            extraData: {}
-                        }
+                        ability: Ability.find(name:'Wait'),
+                        targets: [],
+                        extraData: {}
                     )                
                 );
               },
@@ -293,11 +279,9 @@ return ::(
               (4): ::<= {
                 commitAction(action:
                     BattleAction.new(
-                        state : {
-                            ability: Ability.find(name:'Wyvern Prayer'),
-                            targets: [...enemies, ...allies],
-                            extraData: {}
-                        }
+                        ability: Ability.find(name:'Wyvern Prayer'),
+                        targets: [...enemies, ...allies],
+                        extraData: {}
                     )                
                 );             
               }

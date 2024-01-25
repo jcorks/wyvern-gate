@@ -1228,7 +1228,7 @@
 
 
 
-@:DungeonDelta = ::<= {
+@:DungeonGamma = ::<= {
     
     // true area layouts.
     // Only these can be anchors
@@ -1413,18 +1413,49 @@
 
 @:LAYOUT_ALPHA = 0;
 @:LAYOUT_BETA = 1;
-@:LAYOUT_DELTA = 2;
-@:LAYOUT_GAMMA = 3;
+@:LAYOUT_GAMMA = 2;
+@:LAYOUT_DELTA = 3;
 @:LAYOUT_CUSTOM = 4;
+@:LAYOUT_EPSILON = 5;
 @:DungeonMap = class(
     name: 'Wyvern.DungeonMap',
     define:::(this) {
+    
+        @:layoutToAreas ::(layout, map, mapHint){
+            return match(layout) {
+                (LAYOUT_ALPHA): DungeonAlpha(map:map, mapHint),
+                (LAYOUT_BETA):  DungeonBeta(map:map, mapHint),
+                (LAYOUT_GAMMA):  DungeonGamma(map:map, mapHint),
+                (LAYOUT_DELTA):
+                    match(random.integer(from:0, to:2)) {
+                      (0): DungeonAlpha(map:map, mapHint),
+                      (1): DungeonBeta(map:map, mapHint),
+                      (2): DungeonGamma(map:map, mapHint)
+                    },
+                (LAYOUT_EPSILON): ::<= {
+                    @:world = import(module:'game_singleton.world.mt');                        
+                    return match(world.island.tier) {
+                      (0): layoutToAreas(layout:LAYOUT_ALPHA, map, mapHint),
+                      (1): layoutToAreas(layout:LAYOUT_BETA, map, mapHint),
+                      (2): layoutToAreas(layout:LAYOUT_GAMMA, map, mapHint),
+                      default: layoutToAreas(layout:LAYOUT_DELTA, map, mapHint)
+                    }
+                },
+
+                    
+                    
+                default:
+                    DungeonAlpha(map:map, mapHint)
+            }        
+        }
+    
         this.interface = {
-            LAYOUT_ALPHA : {get::<- LAYOUT_ALPHA},  
-            LAYOUT_BETA  : {get::<- LAYOUT_BETA},  
-            LAYOUT_DELTA : {get::<- LAYOUT_DELTA},  
-            LAYOUT_GAMMA : {get::<- LAYOUT_GAMMA},
-            LAYOUT_CUSTOM: {get::<- LAYOUT_CUSTOM},
+            LAYOUT_ALPHA   : {get::<- LAYOUT_ALPHA},  
+            LAYOUT_BETA    : {get::<- LAYOUT_BETA},  
+            LAYOUT_GAMMA   : {get::<- LAYOUT_GAMMA},
+            LAYOUT_DELTA   : {get::<- LAYOUT_DELTA},  
+            LAYOUT_EPSILON : {get::<- LAYOUT_EPSILON},  
+            LAYOUT_CUSTOM  : {get::<- LAYOUT_CUSTOM},
 
 
             create ::(mapHint, parent) {
@@ -1438,21 +1469,8 @@
 
                 if (mapHint.wallCharacter != empty) map.wallCharacter = mapHint.wallCharacter;
                 if (mapHint.outOfBoundsCharacter != empty) map.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
-                match(mapHint.layoutType) {
-                    (LAYOUT_ALPHA): areas = DungeonAlpha(map:map, mapHint),
-                    (LAYOUT_BETA): areas = DungeonBeta(map:map, mapHint),
-                    (LAYOUT_DELTA): areas = DungeonDelta(map:map, mapHint),
-                    (LAYOUT_GAMMA):
-                        match(random.integer(from:0, to:2)) {
-                          (0): areas = DungeonAlpha(map:map, mapHint),
-                          (1): areas = DungeonBeta(map:map, mapHint),
-                          (2): areas = DungeonDelta(map:map, mapHint)
-                        },
-                        
-                        
-                    default:
-                        areas = DungeonAlpha(map:map, mapHint)
-                }
+                
+                areas = layoutToAreas(layout:mapHint.layoutType, map, mapHint);
                 
                 map.setAreas(new:areas);
                 return map;

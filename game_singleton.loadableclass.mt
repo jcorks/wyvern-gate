@@ -70,7 +70,7 @@ return {
                         initialize(*args);
                     
                     if (args.state != empty) 
-                        this.load(serialized:state)
+                        this.load(serialized:args.state)
                     else 
                         this.defaultLoad(*args);
                 }

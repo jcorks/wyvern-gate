@@ -331,14 +331,21 @@
                 @:interactionNames = [...this.base.interactions]->map(to:::(value) {
                     return Interaction.find(name:value).displayName;
                 });
+                
+                @:scenarioInteractions = [...world.scenario.base.interactionsLocation]->filter(
+                    by::(value) <- value.filter(location:this)
+                );
                     
-                @:choices = [...interactionNames];
+                @:choices = [
+                    ...interactionNames,
+                    [...scenarioInteractions]->map(to:::(value) <- value.displayName)    
+                ];
 
                 if (this.base.aggressiveInteractions->keycount)
-                    choices->push(value: 'Aggress location...');
+                    choices->push(value: 'Aggress');
                     
                 windowEvent.queueChoices(
-                    prompt: 'Interaction',
+                    prompt: this.name + '...',
                     choices:choices,
                     canCancel : true,
                     keep: true,
@@ -347,9 +354,12 @@
                         when(choice == 0) empty;
 
                         // aggress
-                        when(this.base.aggressiveInteractions->keycount > 0 && choice-1 == this.base.interactions->keycount) ::<= {
+                        when(this.base.aggressiveInteractions->keycount > 0 && choice-1 == choices->len) ::<= {
                             aggress(location:this, party);
                         }
+                        
+                        when(choice-1 > interactionNames->size)
+                            scenarioInteractions[choice-1].onSelect(location:this)
                         
                         Interaction.find(name:this.base.interactions[choice-1]).onInteract(
                             location: this,
@@ -1172,7 +1182,7 @@ Location.database.newEntry(data:{
                         filter::(value) <- (
                             value.isUnique == false && 
                             location.ownedBy.level >= value.levelMinimum &&
-                            value.hasAttribute(attribute:Item.ATTRIBUTE.METAL)
+                            value.attributes & Item.ATTRIBUTE.METAL
                         )
                     )
                 )

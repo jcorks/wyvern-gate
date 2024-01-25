@@ -42,25 +42,21 @@
             takeTurn ::(battle, enemies, allies){
                 @:defaultAttack = ::{
                     battle.entityCommitAction(action:BattleAction.new(
-                        state : {
-                            ability: 
-                                Ability.find(name:'Attack'),
+                        ability: 
+                            Ability.find(name:'Attack'),
 
-                            targets: [
-                                Random.pickArrayItem(list:enemies)
-                            ],
-                            extraData: {}                        
-                        }
+                        targets: [
+                            Random.pickArrayItem(list:enemies)
+                        ],
+                        extraData: {}                        
                     ));                  
                 }
             
                 when(enemies->keycount == 0)
                     battle.entityCommitAction(action:BattleAction.new(
-                        state : {
-                            ability: Ability.find(name:'Wait'),
-                            targets: [],
-                            extraData: {}                        
-                        }
+                        ability: Ability.find(name:'Wait'),
+                        targets: [],
+                        extraData: {}                        
                     ));
             
             
@@ -120,11 +116,9 @@
                 
                 
                 battle.entityCommitAction(action:BattleAction.new(
-                    state : {
-                        ability: ability,
-                        targets: targets,
-                        extraData: {}                        
-                    }
+                    ability: ability,
+                    targets: targets,
+                    extraData: {}                        
                 ));
             }
         }   

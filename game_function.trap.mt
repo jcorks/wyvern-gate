@@ -60,8 +60,9 @@
         ))();
         
         oldStats.printDiff(other:hurt.stats, prompt:'Ouch...', renderable:{render::{canvas.blackout();}});
+        @:instance = import(module:'game_singleton.instance.mt');
         
-        location.targetLandmark.visit();
+        instance.visitLandmark(landmark:location.targetLandmark);
     },
     
     // basic damage trap

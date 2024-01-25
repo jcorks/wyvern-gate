@@ -71,7 +71,8 @@
             onCreate : Function,
             onVisit : Function,
             guarded : Boolean,
-            pointOfNoReturn : Boolean
+            pointOfNoReturn : Boolean,
+            ephemeral : Boolean
         }
     ),
 
@@ -97,7 +98,108 @@
 
         @:Entity = import(module:'game_class.entity.mt');
 
- 
+        @:loadContent::(base) {
+
+            if (base.dungeonMap) ::<= {
+                state.map = DungeonMap.create(parent:this, mapHint: base.mapHint);
+            } else ::<= {
+                structureMapBuilder = StructureMap.new();//Map.new(mapHint: base.mapHint);
+                structureMapBuilder.initialize(mapHint:base.mapHint, parent:this);
+            }
+
+
+            if (base.dungeonMap) ::<= {
+                if (base.dungeonForceEntrance) ::<= {
+                    this.addLocation(name:'Entrance');
+                }
+            } else ::<= {
+                this.addLocation(name:'Entrance');
+            }
+            
+            /*
+            [0, Random.integer(from:base.minLocations, to:base.maxLocations)]->for(do:::(i) {
+                locations->push(value:island.newInhabitant());            
+            });
+            */
+            @mapIndex = 0;
+   
+
+
+
+
+
+
+
+            
+            
+
+
+
+
+
+            
+
+
+            foreach(base.requiredLocations)::(i, loc) {
+                this.addLocation(
+                    name:loc
+                );
+            
+                mapIndex += 1;
+            }
+            @:possibleLocations = [...base.possibleLocations];
+            for(0, random.integer(from:base.minLocations, to:base.maxLocations))::(i) {
+                when(possibleLocations->keycount == 0) empty;
+                @:which = random.pickArrayItemWeighted(list:possibleLocations);
+                this.addLocation(
+                    name:which.name
+                );
+                if (which.onePerLandmark) ::<= {
+                    state.possibleLocations->remove(key:state.possibleLocations->findIndex(value:which));
+                }
+                mapIndex += 1;
+            }
+            
+            if (base.dungeonMap) ::<= {
+                @:gate = this.gate;
+                if (gate == empty) ::<= {
+                    this.movePointerToRandomArea();
+                } else ::<= {
+                    state.map.setPointer(
+                        x:gate.x,
+                        y:gate.y
+                    );                    
+                }
+            } else ::<= {
+                state.map = structureMapBuilder.finalize();
+                @:gate = this.gate;
+                state.map.setPointer(
+                    x:gate.x,
+                    y:gate.y
+                );
+
+                // cant add locations to structure maps through the landmark.
+                structureMapBuilder = empty;
+            }
+
+
+
+
+            state.map.title = state.name;
+
+            
+            foreach(base.startingEvents) ::(k, evt) {
+                state.events->push(value:
+                    LandmarkEvent.new(
+                        parent: this,
+                        base: LandmarkEvent.database.find(name:evt)
+                    )
+                );
+            }
+            
+            state.mapEntityController = MapEntity.Controller.new(parent:this);
+            this.base.onCreate(landmark:this, island:island_);        
+        }
 
         this.interface =  {
             initialize ::(parent) {
@@ -125,114 +227,21 @@
                 state.x = x;
                 state.y = y;
                 state.peaceful = base.peaceful;
-                
 
-                if (base.dungeonMap) ::<= {
-                    state.map = DungeonMap.create(parent:this, mapHint: base.mapHint);
-                } else ::<= {
-                    structureMapBuilder = StructureMap.new();//Map.new(mapHint: base.mapHint);
-                    structureMapBuilder.initialize(mapHint:base.mapHint, parent:this);
-                }
-
-
-                if (base.dungeonMap) ::<= {
-                    if (base.dungeonForceEntrance) ::<= {
-                        this.addLocation(name:'Entrance');
-                    }
-                } else ::<= {
-                    this.addLocation(name:'Entrance');
-                }
-                
-                if (base.isUnique)
-                    state.name = base.name
-                else
-                    state.name = base.name + ' of ' + NameGen.place();
-                /*
-                [0, Random.integer(from:base.minLocations, to:base.maxLocations)]->for(do:::(i) {
-                    locations->push(value:island.newInhabitant());            
-                });
-                */
-                @mapIndex = 0;
-       
-
-
-
-
-
-
-
-                
-                
-
-
-
-
-
-                
-
-
-                foreach(base.requiredLocations)::(i, loc) {
-                    this.addLocation(
-                        name:loc
-                    );
-                
-                    mapIndex += 1;
-                }
-                @:possibleLocations = [...base.possibleLocations];
-                for(0, random.integer(from:base.minLocations, to:base.maxLocations))::(i) {
-                    when(possibleLocations->keycount == 0) empty;
-                    @:which = random.pickArrayItemWeighted(list:possibleLocations);
-                    this.addLocation(
-                        name:which.name
-                    );
-                    if (which.onePerLandmark) ::<= {
-                        state.possibleLocations->remove(key:state.possibleLocations->findIndex(value:which));
-                    }
-                    mapIndex += 1;
-                }
-                
-                if (base.dungeonMap) ::<= {
-                    @:gate = this.gate;
-                    if (gate == empty) ::<= {
-                        this.movePointerToRandomArea();
-                    } else ::<= {
-                        state.map.setPointer(
-                            x:gate.x,
-                            y:gate.y
-                        );                    
-                    }
-                } else ::<= {
-                    state.map = structureMapBuilder.finalize();
-                    @:gate = this.gate;
-                    state.map.setPointer(
-                        x:gate.x,
-                        y:gate.y
-                    );
-
-                    // cant add locations to structure maps through the landmark.
-                    structureMapBuilder = empty;
-                }
-                state.map.title = state.base.name + (
-                    if (state.name == '') '' else (' of ' + state.name)
-                );  
                 if (floorHint != empty) ::<= {
                     state.floor = floorHint;
                     state.floor => Number;
                 }
 
+                if (base.isUnique)
+                    state.name = base.name
+                else
+                    state.name = base.name + ' of ' + NameGen.place();
+
+
+                if (!base.ephemeral)
+                    loadContent(base);
                 
-                foreach(base.startingEvents) ::(k, evt) {
-                    state.events->push(value:
-                        LandmarkEvent.new(
-                            parent: this,
-                            base: LandmarkEvent.database.find(name:evt)
-                        )
-                    );
-                }
-                
-                state.mapEntityController = MapEntity.Controller.new(parent:this);
-                this.base.onCreate(landmark:this, island:island_);
-                return this;
             },
 
             save :: {
@@ -297,6 +306,16 @@
                 }
             },
             
+            loadContent ::{
+                @:base = state.base;                
+                if (state.map == empty)
+                    loadContent(base);                            
+            },
+            
+            unloadContent ::{
+                state.map == empty;
+            },
+            
             name : {
                 get :: {
                     return state.name;                
@@ -304,7 +323,8 @@
                 
                 set ::(value) {
                     state.name = value;
-                    state.map.title = value;
+                    if (state.map)
+                        state.map.title = value;
                 }
             },
             
@@ -491,6 +511,7 @@ Landmark.database.newEntry(
         guarded : true,
         canSave : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         startingEvents : [],
         possibleLocations : [
             {name:'Home', rarity: 1},
@@ -531,6 +552,7 @@ Landmark.database.newEntry(
         dungeonMap : false,
         canSave : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         dungeonForceEntrance: false,
         startingEvents : [],
         possibleLocations : [
@@ -578,6 +600,7 @@ Landmark.database.newEntry(
         dungeonMap : true,
         canSave : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         dungeonForceEntrance: true,
         startingEvents : [],
         possibleLocations : [
@@ -618,6 +641,7 @@ Landmark.database.newEntry(
         dungeonMap : true,
         canSave : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         dungeonForceEntrance: true,
         startingEvents : [],
         possibleLocations : [
@@ -654,6 +678,7 @@ Landmark.database.newEntry(
         dungeonMap : true,
         canSave : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         dungeonForceEntrance: true,
         startingEvents : [],
         possibleLocations : [                    
@@ -665,6 +690,67 @@ Landmark.database.newEntry(
         onCreate ::(landmark, island){},
         onVisit ::(landmark, island) {}
         
+    }
+)
+
+
+Landmark.database.newEntry(
+    data: {
+        name : 'Mysterious Shrine',
+        symbol : 'M',
+        legendName: 'Shrine',
+        rarity : 100000,      
+        isUnique : true,
+        minLocations : 0,
+        maxLocations : 4,
+        peaceful: false,
+        guarded : false,
+        dungeonMap : true,
+        canSave : false,
+        pointOfNoReturn : true,
+        ephemeral : true,
+        dungeonForceEntrance: false,
+        startingEvents : [
+            'dungeon-encounters',
+            'item-specter',
+            'the-beast',
+            'the-mirror',
+            'treasure-golem',
+            'cave-bat'
+        ],
+        possibleLocations : [
+//                    {name: 'Stairs Down', rarity:1},
+            {name: 'Fountain', rarity:18},
+            {name: 'Potion Shop', rarity: 17},
+            {name: 'Wyvern Statue', rarity: 15},
+            {name: 'Small Chest', rarity: 16},
+            {name: 'Locked Chest', rarity: 11},
+            {name: 'Magic Chest', rarity: 15},
+
+            {name: 'Healing Circle', rarity:35},
+
+            {name: 'Clothing Shop', rarity: 100},
+            {name: 'Fancy Shop', rarity: 50}
+
+        ],
+        requiredLocations : [
+            'Enchantment Stand',
+            'Stairs Down',
+            'Stairs Down',
+            'Locked Chest',
+            'Small Chest'
+        ],
+        mapHint:{
+            layoutType: DungeonMap.LAYOUT_EPSILON
+        },
+        onCreate ::(landmark, island){
+        },
+        onVisit ::(landmark, island) {
+            if (landmark.floor == 0)
+                windowEvent.queueMessage(
+                    text:"This place seems to shift before you..."
+                );
+        }
     }
 )
 
@@ -684,6 +770,7 @@ Landmark.database.newEntry(
         dungeonMap : true,
         canSave : false,
         pointOfNoReturn : true,
+        ephemeral : true,
         dungeonForceEntrance: false,
         startingEvents : [
             'dungeon-encounters',
@@ -744,6 +831,7 @@ Landmark.database.newEntry(
         dungeonMap : true,
         canSave : false,
         pointOfNoReturn : true,
+        ephemeral : true,
         dungeonForceEntrance: false,
         startingEvents : [
             'dungeon-encounters',
@@ -797,6 +885,7 @@ Landmark.database.newEntry(
         dungeonMap : true,
         canSave : false,
         pointOfNoReturn : true,
+        ephemeral : true,
         dungeonForceEntrance: false,
         startingEvents : [
             'dungeon-encounters',
@@ -829,7 +918,7 @@ Landmark.database.newEntry(
             'Small Chest'
         ],
         mapHint:{
-            layoutType: DungeonMap.LAYOUT_DELTA
+            layoutType: DungeonMap.LAYOUT_GAMMA
         },
         onCreate ::(landmark, island){
         },
@@ -853,6 +942,7 @@ Landmark.database.newEntry(
         dungeonMap : true,
         canSave : false,
         pointOfNoReturn : true,
+        ephemeral : true,
         dungeonForceEntrance: false,
         startingEvents : [
             'dungeon-encounters',
@@ -885,7 +975,7 @@ Landmark.database.newEntry(
             'Small Chest'
         ],
         mapHint:{
-            layoutType: DungeonMap.LAYOUT_GAMMA
+            layoutType: DungeonMap.LAYOUT_DELTA
         },
         onCreate ::(landmark, island){
         },
@@ -909,6 +999,7 @@ Landmark.database.newEntry(
         dungeonMap : true,
         canSave : false,
         pointOfNoReturn : true,
+        ephemeral : true,
         dungeonForceEntrance: false,
         startingEvents : [
         ],
@@ -948,6 +1039,7 @@ Landmark.database.newEntry(
         dungeonMap : true,
         canSave : false,
         pointOfNoReturn : false,
+        ephemeral : false,
         dungeonForceEntrance: false,
         startingEvents : [
         ],
@@ -990,6 +1082,7 @@ Landmark.database.newEntry(
         dungeonMap : true,
         canSave : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         dungeonForceEntrance: false,
         startingEvents : [
         ],
@@ -1027,6 +1120,7 @@ Landmark.database.newEntry(
         dungeonMap : true,
         canSave : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         dungeonForceEntrance: false,
         startingEvents : [
         ],
@@ -1065,6 +1159,7 @@ Landmark.database.newEntry(
         canSave : true,
         dungeonMap : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         dungeonForceEntrance: false,
         startingEvents : [
         ],
@@ -1104,6 +1199,7 @@ Landmark.database.newEntry(
         canSave : true,
         dungeonMap : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         dungeonForceEntrance: false,
         startingEvents : [
         ],
@@ -1142,6 +1238,7 @@ Landmark.database.newEntry(
         guarded : true,
         canSave : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         dungeonForceEntrance: true,
         startingEvents : [
         ],
@@ -1180,6 +1277,7 @@ Landmark.database.newEntry(
         dungeonMap : false,
         canSave : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         dungeonForceEntrance: false,
         guarded : false,
         possibleLocations : [
@@ -1213,6 +1311,7 @@ Landmark.database.newEntry(
         dungeonMap : false,
         canSave : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         dungeonForceEntrance: false,
         minLocations : 5,
         maxLocations : 10,
@@ -1261,6 +1360,7 @@ Landmark.database.newEntry(
         isUnique : false,
         dungeonMap : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         dungeonForceEntrance: true,
         minLocations : 3,
         maxLocations : 5,
@@ -1298,6 +1398,7 @@ Landmark.database.newEntry(
         isUnique : false,
         dungeonMap : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         dungeonForceEntrance: true,
         minLocations : 0,
         maxLocations : 0,
@@ -1330,6 +1431,7 @@ Landmark.database.newEntry(
         guarded : false,
         canSave : true,
         pointOfNoReturn : false,
+        ephemeral : false,
         startingEvents : [
         ],
         possibleLocations : [],
@@ -1355,6 +1457,7 @@ Landmark.database.newEntry(
         minLocations : 0,
         maxLocations : 0,
         pointOfNoReturn : false,
+        ephemeral : false,
         startingEvents : [
         ],
         possibleLocations : [],

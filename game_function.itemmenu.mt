@@ -95,11 +95,11 @@ return ::(
                               keep: true,
                               onChoice ::(choice) {
                                 when(choice == 0) empty;                      
-                                commitAction(action:BattleAction.new(state:{
+                                commitAction(action:BattleAction.new(
                                         ability: Ability.find(name:'Use Item'),
                                         targets: [all[choice-1]],
                                         extraData : [item]
-                                    }) 
+                                    ) 
                                 );                            
                                 if (windowEvent.canJumpToTag(name:'Item'))
                                     windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
@@ -124,11 +124,11 @@ return ::(
                               onChoice ::(choice) {
                            
                                 when(choice == 0) empty;                                                  
-                                commitAction(action:BattleAction.new(state:{
+                                commitAction(action:BattleAction.new(
                                         ability: Ability.find(name:'Use Item'),
                                         targets: if (choice == 1) party.members else enemies,
                                         extraData : [item]
-                                    }) 
+                                    ) 
                                 );                  
                                 if (windowEvent.canJumpToTag(name:'Item'))
                                     windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
@@ -138,11 +138,11 @@ return ::(
                           },
 
                           (Item.USE_TARGET_HINT.ALL): ::<= {
-                            commitAction(action:BattleAction.new(state:{
+                            commitAction(action:BattleAction.new(
                                     ability: Ability.find(name:'Use Item'),
                                     targets: [...party.members, ...enemies],
                                     extraData : [item]
-                                }) 
+                                ) 
                             );                  
                             if (windowEvent.canJumpToTag(name:'Item'))
                                 windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
@@ -164,11 +164,11 @@ return ::(
                       },
                       
                       (2): ::<= {
-                        commitAction(action:BattleAction.new(state:{
+                        commitAction(action:BattleAction.new(
                             ability: Ability.find(name:'Equip Item'),
                             targets: [user],
                             extraData : [item, party.inventory]
-                        }));           
+                        ));           
                         if (windowEvent.canJumpToTag(name:'Item'))
                             windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
                       },

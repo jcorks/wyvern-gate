@@ -147,6 +147,13 @@ return class(
             pickArrayItem::(list) {
                 return list[this.integer(from:0, to:list->keycount-1)];
             },
+            
+            removeArrayItem::(list) {
+                @:index = this.integer(from:0, to:list->keycount-1);
+                @:out = list[index];
+                list->remove(key:index);
+                return out;
+            },
 
             pickTableItem::(table) {
                 return table[this.pickArrayItem(list:table->keys)];

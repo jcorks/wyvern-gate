@@ -207,7 +207,7 @@
         
         this.interface = {
             initialize ::{
-                BattleAI.new(user:this);                
+                state.battleAI = BattleAI.new(user:this);                
             },
             
             
@@ -707,7 +707,9 @@
 
                     // flat 15% chance to avoid damage with a shield 
                     // pretty nifty!
-                    when (dodgeable && this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).hasAttribute(attribute:Item.ATTRIBUTE.SHIELD) && random.try(percentSuccess:15)) ::<= {
+                    when (dodgeable && 
+                          (this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).base.attributes & Item.ATTRIBUTE.SHIELD) && 
+                          random.try(percentSuccess:15)) ::<= {
                         windowEvent.queueMessage(text:random.pickArrayItem(list:[
                             this.name + ' defends against ' + from.name + '\'s attack with their shield!',                 
                         ]));

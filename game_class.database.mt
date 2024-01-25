@@ -34,9 +34,14 @@
     },
     define:::(this) {
         @:items_ = {}
+        @name_;
         @attributes_;
-        this.constructor = ::(attributes, name) {
+        @:databaseNameGetter = {
+            get ::<- name_
+        };
+        this.constructor = ::(attributes, name => String) {
             LOOKUP[name] = this;
+            name_ = name;
             attributes_ = attributes;
         };
 
@@ -44,6 +49,9 @@
             
             attributes : {
                 get::<- attributes_
+            },
+            name : {
+                get ::<- name_
             },
             
             newEntry ::(data) {
@@ -70,7 +78,7 @@
                     else 
                         item[key] = {get::<-val}
                 }                         
-
+                item.databaseName = databaseNameGetter;
                 item->setIsInterface(enabled:true);
                 
                 items_[item.name] = item;

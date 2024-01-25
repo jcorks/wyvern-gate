@@ -52,7 +52,7 @@
             suit_ = suit;
             value_ = value;
             return this;
-        },
+        }
         
         
         this.interface = {

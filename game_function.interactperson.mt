@@ -22,7 +22,6 @@
 @:correctA = import(module:'game_function.correcta.mt');
 @:Battle = import(module:'game_class.battle.mt');
 @:Damage = import(module:'game_class.damage.mt');
-@:PersonInteraction = import(module:'game_database.personinteraction.mt');
 
 // interacts with this entity
 return ::(this, party, location, onDone, overrideChat, skipIntro) {
@@ -34,14 +33,26 @@ return ::(this, party, location, onDone, overrideChat, skipIntro) {
         windowEvent.jumpToTag(name:'InteractPerson', goBeforeTag:true, doResolveNext:true);
     }
     
-    @:interactions = [...world.scenario.base.personInteractions]->map(
-        to ::(value) <- PersonInteraction.find(name:value)
+    @:interactions = [...world.scenario.base.interactionsPerson]->filter(
+        by::(value) <- value.filter(entity:this)
     );
     
     @:interactionNames = [...interactions]->map(
         to ::(value) <- value.displayName
     );
     
+    
+    when (interactions->size == 0) ::<= {
+        windowEvent.queueMessage(
+            text: 'It appears that you cannot interact with ' + this.name + '.'
+        )                
+        windowEvent.queueNoDisplay(
+            onEnter ::{
+                onDone();
+            },
+            onLeave ::{}
+        );
+    }    
     
     if (skipIntro == empty) 
         if (this.isIncapacitated())
@@ -70,9 +81,8 @@ return ::(this, party, location, onDone, overrideChat, skipIntro) {
         jumpTag: 'InteractPerson',
         onChoice::(choice) {
             when(choice == 0) empty;
-            interactions[choice-1].onInteract(
-                this,
-                location
+            interactions[choice-1].onSelect(
+                entity:this
             );
             if (this.onInteract) this.onInteract(interaction:interactions[choice-1].base.name);
         }

@@ -731,7 +731,7 @@ Interaction.newEntry(
             party.inventory.remove(item:ores[0]);
             party.inventory.remove(item:ores[1]);
             
-            @:metal = Item.new(base:Item.database.getRandomWeightedFiltered(filter:::(value) <- value.hasAttribute(attribute:Item.ATTRIBUTE.RAW_METAL)));                        
+            @:metal = Item.new(base:Item.database.getRandomWeightedFiltered(filter:::(value) <- value.attributes & Item.ATTRIBUTE.RAW_METAL));                        
             windowEvent.queueMessage(text: 'Smelted 2 ore chunks into ' + correctA(word:metal.name) + '!');
             party.inventory.add(item:metal);                    
                 
@@ -1024,7 +1024,7 @@ Interaction.newEntry(
         
             @:Entity = import(module:'game_class.entity.mt');
 
-            @:items = party.inventory.items->filter(by:::(value) <- value.hasAttribute(attribute:Item.ATTRIBUTE.RAW_METAL));
+            @:items = party.inventory.items->filter(by:::(value) <- value.base.attributes & Item.ATTRIBUTE.RAW_METAL);
             when(items->keycount == 0)
                 windowEvent.queueMessage(text:'No suitable ingots or materials were found in the party inventory.');
 
@@ -1186,7 +1186,7 @@ Interaction.newEntry(
                                 default: 'Unknown Wyvern Dimension'
                             })
                         );
-                        d.visit();                        
+                        instance.visitLandmark(landmark:d);                        
                     
                     });
                 }
@@ -1218,6 +1218,8 @@ Interaction.newEntry(
                             base:Landmark.database.find(name:'Shrine: Lost Floor')
                         )
                     ;
+                    location.targetLandmark.loadContent();
+
                 } else ::<= {
                     @:Landmark = import(module:'game_mutator.landmark.mt');
                     
@@ -1227,6 +1229,7 @@ Interaction.newEntry(
                             floorHint:location.landmark.floor+1
                         )
                     ;
+                    location.targetLandmark.loadContent();
                     
                     location.targetLandmark.name = 'Shrine ('+location.targetLandmark.floor+'F)';
                 }
@@ -1238,7 +1241,8 @@ Interaction.newEntry(
             windowEvent.queueMessage(text:'The party travels to the next floor.', renderable:{render::{canvas.blackout();}});
             
             
-            location.targetLandmark.visit(where:location.targetLandmarkEntry);
+            @:instance = import(module:'game_singleton.instance.mt');
+            instance.visitLandmark(landmark:location.targetLandmark, where:location.targetLandmarkEntry);
         },
     }
 )  
@@ -1266,31 +1270,22 @@ Interaction.newEntry(
             @:world = import(module:'game_singleton.world.mt');
             @:Event = import(module:'game_mutator.event.mt');
 
-            if (location.contested == true) ::<= {
-                @:event = Event.new(
-                    base:Event.database.find(name:'Encounter:TreasureBoss'),
-                    currentTime:0, // TODO,
-                    parent:location.landmark
-                );  
-                location.contested = false;
-            } else ::<= {
-                if (location.targetLandmark == empty) ::<={
-                    @:Landmark = import(module:'game_mutator.landmark.mt');
-                    
+            if (location.targetLandmark == empty) ::<={
+                @:Landmark = import(module:'game_mutator.landmark.mt');
+                
 
-                    location.targetLandmark = 
-                        location.landmark.island.newLandmark(
-                            base:Landmark.database.find(name:'Treasure Room')
-                        )
-                    ;
-                    location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
-                }
-                location.targetLandmark.visit(where:location.targetLandmarkEntry);
-
-
-                canvas.clear();
+                location.targetLandmark = 
+                    location.landmark.island.newLandmark(
+                        base:Landmark.database.find(name:'Treasure Room')
+                    )
+                ;
+                location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
             }
-        },
+            @:instance = import(module:'game_singleton.instance.mt');
+
+            instance.visitLandmark(landmark:location.targetLandmark, where:location.targetLandmarkEntry);
+            canvas.clear();
+        }
     }
 )          
           
@@ -1536,7 +1531,7 @@ Interaction.newEntry(
                     base:Item.database.getRandomFiltered(
                         filter:::(value) <- (
                             value.isUnique == false &&
-                            value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
+                            value.attributes & Item.ATTRIBUTE.WEAPON
                         )
                     )
                 )                    
@@ -2296,7 +2291,7 @@ Interaction.newEntry(
                 
                 windowEvent.queueMessage(speaker: 'Sylvia', text: '"Here! Thanks again."');
                 item = Item.database.getRandomFiltered(filter:::(value) <- 
-                    value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON) &&
+                    value.attributes & Item.ATTRIBUTE.WEAPON &&
                     !value.isUnique
                 );
               },
@@ -2311,7 +2306,7 @@ Interaction.newEntry(
                 
                 windowEvent.queueMessage(speaker: 'Sylvia', text: '"Here! Thanks again."');
                 item = Item.database.getRandomFiltered(filter:::(value) <- 
-                    (value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON) ||
+                    (value.attributes & Item.ATTRIBUTE.WEAPON ||
                      value.equipType == Item.TYPE.RING ||
                      value.equipType == Item.TYPE.TRINKET) &&
                     value.isUnique

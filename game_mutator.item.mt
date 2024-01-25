@@ -502,31 +502,47 @@
             islandEntry : {
                 get ::<- state.island
             },
-
-    
-            hasAttribute :: (attribute) {
-                return (this.base.attributes & attribute) != 0;
-            },
             
-            setIslandGenAttributes ::(levelHint => Number, nameHint => String, tierHint => Number, islandHint) {
+            setIslandGenAttributes ::(levelHint => Number, nameHint => String, tierHint => Number) {
                 state.islandLevelHint = levelHint;
                 state.islandNameHint = nameHint;
                 state.islandTierHint = tierHint;
-                state.island = islandHint;
             },
             
             modData : {
                 get ::<- state.modData
             },
             
-            addIslandEntry ::(world) {
+            addIslandEntry ::(world, island) {
                 when (state.island != empty) empty;
 
-                state.island = world.discoverIsland(
-                    levelHint: (state.islandLevelHint)=>Number,
-                    nameHint: (state.islandNameHint)=>String,
-                    tierHint: (state.islandTierHint)=>Number
-                );                
+                if (island == empty) ::<= {
+                    state.island = world.discoverIsland(
+                        levelHint: (state.islandLevelHint)=>Number,
+                        nameHint: (state.islandNameHint)=>String,
+                        tierHint: (state.islandTierHint)=>Number
+                    );                
+                } else 
+                    state.island = island;
+
+
+                
+                @:levelToStratum = ::(level) {
+                    return match((level / 5)->floor) {
+                      (0): 'IV',
+                      (1): 'III',
+                      (2): 'II',
+                      (3): 'I',
+                      default: 'Unknown'
+                    }
+                }
+                breakpoint();
+                                
+                state.price *= 1 + ((state.island.levelMin) / (5 + 5*Number.random()));
+                state.price = state.price->ceil;
+                state.customName = 'Key to ' + state.island.name + ' - Stratum ' + levelToStratum(level:state.island.levelMin);
+
+                    
             },
             
             resetContainer :: {
@@ -3904,42 +3920,6 @@ Item.database.newEntry(data : {
         ATTRIBUTE.METAL
     ,
     onCreate ::(item, user, creationHint) {     
-    
-        @:world = import(module:'game_singleton.world.mt');        
-        @:nameGen = import(module:'game_singleton.namegen.mt');
-        @:island = if (creationHint != empty) ::<={
-            return {
-                levelHint:  (creationHint.levelHint) => Number,
-                nameHint:   (creationHint.nameHint)  => String,
-                island : empty
-            }
-        } else ::<= {
-            return {
-                nameHint: nameGen.island(),
-                levelHint: user.level+1,
-                island : empty
-            }
-        }
-        
-        @:levelToStratum = ::(level) {
-            return match((level / 5)->floor) {
-              (0): 'IV',
-              (1): 'III',
-              (2): 'II',
-              (3): 'I',
-              default: 'Unknown'
-            }
-        }
-        
-        item.setIslandGenAttributes(
-            levelHint: island.levelHint,
-            nameHint : island.nameHint,
-            tierHint : 0
-        );
-        
-        item.price *= 1 + ((island.levelHint) / (5 + 5*Number.random()));
-        item.price = item.price->ceil;
-        item.name = 'Key to ' + island.nameHint + ' - Stratum ' + levelToStratum(level:island.levelHint);
     }
     
 })    

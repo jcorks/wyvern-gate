@@ -549,7 +549,7 @@ Scene.newEntry(
                                             
                                             @:prize = Item.new(
                                                 base: Item.database.getRandomFiltered(
-                                                    filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial && value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
+                                                    filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial && value.attributes & Item.ATTRIBUTE.WEAPON
                                                 ),
                                                 rngEnchantHint:true, 
                                                 colorHint:'blue', 

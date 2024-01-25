@@ -48,7 +48,7 @@ Coming changes:
         - This game scenario features a Wyvern's challenge to defeat it 
         - This is a gauntlet with no saving
         - Features level-ups
-        - Long dungeon... after 3 floors gets to choose a perk. 2 of 4.
+        - Player fights in colosseums and must defeat all enemies. They fight amongst each other too.
             Some perks include:
                 - Getting an Ally (same level)
                 - Getting a masterwork item
@@ -56,6 +56,7 @@ Coming changes:
                 - A PERMANENT stat rebalance
                 - A PERMANENT effect  
                 - encountering a shopkeep (normal shop)
+                - learning an ability
     
         - Every 3 sets (so 9 floors) theres a boss. There are 2 bosses then the final.
 

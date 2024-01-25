@@ -236,6 +236,8 @@
                 }
             },
             
+            getDayString : getDayString,
+            
             saveName : {
                 set ::(value) {
                     state.saveName = value;
@@ -247,8 +249,8 @@
             },
             
             
-            discoverIsland ::(levelHint => Number, tierHint => Number, nameHint) {
-                @:out = Island.new(parent:this, levelHint, nameHint, tierHint);
+            discoverIsland ::(levelHint => Number, tierHint => Number, nameHint, landmarksHint) {
+                @:out = Island.new(parent:this, levelHint, nameHint, tierHint, landmarksHint);
                 return out;
             },
             
@@ -333,12 +335,14 @@
                 if (state.turn > 10) ::<={
                     state.turn = 0;
                     state.time += 1;
+                    if (state.time == TIME.MORNING)
+                        this.scenario.newDay();
+
                 }
                     
                 if (state.time > 13) ::<={
                     state.time = 0;
                     state.day += 1;
-                    this.scenario.newDay();
                     this.accoladeIncrement(name:'daysTaken');
                 }
                 

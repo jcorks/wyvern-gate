@@ -27,7 +27,6 @@
 @:Interaction = import(module:'game_database.interaction.mt');
 @:Item = import(module:'game_mutator.item.mt');
 @:namegen = import(module:'game_singleton.namegen.mt');
-@:partyOptions = import(module:'game_function.partyoptions.mt');
 @:LargeMap = import(module:'game_singleton.largemap.mt');
 @:Scenario = import(module:'game_mutator.scenario.mt');
 
@@ -81,46 +80,7 @@ return class(
         
 
         
-        @:systemMenu :: {
-            windowEvent.queueChoices(
-                choices: [
-                    'Save',
-                    'Quit'
-                ],
-                canCancel : true,
-                onChoice::(choice) {
-                    when(choice == 0) empty;
-                    
-                    match(choice-1) {
-                      // save 
-                      (0)::<= {
-                        this.savestate();
-                        windowEvent.queueMessage(text:'Successfully saved world ' + world.saveName);                        
-                      },
-                      // quit
-                      (1)::<= {
-                        windowEvent.queueChoices(
-                            prompt:'Quit?',
-                            choices: [
-                                'Yes',
-                                'No'
-                            ],
-                            onChoice::(choice) {
-                                when(choice == 2) empty;
-                                windowEvent.jumpToTag(name:'MainMenu');
-                            }
-                        );
-                                        
-                      }
-                    }                
-                }
-            );
 
-            
-
-
-            
-        }
         
         
         
@@ -350,9 +310,9 @@ return class(
                                 x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 4 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -4 else 0,
                                 y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  4 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -4 else 0
                             );
-                            world.stepTime(); 
                             island.map.title = world.timeString + '                   ';
                             island.incrementTime();
+                            island.takeStep();
                             
                             // cancel if we've arrived somewhere
                             underFoot = island.map.getNamedItemsUnderPointerRadius(radius:5);
@@ -365,6 +325,9 @@ return class(
                 
                 
                 @:islandChoices = ::{   
+                
+                    @islandOptions;
+                
                     enteredChoices = true;
                     windowEvent.queueChoices(
                         leftWeight: 1,
@@ -374,62 +337,45 @@ return class(
                         canCancel : true,
                         keep: true,
                         onGetChoices ::{
-                            @:choices = [
-                                'Check',
-                                'Party',
-                                'Look around',
-                                'System',
-                            ];
+                            islandOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island));
+                            
+                            @:choices = [...islandOptions]->map(to::(value) <- value.displayName);
                             @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
+
+                            choices->push(value: 'Options');
 
                             if (visitable != empty) ::<= {
                                 foreach(visitable)::(i, vis) {
                                     choices->push(value:'Visit ' + vis.name);                
                                 }
                             }
+                            
                             return choices;
                         },
                         onChoice::(choice) {
                             @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
 
-                           
-                            match(choice-1) {
-                            
-                              // check
-                              (0): ::<= {
-                                choice = windowEvent.queueChoices(
+                            if (choice-1 < islandOptions->size) ::<= {
+                                islandOptions[choice-1].onSelect(island);
+                            } else if (choice-1 == islandOptions->size) ::<= {
+                                @:options = [...world.scenario.base.interactionsOptions]->filter(by::(value) <- value.filter(island));
+                                @:choices = [...options]->map(to::(value) <- value.displayName);
+
+                                windowEvent.queueChoices(
                                     leftWeight: 1,
                                     topWeight: 1,
-                                    prompt: 'Check which?',
-                                    choices: [
-                                        'Island',
-                                    ],
-                                    canCancel: true,
-                                    onChoice::(choice){
-                                        match(choice-1) {
-                                          (0): windowEvent.queueMessage(speaker: 'About ' + island.name, text: island.description)
-                                        }                                                        
+                                    prompt: 'Options',
+                                    canCancel : true,
+                                    keep: true,
+                                    choices,
+                                    onChoice::(choice) {
+                                        when(choice == 0) empty;
+                                        options[choice-1].onSelect(island);
                                     }
                                 );
-                              
-                              },
-                              
-
-                              (2): ::<= {
-                                island.incrementTime();
-                                windowEvent.queueMessage(text:'Nothing to see but the peaceful scenery of ' + island.name + '.');                          
-                              },
-                              // party options
-                              (1): partyOptions(),
-
-                              (3): ::<= {
-                                systemMenu();                          
-                              },                          
-                              
-                              // visit landmark
-                              default: ::<= {
+                            } else ::<= {
                                 //breakpoint();
-                                @:landmark = visitable[choice-5].data;
+                                @:landmark = visitable[choice-(islandOptions->size + 1 + 1)].data;
                                 when (landmark.base.pointOfNoReturn == true) ::<= {
                                     windowEvent.queueMessage(
                                         text: "It may be difficult to return... "
@@ -438,17 +384,12 @@ return class(
                                         prompt:'Enter?',
                                         onChoice::(which) {
                                             if (which == true)
-                                                landmark.visit();
+                                                this.visitLandmark(landmark);
                                         }
                                     )
                                 }
-                                this.visitLandmark(landmark);
-                              }
+                                this.visitLandmark(landmark);                            
                             }
-
-
-                        
-                        
                         }
                     );
                 }
@@ -458,13 +399,15 @@ return class(
             },  
             
             visitLandmark ::(landmark, where) {
+                if (landmark_ != empty && landmark_.base.ephemeral)
+                    landmark_.unloadContent();
                 landmark_ = landmark;
                 if (where != empty)
                     landmark.map.setPointer(
                         x:where.x,
                         y:where.y
-                    );                    
-                
+                    );                 
+                landmark.loadContent();
                 @:windowEvent = import(module:'game_singleton.windowevent.mt');
                 @:partyOptions = import(module:'game_function.partyoptions.mt');
                 @:world = import(module:'game_singleton.world.mt');
@@ -482,6 +425,7 @@ return class(
 
 
                 @:landmarkChoices = ::{
+                    @landmarkOptions;
                     windowEvent.queueChoices(
                         leftWeight: 1,
                         topWeight: 1,
@@ -489,10 +433,11 @@ return class(
                         keep:true,
                         canCancel:true,
                         onGetChoices ::{
-                            @choices = [                
-                                'Party',
-                                'Wait',
-                            ];
+                            landmarkOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island:island_, landmark));
+                            
+                            @:choices = [...landmarkOptions]->map(to::(value) <- value.displayName);
+
+                            choices->push(value: 'Options');
                             
                             
                             @locationAt = landmark.map.getNamedItemsUnderPointer();
@@ -506,67 +451,33 @@ return class(
                         },
                         renderable:landmark.map,
                         onChoice::(choice) {
+                            when(choice == empty) empty;
                             @locationAt = landmark.map.getNamedItemsUnderPointer();
                                 
 
-                                
-                            @:MAX_STATIC_CHOICES = 2;
-                            match(choice-1) {
-                              
-                              (0): ::<={
-                                partyOptions();
-                                landmark.step();
-                              },
-                              
-                              (1): ::<= {
+                            if (choice-1 < landmarkOptions->size) ::<= {
+                                landmarkOptions[choice-1].onSelect(island:island_, landmark);
+                            } else if (choice-1 == landmarkOptions->size) ::<= {
+                                @:options = [...world.scenario.base.interactionsOptions]->filter(by::(value) <- value.filter(island:island_, landmark));
+                                @:choices = [...options]->map(to::(value) <- value.displayName);
+
                                 windowEvent.queueChoices(
-                                    prompt: 'Wait until...',
-                                    choices : [
-                                        'Dawn',
-                                        'Early morning',
-                                        'Morning',
-                                        'Late morning',
-                                        'Midday',
-                                        'Afternoon',
-                                        'Late afternoon',
-                                        'Sunset',
-                                        'Early evening',
-                                        'Evening',
-                                        'Late evening',
-                                        'Midnight',
-                                        'The dead hour',
-                                        'The dead of the night',
-                                    ],
-                                    
-                                    canCancel: true,
-                                    onChoice ::(choice) {
+                                    leftWeight: 1,
+                                    topWeight: 1,
+                                    prompt: 'Options',
+                                    canCancel : true,
+                                    keep: true,
+                                    choices,
+                                    onChoice::(choice) {
                                         when(choice == 0) empty;
-                                        
-                                        @:until = choice-1;
-                                        landmark.wait(until);
-                                        windowEvent.queueMessage(
-                                            text: 'The party waits...',
-                                            renderable : {
-                                                render ::{
-                                                    canvas.blackout();
-                                                }
-                                            }
-                                        )
+                                        options[choice-1].onSelect(island:island_, landmark);
                                     }
-                                )
-                              },
-                              
-                              default: ::<= {
-                                when(choice == empty) empty;
-                                choice -= MAX_STATIC_CHOICES + 1;
+                                );
+                            } else ::<= {
+                                choice -= landmarkOptions->size + 2;
                                 when(choice >= locationAt->keycount) empty;
                                 locationAt = locationAt[choice].data;
-                                
-                                
                                 locationAt.interact();
-
-                              }
-                            
                             }
                         }
                     );

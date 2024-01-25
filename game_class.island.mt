@@ -178,7 +178,7 @@
                 @:wep = Item.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
-                        value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
+                        value.attributes & Item.ATTRIBUTE.WEAPON
                 );
                     
                 entity.equip(
@@ -205,7 +205,7 @@
                 @:wep = Item.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
-                        value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
+                        value.attributes & Item.ATTRIBUTE.WEAPON
                 );
                     
                 entity.equip(
@@ -231,7 +231,7 @@
                 @:wep = Item.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
-                        value.hasAttribute(attribute:Item.ATTRIBUTE.WEAPON)
+                        value.attributes & Item.ATTRIBUTE.WEAPON
                 );
                     
                 entity.equip(
@@ -266,9 +266,91 @@
             }        
         }
 
+        @:addDefaultLandmarks::{
+            @locationCount = (1 + (Number.random()*2)->floor); 
+            if (locationCount < 1) locationCount = 1;
+            for(0, locationCount)::(i) {
+                LargeMap.addLandmark(
+                    map:state.map,
+                    base:Landmark.database.getRandomWeightedFiltered(
+                        filter:::(value) <- value.isUnique == false
+                    ),
+                    island:this
+                )
+            }
+            
+            // guaranteed gate
+            LargeMap.addLandmark(
+                map:state.map,
+                base:Landmark.database.find(name:'Wyvern Gate'),
+                island:this
+            )
+            
+
+
+            // guaranteed shrine
+            @:story = import(module:'game_singleton.story.mt');
+            match(story.tier) {
+                (0):// nothign defeated
+                    LargeMap.addLandmark(
+                        map:state.map,
+                        base:Landmark.database.find(name:'Shrine of Fire'),
+                        island:this
+                    ),
+
+                (1):// fire defeated
+                    LargeMap.addLandmark(
+                        map:state.map,
+                        base:Landmark.database.find(name:'Shrine of Ice'),
+                        island:this
+                    ),
+
+                (2):// ice defeated
+                    LargeMap.addLandmark(
+                        map:state.map,
+                        base:Landmark.database.find(name:'Shrine of Thunder'),
+                        island:this
+                    ),
+                    
+                (3):// thunder defeated
+                    LargeMap.addLandmark(
+                        map:state.map,
+                        base:Landmark.database.find(name:'Shrine of Light'),
+                        island:this
+                    )
+                /*
+                    LargeMap.addLandmark(
+                        map:state.map,
+                        base:Landmark.database.find(name:'Lost Shrine'),
+                        island:this
+                    )
+                */
+            }                        
+
+            
+            LargeMap.addLandmark(
+                map:state.map,
+                base:Landmark.database.find(name:'Town'),
+                island:this
+            )
+
+
+
+
+
+
+            LargeMap.addLandmark(
+                map:state.map,
+                base:Landmark.database.find(name:'City'),
+                island:this
+            )
+
+        
+        }
+
         
         this.interface = {
-            intialize:: { 
+            initialize:: { 
                 @:world = import(module:'game_singleton.world.mt');
                 @:party = world.party;
 
@@ -276,7 +358,19 @@
                 party_ = party;
             
             },
-            defaultLoad::(levelHint, nameHint, tierHint) {
+
+            wait::(until) {            
+                {:::} {
+                    forever ::{
+                        @:world = import(module:'game_singleton.world.mt');
+                        when(world.time == until) send()
+                        this.incrementTime();
+                    }
+                }
+
+            },
+            
+            defaultLoad::(levelHint, nameHint, tierHint, landmarksHint) {
                 ::<= {
                     @factor = Number.random()*50 + 80;
                     @sizeW  = (factor)->floor;
@@ -334,86 +428,17 @@
                 
       
 
-
-                @locationCount = (1 + (Number.random()*2)->floor); 
-                if (locationCount < 1) locationCount = 1;
-                for(0, locationCount)::(i) {
-                    LargeMap.addLandmark(
-                        map:state.map,
-                        base:Landmark.database.getRandomWeightedFiltered(
-                            filter:::(value) <- value.isUnique == false
-                        ),
-                        island:this
-                    )
+                if (landmarksHint == empty)
+                    addDefaultLandmarks()
+                else ::<= {
+                    foreach(landmarksHint) ::(i, landmarkName) {
+                        LargeMap.addLandmark(
+                            map:state.map,
+                            base:Landmark.database.find(name:landmarkName),
+                            island:this
+                        )                    
+                    }
                 }
-                
-                // guaranteed gate
-                LargeMap.addLandmark(
-                    map:state.map,
-                    base:Landmark.database.find(name:'Wyvern Gate'),
-                    island:this
-                )
-                
-
-
-                // guaranteed shrine
-                @:story = import(module:'game_singleton.story.mt');
-                match(story.tier) {
-                    (0):// nothign defeated
-                        LargeMap.addLandmark(
-                            map:state.map,
-                            base:Landmark.database.find(name:'Shrine of Fire'),
-                            island:this
-                        ),
-
-                    (1):// fire defeated
-                        LargeMap.addLandmark(
-                            map:state.map,
-                            base:Landmark.database.find(name:'Shrine of Ice'),
-                            island:this
-                        ),
-
-                    (2):// ice defeated
-                        LargeMap.addLandmark(
-                            map:state.map,
-                            base:Landmark.database.find(name:'Shrine of Thunder'),
-                            island:this
-                        ),
-                        
-                    (3):// thunder defeated
-                        LargeMap.addLandmark(
-                            map:state.map,
-                            base:Landmark.database.find(name:'Shrine of Light'),
-                            island:this
-                        )
-                    /*
-                        LargeMap.addLandmark(
-                            map:state.map,
-                            base:Landmark.database.find(name:'Lost Shrine'),
-                            island:this
-                        )
-                    */
-                }                        
-
-                
-                LargeMap.addLandmark(
-                    map:state.map,
-                    base:Landmark.database.find(name:'Town'),
-                    island:this
-                )
-
-
-
-
-
-
-                LargeMap.addLandmark(
-                    map:state.map,
-                    base:Landmark.database.find(name:'City'),
-                    island:this
-                )
-
-
                 
 
                 return this;
@@ -467,6 +492,7 @@
             },
             
             tier : {
+                set ::(value) <- state.tier = value,
                 get ::<- state.tier
             },
             
@@ -475,6 +501,23 @@
             },
             
             incrementTime:: {
+                @:world = import(module:'game_singleton.world.mt');
+                world.stepTime(); 
+            
+                foreach(state.events)::(index, event) {
+                    event.stepTime();
+                }
+                foreach(state.events)::(index, event) {
+                    if (event.expired) ::<= {
+                        event.base.onEventEnd(event);                    
+                        state.events->remove(key:state.events->findIndex(value:event));
+                    }
+                }
+            },
+            
+            takeStep :: {            
+                state.stepsSinceLastEvent += 1;        
+            
                 // every step, an event can occur.
                 //if (stepsSinceLastEvent > 200000) ::<= {
                 if (state.stepsSinceLastEvent > 13) ::<= {
@@ -500,17 +543,6 @@
                         state.stepsSinceLastEvent = 0;
                     }
                 }    
-                state.stepsSinceLastEvent += 1;        
-            
-                foreach(state.events)::(index, event) {
-                    event.stepTime();
-                }
-                foreach(state.events)::(index, event) {
-                    if (event.expired) ::<= {
-                        event.base.onEventEnd(event);                    
-                        state.events->remove(key:state.events->findIndex(value:event));
-                    }
-                }
             },
             
             newLandmark ::(base, x, y, floorHint) {

@@ -2,131 +2,28 @@
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
-@:canvas = import(module:'game_singleton.canvas.mt');
-@:Battle = import(module:'game_class.battle.mt');
-@:random = import(module:'game_singleton.random.mt');
-@:Material = import(module:'game_database.material.mt');
-@:Profession = import(module:'game_mutator.profession.mt');
+@:Damage = import(module:'game_class.damage.mt');
 @:Item = import(module:'game_mutator.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
+@:random = import(module:'game_singleton.random.mt');
+@:canvas = import(module:'game_singleton.canvas.mt');
+@:namegen = import(module:'game_singleton.namegen.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:InteractionMenuEntry = import(module:'game_struct.interactionmenuentry.mt');
+@:commonInteractions = import(module:'game_singleton.commoninteractions.mt');
 @:Personality = import(module:'game_database.personality.mt');
-@:Damage = import(module:'game_class.damage.mt');
-
-
-@:PersonInteraction = Database.new(
-    name : 'Wyvern.PersonInteraction',
-    attributes : {
-        name : String,
-        displayName : String,
-        onInteract : Function
-    }
-);
 
 
 
+@:interactionsPerson = [
+    commonInteractions.person.barter,
 
-PersonInteraction.newEntry(
-    data : {
-        name : 'barter',
-        displayName : 'Barter',
-        onInteract ::(this, location) {
-            when(this.isIncapacitated())
-                windowEvent.queueMessage(
-                    text: this.name + ' is not currently able to talk.'
-                );                                                        
-
-
-            when (this.inventory.isEmpty) ::<= {
-                windowEvent.queueMessage(
-                    text: this.name + ' has nothing to barter with.'
-                );                
-            }
-            @:item = this.inventory.items[0];
-
-            windowEvent.queueMessage(
-                text: this.name + ' is interested in acquiring ' + correctA(word:this.favoriteItem.name) + '. They are willing to trade one for their ' + item.name + '.'
-            );                
-            
-            @:world = import(module:'game_singleton.world.mt');
-            @:party = world.party;
-
-            @:tradeItems = party.inventory.items->filter(by::(value) <- value.base == this.favoriteItem);
-            
-            when(tradeItems->keycount == 0) ::<= {
-                windowEvent.queueMessage(
-                    text: 'You have no such items to trade, sadly.'
-                );                                                 
-            }
-            
-
-
-            windowEvent.queueChoices(
-                prompt: this.name + ' - bartering',
-                choices: ['Trade', 'Check Item', 'Compare Equipment'],
-                jumpTag: 'Barter',
-                canCancel: true,
-                keep:true,
-                onChoice::(choice) {
-                    when(choice == 0) empty;
-                    
-                    match(choice-1) {
-                      // Trade
-                      (0)::<= {
-                        windowEvent.queueChoices(
-                            choices: [...tradeItems]->map(to::(value) <- value.name),
-                            canCancel: true,
-                            onChoice::(choice) {
-                                when(choice == 0) empty;
-                                
-                                @:chosenItem = tradeItems[choice-1];
-                                party.inventory.remove(item:chosenItem);
-                                this.inventory.remove(item);
-                                party.inventory.add(item);
-                                
-                                windowEvent.queueMessage(
-                                    text: 'In exchange for your ' + chosenItem.name + ', ' + this.name + ' gives the party ' + correctA(word:item.name) + '.'
-                                );                                                                                                 
-                                world.party.karma += 100;
-                                
-                                windowEvent.jumpToTag(name:'Barter', goBeforeTag:true, doResolveNext:true);
-                            }
-                        );
-                      },
-                      // check
-                      (1)::<= {
-                        item.describe();
-                      },
-                      // compare 
-                      (2)::<= {
-                        @:memberNames = [...party.members]->map(to:::(value) <- value.name);
-                        @:choice = windowEvent.queueChoices(
-                            prompt: 'Compare equipment for whom?',
-                            choices: memberNames,
-                            onChoice::(choice) {
-                                @:user = party.members[choice-1];
-                                @slot = user.getSlotsForItem(item)[0];
-                                @currentEquip = user.getEquipped(slot);
-                                
-                                currentEquip.equipMod.printDiffRate(
-                                    prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
-                                    other:item.equipMod
-                                );                                                                               
-                            }
-                        );
-                      }  
-                    }   
-                }
-            );        
-        }
-    }
-)
-
-
-PersonInteraction.newEntry(
-    data : {
-        name : 'hire',
-        displayName : 'Hire',
-        onInteract ::(this, location) {
+    InteractionMenuEntry.new(
+        displayName: 'Hire',
+        filter ::(entity)<- true, // everyone can barter,
+        onSelect ::(entity) {
+            @:this = entity;
             when(this.isIncapacitated())
                 windowEvent.queueMessage(
                     text: this.name + ' is not currently able to talk.'
@@ -190,17 +87,15 @@ PersonInteraction.newEntry(
                         
 
                 }
-            );        
+            );  
         }
-    }
-)
-    
-    
-PersonInteraction.newEntry(
-    data : {
-        name : 'aggress',
-        displayName: 'Aggress...',
-        onInteract::(this, location) {
+    ),
+
+    InteractionMenuEntry.new(
+        displayName: 'Aggress',
+        filter ::(entity)<- true, // everyone can barter,
+        onSelect::(entity) {
+            @:this = entity;
             @whom;
 
             @:world = import(module:'game_singleton.world.mt');
@@ -215,10 +110,9 @@ PersonInteraction.newEntry(
                     text:'"What are you doing??"'
                 );
 
-                if (location != empty) ::<= {
-                    location.landmark.peaceful = false;
-                    windowEvent.queueMessage(text:'The people here are now aware of your aggression.');
-                }
+                @:instance = import(module:'game_singleton.instance.mt');
+                instance.landmark.peaceful = false;
+                windowEvent.queueMessage(text:'The people here are now aware of your aggression.');
 
                 world.battle.start(
                     party,                            
@@ -349,82 +243,237 @@ PersonInteraction.newEntry(
                 }
             )                            
         }
-    }
-)
+    )                    
+];
 
 
 
-PersonInteraction.newEntry(
-    data : {
-        name : 'trader.hire-with-contract',
-        displayName : 'Hire with contract',
-        onInteract ::(this, location) {
-            when(this.isIncapacitated())
-                windowEvent.queueMessage(
-                    text: this.name + ' is not currently able to talk.'
-                );                                                        
-            @:world = import(module:'game_singleton.world.mt');
-            @:party = world.party;
-            @:trader = world.scenario.data.trader;
-
-            when(trader.isHired(entity:this))
-                windowEvent.queueMessage(
-                    text: this.name + ' is already employed by you.'
-                );                
-          
-            when (party.members->keycount >= 3 || !this.adventurous)
-                windowEvent.queueMessage(
-                    speaker: this.name,
-                    text: random.pickArrayItem(list:this.personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_DENY])
-                );                
-                
-            windowEvent.queueMessage(
-                speaker: this.name,
-                text: random.pickArrayItem(list:this.personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_ACCEPT])
-            );                
-
-            @highestStat = 0;
-            if (this.stats.ATK > highestStat) highestStat = this.stats.ATK;
-            if (this.stats.DEF > highestStat) highestStat = this.stats.DEF;
-            if (this.stats.INT > highestStat) highestStat = this.stats.INT;
-            if (this.stats.SPD > highestStat) highestStat = this.stats.SPD;
-            if (this.stats.LUK > highestStat) highestStat = this.stats.LUK;
-            if (this.stats.DEX > highestStat) highestStat = this.stats.DEX;
 
 
 
-            @cost;
-            
-            if (highestStat <= 10)
-                cost = 50+((this.stats.sum/3 + this.level)*2.5)->ceil
-            else
-                cost = 200 + this.stats.sum*13; // bigger and better stats come at a premium
-            this.describe();
 
-            windowEvent.queueAskBoolean(
-                prompt: 'Hire for ' + cost + 'G?',
-                onChoice::(which) {
-                    when(which == false) empty;
+return {
+    name : 'The Chosen',
+    begin ::(data) {
+        @:instance = import(module:'game_singleton.instance.mt');
+        @:story = import(module:'game_singleton.story.mt');
+        @world = import(module:'game_singleton.world.mt');
+        @:LargeMap = import(module:'game_singleton.largemap.mt');
+        @party = world.party;            
+    
+            //story.tier = 2;
+        @:keyhome = Item.new(
+            base: Item.database.find(name:'Wyvern Key')
+        );
+        keyhome.name = 'Wyvern Key: Home';
+        
+        
+        keyhome.setIslandGenAttributes(
+            nameHint:namegen.island(), 
+            levelHint:story.levelHint,
+            tierHint: 0    
+        )
+        keyhome.addIslandEntry(world);
+        world.island = keyhome.islandEntry;
+        @:island = world.island;
+        party = world.party;
+        party.reset();
 
-                    trader.addHiree(
-                        entity:this,
-                        rate: cost
-                    );
-                        
-                    windowEvent.queueMessage(
-                        text: this.name + ' was hired! They\'ll start working for you tomorrow.'
-                    );     
 
-                    world.accoladeIncrement(name:'recruitedCount');                                        
-                    // the location is the one that has ownership over this...
-                    if (this.owns != empty)
-                        this.owns.ownedBy = empty;
-                        
-                }
-            );        
+
+        
+        // debug
+            //party.inventory.addGold(amount:100000);
+
+        
+        // since both the party members are from this island, 
+        // they will already know all its locations
+        foreach(island.landmarks)::(index, landmark) {
+            landmark.discover(); 
         }
-    }
-)
+        
+        
+        
+        @:Species = import(module:'game_database.species.mt');
+        @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:story.levelHint);
+        @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:story.levelHint-2);
+        // theyre just normal people so theyll have some trouble against 
+        // professionals.
+        p0.normalizeStats();
+        p1.normalizeStats();
+
+        party.inventory.add(item:Item.new(
+            base:Item.database.find(name:'Sentimental Box')
+        ));
 
 
-return PersonInteraction;
+
+        // debug
+            /*
+            //party.inventory.add(item:Item.database.find(name:'Pickaxe'
+            //).new(from:island.newInhabitant(),rngEnchantHint:true));
+            
+            @:story = import(module:'game_singleton.story.mt');
+            story.foundFireKey = true;
+            story.foundIceKey = true;
+            story.foundThunderKey = true;
+            story.foundLightKey = true;
+            story.tier = 3;
+            
+            party.inventory.addGold(amount:20000);
+            
+
+
+            
+
+            @:story = import(module:'game_singleton.story.mt');
+            
+
+            
+
+            party.inventory.maxItems = 50
+            for(0, 20) ::(i) {
+                party.inventory.add(
+                    item:Item.new(
+                        base:Item.database.getRandomFiltered(
+                                filter:::(value) <- value.isUnique == false && value.hasQuality
+                        ),
+                        rngEnchantHint:true
+                    )
+                )
+            };
+            */
+            
+            
+
+
+            
+            /*
+            @:sword = Item.new(
+                base: Item.database.find(name:'Glaive'),
+                materialHint: 'Ray',
+                qualityHint: 'Null',
+                rngEnchantHint: false
+            );
+
+            @:tome = Item.new(
+                base:Item.database.find(name:'Tome'),
+                materialHint: 'Ray',
+                qualityHint: 'Null',
+                rngEnchantHint: false,
+                abilityHint: 'Cure'
+            );
+            party.inventory.add(item:sword);
+            party.inventory.add(item:tome);
+            
+            */
+
+
+        party.add(member:p0);
+        party.add(member:p1);
+        
+        
+        /*
+        windowEvent.queueMessage(
+            text: '... As it were, today is the beginning of a new adventure.'
+        );
+
+
+        windowEvent.queueMessage(
+            text: '' + party.members[0].name + ' and their faithful companion ' + party.members[1].name + ' have decided to leave their long-time home of ' + island.name + '. Emboldened by countless tales of long lost eras, these 2 set out to discover the vast, mysterious, and treacherous world before them.'
+        );
+
+        windowEvent.queueMessage(
+            text: 'Their first task is to find a way off their island.\nDue to their distances and dangerous winds, travel between sky islands is only done via the Wyvern Gates, ancient portals of seemingly-eternal magick that connect these islands.'
+        );
+        
+        windowEvent.queueMessage(
+            text: party.members[0].name + ' has done the hard part and acquired a key to the Gate.\nAll thats left is to go to it and find where it leads.'
+        );
+        */
+
+
+
+
+
+        @somewhere = LargeMap.getAPosition(map:island.map);
+        island.map.setPointer(
+            x: somewhere.x,
+            y: somewhere.y
+        );               
+        instance.savestate();
+        @:Scene = import(module:'game_database.scene.mt');
+        Scene.start(name:'scene_intro', onDone::{                    
+            instance.visitIsland();
+            
+            /*island.addEvent(
+                event:Event.database.find(name:'Encounter:Non-peaceful').new(
+                    island, party, landmark //, currentTime
+                )
+            );*/  
+        });        
+    },
+    newDay ::{},
+    
+    interactionsPerson : interactionsPerson,
+    interactionsLocation : [],
+    interactionsLandmark : [],
+    interactionsWalk : [
+        commonInteractions.walk.check,
+        commonInteractions.walk.lookAround,
+        commonInteractions.walk.party,
+        commonInteractions.walk.wait
+    ],
+    interactionsBattle : [],
+    interactionsParty : [],
+    interactionsOptions : [
+        commonInteractions.options.save,
+        commonInteractions.options.system,
+        commonInteractions.options.quit
+    ],
+    
+    
+    databaseOverrides ::{
+        @:Interaction = import(module:'game_database.interaction.mt');
+        
+        // replace with key.
+        Interaction.newEntry(
+            data : {
+                displayName : 'Explore Pit',
+                name : 'explore pit',
+                onInteract ::(location, party) {
+                    @:world = import(module:'game_singleton.world.mt');
+                    @:Event = import(module:'game_mutator.event.mt');
+
+                    if (location.contested == true) ::<= {
+                        @:event = Event.new(
+                            base:Event.database.find(name:'Encounter:TreasureBoss'),
+                            currentTime:0, // TODO,
+                            parent:location.landmark
+                        );  
+                        location.contested = false;
+                    } else ::<= {
+                        if (location.targetLandmark == empty) ::<={
+                            @:Landmark = import(module:'game_mutator.landmark.mt');
+                            
+
+                            location.targetLandmark = 
+                                location.landmark.island.newLandmark(
+                                    base:Landmark.database.find(name:'Treasure Room')
+                                )
+                            ;
+                            location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
+                        }
+                        @:instance = import(module:'game_singleton.instance.mt');
+
+                        instance.visitLandmark(landmark:location.targetLandmark, where:location.targetLandmarkEntry);
+
+
+                        canvas.clear();
+                    }
+                },
+            }
+        )            
+    }        
+    
+}

@@ -30,7 +30,7 @@ return ::(
         name: 'Wyvern.Struct',
         define:::(this){
             this.interface = {
-                new ::(state => Object) {
+                new ::(*state) {
                     @:initialized = {}
                     foreach(itemNames)::(index, value) {
                         initialized[value] = false;
