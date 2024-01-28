@@ -280,7 +280,8 @@
                 } else ::<= {                
                     state.load(parent:this, serialized)
                 }
-                state.mapEntityController.initialize(landmark:this);
+                if (state.mapEntityController != empty)
+                    state.mapEntityController.initialize(parent:this);
             },
 
             worldID : {

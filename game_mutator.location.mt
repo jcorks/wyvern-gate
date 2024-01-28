@@ -2265,7 +2265,7 @@ Location.database.newEntry(data:{
     rarity: 1000000000000,
     ownVerb : 'owned',
     symbol: '-',
-    category : Location.CATEGORY.UTILITY,
+    category : Location.CATEGORY.DUNGEON_SPECIAL,
     minStructureSize : 1,
     onePerLandmark : false,
 

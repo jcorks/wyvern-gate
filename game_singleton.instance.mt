@@ -197,8 +197,7 @@ return class(
                 when (world.finished)
                     (import(module:'game_function.newrecord.mt'))(wish:world.wish);
                     
-                    
-                this.visitIsland(restorePos:true);            
+                world.scenario.resume();
             },
         
             startNew ::{
@@ -218,7 +217,8 @@ return class(
                                 canvas.commit(renderNow:true);                         
                             }
                         },
-                        onEnter ::{                        
+                        onEnter ::{},
+                        onLeave ::{                        
                             do();
                         }                    
                     )                

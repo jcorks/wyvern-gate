@@ -43,6 +43,8 @@
                 begin : Function,
                 // Function called when a new day starts.
                 newDay : Function,
+                // Function called when loading a save.
+                resume : Function,
                 
                 // provides the options one has when interacting with a person.
                 // Each member is an InteractionMenuEntry. Each function is passed an Entity
@@ -86,8 +88,9 @@
             },
             
             load ::(serialized) {
-                @:base = this.database.find(name:serialized.base.name);
+                @:base = Scenario.database.find(name:serialized.base.name);
                 base.databaseOverrides();
+                state.load(parent:this, serialized);
             },
             
             data : {
@@ -96,7 +99,12 @@
             
             newDay :: {
                 state.base.newDay(data:state.data)
+            },
+
+            resume :: {
+                state.base.resume(data:state.data)
             }
+
         }
     }
 );

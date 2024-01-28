@@ -222,6 +222,7 @@
                                         } else if (Number.random() > 0.02) ::<= {
                                             other = instance.island.newHostileCreature()
                                             other.name = 'a ' + other.name;
+                                            breakpoint();
                                         } else ::<= {
                                             @:TheBeast = import(module:'game_class.landmarkevent_thebeast.mt');
                                             other = TheBeast.createBeast();
@@ -623,6 +624,8 @@
         
             dayEnd::(onDone) {
                 @:onDoneReal ::{
+                    @:instance = import(module:'game_singleton.instance.mt');
+                    instance.savestate();
                     onDone();
                     windowEvent.jumpToTag(name:'dayEnd', goBeforeTag:true, doResolveNext:true);
                 }
@@ -680,7 +683,7 @@
                                     );                        
 
                                 } else ::<= {
-                                    @itemsFound = "Items found by " + hiree.entity.name + '\n';
+                                    @itemsFound = "Items found by " + hiree.entity.name + ':\n\n';
                                     foreach(spoils) ::(i, item) {
                                         itemsFound = itemsFound + "-" + item.name + '\n'
                                         world.party.inventory.add(item);
@@ -706,9 +709,9 @@
                                 @:location = world.island.findLocation(id);
                                 
                                 if (location.base.category == Location.CATEGORY.RESIDENTIAL) ::<= {
-                                    rent += (location.modData.trader.boughtPrice * 0.05)->ceil;
+                                    rent += (location.modData.trader.boughtPrice * 0.07)->ceil;
                                     @current = location.modData.trader.listPrice;
-                                    current += (((Number.random() - 0.5) * 0.03) * location.modData.trader.boughtPrice)->floor;
+                                    current += (((Number.random() - 0.5) * 0.05) * location.modData.trader.boughtPrice)->floor;
                                     if (current < 2000)
                                         current = 2000;
                                     location.modData.trader.listPrice = current;
@@ -725,14 +728,14 @@
                                 @:location = world.island.findLocation(id);
                                 when (location.base.category == Location.CATEGORY.RESIDENTIAL) empty
                                 
-                                @profit = location.modData.trader.listPrice * 0.04;
+                                @profit = location.modData.trader.listPrice * 0.15;
                                 profit = random.integer(from:(profit * 0.5)->floor, to:(profit * 1.5)->floor);
                                 
                                 rent += profit;
 
 
                                 @current = location.modData.trader.listPrice;
-                                current += (((Number.random() - 0.5) * 0.03) * location.modData.trader.listPrice)->floor;
+                                current += (((Number.random() - 0.5) * 0.15) * location.modData.trader.listPrice)->floor;
                                 if (current < 9000)
                                     current = 9000;
                                 location.modData.trader.listPrice = current;
@@ -760,8 +763,8 @@
                             state.days += 1;
                             if (profit > state.bestProfit)            
                                 state.bestProfit = profit;
-                            if (state.days % 2 == 0) 
-                                state.upkeep += (state.bestProfit * 0.05)->floor;
+                            if (state.days % 2 == 0 && profit > 0) 
+                                state.upkeep += (profit * 0.01)->floor;
                             
                             status = status + "_________________________________\n";
                             status = status + "  Profit       : " + (if (profit < 0) g(g:profit) else "+" + g(g:profit)) + "\n\n";
@@ -1128,6 +1131,7 @@
                             windowEvent.queueChoices(
                                 prompt: item.name,
                                 leftWeight: 1,
+                                canCancel: true,
                                 choices: [
                                     'Stock in shop',
                                     'Check'
@@ -1680,7 +1684,7 @@
                     );
                         
                     windowEvent.queueMessage(
-                        text: this.name + ' was hired! They\'ll start working for you tomorrow.'
+                        text: this.name + ' was hired! They\'ll start working for you tomorrow. Be sure to assign them a task.'
                     );     
 
                     world.accoladeIncrement(name:'recruitedCount');                                        
@@ -1784,7 +1788,7 @@ return {
         }
 
         party.add(member:p0);
-        //party.inventory.addGold(amount:1100);
+        party.inventory.addGold(amount:1100);
         
         
         
@@ -1798,13 +1802,12 @@ return {
             shop
         );
 
-        party.inventory.addGold(amount:1100);
 
-            /*
-            party.inventory.addGold(amount:100000);
-
-            world.island.tier = 3;
             
+            party.inventory.addGold(amount:100000);
+            
+            world.island.tier = 3;
+            /*
             data.trader.addHiree(
                 entity: world.island.newInhabitant(),
                 rate:117
@@ -1861,6 +1864,13 @@ return {
             onSelect::(location) {
                 @world = import(module:'game_singleton.world.mt');
                 @:trader = world.scenario.data.trader;
+                
+                when(location.ownedBy == empty)
+                    windowEvent.queueMessage(
+                        text: 'This property\'s owner is currently not present.'
+                    );
+                    
+                
                 when(trader.ownedProperties->findIndex(value:location.worldID) != -1)
                     windowEvent.queueMessage(
                         text: 'This property is already owned by you.'
@@ -1925,6 +1935,12 @@ return {
             }
         )
     ],
+    resume ::(data) {
+        @:trader = data.trader;
+        trader.dayStart();                
+    },
+
+
     interactionsLandmark : [],
     interactionsWalk : [
         commonInteractions.walk.check,

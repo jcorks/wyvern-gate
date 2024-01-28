@@ -414,7 +414,12 @@ return {
             );*/  
         });        
     },
-    newDay ::{},
+    newDay ::(data){},
+    
+    resume ::(data) {
+        @:instance = import(module:'game_singleton.instance.mt');
+        instance.visitIsland(restorePos:true);                
+    },
     
     interactionsPerson : interactionsPerson,
     interactionsLocation : [],

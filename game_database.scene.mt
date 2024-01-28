@@ -1380,11 +1380,11 @@ Scene.newEntry(
         name : 'trader.scene_intro',
         script: [
             ['???', '...Greetings, mortal.'],
-            ['???', 'Congratulations! For I have chosen YOU for a once-in-alifetime opportunity.'],
-            ['???', 'You see, my hoard of treasure is looking a bit... small. I require riches.'],
-            ['???', 'If you bring me gold, I will grant you a wish. Anything you like. Doesn\'t that sound wonderful?'],
-            ['???', 'Your meager, drag existence as a simple trader is no more! Now you have something to drive you!'],
-            ['???', 'Go forth, mortal! Your wish awaits!'],
+            ['???', 'Congratulations! For I, the Wyvern of Fortune, have chosen YOU for a once-in-alifetime opportunity.'],
+            ['Wyvern of Fortune', 'You see, my hoard of treasure is looking a bit... small. I require riches.'],
+            ['Wyvern of Fortune', 'If you bring me gold, I will grant you a wish. Anything you like. Doesn\'t that sound wonderful?'],
+            ['Wyvern of Fortune', 'Your meager, drab existence as a simple trader is no more! Now you have something to drive you!'],
+            ['Wyvern of Fortune', 'Go forth, mortal! Get riches! Exploit! Your wish awaits!'],
         ]
     }
 )     

@@ -238,9 +238,9 @@
                     for(cursorPageTop, cursorPageTop+PAGE_SIZE)::(index) {
                         
                         choicesModified->push(value: 
-                            (if (cursorPos == index) '-> ' else '   ') + 
+                            (if (cursorPos == index) '-{ ' else '   ') + 
                             pad(text:choices[index]) + 
-                            (if (cursorPos == index) ' <-' else '   ')                            
+                            (if (cursorPos == index) ' }-' else '   ')                            
                         );
                     }
 
@@ -255,9 +255,9 @@
                         choicesModified->push(value:'   '+header);
                     for(0, choices->keycount)::(index) {
                         choicesModified->push(value: 
-                            (if (cursorPos == index) '-> ' else '   ') + 
+                            (if (cursorPos == index) '-{ ' else '   ') + 
                             pad(text:choices[index]) + 
-                            (if (cursorPos == index) ' <-' else '   ')
+                            (if (cursorPos == index) ' }-' else '   ')
                         );
                     }
                 }
