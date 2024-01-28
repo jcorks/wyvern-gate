@@ -22,6 +22,7 @@
 @:Damage = import(module:'game_class.damage.mt');
 @:Scene = import(module:'game_database.scene.mt');
 @:random = import(module:'game_singleton.random.mt');
+@:g = import(module:'game_function.g.mt');
 
 
 
@@ -2516,7 +2517,7 @@ Effect.newEntry(
         onAffliction : ::(user, item, holder) {
             @:world = import(module:'game_singleton.world.mt');
             @:amount = (50 + Number.random()*400)->floor;                    
-            windowEvent.queueMessage(text:'The party found ' + amount + 'G.');
+            windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
             world.party.inventory.addGold(amount);                    
         },
         
@@ -2615,7 +2616,7 @@ Effect.newEntry(
 
             @:amt = (Number.random() * 20)->ceil;
             windowEvent.queueMessage(
-                text: 'After the battle, ' + holder.name + ' found ' + amt + 'G on the ground dropped from the battling party.'
+                text: 'After the battle, ' + holder.name + ' found ' + g(g:amt) + ' on the ground dropped from the battling party.'
             );
             world.party.inventory.addGold(amount:amt);
             

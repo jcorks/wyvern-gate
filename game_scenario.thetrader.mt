@@ -13,21 +13,89 @@
 @:commonInteractions = import(module:'game_singleton.commoninteractions.mt');
 @:InteractionMenuEntry = import(module:'game_struct.interactionmenuentry.mt');
 @:Personality = import(module:'game_database.personality.mt');
+@:g = import(module:'game_function.g.mt');
+
+
+@:pickItemStock = ::(*args) {
+    @:choicesColumns = import(module:'game_function.choicescolumns.mt');
+    @items = []
+    choicesColumns(
+        leftWeight: args.leftWeight => Number,
+        topWeight:  args.topWeight => Number,
+        prompt: args.prompt => String,
+        onGetPrompt: args.onGetPrompt,
+        canCancel: args.canCancel,
+        jumpTag: 'pickItem',
+        onHover : if (args.onHover)
+            ::(choice) {
+                when(choice == 0) empty;
+                args.onHover(item:args.inventory.items[choice-1])
+            }
+        else 
+            empty,
+        renderable : args.renderable,
+        onGetChoices ::{
+
+            @:popular   = args.traderState.popular
+            @:unpopular   = args.traderState.unpopular;
+
+            
+            items =    
+                [...args.inventory.items]
+            ;
+        
+            @:names = [...items]->map(to:::(value) {
+                return value.name;
+            });
+            
+            @:gold = [...items]->map(to:::(value) {
+                @go = value.price * args.goldMultiplier;
+                go = go->ceil;
+                return if (go < 1)
+                    '?G' /// ooooh mysterious!
+                else
+                    g(g:go);            
+            });
+            
+            @:popularList = [...items]->map(to:::(value) {
+                when(popular->findIndex(value:value.name) != -1) 'High'
+                when(unpopular->findIndex(value:value.name) != -1) 'Low'
+                return ' '
+            })
+            
+            when(names->keycount == 0) ::<={
+                windowEvent.queueMessage(text: "The inventory is empty.");
+            }
+            return [
+                names,
+                popularList,
+                gold,
+            ];
+        },
+        header : ['Item', 'Popularity', 'Worth', ],
+        leftJustified : [true, true, false],
+        keep:true,
+        onChoice ::(choice) {
+            when(choice == 0) args.onPick();
+            args.onPick(item:items[choice-1]);
+        }
+    );
+};
 
 
 @:ROLES = {
     WAITING : 0,
     DISPATCHED : 1,
-    IN_PARTY : 2,
-    BODYGUARD : 3
+    IN_PARTY : 2
+    //BODYGUARD : 3
 }
 
 @:roleToString::(role) {
     return match(role) {
       (0): 'Waiting',
-      (1): 'Dispatched',
-      (2): 'In Party',
-      (3): 'Bodyguard'
+      (1): 'Exploring',
+      (2): 'In Party'
+      //(3): 'Bodyguard'
     }
 }
 @:TraderState_Hiree = LoadableClass.create(
@@ -104,7 +172,7 @@
                 }
                 
                 {:::} {
-                    for(0, random.integer(from:10, to:20)) ::(i) {
+                    for(0, random.integer(from:6, to:12)) ::(i) {
                         (random.pickArrayItemWeighted(
                             list : [
                                 // small chest
@@ -232,7 +300,7 @@
                         state.member.equip(item, slot, silent:true);
                         spoilsFiltered->push(value:current);                        
                     } else 
-                        spoilsFiltered->push(value:current)
+                        spoilsFiltered->push(value:item)
                     
                 }
                 spoils = spoilsFiltered;
@@ -281,10 +349,19 @@
         shopID : empty,
         
         // Current popular items (base names)
-        popular : [],
+        popular : empty,
         
         // No one will buy these (base names)
-        unpopular : []
+        unpopular : empty,
+        
+        // Location IDs that are owned by the player
+        ownedProperties : empty,
+        
+        // Location IDs of properties that are owned but up for sale.
+        propertiesForSale : empty,
+        
+        // Whether a work order was put in for upgrading the shop.
+        workOrder : empty,
     },
     
     define::(this, state) {
@@ -292,6 +369,10 @@
             defaultLoad::(city, shop) {
                 @:Inventory = import(module:'game_class.inventory.mt');
                 state.hirees = [];
+                state.popular = [];
+                state.unpopular = [];
+                state.ownedProperties = [];
+                state.propertiesForSale = [];
                 state.cityID = city.worldID;
                 state.shopID = shop.worldID;
                 @world = import(module:'game_singleton.world.mt');
@@ -304,116 +385,157 @@
                 get ::<- state.startingG
             },
             
-            courierReportDay ::{
-                @:instance = import(module:'game_singleton.instance.mt');
-                @world = import(module:'game_singleton.world.mt');
-                @:currentLandmark = instance.landmark;
-                if (currentLandmark != empty && currentLandmark.base.pointOfNoReturn == true) ::<= {
-                    windowEvent.queueMessage(
-                        text: '"Oh huh. The courier is here... somehow."'
-                    );
-                } else 
-                    windowEvent.queueMessage(
-                        text: '"Oh huh. The courier is here."'
-                    );
+            courierReportDay ::(onDone) {
+                @:onDoneReal ::{
+                    onDone();
+                    windowEvent.jumpToTag(name:'courierReport', goBeforeTag:true, doResolveNext:true);
+                }
+                
+                windowEvent.queueNoDisplay(
+                    renderable : {
+                        render :: {
+                            canvas.blackout();
+                        }
+                    },
+                    keep:true,
+                    jumpTag : 'courierReport',
+                    onEnter ::{
 
-                @hasNews = false;
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        @world = import(module:'game_singleton.world.mt');
+                        @:currentLandmark = instance.landmark;
+                        if (currentLandmark != empty && currentLandmark.base.pointOfNoReturn == true) ::<= {
+                            windowEvent.queueMessage(
+                                text: '"Oh huh. The courier is here... somehow."'
+                            );
+                        } else 
+                            windowEvent.queueMessage(
+                                text: '"Ah. The courier is here."'
+                            );
 
-                foreach([...state.hirees]) ::(i, hiree) {
-                    when (hiree.role != ROLES.DISPATCHED) empty;
+                        @hasNews = false;
+                        
+                        if (state.workOrder == true) ::<= {
+                            hasNews = true;
+                            windowEvent.queueMessage(
+                                speaker: 'Courier',
+                                text: '"It seems that your work order for upgrading your shop has finished successfully. Enjoy the new space."'
+                            );
+                            state.workOrder = empty;
+                            state.shopInventory.maxItems += 5;
+                        }
+                        
 
-                    when (hiree.entity.isDead) ::<= {
-                        hasNews = true;
+                        foreach([...state.hirees]) ::(i, hiree) {
+                            when (hiree.role != ROLES.DISPATCHED) empty;
+
+                            when (hiree.entity.isDead) ::<= {
+                                hasNews = true;
+                                windowEvent.queueMessage(
+                                    speaker: 'Courier',
+                                    text: '"I have unfortunate news... Your hiree ' + hiree.entity.name + ' has not returned from their exploration. Word is that ' + hiree.lastAttackedBy.name + ' got them while adventuring. I don\'t think they\'ll be coming back..."'
+                                );
+                                
+                                state.hirees->remove(key:state.hirees->findIndex(value:hiree));
+                                windowEvent.queueMessage(
+                                    text: hiree.entity.name + ' was removed from the hirees list.'
+                                );
+                            }
+                        }
+
+
+
+                        if (world.island.tier > 0 && state.days % 3 == 1) ::<= {                
+                            windowEvent.queueMessage(
+                                speaker: 'Courier',
+                                text: '"I have received news of what\'s in demand and what\'s not."'
+                            );
+                            hasNews = true;
+                            
+                            @:which = [...Item.database.getAll()]->filter(by::(value) <- value.isUnique == false);
+                            state.popular = [
+                                random.removeArrayItem(list:which),
+                                random.removeArrayItem(list:which),
+                                random.removeArrayItem(list:which),
+                                random.removeArrayItem(list:which),
+                                random.removeArrayItem(list:which),
+                                random.removeArrayItem(list:which),
+                                random.removeArrayItem(list:which)
+                            ]->map(to:::(value) <- value.name);
+
+                            state.unpopular = [
+                                random.removeArrayItem(list:which),
+                                random.removeArrayItem(list:which),
+                                random.removeArrayItem(list:which),
+                                random.removeArrayItem(list:which),
+                                random.removeArrayItem(list:which),
+                                random.removeArrayItem(list:which),
+                                random.removeArrayItem(list:which)
+                            ]->map(to:::(value) <- value.name);
+
+                            
+                            @popnews = 'These items are now popular. People will pay high prices for them compared to normal.\n\n';
+                            foreach(state.popular) ::(i, val) {
+                                popnews = popnews + ' - ' + val + '\n';
+                            }
+                            
+                            windowEvent.queueMessage(text:popnews);
+
+                            @unpopnews = 'These items are now unpopular. People will avoid these or won\'t be willing to buy them for normal prices.\n\n';
+                            foreach(state.unpopular) ::(i, val) {
+                                unpopnews = unpopnews + ' - ' + val + '\n';
+                            }
+                            windowEvent.queueMessage(text:unpopnews);
+                        }
+
+
+                        if (state.days % 5 == 0) ::<= {
+                            windowEvent.queueMessage(
+                                speaker: 'Courier',
+                                text: '"I have received news that the Mysterious Shrine has shifted. I am told this means the quality of items from exploration will increase."'
+                            );
+                            world.island.tier += 1;
+                            hasNews = true;
+                        }
+
+
+                        if (!hasNews) ::<= {
+                            windowEvent.queueMessage(
+                                speaker: 'Courier',
+                                text: '"No essential news today, but... ' + random.pickArrayItem(
+                                    list : [
+                                        'I am told that the items that people consider desirable will change soon."',
+                                        'Word is, business is booming around cities, and most businesses are accepting buy offers."',
+                                        'Word is, people are looking for contract work similar to what you need."',
+                                    ]
+                                )
+                            );
+                        
+                        }
+
+
+                        if (world.party.inventory.gold > 5) ::<= {
+                            world.party.inventory.subtractGold(amount:5);
+
+                            windowEvent.queueMessage(
+                                text: 'You tip the courier 5G for their services.'
+                            );
+                        }
                         windowEvent.queueMessage(
                             speaker: 'Courier',
-                            text: '"I have unfortunate news... Your hiree ' + hiree.entity.name + ' has not returned from their exploration. Word is that ' + hiree.lastAttackedBy.name + ' got them while adventuring. I don\'t think they\'ll be coming back..."'
+                            text: '"Well, that\'s all the news for today. Have a good day."'
                         );
                         
-                        state.hirees->remove(key:state.hirees->findIndex(value:hiree));
-                        windowEvent.queueMessage(
-                            text: hiree.entity.name + ' was removed from the hirees list.'
+                        windowEvent.queueNoDisplay(
+                            onEnter ::{
+                            
+                            },
+                            onLeave ::{
+                                onDoneReal();
+                            }
                         );
                     }
-                }
-
-
-
-                if (world.island.tier > 1 && state.days % 2 == 0) ::<= {                
-                    windowEvent.queueMessage(
-                        speaker: 'Courier',
-                        text: '"I have received news of what\'s in demand and what\'s not."'
-                    );
-                    hasNews = true;
-                    
-                    @:which = [...Item.database.getAll()];
-                    state.popular = [
-                        random.removeArrayItem(list:which),
-                        random.removeArrayItem(list:which),
-                        random.removeArrayItem(list:which),
-                        random.removeArrayItem(list:which),
-                        random.removeArrayItem(list:which)
-                    ]->map(to:::(value) <- value.name);
-
-                    state.unpopular = [
-                        random.removeArrayItem(list:which),
-                        random.removeArrayItem(list:which),
-                        random.removeArrayItem(list:which),
-                        random.removeArrayItem(list:which),
-                        random.removeArrayItem(list:which)
-                    ]->map(to:::(value) <- value.name);
-
-                    
-                    @popnews = 'These items are now popular. People will pay high prices for them compared to normal.\n\n';
-                    foreach(state.popular) ::(i, val) {
-                        popnews = popnews + ' - ' + val + '\n';
-                    }
-                    
-                    windowEvent.queueMessage(text:popnews);
-
-                    @unpopnews = 'These items are now unpopular. People will avoid these or won\'t be willing to buy them for normal prices.\n\n';
-                    foreach(state.unpopular) ::(i, val) {
-                        unpopnews = unpopnews + ' - ' + val + '\n';
-                    }
-                    windowEvent.queueMessage(text:unpopnews);
-                }
-
-
-                if (state.days % 5 == 0) ::<= {
-                    windowEvent.queueMessage(
-                        speaker: 'Courier',
-                        text: '"I have received news that the Mysterious Shrine has shifted. I am told this means the quality of items from exploration will increase."'
-                    );
-                    world.island.tier += 1;
-                    hasNews = true;
-                }
-
-
-                if (!hasNews) ::<= {
-                    windowEvent.queueMessage(
-                        speaker: 'Courier',
-                        text: 'No essential news today, but... ' + random.pickArrayItem(
-                            list : [
-                                '"I am told that the items that people consider desirable will change soon."',
-                                '"Word is, business is booming around cities, and most businesses are accepting buy offers."',
-                                '"Word is, people are looking for contract work similar to what you need."',
-                            ]
-                        )
-                    );
-                
-                }
-
-
-                if (world.party.inventory.gold > 5) ::<= {
-                    world.party.inventory.subtractGold(amount:5);
-
-                    windowEvent.queueMessage(
-                        text: 'You tip the courier 5G for their services.'
-                    );
-                }
-                windowEvent.queueMessage(
-                    speaker: 'Courier',
-                    text: '"Well, that\'s all the news for today. Have a good day."'
-                );
+                )
             },
             
             dayStart ::{
@@ -421,146 +543,277 @@
                 @world = import(module:'game_singleton.world.mt');
                 @party = world.party;            
 
-
-
                 @:currentLandmark = instance.landmark;
                 when (currentLandmark != empty && currentLandmark.base.pointOfNoReturn == true) ::<= {
                     windowEvent.queueMessage(
                         speaker: party.members[0].name,
-                        text: '"What a terrible night to be stuck here. Guess I won\'t open shop today."'
+                        text: '"What a terrible day to be stuck here. Guess I won\'t open shop today."'
                     );
                 }
                 
+                @:doStart :: {
+                    windowEvent.queueChoices(
+                        prompt:'Today I will...',
+                        choices : [
+                            'Open shop',
+                            'Explore'
+                        ],
+                        renderable : {
+                            render ::{
+                                canvas.blackout();
+                            }
+                        },
+                        keep:true,
+                        jumpTag: 'day-start',
+                        onChoice::(choice) {
+                            when(choice == 2) ::<={
+                                this.explore();
+                            }        
+                            this.openShop();
+                        }
+                    );                
+                }                
+                
                 if (state.days != 0)
-                    this.courierReportDay();
+                    this.courierReportDay(onDone::{
+                        doStart();
+                    })
+                else 
+                    doStart();
+            },
+            
+            attemptSellProperty::(id, onDone) {
+                @world = import(module:'game_singleton.world.mt');
+                @location = world.island.findLocation(id);
+                @:buyer = world.island.newInhabitant();
+                buyer.anonymize();
+                windowEvent.queueMessage(
+                    text: 'What\'s this? Someone approaches you with haste...'
+                );  
                 
+                @:name = location.ownedBy.name + '\'s ' + location.base.name;
+                windowEvent.queueMessage(
+                    speaker: buyer.name,
+                    text: '"Good day. I would like to purchase the establishment you have on sale. I believe you have it listed as \'' + name + '\'.'
+                );
                 
+                this.haggle(
+                    name,
+                    standardPrice: location.modData.trader.listPrice,
+                    shopper: buyer,
+                    onDone ::(bought, price) {
+                        when(!bought) windowEvent.queueMessage(
+                            text: 'They left without buying ' + name + '...'
+                        );
 
-                windowEvent.queueChoices(
-                    prompt:'Today I will...',
-                    choices : [
-                        'Open shop',
-                        'Explore'
-                    ],
+                        
+                        windowEvent.queueMessage(
+                            text:  name + ' was bought for ' + g(g:price) + '.'
+                        );                        
+                        
+                        state.propertiesForSale->remove(key:state.propertiesForSale->findIndex(value:id));
+                        location.modData.trader.listPrice = price;
+                        world.party.inventory.addGold(amount:price);
+                        onDone();
+                    }
+                );
+                
+                
+            },
+        
+            dayEnd::(onDone) {
+                @:onDoneReal ::{
+                    onDone();
+                    windowEvent.jumpToTag(name:'dayEnd', goBeforeTag:true, doResolveNext:true);
+                }
+                
+                windowEvent.queueNoDisplay(
                     renderable : {
-                        render ::{
+                        render :: {
                             canvas.blackout();
                         }
                     },
                     keep:true,
-                    jumpTag: 'day-start',
-                    onChoice::(choice) {
-                        when(choice == 2) ::<={
-                            this.explore();
-                        }        
-                        this.openShop();
-                    }
-                );
+                    jumpTag : 'dayEnd',
+                    onEnter ::{
+                        
+                        @world = import(module:'game_singleton.world.mt');
 
-
-            },
-        
-            dayEnd:: {
-                @world = import(module:'game_singleton.world.mt');
-
-                windowEvent.queueMessage(
-                    text: 'The day is over.'
-                );
-
-            
-                if (state.hirees->size > 0 && [...state.hirees]->filter(by:::(value) <- value.role == ROLES.DISPATCHED)->size > 0) ::<= {
-                    windowEvent.queueMessage(
-                        text: 'Your dispatched hirees should be coming to you with news...'
-                    );
-                }
-                foreach([...state.hirees]) ::(i, hiree) {
-                    when (hiree.role != ROLES.DISPATCHED) empty;
-                    @:spoils = hiree.dispatch();
-                    
-                    when (hiree.entity.isDead) ::<= {
                         windowEvent.queueMessage(
-                            text: 'You hear no word from ' + hiree.entity.name + ' on their whereabouts...'
+                            text: 'The day is over.'
                         );
-                    }
-                    
-                    if (hiree.entity.isIncapacitated() || spoils->size == 0) ::<= {
-                        windowEvent.queueMessage(
-                            speaker: hiree.entity.name,
-                            text: '"I\'ve returned, but barely in one piece..."'
-                        );
-                    } else ::<= {
-                        windowEvent.queueMessage(
-                            speaker: hiree.entity.name,
-                            text: '"Exploration was a success!"'
-                        );          
-                    }                    
-                    
-                    if (spoils->size == 0) ::<= {
-                        windowEvent.queueMessage(
-                            text:hiree.entity.name + ' was not able to find anything...'
-                        );                        
 
-                    } else ::<= {
-                        @itemsFound = "Items found by " + hiree.entity.name + '\n';
-                        foreach(spoils) ::(i, item) {
-                            itemsFound = itemsFound + "-" + item.name + '\n'
-                            world.party.inventory.add(item);
+
+
+                        // called once all the event based stuff is done.
+                        @:wrapUp = ::{
+                            if (state.hirees->size > 0 && [...state.hirees]->filter(by:::(value) <- value.role == ROLES.DISPATCHED)->size > 0) ::<= {
+                                windowEvent.queueMessage(
+                                    text: 'Your dispatched hirees should be coming to you with news...'
+                                );
+                            }
+                            foreach([...state.hirees]) ::(i, hiree) {
+                                when (hiree.role != ROLES.DISPATCHED) empty;
+                                @:spoils = hiree.dispatch();
+                                
+                                when (hiree.entity.isDead) ::<= {
+                                    windowEvent.queueMessage(
+                                        text: 'You hear no word from ' + hiree.entity.name + ' on their whereabouts...'
+                                    );
+                                }
+                                
+                                if (hiree.entity.isIncapacitated() || spoils->size == 0) ::<= {
+                                    windowEvent.queueMessage(
+                                        speaker: hiree.entity.name,
+                                        text: '"I\'ve returned, but barely in one piece..."'
+                                    );
+                                } else ::<= {
+                                    windowEvent.queueMessage(
+                                        speaker: hiree.entity.name,
+                                        text: '"Exploration was a success!"'
+                                    );          
+                                }                    
+                                
+                                if (spoils->size == 0) ::<= {
+                                    windowEvent.queueMessage(
+                                        text:hiree.entity.name + ' was not able to find anything...'
+                                    );                        
+
+                                } else ::<= {
+                                    @itemsFound = "Items found by " + hiree.entity.name + '\n';
+                                    foreach(spoils) ::(i, item) {
+                                        itemsFound = itemsFound + "-" + item.name + '\n'
+                                        world.party.inventory.add(item);
+                                    }
+                                    windowEvent.queueMessage(
+                                        text:itemsFound 
+                                    );                        
+                                }
+                                hiree.entity.heal(amount:hiree.entity.stats.HP, silent:true);
+                                
+                            }
+                        
+                            @status = "Todays profit:\n";
+                            
+                            @earnings = world.party.inventory.gold - state.startingG;
+                            status = status + "  Earnings     : "+ (if (earnings < 0) g(g:earnings) else "+" + g(g:earnings)) + "\n\n";
+
+
+                            @:Location = import(module:'game_mutator.location.mt');
+
+                            @rent = 0;
+                            foreach(state.ownedProperties) ::(i, id) {
+                                @:location = world.island.findLocation(id);
+                                
+                                if (location.base.category == Location.CATEGORY.RESIDENTIAL) ::<= {
+                                    rent += (location.modData.trader.boughtPrice * 0.05)->ceil;
+                                    @current = location.modData.trader.listPrice;
+                                    current += (((Number.random() - 0.5) * 0.03) * location.modData.trader.boughtPrice)->floor;
+                                    if (current < 2000)
+                                        current = 2000;
+                                    location.modData.trader.listPrice = current;
+                                }
+                            }
+                            world.party.inventory.addGold(amount:rent);
+                            earnings += rent;
+                            if (rent > 0)
+                                status = status + "  Rent         : +" + g(g:rent) + "\n";
+                            
+
+                            rent = 0;
+                            foreach(state.ownedProperties) ::(i, id) {
+                                @:location = world.island.findLocation(id);
+                                when (location.base.category == Location.CATEGORY.RESIDENTIAL) empty
+                                
+                                @profit = location.modData.trader.listPrice * 0.04;
+                                profit = random.integer(from:(profit * 0.5)->floor, to:(profit * 1.5)->floor);
+                                
+                                rent += profit;
+
+
+                                @current = location.modData.trader.listPrice;
+                                current += (((Number.random() - 0.5) * 0.03) * location.modData.trader.listPrice)->floor;
+                                if (current < 9000)
+                                    current = 9000;
+                                location.modData.trader.listPrice = current;
+                            }
+
+                            world.party.inventory.addGold(amount:rent);
+                            earnings += rent;
+                            if (rent > 0)
+                                status = status + "  Businesses   : +" + g(g:rent) + "\n";
+
+
+                            status 
+
+                            @cost = 0;
+                            foreach(state.hirees) ::(i, hiree) {
+                                cost += hiree.contractRate;
+                            }
+                            status = status + "  Contracts    : -" + g(g:cost) + "\n";
+                            
+                            cost += state.upkeep;
+                            status = status + "  Upkeep       : -" + g(g:state.upkeep) + "\n";
+                            
+                            @currentG = world.party.inventory.gold
+                            @:profit = earnings - cost;
+                            state.days += 1;
+                            if (profit > state.bestProfit)            
+                                state.bestProfit = profit;
+                            if (state.days % 2 == 0) 
+                                state.upkeep += (state.bestProfit * 0.05)->floor;
+                            
+                            status = status + "_________________________________\n";
+                            status = status + "  Profit       : " + (if (profit < 0) g(g:profit) else "+" + g(g:profit)) + "\n\n";
+                            
+
+                            world.party.inventory.subtractGold(amount:cost);
+
+                            if (cost > currentG)
+                                status = status + "Remaining: [BANKRUPT]"
+                            else 
+                                status = status + "Remaining: " + g(g:world.party.inventory.gold)
+
+                            // return to pool
+                            foreach(state.hirees) ::(i, hiree) {
+                                when(hiree.entity == empty) empty;
+                                if (world.party.isMember(entity:hiree.entity))
+                                    hiree.returnFromParty();
+                            }
+                            state.startingG = world.party.inventory.gold;                
+                            windowEvent.queueMessage(text:status, pageAfter:14);
+                            
+                            windowEvent.queueNoDisplay(
+                                onEnter ::{
+                                    onDoneReal();
+                                }
+                            );
                         }
-                        windowEvent.queueMessage(
-                            text:itemsFound 
-                        );                        
+
+                        /// property sales. Event-based so it may be a bit confusing...
+                        @:trySell = [...state.propertiesForSale];
+                        @:nextSale = ::{
+                            when(trySell->size == 0) wrapUp();
+                            @:id = trySell->pop;
+                            when(random.try(percentSuccess:75)) nextSale();
+                            
+                            this.attemptSellProperty(id, onDone:nextSale);
+                        }              
+                        nextSale();   
                     }
-                    hiree.entity.heal(amount:hiree.entity.stats.HP, silent:true);
-                    
-                }
-            
-                @status = "Todays profit:\n";
-                
-                @earnings = world.party.inventory.gold - state.startingG;
-                status = status + "  Earnings     : "+ (if (earnings < 0) earnings else "+" + earnings) + "\n\n";
-                @cost = 0;
-                foreach(state.hirees) ::(i, hiree) {
-                    cost += hiree.contractRate;
-                }
-                status = status + "  Contracts    : -" + cost + "G\n";
-                
-                cost += state.upkeep;
-                status = status + "  Upkeep       : -" + state.upkeep + "G\n";
-                
-                @currentG = world.party.inventory.gold
-                @:profit = earnings - cost;
-                state.days += 1;
-                if (profit > state.bestProfit)            
-                    state.bestProfit = profit;
-                if (state.days % 2 == 0) 
-                    state.upkeep += (state.bestProfit * 0.05)->floor;
-                
-                status = status + "_________________________________\n";
-                status = status + "  Profit       : " + (if (profit < 0) profit else "+" + profit) + "\n\n";
-                
+                )
 
-                world.party.inventory.subtractGold(amount:cost);
-
-                if (cost > currentG)
-                    status = status + "Remaining G: [BANKRUPT]"
-                else 
-                    status = status + "Remaining G: " + world.party.inventory.gold
-
-                // return to pool
-                foreach(state.hirees) ::(i, hiree) {
-                    when(hiree.entity == empty) empty;
-                    if (world.party.isMember(entity:hiree.entity))
-                        hiree.returnFromParty();
-                }
-                state.startingG = world.party.inventory.gold;                
-                windowEvent.queueMessage(text:status);
             },
             
             newDay :: {
-                this.dayEnd();
-                this.dayStart();
+                this.dayEnd(onDone::{
+                    this.dayStart();
+                });
             },
             
+            ownedProperties : {
+                get ::<- state.ownedProperties
+            },
 
             
             isHired ::(entity) {
@@ -589,8 +842,8 @@
                     choices : [
                       'Wait',
                       'Dispatch',
-                      'Add to party',
-                      'Guard the shop'                    
+                      'Add to party'
+                      //'Guard the shop'                    
                     ],
                     leftWeight: 1,
                     topWeight: 0.5,
@@ -601,19 +854,145 @@
                 );
             },
             
+            fire::(hiree) {
+                windowEvent.queueAskBoolean(
+                    prompt: 'Fire ' + hiree.entity.name + '?',
+                    onChoice::(which) {
+                        when(which == false) empty;
+                        
+                        state.hirees->remove(key:state.hirees->findIndex(value:hiree));
+                        
+                        windowEvent.queueMessage(
+                            speaker : hiree.entity.name,
+                            text : random.pickArrayItem(
+                                list : [
+                                    '"Yeah, well, it wasn\'t exactly great working for you, either."',
+                                    '"Curse it all... How am I going to pay my bills now..."',
+                                    '"After all the work I did for you...?"',
+                                    '"Figures."'
+                                ]
+                            ) 
+                        );
+                        
+                        windowEvent.queueMessage(
+                            text : hiree.entity.name + ' walks away sadly...'
+                        );
+                    }
+                );            
+            },
+            sellProperty ::(location) {
+            
+                windowEvent.queueMessage(
+                    text: location.ownedBy.name + '\'s ' + location.base.name + ' is currently worth ' + g(g:location.modData.trader.listPrice) + '. Once put up for sale, it will no longer generate revenue.'
+                );
+
+                windowEvent.queueAskBoolean(
+                    prompt: 'Sell for ' + g(g:location.modData.trader.listPrice) + '?',
+                    onChoice::(which) {
+                        when(which == false) empty;
+                        
+                        
+                        @:index = state.ownedProperties->findIndex(value:location.worldID);
+                        if (index == -1) error(detail: 'No such property');
+                        state.ownedProperties->remove(key:index);
+                        
+                        state.propertiesForSale->push(value:location.worldID);
+                    
+                        windowEvent.queueMessage(
+                            text: location.ownedBy.name + '\'s ' + location.base.name + ' is now up for sale for ' + g(g:location.modData.trader.listPrice) + '.'
+                        );
+                    }
+                );
+            },
+            
+            manageProperties ::{
+                @world = import(module:'game_singleton.world.mt');
+                when(state.ownedProperties->size == 0 && state.propertiesForSale->size == 0)
+                    windowEvent.queueMessage(
+                        text: 'You don\'t currently have any properties except your shop.'
+                    );
+
+                @:locations = [...state.ownedProperties, ...state.propertiesForSale]->map(to:::(value) <- world.island.findLocation(id:value));
+                @:choicesColumns = import(module:'game_function.choicescolumns.mt');
+                
+
+                choicesColumns(
+                    onGetChoices ::{
+                        @:names = [];
+                        @:worth = [];
+                        @:status = [];
+                        foreach(locations) ::(i, location) {
+                            @:delta = location.modData.trader.listPrice - location.modData.trader.boughtPrice;
+
+                            names->push(value: location.ownedBy.name + '\'s ' + location.base.name);
+                            worth->push(value:g(g:location.modData.trader.listPrice) + ' (' + (if(delta > 0) '+' else '') + g(g:delta) + ')');
+                            status->push(value: if (state.propertiesForSale->findIndex(value:location.worldID) == -1) 'Owned' else 'For sale');
+                        }
+                        return [
+                            names, worth, status
+                        ];
+                    },
+                    prompt: 'Properties owned:',
+                    header: ['Name', 'Worth', 'Status'],
+                    leftJustified : [true, true, true],
+                    leftWeight: 0.5,
+                    topWeight: 0.5,
+                    canCancel: true,
+                    keep : true,
+                    onChoice ::(choice) {
+                        when(choice == 0) empty;                        
+                        @location = locations[choice-1];
+            
+
+
+                        windowEvent.queueChoices(
+                            prompt: "Location: " + location.ownedBy.name + '\'s ' + location.name,
+                            leftWeight: 1,
+                            topWeight: 0.5,
+                            choices : [
+                                'Sell',
+                            ],
+                            canCancel : true,
+                            onChoice::(choice) {
+                                when(choice == 0) empty;
+                                
+                                when(state.propertiesForSale->findIndex(value:location.worldID) != -1)
+                                    windowEvent.queueMessage(
+                                        text: 'The property is already for sale.'
+                                    );
+                                if (choice == 1) this.sellProperty(location);
+                            }
+                        );
+                    }
+                );
+
+            
+            },
+            
             manageHirees :: {
                 when(state.hirees->size == 0)
                     windowEvent.queueMessage(
                         text: 'You don\'t currently have anyone employed.'
                     );
-                windowEvent.queueChoices(
+                
+                @:choicesColumns = import(module:'game_function.choicescolumns.mt');
+                    
+                choicesColumns(
                     onGetChoices ::{
-                        @:choices = [];
+                        @:names  = [];
+                        @:wages  = [];
+                        @:status = [];
                         foreach(state.hirees) ::(i, hiree) {
-                            choices->push(value: hiree.entity.name + ' -- ' + roleToString(role:hiree.role));
+                            names->push(value:hiree.entity.name);
+                            wages->push(value:g(g:hiree.contractRate));
+                            status->push(value:roleToString(role:hiree.role));
                         }
-                        return choices;
+                        return [
+                            names, wages, status
+                        ];
                     },
+                    header : ['Name', 'Wage', 'Status'],
+                    leftJustified : [true, true, true],
                     leftWeight: 0.5,
                     topWeight: 0.5,
                     canCancel: true,
@@ -636,13 +1015,9 @@
                                 when(choice == 0) empty;
                                 
                                 match(choice) {
-                                  (1): ::<= {
-                                    hiree.entity.describe()
-                                  },
-                                  
-                                  (2): ::<= {
-                                    this.changeRole(hiree);
-                                  }
+                                  (1): hiree.entity.describe(),
+                                  (2): this.changeRole(hiree),
+                                  (3): this.fire(hiree)
                                 }
                             }
                         );
@@ -655,18 +1030,19 @@
                     prompt: 'What next?',
                     choices : [
                         'Manage hirees',
+                        'Manage properties',
                         'Start exploring!'
                     ],
                     keep:true,
-                    canCancel: false,
+                    canCancel: true,
                     onChoice::(choice) {
                         when(choice == 0) empty;
                         match(choice) {
-                          (1): ::<= {
-                            this.manageHirees();                            
-                          },
+                          (1): this.manageHirees(),
+                          (2): this.manageProperties(),
                           
-                          (2): ::<= {
+                          
+                          (3): ::<= {
                             @:instance = import(module:'game_singleton.instance.mt');
 
                             foreach(state.hirees) ::(k, hiree) {
@@ -684,7 +1060,6 @@
             },
             
             stockShop ::{
-                @:pickItem = import(module:'game_function.pickitem.mt');
                 @world = import(module:'game_singleton.world.mt');
 
                 @:shopInventory ::{
@@ -693,10 +1068,11 @@
                             text: 'The shop has no items stocked. You have to stock it from your inventory first.'
                         );
                     
-                    pickItem(
+                    pickItemStock(
+                        prompt: ' Current shop stock:',
+                        traderState : state,
                         inventory: state.shopInventory,
                         canCancel: true,
-                        showGold: true,
                         goldMultiplier: 0.1, // standard rate
                         topWeight: 0.5,
                         leftWeight: 0.5,
@@ -740,10 +1116,11 @@
                             text: 'You have no items to stock the shop with. Perhaps you should hire someone to look for items. Otherwise, you must explore on your own to find things to sell.'
                         );
                     
-                    pickItem(
+                    pickItemStock(
+                        prompt: ' Current inventory:',
+                        traderState : state,
                         inventory: world.party.inventory,
                         canCancel: true,
-                        showGold: true,
                         goldMultiplier: 0.1,
                         topWeight: 0.5,
                         leftWeight: 0.5,
@@ -800,15 +1177,185 @@
                 );
             },
             
+            // starts the haggling process.
+            // When done, onDone is called with the following arguments:
+            // - bought, a boolean saying whether it was bought 
+            // - price, the final offer that was given before buying or not buying.
+            haggle::(shopper, name, standardPrice, onDone) {
+                @offer = standardPrice;
+                @tries = 0;
+                @lastOffer = 0.5;
+
+                @isPopular = ::<= {                    
+                    @:popular   = state.popular;
+                    return (popular->findIndex(value:name) != -1)
+                }                    
+
+                @isUnpopular = ::<= {                    
+                    @:unpopular   = state.unpopular;
+                    return (unpopular->findIndex(value:name) != -1)
+                }                    
+
+                
+                // personality determines how much theyre willing to go above 
+                // the baseline haggle limit
+                @:shopperWillingToPay = ::<= {
+                    // for custom or unknown personality types
+                    @:defaultCalculation::{
+                        @:stats = shopper.personality.growth;
+                        // Personality's more big-brain stats affect this.
+                        @base = (stats.INT + stats.LUK + stats.AP) / (stats.sum);
+                        if (base < 0) base = 0;
+                        if (base > 1) base = 1;
+                        base = 1 - base;
+                        base += 0.2*(Number.random() -.5); // still can vary a bit
+                        
+                        base *= 0.3; // personality only place a slight role
+                        base += 0.05; // people are generally reasonable
+                        @amount = (base + 1) * standardPrice + 1;
+                        
+                        // cheapskates or splurgers
+                        if (random.try(percentSuccess:33)) 
+                            if (random.flipCoin())
+                                amount *= 0.7
+                            else
+                                amount *= 1.3
+                        ;
+                        
+                        
+                        // not for free!
+                        if (amount < 1) amount = 1;
+                        amount = amount->ceil;    
+                        return amount;                
+                    }
+                    
+                    @:base = match(shopper.personality.name) {
+                      ('Friendly'):       (standardPrice * 1.35)->floor,
+                      ('Short-tempered'): (standardPrice * 1.05)->floor,
+                      ('Quiet'):          (standardPrice * 1.25)->floor,
+                      ('Charismatic'):    (standardPrice * 0.85)->floor,
+                      ('Caring'):         (standardPrice * 1.2)->floor,
+                      ('Cold'):           (standardPrice * 0.95)->floor,
+                      ('Disconnected'):   (standardPrice * 0.95)->floor,
+                      ('Inquisitive'):    (standardPrice * 1.15)->floor,
+                      ('Curious'):        (standardPrice * 1.10)->floor,
+                      ('Calm'):           (standardPrice * 1.20)->floor,
+                      default: defaultCalculation()
+                    }
+
+                    when(isPopular)   base * 2;
+                    when(isUnpopular) (base * 0.5)->floor;
+                    return base;
+                }
+                
+                @:offerFromFraction::(fraction) {
+                    @:min = standardPrice * 0;
+                    @:max = standardPrice * 2;
+                    
+                    return (fraction * (max - min) + min)->ceil;
+                }
+                
+                @haggleNext :: {
+                    windowEvent.queueSlider(
+                        renderable : {
+                            render ::{
+                                canvas.renderTextFrameGeneral(
+                                    lines: [
+                                        shopper.name + ' wants to buy: ',
+                                        name + ' (worth standardly: ' + standardPrice + ')',
+                                        if (isPopular) 'NOTE: this item is currently in demand.' else if (isUnpopular) 'NOTE: this item is currently experiencing a price-drop.' else '',
+                                        'The shopper seems to be: ' + shopper.personality.name
+                                    ],
+                                    topWeight: 0,
+                                    leftWeight: 0.5
+                                );
+
+                                @delta = offer - standardPrice;
+                                canvas.renderTextFrameGeneral(
+                                    lines: [
+                                        'Current offer: ' + g(g:offer) + " (" + (if(delta >= 0) '+'+delta else delta) + ")",
+                                    ],
+                                    topWeight: 1,
+                                    leftWeight: 0.5
+                                );
+
+                            }
+                        },
+                        prompt: 'Offer for how much?',
+                        increments: 40,
+                        defaultValue : lastOffer,
+                        topWeight: 0.6,
+                        
+                        onHover ::(fraction) {
+                            offer = offerFromFraction(fraction);
+                        },
+                        
+                        onChoice ::(fraction) {
+                            lastOffer = fraction;
+                            offer = offerFromFraction(fraction);
+                            windowEvent.queueMessage(
+                                text: '"How about ' + g(g:offer) + '? ' +
+                                    random.pickArrayItem(
+                                        list : [
+                                            'Surely that\'s a reasonable price."',
+                                            'That is about the best I can do."',
+                                            'A great choice, by the way."',
+                                            'Truly a fine piece."',
+                                            'You have a great eye."',
+                                            'It breaks my heart to part with it."',
+                                            'It is great indeed, indeed."'
+                                        ]
+                                    )
+                            );
+                            
+                            if (offer > shopperWillingToPay) ::<= {
+                                tries += 1;
+                                if (tries > 2) ::<= {
+                                    windowEvent.queueMessage(
+                                        speaker: shopper.name,
+                                        text : random.pickArrayItem(
+                                            list : [
+                                                '"Sorry, I think I\'ll reconsider this purchase."',
+                                                '"Sorry, I just think that\'s too expensive."',
+                                                '"I think I\'ve had enough haggling for one day."'
+                                            ]
+                                        )
+                                    );
+                                    onDone(bought:false, price:offer);
+                                } else ::<= {
+                                    windowEvent.queueMessage(
+                                        speaker: shopper.name,
+                                        text : random.pickArrayItem(
+                                            list : [
+                                                '"Ah, I cannot afford this price... Surely you could go lower?"',
+                                                '"I really want this, but that\'s too expensive."',
+                                                '"I don\'t think it\'s worth this much..."'
+                                            ]
+                                        )
+                                    );
+                                    haggleNext();
+                                }
+                            } else ::<= {
+                                windowEvent.queueMessage(
+                                    speaker: shopper.name,
+                                    text : random.pickArrayItem(
+                                        list : [
+                                            '"Sure, that sounds reasonable."',
+                                            '"Well, alright!"'
+                                        ]
+                                    )
+                                );  
+                                onDone(bought:true, price:offer);
+                            }
+                        }
+                    );
+                }
+                haggleNext();
+            },
+            
+            
             startShopDay :: {
                 @world = import(module:'game_singleton.world.mt');
-                // fast forward till morning
-                {:::} {
-                    forever ::{
-                        if (world.time == world.TIME.MORNING) send();
-                        world.stepTime();
-                    }
-                }
 
                 // find shop
                 @:instance = import(module:'game_singleton.instance.mt');
@@ -918,138 +1465,6 @@
                             nextShopper();
                         }
                         
-                        @:haggle::(shopper, item, onDone) {
-                            @:standardPrice = (item.price / 10)->ceil;
-                            @offer = standardPrice;
-                            @tries = 0;
-                            @lastOffer = 0.5;
-                            
-                            // personality determines how much theyre willing to go above 
-                            // the baseline haggle limit
-                            @:shopperWillingToPay = ::<= {
-                                @:stats = shopper.personality.growth;
-                                // Personality's more big-brain stats affect this.
-                                @base = (stats.INT + stats.LUK + stats.AP) / (stats.sum);
-                                if (base < 0) base = 0;
-                                if (base > 1) base = 1;
-                                base = 1 - base;
-                                base += 0.2*(Number.random() -.5); // still can vary a bit
-                                
-                                base *= 0.3; // personality only place a slight role
-                                base += 0.05; // people are generally reasonable
-                                @amount = (base + 1) * standardPrice + 1;
-                                
-                                // not for free!
-                                if (amount < 1) amount = 1;
-                                amount = amount->ceil;
-                                breakpoint();
-                                return amount;
-                            }
-                            
-                            @:offerFromFraction::(fraction) {
-                                @:min = standardPrice * 0;
-                                @:max = standardPrice * 2;
-                                
-                                return (fraction * (max - min) + min)->ceil;
-                            }
-                            
-                            @haggleNext :: {
-                                windowEvent.queueSlider(
-                                    renderable : {
-                                        render ::{
-                                            canvas.renderTextFrameGeneral(
-                                                lines: [
-                                                    shopper.name + ' wants to buy the:',
-                                                    item.name + ' (worth standardly: ' + standardPrice + ')',
-                                                    '',
-                                                    'They seem to be ' + shopper.personality.name
-                                                ],
-                                                topWeight: 0,
-                                                leftWeight: 0.5
-                                            );
-
-                                            @delta = offer - standardPrice;
-                                            canvas.renderTextFrameGeneral(
-                                                lines: [
-                                                    'Current offer: ' + offer + "G (" + (if(delta >= 0) '+'+delta else delta) + ")",
-                                                ],
-                                                topWeight: 1,
-                                                leftWeight: 0.5
-                                            );
-
-                                        }
-                                    },
-                                    prompt: 'Offer for how much?',
-                                    increments: 40,
-                                    defaultValue : lastOffer,
-                                    topWeight: 0.6,
-                                    
-                                    onHover ::(fraction) {
-                                        offer = offerFromFraction(fraction);
-                                    },
-                                    
-                                    onChoice ::(fraction) {
-                                        lastOffer = fraction;
-                                        offer = offerFromFraction(fraction);
-                                        windowEvent.queueMessage(
-                                            text: '"How about ' + offer + 'G? ' +
-                                                random.pickArrayItem(
-                                                    list : [
-                                                        'Surely that\'s a reasonable price."',
-                                                        'That is about the best I can do."',
-                                                        'A great choice, by the way."',
-                                                        'Truly a fine piece."',
-                                                        'You have a great eye."',
-                                                        'It breaks my heart to part with it."',
-                                                        'It is a great item, indeed."'
-                                                    ]
-                                                )
-                                        );
-                                        
-                                        if (offer > shopperWillingToPay) ::<= {
-                                            tries += 1;
-                                            if (tries > 2) ::<= {
-                                                windowEvent.queueMessage(
-                                                    speaker: shopper.name,
-                                                    text : random.pickArrayItem(
-                                                        list : [
-                                                            '"Sorry, I think I\'ll find this item elsewhere."',
-                                                            '"Sorry, I just think that\'s too expensive."',
-                                                            '"I think I\'ve had enough haggling for one day."'
-                                                        ]
-                                                    )
-                                                );
-                                                onDone(bought:false, price:offer);
-                                            } else ::<= {
-                                                windowEvent.queueMessage(
-                                                    speaker: shopper.name,
-                                                    text : random.pickArrayItem(
-                                                        list : [
-                                                            '"Ah, I cannot afford this price... Surely you could go lower?"',
-                                                            '"I really want this, but that\'s too expensive."',
-                                                            '"I don\'t think it\'s worth this much..."'
-                                                        ]
-                                                    )
-                                                );
-                                                haggleNext();
-                                            }
-                                        } else ::<= {
-                                            windowEvent.queueMessage(
-                                                speaker: shopper.name,
-                                                text : random.pickArrayItem(
-                                                    list : [
-                                                        '"Sure, that sounds reasonable."',
-                                                        '"Well, alright!"'
-                                                    ]
-                                                )
-                                            );  
-                                            onDone(bought:true, price:offer);
-                                        }
-                                    }
-                                );
-                            }
-                            haggleNext();
-                        }
                         
                         @:nextShopper ::{
                             when(shopperList->size == 0) finishHour();
@@ -1074,14 +1489,15 @@
                             );
                             
                             /// barter logic
-                            haggle(
+                            this.haggle(
                                 shopper,
-                                item,
+                                name:item.name,
+                                standardPrice: (item.price / 10)->ceil,
                                 onDone::(bought, price) {
                                     if (bought) ::<= {
                                         world.party.inventory.addGold(amount:price);
                                         windowEvent.queueMessage(
-                                            text: shopper.name + ' bought the ' + item.name + ' for ' + price + 'G.'
+                                            text: shopper.name + ' bought the ' + item.name + ' for ' + g(g:price) + '.'
                                         );
                                         state.shopInventory.remove(item);
                                     } else ::<= {
@@ -1114,11 +1530,71 @@
 
             },
             
+            
+            upgradeShop ::{
+                @:current = state.shopInventory.maxItems;
+                
+                when (state.workOrder == true)
+                    windowEvent.queueMessage(
+                        text: 'A work order for upgrading has already been placed.'
+                    );
+                
+                @table = [
+                    100,
+                    300,
+                    500,
+                    700,
+                    1400,
+                    2200,
+                    4000,
+                    8300,
+                    12000,
+                    18000,
+                    26000,
+                    40000,
+                    78000,
+                    112000
+                ]
+                
+
+                @:costNext = table[((current - 10)/5)->floor];
+                when(costNext == empty)
+                    windowEvent.queueMessage(
+                        text: 'Your shop cannot be upgraded any further.'
+                    );
+                
+                windowEvent.queueMessage(
+                    text: 'Your shop can currently hold ' + current + ' items in its stock. It will cost ' + g(g:costNext) + ' in supplies to increase the stock. If upgraded, it will take a day to complete the order.'
+                );
+                
+                windowEvent.queueAskBoolean(
+                    prompt: 'Upgrade shop for ' + g(g:costNext) + '?',
+                    onChoice::(which) {
+                        when(which == false) empty;
+                        @:world = import(module:'game_singleton.world.mt');
+                        
+                        if (costNext > world.party.inventory.gold)
+                            windowEvent.queueMessage(
+                                text: 'You cannot afford to upgrade the shop at this time.'
+                            );
+                            
+                        windowEvent.queueMessage(
+                            text: 'Your work order upgrade should finish tomorrow.'
+                        );
+                        
+                        world.party.inventory.addGold(amount:costNext);
+                        state.workOrder = true;
+                    }
+                );
+
+            },
+            
             openShop :: {
                 windowEvent.queueChoices(
                     prompt: 'Shop options:',
                     choices : [
                         'Manage hirees',
+                        'Manage Properties',
                         'Stock shop', // inv to shop 
                         'Upgrade shop', // stock, starts at 15 
                         'Start the day!'
@@ -1129,9 +1605,10 @@
                         when(choice == 0) empty;
                         match(choice) {
                           (1): this.manageHirees(),
-                          (2): this.stockShop(),
-                          (3): this.upgradeShop(),
-                          (4): this.startShopDay()
+                          (2): this.manageProperties(),
+                          (3): this.stockShop(),
+                          (4): this.upgradeShop(),
+                          (5): this.startShopDay()
                         }
                     }
                 );
@@ -1189,14 +1666,11 @@
 
             @cost;
             
-            if (highestStat <= 10)
-                cost = 50+((this.stats.sum/3 + this.level)*2.5)->ceil
-            else
-                cost = 200 + this.stats.sum*13; // bigger and better stats come at a premium
+            cost = 50+((this.stats.sum/7 + this.level)*2.5)->ceil
             this.describe();
 
             windowEvent.queueAskBoolean(
-                prompt: 'Hire for ' + cost + 'G?',
+                prompt: 'Hire for ' + g(g:cost) + ' a day?',
                 onChoice::(which) {
                     when(which == false) empty;
 
@@ -1310,7 +1784,7 @@ return {
         }
 
         party.add(member:p0);
-        party.inventory.addGold(amount:1100);
+        //party.inventory.addGold(amount:1100);
         
         
         
@@ -1324,13 +1798,27 @@ return {
             shop
         );
 
+        party.inventory.addGold(amount:1100);
+
+            /*
+            party.inventory.addGold(amount:100000);
+
+            world.island.tier = 3;
+            
+            data.trader.addHiree(
+                entity: world.island.newInhabitant(),
+                rate:117
+            );
+            data.trader.addHiree(
+                entity: world.island.newInhabitant(),
+                rate:103
+            );
+            data.trader.addHiree(
+                entity: world.island.newInhabitant(),
+                rate:157
+            );
+            */
         
-        /*
-        data.trader.addHiree(
-            entity: world.island.newInhabitant(),
-            rate:117
-        );
-        */
 
 
         @somewhere = LargeMap.getAPosition(map:island.map);
@@ -1361,7 +1849,82 @@ return {
 
     
     interactionsPerson : interactionsPerson,
-    interactionsLocation : [],
+    interactionsLocation : [
+        InteractionMenuEntry.new(
+            displayName : 'Buy property',
+            filter ::(location) {
+                @world = import(module:'game_singleton.world.mt');
+                @:trader = world.scenario.data.trader;
+                return location.ownedBy != empty && trader.ownedProperties->findIndex(value:location.worldID) == -1;
+            },
+                    
+            onSelect::(location) {
+                @world = import(module:'game_singleton.world.mt');
+                @:trader = world.scenario.data.trader;
+                when(trader.ownedProperties->findIndex(value:location.worldID) != -1)
+                    windowEvent.queueMessage(
+                        text: 'This property is already owned by you.'
+                    );
+
+                @:Location = import(module:'game_mutator.location.mt');
+                if (location.modData.trader == empty)
+                    location.modData.trader = {};
+                 
+                // generate list price   
+                if (location.modData.trader.listPrice == empty) ::<= {
+                    @basePrice = match(location.base.category) {
+                      // residential properties can be bought, and thee owners become 
+                      // tennants
+                      (Location.CATEGORY.RESIDENTIAL): random.pickArrayItem(list:[9000, 12000, 8000, 14000, 5000]),
+                      (Location.CATEGORY.BUSINESS): random.pickArrayItem(list:[100000, 120000, 89000, 160000]),
+                      (Location.CATEGORY.UTILITY): random.pickArrayItem(list:[30000, 35000, 22000, 45000])
+                    }
+                    
+                    location.modData.trader.listPrice = random.integer(from:(basePrice * 0.8)->floor, to:(basePrice * 1.2)->floor);
+                }
+
+                windowEvent.queueMessage(
+                    text: location.ownedBy.name + '\'s ' + location.base.name + ' is available for purchase for ' + g(g:location.modData.trader.listPrice) + '.'
+                );
+                
+                when(world.party.inventory.gold < location.modData.trader.listPrice)
+                    windowEvent.queueMessage(
+                        text: 'The party cannot afford to buy this property.'
+                    );
+
+                windowEvent.queueAskBoolean(
+                    prompt: 'Buy property for ' + g(g:location.modData.trader.listPrice) + '?',
+                    onChoice::(which) {
+                        when(which == false) empty;
+                        
+                        world.party.inventory.subtractGold(amount: location.modData.trader.listPrice);
+                        location.modData.trader.boughtPrice = location.modData.trader.listPrice;
+
+                        
+                        @:trader = world.scenario.data.trader;
+                        trader.ownedProperties->push(value: location.worldID);
+
+                        windowEvent.queueMessage(
+                            text: 'Congratulations! You now own ' + location.ownedBy.name + '\'s ' + location.base.name + '.'
+                        );
+                        
+                        if (location.base.category == Location.CATEGORY.RESIDENTIAL)
+                            windowEvent.queueMessage(
+                                text: 'This residence will pay you rent daily based on a percentage of the price you bought it at.'
+                            )
+                        else                            
+                            windowEvent.queueMessage(
+                                text: 'This business will pay you a percentage of their profits at the end of the day. This rate will be variable, but scales with how expensive the business is.'
+                            )
+
+
+                    }
+                );
+                    
+                
+            }
+        )
+    ],
     interactionsLandmark : [],
     interactionsWalk : [
         commonInteractions.walk.check,
@@ -1369,8 +1932,13 @@ return {
         commonInteractions.walk.party,
         commonInteractions.walk.wait
     ],
-    interactionsBattle : [],
-    interactionsParty : [],
+    interactionsBattle : [
+        commonInteractions.battle.act,
+        commonInteractions.battle.check,
+        commonInteractions.battle.item,
+        commonInteractions.battle.wait,
+        commonInteractions.battle.pray
+    ],
     interactionsOptions : [
         commonInteractions.options.save,
         commonInteractions.options.system,

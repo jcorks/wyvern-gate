@@ -19,6 +19,7 @@
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:world = import(module:'game_singleton.world.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
+@:g = import(module:'game_function.g.mt');
 
 
 
@@ -52,7 +53,7 @@ return ::{
                 
             }
             canvas.movePen(x: ((canvas.width - width) / 2)+1, y: 1);    
-            canvas.drawText(text:'Party: (' + party.inventory.gold + 'G, ' + party.inventory.items->keycount + ' items)');     
+            canvas.drawText(text:'Party: (' + g(g:party.inventory.gold) + ', ' + party.inventory.items->keycount + ' items)');     
         
         }
     }

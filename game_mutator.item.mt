@@ -536,7 +536,6 @@
                       default: 'Unknown'
                     }
                 }
-                breakpoint();
                                 
                 state.price *= 1 + ((state.island.levelMin) / (5 + 5*Number.random()));
                 state.price = state.price->ceil;

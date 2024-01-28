@@ -13,6 +13,7 @@
 @:InteractionMenuEntry = import(module:'game_struct.interactionmenuentry.mt');
 @:commonInteractions = import(module:'game_singleton.commoninteractions.mt');
 @:Personality = import(module:'game_database.personality.mt');
+@:g = import(module:'game_function.g.mt');
 
 
 
@@ -67,7 +68,7 @@
             this.describe();
 
             windowEvent.queueAskBoolean(
-                prompt: 'Hire for ' + cost + 'G?',
+                prompt: 'Hire for ' + g(g:cost) + '?',
                 onChoice::(which) {
                     when(which == false) empty;
                     when(party.inventory.gold < cost)
@@ -424,8 +425,13 @@ return {
         commonInteractions.walk.party,
         commonInteractions.walk.wait
     ],
-    interactionsBattle : [],
-    interactionsParty : [],
+    interactionsBattle : [
+        commonInteractions.battle.act,
+        commonInteractions.battle.check,
+        commonInteractions.battle.item,
+        commonInteractions.battle.wait,
+        commonInteractions.battle.pray
+    ],
     interactionsOptions : [
         commonInteractions.options.save,
         commonInteractions.options.system,

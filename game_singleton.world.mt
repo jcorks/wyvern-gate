@@ -258,6 +258,10 @@
                 get ::<- state.time
             },
             
+            day : {
+                get ::<- state.day
+            },
+            
             season : {
                 get :: {
                     return match(true) {

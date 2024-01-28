@@ -11,9 +11,267 @@
 @:namegen = import(module:'game_singleton.namegen.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:BattleAction = import(module:'game_struct.battleaction.mt');
+@:Ability = import(module:'game_database.ability.mt');
 
 
 return {
+    battle : {
+        act : InteractionMenuEntry.new(
+            displayName : 'Act',
+            filter::(user, battle) <- true,
+            onSelect::(user, battle, commitAction) {
+                @:abilities = [];
+                @:allies  = battle.getAllies(entity:user);
+                @:enemies = battle.getEnemies(entity:user);
+                foreach(user.abilitiesAvailable)::(index, ability) {
+                    abilities->push(value:
+                        if (ability.apCost > 0 || ability.hpCost > 0)
+                            if (ability.apCost > 0) 
+                                ability.name + '(' + ability.apCost + ' AP)'
+                            else 
+                                ability.name + '(' + ability.apCost + ' HP)'
+                        else
+                            ability.name
+                    );
+                }
+                
+                windowEvent.queueChoices(
+                    leftWeight: 1,
+                    topWeight: 1,
+                    prompt:'What ability should ' + user.name + ' use?',
+                    choices: abilities,
+                    canCancel: true,
+                    keep: true,
+                    onChoice::(choice) {
+                        when(choice == 0) empty;
+                        
+                        
+                        @:ability = user.abilitiesAvailable[choice-1];
+                        
+                        
+                        match(ability.targetMode) {
+                          (Ability.TARGET_MODE.ONE): ::<={
+                            @:all = [];
+                            foreach(allies)::(index, ally) {
+                                all->push(value:ally);
+                            }
+                            foreach(enemies)::(index, enemy) {
+                                all->push(value:enemy);
+                            }
+                            
+                            
+                            @:allNames = [];
+                            foreach(all)::(index, person) {
+                                allNames->push(value:person.name);
+                            }
+                          
+                          
+                            windowEvent.queueChoices(
+                              leftWeight: 1,
+                              topWeight: 1,
+                              prompt: 'Against whom?',
+                              choices: allNames,
+                              canCancel: true,
+                              keep: true,
+                              onChoice::(choice) {
+                                when(choice == 0) empty;
+                                
+                                commitAction(action:
+                                    BattleAction.new(
+                                        ability: ability,
+                                        targets: [all[choice-1]],
+                                        extraData: {}
+                                    )
+                                );
+                              
+                              }
+                            );
+                            
+                          },
+                          (Ability.TARGET_MODE.ALLALLY): ::<={
+                            commitAction(action:
+                                BattleAction.new(
+                                    ability: ability,
+                                    targets: allies,
+                                    extraData: {}
+                                )
+                            );                          
+                          },
+                          (Ability.TARGET_MODE.ALLENEMY): ::<={
+                            commitAction(action:
+                                BattleAction.new(
+                                    ability: ability,
+                                    targets: enemies,
+                                    extraData: {}                                
+                                )
+                            );
+                          },
+
+                          (Ability.TARGET_MODE.ALL): ::<={
+                            commitAction(action:
+                                BattleAction.new(
+                                    ability: ability,
+                                    targets: [...allies, ...enemies],
+                                    extraData: {}                                
+                                )
+                            );
+                          },
+
+
+
+                          (Ability.TARGET_MODE.NONE): ::<={
+                            commitAction(action:
+                                BattleAction.new(
+                                    ability: ability,
+                                    targets: [],
+                                    extraData: {}                                
+                                )
+                            );
+                          },
+
+                          (Ability.TARGET_MODE.RANDOM): ::<={
+                            @all = [];
+                            foreach(allies)::(index, ally) {
+                                all->push(value:ally);
+                            }
+                            foreach(enemies)::(index, enemy) {
+                                all->push(value:enemy);
+                            }
+                
+                            commitAction(action:
+                                BattleAction.new(
+                                    ability: ability,
+                                    targets: random.pickArrayItem(list:all),
+                                    extraData: {}                                
+                                )
+                            );
+                          }
+                        }                    
+                    }
+                );
+            }
+        ),
+        
+        check : InteractionMenuEntry.new(
+            displayName : 'Check',
+            filter::(user, battle) <- true,
+            onSelect::(user, battle, commitAction) {
+
+                @:allies  = battle.getAllies(entity:user);
+                @:enemies = battle.getEnemies(entity:user);
+
+                windowEvent.queueChoices(
+                  topWeight: 1,
+                  prompt: 'Check which?', 
+                  leftWeight: 1,
+                  keep: true,
+                  canCancel: true,
+                  choices : [
+                    'Abilities',
+                    'Allies',
+                    'Enemies'
+                  ],
+                  onChoice::(choice) {
+                    when(choice == 0) empty;
+
+                    match(choice-1) {
+                      (0): ::<={ // abilities
+                        @:names = [...user.abilitiesAvailable]->map(to:::(value){return value.name;});
+                        
+                        windowEvent.queueChoices(
+                          leftWeight: 1,
+                          topWeight: 1,
+                          prompt: 'Check which ability?',
+                          choices: names,
+                          keep: true,
+                          canCancel: true,
+                          onChoice::(choice) {
+                            when(choice == 0) empty;
+                                
+                            @:ability = user.abilitiesAvailable[choice-1];
+
+                            windowEvent.queueMessage(
+                                speaker: 'Ability: ' + ability.name,
+                                text:ability.description
+                            );                          
+                          }
+                        );
+                      },
+                      
+                      (1): ::<={ // allies
+                        @:names = [...allies]->map(to:::(value){return value.name;});
+                        
+                        choice = windowEvent.queueChoices(
+                            topWeight: 1,
+                            leftWeight: 1,
+                            prompt:'Check which ally?',
+                            choices: names,
+                            keep: true,
+                            canCancel: true,
+                            onChoice::(choice) {
+                                when (choice == 0) empty;
+
+                                @:ally = allies[choice-1];
+                                ally.describe();                            
+                            }
+                        );
+                      }
+                    
+                    }                  
+                  }
+                )
+            }      
+        ),
+        
+        wait : InteractionMenuEntry.new(
+            displayName : 'Wait',
+            filter::(user, battle) <- true,
+            onSelect::(user, battle, commitAction) {
+                commitAction(action:
+                    BattleAction.new(
+                        ability: Ability.find(name:'Wait'),
+                        targets: [],
+                        extraData: {}
+                    )                
+                );
+            }
+        ),
+        
+        
+        item : InteractionMenuEntry.new(
+            displayName : 'Item',
+            filter::(user, battle) <- true,
+            onSelect::(user, battle, commitAction) {
+                @:world = import(module:'game_singleton.world.mt');
+                @:itemmenu = import(module:'game_function.itemmenu.mt');
+                @:enemies = battle.getEnemies(entity:user);
+
+                itemmenu(inBattle:true, user, party:world.party, enemies, onAct::(action){
+                    commitAction(action);
+                });
+            }
+        ),
+        
+        pray : InteractionMenuEntry.new(
+            displayName : 'Pray',
+            filter::(user, battle) <- true,
+            onSelect::(user, battle, commitAction) {
+
+                @:allies  = battle.getAllies(entity:user);
+                @:enemies = battle.getEnemies(entity:user);
+                
+                commitAction(action:
+                    BattleAction.new(
+                        ability: Ability.find(name:'Wyvern Prayer'),
+                        targets: [...enemies, ...allies],
+                        extraData: {}
+                    )                
+                );             
+            }        
+        )
+    },
+
     options : {
         quit : InteractionMenuEntry.new(
             displayName : 'Quit',

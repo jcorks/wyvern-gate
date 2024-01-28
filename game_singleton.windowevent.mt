@@ -148,6 +148,7 @@
             @:defaultChoice = data.defaultChoice;
             @:onChoice = data.onChoice;
             @:onHover = data.onHover;
+            @:header = if (data.onGetHeader) data.onGetHeader() else data.header;
             @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
 
             when (requestAutoSkip) false;
@@ -173,17 +174,35 @@
                         if (text->length > max)
                             max = text->length;
                     }
-                    
+                    if (header != empty)
+                        if (header->length > max)
+                            max = header->length;
+                            
                     return max;
                 }
 
-                @lineTop = '^';
-                @lineBot = 'v';
-                for(0, WIDTH+2)::(i) {
-                    lineTop = lineTop + ' ';            
+                @padCombine = [];
+                @:pad::(text) {
+                    padCombine->setSize(size:0);
+                    padCombine->push(value:text);
+                    for(text->length, WIDTH) ::(i) {
+                        padCombine->push(value:' ');
+                    }
+                    return String.combine(strings:padCombine);
+                }
+
+
+                @lineTop = '^  ';
+                @lineBot = 'v  ';
+                for(0, WIDTH)::(i) {
+                    if (header == empty)
+                        lineTop = lineTop + ' ';            
                     lineBot = lineBot + ' ';            
                 }
                 
+                if (header != empty)
+                    lineTop = lineTop + header;
+    
                 @cursorPageTop = 0;
 
                 if (choice == CURSOR_ACTIONS.UP) ::<= {
@@ -207,13 +226,22 @@
                 
                 
                 if (choices->keycount > PAGE_SIZE) ::<= {
-                    @initialLine = if (cursorPageTop > 0) lineTop else '';
+                    @initialLine = if (cursorPageTop > 0) lineTop else 
+                        if (header == empty)
+                            ''
+                        else 
+                            '   '+header
+                    ;
                     choicesModified->push(value:initialLine);
 
 
                     for(cursorPageTop, cursorPageTop+PAGE_SIZE)::(index) {
                         
-                        choicesModified->push(value: (if (cursorPos == index) '>  ' else '   ') + choices[index]);
+                        choicesModified->push(value: 
+                            (if (cursorPos == index) '-> ' else '   ') + 
+                            pad(text:choices[index]) + 
+                            (if (cursorPos == index) ' <-' else '   ')                            
+                        );
                     }
 
 
@@ -223,8 +251,14 @@
                         choicesModified->push(value:'');
 
                 } else ::<= {
+                    if (header != empty)                               
+                        choicesModified->push(value:'   '+header);
                     for(0, choices->keycount)::(index) {
-                        choicesModified->push(value: (if (cursorPos == index) '>  ' else '   ') + choices[index]);
+                        choicesModified->push(value: 
+                            (if (cursorPos == index) '-> ' else '   ') + 
+                            pad(text:choices[index]) + 
+                            (if (cursorPos == index) ' <-' else '   ')
+                        );
                     }
                 }
                 
@@ -780,7 +814,7 @@
             // Like all UI choices, the weight can be chosen.
             // Prompt will be displayed, like speaker in the message callback
             //
-            queueChoices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetChoices, onGetPrompt, jumpTag, onLeave) {
+            queueChoices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetChoices, onGetPrompt, jumpTag, onLeave, header, onGetHeader) {
 
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
@@ -798,7 +832,9 @@
                         onGetChoices : onGetChoices,
                         onGetPrompt : onGetPrompt,
                         renderable:renderable,
-                        jumpTag : jumpTag
+                        jumpTag : jumpTag,
+                        header : header,
+                        onGetHeader : onGetHeader
                     });
                 }]);
             },

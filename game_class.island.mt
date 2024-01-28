@@ -248,7 +248,7 @@
                 @:wep = Item.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
-                        value.type == Item.TYPE.ARMOR
+                        value.equipType == Item.TYPE.ARMOR
                 );;
                     
                 entity.equip(
@@ -359,10 +359,16 @@
             
             },
 
-            wait::(until) {            
+            wait::(until) {       
+                @:world = import(module:'game_singleton.world.mt');
                 {:::} {
                     forever ::{
-                        @:world = import(module:'game_singleton.world.mt');
+                        when(world.time != until) send()
+                        this.incrementTime();
+                    }
+                }
+                {:::} {
+                    forever ::{
                         when(world.time == until) send()
                         this.incrementTime();
                     }
@@ -511,6 +517,17 @@
                     if (event.expired) ::<= {
                         event.base.onEventEnd(event);                    
                         state.events->remove(key:state.events->findIndex(value:event));
+                    }
+                }
+            },
+            
+            findLocation ::(id) {
+                return {:::} {
+                    foreach(state.map.getAllItemData())::(i, landmark) {
+                        foreach(landmark.locations)::(n, location) {
+                            when(location.worldID == id)
+                                send(message:location);
+                        }
                     }
                 }
             },

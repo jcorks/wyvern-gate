@@ -26,6 +26,7 @@
 @:Profession = import(module:'game_mutator.profession.mt');
 @:Item = import(module:'game_mutator.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
+@:g = import(module:'game_function.g.mt');
 
 
 @:Interaction = Database.new(
@@ -336,7 +337,7 @@ Interaction.newEntry(
                 @:chance = Number.random();
                 match(true) {
                   // normal
-                  (chance < 0.5)::<= {
+                  (chance < 0.7)::<= {
                     windowEvent.queueMessage(
                         text:'Someone sits next to you.'
                     );   
@@ -359,7 +360,7 @@ Interaction.newEntry(
                   
 
                   // gamblist
-                  (chance < 0.8 && world.npcs.skie != empty && !world.npcs.skie.isIncapacitated() && !world.party.isMember(entity:world.npcs.skie))::<= {
+                  (chance < 0.85 && world.npcs.skie != empty && !world.npcs.skie.isIncapacitated() && !world.party.isMember(entity:world.npcs.skie))::<= {
 
                   
                   
@@ -575,7 +576,7 @@ Interaction.newEntry(
                   
 
                   // drunkard
-                  (chance < 1)::<= {                            
+                  (chance < 0.88)::<= {                            
                     @:talkee = location.landmark.island.newInhabitant();
                     talkee.anonymize();
                     windowEvent.queueMessage(
@@ -780,15 +781,16 @@ Interaction.newEntry(
                 windowEvent.queueMessage(text: 'The shop appears to be closed at this hour..');                            
 
 
-            @:pickItem = import(module:'game_function.pickitem.mt');
+            @:pickItem = import(module:'game_function.pickitemprices.mt');
             pickItem(
                 inventory:party.inventory,
                 canCancel: true,
                 leftWeight: 0.5,
                 topWeight: 0.5,
                 onGetPrompt:: <-  'Sell which? (current: ' + party.inventory.gold + 'G)',
-                showGold: true,
                 goldMultiplier: (0.5 / 5)*0.5,
+                header : ['Item', 'Price'],
+                leftJustified : [true, false],
                 onPick::(item) {
                     when(item == empty) empty;
 
@@ -802,7 +804,7 @@ Interaction.newEntry(
                         price = 1;
                     }
                     windowEvent.queueAskBoolean(
-                        prompt:'Sell the ' + item.name + ' for ' + price + 'G?',
+                        prompt:'Sell the ' + item.name + ' for ' + g(g:price) + '?',
                         onChoice::(which) {
                             when(which == false) empty;
 
@@ -817,7 +819,7 @@ Interaction.newEntry(
                             }
 
                             
-                            windowEvent.queueMessage(text: 'Sold the ' + item.name + ' for ' + price + 'G');
+                            windowEvent.queueMessage(text: 'Sold the ' + item.name + ' for ' + g(g:price) + '.');
 
                             party.inventory.addGold(amount:price);
                             party.inventory.remove(item);
@@ -841,7 +843,7 @@ Interaction.newEntry(
         name : 'bag:shop',
         onInteract ::(location, party) {
             @:cost = (200 + 30*(party.inventory.maxItems - 10)**1.3)->floor;
-            windowEvent.queueMessage(text: 'The shopkeep offers to exchange your bag for a larger one. This new one will hold 5 additional items, making the capacity ' + (party.inventory.maxItems + 5) + ' items. This upgrade will cost ' + cost +'G');
+            windowEvent.queueMessage(text: 'The shopkeep offers to exchange your bag for a larger one. This new one will hold 5 additional items, making the capacity ' + (party.inventory.maxItems + 5) + ' items. This upgrade will cost ' + g(g:cost) +'.');
             when(party.inventory.gold < cost)
                 windowEvent.queueMessage(text: 'The party cant afford to upgrade their bag.');
             windowEvent.queueAskBoolean(
@@ -893,7 +895,7 @@ Interaction.newEntry(
                     }
                 );
             }
-            @:pickItem = import(module:'game_function.pickitem.mt');
+            @:pickItem = import(module:'game_function.pickitemprices.mt');
             
             when (world.time < world.TIME.MORNING || world.time > world.TIME.EVENING)
                 windowEvent.queueMessage(text: 'The shop appears to be closed at this hour..');                            
@@ -906,12 +908,13 @@ Interaction.newEntry(
                 canCancel: true,
                 leftWeight: 0.6,
                 topWeight: 0.5,
-                onGetPrompt:: <-  'Buy which? (current: ' + party.inventory.gold + 'G)',
-                showGold: true,
+                onGetPrompt:: <-  'Buy which? (current: ' + g(g:party.inventory.gold) + ')',
                 goldMultiplier: (0.5 / 5),
                 onHover ::(item) {
                     hoveredItem = item;
                 },
+                header : ['Item', 'Price'],
+                leftJustified : [true, false],
                 
                 renderable : {
                     render ::{
@@ -1410,7 +1413,7 @@ Interaction.newEntry(
             @:cost = (level * (party.members->keycount)) * 2;
         
             windowEvent.queueAskBoolean(
-                prompt: 'Rest for ' + cost + 'G?',
+                prompt: 'Rest for ' + g(g:cost) + '?',
                 onChoice::(which) {
                     when(which == false) empty;
 
@@ -1491,7 +1494,7 @@ Interaction.newEntry(
 
 
                     windowEvent.queueMessage(
-                        text: 'Changing ' + whom.name + "'s profession from " + whom.profession.base.name + ' to ' + location.ownedBy.profession.base.name + ' will cost ' + cost + 'G.'
+                        text: 'Changing ' + whom.name + "'s profession from " + whom.profession.base.name + ' to ' + location.ownedBy.profession.base.name + ' will cost ' + g(g:cost) + '.'
 
                     );
 
@@ -1667,7 +1670,7 @@ Interaction.newEntry(
                         
                         @choice = windowEvent.queueChoices(
                             prompt: 'Bet how much?',
-                            choices: [...bets]->map(to:::(value) <- String(from:value)),
+                            choices: [...bets]->map(to:::(value) <- g(g:value)),
                             canCancel: true,
                             onChoice::(choice) {
                                 when(choice == 0) empty;
@@ -1759,12 +1762,12 @@ Interaction.newEntry(
                                                 if ((betOnA && aWon) || (!betOnA && !aWon)) ::<= {
                                                     world.accoladeEnable(name:'wonArenaBet');
                                                     windowEvent.queueMessage(
-                                                        text:'The party won ' + win + 'G.'
+                                                        text:'The party won ' + g(g:win) + 'G.'
                                                     );                                    
                                                     party.inventory.addGold(amount:win);
                                                 } else ::<= {
                                                     windowEvent.queueMessage(
-                                                        text:'The party lost ' + bet + 'G.'
+                                                        text:'The party lost ' + g(g:bet) + 'G.'
                                                     );                                    
                                                     party.inventory.subtractGold(amount:bet);
                                                 }  
@@ -1824,7 +1827,7 @@ Interaction.newEntry(
 
         
             @:amount = (20 + Number.random()*75)->floor;
-            windowEvent.queueMessage(text:'The party found ' + amount + 'G');
+            windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
             world.party.inventory.addGold(amount);    
 
         }

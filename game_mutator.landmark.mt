@@ -383,6 +383,15 @@
             },
             
             wait ::(until) {
+                // if already that time, wait till no longer
+                {:::} {
+                    forever ::{
+                        when(world.time != until) send()
+                        world.stepTime();
+                    }
+                }
+                
+                // then wait until the next time that time appears
                 {:::} {
                     forever ::{
                         when(world.time == until) send()
@@ -425,7 +434,10 @@
             },
             
             locations : {
-                get :: <- state.map.getAllItemData()->filter(by:::(value) <- value->type == Location.type)
+                get :: {
+                    when(state.map == empty) [];
+                    return state.map.getAllItemData()->filter(by:::(value) <- value->type == Location.type)
+                }
             },
             island : {
                 get ::<- island_

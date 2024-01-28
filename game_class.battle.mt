@@ -24,6 +24,7 @@
 @:Party = import(module:'game_class.party.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:StateFlags = import(module:'game_class.stateflags.mt');
+@:g = import(module:'game_function.g.mt');
 
 
 
@@ -46,7 +47,7 @@
             windowEvent.queueMessage(text: 'The party acquired ' + item.name + '.');
             party.inventory.add(item);
         }
-        windowEvent.queueMessage(text: 'The party acquired ' + inv.gold + 'G.');
+        windowEvent.queueMessage(text: 'The party acquired ' + g(g:inv.gold) + '.');
         if (inv.gold > 0)
             party.inventory.addGold(amount:inv.gold);
     }
@@ -67,7 +68,7 @@
                 func::{
                     windowEvent.queueMessage(text: 'Jackpot! They dropped some gold!');
                     @:amount = (20 + Number.random()*75)->floor;
-                    windowEvent.queueMessage(text:'The party found ' + amount + 'G');
+                    windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
                     party.inventory.addGold(amount);    
                 },
                 rarity: 100 / 30

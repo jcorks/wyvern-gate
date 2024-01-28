@@ -62,12 +62,12 @@
                 interactionsWalk: Object, 
     
                 // provides the options available when commanding the party in battle.
-                // Each member is an InteractionMenuEntry. Each function is passed the Battle instance.
+                // Each member is an InteractionMenuEntry. Each function is passed the Battle instance and the user.
+                // In addition, the onSelect function will be passed a "commitAction" function. This shall 
+                // be called when the handler has finished choosing an action to commit for the user entity.
+                // This will automatically back out of any existing menus that were placed since 
+                // the onSelect function was called.
                 interactionsBattle : Object,
-                
-                // Provides the options available when browsing the party menu.
-                // Each member is an InteractionMenuEntry
-                interactionsParty : Object,
                 
                 // Provides the options available when opening the options menu.
                 // Each member is an InteractionMenuEntry. Each function is passed the current island and landmark if applicable.

@@ -31,22 +31,25 @@ return ::(
     allies,
     enemies             
 ) {
-    @:commitAction ::(action) {
+    @:world = import(module:'game_singleton.world.mt');
+
+    @:commitAction ::(action => BattleAction->type) {
         battle.entityCommitAction(action:action);    
         windowEvent.jumpToTag(name:'BattleMenu', goBeforeTag:true, doResolveNext:true);
     }
+
+    @:options = [...world.scenario.base.interactionsBattle]->filter(
+        by:::(value) <- value.filter(user, battle)
+    );
+
+
+    @:choices = [...options]->map(to:::(value) <- value.displayName);
 
 
     windowEvent.queueChoiceColumns(
         leftWeight: 1,
         topWeight: 1,
-        choices : [
-            'Act',
-            'Check',
-            'Wait',
-            'Item',
-            'Prayer',
-        ],
+        choices : choices,
         jumpTag: 'BattleMenu',
         keep: true,
         itemsPerColumn: 3,
@@ -54,238 +57,8 @@ return ::(
         prompt: 'What will ' + user.name + ' do?',
         canCancel: false,
         onChoice::(choice) {
-            
-            match(choice-1) {
-              (0): ::<={ // fight
-
-                @:abilities = [];
-                foreach(user.abilitiesAvailable)::(index, ability) {
-                    abilities->push(value:
-                        if (ability.apCost > 0 || ability.hpCost > 0)
-                            if (ability.apCost > 0) 
-                                ability.name + '(' + ability.apCost + ' AP)'
-                            else 
-                                ability.name + '(' + ability.apCost + ' HP)'
-                        else
-                            ability.name
-                    );
-                }
-                
-                windowEvent.queueChoices(
-                    leftWeight: 1,
-                    topWeight: 1,
-                    prompt:'What ability should ' + user.name + ' use?',
-                    choices: abilities,
-                    canCancel: true,
-                    keep: true,
-                    onChoice::(choice) {
-                        when(choice == 0) empty;
-                        
-                        
-                        @:ability = user.abilitiesAvailable[choice-1];
-                        
-                        
-                        match(ability.targetMode) {
-                          (Ability.TARGET_MODE.ONE): ::<={
-                            @:all = [];
-                            foreach(allies)::(index, ally) {
-                                all->push(value:ally);
-                            }
-                            foreach(enemies)::(index, enemy) {
-                                all->push(value:enemy);
-                            }
-                            
-                            
-                            @:allNames = [];
-                            foreach(all)::(index, person) {
-                                allNames->push(value:person.name);
-                            }
-                          
-                          
-                            windowEvent.queueChoices(
-                              leftWeight: 1,
-                              topWeight: 1,
-                              prompt: 'Against whom?',
-                              choices: allNames,
-                              canCancel: true,
-                              keep: true,
-                              onChoice::(choice) {
-                                when(choice == 0) empty;
-                                
-                                commitAction(action:
-                                    BattleAction.new(
-                                        ability: ability,
-                                        targets: [all[choice-1]],
-                                        extraData: {}
-                                    )
-                                );
-                              
-                              }
-                            );
-                            
-                          },
-                          (Ability.TARGET_MODE.ALLALLY): ::<={
-                            commitAction(action:
-                                BattleAction.new(
-                                    ability: ability,
-                                    targets: allies,
-                                    extraData: {}
-                                )
-                            );                          
-                          },
-                          (Ability.TARGET_MODE.ALLENEMY): ::<={
-                            commitAction(action:
-                                BattleAction.new(
-                                    ability: ability,
-                                    targets: enemies,
-                                    extraData: {}                                
-                                )
-                            );
-                          },
-
-                          (Ability.TARGET_MODE.ALL): ::<={
-                            commitAction(action:
-                                BattleAction.new(
-                                    ability: ability,
-                                    targets: [...allies, ...enemies],
-                                    extraData: {}                                
-                                )
-                            );
-                          },
-
-
-
-                          (Ability.TARGET_MODE.NONE): ::<={
-                            commitAction(action:
-                                BattleAction.new(
-                                    ability: ability,
-                                    targets: [],
-                                    extraData: {}                                
-                                )
-                            );
-                          },
-
-                          (Ability.TARGET_MODE.RANDOM): ::<={
-                            @all = [];
-                            foreach(allies)::(index, ally) {
-                                all->push(value:ally);
-                            }
-                            foreach(enemies)::(index, enemy) {
-                                all->push(value:enemy);
-                            }
-                
-                            commitAction(action:
-                                BattleAction.new(
-                                    ability: ability,
-                                    targets: Random.pickArrayItem(list:all),
-                                    extraData: {}                                
-                                )
-                            );
-                          }
-                          
-                          
-
-                        }                    
-                    }
-                );
-              },
-              
-              (1): ::<={ // Info
-                windowEvent.queueChoices(
-                  topWeight: 1,
-                  prompt: 'Check which?', 
-                  leftWeight: 1,
-                  keep: true,
-                  canCancel: true,
-                  choices : [
-                    'Abilities',
-                    'Allies',
-                    'Enemies'
-                  ],
-                  onChoice::(choice) {
-                    when(choice == 0) empty;
-
-                    match(choice-1) {
-                      (0): ::<={ // abilities
-                        @:names = [...user.abilitiesAvailable]->map(to:::(value){return value.name;});
-                        
-                        windowEvent.queueChoices(
-                          leftWeight: 1,
-                          topWeight: 1,
-                          prompt: 'Check which ability?',
-                          choices: names,
-                          keep: true,
-                          canCancel: true,
-                          onChoice::(choice) {
-                            when(choice == 0) empty;
-                                
-                            @:ability = user.abilitiesAvailable[choice-1];
-
-                            windowEvent.queueMessage(
-                                speaker: 'Ability: ' + ability.name,
-                                text:ability.description
-                            );                          
-                          }
-                        );
-                      },
-                      
-                      (1): ::<={ // allies
-                        @:names = [...allies]->map(to:::(value){return value.name;});
-                        
-                        choice = windowEvent.queueChoices(
-                            topWeight: 1,
-                            leftWeight: 1,
-                            prompt:'Check which ally?',
-                            choices: names,
-                            keep: true,
-                            canCancel: true,
-                            onChoice::(choice) {
-                                when (choice == 0) empty;
-
-                                @:ally = allies[choice-1];
-                                ally.describe();                            
-                            }
-                        );
-                      }
-                    
-                    }                  
-                  }
-                );
-                
-
-              },
-              
-
-              
-              // wait
-              (2): ::<={
-                commitAction(action:
-                    BattleAction.new(
-                        ability: Ability.find(name:'Wait'),
-                        targets: [],
-                        extraData: {}
-                    )                
-                );
-              },
-              
-              // Item
-              (3): ::<= {
-                itemmenu(inBattle:true, user, party, enemies, onAct::(action){
-                    commitAction(action);
-                });
-              },
-              
-              // Pray to the great wyverns
-              (4): ::<= {
-                commitAction(action:
-                    BattleAction.new(
-                        ability: Ability.find(name:'Wyvern Prayer'),
-                        targets: [...enemies, ...allies],
-                        extraData: {}
-                    )                
-                );             
-              }
-            }          
+            when(choice == 0) empty;
+            options[choice-1].onSelect(user, battle, commitAction);        
         }
     );    
 }

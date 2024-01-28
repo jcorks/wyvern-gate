@@ -276,7 +276,7 @@
                     @:choiceNames = [];
                     foreach(location.base.aggressiveInteractions) ::(k, name) {
                         choiceNames->push(value:
-                            Interaction.database.find(name).displayName
+                            Interaction.find(name).displayName
                         );
                     }                
                     windowEvent.queueChoices(
@@ -287,7 +287,7 @@
                             when(choice == 0) empty;
 
 
-                            @:interaction = Interaction.database.find(name:
+                            @:interaction = Interaction.find(name:
                                 location.base.aggressiveInteractions[choice-1]
                             );
                             
@@ -341,7 +341,6 @@
                     ...([...scenarioInteractions]->map(to:::(value) <- value.displayName))    
                 ];
                 
-                breakpoint();
 
                 if (this.base.aggressiveInteractions->keycount)
                     choices->push(value: 'Aggress');
@@ -356,12 +355,12 @@
                         when(choice == 0) empty;
 
                         // aggress
-                        when(this.base.aggressiveInteractions->keycount > 0 && choice-1 == choices->size) ::<= {
+                        when(this.base.aggressiveInteractions->keycount > 0 && choice == choices->size) ::<= {
                             aggress(location:this, party);
                         }
                         
-                        when(choice-1 > interactionNames->size)
-                            scenarioInteractions[choice-1].onSelect(location:this)
+                        when(choice-1 >= interactionNames->size)
+                            scenarioInteractions[choice-(1+interactionNames->size)].onSelect(location:this)
                         
                         Interaction.find(name:this.base.interactions[choice-1]).onInteract(
                             location: this,
@@ -1232,8 +1231,8 @@ Location.database.newEntry(data:{
 
 
     
-    minOccupants : 1,
-    maxOccupants : 6,
+    minOccupants : 0,
+    maxOccupants : 0,
     onFirstInteract ::(location) {
         location.ownedBy = location.landmark.island.newInhabitant();            
         location.ownedBy.normalizeStats();              
@@ -1276,9 +1275,12 @@ Location.database.newEntry(data:{
 
 
     
-    minOccupants : 1,
-    maxOccupants : 6,
-    onFirstInteract ::(location) {},
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {
+        location.ownedBy = location.landmark.island.newInhabitant();            
+        location.ownedBy.normalizeStats();                  
+    },
     
     onInteract ::(location) {
 
@@ -1317,9 +1319,12 @@ Location.database.newEntry(data:{
 
 
     
-    minOccupants : 1,
-    maxOccupants : 4,
-    onFirstInteract ::(location) {},
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {
+        location.ownedBy = location.landmark.island.newInhabitant();            
+        location.ownedBy.normalizeStats();                  
+    },
     
     onInteract ::(location) {
 
@@ -1357,8 +1362,8 @@ Location.database.newEntry(data:{
 
 
     
-    minOccupants : 1,
-    maxOccupants : 4,
+    minOccupants : 0,
+    maxOccupants : 0,
     onFirstInteract ::(location) {},
     
     onInteract ::(location) {
@@ -1399,8 +1404,8 @@ Location.database.newEntry(data:{
 
 
     
-    minOccupants : 1,
-    maxOccupants : 10,
+    minOccupants : 0,
+    maxOccupants : 0,
     onFirstInteract ::(location) {},
     
     onInteract ::(location) {

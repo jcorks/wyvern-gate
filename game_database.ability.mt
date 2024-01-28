@@ -22,7 +22,7 @@
 @:Damage = import(module:'game_class.damage.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:StateFlags = import(module:'game_class.stateflags.mt');
-
+@:g = import(module:'game_function.g.mt');
 
 @TARGET_MODE = {
     ONE     : 0,    
@@ -2615,7 +2615,7 @@ Ability.newEntry(
                     targets[0].inventory.addGold(amount);
                 }
                 
-                windowEvent.queueMessage(text:user.name + ' stole ' + amount + 'G!');
+                windowEvent.queueMessage(text:user.name + ' stole ' + g(g:amount) + '!');
             }
 
         }
@@ -3591,21 +3591,21 @@ Ability.newEntry(
                 (world.party.isMember(entity:user)) ::<= {
 
                     when (world.party.inventory.gold < cost)
-                        windowEvent.queueMessage(text: "The party couldn't afford the " + cost + "G bribe!");
+                        windowEvent.queueMessage(text: "The party couldn't afford the " + g(g:cost) + " bribe!");
 
                     world.party.inventory.subtractGold(amount:cost);
                     targets[0].addEffect(
                         from:user, name: 'Bribed', durationTurns: -1
                     );             
-                    windowEvent.queueMessage(text: user.name + ' bribes ' + targets[0].name + '!');
+                    windowEvent.queueMessage(text: user.name + ' bribes ' + targets[0].name + ' for ' + g(g:cost) + '!');
                 
                 },
                 
                 // NPC -> party
                 (world.party.isMember(entity:targets[0])) ::<= {
-                    windowEvent.queueMessage(text: user.name + ' has offered ' + cost + 'G for ' + targets[0].name + ' to stop acting for the rest of the battle.');
+                    windowEvent.queueMessage(text: user.name + ' has offered ' + g(g:cost) + ' for ' + targets[0].name + ' to stop acting for the rest of the battle.');
                     windowEvent.queueAskBoolean(
-                        prompt: 'Accept offer for ' + cost + 'G?',
+                        prompt: 'Accept offer for ' + g(g:cost) + '?',
                         onChoice::(which) {
                             when(which == false) empty;
 
