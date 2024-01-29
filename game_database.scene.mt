@@ -1380,15 +1380,117 @@ Scene.newEntry(
         name : 'trader.scene_intro',
         script: [
             ['???', '...Greetings, mortal.'],
-            ['???', 'Congratulations! For I, the Wyvern of Fortune, have chosen YOU for a once-in-alifetime opportunity.'],
-            ['Wyvern of Fortune', 'You see, my hoard of treasure is looking a bit... small. I require riches.'],
-            ['Wyvern of Fortune', 'If you bring me gold, I will grant you a wish. Anything you like. Doesn\'t that sound wonderful?'],
-            ['Wyvern of Fortune', 'Your meager, drab existence as a simple trader is no more! Now you have something to drive you!'],
-            ['Wyvern of Fortune', 'Go forth, mortal! Get riches! Exploit! Your wish awaits!'],
+            ['???', 'Congratulations! For I, Shiikaakael, the Wyvern of Fortune, have chosen YOU for a once-in-alifetime opportunity.'],
+            ['Shiikaakael, Wyvern of Fortune', 'You see, my hoard of treasure is looking a bit... small. I require riches.'],
+            ['Shiikaakael, Wyvern of Fortune', 'If you bring me gold, I will grant you a wish. Anything you like. Doesn\'t that sound wonderful?'],
+            ['Shiikaakael, Wyvern of Fortune', 'Bring me.... Hummm... Let us say, 10,000G and a wish shall be yours.'],
+            ['Shiikaakael, Wyvern of Fortune', 'Your meager, drab existence as a simple trader is no more! Now you have something to drive you!'],
+            ['Shiikaakael, Wyvern of Fortune', 'Go forth, mortal! Get riches! Exploit! Your wish awaits!'],
         ]
     }
 )     
 
+
+Scene.newEntry(
+    data : {
+        name : 'trader.scene_gold0',
+        script: [
+            ['???', '...'],
+            ['Shiikaakael, Wyvern of Fortune', '...Mortal... I have sensed that you have my riches ready!'],
+            ['Shiikaakael, Wyvern of Fortune', 'I can hardly wait. I will bring you to me at once!'],
+            ['', 'Magic lifts you off your feet and transports you to a new land...'],
+            ::(location, landmark, doNext) {
+                @:world = import(module:'game_singleton.world.mt');
+                @:instance = import(module:'game_singleton.instance.mt');
+                @:Landmark = import(module:'game_mutator.landmark.mt');
+
+                @:d = world.island.newLandmark(
+                    base:Landmark.database.find(name:'Fortune Wyvern Dimension')
+                );
+                instance.visitLandmark(landmark:d);             
+                doNext();
+            }
+        ]
+    }
+)
+
+
+Scene.newEntry(
+    data : {
+        name : 'trader.scene_gold1-0',
+        script: [
+            ['Shiikaakael, Wyvern of Fortune', 'Mortal, show me the fruits of your labor...!'],
+            ['Shiikaakael, Wyvern of Fortune', '...'],
+            ['Shiikaakael, Wyvern of Fortune', 'I\'ll be honest. 10,000G looks a tad... smaller... in person than I was hoping.'],
+            ['Shiikaakael, Wyvern of Fortune', 'Surely, you are capable of much more! Let me think...'],
+            ['Shiikaakael, Wyvern of Fortune', '...Perhaps If you came back with 80,000G! Yes! That would be wonderful.'],
+            ['Shiikaakael, Wyvern of Fortune', 'Obedient mortal, I have decided. Keep your 10,000G. Instead, I will come for you when you have 80,000G. This feels much more befitting of the cost of a wish, does it not?'],
+            ['Shiikaakael, Wyvern of Fortune', '...'],
+            ['Shiikaakael, Wyvern of Fortune', 'Well. Go get my riches! Shoo!'],
+            ['', 'The Wyvern\'s magic lifts you off your feet and transports you home...'],
+            ::(location, landmark, doNext) {
+                @:world = import(module:'game_singleton.world.mt');
+                @:instance = import(module:'game_singleton.instance.mt');
+
+
+                instance.visitIsland(restorePos:true);                
+            }
+        ]
+    }
+)
+
+Scene.newEntry(
+    data : {
+        name : 'trader.scene_gold1-1',
+        script: [
+            ['Shiikaakael, Wyvern of Fortune', 'Mortal, you have done it! 80,000G in all its glory!'],
+            ['Shiikaakael, Wyvern of Fortune', '...'],
+            ['Shiikaakael, Wyvern of Fortune', 'Hmm. I was thinking it would fill me with joy seeing all these riches. But something about it still feels...'],
+            ['Shiikaakael, Wyvern of Fortune', '...too small.'],
+            ['Shiikaakael, Wyvern of Fortune', 'Surely, you are capable of much more! Let me think...'],
+            ['Shiikaakael, Wyvern of Fortune', '...Perhaps If you came back with 200,000G! Yes! That would be perfect.'],
+            ['Shiikaakael, Wyvern of Fortune', 'Obedient mortal, I have decided. Keep your 80,000G. Instead, I will come for you when you have 200,000G. This feels much more befitting of the cost of a wish, does it not?'],
+            ['Shiikaakael, Wyvern of Fortune', '...'],
+            ['Shiikaakael, Wyvern of Fortune', 'Well. Go get my riches! Shoo!'],
+            ['', 'The Wyvern\'s magic lifts you off your feet and transports you home...'],
+            ::(location, landmark, doNext) {
+                @:world = import(module:'game_singleton.world.mt');
+                @:instance = import(module:'game_singleton.instance.mt');
+
+
+                instance.visitIsland(restorePos:true);                
+            }
+        ]
+    }
+)
+
+
+Scene.newEntry(
+    data : {
+        name : 'trader.scene_gold1-2',
+        script: [
+            ['Shiikaakael, Wyvern of Fortune', 'Mortal...!'],
+            ['Shiikaakael, Wyvern of Fortune', '...It\'s glorious! It\'s perfect!'],
+            ['Shiikaakael, Wyvern of Fortune', 'Never have I seen so much mortal gold! This will be a wonderful addition to my hoard.'],
+            ['Shiikaakael, Wyvern of Fortune', '...Yes, oh yes!'],
+            ['Shiikaakael, Wyvern of Fortune', 'I\'m unable to fathom how are able to even carry that with you! 200,000G is enough to swim in, even for a creature such as me!'],
+            ['Shiikaakael, Wyvern of Fortune', '...Well. You have earned it. Here is your wish.'],
+            ::(location, landmark, doNext) {
+                @:instance = import(module:'game_singleton.instance.mt');
+                @:enter = import(module:'game_function.name.mt');
+                enter(
+                    prompt: 'What is your wish?',
+                    onDone ::(name) {
+                        @:world = import(module:'game_singleton.world.mt')
+                        world.setWish(wish:name);
+                        instance.savestate();
+                        (import(module:'game_function.newrecord.mt'))(wish:name);
+                    }
+                );
+            }
+        ]
+    }
+)
 
 
 

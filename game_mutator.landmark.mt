@@ -1119,6 +1119,45 @@ Landmark.database.newEntry(
     }
 )        
 
+
+Landmark.database.newEntry(
+    data: {
+        name : 'Fortune Wyvern Dimension',
+        legendName: '???',
+        symbol : 'M',
+        rarity : 1,      
+        isUnique : true,
+        minLocations : 2,
+        maxLocations : 2,
+        guarded : false,
+        peaceful: true,
+        dungeonMap : true,
+        canSave : true,
+        pointOfNoReturn : false,
+        ephemeral : false,
+        dungeonForceEntrance: false,
+        startingEvents : [
+        ],
+        possibleLocations : [
+        ],
+        requiredLocations : [
+            'Wyvern Throne of Fortune',
+        ],
+        
+        mapHint : {
+            roomSize: 20,
+            roomAreaSize: 15,
+            roomAreaSizeLarge: 15,
+            emptyAreaCount: 1,
+            wallCharacter: ' ',
+            outOfBoundsCharacter: '$'
+        },
+        onCreate ::(landmark, island){},
+        onVisit ::(landmark, island) {}
+        
+    }
+)
+
 Landmark.database.newEntry(
     data: {
         name : 'Ice Wyvern Dimension',

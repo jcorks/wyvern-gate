@@ -197,7 +197,7 @@ return class(
                 when (world.finished)
                     (import(module:'game_function.newrecord.mt'))(wish:world.wish);
                     
-                world.scenario.resume();
+                world.scenario.onResume();
             },
         
             startNew ::{
@@ -231,7 +231,7 @@ return class(
                 loadingScreen(
                     message: 'Loading...',
                     do ::{
-                        world.scenario.base.begin(data:world.scenario.data);
+                        world.scenario.base.onBegin(data:world.scenario.data);
                     }
                 )
                 
@@ -374,7 +374,6 @@ return class(
                                     }
                                 );
                             } else ::<= {
-                                //breakpoint();
                                 @:landmark = visitable[choice-(islandOptions->size + 1 + 1)].data;
                                 when (landmark.base.pointOfNoReturn == true) ::<= {
                                     windowEvent.queueMessage(
@@ -574,6 +573,8 @@ return class(
             
             load ::(serialized) {
                 world.load(serialized);
+                @:island = world.island;
+                island_ = island;                
             }
         }
     }

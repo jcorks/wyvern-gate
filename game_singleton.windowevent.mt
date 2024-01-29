@@ -82,9 +82,10 @@
                 if (data.keep) ::<= {
                     choiceStack->push(value:data);
                 } else ::<= {
-                    if (!requestAutoSkip) 
-                        canvas.popState();
-                    
+                    if (!requestAutoSkip) ::<= {
+                        if (data.pushedCanvasState)
+                            canvas.popState();
+                    }
                     
                     if (data.onLeave)
                         data.onLeave();

@@ -340,7 +340,7 @@
                     state.turn = 0;
                     state.time += 1;
                     if (state.time == TIME.MORNING)
-                        this.scenario.newDay();
+                        this.scenario.onNewDay();
 
                 }
                     

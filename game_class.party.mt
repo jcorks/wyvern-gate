@@ -69,6 +69,7 @@
                 {:::}{
                     foreach(state.members)::(index, m) {
                         if (m == member)::<={
+                            breakpoint();
                             state.members->remove(key:index);
                             windowEvent.queueMessage(text:m.name + ' has been removed from the party.');
                             send();

@@ -214,8 +214,10 @@
             @removed = [];
             foreach(turn)::(index, entity) {                    
                 when(entity.isDead == false && entity.requestsRemove == false) empty;
-                if (group2party[ent2group[entity]] && entity.isDead) party_.remove(member:entity);
-                
+                if (group2party[ent2group[entity]] && entity.isDead) ::<= {
+                    @:world = import(module:'game_singleton.world.mt')
+                    world.scenario.onDeath(entity);
+                }
                 @:group  = ent2group[entity];
                 
                 @index = group->findIndex(value:entity);

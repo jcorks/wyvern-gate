@@ -255,7 +255,7 @@
 
 return {
     name : 'The Chosen',
-    begin ::(data) {
+    onBegin ::(data) {
         @:instance = import(module:'game_singleton.instance.mt');
         @:story = import(module:'game_singleton.story.mt');
         @world = import(module:'game_singleton.world.mt');
@@ -414,11 +414,16 @@ return {
             );*/  
         });        
     },
-    newDay ::(data){},
+    onNewDay ::(data){},
     
-    resume ::(data) {
+    onResume ::(data) {
         @:instance = import(module:'game_singleton.instance.mt');
         instance.visitIsland(restorePos:true);                
+    },
+    
+    onDeath ::(data, entity) {
+        @:world = import(module:'game_singleton.world.mt');
+        world.party.remove(member:entity);        
     },
     
     interactionsPerson : interactionsPerson,

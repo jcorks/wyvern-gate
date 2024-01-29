@@ -14,7 +14,7 @@
 @:InteractionMenuEntry = import(module:'game_struct.interactionmenuentry.mt');
 @:Personality = import(module:'game_database.personality.mt');
 @:g = import(module:'game_function.g.mt');
-
+@:Scene = import(module:'game_database.scene.mt');
 
 @:pickItemStock = ::(*args) {
     @:choicesColumns = import(module:'game_function.choicescolumns.mt');
@@ -110,10 +110,12 @@
         contractRate : 0,
         
         // Whether the hiree was dispatched for the day.
-        role : ROLES.WAITING
+        role : ROLES.WAITING,
+        
+        // The last thing that attacked this hiree while exploring
+        lastAttackedBy : empty
     },
     define ::(this, state) {
-        @lastAttackedBy;
     
         this.interface = {
             defaultLoad ::(member, rate) {
@@ -126,8 +128,12 @@
                 get ::<- state.member
             },
             
+            entityID : {
+                get ::<- state.memberID
+            },
+            
             lastAttackedBy : {
-                get ::<- lastAttackedBy
+                get ::<- state.lastAttackedBy
             },
             
         
@@ -221,14 +227,14 @@
                                             other.anonymize();
                                         } else if (Number.random() > 0.02) ::<= {
                                             other = instance.island.newHostileCreature()
-                                            other.name = 'a ' + other.name;
+                                            other.nickname = 'a ' + other.name;
                                             breakpoint();
                                         } else ::<= {
                                             @:TheBeast = import(module:'game_class.landmarkevent_thebeast.mt');
                                             other = TheBeast.createBeast();
                                         } 
                                             
-                                        lastAttackedBy = other;
+                                        state.lastAttackedBy = other.name;
                                         windowEvent.autoSkip = true;
                                             {:::} {
                                                 forever ::{
@@ -281,7 +287,6 @@
                 @:Entity = import(module:'game_class.entity.mt');
                 // first, look through all items and pick any equipment thats 
                 // more expensive for the slot. This approximates "better gear"
-                breakpoint();
                 @spoilsFiltered = [];
                 foreach(spoils) ::(i, item) {
                     @slot = state.member.getSlotsForItem(item)[0];
@@ -305,7 +310,6 @@
                     
                 }
                 spoils = spoilsFiltered;
-                breakpoint();
                 
                 
                 // then, randomly take half of the spoils. Hiree deserves some good stuff too,
@@ -363,6 +367,9 @@
         
         // Whether a work order was put in for upgrading the shop.
         workOrder : empty,
+        
+        // The times the 
+        goldTier : 0,
     },
     
     define::(this, state) {
@@ -384,6 +391,11 @@
             
             startingG : {
                 get ::<- state.startingG
+            },
+            
+            goldTier : {
+                set ::(value) <- state.goldTier = value,
+                get ::<- state.goldTier
             },
             
             courierReportDay ::(onDone) {
@@ -434,7 +446,7 @@
                                 hasNews = true;
                                 windowEvent.queueMessage(
                                     speaker: 'Courier',
-                                    text: '"I have unfortunate news... Your hiree ' + hiree.entity.name + ' has not returned from their exploration. Word is that ' + hiree.lastAttackedBy.name + ' got them while adventuring. I don\'t think they\'ll be coming back..."'
+                                    text: '"I have unfortunate news... Your hiree ' + hiree.entity.name + ' has not returned from their exploration. Word is that ' + hiree.lastAttackedBy+ ' got them while adventuring. I don\'t think they\'ll be coming back..."'
                                 );
                                 
                                 state.hirees->remove(key:state.hirees->findIndex(value:hiree));
@@ -529,9 +541,6 @@
                         
                         windowEvent.queueNoDisplay(
                             onEnter ::{
-                            
-                            },
-                            onLeave ::{
                                 onDoneReal();
                             }
                         );
@@ -539,10 +548,29 @@
                 )
             },
             
+            isPropertyOwned ::(location) {
+                when(state.ownedProperties->findIndex(query::(value) <- value == location.worldID) != -1) true;
+                when(state.propertiesForSale->findIndex(query::(value) <- value == location.worldID) != -1) true;
+                return false;
+            },
+            
             dayStart ::{
                 @:instance = import(module:'game_singleton.instance.mt');
                 @world = import(module:'game_singleton.world.mt');
-                @party = world.party;            
+                @party = world.party;          
+                
+                
+                @:tiers = [
+                    10000,
+                    80000,
+                    200000
+                ];
+                  
+                when (party.inventory.gold > tiers[state.goldTier]) ::<= {
+                    Scene.start(name:'trader.scene_gold0', onDone ::{
+                    });
+                }
+
 
                 @:currentLandmark = instance.landmark;
                 when (currentLandmark != empty && currentLandmark.base.pointOfNoReturn == true) ::<= {
@@ -574,6 +602,7 @@
                         }
                     );                
                 }                
+                
                 
                 if (state.days != 0)
                     this.courierReportDay(onDone::{
@@ -852,9 +881,27 @@
                     topWeight: 0.5,
                     canCancel: true,
                     onChoice ::(choice) {
+                        when(choice-1 == ROLES.IN_PARTY && [...state.hirees]->filter(by::(value) <- value.role == ROLES.IN_PARTY)->size == 2) ::<= {
+                            windowEvent.queueMessage(
+                                text: 'You already have 2 hirees set to join your party. This is the maximum amount.'
+                            );
+                        }
+                    
                         hiree.role = choice-1;
                     }
                 );
+            },
+            
+            removeHireeEntity::(entity) {
+                @world = import(module:'game_singleton.world.mt');
+        
+                world.party.remove(member:entity);
+
+                @hiree = state.hirees[state.hirees->findIndex(query::(value) <- value.entityID == entity.worldID)];
+                state.hirees->remove(key:state.hirees->findIndex(value:hiree));
+                windowEvent.queueMessage(
+                    text: entity.name + ' was removed from the hirees list.'
+                );            
             },
             
             fire::(hiree) {
@@ -1234,16 +1281,16 @@
                     }
                     
                     @:base = match(shopper.personality.name) {
-                      ('Friendly'):       (standardPrice * 1.35)->floor,
-                      ('Short-tempered'): (standardPrice * 1.05)->floor,
-                      ('Quiet'):          (standardPrice * 1.25)->floor,
-                      ('Charismatic'):    (standardPrice * 0.85)->floor,
-                      ('Caring'):         (standardPrice * 1.2)->floor,
-                      ('Cold'):           (standardPrice * 0.95)->floor,
-                      ('Disconnected'):   (standardPrice * 0.95)->floor,
-                      ('Inquisitive'):    (standardPrice * 1.15)->floor,
-                      ('Curious'):        (standardPrice * 1.10)->floor,
-                      ('Calm'):           (standardPrice * 1.20)->floor,
+                      ('Friendly'):       (standardPrice * 1.56)->floor,
+                      ('Short-tempered'): (standardPrice * 1.13)->floor,
+                      ('Quiet'):          (standardPrice * 1.28)->floor,
+                      ('Charismatic'):    (standardPrice * 1)->floor,
+                      ('Caring'):         (standardPrice * 1.3)->floor,
+                      ('Cold'):           (standardPrice * 1.15)->floor,
+                      ('Disconnected'):   (standardPrice * 1.45)->floor,
+                      ('Inquisitive'):    (standardPrice * 1.25)->floor,
+                      ('Curious'):        (standardPrice * 1.2)->floor,
+                      ('Calm'):           (standardPrice * 1.3)->floor,
                       default: defaultCalculation()
                     }
 
@@ -1637,17 +1684,28 @@
             when(this.isIncapacitated())
                 windowEvent.queueMessage(
                     text: this.name + ' is not currently able to talk.'
-                );                                                        
+                );                    
+                
             @:world = import(module:'game_singleton.world.mt');
             @:party = world.party;
             @:trader = world.scenario.data.trader;
+            
+            // prevents a few ownership issues that can come up naturally 
+            // by mixing property ownership and employee hiring
+            when (trader.isPropertyOwned(location:entity.owns))
+                windowEvent.queueMessage(
+                    speaker: this.name,
+                    text: random.pickArrayItem(list:this.personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_DENY])
+                );                
+
+
 
             when(trader.isHired(entity:this))
                 windowEvent.queueMessage(
                     text: this.name + ' is already employed by you.'
                 );                
           
-            when (party.members->keycount >= 3 || !this.adventurous)
+            when (!this.adventurous)
                 windowEvent.queueMessage(
                     speaker: this.name,
                     text: random.pickArrayItem(list:this.personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_DENY])
@@ -1709,7 +1767,7 @@
 
 return {
     name : 'The Trader',
-    begin ::(data) {
+    onBegin ::(data) {
     
     
         @:instance = import(module:'game_singleton.instance.mt');
@@ -1804,10 +1862,11 @@ return {
 
 
             
-            party.inventory.addGold(amount:100000);
+            /*
+            party.inventory.addGold(amount:200000);
             
             world.island.tier = 3;
-            /*
+            
             data.trader.addHiree(
                 entity: world.island.newInhabitant(),
                 rate:117
@@ -1821,7 +1880,7 @@ return {
                 rate:157
             );
             */
-        
+                  
 
 
         @somewhere = LargeMap.getAPosition(map:island.map);
@@ -1845,7 +1904,7 @@ return {
         
     },
 
-    newDay ::(data){
+    onNewDay ::(data){
         when(data.trader == empty) empty;
         data.trader.newDay();
     },
@@ -1857,8 +1916,17 @@ return {
             displayName : 'Buy property',
             filter ::(location) {
                 @world = import(module:'game_singleton.world.mt');
+                @:Location = import(module:'game_mutator.location.mt');
                 @:trader = world.scenario.data.trader;
-                return location.ownedBy != empty && trader.ownedProperties->findIndex(value:location.worldID) == -1;
+                return 
+                    location.ownedBy != empty && 
+                    trader.ownedProperties->findIndex(value:location.worldID) == -1 &&
+                    (
+                        location.base.category == Location.CATEGORY.RESIDENTIAL ||
+                        location.base.category == Location.CATEGORY.UTILITY ||
+                        location.base.category == Location.CATEGORY.BUSINESS
+                    )
+                ;
             },
                     
             onSelect::(location) {
@@ -1935,9 +2003,23 @@ return {
             }
         )
     ],
-    resume ::(data) {
+    onResume ::(data) {
         @:trader = data.trader;
         trader.dayStart();                
+    },
+    
+    onDeath ::(data, entity) {
+        @:world = import(module:'game_singleton.world.mt')
+        when (entity == world.party.members[0]) ::<= {
+            windowEvent.queueMessage(
+                text: 'The Trader ' + entity.name + '\'s journey comes to an end...',
+                onLeave :: {
+                    windowEvent.jumpToTag(name:'MainMenu');                
+                }
+            );
+        }
+        
+        data.trader.removeHireeEntity(entity);
     },
 
 

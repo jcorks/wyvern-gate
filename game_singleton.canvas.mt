@@ -276,6 +276,10 @@ return class(
                 @top = savestates->pop;
                 canvas = top.text;
             },
+            
+            stateCount : {
+                get ::<- savestates->keycount
+            },
                         
             drawText ::(text => String) {
                 when (penx < 0 || penx >= CANVAS_WIDTH || peny < 0 || peny >= CANVAS_HEIGHT) empty;              

@@ -145,6 +145,8 @@
         rraeziil        horn
         shaal           light        
         shiikohl        power / influence / strength
+        kaakael         gold / money 
+        shiil           hand / paw
         
         
         

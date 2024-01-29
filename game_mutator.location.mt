@@ -657,6 +657,82 @@ Location.database.newEntry(data:{
 
 
 Location.database.newEntry(data:{
+    name: 'Wyvern Throne of Fortune',
+    rarity: 1,
+    ownVerb : 'owned',
+    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    symbol: 'W',
+    onePerLandmark : true,
+    minStructureSize : 1,
+
+    descriptions: [
+        "What seems to be a gold throne",
+    ],
+    interactions : [
+        'talk',
+        'examine'
+    ],
+    
+    aggressiveInteractions : [
+    ],
+
+
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    
+    onFirstInteract ::(location) {
+    },
+    onInteract ::(location) {
+        return true;
+
+    },            
+    
+    onCreate ::(location) {
+        location.name = 'Wyvern Throne';
+        @:Profession = import(module:'game_mutator.profession.mt');
+        @:Species = import(module:'game_database.species.mt');
+        @:Story = import(module:'game_singleton.story.mt');
+        @:Scene = import(module:'game_database.scene.mt');
+        @:StatSet = import(module:'game_class.statset.mt');
+        location.ownedBy = location.landmark.island.newInhabitant();
+        location.ownedBy.name = 'Wyvern of Fortune';
+        location.ownedBy.species = Species.find(name:'Wyvern of Fire');
+        location.ownedBy.profession = Profession.new(base:Profession.database.find(name:'Wyvern of Fire'));               
+        location.ownedBy.clearAbilities();
+        foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
+            location.ownedBy.learnAbility(name:ability);
+        }
+
+        
+        location.ownedBy.overrideInteract = ::(party, location, onDone) {
+            @:world = import(module:'game_singleton.world.mt');
+            @:trader = world.scenario.data.trader;
+
+            Scene.start(name:'trader.scene_gold1-' + trader.goldTier, onDone::{}, location, landmark:location.landmark);
+            trader.goldTier += 1;
+        }
+        location.ownedBy.stats.load(serialized:StatSet.new(
+            HP:   150,
+            AP:   999,
+            ATK:  12,
+            INT:  5,
+            DEF:  11,
+            LUK:  8,
+            SPD:  25,
+            DEX:  11
+        ).save());
+        location.ownedBy.heal(amount:9999, silent:true); 
+        location.ownedBy.healAP(amount:9999, silent:true); 
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+})
+
+
+Location.database.newEntry(data:{
     name: 'Wyvern Throne of Fire',
     rarity: 1,
     ownVerb : 'owned',

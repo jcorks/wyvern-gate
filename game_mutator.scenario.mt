@@ -40,11 +40,18 @@
             attributes : {
                 name : String,
                 // the function to start off the scenario
-                begin : Function,
+                onBegin : Function,
                 // Function called when a new day starts.
-                newDay : Function,
+                onNewDay : Function,
                 // Function called when loading a save.
-                resume : Function,
+                onResume : Function,
+                // Function to be called when a party member experiences death.
+                onDeath : Function,
+                
+                
+                
+                
+                
                 
                 // provides the options one has when interacting with a person.
                 // Each member is an InteractionMenuEntry. Each function is passed an Entity
@@ -97,13 +104,17 @@
                 get ::<- state.data
             },
             
-            newDay :: {
-                state.base.newDay(data:state.data)
+            onNewDay :: {
+                state.base.onNewDay(data:state.data)
             },
 
-            resume :: {
-                state.base.resume(data:state.data)
-            }
+            onResume :: {
+                state.base.onResume(data:state.data)
+            },
+            
+            onDeath ::(entity) {
+                state.base.onDeath(data:state.data, entity);
+            },
 
         }
     }
