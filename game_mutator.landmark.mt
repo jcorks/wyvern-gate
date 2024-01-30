@@ -515,8 +515,8 @@ Landmark.database.newEntry(
         legendName : 'Town',
         symbol : '#',
         rarity : 100000,
-        minLocations : 3,
-        maxLocations : 5,
+        minLocations : 7,
+        maxLocations : 15,
         isUnique : false,
         peaceful : true,
         dungeonMap : false,
@@ -528,13 +528,13 @@ Landmark.database.newEntry(
         startingEvents : [],
         possibleLocations : [
             {name:'Home', rarity: 1},
-            {name:'Tavern', rarity: 3},
-            {name:'Blacksmith', rarity: 3},
             //{name:'guild', rarity: 25}
         ],
         requiredLocations : [
             'Shop',
             'School',
+            'Tavern',
+            'Blacksmith',
             'Inn',
         ],
         mapHint : {
@@ -557,9 +557,9 @@ Landmark.database.newEntry(
         legendName : 'City',
         symbol : '|',
         rarity : 5,
-        minLocations : 3,
+        minLocations : 12,
         isUnique : false,
-        maxLocations : 12,
+        maxLocations : 17,
         peaceful : true,
         guarded : true,
         dungeonMap : false,

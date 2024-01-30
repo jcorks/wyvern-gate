@@ -787,7 +787,7 @@ Interaction.newEntry(
                 canCancel: true,
                 leftWeight: 0.5,
                 topWeight: 0.5,
-                onGetPrompt:: <-  'Sell which? (current: ' + party.inventory.gold + 'G)',
+                onGetPrompt:: <-  'Sell which? (current: ' + g(g:party.inventory.gold) + ')',
                 goldMultiplier: (0.5 / 5)*0.5,
                 header : ['Item', 'Price'],
                 leftJustified : [true, false],

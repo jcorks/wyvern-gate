@@ -375,6 +375,9 @@ return class(
                                 );
                             } else ::<= {
                                 @:landmark = visitable[choice-(islandOptions->size + 1 + 1)].data;
+
+                                @where = landmark.gate;
+
                                 when (landmark.base.pointOfNoReturn == true) ::<= {
                                     windowEvent.queueMessage(
                                         text: "It may be difficult to return... "
@@ -383,11 +386,11 @@ return class(
                                         prompt:'Enter?',
                                         onChoice::(which) {
                                             if (which == true)
-                                                this.visitLandmark(landmark);
+                                                this.visitLandmark(landmark, where);
                                         }
                                     )
                                 }
-                                this.visitLandmark(landmark);                            
+                                this.visitLandmark(landmark, where);                            
                             }
                         }
                     );

@@ -234,6 +234,8 @@
                             '   '+header
                     ;
                     choicesModified->push(value:initialLine);
+                    if (header != empty)
+                        choicesModified->push(value:'');
 
 
                     for(cursorPageTop, cursorPageTop+PAGE_SIZE)::(index) {
@@ -252,8 +254,10 @@
                         choicesModified->push(value:'');
 
                 } else ::<= {
-                    if (header != empty)                               
+                    if (header != empty) ::<= {     
                         choicesModified->push(value:'   '+header);
+                        choicesModified->push(value:'');
+                    }
                     for(0, choices->keycount)::(index) {
                         choicesModified->push(value: 
                             (if (cursorPos == index) '-{ ' else '   ') + 

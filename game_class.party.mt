@@ -64,6 +64,10 @@
             isMember::(entity => Entity.type) {
                 return state.members->any(condition:::(value) <- value == entity);
             },
+
+            isMemberID::(id => Number) {
+                return state.members->any(condition:::(value) <- value.worldID == id);
+            },
                         
             remove::(member => Entity.type) {
                 {:::}{
