@@ -1567,10 +1567,12 @@ Location.database.newEntry(data:{
     },
     
     onCreate ::(location) {
+        /*
         if (location.landmark.island.tier > 1) 
             if (random.flipCoin()) ::<= {
                 location.lockWithPressurePlate();
             }
+        */
     },
     
     onTimeChange::(location, time) {
