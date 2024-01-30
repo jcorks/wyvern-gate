@@ -1987,7 +1987,7 @@
             
             // prevents a few ownership issues that can come up naturally 
             // by mixing property ownership and employee hiring
-            when (trader.isPropertyOwned(location:entity.owns))
+            when (entity.owns != empty && trader.isPropertyOwned(location:entity.owns))
                 windowEvent.queueMessage(
                     speaker: this.name,
                     text: random.pickArrayItem(list:this.personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_DENY])
