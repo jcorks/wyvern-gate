@@ -163,6 +163,8 @@
         accolades : empty,
         modData : empty
     },  
+    
+
     define:::(this, state) {
 
         @battle = Battle.new();
@@ -706,7 +708,7 @@
             
             load ::(serialized) {
                 loadableIslands = [];
-                state.load(parent:this, serialized);
+                state.load(parent:this, loadFirst:['scenario'], serialized);
                 // overwrite singleton with saved instance
                 @:st = state.story;
                 state.story = import(module:'game_singleton.story.mt');

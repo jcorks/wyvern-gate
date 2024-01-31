@@ -2076,7 +2076,7 @@ Location.database.newEntry(data:{
             return false;
         }
         location.ownedBy.onInteract = ::(interaction) {
-            when(interaction != 'hire') empty;
+            when(interaction != 'Hire' && interaction != 'Hire with contract') empty;
             @:story = import(module:'game_singleton.story.mt');
             world.npcs.mei = empty;
             world.accoladeEnable(name:'recruitedOPNPC');
@@ -2159,7 +2159,7 @@ Location.database.newEntry(data:{
             return false;
         }
         location.ownedBy.onInteract = ::(interaction) {
-            when(interaction != 'hire') empty;
+            when(interaction != 'Hire' && interaction != 'Hire with contract') empty;
             @:world = import(module:'game_singleton.world.mt');                
             world.npcs.sylvia = empty;
             // Nerfed 'em because too common of an appearance. People can recruit if they want without penalty.
@@ -2254,7 +2254,7 @@ Location.database.newEntry(data:{
         }
         
         location.ownedBy.onInteract = ::(interaction) {
-            when(interaction != 'hire') empty;
+            when(interaction != 'Hire' && interaction != 'Hire with contract') empty;
             @:world = import(module:'game_singleton.world.mt');                
             world.npcs.faus = empty;            
             world.accoladeEnable(name:'recruitedOPNPC');

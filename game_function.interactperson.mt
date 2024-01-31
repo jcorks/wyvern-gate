@@ -84,7 +84,7 @@ return ::(this, party, location, onDone, overrideChat, skipIntro) {
             interactions[choice-1].onSelect(
                 entity:this
             );
-            if (this.onInteract) this.onInteract(interaction:interactions[choice-1].base.name);
+            if (this.onInteract) this.onInteract(interaction:interactions[choice-1].displayName);
         }
     );  
 };

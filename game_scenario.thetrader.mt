@@ -1086,6 +1086,24 @@
                                     if (world.party.isMember(entity:hiree.entity))
                                         hiree.returnFromParty();
                                 }
+                                
+                                // Interesting. You seemed to have a phantom employee in your party!
+                                // This is possible with Skie, but could be done through other 
+                                // means perhaps. They are now your free employees!
+                                if (world.party.members->size > 1) ::<= {
+                                    {:::} {
+                                        forever ::{
+                                            when(world.party.members->size == 1) send();
+                                            
+                                            @:newMem = world.party.members->pop;
+                                            this.addHiree(
+                                                entity: newMem,
+                                                rate: 0
+                                            );
+                                        }
+                                    }   
+                                }
+                                
                                 state.startingG = world.party.inventory.gold;                
                                 windowEvent.queueMessage(text:status, pageAfter:14);
                                 
@@ -1973,7 +1991,7 @@
     commonInteractions.person.barter,
     InteractionMenuEntry.new(
         displayName: 'Hire with contract',
-        filter ::(entity)<- true, // everyone can barter,
+        filter ::(entity)<- true,
         onSelect ::(entity) {
             @:this = entity;
             when(this.isIncapacitated())
@@ -2349,9 +2367,23 @@ return {
                 world.scenario.data.trader.finances();
             }
         ),
-        commonInteractions.walk.lookAround,
         commonInteractions.walk.party,
-        commonInteractions.walk.wait
+        InteractionMenuEntry.new(
+            displayName: 'Finish Day',
+            filter::(island, landmark) <- landmark == empty || landmark.base.pointOfNoReturn == false,
+            onSelect::(island, landmark) {
+                windowEvent.queueAskBoolean(
+                    prompt: 'Wait until next day to open shop / explore?',
+                    onChoice::(which) {
+                        when(which == false) empty;
+                        if (landmark)
+                            landmark.wait(until:3) // late morning
+                        else 
+                            island.wait(until:3)                        
+                    }
+                );
+            }
+        )
     ],
     interactionsBattle : [
         commonInteractions.battle.act,

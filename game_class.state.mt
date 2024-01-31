@@ -198,10 +198,35 @@ return {
             return serialized;
         };
             
-        items.load = ::(parent, serialized) {
+        items.load = ::(parent, loadFirst, serialized) {
+
+
             if (parent == empty)
                 error(detail:'state loading parent MUST be present. (parent parameter must be set to something)');
+
+            when(loadFirst == empty) ::<= {
+                foreach(serialized) ::(key, value) {
+                    deserialize(
+                        parent, 
+                        output:items,
+                        key,
+                        value
+                    );
+                }
+            }
+            
+            @:loaded = {};
+            foreach(loadFirst) ::(i, key) {
+                deserialize(
+                    parent, 
+                    output:items,
+                    key,
+                    value:serialized[key]
+                );
+                loaded[key] = true;
+            }
             foreach(serialized) ::(key, value) {
+                when(loaded[key] != empty) empty;
                 deserialize(
                     parent, 
                     output:items,

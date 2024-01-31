@@ -3525,7 +3525,7 @@ Item.database.newEntry(data : {
 
 
 
-
+/*
 Item.database.newEntry(data : {
     name : "Runestone",
     description: "Resonates with certain locations and can reveal runes.",
@@ -3563,7 +3563,7 @@ Item.database.newEntry(data : {
     onCreate ::(item, creationHint) {}
 
 })  
-
+*/
 
 
 Item.database.newEntry(data : {
@@ -3585,7 +3585,7 @@ Item.database.newEntry(data : {
     isApparel : false,    isUnique : false,
     levelMinimum : 10000000,
     useTargetHint : USE_TARGET_HINT.ONE,
-    basePrice: 1,
+    basePrice: 175,
     possibleAbilities : [],
 
     equipMod : StatSet.new(
