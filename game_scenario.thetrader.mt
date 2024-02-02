@@ -156,7 +156,7 @@
                         'Employed for   : ' + state.daysEmployed + ' days\n' +  
                         'Current role   : ' + roleToString(role:state.role) + '\n\n' +
                         
-                        'Total expenses in wages    : ' + g(g:-state.spent) + '\n\n' +
+                        'Total expenses in wages : ' + g(g:-state.spent) + '\n\n' +
 
                         'Profit from employment:\n' +
                         'Dispatch    :' + g(g:state.earned) + '\n' +
@@ -435,7 +435,13 @@
         ledger : empty,
         
         // How many NPC-fronted storefronts there are.
-        additionalStorefrontCount : 0
+        additionalStorefrontCount : 0,
+        
+        // whether a recessions is present and for how many days.
+        // if positive, currently experiencing a recession 
+        // if negative, a recession is impossible for that many days 
+        // if 0, no recession.
+        recession: 0
     },
     
     define::(this, state) {
@@ -564,24 +570,60 @@
                                 popnews = popnews + ' - ' + val + '\n';
                             }
                             
-                            windowEvent.queueMessage(text:popnews);
+                            windowEvent.queueMessage(text:popnews, pageAfter:14);
 
                             @unpopnews = 'These items are now unpopular. People will avoid these or won\'t be willing to buy them for normal prices.\n\n';
                             foreach(state.unpopular) ::(i, val) {
                                 unpopnews = unpopnews + ' - ' + val + '\n';
                             }
-                            windowEvent.queueMessage(text:unpopnews);
+                            windowEvent.queueMessage(text:unpopnews, pageAfter:14);
                         }
 
 
                         if (state.days % 5 == 0) ::<= {
+                            if (world.island.tier < 5) ::<= {
+                                windowEvent.queueMessage(
+                                    speaker: 'Courier',
+                                    text: '"I have received news that the Mysterious Shrine has shifted. I am told this means the quality of items from exploration will increase."'
+                                );
+                                hasNews = true;
+                            }
+                            world.island.tier += 1;
+                        }
+
+                        if (state.recession < 0)
+                            state.recession += 1;
+
+                        
+                        if (state.recession > 0) ::<= {
+                            state.recession -= 1;
+                            if (state.recession == 0) ::<= {
+                                windowEvent.queueMessage(
+                                    speaker: 'Courier',
+                                    text: '"Truly great news. It looks like the island is coming out of its recession. Business should be returning to normal soon."'
+                                );
+                                hasNews = true;
+                                state.recession = -9; // days cooldown
+                            } else ::<= {
+                                windowEvent.queueMessage(
+                                    speaker: 'Courier',
+                                    text: '"I hear the island\'s recession is still ongoing. Hopefully business returns to normal soon."'
+                                );                            
+                                hasNews = true;
+                            }
+                        }
+                        
+                        if (state.days > 25 && state.recession == false && random.try(percentSuccess:10)) ::<= {
+                            state.recession = 5;
+
                             windowEvent.queueMessage(
                                 speaker: 'Courier',
-                                text: '"I have received news that the Mysterious Shrine has shifted. I am told this means the quality of items from exploration will increase."'
+                                text: '"Truly unfortunate news. It looks like the island is currently experiencing a recession. This will affect business for a while."'
                             );
-                            world.island.tier += 1;
                             hasNews = true;
                         }
+                        
+                        
 
 
                         if (!hasNews) ::<= {
@@ -589,13 +631,13 @@
                                 speaker: 'Courier',
                                 text: '"No essential news today, but... ' + 
                                     if (state.days == 1) 
-                                        'Word is, people are looking for contract work similar to what you need. Most people seem to look for work whiel sharing drinks at Taverns."'
+                                        'Word is, people are looking for contract work similar to what you need. Most people seem to look for work while sharing drinks at Taverns."'
                                     else
                                         random.pickArrayItem(
                                         list : [
                                             'I am told that the items that people consider desirable will change soon."',
                                             'Word is, business is booming around cities, and most businesses are accepting buy offers."',
-                                            'Word is, people are looking for contract work similar to what you need. Most people seem to look for work whiel sharing drinks at Taverns."'
+                                            'Word is, people are looking for contract work similar to what you need. Most people seem to look for work while sharing drinks at Taverns."'
                                         ]
                                     )
                             );
@@ -846,7 +888,8 @@
                 
                 @:wantsRaise = [];                            
                 foreach([...state.hirees]) ::(i, hiree) {
-                    if (hiree.entity.isDead == false && hiree.daysEmployed > 4 && random.try(percentSuccess:25)) ::<= {
+                    @:percent = if (state.recession > 0) 45 else 25;
+                    if (hiree.entity.isDead == false && hiree.daysEmployed > 4 && random.try(percentSuccess:percent)) ::<= {
                         wantsRaise->push(value:hiree);
                     }
                 }            
@@ -859,7 +902,7 @@
                         text: "Your hiree " + hiree.entity.name + " comes up to you, hopeful."
                     );
                     
-                    @:raiseAmount = (hiree.contractRate * 0.35)->floor
+                    @:raiseAmount = (hiree.contractRate * 0.6)->floor
                     
                     windowEvent.queueMessage(
                         speaker: hiree.entity.name,
@@ -951,7 +994,12 @@
 
                 {:::} {
                     for(world.TIME.LATE_MORNING, world.TIME.EVENING) ::(i) {
-                        @:shoppers = random.integer(from:0, to:maxPerHour);                            
+                        @shoppers = random.integer(from:0, to:maxPerHour);                            
+
+                        if (state.recession > 0)
+                            shoppers = if (random.try(percentSuccess:20)) 1 else 0;
+
+
                         for(0, shoppers) ::(n) {
                             when(state.shopInventory.items->size == 0) send();
                             @:sold = random.removeArrayItem(list:state.shopInventory.items);
@@ -1036,15 +1084,23 @@
                                     );                        
 
                                 } else ::<= {
-                                    @itemsFound = "Items found by " + hiree.entity.name + ':\n\n';
-                                    foreach(spoils) ::(i, item) {
-                                        itemsFound = itemsFound + "- " + item.name + '\n'
-                                        hiree.earned += (item.price / 10)->floor;
-                                        world.party.inventory.add(item);
+                                    if (!world.party.inventory.isFull) ::<= {
+                                        @itemsFound = "Items found by " + hiree.entity.name + ':\n\n';
+                                        foreach(spoils) ::(i, item) {
+                                            if (!world.party.inventory.isFull) ::<= {
+                                                itemsFound = itemsFound + "- " + item.name + '\n'
+                                                hiree.earned += (item.price / 10)->floor;
+                                                world.party.inventory.add(item);
+                                            }
+                                        }
+                                        windowEvent.queueMessage(
+                                            text:itemsFound
+                                        );   
                                     }
-                                    windowEvent.queueMessage(
-                                        text:itemsFound 
-                                    );                        
+                                    if (world.party.inventory.isFull)
+                                        windowEvent.queueMessage(
+                                            text:'"I found more stuff, but we didn\'t have any space left to hold it."'
+                                        );   
                                 }
                                 hiree.entity.heal(amount:hiree.entity.stats.HP, silent:true);
                                 
@@ -1117,6 +1173,12 @@
                                         rent += (location.modData.trader.boughtPrice * 0.07)->ceil;
                                         @current = location.modData.trader.listPrice;
                                         current += (((Number.random() - 0.5) * 0.05) * location.modData.trader.boughtPrice)->floor;
+
+                                        if (state.recession > 0)
+                                            current *= 0.92;
+                                        current = current->floor;
+
+
                                         if (current < 2000)
                                             current = 2000;
                                         location.modData.trader.listPrice = current;
@@ -1141,6 +1203,11 @@
 
                                     @current = location.modData.trader.listPrice;
                                     current += (((Number.random() - 0.5) * 0.15) * location.modData.trader.listPrice)->floor;
+
+                                    if (state.recession > 0)
+                                        current *= 0.92;
+                                    current = current->floor;
+
                                     if (current < 9000)
                                         current = 9000;
                                     location.modData.trader.listPrice = current;
@@ -1824,7 +1891,7 @@
                                         shopper.name + ' wants to buy: ',
                                         displayName + ' (worth standardly: ' + g(g:standardPrice) + ')',
                                         if (isPopular) 'NOTE: this item is currently in demand.' else if (isUnpopular) 'NOTE: this item is currently experiencing a price-drop.' else '',
-                                        'The shopper seems to be: ' + shopper.personality.name
+                                        'Their personality seems to be: ' + shopper.personality.name
                                     ],
                                     topWeight: 0,
                                     leftWeight: 0.5
@@ -1998,12 +2065,15 @@
                                 );
                             };
 
-                            @:shoppers = random.integer(from:0, to:maxPerHour);
+                            @shoppers = random.integer(from:0, to:maxPerHour);
 
 
                             windowEvent.queueMessage(
                                 text: 'Some time passes...' + world.getDayString()
                             );
+
+                            if (state.recession > 0)
+                                shoppers = if (random.try(percentSuccess:20)) 1 else 0;
 
 
                             when (shoppers == 0)
@@ -2433,7 +2503,7 @@ return {
         }
 
         party.add(member:p0);
-        party.inventory.addGold(amount:1100);
+        party.inventory.addGold(amount:250);
         
         
         
@@ -2665,7 +2735,6 @@ return {
         commonInteractions.battle.pray
     ],
     interactionsOptions : [
-        commonInteractions.options.save,
         commonInteractions.options.system,
         commonInteractions.options.quit
     ],

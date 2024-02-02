@@ -9,8 +9,9 @@
 - Fixes to some windowEvent bugs.
 - Added column usage, giving a face lift to buying and selling items.
 - Menu selection graphic is different.
-- Added waiting action
+- Added waiting action.
 - Huge database and loadable class restructure for easier reading and working. Expect bugs!
+- Fixed multi-paging displays.
 
 0.1.6a
 - Added MapEntity, which allows for NPC to NPC interactions 

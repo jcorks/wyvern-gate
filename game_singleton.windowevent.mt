@@ -30,6 +30,16 @@
     canvas.renderTextFrameGeneral(leftWeight, topWeight, lines, title:speaker, notchText:if(hasNotch != empty) "(next)" else empty)
 }
 
+@:createBlankLine::(width, header) {
+    if (header == empty)
+        header = '';
+    @:out = [header];
+    for(header->length, width) ::(i) {
+        out->push(value: ' ');
+    }
+    return String.combine(strings:out);
+}
+
 @:min = ::(a, b) {
     when(a < b) a;
     return b;
@@ -762,30 +772,55 @@
                 when(requestAutoSkip) ::<= {
                     if (onLeave) onLeave();
                 }
-                nextResolve->push(value:[::{
-                    if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
-                    @iter = lines->keycount - pageAfter;
-                    {:::} {
-                        forever ::{
-                            if (iter < 0) iter = 0;                        
-                            @last = iter == 0;
-                            choiceStack->push(value:{
-                                topWeight: topWeight,
-                                leftWeight : leftWeight,
-                                lines:lines->subset(from:iter, to:min(a:iter+pageAfter, b:lines->keycount)-1),
-                                pageAfter: pageAfter,
-                                prompt: prompt,
-                                onLeave: onLeave,
-                                mode: CHOICE_MODE.DISPLAY,
-                                renderable: renderable
-                            });
-                            when (last) send();
-                            
-                            iter -= pageAfter;
-                            
-                        }
+
+                @:queuePage ::(iter, width, more){
+                    nextResolve->push(value:[::{
+                        @:linesOut = lines->subset(
+                            from:iter, 
+                            to:min(a:iter+pageAfter, b:lines->keycount)-1
+                        )
+                        
+                        if (width != empty)
+                            linesOut->push(value:createBlankLine(width, header:if (more) '-More-' else ''));
+                        
+                        choiceStack->push(value:{
+                            topWeight: topWeight,
+                            leftWeight : leftWeight,
+                            lines : linesOut,
+                            pageAfter: pageAfter,
+                            prompt: prompt,
+                            onLeave: onLeave,
+                            mode: CHOICE_MODE.DISPLAY,
+                            renderable: renderable
+                        });
+                    }]);
+                }
+                if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
+
+                @:MAX_WIDTH = ::<= {
+                    when(lines->size <= pageAfter) empty;
+                    @width = 0;
+                    foreach(lines) ::(k, line) {
+                        if (line->length > width)
+                            width = line->length
                     }
-                }]);
+                    return width;
+                }
+
+                @iter = 0;
+                {:::} {
+                    forever ::{
+
+                        @last = iter + pageAfter >= lines->size;
+
+                        queuePage(iter, width:MAX_WIDTH, more:!last);
+
+                        when (last) send();
+                        iter += 1;
+                        
+                        breakpoint();
+                    }
+                }
             },
             
             // A place holder action. This can be used to run a function 
