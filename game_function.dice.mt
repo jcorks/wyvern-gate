@@ -19,7 +19,6 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:Ability = import(module:'game_database.ability.mt');
-@:pickItem = import(module:'game_function.pickitem.mt');
 @:class = import(module:'Matte.Core.Class');
 @:Die = import(module:'game_class.die.mt');
 

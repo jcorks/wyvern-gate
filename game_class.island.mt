@@ -220,7 +220,7 @@
               
               
               // tier 2: learn 1 to 2 skills and get equips
-              (4):::<= {
+              default: ::<= {
                 for(0, 10)::(i) {
                     entity.learnNextAbility();                
                 }

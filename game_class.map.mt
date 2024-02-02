@@ -48,7 +48,7 @@
 @:THE_BIG_ONE = 100000000;
 @mapSizeW  = 50;
 @mapSizeH  = 18;
-@:SIGHT_RAY_LIMIT = 6;
+@:SIGHT_RAY_LIMIT = 7;
 @:SIGHT_RAY_EPSILON = 0.4;
 
 

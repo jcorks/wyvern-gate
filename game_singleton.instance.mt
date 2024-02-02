@@ -64,7 +64,7 @@ import(module:'game_mutator.location.mt');
     return (xd**2 + yd**2)**0.5;
 }
 @:JSON = import(module:'Matte.Core.JSON');
-@:VERSION = '0.1.5a';
+@:VERSION = '0.1.7a';
 @world = import(module:'game_singleton.world.mt');
 import(module:'game_function.newrecord.mt');
 world.initializeNPCs();
@@ -242,7 +242,7 @@ return class(
             },
             visitIsland ::(where, restorePos) {
                 if (where != empty) ::<= {
-                    world.island = island;
+                    world.island = where;
                 }
                 @:island = world.island;
                 island_ = island;
@@ -571,7 +571,8 @@ return class(
             },
 
             island : {
-                get ::<- island_
+                get ::<- island_,
+                set ::(value) <- island_ = value
             },
             
             load ::(serialized) {

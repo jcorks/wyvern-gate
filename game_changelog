@@ -1,8 +1,22 @@
+0.1.7a
+- Added scenarios. Base game before is the "Chosen" scenario.
+- Added the Trader scenario. It's fun! I think anyway.
+- Enhanced support for custom behavior
+- Saving and loading is now fixed
+- Dungeons are less grindy. Enemy groups can come in 1 to max party members in higher tiers. Stairs are never locked
+- Removed runestone
+- Tablets are now worth a lot more
+- Fixes to some windowEvent bugs.
+- Added column usage, giving a face lift to buying and selling items.
+- Menu selection graphic is different.
+- Added waiting action
+- Huge database and loadable class restructure for easier reading and working. Expect bugs!
+
 0.1.6a
 - Added MapEntity, which allows for NPC to NPC interactions 
 - Rebalanced game to be generally shorter dungeon floors with more hazards
 - Introduced The Beast, The Specter, the Treasure Golem, The Mirror, and "busy" dungeon room events.
-- NPCs in dungeons now disappear when close to an exit
+- Normal NPCs in dungeons now disappear when close to an exit
 - Added multi-team battles
 - Added Life Crystals, where 2 are given by default, and more can be acquired by defeating The Mirror and the Specter.
 

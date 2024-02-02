@@ -260,8 +260,8 @@ Scene.newEntry(
                         @items = [];
                         @runOnce = false;
                         @chooseItem = ::(item) {
-                            when (item == empty && runOnce) ::<= {
-                                // re-add the items
+                            @:cancelTrade = ::{
+                               // re-add the items
                                 foreach(items)::(i, item) {
                                     world.party.inventory.add(item);
                                 }
@@ -270,8 +270,11 @@ Scene.newEntry(
                                 windowEvent.queueNoDisplay(
                                     onEnter::{},
                                     onLeave::{doNext();}                                    
-                                );
-                                                
+                                );                            
+                            }
+
+                            when (item == empty && runOnce) ::<= {
+                                cancelTrade();
                             }
                             if (item != empty) ::<= {
                                 if (item.name == 'Wyvern Key of Fire') ::<= {
@@ -283,35 +286,43 @@ Scene.newEntry(
                             }
                             
                             when(items->keycount == 3) ::<= {
-                                windowEvent.queueMessage(speaker:'Kaedjaal', text:'Excellent. Let me, in exchange, give you this.');   
-                                @:item = Item.new(
-                                    base:Item.database.getRandomFiltered(
-                                        filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial
-                                    ),
-                                    rngEnchantHint:true, 
-                                    colorHint:'red', 
-                                    materialHint: 'Gold'
-                                );
-                                @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
-                                item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(name:'Burning')));
-                                item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(name:'Burning')));
-
-
-                                windowEvent.queueMessage(text:'In exchange, the party was given ' + correctA(word:item.name) + '.');
-                                world.party.inventory.add(item);
-                                
-                                windowEvent.queueMessage(speaker:'Kaedjaal', text:'Would you like to trade once more?');
+                            
                                 windowEvent.queueAskBoolean(
-                                    prompt:'Trade again?',
+                                    prompt: 'Trade items?',
                                     onChoice::(which) {
-                                        when(which) ::<= {
-                                            runOnce = false;
-                                            items = [];
-                                            chooseItem();
-                                        }
-                                        doNext();
+                                        when(which == false) cancelTrade();
+
+                                        windowEvent.queueMessage(speaker:'Kaedjaal', text:'Excellent. Let me, in exchange, give you this.');   
+                                        @:item = Item.new(
+                                            base:Item.database.getRandomFiltered(
+                                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial
+                                            ),
+                                            rngEnchantHint:true, 
+                                            colorHint:'red', 
+                                            materialHint: 'Gold'
+                                        );
+                                        @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
+                                        item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(name:'Burning')));
+                                        item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(name:'Burning')));
+
+
+                                        windowEvent.queueMessage(text:'In exchange, the party was given ' + correctA(word:item.name) + '.');
+                                        world.party.inventory.add(item);
+                                        
+                                        windowEvent.queueMessage(speaker:'Kaedjaal', text:'Would you like to trade once more?');
+                                        windowEvent.queueAskBoolean(
+                                            prompt:'Trade again?',
+                                            onChoice::(which) {
+                                                when(which) ::<= {
+                                                    runOnce = false;
+                                                    items = [];
+                                                    chooseItem();
+                                                }
+                                                doNext();
+                                            }
+                                        );                                        
                                     }
-                                );
+                                )
                             }
                             
                             
@@ -322,7 +333,8 @@ Scene.newEntry(
                                 inventory: world.party.inventory,
                                 leftWeight: 0.5,
                                 topWeight: 0.5,
-                                canCancel:true,
+                                canCancel:false,
+                                keep:false,
                                 prompt: 'Pick the ' + (match(items->keycount) {
                                             (0): 'first',
                                             (1): 'second',
@@ -1390,6 +1402,20 @@ Scene.newEntry(
     }
 )     
 
+Scene.newEntry(
+    data : {
+        name : 'trader.scene_bankrupt',
+        script: [
+            ['???', '...'],
+            ['Shiikaakael, Wyvern of Fortune', '...Mortal... I have sensed something...'],
+            ['Shiikaakael, Wyvern of Fortune', '...most disappointing. The absence of riches.'],
+            ['Shiikaakael, Wyvern of Fortune', 'What\'s worse is those were MY riches that you lost...'],
+            ['Shiikaakael, Wyvern of Fortune', '...Bah. Dreadful. Disgusting, even.'],
+            ['Shiikaakael, Wyvern of Fortune', 'This is why I don\'t do anything with lesser creatures... Be gone, you.'],
+        ]
+    }
+)
+
 
 Scene.newEntry(
     data : {
@@ -1421,6 +1447,8 @@ Scene.newEntry(
         script: [
             ['Shiikaakael, Wyvern of Fortune', 'Mortal, show me the fruits of your labor...!'],
             ['Shiikaakael, Wyvern of Fortune', '...'],
+            ['Shiikaakael, Wyvern of Fortune', '.......'],
+            ['Shiikaakael, Wyvern of Fortune', '..........'],
             ['Shiikaakael, Wyvern of Fortune', 'I\'ll be honest. 10,000G looks a tad... smaller... in person than I was hoping.'],
             ['Shiikaakael, Wyvern of Fortune', 'Surely, you are capable of much more! Let me think...'],
             ['Shiikaakael, Wyvern of Fortune', '...Perhaps If you came back with 80,000G! Yes! That would be wonderful.'],
@@ -1445,11 +1473,13 @@ Scene.newEntry(
         script: [
             ['Shiikaakael, Wyvern of Fortune', 'Mortal, you have done it! 80,000G in all its glory!'],
             ['Shiikaakael, Wyvern of Fortune', '...'],
+            ['Shiikaakael, Wyvern of Fortune', '.......'],
+            ['Shiikaakael, Wyvern of Fortune', '..........'],
             ['Shiikaakael, Wyvern of Fortune', 'Hmm. I was thinking it would fill me with joy seeing all these riches. But something about it still feels...'],
             ['Shiikaakael, Wyvern of Fortune', '...too small.'],
             ['Shiikaakael, Wyvern of Fortune', 'Surely, you are capable of much more! Let me think...'],
-            ['Shiikaakael, Wyvern of Fortune', '...Perhaps If you came back with 200,000G! Yes! That would be perfect.'],
-            ['Shiikaakael, Wyvern of Fortune', 'Obedient mortal, I have decided. Keep your 80,000G. Instead, I will come for you when you have 200,000G. This feels much more befitting of the cost of a wish, does it not?'],
+            ['Shiikaakael, Wyvern of Fortune', '...Perhaps If you came back with 250,000G! Yes! That would be perfect.'],
+            ['Shiikaakael, Wyvern of Fortune', 'Obedient mortal, I have decided. Keep your 80,000G. Instead, I will come for you when you have 250,000G. This feels much more befitting of the cost of a wish, does it not?'],
             ['Shiikaakael, Wyvern of Fortune', '...'],
             ['Shiikaakael, Wyvern of Fortune', 'Well. Go get my riches! Shoo!'],
             ['', 'The Wyvern\'s magic lifts you off your feet and transports you home...'],
@@ -1469,11 +1499,14 @@ Scene.newEntry(
     data : {
         name : 'trader.scene_gold1-2',
         script: [
-            ['Shiikaakael, Wyvern of Fortune', 'Mortal...!'],
+            ['Shiikaakael, Wyvern of Fortune', 'Mortal... Let me see it. What you have done. What you have brought me!'],
+            ['Shiikaakael, Wyvern of Fortune', '...'],
+            ['Shiikaakael, Wyvern of Fortune', '.......'],
+            ['Shiikaakael, Wyvern of Fortune', '..........'],
             ['Shiikaakael, Wyvern of Fortune', '...It\'s glorious! It\'s perfect!'],
             ['Shiikaakael, Wyvern of Fortune', 'Never have I seen so much mortal gold! This will be a wonderful addition to my hoard.'],
             ['Shiikaakael, Wyvern of Fortune', '...Yes, oh yes!'],
-            ['Shiikaakael, Wyvern of Fortune', 'I\'m unable to fathom how are able to even carry that with you! 200,000G is enough to swim in, even for a creature such as me!'],
+            ['Shiikaakael, Wyvern of Fortune', 'I\'m unable to fathom how are able to even carry that with you! 250,000G is enough to swim in, even for a creature such as me!'],
             ['Shiikaakael, Wyvern of Fortune', '...Well. You have earned it. Here is your wish.'],
             ::(location, landmark, doNext) {
                 @:instance = import(module:'game_singleton.instance.mt');

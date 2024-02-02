@@ -4,47 +4,15 @@ Known bugs / concerns:
 
 - Some time of day displays go offscreen when the island name 
   is too long.
-- Sleeping at an inn doesnt apply the change of day until you leave and re-enter the town / city / etc.
 - In battle, some frames display a previous background image rather than the most current one
 - In topaz builds, fullscreen disabling doesnt come with window decoration and resizing is impossible
 - Some abilities are not properly implemented currently.
 - Sometimes, using items will not consume them when they will sometimes be consumed normally. Likely due to either entiering or leaving the battle state, or save/loading an inventory.
+- Certain locations in dungeons need to be made unique per-floor, such as potion shops.
 
 Coming changes:
-  . SCENARIOS. The game will be split up into "scenarios" which have different 
-    goals. The default scenario is "The Chosen", which is the current game. 
-    Each scenario ends up with a Wyvern's Wish at the end. 
     
-    The Trader
-        - This game scenario features a wyvern's request to get 100k (then 700k, then 2M) in exchange for 
-          a wish. 
-        - Each day you decide whether to Explore (normal game) or Shopkeep (sell and buy items)
-        - You start off as one person (always a trader)
-          Shopkeeping 
-            . You choose from your inv what youre stocking the store with. At first this number is low (10)
-              because the shop starts small. You can pay to expand it.
-        - Hiring adventurers results in a hiring wage. Each person you hire goes into a hiring 
-          reserve. At the start of the day, you decide whether to have the adventurer go exploring on 
-          your behalf, or have them join you.
-            . Exploring: An NPC will fight locals ("squabble") and will accrue items from successful fights.
-              If their health is below 50%, they'll finish for the day. You get half of what they bring back 
-              (the lowest value stuff). If they die or get knocked out, they will no longer work for you.
-              They will also equip items as they see fit.
-        - Each day, you have to pay upkeep. THe rent increases based on how much youre making (evil)
-        - Shopkeep mode has NPCs come up to you asking whether to sell or buy. Anywhere from 15-30
-          NPCs may come up to you, with 80% asking to buy something and 20% asking to sell, more or less.
-            . Each item has a base price, and customers will tolerate a certain deviation from the base price 
-              its up to the player to try to guess that and be reasonable.
-            . Haggling has up to 3 turns, First the customer asks how much to buy / sell. Then the player 
-              gives a G amount with a custom deviation from the base price. If within the tolerable range of 
-              an NPC, they will accept the price. Else they will request a lower or higher amount. As days go on, 
-              this range will tighten.
-        - Every 2 days, 5 item types will have their base price doubled (quality and material ignored) and their base price 
-          halved based on current demand. tier sensitive
-        - Every 5 days, tier increases. Message announced that the shrine section has been discovered or something like that and new goods are available
-        - At last tier: Thieving is possible every day. Body guard assignments can be made from hirees
-
-    The Warrior
+    The Warrior Scenario
         - This game scenario features a Wyvern's challenge to defeat it 
         - This is a gauntlet with no saving
         - Features level-ups
@@ -60,11 +28,7 @@ Coming changes:
     
         - Every 3 sets (so 9 floors) theres a boss. There are 2 bosses then the final.
 
-          
-
-  . Native implementation for path searching
-    
-    
+              
   . music and cues in topaz builds 
   . New profession: Artificer
     - Build Auto. takes 3 AP

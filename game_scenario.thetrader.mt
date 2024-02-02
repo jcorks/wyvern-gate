@@ -16,6 +16,10 @@
 @:g = import(module:'game_function.g.mt');
 @:Scene = import(module:'game_database.scene.mt');
 
+
+@:WORK_ORDER__SPACE = 1;
+@:WORK_ORDER__FRONT = 2;
+
 @:hireeContractWorth::(entity)<- 5+((entity.stats.sum/8 + entity.level)*2.5)->ceil;
 @:pickItemStock = ::(*args) {
     @:choicesColumns = import(module:'game_function.choicescolumns.mt');
@@ -59,12 +63,12 @@
             });
             
             @:popularList = [...items]->map(to:::(value) {
-                when(popular->findIndex(value:value.name) != -1) 'High'
-                when(unpopular->findIndex(value:value.name) != -1) 'Low'
+                when(popular->findIndex(value:value.base.name) != -1) 'High'
+                when(unpopular->findIndex(value:value.base.name) != -1) 'Low'
                 return ' '
             })
             
-            when(names->keycount == 0) ::<={
+            if (names->keycount == 0) ::<={
                 windowEvent.queueMessage(text: "The inventory is empty.");
             }
             return [
@@ -87,16 +91,16 @@
 @:ROLES = {
     WAITING : 0,
     DISPATCHED : 1,
-    IN_PARTY : 2
-    //BODYGUARD : 3
+    IN_PARTY : 2,
+    SHOPKEEP : 3,
 }
 
 @:roleToString::(role) {
     return match(role) {
       (0): 'Waiting',
       (1): 'Exploring',
-      (2): 'In Party'
-      //(3): 'Bodyguard'
+      (2): 'In Party',
+      (3): 'Shopkeeping'
     }
 }
 @:TraderState_Hiree = LoadableClass.create(
@@ -120,6 +124,9 @@
         // worth of items found
         earned : 0,
         
+        // amount sold as a shopkeeper
+        sold : 0,
+        
         // How much money has been paid out
         spent : 0
     },
@@ -141,16 +148,19 @@
             
             report :: {
                 windowEvent.queueMessage(
+                    pageAfter: 14,
                     text: 
                         'Report on: ' + state.member.name +'\n' +
                         'Contract worth : ' + g(g:hireeContractWorth(entity:state.member)) + ' a day\n' +
                         'Current wage   : ' + g(g:state.contractRate) + ' a day\n' + 
-                        'Employed for   : ' + state.daysEmployed + ' days\n\n' +
+                        'Employed for   : ' + state.daysEmployed + ' days\n' +  
+                        'Current role   : ' + roleToString(role:state.role) + '\n\n' +
                         
+                        'Total expenses in wages    : ' + g(g:-state.spent) + '\n\n' +
+
                         'Profit from employment:\n' +
-                        'Total expenses in wages    : ' + g(g:-state.spent) + '\n' +
-                        'Estimated earned (dispatch): ' + g(g:state.earned) + '\n'
-                        
+                        'Dispatch    :' + g(g:state.earned) + '\n' +
+                        'Shopkeeping :' + g(g:state.sold) + '\n'
                 );  
             },
         
@@ -191,6 +201,12 @@
                 get ::<- state.earned,
                 set ::(value) <- state.earned = value            
             },
+
+            sold : {
+                get ::<- state.sold,
+                set ::(value) <- state.sold = value            
+            },
+
             
             spent : {
                 get ::<- state.spent,
@@ -415,7 +431,11 @@
         // The times the gold goal has been met
         goldTier : 0,
         
-        ledger : empty
+        // history of transactions
+        ledger : empty,
+        
+        // How many NPC-fronted storefronts there are.
+        additionalStorefrontCount : 0
     },
     
     define::(this, state) {
@@ -475,14 +495,19 @@
 
                         @hasNews = false;
                         
-                        if (state.workOrder == true) ::<= {
+                        if (state.workOrder != empty) ::<= {
                             hasNews = true;
                             windowEvent.queueMessage(
                                 speaker: 'Courier',
                                 text: '"It seems that your work order for upgrading your shop has finished successfully. Enjoy the new space."'
                             );
+                            breakpoint();
+                            if (state.workOrder == WORK_ORDER__SPACE)
+                                state.shopInventory.maxItems += 5
+                            else
+                                state.additionalStorefrontCount += 1;
+
                             state.workOrder = empty;
-                            state.shopInventory.maxItems += 5;
                         }
                         
 
@@ -564,13 +589,13 @@
                                 speaker: 'Courier',
                                 text: '"No essential news today, but... ' + 
                                     if (state.days == 1) 
-                                        'Word is, people are looking for contract work similar to what you need. Most people accept being talked to at their homes, or in Taverns."'
+                                        'Word is, people are looking for contract work similar to what you need. Most people seem to look for work whiel sharing drinks at Taverns."'
                                     else
                                         random.pickArrayItem(
                                         list : [
                                             'I am told that the items that people consider desirable will change soon."',
                                             'Word is, business is booming around cities, and most businesses are accepting buy offers."',
-                                            'Word is, people are looking for contract work similar to what you need. Most people accept being talked to at their homes, or in Taverns."',
+                                            'Word is, people are looking for contract work similar to what you need. Most people seem to look for work whiel sharing drinks at Taverns."'
                                         ]
                                     )
                             );
@@ -727,7 +752,7 @@
                 @:tiers = [
                     10000,
                     80000,
-                    200000
+                    250000
                 ];
                   
                 when (party.inventory.gold > tiers[state.goldTier]) ::<= {
@@ -792,7 +817,8 @@
                 );
                 
                 this.haggle(
-                    name,
+                    displayName:name,
+                    name:name,
                     standardPrice: location.modData.trader.listPrice,
                     shopper: buyer,
                     onDone ::(bought, price) {
@@ -820,7 +846,7 @@
                 
                 @:wantsRaise = [];                            
                 foreach([...state.hirees]) ::(i, hiree) {
-                    if (hiree.entity.isDead == false && hiree.daysEmployed > 3 && random.try(percentSuccess:25)) ::<= {
+                    if (hiree.entity.isDead == false && hiree.daysEmployed > 4 && random.try(percentSuccess:25)) ::<= {
                         wantsRaise->push(value:hiree);
                     }
                 }            
@@ -833,15 +859,7 @@
                         text: "Your hiree " + hiree.entity.name + " comes up to you, hopeful."
                     );
                     
-                    @:raiseAmount = random.pickArrayItem(
-                        list : [
-                            5,
-                            10,
-                            7,
-                            12,
-                            3
-                        ]
-                    )
+                    @:raiseAmount = (hiree.contractRate * 0.35)->floor
                     
                     windowEvent.queueMessage(
                         speaker: hiree.entity.name,
@@ -910,6 +928,52 @@
                 }
                 nextRaise();
             },
+            
+            simulateShopkeep::(itemsSold) {
+                when(state.shopInventory.items->size == 0) -1;
+                @maxPerHour = (
+                    (state.shopInventory.items->size / 4.5)
+                )->ceil;
+                
+                if (maxPerHour < 3)
+                    maxPerHour = 3;
+                    
+                if (maxPerHour > 8)
+                    maxPerHour = 8;
+
+                @gained = 0;
+                @world = import(module:'game_singleton.world.mt');
+
+                @:popular   = state.popular;
+                @:unpopular   = state.unpopular;
+
+
+
+                {:::} {
+                    for(world.TIME.LATE_MORNING, world.TIME.EVENING) ::(i) {
+                        @:shoppers = random.integer(from:0, to:maxPerHour);                            
+                        for(0, shoppers) ::(n) {
+                            when(state.shopInventory.items->size == 0) send();
+                            @:sold = random.removeArrayItem(list:state.shopInventory.items);
+
+                            @price = 
+                                if (popular->findIndex(value:sold.base.name) != -1) 
+                                    ((sold.price / 10)->floor)*2
+                                else if (unpopular->findIndex(value:sold.base.name) != -1)
+                                    ((sold.price / 20)->floor)
+                                else 
+                                    (sold.price / 10)->floor
+                            if (price < 1)
+                                price = 1;
+                                    
+                            gained += price;
+                            itemsSold->push(value:sold);
+                            state.shopInventory.remove(item:sold);
+                        }                                    
+                    }
+                }
+                return gained;
+            },
         
             dayEnd::(onDone) {
                 @:onDoneReal ::{
@@ -974,7 +1038,7 @@
                                 } else ::<= {
                                     @itemsFound = "Items found by " + hiree.entity.name + ':\n\n';
                                     foreach(spoils) ::(i, item) {
-                                        itemsFound = itemsFound + "-" + item.name + '\n'
+                                        itemsFound = itemsFound + "- " + item.name + '\n'
                                         hiree.earned += (item.price / 10)->floor;
                                         world.party.inventory.add(item);
                                     }
@@ -985,6 +1049,56 @@
                                 hiree.entity.heal(amount:hiree.entity.stats.HP, silent:true);
                                 
                             }
+
+                            if (state.hirees->size > 0 && [...state.hirees]->filter(by:::(value) <- value.role == ROLES.SHOPKEEP)->size > 0) ::<= {
+                                windowEvent.queueMessage(
+                                    text: 'Your shopkeeps are here with news.'
+                                );
+                            }
+                            foreach([...state.hirees]) ::(i, hiree) {
+                                when (hiree.role != ROLES.SHOPKEEP) empty;
+                                @:itemsSold = [];
+                                @:gained = this.simulateShopkeep(itemsSold);
+                                
+                                // < 0 means stock was empty.
+                                when (gained == -1) 
+                                    windowEvent.queueMessage(
+                                        speaker:hiree.entity.name,
+                                        text: '"Unforunately, no sales were made today due to the store stock being depleted."'
+                                    );
+
+                                when (gained == 0) 
+                                    windowEvent.queueMessage(
+                                        speaker:hiree.entity.name,
+                                        text: '"Unforunately, no sales were made today."'
+                                    );
+
+                                windowEvent.queueMessage(
+                                    speaker:hiree.entity.name,
+                                    text: random.pickArrayItem(
+                                        list : [
+                                            '"Selling today went great."',
+                                            '"Another great day at the store front."',
+                                            '"Many customers today!"',
+                                            '"It was great to see so many things off the shelves."'
+                                        ]
+                                    )
+                                );
+                                
+                                
+                                @sold = "Items sold by " + hiree.entity.name + ':\n\n';
+                                foreach(itemsSold) ::(i, item) {
+                                    sold = sold + "- " + item.name + '\n'
+                                }
+                                sold = sold + '\n\n' + 'Total earned: ' + g(g:gained);
+                                windowEvent.queueMessage(
+                                    text:sold,
+                                    pageAfter:14
+                                );                        
+                                hiree.sold += gained;
+                                world.party.inventory.addGold(amount:gained);
+                            }
+
 
                             @:endWrapUp :: {
                                 @status = "Todays profit:\n";
@@ -1081,6 +1195,13 @@
                                 else 
                                     status = status + "Remaining: " + g(g:world.party.inventory.gold)
 
+                                when (cost > currentG)
+                                    Scene.start(name:'trader.scene_bankrupt', onDone::{                    
+                                        windowEvent.jumpToTag(name:'MainMenu', clearResolve:true);
+                                    });        
+                                        
+
+
                                 // return to pool
                                 foreach(state.hirees) ::(i, hiree) {
                                     if (world.party.isMember(entity:hiree.entity))
@@ -1169,8 +1290,8 @@
                     choices : [
                       'Wait',
                       'Dispatch',
-                      'Add to party'
-                      //'Guard the shop'                    
+                      'Add to party',
+                      'Shopkeep'                 
                     ],
                     leftWeight: 1,
                     topWeight: 0.5,
@@ -1181,6 +1302,14 @@
                                 text: 'You already have 2 hirees set to join your party. This is the maximum amount.'
                             );
                         }
+                        
+                        
+                        when(choice-1 == ROLES.SHOPKEEP && [...state.hirees]->filter(by::(value) <- value.role == ROLES.SHOPKEEP)->size == state.additionalStorefrontCount) ::<= {
+                            windowEvent.queueMessage(
+                                text: 'You currently have no store front available to be kept by a hiree. Your main shop front must be kept by you. You can outfit your shop with additional store fronts by upgrading it.'
+                            );
+                        }
+                        
                     
                         hiree.role = choice-1;
                     }
@@ -1393,6 +1522,68 @@
                 );
             },
             
+            preflightCheckStart::(onDone, isShopkeeping) {
+                @world = import(module:'game_singleton.world.mt');
+                @preflightCheckStart_hireeswaiting :: {
+                    @hasWaitingHiree = false;
+                    foreach(state.hirees) ::(k, hiree) {
+                        if (hiree.role == ROLES.WAITING) ::<= {
+                            hasWaitingHiree = true;
+                        }
+                    }
+                    
+                    when(hasWaitingHiree == false) nextChain();
+                    
+                    windowEvent.queueMessage(
+                        text: 'You have one or more employees that dont have a task.'
+                    );
+                    
+                    windowEvent.queueAskBoolean(
+                        prompt: 'Start day with unassigned hiree tasks?',
+                        onChoice::(which) {
+                            when(which == false) empty;
+                            nextChain();
+                        }
+                    );
+                }
+
+                @:preflightCheckStart_shopkeepingwithnostock :: {
+                    when(isShopkeeping == empty) nextChain();
+                    when(state.shopInventory.items->size != 0) nextChain();
+                    
+                    windowEvent.queueMessage(
+                        text: 'You\'ve chosen to open up shop, but have not stocked your shop yet with items from your inventory. (You have ' + world.party.inventory.items->size + ' item(s) in your inventory to stock the shop with.)'
+                    );
+                    
+                    windowEvent.queueAskBoolean(
+                        prompt: 'Start shopkeeping with empty shop?',
+                        onChoice::(which) {
+                            when(which == false) empty;
+                            nextChain();
+                        }
+                    );
+                    
+                }
+
+
+                @:chain = [
+                    preflightCheckStart_hireeswaiting,
+                    preflightCheckStart_shopkeepingwithnostock
+                ]
+                
+                @:nextChain ::(cancel) {
+                    when(cancel) empty;
+                    when(chain->size == 0) onDone();
+                    @:val = chain[chain->size-1];
+                    chain->pop;
+                    val();
+                }
+                
+                nextChain();
+                
+                
+            },
+            
             explore ::{
                 windowEvent.queueChoices(
                     prompt: 'What next?',
@@ -1408,16 +1599,19 @@
                           (1): this.manage(),
                           
                           (2): ::<= {
-                            @:instance = import(module:'game_singleton.instance.mt');
+                            this.preflightCheckStart(
+                                onDone :: {
+                                    @:instance = import(module:'game_singleton.instance.mt');
 
-                            foreach(state.hirees) ::(k, hiree) {
-                                if (hiree.role == ROLES.IN_PARTY)
-                                    hiree.addToParty();
-                            }
+                                    foreach(state.hirees) ::(k, hiree) {
+                                        if (hiree.role == ROLES.IN_PARTY)
+                                            hiree.addToParty();
+                                    }
 
-                            instance.visitIsland();            
-                            windowEvent.jumpToTag(name:'day-start', goBeforeTag:true, doResolveNext:true);
-
+                                    instance.visitIsland();            
+                                    windowEvent.jumpToTag(name:'day-start', goBeforeTag:true, doResolveNext:true);
+                                }
+                            )
                           }
                         }
                     }
@@ -1547,7 +1741,7 @@
             // When done, onDone is called with the following arguments:
             // - bought, a boolean saying whether it was bought 
             // - price, the final offer that was given before buying or not buying.
-            haggle::(shopper, name, standardPrice, onDone) {
+            haggle::(shopper, displayName, name, standardPrice, onDone) {
                 @offer = standardPrice;
                 @tries = 0;
                 @lastOffer = 0.5;
@@ -1628,7 +1822,7 @@
                                 canvas.renderTextFrameGeneral(
                                     lines: [
                                         shopper.name + ' wants to buy: ',
-                                        name + ' (worth standardly: ' + standardPrice + ')',
+                                        displayName + ' (worth standardly: ' + g(g:standardPrice) + ')',
                                         if (isPopular) 'NOTE: this item is currently in demand.' else if (isUnpopular) 'NOTE: this item is currently experiencing a price-drop.' else '',
                                         'The shopper seems to be: ' + shopper.personality.name
                                     ],
@@ -1719,7 +1913,21 @@
                 haggleNext();
             },
             
-            
+            finishDay ::(landmark, island) {
+                @world = import(module:'game_singleton.world.mt');
+                if (world.time <= 3)
+                    if (landmark)
+                        landmark.wait(until:4) // late morning
+                    else 
+                        world.island.wait(until:4)                        
+                
+
+                if (landmark)
+                    landmark.wait(until:3) // late morning
+                else 
+                    world.island.wait(until:3)             
+            },
+
             startShopDay :: {
                 @world = import(module:'game_singleton.world.mt');
 
@@ -1758,19 +1966,15 @@
                         
                         if (maxPerHour < 3)
                             maxPerHour = 3;
+                        if (maxPerHour > 5)
+                            maxPerHour = 5;
 
 
                         @shopperList = [];
 
                         @:endShopDay :: {
                             windowEvent.jumpToTag(name:'day-start-shop', goBeforeTag:true);
-                            {:::} {
-                                forever ::{
-                                    when(world.time != world.TIME.MORNING)
-                                        world.stepTime();
-                                    send();
-                                }
-                            }                
+                            this.finishDay();               
                         }
                             
                         @:startHour ::{
@@ -1839,7 +2043,7 @@
 
                             shopper.anonymize();
                             
-                            @:item = state.shopInventory.items->pop;
+                            @:item = random.removeArrayItem(list:state.shopInventory.items);
                             
                             windowEvent.queueMessage(
                                 speaker: shopper.name,
@@ -1857,7 +2061,8 @@
                             /// barter logic
                             this.haggle(
                                 shopper,
-                                name:item.name,
+                                displayName:item.name,
+                                name : item.base.name,
                                 standardPrice: (item.price / 10)->ceil,
                                 onDone::(bought, price) {
                                     if (bought) ::<= {
@@ -1897,62 +2102,130 @@
             },
             
             
-            upgradeShop ::{
-                @:current = state.shopInventory.maxItems;
-                
-                when (state.workOrder == true)
-                    windowEvent.queueMessage(
-                        text: 'A work order for upgrading has already been placed.'
-                    );
-                
-                @table = [
-                    100,
-                    300,
-                    500,
-                    700,
-                    1400,
-                    2200,
-                    4000,
-                    8300,
-                    12000,
-                    18000,
-                    26000,
-                    40000,
-                    78000,
-                    112000
-                ]
-                
+            upgradeShop ::{ 
+                @:upgradeShop_space = ::{
+                    @:current = state.shopInventory.maxItems;
+                    
+                    when (state.workOrder != empty)
+                        windowEvent.queueMessage(
+                            text: 'A work order for upgrading has already been placed.'
+                        );
+                    
+                    @table = [
+                        100,
+                        300,
+                        500,
+                        700,
+                        1400,
+                        2200,
+                        4000,
+                        8300,
+                        12000,
+                        18000,
+                        26000,
+                        40000,
+                        78000,
+                        112000
+                    ]
+                    
 
-                @:costNext = table[((current - 10)/5)->floor];
-                when(costNext == empty)
+                    @:costNext = table[((current - 10)/5)->floor];
+                    when(costNext == empty)
+                        windowEvent.queueMessage(
+                            text: 'Your shop cannot be upgraded any further in this way.'
+                        );
+                    
                     windowEvent.queueMessage(
-                        text: 'Your shop cannot be upgraded any further.'
+                        text: 'Your shop can currently hold ' + current + ' items in its stock. It will cost ' + g(g:costNext) + ' in supplies to increase the stock. If upgraded, it will take a day to complete the order.'
                     );
-                
-                windowEvent.queueMessage(
-                    text: 'Your shop can currently hold ' + current + ' items in its stock. It will cost ' + g(g:costNext) + ' in supplies to increase the stock. If upgraded, it will take a day to complete the order.'
-                );
-                
-                windowEvent.queueAskBoolean(
-                    prompt: 'Upgrade shop for ' + g(g:costNext) + '?',
-                    onChoice::(which) {
-                        when(which == false) empty;
-                        @:world = import(module:'game_singleton.world.mt');
-                        
-                        if (costNext > world.party.inventory.gold)
+                    
+                    windowEvent.queueAskBoolean(
+                        prompt: 'Upgrade shop for ' + g(g:costNext) + '?',
+                        onChoice::(which) {
+                            when(which == false) empty;
+                            @:world = import(module:'game_singleton.world.mt');
+                            
+                            if (costNext > world.party.inventory.gold)
+                                windowEvent.queueMessage(
+                                    text: 'You cannot afford to upgrade the shop at this time.'
+                                );
+                                
                             windowEvent.queueMessage(
-                                text: 'You cannot afford to upgrade the shop at this time.'
+                                text: 'Your work order upgrade should finish tomorrow.'
                             );
                             
+                            world.party.inventory.addGold(amount:costNext);
+                            state.workOrder = WORK_ORDER__SPACE;
+                        }
+                    );
+                }
+                
+                
+                @:upgradeShop_fronts = ::{
+                    when (state.workOrder != empty)
                         windowEvent.queueMessage(
-                            text: 'Your work order upgrade should finish tomorrow.'
+                            text: 'A work order for upgrading has already been placed.'
                         );
-                        
-                        world.party.inventory.addGold(amount:costNext);
-                        state.workOrder = true;
+                    
+                    @table = [
+                        1000,
+                        3000,
+                        14000,
+                        27000,
+                        40000,
+                        74000,
+                        100200,
+                        220000,
+                    ]
+                    
+
+                    @:costNext = table[state.additionalStorefrontCount];
+                    when(costNext == empty)
+                        windowEvent.queueMessage(
+                            text: 'Your shop cannot be upgraded any further in this way.'
+                        );
+                    
+                    windowEvent.queueMessage(
+                        text: 'Your shop can currently has '+state.additionalStorefrontCount+' additional store fronts. Additional store fronts can be managed by hirees, allowing you to sell items either simultaneously, or while you are away. It will cost ' + g(g:costNext) + ' in supplies to add an additional store front. If upgraded, it will take a day to complete the order.'
+                    );
+                    
+                    windowEvent.queueAskBoolean(
+                        prompt: 'Upgrade shop for ' + g(g:costNext) + '?',
+                        onChoice::(which) {
+                            when(which == false) empty;
+                            @:world = import(module:'game_singleton.world.mt');
+                            
+                            if (costNext > world.party.inventory.gold)
+                                windowEvent.queueMessage(
+                                    text: 'You cannot afford to upgrade the shop at this time.'
+                                );
+                                
+                            windowEvent.queueMessage(
+                                text: 'Your work order upgrade should finish tomorrow.'
+                            );
+                            
+                            world.party.inventory.subtractGold(amount:costNext);
+                            state.workOrder = WORK_ORDER__FRONT;
+                        }
+                    );
+                }
+                
+                
+                windowEvent.queueChoices(
+                    prompt: 'Upgrades...',
+                    choices : [
+                        'Stock size',
+                        'Additional store fronts'
+                    ],
+                    canCancel: true,                    
+                    onChoice::(choice) {
+                        match(choice) {
+                          (1): upgradeShop_space(),
+                          (2): upgradeShop_fronts()
+                        }
                     }
                 );
-
+                
             },
             
             openShop :: {
@@ -1972,7 +2245,7 @@
                           (1): this.manage(),
                           (2): this.stockShop(),
                           (3): this.upgradeShop(),
-                          (4): this.startShopDay()
+                          (4): this.preflightCheckStart(onDone::{this.startShopDay();}, isShopkeeping:true)
                         }
                     }
                 );
@@ -2018,12 +2291,12 @@
                     text: this.name + ' is already employed by you.'
                 );                
           
-            when (!this.adventurous)
+            /*when (!this.adventurous)
                 windowEvent.queueMessage(
                     speaker: this.name,
                     text: random.pickArrayItem(list:this.personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_DENY])
                 );                
-                
+            */  
             windowEvent.queueMessage(
                 speaker: this.name,
                 text: random.pickArrayItem(list:this.personality.phrases[Personality.SPEECH_EVENT.ADVENTURE_ACCEPT])
@@ -2119,6 +2392,7 @@ return {
         ));
         world.island = keyhome.islandEntry;
         @:island = world.island;
+        instance.island = island;
         party = world.party;
         party.reset();
         party.inventory.maxItems = 70;
@@ -2187,6 +2461,7 @@ return {
             world.island.tier = 3;
             
             
+            
             data.trader.addHiree(
                 entity: world.island.newInhabitant(),
                 rate:117
@@ -2214,7 +2489,6 @@ return {
                 )
             );
             */
-
 
         @somewhere = LargeMap.getAPosition(map:island.map);
         island.map.setPointer(
@@ -2376,10 +2650,8 @@ return {
                     prompt: 'Wait until next day to open shop / explore?',
                     onChoice::(which) {
                         when(which == false) empty;
-                        if (landmark)
-                            landmark.wait(until:3) // late morning
-                        else 
-                            island.wait(until:3)                        
+                        @world = import(module:'game_singleton.world.mt');
+                        world.scenario.data.trader.finishDay(landmark);                       
                     }
                 );
             }

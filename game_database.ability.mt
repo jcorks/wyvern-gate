@@ -1038,7 +1038,7 @@ Ability.newEntry(
             @:pickItem = import(module:'game_function.pickitem.mt');
             @:world = import(module:'game_singleton.world.mt');
             
-            @:item = pickItem(inventory:world.party.inventory, canCancel:false);
+            @:item = pickItem(inventory:world.party.inventory, canCancel:false, keep:false);
         
             windowEvent.queueMessage(
                 text: user.name + ' throws a ' + item.name + ' at ' + targets[0].name + '!'

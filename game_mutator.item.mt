@@ -527,6 +527,10 @@
 
 
                 
+                                
+                state.price *= 1 + ((state.island.levelMin) / (5 + 5*Number.random()));
+                state.price = state.price->ceil;
+                /*
                 @:levelToStratum = ::(level) {
                     return match((level / 5)->floor) {
                       (0): 'IV',
@@ -536,12 +540,8 @@
                       default: 'Unknown'
                     }
                 }
-                                
-                state.price *= 1 + ((state.island.levelMin) / (5 + 5*Number.random()));
-                state.price = state.price->ceil;
                 state.customName = 'Key to ' + state.island.name + ' - Stratum ' + levelToStratum(level:state.island.levelMin);
-
-                    
+                */
             },
             
             resetContainer :: {

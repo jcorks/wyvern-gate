@@ -1279,7 +1279,7 @@ ItemEnchant.database.newEntry(
             ATK: 30,
             DEF: 30,
             INT: 30,
-            HP: -40
+            HP: -10
         ),
         priceMod: 2000,
         tier : 3,
@@ -1304,7 +1304,7 @@ ItemEnchant.database.newEntry(
             ATK: 30,
             DEF: 30,
             INT: 30,
-            AP: -40
+            AP: -10
         ),
         priceMod: 2000,
         tier : 3,

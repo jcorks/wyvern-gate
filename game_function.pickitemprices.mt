@@ -22,6 +22,15 @@
 
 
 return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, goldMultiplier, onHover, renderable, filter, header, leftJustified) {
+    when(inventory.items->size == 0) ::<= {
+        windowEvent.queueMessage(
+            message: 'This inventory is empty.',
+            onLeave :: {
+                onPick();
+            }
+        );
+    }
+    
     @items = []
     choicesColumns(
         leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
@@ -60,6 +69,7 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
             });
             when(names->keycount == 0) ::<={
                 windowEvent.queueMessage(text: "The inventory is empty.");
+                return [[], []];
             }
             return [
                 names,

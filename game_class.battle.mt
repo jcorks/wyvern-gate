@@ -776,6 +776,10 @@
                         error(detail: 'Tried to join battle when was already a part of the battle');
                     windowEvent.queueMessage(text:entity.name + ' joins the fray!');
                     entity.battleStart(battle:this);
+                    entity.startTurn(
+                        enemies: this.getEnemies(entity),
+                        allies: this.getAllies(entity)
+                    );
                 }
 
                 @:newGroup = if (sameGroupAs != empty)

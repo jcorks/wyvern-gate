@@ -478,6 +478,116 @@ MapEntity.Task.database.newEntry(
         return nearby;
     }
 
+    @:aggressive = ::(speed, data, mapEntity) {
+        @:map = mapEntity.controller.map;
+        when (map.getDistanceFromItem(data:mapEntity) < CONTACT_DISTANCE) ::<= {
+            mapEntity.remove();
+            @:landmark = mapEntity.controller.landmark;
+
+            when (world.battle.isActive) ::<= {
+                if (mapEntity.entities[0].species.swarms) ::<= {
+                    // swarming will group them in the same 
+                    // team as the currently swarmed enemy
+                    @:all = world.battle.getMembers();
+                    {:::} {
+                        foreach(all) ::(k, member) {
+                            if (member.species.name == mapEntity.entities[0].species.name) ::<= {
+                                world.battle.join(group: mapEntity.entities, sameGroupAs:member);                        
+                                send();
+                            }
+                        }   
+                        world.battle.join(group: mapEntity.entities);                        
+                    }
+                } else ::<= {
+                    world.battle.join(group: mapEntity.entities);                        
+                }
+            }
+
+
+            world.battle.start(
+                party:  landmark.island.world.party,                            
+                allies: landmark.island.world.party.members,
+                enemies: [...mapEntity.entities],
+                landmark: landmark,
+                loot: true,
+                onAct ::{
+                    landmark.step(); // convenient!
+                },
+                
+                onEnd::(result) {
+                    when(!world.battle.partyWon()) ::<= {
+                        @:windowEvent = import(module:'game_singleton.windowevent.mt');
+                        windowEvent.queueMessage(text:'Perhaps these Chosen were not ready...',
+                            renderable : {
+                                render :: {
+                                    @:canvas = import(module:'game_singleton.canvas.mt');
+                                    canvas.blackout();
+                                    canvas.commit();
+                                }
+                            }
+                        );
+                        
+                        windowEvent.queueNoDisplay(
+                            onEnter :: {                                        
+                                windowEvent.jumpToTag(name:'MainMenu');                                        
+                            }
+                        );
+                    }
+                }
+            ); 
+
+            
+        }
+
+
+        // get new routes and also squabble
+        @:item = map.getItem(data:mapEntity);
+        @:nearby = getAllNearby(mapEntity, map);
+        @closestDist = 1000000;
+        @closest = empty;
+        @squabbled = false;
+        foreach(nearby) ::(i, itemOther) {
+
+            // swarming enemies dont attack each other
+            when (itemOther.data != empty && // filter out pointer
+                  mapEntity.entities[0].species.swarms && 
+                  mapEntity.entities[0].species.name == itemOther.data.entities[0].species.name)
+                empty;
+            
+            @dist = distance(
+                x0: item.x,
+                y0: item.y,
+                x1: itemOther.x,
+                y1: itemOther.y 
+            );
+
+
+            if (dist < closestDist) ::<= {
+                closestDist = dist;
+                closest = itemOther;
+            }
+                                
+            if (dist < CONTACT_DISTANCE) ::<= {
+
+                mapEntity.squabble(other:itemOther.data);
+                squabbled = true;
+            }
+        }
+        
+        // busy!
+        when(squabbled)
+            mapEntity.clearPath();
+        
+
+        when (closestDist < INTEREST_DISTANCE) ::<= {
+            mapEntity.newPathTo(
+                x:closest.x,
+                y:closest.y,
+                speed
+            );
+        }      
+    }
+
 
     MapEntity.Task.database.newEntry(
         data : {
@@ -486,118 +596,22 @@ MapEntity.Task.database.newEntry(
             },
             
             do ::(data, mapEntity) {
-                    
-
-
-                @:map = mapEntity.controller.map;
-                when (map.getDistanceFromItem(data:mapEntity) < CONTACT_DISTANCE) ::<= {
-                    mapEntity.remove();
-                    @:landmark = mapEntity.controller.landmark;
-
-                    when (world.battle.isActive) ::<= {
-                        if (mapEntity.entities[0].species.swarms) ::<= {
-                            // swarming will group them in the same 
-                            // team as the currently swarmed enemy
-                            @:all = world.battle.getMembers();
-                            {:::} {
-                                foreach(all) ::(k, member) {
-                                    if (member.species.name == mapEntity.entities[0].species.name) ::<= {
-                                        world.battle.join(group: mapEntity.entities, sameGroupAs:member);                        
-                                        send();
-                                    }
-                                }   
-                                world.battle.join(group: mapEntity.entities);                        
-                            }
-                        } else ::<= {
-                            world.battle.join(group: mapEntity.entities);                        
-                        }
-                    }
-
-
-                    world.battle.start(
-                        party:  landmark.island.world.party,                            
-                        allies: landmark.island.world.party.members,
-                        enemies: [...mapEntity.entities],
-                        landmark: landmark,
-                        loot: true,
-                        onAct ::{
-                            landmark.step(); // convenient!
-                        },
-                        
-                        onEnd::(result) {
-                            when(!world.battle.partyWon()) ::<= {
-                                @:windowEvent = import(module:'game_singleton.windowevent.mt');
-                                windowEvent.queueMessage(text:'Perhaps these Chosen were not ready...',
-                                    renderable : {
-                                        render :: {
-                                            @:canvas = import(module:'game_singleton.canvas.mt');
-                                            canvas.blackout();
-                                            canvas.commit();
-                                        }
-                                    }
-                                );
-                                
-                                windowEvent.queueNoDisplay(
-                                    onEnter :: {                                        
-                                        windowEvent.jumpToTag(name:'MainMenu');                                        
-                                    }
-                                );
-                            }
-                        }
-                    ); 
-
-                    
-                }
-
-
-                // get new routes and also squabble
-                @:item = map.getItem(data:mapEntity);
-                @:nearby = getAllNearby(mapEntity, map);
-                @closestDist = 1000000;
-                @closest = empty;
-                @squabbled = false;
-                foreach(nearby) ::(i, itemOther) {
-
-                    // swarming enemies dont attack each other
-                    when (itemOther.data != empty && // filter out pointer
-                          mapEntity.entities[0].species.swarms && 
-                          mapEntity.entities[0].species.name == itemOther.data.entities[0].species.name)
-                        empty;
-                    
-                    @dist = distance(
-                        x0: item.x,
-                        y0: item.y,
-                        x1: itemOther.x,
-                        y1: itemOther.y 
-                    );
-
-
-                    if (dist < closestDist) ::<= {
-                        closestDist = dist;
-                        closest = itemOther;
-                    }
-                                        
-                    if (dist < CONTACT_DISTANCE) ::<= {
-
-                        mapEntity.squabble(other:itemOther.data);
-                        squabbled = true;
-                    }
-                }
-                
-                // busy!
-                when(squabbled)
-                    mapEntity.clearPath();
-                
-
-                when (closestDist < INTEREST_DISTANCE) ::<= {
-                    mapEntity.newPathTo(
-                        x:closest.x,
-                        y:closest.y
-                    );
-                }        
+                aggressive(speed:1, data, mapEntity);      
             }
         }
     );
+    
+    MapEntity.Task.database.newEntry(
+        data : {
+            name: 'aggressive-slow',
+            startup ::{
+            },
+            
+            do ::(data, mapEntity) {
+                aggressive(speed:0.5, data, mapEntity);      
+            }
+        }
+    );    
 }
 
 

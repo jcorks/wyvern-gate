@@ -79,7 +79,7 @@
                 entities : ents,
                 tag : 'treasuregolem'
             );
-            ref.addUpkeepTask(name:'aggressive');
+            ref.addUpkeepTask(name:'aggressive-slow');
             
         }
         

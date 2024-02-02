@@ -20,7 +20,7 @@
 
 
 
-return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, onHover, renderable, filter) {
+return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, onHover, renderable, filter, keep) {
     @names = []
     @items = []
     windowEvent.queueChoices(
@@ -54,7 +54,7 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
             }
             return names;
         },
-        keep:true,
+        keep: if (keep == empty) true else keep,
         onChoice ::(choice) {
             when(choice == 0) onPick();
             onPick(item:items[choice-1]);
