@@ -1198,7 +1198,10 @@
                                     @profit = location.modData.trader.listPrice * 0.15;
                                     profit = random.integer(from:(profit * 0.5)->floor, to:(profit * 1.5)->floor);
                                     
-                                    rent += profit;
+                                    if (state.recession > 0 && random.try(percentSuccess:65))
+                                        rent -= profit
+                                    else
+                                        rent += profit;
 
 
                                     @current = location.modData.trader.listPrice;
@@ -1216,7 +1219,7 @@
                                 world.party.inventory.addGold(amount:rent);
                                 investments += rent;
                                 if (rent > 0)
-                                    status = status + "  Businesses   : +" + g(g:rent) + "\n";
+                                    status = status + "  Businesses   : " + (if (rent >= 0) '+' + g(g:rent) else g(g:rent)) + "\n";
 
 
                                 status 
