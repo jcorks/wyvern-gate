@@ -15,6 +15,7 @@
 @:Personality = import(module:'game_database.personality.mt');
 @:g = import(module:'game_function.g.mt');
 @:Scene = import(module:'game_database.scene.mt');
+@:Accolade = import(module:'game_struct.accolade.mt');
 
 
 @:WORK_ORDER__SPACE = 1;
@@ -159,8 +160,8 @@
                         'Total expenses in wages : ' + g(g:-state.spent) + '\n\n' +
 
                         'Profit from employment:\n' +
-                        'Dispatch    :' + g(g:state.earned) + '\n' +
-                        'Shopkeeping :' + g(g:state.sold) + '\n'
+                        'Dispatch    : ' + g(g:state.earned) + '\n' +
+                        'Shopkeeping : ' + g(g:state.sold) + '\n'
                 );  
             },
         
@@ -338,7 +339,8 @@
                             qualityHint : 'Masterwork',
                             rngEnchantHint:true
                         )
-                    );   
+                    ); 
+                    world.scenario.data.trader.state.accolade_employeeCompletedDungeon = true;  
 
 
                 }
@@ -441,7 +443,61 @@
         // if positive, currently experiencing a recession 
         // if negative, a recession is impossible for that many days 
         // if 0, no recession.
-        recession: 0
+        recession: 0,
+        
+        // Total earned from purely investments 
+        totalEarnedInvestments : 0,
+        
+        // Total earned from purely shopkeeping / selling property
+        totalEarnedSales : 0,
+        
+        
+        //////////////
+        ////////////// accolade data 
+        //////////////
+
+        // whether the player experienced a recession
+        accolade_experiencedRecession: false,
+        
+        // whether an employee was never heard from again. 
+        // honestly pretty common, so getting this is hard 
+        accolade_noEmployeesLost : true,
+        
+        // whether an employee completed a dungeon
+        accolade_employeeCompletedDungeon : false,
+        
+        // Whether a player had a customer walk out on them 
+        accolade_failedToHaggle : false,
+        
+        // Whether the player agreed to a raise of over 1000G
+        accolade_raiseOver1000G : false,
+        
+        // Whether a player sold a property.
+        accolade_soldAPropertyProfit : false,
+        
+        // Whether a player found and sold a material shipment.
+        accolade_soldAShipment : false,
+        
+        // Whether a player bought a business that cost over 100000G
+        accolade_boughtBusinessOver100000G : false,
+        
+        // Whether a player denied a raise to get an employee to quit 
+        accolade_hadEmployeeQuit : false,
+        
+        // Manage at least 5 simultaneous employees
+        accolade_5simultaneousHiree : false,
+        
+        // under 40 days is an accolade 
+
+        // whether a player sold a worthless item.
+        accolade_soldAWorthlessItem : false
+        
+        // completing a dungeon by hand is an accolade
+        
+        
+        //imported accolades
+        
+        
     },
     
     define::(this, state) {
@@ -526,6 +582,7 @@
                                     speaker: 'Courier',
                                     text: '"I have unfortunate news... Your hiree ' + hiree.entity.name + ' has not returned from their exploration. Word is that ' + hiree.lastAttackedBy+ ' got them while adventuring. I don\'t think they\'ll be coming back..."'
                                 );
+                                state.accolade_noEmployeesLost = false;
                                 
                                 state.hirees->remove(key:state.hirees->findIndex(value:hiree));
                                 windowEvent.queueMessage(
@@ -615,6 +672,7 @@
                         
                         if (state.days > 25 && state.recession == false && random.try(percentSuccess:10)) ::<= {
                             state.recession = 5;
+                            state.accolade_experiencedRecession = true;
 
                             windowEvent.queueMessage(
                                 speaker: 'Courier',
@@ -870,12 +928,15 @@
 
                         
                         windowEvent.queueMessage(
-                            text:  name + ' was bought for ' + g(g:price) + '.'
+                            text:  name + ' was sold for ' + g(g:price) + '.'
                         );                        
                         
                         state.propertiesForSale->remove(key:state.propertiesForSale->findIndex(value:id));
                         location.modData.trader.listPrice = price;
                         world.party.inventory.addGold(amount:price);
+
+                        if (price > location.modData.trader.boughtPrice)
+                            state.accolade_soldAPropertyProfit = true;
                         onDone();
                     }
                 );
@@ -898,11 +959,16 @@
                     when(wantsRaise->size == 0) onDone();
                     
                     @:hiree = wantsRaise->pop;
+                    @:raiseAmount = (hiree.contractRate * 0.6)->floor;
+                    when(raiseAmount == 0)
+                        nextRaise();
+
+
+
                     windowEvent.queueMessage(
                         text: "Your hiree " + hiree.entity.name + " comes up to you, hopeful."
                     );
                     
-                    @:raiseAmount = (hiree.contractRate * 0.6)->floor
                     
                     windowEvent.queueMessage(
                         speaker: hiree.entity.name,
@@ -931,7 +997,7 @@
                                     
                                     nextRaise();
                                 }
-                                
+                                    
                                 windowEvent.queueMessage(
                                     speaker: hiree.entity.name,
                                     text: random.pickArrayItem(list: [
@@ -942,6 +1008,9 @@
                                 );                                  
                                 
                                 hiree.contractRate += raiseAmount;
+                                if (hiree.contractRate > 1000)
+                                    state.accolade_raiseOver1000G = true;
+
                                 nextRaise();
                                 
                             }
@@ -1011,8 +1080,13 @@
                                     ((sold.price / 20)->floor)
                                 else 
                                     (sold.price / 10)->floor
-                            if (price < 1)
+                            if (price < 1) ::<= {
+                                state.accolade_soldAWorthlessItem = true;
                                 price = 1;
+                            }
+                                
+                            if (sold.base.name == 'Shipment')
+                                state.accolade_soldAShipment = true;
                                     
                             gained += price;
                             itemsSold->push(value:sold);
@@ -1153,6 +1227,7 @@
                                 );                        
                                 hiree.sold += gained;
                                 world.party.inventory.addGold(amount:gained);
+                                state.totalEarnedSales += gained;
                             }
 
 
@@ -1184,6 +1259,7 @@
                                         location.modData.trader.listPrice = current;
                                     }
                                 }
+                                state.totalEarnedInvestments += rent;
                                 world.party.inventory.addGold(amount:rent);
                                 @investments = rent;
                                 if (rent > 0)
@@ -1215,10 +1291,10 @@
                                         current = 9000;
                                     location.modData.trader.listPrice = current;
                                 }
-
+                                state.totalEarnedInvestments += rent;
                                 world.party.inventory.addGold(amount:rent);
                                 investments += rent;
-                                if (rent > 0)
+                                if (rent != 0)
                                     status = status + "  Businesses   : " + (if (rent >= 0) '+' + g(g:rent) else g(g:rent)) + "\n";
 
 
@@ -1352,6 +1428,8 @@
                         rate
                     )
                 );
+                if (state.hirees->size >= 5)
+                    state.accolade_5simultaneousHiree = true;
             },
             
             changeRole::(hiree) {
@@ -1415,7 +1493,9 @@
                 
                 windowEvent.queueMessage(
                     text : hiree.entity.name + ' quits working for you.'
-                );            
+                );  
+                
+                state.accolade_hadEmployeeQuit = true;          
             },
             
             fire::(hiree) {
@@ -1812,6 +1892,9 @@
             // - bought, a boolean saying whether it was bought 
             // - price, the final offer that was given before buying or not buying.
             haggle::(shopper, displayName, name, standardPrice, onDone) {
+                @worthless = standardPrice < 1;
+                if (standardPrice < 1) standardPrice = 1;
+            
                 @offer = standardPrice;
                 @tries = 0;
                 @lastOffer = 0.5;
@@ -1892,14 +1975,14 @@
                                 canvas.renderTextFrameGeneral(
                                     lines: [
                                         shopper.name + ' wants to buy: ',
-                                        displayName + ' (worth standardly: ' + g(g:standardPrice) + ')',
+                                        displayName + ' (worth standardly: ' + (if(worthless) 'WORTHLESS' else g(g:standardPrice)) + ')',
                                         if (isPopular) 'NOTE: this item is currently in demand.' else if (isUnpopular) 'NOTE: this item is currently experiencing a price-drop.' else '',
                                         'Their personality seems to be: ' + shopper.personality.name
                                     ],
                                     topWeight: 0,
                                     leftWeight: 0.5
                                 );
-
+                                
                                 @delta = offer - standardPrice;
                                 canvas.renderTextFrameGeneral(
                                     lines: [
@@ -1952,6 +2035,7 @@
                                         )
                                     );
                                     onDone(bought:false, price:offer);
+                                    state.accolade_failedToHaggle = true;
                                 } else ::<= {
                                     windowEvent.queueMessage(
                                         speaker: shopper.name,
@@ -1975,6 +2059,13 @@
                                         ]
                                     )
                                 );  
+                                if (name == 'Shipment')
+                                    state.accolade_soldAShipment = true;
+                                    
+                                if (worthless)
+                                    state.accolade_soldAWorthlessItem = true;
+
+                                state.totalEarnedSales += offer;
                                 onDone(bought:true, price:offer);
                             }
                         }
@@ -2301,6 +2392,10 @@
                 
             },
             
+            state : {
+                get ::<- state
+            },
+            
             openShop :: {
                 windowEvent.queueChoices(
                     prompt: 'Shop options:',
@@ -2529,7 +2624,7 @@ return {
 
             
             /*
-            party.inventory.addGold(amount:200000);
+            party.inventory.addGold(amount:250000);
             
             world.island.tier = 3;
             
@@ -2562,6 +2657,7 @@ return {
                 )
             );
             */
+            
 
         @somewhere = LargeMap.getAPosition(map:island.map);
         island.map.setPointer(
@@ -2662,6 +2758,9 @@ return {
                         @:trader = world.scenario.data.trader;
                         trader.ownedProperties->push(value: location.worldID);
 
+                        if (location.modData.trader.listPrice > 100000)
+                            trader.state.accolade_boughtBusinessOver100000G = true;
+
                         windowEvent.queueMessage(
                             text: 'Congratulations! You now own ' + location.ownedBy.name + '\'s ' + location.base.name + '.'
                         );
@@ -2742,6 +2841,117 @@ return {
         commonInteractions.options.quit
     ],
     
+    accolades : [
+        Accolade.new(
+            message: "Lucky, lucky!",
+            info : 'Won a gambling game.',
+            condition::(world)<- world.accoladeEnabled(name:'wonGamblingGame')        
+        ),
+        
+        Accolade.new(
+            message: "Honestly, the Arena is a little brutal...",
+            info : 'Won an Arena bet.',
+            condition::(world)<- world.accoladeEnabled(name:'wonArenaBet')
+        ),
+        
+        Accolade.new(
+            message: "Should have kicked them out a while ago.",
+            info: 'Fought a drunkard at the tavern.',
+            condition::(world)<- world.accoladeEnabled(name:'foughtDrunkard')
+        ),
+
+
+
+
+
+
+        Accolade.new(
+            message: 'Business is not-so-booming anymore, is it?',
+            info: 'Managed to get caught up in an economic recession.',
+            condition ::(world) <- world.scenario.data.trader.state.accolade_experiencedRecession
+        ),
+    
+        Accolade.new(
+            message: 'Voted best place to work on the island!',
+            info: 'No employees got murdered.',
+            condition ::(world) <- world.scenario.data.trader.state.accolade_noEmployeesLost && world.accoladeCount(name:'deadPartyMembers') == 0
+        ),
+
+        Accolade.new(
+            message: 'Wow uh. Your employee is a little on the intense side...',
+            info: 'Have a hiree complete a dungeon run and get a Masterwork item at the end.',
+            condition ::(world) <- world.scenario.data.trader.state.accolade_employeeCompletedDungeon
+        ),
+
+        Accolade.new(
+            message: 'You don\'t have to make THAT much of a profit, you know.',
+            info: 'Have a customer leave after haggling to aggressively.',
+            condition ::(world) <- world.scenario.data.trader.state.accolade_failedToHaggle
+        ),
+        
+        Accolade.new(
+            message: 'Voted best place to work on the island*! (* by our employees)',
+            info: 'Agree to a wage of over 1,000G.',
+            condition ::(world) <- world.scenario.data.trader.state.accolade_raiseOver1000G
+        ),
+
+
+        Accolade.new(
+            message: 'It\'s not scalping if it\'s a property... That\'s called an investment!',
+            info: 'Sold a property for a profit.',
+            condition ::(world) <- world.scenario.data.trader.state.accolade_soldAPropertyProfit
+        ),
+
+        Accolade.new(
+            message: 'Hey! Where\'d you find that? More importantly, how did you carry that around?',
+            info: 'Find and sell a material shipment.',
+            condition ::(world) <- world.scenario.data.trader.state.accolade_soldAShipment
+        ),
+
+        Accolade.new(
+            message: 'Got money to spend, I guess.',
+            info: 'Bought a business worth over 100,000G.',
+            condition ::(world) <- world.scenario.data.trader.state.accolade_boughtBusinessOver100000G
+        ),
+        
+        Accolade.new(
+            message: 'You probably should have given them the raise.',
+            info: 'Had an employee quit.',
+            condition ::(world) <- world.scenario.data.trader.state.accolade_hadEmployeeQuit
+        ),
+
+        Accolade.new(
+            message: 'Like a finely-tuned machine.',
+            info: 'Had 5 simultaneous hirees.',
+            condition ::(world) <- world.scenario.data.trader.state.accolade_5simultaneousHiree
+        ),
+
+        Accolade.new(
+            message: 'A true trader.',
+            info: 'Raise 250,000G for the Wyvern of Fortune in fewer than 42 days.',
+            condition ::(world) <- world.scenario.data.trader.state.days < 42
+        ),
+
+        Accolade.new(
+            message: 'Someone\'s gotta buy it, right?',
+            info: 'Sold a worthless item to a customer.',
+            condition ::(world) <- world.scenario.data.trader.state.accolade_soldAWorthlessItem
+        )
+        // TODO: completing a dungeon by hand is an accolade
+    ],
+    
+    reportCard :: {
+        @world = import(module:'game_singleton.world.mt');
+        @trader = world.scenario.data.trader;
+        return 
+            'Days taken  : ' + trader.state.days + '\n' +
+            'Final total : ' + g(g:world.party.inventory.gold) + '\n' +
+            'Properties  : ' + (trader.state.ownedProperties->size + trader.state.propertiesForSale->size) + '\n' +
+            'Hirees      : ' + (trader.state.hirees->size) + '\n' +
+            ' - Earnings -\n' +
+            'Investments : ' + g(g:trader.state.totalEarnedInvestments) + '\n' +
+            'Sales       : ' + g(g:trader.state.totalEarnedSales) + '\n'
+    },
     
     databaseOverrides ::{
         Item.database.newEntry(data : {

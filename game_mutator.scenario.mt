@@ -84,7 +84,14 @@
                 
                 
                 // Function dedicated to replacing database items before loading.
-                databaseOverrides : Function
+                databaseOverrides : Function,
+                
+                // An array of accolades to recount once the game is completed.
+                accolades : Object,
+                
+                // A function to return a small table of stats once a new record (game complete) 
+                // is reached. If no such data makes sense, this can simply return an empty string.
+                reportCard : Function
             }
         ),
     define::(this, state) {
@@ -114,8 +121,7 @@
             
             onDeath ::(entity) {
                 state.base.onDeath(data:state.data, entity);
-            },
-
+            }
         }
     }
 );
