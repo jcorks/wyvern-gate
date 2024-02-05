@@ -17,12 +17,6 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
-@:windowEvent = import(module:'game_singleton.windowevent.mt');
-@:Item = import(module:'game_mutator.item.mt');
-@:Damage = import(module:'game_class.damage.mt');
-@:random = import(module:'game_singleton.random.mt');
-@:StateFlags = import(module:'game_class.stateflags.mt');
-@:g = import(module:'game_function.g.mt');
 
 @TARGET_MODE = {
     ONE     : 0,    
@@ -42,34 +36,18 @@
 } 
 
 
-@:Ability = class(
-    inherits: [Database],
-    define::(this) {
-        this.interface = {        
-            TARGET_MODE : {get::<- TARGET_MODE},
-            USAGE_HINT : {get::<- USAGE_HINT}  
-        }
-    }    
-).new(
-    name : 'Wyvern.Ability',
-    attributes : {
-        name : String,
-        description : String,
-        targetMode : Number,
-        usageHintAI : Number,
-        oncePerBattle : Boolean,
-        durationTurns : Number, // multiduration turns supercede the choice of action
-        apCost : Number,
-        hpCost : Number,
-
-        onAction : Function
-    }
-);
 
 
 
 
 
+@:reset = ::{
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
+@:Item = import(module:'game_mutator.item.mt');
+@:Damage = import(module:'game_class.damage.mt');
+@:random = import(module:'game_singleton.random.mt');
+@:StateFlags = import(module:'game_class.stateflags.mt');
+@:g = import(module:'game_function.g.mt');
 
 Ability.newEntry(
     data: {
@@ -3629,6 +3607,33 @@ Ability.newEntry(
         }
     }
 )
+};
+
+@:Ability = class(
+    inherits: [Database],
+    define::(this) {
+        this.interface = {        
+            TARGET_MODE : {get::<- TARGET_MODE},
+            USAGE_HINT : {get::<- USAGE_HINT}  
+        }
+    }    
+).new(
+    name : 'Wyvern.Ability',
+    attributes : {
+        name : String,
+        description : String,
+        targetMode : Number,
+        usageHintAI : Number,
+        oncePerBattle : Boolean,
+        durationTurns : Number, // multiduration turns supercede the choice of action
+        apCost : Number,
+        hpCost : Number,
+
+        onAction : Function
+    },
+    reset
+);
+
 
 
 return Ability;

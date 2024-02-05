@@ -17,364 +17,21 @@
 */
 @:Database = import(module:'game_class.database.mt');
 @:class = import(module:'Matte.Core.Class');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+
+
+
+
+@:reset ::{
+
 @:random = import(module:'game_singleton.random.mt');
-@Landmark = import(module:'game_mutator.landmark.mt');
+@:Landmark = import(module:'game_mutator.landmark.mt');
 @:Item = import(module:'game_mutator.item.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
 @:Scene = import(module:'game_database.scene.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:State = import(module:'game_class.state.mt');
-@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
-
-@:Location = databaseItemMutatorClass(
-    name: 'Wyvern.Location',
-    statics : {
-        CATEGORY ::<= {  
-            @:ct = {
-                ENTRANCE : 0,
-                RESIDENTIAL : 1,
-                BUSINESS : 2,
-                UTILITY : 3,
-                EXIT : 4,
-                DUNGEON_SPECIAL : 5
-            }
-            return {
-                get ::<- ct
-            }
-        }
-    },
-    items : {
-        worldID : empty,
-        targetLandmark : empty, // where this location could take the party. Could be a different island in theory
-        targetLandmarkEntry : empty, // where in the landmark to take to. Should be an X-Y if populated, else its the locations responsibility to populate as needed.
-        base : empty,
-        occupants : empty, // entities. non-owners can shift
-        ownedBy : empty,// entity
-        description : empty,
-        inventory : empty,
-        x : 0,
-        y : 0,
-        contested : false,
-        name : empty,
-        data : empty, // simple table
-        visited : false,
-        modData : empty
-    },
-    
-    database : Database.new(
-        name: 'Wyvern.Location.Base',
-        attributes : {
-            name: String,
-            rarity: Number,
-            descriptions : Object,
-            symbol : String,
-            
-            // List of interaction names
-            interactions : Object,
-            
-            // List of interaction names that will mark you as 
-            // hostile by the owner / occupants. Might initiate 
-            // combat
-            aggressiveInteractions : Object,
-            
-            ownVerb : String,
-            // number of people aside from the owner
-            minOccupants : Number,
-            // number of people aside from the owner
-            maxOccupants : Number,
-            
-            // Whether there can only be one per landmark.
-            // This is strictly followed in dungeons.
-            onePerLandmark: Boolean,
-
-            // when the location is interacted with, before displaying options
-            // The return value is whether to continue with interaction options 
-            // or not.
-            onInteract : Function,
-            
-            // Called on first time interaction is attempted. 
-            onFirstInteract : Function,
-            
-            // when the location is created
-            onCreate : Function,
-            // called by the world when the time of day changes
-            onTimeChange : Function,
-            // the type of location it is
-            category : Number,
-            
-            // in structural maps, this determines the structure 
-            // size in min units.
-            minStructureSize : Number
-        }
-    ),
-    
-    define:::(this, state) {
-
-
-        @landmark_;
-        @world = import(module:'game_singleton.world.mt');    
-
-                
-        
-        this.interface = {
-            initialize ::(landmark, parent) {
-                @:landmark = if (landmark) landmark else parent.parent; // parents of locations are always maps
-                landmark_ = landmark;     
-            },
-            defaultLoad ::(base, xHint, yHint, ownedByHint) {
-                state.worldID = world.getNextID();
-                state.occupants = []; // entities. non-owners can shift
-                state.inventory = Inventory.new(size:30);
-                state.data = {}; // simple table
-                state.modData = {};
-
-
-                state.base = base;
-                state.x = if (xHint == empty) (Number.random() * landmark_.width ) else xHint;  
-                state.y = if (yHint == empty) (Number.random() * landmark_.height) else yHint;
-                if (ownedByHint != empty)
-                    this.ownedBy = ownedByHint;
-                       
-                state.description = random.pickArrayItem(list:base.descriptions);            
-                base.onCreate(location:this);
-                return this;
-            },
-            
-            afterLoad ::{
-                if (this.ownedBy)
-                    this.ownedBy.owns = this;
-            },
-
-            worldID : {
-                get ::<- state.worldID
-            },
-            
-            targetLandmark : {
-                get ::<- state.targetLandmark,
-                set ::(value) <- state.targetLandmark = value
-            },
-
-            targetLandmarkEntry : {
-                get ::<- state.targetLandmarkEntry,
-                set ::(value) <- state.targetLandmarkEntry = value
-            },
-
-            
-            inventory : {
-                get ::<- state.inventory
-            },
-            ownedBy : {
-                get ::<- state.ownedBy,
-                set ::(value) {
-                    if (state.ownedBy != empty)
-                        state.ownedBy.owns = empty;
-                    state.ownedBy = value          
-                    if (value != empty)          
-                        value.owns = this;
-                }
-            },
-            
-            data : {
-                get ::<- state.data
-            },
-            
-            description : {
-                get ::<- state.description + (if (state.ownedBy != empty && state.base.ownVerb != '') ' This ' + state.base.name + ' is ' + state.base.ownVerb + ' by ' + state.ownedBy.name + '.' else '')
-            },
-            
-            contested : {
-                get ::<- state.contested,
-                set ::(value) <- state.contested = value
-            },
-            x : {
-                get:: <- state.x,
-                set::(value) <- state.x = value
-            },
-            
-            y : {
-                get:: <- state.y,
-                set::(value) <- state.y = value
-            },
-            
-            inventory : {
-                get :: <- state.inventory
-            },
-            
-            name : {
-                get::<- if (state.name == empty) (if (state.ownedBy == empty) state.base.name else (state.ownedBy.name + "'s " + state.base.name)) else state.name,
-                set::(value) <- state.name = value
-            },
-            occupants : {
-                get :: {
-                    return state.occupants;
-                }
-            },
-            
-            discovered : {
-                get :: <- true
-            },  
-            
-            
-            landmark : {
-                get ::<- landmark_
-            },
-            
-            peaceful : {
-                get ::{
-                    when (state.data.peaceful) true;
-                    return landmark_.peaceful;
-                }
-            },
-            
-            // per location mod data.
-            modData : {
-                get ::<- state.modData
-            },
-            
-            
-            lockWithPressurePlate :: {
-                @:pressurePlate = landmark_.addLocation(
-                    name:'Pressure Plate'
-                );
-                
-                state.data.plateID = pressurePlate.worldID;
-                pressurePlate.data.pressed = false;
-
-
-                if (random.flipCoin()) ::<= {
-                    // for every pressure plate, there is a trapped 
-                    // pressure plate.
-                    @:pressurePlateFake = landmark_.addLocation(
-                        name:'Pressure Plate'
-                    );
-                    pressurePlateFake.data.trapped = true;
-                }
-            },
-            
-            
-            isUnlockedWithPlate :: {
-                when(state.data.plateID == empty) true;
-                
-                @locations = landmark_.locations;
-                
-                return locations[locations->findIndex(query::(value) <- 
-                    value.name == 'Pressure Plate' &&
-                    value.worldID == state.data.plateID
-                )].data.pressed;
-            },
-            
-            interact ::{
-                @world = import(module:'game_singleton.world.mt');
-                @party = world.party;            
-                @:Interaction = import(module:'game_database.interaction.mt');
-                
-
-            
-                @:aggress::(location, party) {
-                
-                    @:choiceNames = [];
-                    foreach(location.base.aggressiveInteractions) ::(k, name) {
-                        choiceNames->push(value:
-                            Interaction.find(name).displayName
-                        );
-                    }                
-                    windowEvent.queueChoices(
-                        prompt: 'Aggress how?',
-                        choices: choiceNames,
-                        canCancel : true,
-                        onChoice ::(choice) {
-                            when(choice == 0) empty;
-
-
-                            @:interaction = Interaction.find(name:
-                                location.base.aggressiveInteractions[choice-1]
-                            );
-                            
-                            when (!location.landmark.peaceful) ::<= {
-                                interaction.onInteract(location, party);                    
-                            }
-                                
-                            
-                            windowEvent.queueAskBoolean(
-                                prompt: 'Are you sure?',
-                                onChoice::(which) {
-                                    when(which == false) empty;
-                                    interaction.onInteract(location, party);                                                                                
-                                }
-                            );
-                        }
-                    );
-                }            
-            
-            
-                // initial interaction 
-                // Initial interaction triggers an event.
-                
-                if (state.visited == false) ::<= {
-                    for(0, random.integer(from:state.base.minOccupants, to:state.base.maxOccupants))::(i) {
-                        state.occupants->push(value:landmark_.island.newInhabitant());
-                    }
-                
-                
-                    state.visited = true;
-                    this.base.onFirstInteract(location:this);
-                }
-                    
-                
-                @canInteract = {:::} {
-                    return this.base.onInteract(location:this);
-                }
-                    
-                when(canInteract == false) empty;
-              
-                @:interactionNames = [...this.base.interactions]->map(to:::(value) {
-                    return Interaction.find(name:value).displayName;
-                });
-                
-                @:scenarioInteractions = [...world.scenario.base.interactionsLocation]->filter(
-                    by::(value) <- value.filter(location:this)
-                );
-                    
-                @:choices = [
-                    ...interactionNames,
-                    ...([...scenarioInteractions]->map(to:::(value) <- value.displayName))    
-                ];
-                
-
-                if (this.base.aggressiveInteractions->keycount)
-                    choices->push(value: 'Aggress');
-                    
-                windowEvent.queueChoices(
-                    prompt: this.name + '...',
-                    choices:choices,
-                    canCancel : true,
-                    keep: true,
-                    onChoice::(choice) {
-               
-                        when(choice == 0) empty;
-
-                        // aggress
-                        when(this.base.aggressiveInteractions->keycount > 0 && choice == choices->size) ::<= {
-                            aggress(location:this, party);
-                        }
-                        
-                        when(choice-1 >= interactionNames->size)
-                            scenarioInteractions[choice-(1+interactionNames->size)].onSelect(location:this)
-                        
-                        Interaction.find(name:this.base.interactions[choice-1]).onInteract(
-                            location: this,
-                            party
-                        );
-                        this.landmark.step();                            
-                    }
-                );            
-            }
-        }
-    }
-);
-
-
 
 Location.database.newEntry(data:{
     name: 'Entrance',
@@ -2422,6 +2079,361 @@ Location.database.newEntry(data:{
     
     }
 })                
+}
+
+
+@:Location = databaseItemMutatorClass(
+    name: 'Wyvern.Location',
+    statics : {
+        CATEGORY ::<= {  
+            @:ct = {
+                ENTRANCE : 0,
+                RESIDENTIAL : 1,
+                BUSINESS : 2,
+                UTILITY : 3,
+                EXIT : 4,
+                DUNGEON_SPECIAL : 5
+            }
+            return {
+                get ::<- ct
+            }
+        }
+    },
+    items : {
+        worldID : empty,
+        targetLandmark : empty, // where this location could take the party. Could be a different island in theory
+        targetLandmarkEntry : empty, // where in the landmark to take to. Should be an X-Y if populated, else its the locations responsibility to populate as needed.
+        base : empty,
+        occupants : empty, // entities. non-owners can shift
+        ownedBy : empty,// entity
+        description : empty,
+        inventory : empty,
+        x : 0,
+        y : 0,
+        contested : false,
+        name : empty,
+        data : empty, // simple table
+        visited : false,
+        modData : empty
+    },
+    
+    database : Database.new(
+        name: 'Wyvern.Location.Base',
+        attributes : {
+            name: String,
+            rarity: Number,
+            descriptions : Object,
+            symbol : String,
+            
+            // List of interaction names
+            interactions : Object,
+            
+            // List of interaction names that will mark you as 
+            // hostile by the owner / occupants. Might initiate 
+            // combat
+            aggressiveInteractions : Object,
+            
+            ownVerb : String,
+            // number of people aside from the owner
+            minOccupants : Number,
+            // number of people aside from the owner
+            maxOccupants : Number,
+            
+            // Whether there can only be one per landmark.
+            // This is strictly followed in dungeons.
+            onePerLandmark: Boolean,
+
+            // when the location is interacted with, before displaying options
+            // The return value is whether to continue with interaction options 
+            // or not.
+            onInteract : Function,
+            
+            // Called on first time interaction is attempted. 
+            onFirstInteract : Function,
+            
+            // when the location is created
+            onCreate : Function,
+            // called by the world when the time of day changes
+            onTimeChange : Function,
+            // the type of location it is
+            category : Number,
+            
+            // in structural maps, this determines the structure 
+            // size in min units.
+            minStructureSize : Number
+        },
+        reset
+    ),
+    
+    define:::(this, state) {
+        @:random = import(module:'game_singleton.random.mt');
+        @:Landmark = import(module:'game_mutator.landmark.mt');
+        @:Item = import(module:'game_mutator.item.mt');
+        @:Inventory = import(module:'game_class.inventory.mt');
+        @:Scene = import(module:'game_database.scene.mt');
+        @:windowEvent = import(module:'game_singleton.windowevent.mt');
+
+        @landmark_;
+        @world = import(module:'game_singleton.world.mt');    
+
+                
+        
+        this.interface = {
+            initialize ::(landmark, parent) {
+                @:landmark = if (landmark) landmark else parent.parent; // parents of locations are always maps
+                landmark_ = landmark;     
+            },
+            defaultLoad ::(base, xHint, yHint, ownedByHint) {
+                state.worldID = world.getNextID();
+                state.occupants = []; // entities. non-owners can shift
+                state.inventory = Inventory.new(size:30);
+                state.data = {}; // simple table
+                state.modData = {};
+
+
+                state.base = base;
+                state.x = if (xHint == empty) (Number.random() * landmark_.width ) else xHint;  
+                state.y = if (yHint == empty) (Number.random() * landmark_.height) else yHint;
+                if (ownedByHint != empty)
+                    this.ownedBy = ownedByHint;
+                       
+                state.description = random.pickArrayItem(list:base.descriptions);            
+                base.onCreate(location:this);
+                return this;
+            },
+            
+            afterLoad ::{
+                if (this.ownedBy)
+                    this.ownedBy.owns = this;
+            },
+
+            worldID : {
+                get ::<- state.worldID
+            },
+            
+            targetLandmark : {
+                get ::<- state.targetLandmark,
+                set ::(value) <- state.targetLandmark = value
+            },
+
+            targetLandmarkEntry : {
+                get ::<- state.targetLandmarkEntry,
+                set ::(value) <- state.targetLandmarkEntry = value
+            },
+
+            
+            inventory : {
+                get ::<- state.inventory
+            },
+            ownedBy : {
+                get ::<- state.ownedBy,
+                set ::(value) {
+                    if (state.ownedBy != empty)
+                        state.ownedBy.owns = empty;
+                    state.ownedBy = value          
+                    if (value != empty)          
+                        value.owns = this;
+                }
+            },
+            
+            data : {
+                get ::<- state.data
+            },
+            
+            description : {
+                get ::<- state.description + (if (state.ownedBy != empty && state.base.ownVerb != '') ' This ' + state.base.name + ' is ' + state.base.ownVerb + ' by ' + state.ownedBy.name + '.' else '')
+            },
+            
+            contested : {
+                get ::<- state.contested,
+                set ::(value) <- state.contested = value
+            },
+            x : {
+                get:: <- state.x,
+                set::(value) <- state.x = value
+            },
+            
+            y : {
+                get:: <- state.y,
+                set::(value) <- state.y = value
+            },
+            
+            inventory : {
+                get :: <- state.inventory
+            },
+            
+            name : {
+                get::<- if (state.name == empty) (if (state.ownedBy == empty) state.base.name else (state.ownedBy.name + "'s " + state.base.name)) else state.name,
+                set::(value) <- state.name = value
+            },
+            occupants : {
+                get :: {
+                    return state.occupants;
+                }
+            },
+            
+            discovered : {
+                get :: <- true
+            },  
+            
+            
+            landmark : {
+                get ::<- landmark_
+            },
+            
+            peaceful : {
+                get ::{
+                    when (state.data.peaceful) true;
+                    return landmark_.peaceful;
+                }
+            },
+            
+            // per location mod data.
+            modData : {
+                get ::<- state.modData
+            },
+            
+            
+            lockWithPressurePlate :: {
+                @:pressurePlate = landmark_.addLocation(
+                    name:'Pressure Plate'
+                );
+                
+                state.data.plateID = pressurePlate.worldID;
+                pressurePlate.data.pressed = false;
+
+
+                if (random.flipCoin()) ::<= {
+                    // for every pressure plate, there is a trapped 
+                    // pressure plate.
+                    @:pressurePlateFake = landmark_.addLocation(
+                        name:'Pressure Plate'
+                    );
+                    pressurePlateFake.data.trapped = true;
+                }
+            },
+            
+            
+            isUnlockedWithPlate :: {
+                when(state.data.plateID == empty) true;
+                
+                @locations = landmark_.locations;
+                
+                return locations[locations->findIndex(query::(value) <- 
+                    value.name == 'Pressure Plate' &&
+                    value.worldID == state.data.plateID
+                )].data.pressed;
+            },
+            
+            interact ::{
+                @world = import(module:'game_singleton.world.mt');
+                @party = world.party;            
+                @:Interaction = import(module:'game_database.interaction.mt');
+                
+
+            
+                @:aggress::(location, party) {
+                
+                    @:choiceNames = [];
+                    foreach(location.base.aggressiveInteractions) ::(k, name) {
+                        choiceNames->push(value:
+                            Interaction.find(name).displayName
+                        );
+                    }                
+                    windowEvent.queueChoices(
+                        prompt: 'Aggress how?',
+                        choices: choiceNames,
+                        canCancel : true,
+                        onChoice ::(choice) {
+                            when(choice == 0) empty;
+
+
+                            @:interaction = Interaction.find(name:
+                                location.base.aggressiveInteractions[choice-1]
+                            );
+                            
+                            when (!location.landmark.peaceful) ::<= {
+                                interaction.onInteract(location, party);                    
+                            }
+                                
+                            
+                            windowEvent.queueAskBoolean(
+                                prompt: 'Are you sure?',
+                                onChoice::(which) {
+                                    when(which == false) empty;
+                                    interaction.onInteract(location, party);                                                                                
+                                }
+                            );
+                        }
+                    );
+                }            
+            
+            
+                // initial interaction 
+                // Initial interaction triggers an event.
+                
+                if (state.visited == false) ::<= {
+                    for(0, random.integer(from:state.base.minOccupants, to:state.base.maxOccupants))::(i) {
+                        state.occupants->push(value:landmark_.island.newInhabitant());
+                    }
+                
+                
+                    state.visited = true;
+                    this.base.onFirstInteract(location:this);
+                }
+                    
+                
+                @canInteract = {:::} {
+                    return this.base.onInteract(location:this);
+                }
+                    
+                when(canInteract == false) empty;
+              
+                @:interactionNames = [...this.base.interactions]->map(to:::(value) {
+                    return Interaction.find(name:value).displayName;
+                });
+                
+                @:scenarioInteractions = [...world.scenario.base.interactionsLocation]->filter(
+                    by::(value) <- value.filter(location:this)
+                );
+                    
+                @:choices = [
+                    ...interactionNames,
+                    ...([...scenarioInteractions]->map(to:::(value) <- value.displayName))    
+                ];
+                
+
+                if (this.base.aggressiveInteractions->keycount)
+                    choices->push(value: 'Aggress');
+                    
+                windowEvent.queueChoices(
+                    prompt: this.name + '...',
+                    choices:choices,
+                    canCancel : true,
+                    keep: true,
+                    onChoice::(choice) {
+               
+                        when(choice == 0) empty;
+
+                        // aggress
+                        when(this.base.aggressiveInteractions->keycount > 0 && choice == choices->size) ::<= {
+                            aggress(location:this, party);
+                        }
+                        
+                        when(choice-1 >= interactionNames->size)
+                            scenarioInteractions[choice-(1+interactionNames->size)].onSelect(location:this)
+                        
+                        Interaction.find(name:this.base.interactions[choice-1]).onInteract(
+                            location: this,
+                            party
+                        );
+                        this.landmark.step();                            
+                    }
+                );            
+            }
+        }
+    }
+);
 
 
 return Location;

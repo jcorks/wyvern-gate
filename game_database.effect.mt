@@ -18,36 +18,21 @@
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
+
+
+
+
+
+
+    ////////////////////// SPECIAL EFFECTS
+@:reset :: {
+
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Damage = import(module:'game_class.damage.mt');
 @:Scene = import(module:'game_database.scene.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:g = import(module:'game_function.g.mt');
 
-
-
-@:Effect = Database.new(
-    name: "Wyvern.Effect",
-    attributes : {
-        name : String,
-        description : String,
-        battleOnly : Boolean,
-        skipTurn : Boolean, // whether this effect makes the user not act for a turn
-        stats : StatSet.type,
-        onAffliction : Function, //Called once when first activated
-        onPostAttackOther : Function, // Called AFTER the user has explicitly damaged a target
-        onPreAttackOther : Function, // called when user is giving damage
-        onAttacked : Function, // called when user is attacked, before being damaged.
-        onRemoveEffect : Function, //Called once when removed. All effects will be removed at some point.
-        onDamage : Function, // when the holder of the effect is hurt
-        onNextTurn : Function, //< on end phase of turn once added as an effect. Not called if duration is 0
-        onStatRecalculate : Function, // on start of a turn. Not called if duration is 0
-        stackable : Boolean // whether multiple of the same effect can coexist
-    } 
-);
-
-
-    ////////////////////// SPECIAL EFFECTS
 
 Effect.newEntry(
     data : {
@@ -4903,5 +4888,27 @@ Effect.newEntry(
         }
     }
 ) 
+}
+
+@:Effect = Database.new(
+    name: "Wyvern.Effect",
+    attributes : {
+        name : String,
+        description : String,
+        battleOnly : Boolean,
+        skipTurn : Boolean, // whether this effect makes the user not act for a turn
+        stats : StatSet.type,
+        onAffliction : Function, //Called once when first activated
+        onPostAttackOther : Function, // Called AFTER the user has explicitly damaged a target
+        onPreAttackOther : Function, // called when user is giving damage
+        onAttacked : Function, // called when user is attacked, before being damaged.
+        onRemoveEffect : Function, //Called once when removed. All effects will be removed at some point.
+        onDamage : Function, // when the holder of the effect is hurt
+        onNextTurn : Function, //< on end phase of turn once added as an effect. Not called if duration is 0
+        onStatRecalculate : Function, // on start of a turn. Not called if duration is 0
+        stackable : Boolean // whether multiple of the same effect can coexist
+    },
+    reset
+);
 
 return Effect;

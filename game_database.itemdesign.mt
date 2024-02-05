@@ -20,15 +20,9 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@:ItemDesign = Database.new(
-    name : 'Wyvern.ItemDesign',
-    attributes : {
-        name : String,
-        equipMod : StatSet.type, // percentages
-    }            
-);
 
 
+@:reset :: {
 ItemDesign.newEntry(
     data : {
         name : 'complicated',
@@ -122,7 +116,16 @@ ItemDesign.newEntry(
         ),
     }
 )
+}
 
+@:ItemDesign = Database.new(
+    name : 'Wyvern.ItemDesign',
+    attributes : {
+        name : String,
+        equipMod : StatSet.type, // percentages
+    },
+    reset
+);
 
 
 

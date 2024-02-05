@@ -30,19 +30,27 @@
         },
         ItemType : {
             get ::<- ItemType
+        },
+        
+        reset :: {
+            foreach(LOOKUP) ::(name, database) {
+                database.reset();
+            }
         }
     },
     define:::(this) {
-        @:items_ = {}
+        @items_ = {}
         @name_;
         @attributes_;
+        @reset_;
         @:databaseNameGetter = {
             get ::<- name_
         };
-        this.constructor = ::(attributes, name => String) {
+        this.constructor = ::(attributes, name => String, reset => Function) {
             LOOKUP[name] = this;
             name_ = name;
             attributes_ = attributes;
+            reset_ = reset;
         };
 
         this.interface = {
@@ -53,7 +61,10 @@
             name : {
                 get ::<- name_
             },
-            
+            reset :: {
+                items_ = {};
+                reset_();
+            },            
             newEntry ::(data) {
                 // preflight                            
                 @:item = Object.instantiate(type:ItemType);

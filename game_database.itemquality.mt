@@ -19,19 +19,9 @@
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 
-@:ItemQuality = Database.new(
-    name : 'Wyvern.ItemQuality',
-    attributes : {
-        name : String,
-        description : String,
-        levelMinimum : Number,
-        equipMod : StatSet.type, // percentages
-        useEffects : Object,
-        equipEffects : Object,
-        pricePercentMod : Number,
-        rarity: Number
-    }            
-);
+
+
+@:reset ::{
 
 
 ItemQuality.newEntry(
@@ -418,7 +408,22 @@ ItemQuality.newEntry(
         useEffects : []
     }
 ) 
+}
 
+@:ItemQuality = Database.new(
+    name : 'Wyvern.ItemQuality',
+    attributes : {
+        name : String,
+        description : String,
+        levelMinimum : Number,
+        equipMod : StatSet.type, // percentages
+        useEffects : Object,
+        equipEffects : Object,
+        pricePercentMod : Number,
+        rarity: Number
+    },
+    reset 
+);
 
 
 

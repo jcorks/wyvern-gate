@@ -21,22 +21,9 @@
 
 
 
-@:Species = Database.new(
-    name : 'Wyvern.Species',
-    attributes : {
-        name : String,
-        rarity: Number,
-        qualities : Object,
-        description : String,
-        growth : StatSet.type,
-        passives : Object,
-        special : Boolean,
-        swarms : Boolean
-    }            
-);
-
 
 // 36 points
+@:reset ::{
 
 Species.newEntry(data:{
     name : 'Wolf',
@@ -1133,4 +1120,22 @@ Species.newEntry(data:{
     passives : [
     ]
 })
+}
+
+
+@:Species = Database.new(
+    name : 'Wyvern.Species',
+    attributes : {
+        name : String,
+        rarity: Number,
+        qualities : Object,
+        description : String,
+        growth : StatSet.type,
+        passives : Object,
+        special : Boolean,
+        swarms : Boolean
+    },
+    reset 
+);
+
 return Species;

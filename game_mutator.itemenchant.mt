@@ -17,12 +17,9 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
-@:StatSet = import(module:'game_class.statset.mt');
-@:ItemEnchantCondition = import(module:'game_database.itemenchantcondition.mt');
-@:random = import(module:'game_singleton.random.mt');
-@:State = import(module:'game_class.state.mt');
-@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:StatSet = import(module:'game_class.statset.mt');
+@:random = import(module:'game_singleton.random.mt');
 
 @:CONDITION_CHANCES = [
     10,
@@ -43,83 +40,12 @@
 
 
 
-@:ItemEnchant = databaseItemMutatorClass(
-    name : 'Wyvern.ItemEnchant',
-    items : {
-        condition : empty,
-        conditionChance : empty,
-        conditionChanceName  : empty   
-    },
 
-    database: Database.new(
-        name : 'Wyvern.ItemEnchant.Base',
-        attributes : {
-            name : String,
-            description : String,
-            levelMinimum : Number,
-            equipMod : StatSet.type, // percentages
-            useEffects : Object,
-            equipEffects : Object,
-            triggerConditionEffects : Object,
-            priceMod : Number,
-            tier : Number
-        }
-    ),
 
-    define:::(this, state) {
-        
-        this.interface = {
-            initialize::{},
-            defaultLoad ::(base, conditionHint) {
-                state.base = base;
-                
-                if (base.triggerConditionEffects->keycount > 0) ::<= {
-                    if (conditionHint != empty) ::<= {
-                        state.condition = ItemEnchantCondition.find(name:conditionHint);
-                    } else ::<= {
-                        state.condition = ItemEnchantCondition.getRandom();
-                    }
-                    @conditionIndex = random.pickArrayItem(list:CONDITION_CHANCES->keys);
-                    state.conditionChance = CONDITION_CHANCES[conditionIndex];
-                    state.conditionChanceName = CONDITION_CHANCE_NAMES[conditionIndex];
-                }
-                return this;
-            },
-            
+@:reset ::{
 
-            description : {
-                get ::{
-                    when(state.condition == empty) state.base.description;
-                    return state.condition.description + (state.base.description)->replace(key:'$1', with: state.conditionChanceName);
-                    
-                }
-            },
-            
-            name : {
-                get ::{
-                    when(state.condition == empty) state.base.name;
-                    breakpoint();
-                    return state.condition.name + ': ' + state.base.name;
-                }
-            },
-            
-            onTurnCheck ::(wielder, item, battle) {
-                when(state.condition == empty) empty;
-                if (state.condition.onTurnCheck(wielder, item, battle) == true) ::<= {
-                    when(!random.try(percentSuccess:state.conditionChance)) empty;
-                
-                    foreach(state.base.triggerConditionEffects)::(i, effectName) {
-                        wielder.addEffect(
-                            from:wielder, name: effectName, durationTurns: 1, item
-                        );                        
-                    }
-                }
-            }
-        }
-    }
-
-);
-
+@:State = import(module:'game_class.state.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 ItemEnchant.database.newEntry(
     data : {
@@ -1468,5 +1394,86 @@ ItemEnchant.database.newEntry(
         useEffects : []
     }
 )
+}
+
+
+@:ItemEnchant = databaseItemMutatorClass(
+    name : 'Wyvern.ItemEnchant',
+    items : {
+        condition : empty,
+        conditionChance : empty,
+        conditionChanceName  : empty   
+    },
+
+    database: Database.new(
+        name : 'Wyvern.ItemEnchant.Base',
+        attributes : {
+            name : String,
+            description : String,
+            levelMinimum : Number,
+            equipMod : StatSet.type, // percentages
+            useEffects : Object,
+            equipEffects : Object,
+            triggerConditionEffects : Object,
+            priceMod : Number,
+            tier : Number
+        },
+        reset
+    ),
+
+    define:::(this, state) {
+        @:ItemEnchantCondition = import(module:'game_database.itemenchantcondition.mt');
+
+        this.interface = {
+            initialize::{},
+            defaultLoad ::(base, conditionHint) {
+                state.base = base;
+                
+                if (base.triggerConditionEffects->keycount > 0) ::<= {
+                    if (conditionHint != empty) ::<= {
+                        state.condition = ItemEnchantCondition.find(name:conditionHint);
+                    } else ::<= {
+                        state.condition = ItemEnchantCondition.getRandom();
+                    }
+                    @conditionIndex = random.pickArrayItem(list:CONDITION_CHANCES->keys);
+                    state.conditionChance = CONDITION_CHANCES[conditionIndex];
+                    state.conditionChanceName = CONDITION_CHANCE_NAMES[conditionIndex];
+                }
+                return this;
+            },
+            
+
+            description : {
+                get ::{
+                    when(state.condition == empty) state.base.description;
+                    return state.condition.description + (state.base.description)->replace(key:'$1', with: state.conditionChanceName);
+                    
+                }
+            },
+            
+            name : {
+                get ::{
+                    when(state.condition == empty) state.base.name;
+                    breakpoint();
+                    return state.condition.name + ': ' + state.base.name;
+                }
+            },
+            
+            onTurnCheck ::(wielder, item, battle) {
+                when(state.condition == empty) empty;
+                if (state.condition.onTurnCheck(wielder, item, battle) == true) ::<= {
+                    when(!random.try(percentSuccess:state.conditionChance)) empty;
+                
+                    foreach(state.base.triggerConditionEffects)::(i, effectName) {
+                        wielder.addEffect(
+                            from:wielder, name: effectName, durationTurns: 1, item
+                        );                        
+                    }
+                }
+            }
+        }
+    }
+
+);
 
 return ItemEnchant;

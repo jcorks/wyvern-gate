@@ -17,24 +17,15 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
+
+
+
+
+
+
+
+@:reset :: {
 @:StateFlags = import(module:'game_class.stateflags.mt');
-
-
-
-
-// conditions are checked at the end of turns
-@:ItemEnchantCondition = Database.new(
-    name : 'Wyvern.ItemEnchantCondition',
-    attributes : {
-        name : String,
-        description : String,
-        isState : Boolean,
-        onTurnCheck : Function
-    }
-);
-
-
-
 
 ItemEnchantCondition.newEntry(
     data : {
@@ -123,5 +114,19 @@ ItemEnchantCondition.newEntry(
         }                                
     }
 )
+}
+
+// conditions are checked at the end of turns
+@:ItemEnchantCondition = Database.new(
+    name : 'Wyvern.ItemEnchantCondition',
+    attributes : {
+        name : String,
+        description : String,
+        isState : Boolean,
+        onTurnCheck : Function
+    },
+    reset
+);
+
 
 return ItemEnchantCondition;

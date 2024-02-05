@@ -16,497 +16,16 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:class = import(module:'Matte.Core.Class');
-@:random = import(module:'game_singleton.random.mt');
-@:NameGen = import(module:'game_singleton.namegen.mt');
-@:Database = import(module:'game_class.database.mt');
-@:DungeonMap = import(module:'game_singleton.dungeonmap.mt');
-@:StructureMap = import(module:'game_class.structuremap.mt');
-@:distance = import(module:'game_function.distance.mt');
-@Location = empty; // circular dep.
-@:State = import(module:'game_class.state.mt');
-@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-@:Map = import(module:'game_class.map.mt');
-@:windowEvent = import(module:'game_singleton.windowevent.mt');
-@:canvas = import(module:'game_singleton.canvas.mt');
-@:LandmarkEvent = import(module:'game_mutator.landmarkevent.mt');
 @:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
-@:Event = import(module:'game_mutator.event.mt');
-
-
-@:Landmark = databaseItemMutatorClass(  
-    name : 'Wyvern.Landmark',
-    items : {
-        worldID : empty,
-        name : empty,
-        x : 0,
-        y : 0,
-        discovered : false,
-        peaceful : false,
-        floor : 0,
-        map : empty,
-        stepsSinceLast: 0,
-        modData : empty,
-        events : empty,
-        mapEntityController : empty
-    },
-    
-    database : Database.new(
-        name : 'Wyvern.Landmark.Base',
-        attributes : {
-            name : String,
-            legendName : String,
-            symbol : String,
-            rarity: Number,
-            isUnique : Boolean,
-            minLocations : Number,
-            maxLocations : Number,
-            possibleLocations : Object,
-            requiredLocations : Object,
-            startingEvents : Object,
-            canSave : Boolean,
-            peaceful: Boolean,
-            dungeonMap: Boolean,
-            dungeonForceEntrance : Boolean,
-            mapHint : Object,
-            onCreate : Function,
-            onVisit : Function,
-            guarded : Boolean,
-            pointOfNoReturn : Boolean,
-            ephemeral : Boolean
-        }
-    ),
-
-    
-    define :::(this, state) {
-        @:MapEntity = import(module:'game_mutator.mapentity.mt');
-        
-        if (Location == empty) Location = import(module:'game_mutator.location.mt');
-
-        @island_;
-        @structureMapBuilder; // only used in initialization
-
-        @:world = import(module:'game_singleton.world.mt');
-
-
-        
-        
-        
-
-        
-        
-        
-
-        @:Entity = import(module:'game_class.entity.mt');
-
-        @:loadContent::(base) {
-
-            if (base.dungeonMap) ::<= {
-                state.map = DungeonMap.create(parent:this, mapHint: base.mapHint);
-            } else ::<= {
-                structureMapBuilder = StructureMap.new();//Map.new(mapHint: base.mapHint);
-                structureMapBuilder.initialize(mapHint:base.mapHint, parent:this);
-            }
-
-
-            if (base.dungeonMap) ::<= {
-                if (base.dungeonForceEntrance) ::<= {
-                    this.addLocation(name:'Entrance');
-                }
-            } else ::<= {
-                this.addLocation(name:'Entrance');
-            }
-            
-            /*
-            [0, Random.integer(from:base.minLocations, to:base.maxLocations)]->for(do:::(i) {
-                locations->push(value:island.newInhabitant());            
-            });
-            */
-            @mapIndex = 0;
-   
+@:Database = import(module:'game_class.database.mt');
 
 
 
 
+@:reset ::{
 
-
-
-            
-            
-
-
-
-
-
-            
-
-
-            foreach(base.requiredLocations)::(i, loc) {
-                this.addLocation(
-                    name:loc
-                );
-            
-                mapIndex += 1;
-            }
-            @:possibleLocations = [...base.possibleLocations];
-            for(0, random.integer(from:base.minLocations, to:base.maxLocations))::(i) {
-                when(possibleLocations->keycount == 0) empty;
-                @:which = random.pickArrayItemWeighted(list:possibleLocations);
-                this.addLocation(
-                    name:which.name
-                );
-                if (which.onePerLandmark) ::<= {
-                    state.possibleLocations->remove(key:state.possibleLocations->findIndex(value:which));
-                }
-                mapIndex += 1;
-            }
-            
-            if (base.dungeonMap) ::<= {
-                @:gate = this.gate;
-                if (gate == empty) ::<= {
-                    this.movePointerToRandomArea();
-                } else ::<= {
-                    state.map.setPointer(
-                        x:gate.x,
-                        y:gate.y
-                    );                    
-                }
-            } else ::<= {
-                state.map = structureMapBuilder.finalize();
-                @:gate = this.gate;
-                state.map.setPointer(
-                    x:gate.x,
-                    y:gate.y
-                );
-
-                // cant add locations to structure maps through the landmark.
-                structureMapBuilder = empty;
-            }
-
-
-
-
-            state.map.title = state.name;
-
-            
-            foreach(base.startingEvents) ::(k, evt) {
-                state.events->push(value:
-                    LandmarkEvent.new(
-                        parent: this,
-                        base: LandmarkEvent.database.find(name:evt)
-                    )
-                );
-            }
-            
-            state.mapEntityController = MapEntity.Controller.new(parent:this);
-            this.base.onCreate(landmark:this, island:island_);        
-        }
-
-        this.interface =  {
-            initialize ::(parent) {
-                @island = if (parent->type == Map.type)
-                    parent.parent // immediate parent is map
-                else // only other case is its a location, due to targetLandmark
-                    parent.landmark.island
-                    // loc  map   landm   map   island
-                ;
-                @:Island = import(module:'game_class.island.mt');
-                
-                island_ = island;
-            },
-
-            defaultLoad::(base, x, y, floorHint){
-                state.worldID = world.getNextID();
-                state.x = 0;
-                state.y = 0;
-                state.floor = 0;
-                state.stepsSinceLast = 0;
-                state.modData = {};
-                state.events = [];
-
-                state.base = base;
-                state.x = x;
-                state.y = y;
-                state.peaceful = base.peaceful;
-
-                if (floorHint != empty) ::<= {
-                    state.floor = floorHint;
-                    state.floor => Number;
-                }
-
-                if (base.isUnique)
-                    state.name = base.name
-                else
-                    state.name = base.name + ' of ' + NameGen.place();
-
-
-                if (!base.ephemeral)
-                    loadContent(base);
-                
-            },
-
-            save :: {
-                when (state.base.canSave)
-                    state.save();
-                
-                return State.new(
-                    items: {
-                        x : state.x,
-                        y : state.y,
-                        floorHint : state.floor,
-                        base : state.base,
-                        isSparse : true
-                    }
-                ).save()
-            },
-            load ::(serialized) { 
-                
-                if (serialized.isSparse) ::<= {
-                    @:sparse = State.new(
-                        items: {
-                            x : state.x,
-                            y : state.y,
-                            floorHint : state.floor,
-                            base : state.base,
-                            isSparse : true
-                        }
-                    );
-                    sparse.load(parent:this, serialized);
-                    this.defaultLoad(
-                        base: sparse.base,
-                        x: sparse.x,
-                        y: sparse.y,
-                        floorHint: sparse.floorHint
-                    )   
-                } else ::<= {                
-                    state.load(parent:this, serialized)
-                }
-                if (state.mapEntityController != empty)
-                    state.mapEntityController.initialize(parent:this);
-            },
-
-            worldID : {
-                get ::<- state.worldID
-            },
-            
-            // can modify
-            events : {
-                get ::<- state.events
-            },
-        
-            description : {
-                get :: {
-                    @:locations = this.locations;
-                    @out = state.name + ', a ' + state.base.name;
-                    if (locations->keycount > 0) ::<={
-                        out = out + ' with ' + locations->keycount + ' permanent inhabitants';//:\n';
-                        //foreach(in:locations, do:::(index, inhabitant) {
-                        //    out = out + '   ' + inhabitant.name + ', a ' + inhabitant.species.name + ' ' + inhabitant.profession.base.name +'\n';
-                        //});
-                    }
-                    return out;
-                }
-            },
-            
-            loadContent ::{
-                @:base = state.base;                
-                if (state.map == empty)
-                    loadContent(base);                            
-            },
-            
-            unloadContent ::{
-                state.map == empty;
-            },
-            
-            name : {
-                get :: {
-                    return state.name;                
-                },
-                
-                set ::(value) {
-                    state.name = value;
-                    if (state.map)
-                        state.map.title = value;
-                }
-            },
-            
-            x : {
-                get ::<- state.x
-            },
-            
-            y : {
-                get ::<- state.y
-            },
-            
-            width : {
-                get ::<- if (structureMapBuilder) structureMapBuilder.getWidth() else state.map.width
-            },
-            height : {
-                get ::<- if (structureMapBuilder) structureMapBuilder.getHeight() else state.map.height
-            },
-            
-            peaceful : {
-                get :: <- state.peaceful,
-                set ::(value) <- state.peaceful = value
-            },
-
-            floor : {
-                get :: <- state.floor
-            },
-
-            step :: {
-
-                world.stepTime(isStep:true); 
-                this.map.title = this.name + ' - ' + world.timeString + '          ';
-                state.mapEntityController.step();
-                when(!state.base.dungeonMap) empty;
-                foreach(state.events) ::(k, event) {
-                    event.step();
-                }
-
-                state.stepsSinceLast += 1;
-                if (this.peaceful == false) ::<= {
-                    if (state.stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
-                        this.island.addEvent(
-                            event:Event.new(
-                                base:Event.database.find(name:'Encounter:Non-peaceful'),
-                                parent:this //, currentTime
-                            )
-                        );
-                        state.stepsSinceLast = 0;
-                    }
-                }
-
-                
-            },
-            
-            mapEntityController : {
-                get ::<- state.mapEntityController
-            },
-            
-            wait ::(until) {
-                // if already that time, wait till no longer
-                {:::} {
-                    forever ::{
-                        when(world.time != until) send()
-                        world.stepTime();
-                    }
-                }
-                
-                // then wait until the next time that time appears
-                {:::} {
-                    forever ::{
-                        when(world.time == until) send()
-                        world.stepTime();
-                    }
-                }
-                this.map.title = this.name + ' - ' + world.timeString + '          ';
-            },
-            
-            kind : {
-                get :: {
-                    return state.base.name;
-                }
-            },
-            
-            gate : {
-                get :: {
-                    @:locations = this.locations;
-                    @:index = locations->findIndex(query::(value) {
-                        return value.base.name == 'Entrance'
-                    });
-                    when (index != -1)
-                        locations[index];
-                }
-            },
-            discover :: {
-                @:world = import(module:'game_singleton.world.mt');
-                @:windowEvent = import(module:'game_singleton.windowevent.mt');
-                if (!state.discovered)
-                    if (world.party.inventory.items->filter(by:::(value) <- value.base.name == 'Runestone')->keycount != 0) ::<= {
-                        world.storyFlags.data_locationsDiscovered += 1;
-                        windowEvent.queueMessage(text:'Location found! ' + world.storyFlags.data_locationsDiscovered + ' / ' 
-                                                                 + world.storyFlags.data_locationsNeeded + ' locations.');               
-                    }
-                state.discovered = true;
-            },
-            
-            discovered : {
-                get ::<- state.discovered
-            },
-            
-            locations : {
-                get :: {
-                    when(state.map == empty) [];
-                    return state.map.getAllItemData()->filter(by:::(value) <- value->type == Location.type)
-                }
-            },
-            island : {
-                get ::<- island_
-            },
-            
-            movePointerToRandomArea ::{
-                @:area = state.map.getRandomEmptyArea();
-                state.map.setPointer(
-                    x:area.x + (area.width/2)->floor,
-                    y:area.y + (area.height/2)->floor
-                );            
-            },
-            
-            getRandomEmptyPosition ::{
-                // shouldnt do this!
-                when (!state.base.dungeonMap) empty;
-
-                @:area = state.map.getRandomEmptyArea();
-                return { 
-                    x:area.x + (area.width/2)->floor,
-                    y:area.y + (area.height/2)->floor
-                }
-            },
-            
-            modData : {
-                get ::<- state.modData
-            },
-
-
-            removeLocation ::(location) {
-                state.map.removeItem(data:location);
-            },
-
-            addLocation ::(name, ownedByHint, x, y) {
-            
-                @loc = Location.new(
-                    base:Location.database.find(name:name),
-                    landmark:this, ownedByHint,
-                    xHint: x,
-                    yHint: y
-                );
-
-                if (state.base.dungeonMap) ::<= {
-                    if (x == empty || y == empty)
-                        state.map.addToRandomEmptyArea(item:loc, symbol: loc.base.symbol, name:loc.name)
-                    else
-                        state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
-                    
-                } else ::<= {
-                    if (structureMapBuilder != empty)
-                        structureMapBuilder.addLocation(location:loc)
-                    else 
-                        state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);                    
-                }
-                return loc;            
- 
-            },
-            
-            island : {
-                get ::<- island_
-            },
-            
-            map : {
-                get ::<- state.map
-            }
-        }
-    }
-);
+@:DungeonMap = import(module:'game_singleton.dungeonmap.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 
 
 Landmark.database.newEntry(
@@ -1072,7 +591,6 @@ Landmark.database.newEntry(
         },
         onCreate ::(landmark, island){},
         onVisit ::(landmark, island) {
-            @:windowEvent = import(module:'game_singleton.windowevent.mt');
             windowEvent.queueMessage(text:'The party enters the pit full of treasure.');
        
         }
@@ -1519,7 +1037,494 @@ Landmark.database.newEntry(
         onVisit ::(landmark, island) {}
     }
 )
+}
 
+@:Landmark = databaseItemMutatorClass(  
+    name : 'Wyvern.Landmark',
+    items : {
+        worldID : empty,
+        name : empty,
+        x : 0,
+        y : 0,
+        discovered : false,
+        peaceful : false,
+        floor : 0,
+        map : empty,
+        stepsSinceLast: 0,
+        modData : empty,
+        events : empty,
+        mapEntityController : empty
+    },
+    
+    database : Database.new(
+        name : 'Wyvern.Landmark.Base',
+        attributes : {
+            name : String,
+            legendName : String,
+            symbol : String,
+            rarity: Number,
+            isUnique : Boolean,
+            minLocations : Number,
+            maxLocations : Number,
+            possibleLocations : Object,
+            requiredLocations : Object,
+            startingEvents : Object,
+            canSave : Boolean,
+            peaceful: Boolean,
+            dungeonMap: Boolean,
+            dungeonForceEntrance : Boolean,
+            mapHint : Object,
+            onCreate : Function,
+            onVisit : Function,
+            guarded : Boolean,
+            pointOfNoReturn : Boolean,
+            ephemeral : Boolean
+        },
+        reset
+    ),
+
+    
+    define :::(this, state) {
+        @:MapEntity = import(module:'game_mutator.mapentity.mt');
+        @:random = import(module:'game_singleton.random.mt');
+        @:NameGen = import(module:'game_singleton.namegen.mt');
+        @:DungeonMap = import(module:'game_singleton.dungeonmap.mt');
+        @:StructureMap = import(module:'game_class.structuremap.mt');
+        @:distance = import(module:'game_function.distance.mt');
+        @:State = import(module:'game_class.state.mt');
+        @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+        @:Map = import(module:'game_class.map.mt');
+        @:windowEvent = import(module:'game_singleton.windowevent.mt');
+        @:canvas = import(module:'game_singleton.canvas.mt');
+        @:LandmarkEvent = import(module:'game_mutator.landmarkevent.mt');
+        @:Event = import(module:'game_mutator.event.mt');        
+        @:Location = import(module:'game_mutator.location.mt');
+
+        @island_;
+        @structureMapBuilder; // only used in initialization
+
+        @:world = import(module:'game_singleton.world.mt');
+
+
+        
+        
+        
+
+        
+        
+        
+
+        @:Entity = import(module:'game_class.entity.mt');
+
+        @:loadContent::(base) {
+
+            if (base.dungeonMap) ::<= {
+                state.map = DungeonMap.create(parent:this, mapHint: base.mapHint);
+            } else ::<= {
+                structureMapBuilder = StructureMap.new();//Map.new(mapHint: base.mapHint);
+                structureMapBuilder.initialize(mapHint:base.mapHint, parent:this);
+            }
+
+
+            if (base.dungeonMap) ::<= {
+                if (base.dungeonForceEntrance) ::<= {
+                    this.addLocation(name:'Entrance');
+                }
+            } else ::<= {
+                this.addLocation(name:'Entrance');
+            }
+            
+            /*
+            [0, Random.integer(from:base.minLocations, to:base.maxLocations)]->for(do:::(i) {
+                locations->push(value:island.newInhabitant());            
+            });
+            */
+            @mapIndex = 0;
+   
+
+
+
+
+
+
+
+            
+            
+
+
+
+
+
+            
+
+
+            foreach(base.requiredLocations)::(i, loc) {
+                this.addLocation(
+                    name:loc
+                );
+            
+                mapIndex += 1;
+            }
+            @:possibleLocations = [...base.possibleLocations];
+            for(0, random.integer(from:base.minLocations, to:base.maxLocations))::(i) {
+                when(possibleLocations->keycount == 0) empty;
+                @:which = random.pickArrayItemWeighted(list:possibleLocations);
+                this.addLocation(
+                    name:which.name
+                );
+                if (which.onePerLandmark) ::<= {
+                    state.possibleLocations->remove(key:state.possibleLocations->findIndex(value:which));
+                }
+                mapIndex += 1;
+            }
+            
+            if (base.dungeonMap) ::<= {
+                @:gate = this.gate;
+                if (gate == empty) ::<= {
+                    this.movePointerToRandomArea();
+                } else ::<= {
+                    state.map.setPointer(
+                        x:gate.x,
+                        y:gate.y
+                    );                    
+                }
+            } else ::<= {
+                state.map = structureMapBuilder.finalize();
+                @:gate = this.gate;
+                state.map.setPointer(
+                    x:gate.x,
+                    y:gate.y
+                );
+
+                // cant add locations to structure maps through the landmark.
+                structureMapBuilder = empty;
+            }
+
+
+
+
+            state.map.title = state.name;
+
+            
+            foreach(base.startingEvents) ::(k, evt) {
+                state.events->push(value:
+                    LandmarkEvent.new(
+                        parent: this,
+                        base: LandmarkEvent.database.find(name:evt)
+                    )
+                );
+            }
+            
+            state.mapEntityController = MapEntity.Controller.new(parent:this);
+            this.base.onCreate(landmark:this, island:island_);        
+        }
+
+        this.interface =  {
+            initialize ::(parent) {
+                @island = if (parent->type == Map.type)
+                    parent.parent // immediate parent is map
+                else // only other case is its a location, due to targetLandmark
+                    parent.landmark.island
+                    // loc  map   landm   map   island
+                ;
+                @:Island = import(module:'game_class.island.mt');
+                
+                island_ = island;
+            },
+
+            defaultLoad::(base, x, y, floorHint){
+                state.worldID = world.getNextID();
+                state.x = 0;
+                state.y = 0;
+                state.floor = 0;
+                state.stepsSinceLast = 0;
+                state.modData = {};
+                state.events = [];
+
+                state.base = base;
+                state.x = x;
+                state.y = y;
+                state.peaceful = base.peaceful;
+
+                if (floorHint != empty) ::<= {
+                    state.floor = floorHint;
+                    state.floor => Number;
+                }
+
+                if (base.isUnique)
+                    state.name = base.name
+                else
+                    state.name = base.name + ' of ' + NameGen.place();
+
+
+                if (!base.ephemeral)
+                    loadContent(base);
+                
+            },
+
+            save :: {
+                when (state.base.canSave)
+                    state.save();
+                
+                return State.new(
+                    items: {
+                        x : state.x,
+                        y : state.y,
+                        floorHint : state.floor,
+                        base : state.base,
+                        isSparse : true
+                    }
+                ).save()
+            },
+            load ::(serialized) { 
+                
+                if (serialized.isSparse) ::<= {
+                    @:sparse = State.new(
+                        items: {
+                            x : state.x,
+                            y : state.y,
+                            floorHint : state.floor,
+                            base : state.base,
+                            isSparse : true
+                        }
+                    );
+                    sparse.load(parent:this, serialized);
+                    this.defaultLoad(
+                        base: sparse.base,
+                        x: sparse.x,
+                        y: sparse.y,
+                        floorHint: sparse.floorHint
+                    )   
+                } else ::<= {                
+                    state.load(parent:this, serialized)
+                }
+                if (state.mapEntityController != empty)
+                    state.mapEntityController.initialize(parent:this);
+            },
+
+            worldID : {
+                get ::<- state.worldID
+            },
+            
+            // can modify
+            events : {
+                get ::<- state.events
+            },
+        
+            description : {
+                get :: {
+                    @:locations = this.locations;
+                    @out = state.name + ', a ' + state.base.name;
+                    if (locations->keycount > 0) ::<={
+                        out = out + ' with ' + locations->keycount + ' permanent inhabitants';//:\n';
+                        //foreach(in:locations, do:::(index, inhabitant) {
+                        //    out = out + '   ' + inhabitant.name + ', a ' + inhabitant.species.name + ' ' + inhabitant.profession.base.name +'\n';
+                        //});
+                    }
+                    return out;
+                }
+            },
+            
+            loadContent ::{
+                @:base = state.base;                
+                if (state.map == empty)
+                    loadContent(base);                            
+            },
+            
+            unloadContent ::{
+                state.map == empty;
+            },
+            
+            name : {
+                get :: {
+                    return state.name;                
+                },
+                
+                set ::(value) {
+                    state.name = value;
+                    if (state.map)
+                        state.map.title = value;
+                }
+            },
+            
+            x : {
+                get ::<- state.x
+            },
+            
+            y : {
+                get ::<- state.y
+            },
+            
+            width : {
+                get ::<- if (structureMapBuilder) structureMapBuilder.getWidth() else state.map.width
+            },
+            height : {
+                get ::<- if (structureMapBuilder) structureMapBuilder.getHeight() else state.map.height
+            },
+            
+            peaceful : {
+                get :: <- state.peaceful,
+                set ::(value) <- state.peaceful = value
+            },
+
+            floor : {
+                get :: <- state.floor
+            },
+
+            step :: {
+
+                world.stepTime(isStep:true); 
+                this.map.title = this.name + ' - ' + world.timeString + '          ';
+                state.mapEntityController.step();
+                when(!state.base.dungeonMap) empty;
+                foreach(state.events) ::(k, event) {
+                    event.step();
+                }
+
+                state.stepsSinceLast += 1;
+                if (this.peaceful == false) ::<= {
+                    if (state.stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
+                        this.island.addEvent(
+                            event:Event.new(
+                                base:Event.database.find(name:'Encounter:Non-peaceful'),
+                                parent:this //, currentTime
+                            )
+                        );
+                        state.stepsSinceLast = 0;
+                    }
+                }
+
+                
+            },
+            
+            mapEntityController : {
+                get ::<- state.mapEntityController
+            },
+            
+            wait ::(until) {
+                // if already that time, wait till no longer
+                {:::} {
+                    forever ::{
+                        when(world.time != until) send()
+                        world.stepTime();
+                    }
+                }
+                
+                // then wait until the next time that time appears
+                {:::} {
+                    forever ::{
+                        when(world.time == until) send()
+                        world.stepTime();
+                    }
+                }
+                this.map.title = this.name + ' - ' + world.timeString + '          ';
+            },
+            
+            kind : {
+                get :: {
+                    return state.base.name;
+                }
+            },
+            
+            gate : {
+                get :: {
+                    @:locations = this.locations;
+                    @:index = locations->findIndex(query::(value) {
+                        return value.base.name == 'Entrance'
+                    });
+                    when (index != -1)
+                        locations[index];
+                }
+            },
+            discover :: {
+                @:world = import(module:'game_singleton.world.mt');
+                @:windowEvent = import(module:'game_singleton.windowevent.mt');
+                if (!state.discovered)
+                    if (world.party.inventory.items->filter(by:::(value) <- value.base.name == 'Runestone')->keycount != 0) ::<= {
+                        world.storyFlags.data_locationsDiscovered += 1;
+                        windowEvent.queueMessage(text:'Location found! ' + world.storyFlags.data_locationsDiscovered + ' / ' 
+                                                                 + world.storyFlags.data_locationsNeeded + ' locations.');               
+                    }
+                state.discovered = true;
+            },
+            
+            discovered : {
+                get ::<- state.discovered
+            },
+            
+            locations : {
+                get :: {
+                    when(state.map == empty) [];
+                    return state.map.getAllItemData()->filter(by:::(value) <- value->type == Location.type)
+                }
+            },
+            island : {
+                get ::<- island_
+            },
+            
+            movePointerToRandomArea ::{
+                @:area = state.map.getRandomEmptyArea();
+                state.map.setPointer(
+                    x:area.x + (area.width/2)->floor,
+                    y:area.y + (area.height/2)->floor
+                );            
+            },
+            
+            getRandomEmptyPosition ::{
+                // shouldnt do this!
+                when (!state.base.dungeonMap) empty;
+
+                @:area = state.map.getRandomEmptyArea();
+                return { 
+                    x:area.x + (area.width/2)->floor,
+                    y:area.y + (area.height/2)->floor
+                }
+            },
+            
+            modData : {
+                get ::<- state.modData
+            },
+
+
+            removeLocation ::(location) {
+                state.map.removeItem(data:location);
+            },
+
+            addLocation ::(name, ownedByHint, x, y) {
+            
+                @loc = Location.new(
+                    base:Location.database.find(name:name),
+                    landmark:this, ownedByHint,
+                    xHint: x,
+                    yHint: y
+                );
+
+                if (state.base.dungeonMap) ::<= {
+                    if (x == empty || y == empty)
+                        state.map.addToRandomEmptyArea(item:loc, symbol: loc.base.symbol, name:loc.name)
+                    else
+                        state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
+                    
+                } else ::<= {
+                    if (structureMapBuilder != empty)
+                        structureMapBuilder.addLocation(location:loc)
+                    else 
+                        state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);                    
+                }
+                return loc;            
+ 
+            },
+            
+            island : {
+                get ::<- island_
+            },
+            
+            map : {
+                get ::<- state.map
+            }
+        }
+    }
+);
 
 
 return Landmark;

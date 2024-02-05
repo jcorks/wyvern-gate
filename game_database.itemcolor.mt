@@ -20,15 +20,8 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@:ItemColor = Database.new(
-    name : 'Wyvern.ItemColor',
-    attributes : {
-        name : String,
-        equipMod : StatSet.type, // percentages
-    }            
-);
 
-
+@:reset ::{
 ItemColor.newEntry(
     data : {
         name : 'red',
@@ -200,6 +193,15 @@ ItemColor.newEntry(
         ),
     }
 )
+}
+@:ItemColor = Database.new(
+    name : 'Wyvern.ItemColor',
+    attributes : {
+        name : String,
+        equipMod : StatSet.type, // percentages
+    },
+    reset
+);
 
 
 return ItemColor;

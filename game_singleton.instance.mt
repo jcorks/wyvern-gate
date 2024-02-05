@@ -15,6 +15,36 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
+// database loading 
+
+import(module:'game_database.ability.mt');
+import(module:'game_database.apparelmaterial.mt');
+import(module:'game_database.effect.mt');
+import(module:'game_database.interaction.mt');
+import(module:'game_database.itemcolor.mt');
+import(module:'game_database.itemdesign.mt');
+import(module:'game_database.itemenchantcondition.mt');
+import(module:'game_database.itemquality.mt');
+import(module:'game_database.material.mt');
+import(module:'game_database.personality.mt');
+import(module:'game_database.scene.mt');
+import(module:'game_database.species.mt');
+
+import(module:'game_mutator.entityquality.mt');
+import(module:'game_mutator.event.mt');
+import(module:'game_mutator.item.mt');
+import(module:'game_mutator.itemenchant.mt');
+import(module:'game_mutator.landmark.mt');
+import(module:'game_mutator.landmarkevent.mt');
+import(module:'game_mutator.location.mt');
+import(module:'game_mutator.mapentity.mt');
+import(module:'game_mutator.profession.mt');
+import(module:'game_mutator.scenario.mt');
+
+@:Database = import(module:'game_class.database.mt');
+
+
 @:class = import(module:'Matte.Core.Class');
 @:Entity = import(module:'game_class.entity.mt');
 @:Party = import(module:'game_class.party.mt');
@@ -38,21 +68,14 @@ import(module:'game_function.pickpartyitem.mt');
 
 import(module:'game_class.statset.mt');
 import(module:'game_class.battleai.mt');
-import(module:'game_mutator.entityquality.mt');
 import(module:'game_class.inventory.mt');
-import(module:'game_mutator.itemenchant.mt');
 import(module:'game_class.map.mt');
 import(module:'game_class.party.mt');
-import(module:'game_mutator.profession.mt');
 import(module:'game_class.stateflags.mt');
 
 
-import(module:'game_mutator.item.mt');
 import(module:'game_class.entity.mt');
-import(module:'game_mutator.event.mt');
 import(module:'game_class.island.mt');
-import(module:'game_mutator.landmark.mt');
-import(module:'game_mutator.location.mt');
 
 
 
@@ -67,7 +90,6 @@ import(module:'game_mutator.location.mt');
 @:VERSION = '0.1.7a';
 @world = import(module:'game_singleton.world.mt');
 import(module:'game_function.newrecord.mt');
-world.initializeNPCs();
 
 return class(
     name: 'Wyvern.Instance',
@@ -129,6 +151,8 @@ return class(
                                 onChoice::(choice) {
                                     when(choice == 0) empty;
                                     @:data = onLoadState(slot:choices[choice-1]);
+
+                                    this.resetDatabase();
                                                                             
                                     this.load(serialized:JSON.decode(string:data));
                                     this.startResume();
@@ -140,6 +164,8 @@ return class(
                           (1)::<= {
                             canvas.clear();
                             canvas.blackout();
+
+                            this.resetDatabase();
 
                             @:enterName = import(module:'game_function.name.mt');
 
@@ -568,6 +594,12 @@ return class(
                     return empty;
                 }
                 
+            },
+            
+            resetDatabase :: {
+                Database.reset();
+                world.initializeNPCs();
+                // Load mod database overrides here            
             },
 
             island : {

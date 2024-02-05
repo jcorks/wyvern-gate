@@ -5,58 +5,13 @@
 @:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
 
 
-// essentially an opaque wrapper for custom per-step 
-// controllers of landmarks.
-@:LandmarkEvent = databaseItemMutatorClass(
-    name : 'Wyvern.LandmarkEvent',
-    items : {
-        data : empty // maintained    
-    },
-    
-    database : Database.new(
-        name:'Wyvern.LandmarkEvent.Base',
-        attributes : {
-            name : String,
-            startup : Function,
-            step : Function,
-            isActive : Function
-        }
-    ),
-    
-    define::(this, state) {
-        
-        @landmark_;
-                
-        this.interface = {
-            initialize ::(parent) {
-                landmark_ = parent;
-            },
-                        
-            defaultLoad ::(base) {
-                state.base = base;
-                state.data = base.startup(landmark:landmark_);
-            },
-            
-            step::{
-                state.base.step(
-                    landmark:landmark_,
-                    data:state.data
-                );
-            },
-            
-            isActive ::{
-                return state.base.isActive(data:state.data);
-            }
-        }
-    }
-);
 
 
 
 
 
 
-
+@:reset ::{
 LandmarkEvent.database.newEntry(
     data : {
         name: 'item-specter',
@@ -184,5 +139,54 @@ LandmarkEvent.database.newEntry(
         }
     }
 );
+}
+
+// essentially an opaque wrapper for custom per-step 
+// controllers of landmarks.
+@:LandmarkEvent = databaseItemMutatorClass(
+    name : 'Wyvern.LandmarkEvent',
+    items : {
+        data : empty // maintained    
+    },
+    
+    database : Database.new(
+        name:'Wyvern.LandmarkEvent.Base',
+        attributes : {
+            name : String,
+            startup : Function,
+            step : Function,
+            isActive : Function
+        },
+        reset
+    ),
+    
+    define::(this, state) {
+        
+        @landmark_;
+                
+        this.interface = {
+            initialize ::(parent) {
+                landmark_ = parent;
+            },
+                        
+            defaultLoad ::(base) {
+                state.base = base;
+                state.data = base.startup(landmark:landmark_);
+            },
+            
+            step::{
+                state.base.step(
+                    landmark:landmark_,
+                    data:state.data
+                );
+            },
+            
+            isActive ::{
+                return state.base.isActive(data:state.data);
+            }
+        }
+    }
+);
+
 
 return LandmarkEvent;

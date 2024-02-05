@@ -16,9 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:class = import(module:'Matte.Core.Class');
-@:Random = import(module:'game_singleton.random.mt');
-@:StatSet = import(module:'game_class.statset.mt');
 @:Database = import(module:'game_class.database.mt');
+@:StatSet = import(module:'game_class.statset.mt');
 
 @:SPEECH_EVENT = {
     HURT : 0,
@@ -30,21 +29,9 @@
     INAPPROPRIATE_TIME: 6
 }
 
-@:Personality = class(
-    inherits:[Database],
-    define ::(this) {
-        this.interface = {
-            SPEECH_EVENT : {get::<-SPEECH_EVENT}
-        }    
-    }
-).new(
-    name : 'Wyvern.Personality',
-    attributes : {
-        name : String,
-        growth : StatSet.type,
-        phrases : Object            
-    }
-)
+@:reset :: {
+@:Random = import(module:'game_singleton.random.mt');
+
 
 Personality.newEntry(data: {
     name: 'Calm',
@@ -613,5 +600,25 @@ Personality.newEntry(data:{
     }
 
 })
+}
+
+@:Personality = class(
+    inherits:[Database],
+    define ::(this) {
+        this.interface = {
+            SPEECH_EVENT : {get::<-SPEECH_EVENT}
+        }    
+    }
+).new(
+    name : 'Wyvern.Personality',
+    attributes : {
+        name : String,
+        growth : StatSet.type,
+        phrases : Object            
+    },
+    reset
+)
+
+
 
 return Personality;

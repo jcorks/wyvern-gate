@@ -17,104 +17,21 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
+@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:random = import(module:'game_singleton.random.mt');
+
+
+
+
+
+
+
+
+@:reset ::{
+
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
-
-
-
-
-
-@:EntityQuality = databaseItemMutatorClass(
-    name : 'Wyvern.EntityQuality',
-    items : {
-        trait0 : empty,
-        trait1 : empty,
-        trait2 : empty,
-        descIndex : empty
-    },
-    database : Database.new(
-        name : 'Wyvern.EntityQuality.Base',     
-        attributes : {
-            name : String,
-            plural : Boolean,
-            appearanceChance : Number,
-            descriptions : Object,
-            trait0 : Object,
-            trait1 : Object,
-            trait2 : Object
-        }            
-    ),
-
-    define:::(this, state) {
-        
-        
-        
-        this.interface = {
-            initialize ::{},
-            defaultLoad::(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint) {
-                state.base = base;            
-                
-                if (trait0Hint != empty) 
-                    state.trait0 = trait0Hint
-                else 
-                    state.trait0 = random.integer(from:0, to:state.base.trait0->keycount-1);
-
-
-                if (trait1Hint != empty) 
-                    state.trait1 = trait1Hint
-                else 
-                    state.trait1 = random.integer(from:0, to:state.base.trait1->keycount-1);
-
-                if (trait2Hint != empty) 
-                    state.trait2 = trait2Hint
-                else 
-                    state.trait2 = random.integer(from:0, to:state.base.trait2->keycount-1);
-                
-                if (descriptionHint != empty) 
-                    state.descIndex = descriptionHint
-                else 
-                    state.descIndex = random.integer(from:0, to:state.base.descriptions->keycount-1);
-                
-                return this;
-                
-            },            
-            
-            name : {
-                get :: {
-                    return state.base.name;
-                },
-            },
-
-            plural : {
-                get :: {
-                    return state.base.plural;
-                },
-            },
-            
-            appearanceChance : {
-                get ::<- state.base.appearanceChance
-            },
-            
-            description : {
-                get ::{
-                    @base = state.base.descriptions[state.descIndex];
-                    if (base->contains(key:'$0')) base = base->replace(key:'$0', with:state.base.trait0[state.trait0]);
-                    if (base->contains(key:'$1')) base = base->replace(key:'$1', with:state.base.trait1[state.trait1]);
-                    if (base->contains(key:'$2')) base = base->replace(key:'$2', with:state.base.trait2[state.trait2]);
-                    return base;
-                }
-            }           
-        }
-    
-    }
-);
-
-
-
-
 
 EntityQuality.database.newEntry(
     data : {
@@ -454,5 +371,94 @@ EntityQuality.database.newEntry(
         ]             
     }
 ) 
+}
+
+
+@:EntityQuality = databaseItemMutatorClass(
+    name : 'Wyvern.EntityQuality',
+    items : {
+        trait0 : empty,
+        trait1 : empty,
+        trait2 : empty,
+        descIndex : empty
+    },
+    database : Database.new(
+        name : 'Wyvern.EntityQuality.Base',     
+        attributes : {
+            name : String,
+            plural : Boolean,
+            appearanceChance : Number,
+            descriptions : Object,
+            trait0 : Object,
+            trait1 : Object,
+            trait2 : Object
+        },
+        reset 
+    ),
+
+    define:::(this, state) {
+        
+        
+        
+        this.interface = {
+            initialize ::{},
+            defaultLoad::(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint) {
+                state.base = base;            
+                
+                if (trait0Hint != empty) 
+                    state.trait0 = trait0Hint
+                else 
+                    state.trait0 = random.integer(from:0, to:state.base.trait0->keycount-1);
+
+
+                if (trait1Hint != empty) 
+                    state.trait1 = trait1Hint
+                else 
+                    state.trait1 = random.integer(from:0, to:state.base.trait1->keycount-1);
+
+                if (trait2Hint != empty) 
+                    state.trait2 = trait2Hint
+                else 
+                    state.trait2 = random.integer(from:0, to:state.base.trait2->keycount-1);
+                
+                if (descriptionHint != empty) 
+                    state.descIndex = descriptionHint
+                else 
+                    state.descIndex = random.integer(from:0, to:state.base.descriptions->keycount-1);
+                
+                return this;
+                
+            },            
+            
+            name : {
+                get :: {
+                    return state.base.name;
+                },
+            },
+
+            plural : {
+                get :: {
+                    return state.base.plural;
+                },
+            },
+            
+            appearanceChance : {
+                get ::<- state.base.appearanceChance
+            },
+            
+            description : {
+                get ::{
+                    @base = state.base.descriptions[state.descIndex];
+                    if (base->contains(key:'$0')) base = base->replace(key:'$0', with:state.base.trait0[state.trait0]);
+                    if (base->contains(key:'$1')) base = base->replace(key:'$1', with:state.base.trait1[state.trait1]);
+                    if (base->contains(key:'$2')) base = base->replace(key:'$2', with:state.base.trait2[state.trait2]);
+                    return base;
+                }
+            }           
+        }
+    
+    }
+);
+
 
 return EntityQuality;

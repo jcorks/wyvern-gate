@@ -17,16 +17,17 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
-@:StatSet = import(module:'game_class.statset.mt');
-@:windowEvent = import(module:'game_singleton.windowevent.mt');
-@:Damage = import(module:'game_class.damage.mt');
-@:Item = import(module:'game_mutator.item.mt');
-@:correctA = import(module:'game_function.correcta.mt');
-@:random = import(module:'game_singleton.random.mt');
-@:canvas = import(module:'game_singleton.canvas.mt');
-@:namegen = import(module:'game_singleton.namegen.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+
+
+@:reset ::{
+    Scenario.database.newEntry(data : (import(module:'game_scenario.thechosen.mt')))   
+    Scenario.database.newEntry(
+        data : import(module:'game_scenario.thetrader.mt')
+    )   
+}
+
 
 
 @:Scenario = databaseItemMutatorClass(
@@ -92,7 +93,9 @@
                 // A function to return a small table of stats once a new record (game complete) 
                 // is reached. If no such data makes sense, this can simply return an empty string.
                 reportCard : Function
-            }
+            },
+            
+            reset
         ),
     define::(this, state) {
         this.interface = {
@@ -129,15 +132,6 @@
 
 
 
-
-
-Scenario.database.newEntry(data : (import(module:'game_scenario.thechosen.mt')))   
-
-
-
-Scenario.database.newEntry(
-    data : import(module:'game_scenario.thetrader.mt')
-)   
 
 return Scenario;
 

@@ -17,6 +17,11 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
+
+
+
+@:reset ::{
+
 @:StatSet = import(module:'game_class.statset.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
@@ -29,14 +34,6 @@
 @:g = import(module:'game_function.g.mt');
 
 
-@:Interaction = Database.new(
-    name : 'Wyvern.Interaction',
-    attributes : {
-        name : String,
-        displayName : String,
-        onInteract : Function
-    }
-);
 
 Interaction.newEntry(
     data : {
@@ -2330,7 +2327,18 @@ Interaction.newEntry(
             
         }
     }
-)               
+)      
+}
+
+@:Interaction = Database.new(
+    name : 'Wyvern.Interaction',
+    attributes : {
+        name : String,
+        displayName : String,
+        onInteract : Function
+    },
+    reset
+);         
         
 
 return Interaction;

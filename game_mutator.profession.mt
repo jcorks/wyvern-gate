@@ -17,10 +17,10 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
-@:StatSet = import(module:'game_class.statset.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:StatSet = import(module:'game_class.statset.mt');
 
 
 @: nextSPLevel ::(spLevel) {
@@ -28,75 +28,6 @@
     //return (((spLevel+1)*0.75 * 10) + (spLevel+1) * 5)->ceil;
 }
 
-@:Profession = databaseItemMutatorClass(
-    name : 'Wyvern.Profession.Instance',
-
-    items : {
-        base : empty,
-        sp : 0,
-        spNext : 1,
-        spLevel : 0
-    },
-    
-    database : Database.new(
-        name : 'Wyvern.Profession.Base',   
-        attributes : {
-            name : String,
-            description : String,
-            growth : StatSet.type,
-            minKarma : Number,
-            maxKarma : Number,
-            abilities : Object,
-            levelMinimum : Number,
-            passives : Object,
-            learnable : Boolean,
-            weaponAffinity : String
-        }            
-    ),
-
-    define :::(this, state) {
-        
-
-        this.interface = {
-            initialize ::{},
-            defaultLoad ::(base) {
-                state.base = base;
-                return this;
-            },
-
-            base : {
-                get ::{
-                    return state.base;
-                }
-            },
-            
-            sp : {
-                get :: {
-                    return state.sp;
-                }
-            },
-            
-            // returns any learned abilities();
-            gainSP ::(amount) {
-                state.spNext -= amount;
-                @learned = [];
-                {:::} {
-                    forever ::{
-                        when(state.spNext > 0) send();
-                        @:next = state.base.abilities[state.spLevel];
-
-                        state.spNext += nextSPLevel(spLevel: state.spLevel);
-                        state.spLevel+=1;
-                        when(next == empty) empty; 
-                        learned->push(value:next);
-                    
-                    }
-                }
-                return learned;
-            }
-        }
-    }
-);
 
 
 
@@ -111,7 +42,7 @@
 
 
 */
-
+@:reset ::{
 Profession.database.newEntry(data:{
     name: 'Adventurer',
     description : 'General, well-rounded profession. Learns abilities on-the-fly to stay alive.', 
@@ -1387,4 +1318,80 @@ Profession.database.newEntry(data:{
     passives : [
     ]
 }) 
+}
+
+
+@:Profession = databaseItemMutatorClass(
+    name : 'Wyvern.Profession.Instance',
+
+    items : {
+        base : empty,
+        sp : 0,
+        spNext : 1,
+        spLevel : 0
+    },
+    
+    database : Database.new(
+        name : 'Wyvern.Profession.Base',   
+        attributes : {
+            name : String,
+            description : String,
+            growth : StatSet.type,
+            minKarma : Number,
+            maxKarma : Number,
+            abilities : Object,
+            levelMinimum : Number,
+            passives : Object,
+            learnable : Boolean,
+            weaponAffinity : String
+        },
+        reset           
+    ),
+
+    define :::(this, state) {
+        
+
+        this.interface = {
+            initialize ::{},
+            defaultLoad ::(base) {
+                state.base = base;
+                return this;
+            },
+
+            base : {
+                get ::{
+                    return state.base;
+                }
+            },
+            
+            sp : {
+                get :: {
+                    return state.sp;
+                }
+            },
+            
+            // returns any learned abilities();
+            gainSP ::(amount) {
+                state.spNext -= amount;
+                @learned = [];
+                {:::} {
+                    forever ::{
+                        when(state.spNext > 0) send();
+                        @:next = state.base.abilities[state.spLevel];
+
+                        state.spNext += nextSPLevel(spLevel: state.spLevel);
+                        state.spLevel+=1;
+                        when(next == empty) empty; 
+                        learned->push(value:next);
+                    
+                    }
+                }
+                return learned;
+            }
+        }
+    }
+);
+
+
+
 return Profession;

@@ -17,53 +17,18 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
-@:StatSet = import(module:'game_class.statset.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
+
+
+
+
+@:reset :: {
+@:StatSet = import(module:'game_class.statset.mt');
 @:Damage = import(module:'game_class.damage.mt');
 @:Item = import(module:'game_mutator.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
-
-@:Scene = class(
-    inherits:[Database],
-    define::(this) {
-        this.interface = {
-            start::(name, onDone => Function, location, landmark) {
-                @:scene = this.find(name);
-                if (scene == empty)
-                    error(detail:'No such scene ' + name);
-                    
-                @:left = [...scene.script];
-                
-                @:doNext ::{
-                    when(left->keycount == 0) onDone();
-                    @:action = left[0];
-                    left->remove(key:0);
-                    match(action->type) {
-                      (Function):
-                        action(location, landmark, doNext),
-                      
-                      (Object): ::<= {
-                        windowEvent.queueMessage(speaker: action[0], text: action[1]);
-                        windowEvent.queueNoDisplay(onEnter:doNext);
-                      },
-                      default:
-                        error(detail:'Scene scripts only accept arrays or functions')
-                    }
-                }
-                
-                doNext();
-            }    
-        }
-    }
-).new(
-    name : 'Wyvern.Scene',
-    attributes : {
-        name : String,
-        script : Object
-    }
-);
 
 Scene.newEntry(
     data : {
@@ -1524,7 +1489,48 @@ Scene.newEntry(
         ]
     }
 )
+}
 
+@:Scene = class(
+    inherits:[Database],
+    define::(this) {
+        this.interface = {
+            start::(name, onDone => Function, location, landmark) {
+                @:scene = this.find(name);
+                if (scene == empty)
+                    error(detail:'No such scene ' + name);
+                    
+                @:left = [...scene.script];
+                
+                @:doNext ::{
+                    when(left->keycount == 0) onDone();
+                    @:action = left[0];
+                    left->remove(key:0);
+                    match(action->type) {
+                      (Function):
+                        action(location, landmark, doNext),
+                      
+                      (Object): ::<= {
+                        windowEvent.queueMessage(speaker: action[0], text: action[1]);
+                        windowEvent.queueNoDisplay(onEnter:doNext);
+                      },
+                      default:
+                        error(detail:'Scene scripts only accept arrays or functions')
+                    }
+                }
+                
+                doNext();
+            }    
+        }
+    }
+).new(
+    name : 'Wyvern.Scene',
+    attributes : {
+        name : String,
+        script : Object
+    },
+    reset
+);
 
 
 

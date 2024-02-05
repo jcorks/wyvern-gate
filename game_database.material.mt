@@ -20,22 +20,11 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@:Material = Database.new(
-    name : 'Wyvern.Material',
-    attributes : {
-        name : String,
-        rarity : Number,
-        tier : Number,
-        description : String,
-        statMod : StatSet.type, // percentages
-        pricePercentMod : Number
-    }            
-);
 
 
 
 
-
+@:reset :: {
 Material.newEntry(
     data : {
         name : 'Hardstone',
@@ -267,6 +256,21 @@ Material.newEntry(
         pricePercentMod: 150
     }
 )
+}
+
+@:Material = Database.new(
+    name : 'Wyvern.Material',
+    attributes : {
+        name : String,
+        rarity : Number,
+        tier : Number,
+        description : String,
+        statMod : StatSet.type, // percentages
+        pricePercentMod : Number
+    },
+    reset            
+);
+
 
 return Material;
 

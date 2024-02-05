@@ -1,19 +1,11 @@
-
 @:Database = import(module:'game_class.database.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:State = import(module:'game_class.state.mt');
 @:class = import(module:'Matte.Core.Class');
-@:Item = import(module:'game_mutator.item.mt');
 @:distance = import(module:'game_function.distance.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
-@:random = import(module:'game_singleton.random.mt');
-@:Damage = import(module:'game_class.damage.mt');
-@:Landmark = import(module:'game_mutator.landmark.mt');
-@:world = import(module:'game_singleton.world.mt');
-@:Battle = import(module:'game_class.battle.mt');
-@:Entity = import(module:'game_class.entity.mt');
 @:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
-
+@:random = import(module:'game_singleton.random.mt');
 /*
     Some tasks to implement:
         "fight" -> when with party, fights normal, when with npc v npc, does damage to both every step.
@@ -24,351 +16,17 @@
 */
 
 
-@:MapEntity = LoadableClass.create(
-    name : 'Wyvern.MapEntity',
-    statics : {
-        Controller :::<= {
-            @a;
-            return {
-                get ::<- a,
-                set::(value) <- a = value
-            }
-        },
-        
-        Task :::<= {
-            @a;
-            return {
-                get ::<- a,
-                set::(value) <- a = value
-            }
-        }        
-    },
-    items : {
-        tag : empty,
-        entities : empty,
-        targetX : empty,
-        targetY : empty,
-        path : empty,
-        onArrive : empty, // MapEntity.Task to do when arriving 
-        onCancel : empty, // MapEntity.Task to do when cancelling.
-        onStepSet: empty, // MapEntity.Task array to do each step
-        steps : 0,
-        speed : 1
-    },
-    define:::(this, state) {
-    
-
-        @controller_;
-        @isRemoved = false;
-
-        
-        
-        this.interface = {
-            initialize ::(parent) {
-                parent => MapEntity.Controller.type
-                controller_ = parent;
-            },
-            
-            defaultLoad::(x, y, symbol, entities => Object, tag) {
-                state.entities = entities;
-                state.tag = tag;
-                state.onStepSet = [];
-                controller_.map.setItem(data:this, x, y, discovered:true, symbol);            
-            },
-            
-            steps : {
-                get ::<- state.steps
-            },
-            
-            tag : {
-                get ::<- state.tag
-            },
-        
-            step :: {
-                when(isRemoved) empty;
-                state.steps += 1;
-                foreach(state.onStepSet) ::(k, task) {
-                    task.do(mapEntity:this);
-                }
-            
-            
-                @path = state.path;
-                when(path == empty) empty;
-                when(state.steps % state.speed != 0) empty;
-                when(isRemoved) empty;
-                when (
-                    distance(x0:state.targetX,
-                             y0:state.targetY,
-                             
-                             x1:controller_.map.getItem(data:this).x,
-                             y1:controller_.map.getItem(data:this).y
-                ) < 2) ::<={
-                    state.onCancel = empty;
-                    if (state.onArrive) ::<= {
-                        @:task = MapEntity.Task.new(
-                            base:MapEntity.Task.database.find(name:state.onArrive)
-                        );
-                        task.do(mapEntity:this);
-                        
-                    }
-                    state.path = empty;
-                }
-
-                when(isRemoved) empty;
-
-
-                @:next = path[path->size-1];
-                path->setSize(size:path->size-1);
-                when (path->size == 0)
-                    state.path = empty;
-                
-                // looks like the map was updated and we bumped 
-                // into a wall! get a new route.
-                if (controller_.map.isWalled(x:next.x, y:next.y))
-                    state.path = controller_.map.getPathTo(
-                        data:this,
-                        x:state.targetX,
-                        y:state.targetY,
-                        useBFS:true
-                    );
-                
-                controller_.map.moveItem(data:this, x:next.x, y:next.y);
-                
-            },
-            
-            addUpkeepTask ::(name) {
-                state.onStepSet->push(
-                    value: MapEntity.Task.new(
-                        base:MapEntity.Task.database.find(name)
-                    )
-                );
-            },
-            
-            removeUpkeepTask ::(name) {
-                @:index = state.onStepSet->findIndex(query::(value) <- value.base.name == name);
-                when(index == -1) empty;
-                state.onStepSet->remove(key:index);
-            },
-            
-            controller : {
-                get ::<- controller_
-            },
-            
-            // for non-battle fighting between NPCs.
-            // each member does a blow to a random other member who is 
-            // not incapacitated. Simplified attacks.
-            squabble ::(other => MapEntity.type) {
-
-                windowEvent.autoSkip = true;
-                
-                    @:allies = state.entities->filter(by::(value) <- !value.isIncapacitated());
-                    @:enemies = other.entities->filter(by::(value) <- !value.isIncapacitated());
-                    if (enemies->size > 0)  ::<= {
-                        foreach(allies) ::(i, ally) {
-                            @target = random.pickArrayItem(list:enemies);
-                            ally.attack(
-                                target,
-                                amount:ally.stats.ATK * (0.5),
-                                damageType : Damage.TYPE.PHYS,
-                                damageClass: Damage.CLASS.HP
-                            );       
-                        }
-                    }
-                    
-                    @defeated = true;
-                    foreach(enemies) ::(i, enemy) {
-                        if (!enemy.isIncapacitated())
-                            defeated = false;
-                    }
-
-                windowEvent.autoSkip = false;
-                @:Location = import(module:'game_mutator.location.mt');
-                
-                
-                if (defeated) ::<= {
-                    @:otherItem = controller_.map.getItem(data:other);
-                    other.remove();
-                    
-                    // Not really needed it seems since we have Bodies appearing 
-                    // for fallen teams.
-                    /*
-                    if (distance(   
-                        x0: controller_.map.pointerX,
-                        y0: controller_.map.pointerY,
-                        x1: otherItem.x,
-                        y1: otherItem.y
-                    ) < 15)
-                        windowEvent.queueMessage(
-                            text: random.pickArrayItem(list : [
-                                'Was that a scream...?',
-                                'Something definitely happened to someone nearby...',
-                                '...That did not sound good.',
-                                'A battle of some kind just ended.'
-                            ])
-                        );
-                    */
-                        
-                    @coversEntranceExit = {:::} {
-                        foreach(controller_.map.getItemsWithinRadius(
-                            x:otherItem.x,
-                            y:otherItem.y,
-                            radius: 2
-                        )) ::(i, item) {
-                            if (item.data->type == Location.type && (
-                                item.data.base.category == Location.CATEGORY.ENTRANCE ||
-                                item.data.base.category == Location.CATEGORY.EXIT
-                            ))
-                                send(message:true);
-                        
-                        }
-                        
-                        return false;
-                    }
-                    
-                    if (!coversEntranceExit) ::<= {
-                        foreach(other.entities) ::(i, entity) {
-                            controller_.landmark.addLocation(
-                                x:otherItem.x,
-                                y:otherItem.y,
-                                ownedByHint: entity,
-                                name: 'Body'
-                            );
-                        }
-                    }
-                }
-            },
-            
-            remove :: {
-                when(isRemoved) empty;
-                isRemoved = true;
-                controller_.remove(entity:this);
-            },
-            
-            entities : {
-                get ::<- state.entities
-            },
-
-            // sets a new place to go to
-            newPathTo ::(x => Number, y => Number, onArrive, onCancel, speed) {
-                when(isRemoved) empty;
-                this.clearPath();
-                state.speed = if (speed != empty) (1/speed)->round else 1;
-                state.targetX = x;
-                state.targetY = y;
-                state.onArrive = onArrive;
-                state.onCancel = onCancel;
-                state.path = controller_.map.getPathTo(
-                    data:this,
-                    x,
-                    y,
-                    useBFS:true
-                );
-            },
-            
-            clearPath ::{
-                when(isRemoved) empty;
-                if (state.onCancel != empty) ::<= {
-                    @:task = MapEntity.Task.new(
-                        base:MapEntity.Task.database.find(name:state.onArrive)
-                    );
-                    task.do(mapEntity:this);
-                }
-                state.path = empty;
-                state.onCancel = empty;
-                state.onArrive = empty;            
-            },
-            
-            hasPath : {
-                get ::<- state.path != empty
-            }         
-        }
-    }
-)
 
 
 
-MapEntity.Controller = LoadableClass.create(
-    name : 'Wyvern.MapEntity.Controller',
-    items : {
-        // it used to be mapEntities, but the map will own all instances, 
-        // and we cant have reference copies anywhere.
-    },
-    define:::(this, state) {
-    
-        @map_;
-        @landmark_;
-        
+@:reset :: {
 
-        
-        this.interface = {
-            initialize ::(parent) {
-                landmark_ = parent => Landmark.type;
-                map_ = parent.map;
-            },
-            
-            defaultLoad ::{},
-            
-            map : {
-                get ::<- map_
-            },
-            
-            landmark : {
-                get ::<- landmark_
-            },
-            
-            add::(x, y, symbol, entities => Object, tag) {
-                return MapEntity.new(parent:this, x, y, symbol, entities, tag); // automatically gets added to mapEntities
-            },
-            
-            mapEntities : {
-                get ::{
-                    @:out = map_.getAllItemData()->filter(by::(value) <- value->type == MapEntity.type);
-                    return out;
-                }
-            },
-            
-            remove::(entity => MapEntity.type) {
-                map_.removeItem(data:entity);
-            },
-            
-            step ::{
-                foreach(this.mapEntities) ::(k, ent) {
-                    ent.step();
-                }
-            }
-        }
-    }
-);
-
-
-MapEntity.Task = databaseItemMutatorClass(
-    name : "Wyvern.MapEntity.Task",
-    items : {
-        data : empty
-    },    
-    database : Database.new(
-        name : 'Wyvern.MapEntity.Task.Base',
-        attributes : {
-            name : String,
-            startup : Function,
-            do : Function
-        }
-    ),
-    define::(this, state) {    
-        this.interface = {
-            defaultLoad ::(base) {
-                state.data = base.startup();
-            },
-            
-            do ::(mapEntity => MapEntity.type) {
-                state.base.do(
-                    mapEntity,
-                    data:state.data
-                )
-            }
-        }
-    }
-);
+@:Item = import(module:'game_mutator.item.mt');
+@:Damage = import(module:'game_class.damage.mt');
+@:Landmark = import(module:'game_mutator.landmark.mt');
+@:world = import(module:'game_singleton.world.mt');
+@:Battle = import(module:'game_class.battle.mt');
+@:Entity = import(module:'game_class.entity.mt');
 
 
 
@@ -898,5 +556,363 @@ MapEntity.Task.database.newEntry(
         }
     );
 }
+}
+
+@:MapEntity = LoadableClass.create(
+    name : 'Wyvern.MapEntity',
+    statics : {
+        Controller :::<= {
+            @a;
+            return {
+                get ::<- a,
+                set::(value) <- a = value
+            }
+        },
+        
+        Task :::<= {
+            @a;
+            return {
+                get ::<- a,
+                set::(value) <- a = value
+            }
+        }        
+    },
+    items : {
+        tag : empty,
+        entities : empty,
+        targetX : empty,
+        targetY : empty,
+        path : empty,
+        onArrive : empty, // MapEntity.Task to do when arriving 
+        onCancel : empty, // MapEntity.Task to do when cancelling.
+        onStepSet: empty, // MapEntity.Task array to do each step
+        steps : 0,
+        speed : 1
+    },
+    define:::(this, state) {
+        @:Item = import(module:'game_mutator.item.mt');
+        @:Damage = import(module:'game_class.damage.mt');
+        @:Landmark = import(module:'game_mutator.landmark.mt');
+        @:world = import(module:'game_singleton.world.mt');
+        @:Battle = import(module:'game_class.battle.mt');
+        @:Entity = import(module:'game_class.entity.mt');
+    
+
+        @controller_;
+        @isRemoved = false;
+
+        
+        
+        this.interface = {
+            initialize ::(parent) {
+                parent => MapEntity.Controller.type
+                controller_ = parent;
+            },
+            
+            defaultLoad::(x, y, symbol, entities => Object, tag) {
+                state.entities = entities;
+                state.tag = tag;
+                state.onStepSet = [];
+                controller_.map.setItem(data:this, x, y, discovered:true, symbol);            
+            },
+            
+            steps : {
+                get ::<- state.steps
+            },
+            
+            tag : {
+                get ::<- state.tag
+            },
+        
+            step :: {
+                when(isRemoved) empty;
+                state.steps += 1;
+                foreach(state.onStepSet) ::(k, task) {
+                    task.do(mapEntity:this);
+                }
+            
+            
+                @path = state.path;
+                when(path == empty) empty;
+                when(state.steps % state.speed != 0) empty;
+                when(isRemoved) empty;
+                when (
+                    distance(x0:state.targetX,
+                             y0:state.targetY,
+                             
+                             x1:controller_.map.getItem(data:this).x,
+                             y1:controller_.map.getItem(data:this).y
+                ) < 2) ::<={
+                    state.onCancel = empty;
+                    if (state.onArrive) ::<= {
+                        @:task = MapEntity.Task.new(
+                            base:MapEntity.Task.database.find(name:state.onArrive)
+                        );
+                        task.do(mapEntity:this);
+                        
+                    }
+                    state.path = empty;
+                }
+
+                when(isRemoved) empty;
+
+
+                @:next = path[path->size-1];
+                path->setSize(size:path->size-1);
+                when (path->size == 0)
+                    state.path = empty;
+                
+                // looks like the map was updated and we bumped 
+                // into a wall! get a new route.
+                if (controller_.map.isWalled(x:next.x, y:next.y))
+                    state.path = controller_.map.getPathTo(
+                        data:this,
+                        x:state.targetX,
+                        y:state.targetY,
+                        useBFS:true
+                    );
+                
+                controller_.map.moveItem(data:this, x:next.x, y:next.y);
+                
+            },
+            
+            addUpkeepTask ::(name) {
+                state.onStepSet->push(
+                    value: MapEntity.Task.new(
+                        base:MapEntity.Task.database.find(name)
+                    )
+                );
+            },
+            
+            removeUpkeepTask ::(name) {
+                @:index = state.onStepSet->findIndex(query::(value) <- value.base.name == name);
+                when(index == -1) empty;
+                state.onStepSet->remove(key:index);
+            },
+            
+            controller : {
+                get ::<- controller_
+            },
+            
+            // for non-battle fighting between NPCs.
+            // each member does a blow to a random other member who is 
+            // not incapacitated. Simplified attacks.
+            squabble ::(other => MapEntity.type) {
+
+                windowEvent.autoSkip = true;
+                
+                    @:allies = state.entities->filter(by::(value) <- !value.isIncapacitated());
+                    @:enemies = other.entities->filter(by::(value) <- !value.isIncapacitated());
+                    if (enemies->size > 0)  ::<= {
+                        foreach(allies) ::(i, ally) {
+                            @target = random.pickArrayItem(list:enemies);
+                            ally.attack(
+                                target,
+                                amount:ally.stats.ATK * (0.5),
+                                damageType : Damage.TYPE.PHYS,
+                                damageClass: Damage.CLASS.HP
+                            );       
+                        }
+                    }
+                    
+                    @defeated = true;
+                    foreach(enemies) ::(i, enemy) {
+                        if (!enemy.isIncapacitated())
+                            defeated = false;
+                    }
+
+                windowEvent.autoSkip = false;
+                @:Location = import(module:'game_mutator.location.mt');
+                
+                
+                if (defeated) ::<= {
+                    @:otherItem = controller_.map.getItem(data:other);
+                    other.remove();
+                    
+                    // Not really needed it seems since we have Bodies appearing 
+                    // for fallen teams.
+                    /*
+                    if (distance(   
+                        x0: controller_.map.pointerX,
+                        y0: controller_.map.pointerY,
+                        x1: otherItem.x,
+                        y1: otherItem.y
+                    ) < 15)
+                        windowEvent.queueMessage(
+                            text: random.pickArrayItem(list : [
+                                'Was that a scream...?',
+                                'Something definitely happened to someone nearby...',
+                                '...That did not sound good.',
+                                'A battle of some kind just ended.'
+                            ])
+                        );
+                    */
+                        
+                    @coversEntranceExit = {:::} {
+                        foreach(controller_.map.getItemsWithinRadius(
+                            x:otherItem.x,
+                            y:otherItem.y,
+                            radius: 2
+                        )) ::(i, item) {
+                            if (item.data->type == Location.type && (
+                                item.data.base.category == Location.CATEGORY.ENTRANCE ||
+                                item.data.base.category == Location.CATEGORY.EXIT
+                            ))
+                                send(message:true);
+                        
+                        }
+                        
+                        return false;
+                    }
+                    
+                    if (!coversEntranceExit) ::<= {
+                        foreach(other.entities) ::(i, entity) {
+                            controller_.landmark.addLocation(
+                                x:otherItem.x,
+                                y:otherItem.y,
+                                ownedByHint: entity,
+                                name: 'Body'
+                            );
+                        }
+                    }
+                }
+            },
+            
+            remove :: {
+                when(isRemoved) empty;
+                isRemoved = true;
+                controller_.remove(entity:this);
+            },
+            
+            entities : {
+                get ::<- state.entities
+            },
+
+            // sets a new place to go to
+            newPathTo ::(x => Number, y => Number, onArrive, onCancel, speed) {
+                when(isRemoved) empty;
+                this.clearPath();
+                state.speed = if (speed != empty) (1/speed)->round else 1;
+                state.targetX = x;
+                state.targetY = y;
+                state.onArrive = onArrive;
+                state.onCancel = onCancel;
+                state.path = controller_.map.getPathTo(
+                    data:this,
+                    x,
+                    y,
+                    useBFS:true
+                );
+            },
+            
+            clearPath ::{
+                when(isRemoved) empty;
+                if (state.onCancel != empty) ::<= {
+                    @:task = MapEntity.Task.new(
+                        base:MapEntity.Task.database.find(name:state.onArrive)
+                    );
+                    task.do(mapEntity:this);
+                }
+                state.path = empty;
+                state.onCancel = empty;
+                state.onArrive = empty;            
+            },
+            
+            hasPath : {
+                get ::<- state.path != empty
+            }         
+        }
+    }
+)
+
+
+
+MapEntity.Controller = LoadableClass.create(
+    name : 'Wyvern.MapEntity.Controller',
+    items : {
+        // it used to be mapEntities, but the map will own all instances, 
+        // and we cant have reference copies anywhere.
+    },
+    define:::(this, state) {
+    
+        @map_;
+        @landmark_;
+        
+        @:Landmark = import(module:'game_mutator.landmark.mt');
+
+        
+        this.interface = {
+            initialize ::(parent) {
+                landmark_ = parent => Landmark.type;
+                map_ = parent.map;
+            },
+            
+            defaultLoad ::{},
+            
+            map : {
+                get ::<- map_
+            },
+            
+            landmark : {
+                get ::<- landmark_
+            },
+            
+            add::(x, y, symbol, entities => Object, tag) {
+                return MapEntity.new(parent:this, x, y, symbol, entities, tag); // automatically gets added to mapEntities
+            },
+            
+            mapEntities : {
+                get ::{
+                    @:out = map_.getAllItemData()->filter(by::(value) <- value->type == MapEntity.type);
+                    return out;
+                }
+            },
+            
+            remove::(entity => MapEntity.type) {
+                map_.removeItem(data:entity);
+            },
+            
+            step ::{
+                foreach(this.mapEntities) ::(k, ent) {
+                    ent.step();
+                }
+            }
+        }
+    }
+);
+
+MapEntity.Task = databaseItemMutatorClass(
+    name : "Wyvern.MapEntity.Task",
+    items : {
+        data : empty
+    },    
+    database : Database.new(
+        name : 'Wyvern.MapEntity.Task.Base',
+        attributes : {
+            name : String,
+            startup : Function,
+            do : Function
+        },
+        reset
+    ),
+    define::(this, state) {    
+        this.interface = {
+            defaultLoad ::(base) {
+                state.data = base.startup();
+            },
+            
+            do ::(mapEntity => MapEntity.type) {
+                state.base.do(
+                    mapEntity,
+                    data:state.data
+                )
+            }
+        }
+    }
+);
+
+
+
+
 
 return MapEntity;

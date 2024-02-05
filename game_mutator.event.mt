@@ -17,6 +17,12 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
+@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+
+
+
+@: reset ::{
+
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:Battle = import(module:'game_class.battle.mt');
@@ -27,94 +33,6 @@
 @:correctA = import(module:'game_function.correcta.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
-
-
-@:Event = databaseItemMutatorClass(
-    name: 'Wyvern.Event',
-    items : {
-        timeLeft : empty,
-        duration : empty,
-        startAt : empty   
-    },
-    database: Database.new(
-        name : 'Wyvern.Event.Base',
-        attributes : {
-            name : String,
-            rarity: Number,
-            onEventStart : Function,
-            onEventUpdate : Function,
-            onEventEnd : Function
-        }            
-    ),
-        
-    define:::(this, state) {        
-    
-        @party_;
-        @island_;
-        @landmark_;
-        this.interface = {
-            initialize ::(parent, base, currentTime, state) {
-                @:world = import(module:'game_singleton.world.mt');
-                
-                @:Island = import(module:'game_class.island.mt');
-                @:Landmark = import(module:'game_mutator.landmark.mt');
-                
-                @landmark;
-                @island;
-                
-                if (parent->type == Island.type) ::<= {
-                    landmark = empty;
-                    island = parent;
-                } else if (parent->type == Landmark.type) ::<= {
-                    landmark = parent;
-                    island = landmark.island;
-                } else 
-                    error(detail:'Parents of Events can only be either Landmarks or Islands');
-                
-                @:party = world.party;                
-                island_ = island;
-                party_ = party;
-                landmark_ = landmark;
-            },
-
-            defaultLoad ::(base, currentTime) {
-                state.base = base; 
-                state.startAt = currentTime;
-                state.duration = base.onEventStart(event:this);
-                state.timeLeft = state.duration;
-                return this;
-            },
-        
-            expired : {
-                get :: <- state.timeLeft == 0
-            },
-            
-            stepTime :: {
-                state.base.onEventUpdate(event:this);
-                if (state.timeLeft > 0) state.timeLeft -= 1;
-            },
-            
-            duration : {
-                get :: <- state.duration
-            },
-            
-            island : {
-                get :: <- island_
-            },
-            
-            party : {
-                get :: <- party_
-            },
-            
-            landmark : {
-                get :: <- landmark_
-            }
-        }
-    }
-
-);
-
 
 Event.database.newEntry(
     data: {
@@ -869,7 +787,95 @@ Event.database.newEntry(
         }
     }
 )
+}
 
+
+
+@:Event = databaseItemMutatorClass(
+    name: 'Wyvern.Event',
+    items : {
+        timeLeft : empty,
+        duration : empty,
+        startAt : empty   
+    },
+    database: Database.new(
+        name : 'Wyvern.Event.Base',
+        attributes : {
+            name : String,
+            rarity: Number,
+            onEventStart : Function,
+            onEventUpdate : Function,
+            onEventEnd : Function
+        },
+        reset         
+    ),
+        
+    define:::(this, state) {        
+    
+        @party_;
+        @island_;
+        @landmark_;
+        this.interface = {
+            initialize ::(parent, base, currentTime, state) {
+                @:world = import(module:'game_singleton.world.mt');
+                
+                @:Island = import(module:'game_class.island.mt');
+                @:Landmark = import(module:'game_mutator.landmark.mt');
+                
+                @landmark;
+                @island;
+                
+                if (parent->type == Island.type) ::<= {
+                    landmark = empty;
+                    island = parent;
+                } else if (parent->type == Landmark.type) ::<= {
+                    landmark = parent;
+                    island = landmark.island;
+                } else 
+                    error(detail:'Parents of Events can only be either Landmarks or Islands');
+                
+                @:party = world.party;                
+                island_ = island;
+                party_ = party;
+                landmark_ = landmark;
+            },
+
+            defaultLoad ::(base, currentTime) {
+                state.base = base; 
+                state.startAt = currentTime;
+                state.duration = base.onEventStart(event:this);
+                state.timeLeft = state.duration;
+                return this;
+            },
+        
+            expired : {
+                get :: <- state.timeLeft == 0
+            },
+            
+            stepTime :: {
+                state.base.onEventUpdate(event:this);
+                if (state.timeLeft > 0) state.timeLeft -= 1;
+            },
+            
+            duration : {
+                get :: <- state.duration
+            },
+            
+            island : {
+                get :: <- island_
+            },
+            
+            party : {
+                get :: <- party_
+            },
+            
+            landmark : {
+                get :: <- landmark_
+            }
+        }
+    }
+
+);
 
 
 return Event;
