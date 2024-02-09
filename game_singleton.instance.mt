@@ -99,11 +99,63 @@ return class(
         @island_;
         @landmark_;
         
-        
+        // the main.mt results of all mods, ordered based on dependency
+        @:modMainOrdered = [];
 
         
 
+        @:loadMods ::(mods) {
+            // first we need the proper dep tree;
+            @:depends = {};
+            @:modsIndexed = {};
+            
         
+            foreach(mods) ::(i, mod) {
+                depends[mod.name] = [...mod.loadFirst];
+                modsIndexed[mod.name] = mod;
+            }
+
+            
+            @:loaded = {}; // by name
+            @:loading = {}; // by name, for circ dep
+            
+            
+            // loads a single mod in order, detected circular dependencies.
+            @:loadMod ::(mod) {
+                when(loaded[mod.name] == true) empty;
+                if (loading[mod.name] == true)
+                    error(detail: 'Circular dependency of mods detected! First circular dependency: ' + mod.name);
+                    
+                loading[mod.name] = true;
+                
+                // load prereqs
+                foreach(mod.loadFirst) ::(i, first) {
+                    loadMod(mod:modsIndexed[first]);
+                }
+                
+                
+                // get entry point.
+                @:result = {:::} {
+                    return import(module: mod.name + '/main.mt');
+                } : {
+                    onError::(message) {
+                        error(detail: 'An error occurred while loading the mod ' + mod.name + ':' + message.summary + '\n\n');
+                    }
+                }
+
+                modMainOrdered->push(value:result);
+
+                loaded[mod.name] = true;
+            }
+            foreach(mods) ::(i, mod) {
+                loadMod(mod);
+            }
+            
+            
+            foreach(modMainOrdered) ::(i, modMain) {
+                modMain.onGameStartup();
+            }
+        }
         
         
         
@@ -117,6 +169,7 @@ return class(
                 onSaveState => Function, // for saving,
                 onLoadState => Function,
                 onListSlots => Function,
+                preloadMods => Function,
                 onQuit => Function
             ) {
                 canvas.resize(width:canvasWidth, height:canvasHeight);
@@ -126,8 +179,142 @@ return class(
                 windowEvent.queueMessage(
                     text: ' Wyvern Gate ' + VERSION + ' '
                 );
+                
+                
+                @:mods = preloadMods();
+                loadMods(mods);
+                
+
+
+                @:choiceNames = [];
+                @:choiceActions = [];
+                
+                
+                if (onListSlots()->size != 0) ::<= {
+                    choiceNames->push(value:'Load');
+                    choiceActions->push(value: ::{
+                        @:choices = onListSlots();
+                        when (choices->size == 0) ::<= {
+                            windowEvent.queueMessage(text: 'No save files were found.');
+                        }
+                        windowEvent.queueChoices(
+                            choices,
+                            prompt: 'Load which save?',
+                            canCancel: true,
+                            onChoice::(choice) {
+                                when(choice == 0) empty;
+                                @:data = onLoadState(slot:choices[choice-1]);
+
+                                this.resetDatabase();
+
+                                                                        
+                                this.load(serialized:JSON.decode(string:data));
+                                this.startResume();
+                            
+                            }
+                        );                    
+                    });
+                }
+                
+                choiceNames->push(value:'New');
+                choiceActions->push(value:::{
+                    canvas.clear();
+                    canvas.blackout();
+
+                    this.resetDatabase();
+
+
+                    @:enterName = import(module:'game_function.name.mt');
+
+
+                    @:choices = Scenario.database.getAll();
+                    @:choiceNames = [...choices]->map(to::(value) <- value.name);
+                    
+                    
+                    windowEvent.queueChoices(
+                        prompt: 'Select a scenario:',
+                        choices: choiceNames,
+                        canCancel: true,
+                        onChoice::(choice) {
+                            when(choice <= 0) empty;
+                            world.scenario = Scenario.new(base:choices[choice-1]);
+
+                            @:startNewWorld = ::(name){
+                                world.saveName = name;                        
+                                this.startNew();
+                                //this.startInstance();                            
+                            }
+
+                            enterName(
+                                prompt: 'Enter a file name.',
+                                onDone ::(name){
+                                    @:currentFiles = onListSlots();
+
+                                    when (currentFiles->findIndex(value:name) != -1) ::<= {
+                                        windowEvent.queueMessage(text:'There\'s already a file named ' + name);
+                                        windowEvent.queueAskBoolean(
+                                            prompt: 'Overwrite ' + name + '?',
+                                            onChoice ::(which) {
+                                                when(!which) empty;
+                                                startNewWorld(name);
+                                            }
+                                        );
+                                    }
+                                
+                                    startNewWorld(name);
+                                }
+                            )
+                        }
+                    );                
+                });
+                
+                
+                if (mods->size != 0) ::<= {
+                    choiceNames->push(value:'Mods...');
+
+                    @:modNames = [];
+                    @:modList = [];
+                    
+                    foreach(mods) ::(k, mod) {
+                        modNames->push(value:mod.displayName);
+                        modList->push(value:mod);
+                    }
+
+                    choiceActions->push(value:::{
+                        windowEvent.queueChoices(
+                            prompt: 'Loaded mods:',
+                            keep:true,
+                            canCancel:true,
+                            choices: modNames,
+                            onChoice ::(choice) {
+                                @:mod = modList[choice-1];
+                                windowEvent.queueMessage(
+                                    speaker: 'Mod info...',
+                                    text: 
+                                        'Name    : ' + mod.displayName + '\n'+
+                                        '         (' + mod.name + ')\n' +
+                                        'Author  : ' + mod.author + '\n' +
+                                        'Website : ' + mod.website + '\n\n' +
+                                        mod.description + 
+                                        '\n\nDepends on ' + mod.loadFirst->size + ' mods:\n' + ::<= {
+                                            @out = '';
+                                            foreach(mod.loadFirst) ::(i, depends) {
+                                                out = out + ' - ' + depends + '\n'
+                                            }
+                                            return out;
+                                        }
+                                )
+                            }
+                        );
+                    });
+                }
+                
+                choiceNames->push(value: 'Quit');
+                choiceActions->push(value ::<- onQuit());
+                
+                
                 windowEvent.queueChoices(
-                    choices : ['Load', 'New', 'Quit'],
+                    choices: choiceNames,
                     topWeight: 0.75,
                     keep : true,
                     jumpTag : 'MainMenu',
@@ -137,84 +324,7 @@ return class(
                         }
                     },
                     onChoice ::(choice) {
-                        match(choice-1) {
-                          // Load 
-                          (0)::<= {
-                            @:choices = onListSlots();
-                            when (choices->size == 0) ::<= {
-                                windowEvent.queueMessage(text: 'No save files were found.');
-                            }
-                            windowEvent.queueChoices(
-                                choices,
-                                prompt: 'Load which save?',
-                                canCancel: true,
-                                onChoice::(choice) {
-                                    when(choice == 0) empty;
-                                    @:data = onLoadState(slot:choices[choice-1]);
-
-                                    this.resetDatabase();
-                                                                            
-                                    this.load(serialized:JSON.decode(string:data));
-                                    this.startResume();
-                                
-                                }
-                            );
-                          },
-                          
-                          (1)::<= {
-                            canvas.clear();
-                            canvas.blackout();
-
-                            this.resetDatabase();
-
-                            @:enterName = import(module:'game_function.name.mt');
-
-
-                            @:choices = Scenario.database.getAll();
-                            @:choiceNames = [...choices]->map(to::(value) <- value.name);
-                            
-                            
-                            windowEvent.queueChoices(
-                                prompt: 'Select a scenario:',
-                                choices: choiceNames,
-                                canCancel: true,
-                                onChoice::(choice) {
-                                    when(choice <= 0) empty;
-                                    world.scenario = Scenario.new(base:choices[choice-1]);
-
-                                    @:startNewWorld = ::(name){
-                                        world.saveName = name;                        
-                                        this.startNew();
-                                        //this.startInstance();                            
-                                    }
-
-                                    enterName(
-                                        prompt: 'Enter a file name.',
-                                        onDone ::(name){
-                                            @:currentFiles = onListSlots();
-
-                                            when (currentFiles->findIndex(value:name) != -1) ::<= {
-                                                windowEvent.queueMessage(text:'There\'s already a file named ' + name);
-                                                windowEvent.queueAskBoolean(
-                                                    prompt: 'Overwrite ' + name + '?',
-                                                    onChoice ::(which) {
-                                                        when(!which) empty;
-                                                        startNewWorld(name);
-                                                    }
-                                                );
-                                            }
-                                        
-                                            startNewWorld(name);
-                                        }
-                                    )
-                                }
-                            );
-                          },
-                          
-                          (2)::<= {
-                            onQuit();
-                          }
-                        }                            
+                        choiceActions[choice-1]();
                     }
                 );
             },
@@ -599,7 +709,9 @@ return class(
             resetDatabase :: {
                 Database.reset();
                 world.initializeNPCs();
-                // Load mod database overrides here            
+                foreach(modMainOrdered) ::(i, modMain) {
+                    modMain.onDatabaseStartup();
+                }
             },
 
             island : {

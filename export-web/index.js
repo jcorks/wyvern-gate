@@ -7,63 +7,24 @@ var CANVAS;
          (navigator.maxTouchPoints > 0) ||
          (navigator.msMaxTouchPoints > 0)));
     
+    const rows = [];
+    
 
     CANVAS = {
         _el: null,
         _commitRow: 0,
 
         init: function (element) {
-            if (!element) {
-                console.warn('Could not find canvas to init!');
-            } else {
-                this._el = element;
-            }
         },
         reset: function (clear = false) {
             this._commitRow = 0;
         },
         clear: function () {
-            this._el.innerHTML = '';
+            this._commitRow = 0;
         },
         writeRow: function (y, text) {
-            // The old way, but here
-            //this._el.innerHTML += '\n' + [...text]
-            //    .map(character => `<span>${character}</span>`)
-            //    .join('');
-
-            // The better way
-            // Make sure row exists first
-            let row = this._el.children[y];
-
-            if (!(row instanceof Element)) {
-                row = document.createElement('div')
-                row.id = `row-${y}`
-                row.className = 'canvas__row'
-            }
-
-            // Iterate over text
-            let textArray = [...text]
-            
-            textArray.forEach((character, x) => {
-                let cell = row.children[x]
-
-                if (!(cell instanceof Element)) {
-                    cell = document.createElement('span')
-                    cell.id = `cell-${x},${y}`
-                    cell.className = 'canvas__row__cell'
-                }
-
-                cell.innerText = character;
-
-                if (cell.parentElement === null) {
-                    row.appendChild(cell)
-                }
-            })
-
-            // Append at the end so we only render the DOM once
-            if (row.parentElement === null) {
-                this._el.appendChild(row)
-            }
+            TextRenderer.setLine(y, text);
+            TextRenderer.requestDraw();
         },
         writeCommit: function (text) {
             this.writeRow(this._commitRow, text);

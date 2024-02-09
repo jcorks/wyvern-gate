@@ -22,9 +22,15 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:instance = import(module:'game_singleton.instance.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
+@:JSON = import(module:'Matte.Core.JSON');
 
+@MOD_DIR = './mod_examples';
 
-
+{:::} {
+    MOD_DIR = import(module:'wyvern_gate__native__get_mod_dir')(); 
+} : {
+    onError::(message) {}
+};
 
 @currentCanvas;
 @canvasChanged = false;
@@ -100,22 +106,25 @@ canvas.onCommit = ::(lines, renderNow){
     } 
 }
 
-@enterSaveLocation ::(action) {
+@enterNewLocation ::(action, path) {
     @:Filesystem = import(module:'Matte.System.Filesystem');
     @CWD = Filesystem.cwd;
-    Filesystem.cwd = './';
+    Filesystem.cwd = path;
     @output;
     {:::} {
         output = action(filesystem:Filesystem);
     } : {
-        onError::(detail) {
+        onError::(message) {
             Filesystem.cwd = CWD;        
-            error(detail);                
+            error(detail:message.detail);                
         }
     }
     Filesystem.cwd = CWD;        
     return output;
 }
+
+
+
 instance.mainMenu(
     canvasWidth: 80,
     canvasHeight: 22,
@@ -123,7 +132,8 @@ instance.mainMenu(
         slot,
         data
     ) {
-        enterSaveLocation(
+        enterNewLocation(
+            path: './',
             action::(filesystem) {
                 filesystem.writeString(
                     path: 'save_' + slot,
@@ -134,7 +144,8 @@ instance.mainMenu(
     },
     
     onListSlots ::{
-        return enterSaveLocation(
+        return enterNewLocation(
+            path: './',
             action::(filesystem) {
                 @:out = {};
                 foreach(filesystem.directoryContents) ::(k, file) {
@@ -151,7 +162,8 @@ instance.mainMenu(
         slot
     ) {
         return {:::} {
-            return enterSaveLocation(
+            return enterNewLocation(
+                path: './',
                 action::(filesystem) {
                     return filesystem.readString(
                         path: 'save_' + slot
@@ -163,6 +175,82 @@ instance.mainMenu(
                 return empty;
             }
         }
+    },
+    
+    preloadMods :: {
+        @:mods = [];
+
+        @:jsonTypes = {
+            name : String,
+            displayName : String,
+            description : String,
+            author : String,
+            website : String,
+            files : Object,
+            loadFirst : Object
+        }
+        
+        @:checkTypes ::(path, json) {
+            foreach(jsonTypes) ::(name, type) {
+                when(json[name]->type != type)
+                    error(detail:path + ': mod.json: "' + name + '" must be a ' + String(from:type) + '!');
+            }
+        }
+        
+        
+        @:preload ::(json) {
+            foreach(json.files) ::(i, file) {
+                {:::} {
+                    import(
+                        module:file,
+                        alias:json.name + '/' + file,
+                        preloadOnly: true 
+                    )
+                } : {
+                    onError::(message) {
+                        error(detail: 'Could not preload / compile ' + json.name + '/' + file + ':' + message.detail);
+                    }
+                }
+            }
+        }
+        
+
+        @:loadModJSON ::(filesystem, file) {
+            enterNewLocation(
+                path: file.path,
+                action ::(filesystem) {
+                    // first, get the JSON 
+                    @:json = {:::} {
+                        @:data = filesystem.readString(path:'mod.json');
+                        
+                        if (data == empty || data == '')
+                            error();
+                            
+                        return JSON.decode(string:data);
+                    } : {
+                        onError ::(message) {
+                            error(detail: 'Could not read or parse mod.json file within ' + file.path + '!');
+                        }
+                    }
+                    
+                    checkTypes(path:file.path, json);
+                    preload(json);
+                    mods->push(value:json);
+                }
+            )
+        }
+    
+        enterNewLocation(
+            path: MOD_DIR,
+            action::(filesystem) {
+                foreach(filesystem.directoryContents) ::(k, file) {
+                    when (file.isFile) empty;
+                    
+                    loadModJSON(filesystem, file);
+                }
+            }
+        );
+        return mods;    
     },
     
     onQuit :: {

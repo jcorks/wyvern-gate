@@ -6,16 +6,12 @@
     <meta name="description" content="Wyvern Gate: A Text RPG">
     <meta name="keywords" content="text adventer">
     <link rel="stylesheet" href="style.css">
-    <script src="matte.js"></script>
-    <script src="index.js"></script>
-    <script src="driver.js"></script>
+
 
 
 </head>
 <body onkeydown="onPageInput(event)" style="touch-action: manipulation">
-    <pre><code id='canvas'>
-    
-    </code></pre>
+    <canvas id="canvas" width="1200px" height="600px"></canvas>
     <!-- controls -->
 
     <div id="inputArea" style="width:100%;position:fixed;bottom:0%;user-select:none;display:flex;justify-content:space-between;">
@@ -56,5 +52,12 @@
     
 
 </body>
+<footer> 
+    <script src="textrenderer-utils.js"></script>
+    <script src="textrenderer.js"></script>
+    <script src="matte.js"></script>
+    <script src="index.js"></script>
+    <script src="driver.js"></script>
+</footer>
 </html>
 

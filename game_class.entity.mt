@@ -212,7 +212,7 @@
             
             
         
-            defaultLoad::(island, speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities, innateEffects) {
+            defaultLoad::(island, speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities, innateEffects, faveWeapon) {
                 state.worldID = world.getNextID();
                 state.stats = StatSet.new(
                     HP:1,
@@ -293,6 +293,9 @@
                     this.autoLevel();                
                 }
                 state.inventory = Inventory.new(size:10);
+                if (faveWeapon)
+                    state.faveWeapon = Item.database.find(name:faveWeapon);
+
                 if (island != empty)  ::<= {
                     for(0, 3)::(i) {
                         state.inventory.add(item:
@@ -305,10 +308,13 @@
                             )
                         );
                     }
-                    state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0 && value.tier <= island.tier)
-                } else 
-                    state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0)
 
+                    if (state.faveWeapon == empty)
+                        state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0 && value.tier <= island.tier)
+                } else ::<= {
+                    if (state.faveWeapon == empty)
+                        state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0)
+                }
                 state.inventory.addGold(amount:(Number.random() * 100)->ceil);
                 state.favoriteItem = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
                 state.innateEffects = innateEffects;

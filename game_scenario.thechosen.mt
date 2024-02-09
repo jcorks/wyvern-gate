@@ -369,6 +369,16 @@ return {
             
             */
 
+            /*
+            @:pan = Item.new(
+                base:Item.database.find(name:'Frying Pan'),
+                materialHint: 'Crystal',
+                qualityHint: 'Divine',
+                rngEnchantHint: true
+            );
+            party.inventory.add(item:pan);
+            */
+
 
         party.add(member:p0);
         party.add(member:p1);
