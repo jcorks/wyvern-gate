@@ -1,5 +1,4 @@
-var LAST_INPUT = -1;
-var CANVAS;
+var matteWorker = null;
 (function() {
 
     const isTouchScreen =
@@ -10,83 +9,89 @@ var CANVAS;
     const rows = [];
     
 
-    CANVAS = {
-        _el: null,
-        _commitRow: 0,
-
-        init: function (element) {
-        },
-        reset: function (clear = false) {
-            this._commitRow = 0;
-        },
-        clear: function () {
-            this._commitRow = 0;
-        },
-        writeRow: function (y, text) {
-            TextRenderer.setLine(y, text);
-            TextRenderer.requestDraw();
-        },
-        writeCommit: function (text) {
-            this.writeRow(this._commitRow, text);
-            this._commitRow++;
-        }
-    }
-
     document.addEventListener('DOMContentLoaded', function () {
-        CANVAS.init(document.getElementById('canvas'));
+
+        matteWorker = new Worker("worker.js");
+        
+        matteWorker.postMessage({
+            command: 'deliverSaves',
+            saves: JSON.parse(JSON.stringify(window['localStorage']))
+        });
+
+        matteWorker.onmessage = function(e) {
+            switch(e.data.command) {
+              case 'lines':
+                for(var i = 0; i < e.data.data.length; ++i) {
+                    TextRenderer.setLine(i, e.data.data[i]);
+                }
+                TextRenderer.requestDraw();
+                break;
+                
+              case 'save': {
+                var storage = window['localStorage'];
+                storage[e.data.name] = e.data.data;                
+
+                matteWorker.postMessage({
+                    command: 'deliverSaves',
+                    saves: JSON.parse(JSON.stringify(window['localStorage']))
+                });
+              }             
+            }
+             
+        }
 
         if (!isTouchScreen) {
             document.getElementById('arrow-left').addEventListener('mousedown', function(e) {
-                LAST_INPUT = 0;
+                matteWorker.postMessage(0);
             });
 
             document.getElementById('arrow-up').addEventListener('mousedown', function(e) {
-                LAST_INPUT = 1;
+                matteWorker.postMessage(1);
             });
 
             document.getElementById('arrow-right').addEventListener('mousedown', function(e) {
-                LAST_INPUT = 2;
+                matteWorker.postMessage(2);
             });
 
             document.getElementById('arrow-down').addEventListener('mousedown', function(e) {
-                LAST_INPUT = 3;
+                matteWorker.postMessage(3);
             });
 
 
             document.getElementById('a-button').addEventListener('mousedown', function(e) {
-                LAST_INPUT = 4;
+                matteWorker.postMessage(4);
             });
 
             document.getElementById('b-button').addEventListener('mousedown', function(e) {
-                LAST_INPUT = 5;
+                matteWorker.postMessage(5);
             });
         }
         
         
         
        document.getElementById('arrow-left').addEventListener('touchstart', function(e) {
-            LAST_INPUT = 0;
+            matteWorker.postMessage(0);
         });
 
         document.getElementById('arrow-up').addEventListener('touchstart', function(e) {
-            LAST_INPUT = 1;
+            matteWorker.postMessage(1);
         });
 
         document.getElementById('arrow-right').addEventListener('touchstart', function(e) {
-            LAST_INPUT = 2;
+            matteWorker.postMessage(2);
         });
 
         document.getElementById('arrow-down').addEventListener('touchstart', function(e) {
-            LAST_INPUT = 3;
+            matteWorker.postMessage(3);
         });
 
 
         document.getElementById('a-button').addEventListener('touchstart', function(e) {
-            LAST_INPUT = 4;
+            matteWorker.postMessage(4);
         });
 
         document.getElementById('b-button').addEventListener('touchstart', function(e) {
-            LAST_INPUT = 5;
+            matteWorker.postMessage(5);
         });        
 
     });
@@ -191,37 +196,32 @@ var CANVAS;
 var onPageInput = function (event) {
     switch(event.key) {
       case 'ArrowLeft': 
-        LAST_INPUT = 0;
+        matteWorker.postMessage(0);
         break;
 
       case 'ArrowRight': 
-        LAST_INPUT = 2;
+        matteWorker.postMessage(2);
         break;
 
       case 'ArrowUp': 
-        LAST_INPUT = 1;
+        matteWorker.postMessage(1);
         break;
 
       case 'ArrowDown': 
-        LAST_INPUT = 3;
+        matteWorker.postMessage(3);
         break;
 
       case 'z': 
       case 'Space': 
       case 'Enter': 
-        LAST_INPUT = 4;
+        matteWorker.postMessage(4);
         break;
 
       case 'x': 
       case 'Escape': 
       case 'Backspace': 
-        LAST_INPUT = 5;
+        matteWorker.postMessage(5);
         break;
-
-
-    }
-    if (LAST_INPUT != -1) {
-        console.log(LAST_INPUT);
     }
 };
 

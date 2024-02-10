@@ -139,58 +139,54 @@
 
 
     matte.setExternalFunction('external_onStartCommit', [], function(fn, args) {
-        CANVAS.reset();
         return matte.store.createEmpty();        
     });
 
     matte.setExternalFunction('external_onEndCommit', [],function(fn, args) {
+        Worker.send();
         return matte.store.createEmpty();            
     });
 
 
     matte.setExternalFunction('external_onCommitText', ['a'],function(fn, args) {
-        CANVAS.writeCommit(args[0].data);
+        Worker.newLine(args[0].data);
         return matte.store.createEmpty();        
     });
 
     matte.setExternalFunction('external_onSaveState', ['a', 'b'], function(fn, args) {
-        var storage = window['localStorage'];
         const slot = args[0].data;
-        storage['wyvernslot'+slot] = args[1].data;
+        Worker.save({
+            name: 'wyvernslot'+slot,
+            data: args[1].data
+        });
         return matte.store.createEmpty();            
     });
 
     matte.setExternalFunction('external_onListSlots', ['a', 'b'], function(fn, args) {
-        var storage = window['localStorage'];
-        const names = Object.keys(storage);
+        const names = Worker.listSaveSlots();
         const argsA = [];
         
         for(var i = 0; i < names.length; ++i) {
-            if (names[i].indexOf('wyvernslot' !=-1)) {
-                argsA.push(
-                    matte.store.createString(
-                        names[i].substring(
-                            10
-                        )
-                    )
+            argsA.push(
+                matte.store.createString(
+                    names[i]
                 )
-            }
+            )
         }
         return matte.store.createObjectArray(argsA);            
     });
 
       
     matte.setExternalFunction('external_onLoadState', ['a'], function(fn, args) {
-        var storage = window['localStorage'];
-        return matte.store.createString(storage['wyvernslot'+args[0].data]);    
+        return matte.store.createString(Worker.getSlot(args[0].data));    
     });      
 
 
     matte.setExternalFunction('external_getInput', [], function(fn, args) {
-        if (LAST_INPUT == -1) return matte.store.createEmpty();
-        var out = LAST_INPUT;
-        LAST_INPUT = -1;
-        return matte.store.createNumber(out);
+        const val = Worker.nextInput();
+
+        if (val == null) return matte.store.createEmpty();
+        return matte.store.createNumber(val);
     });
 
 

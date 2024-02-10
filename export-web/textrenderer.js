@@ -11,7 +11,7 @@ const TextRenderer = (function() {
     const ATLAS_CHARS_PER_ROW = 24;
     const ATLAS_CHARS_PER_COLUMN = 20;
     const ATLAS_CHARS_WIDTH_TEXELS = 13;
-    const ATLAS_CHARS_HEIGHT_TEXELS = 23;
+    const ATLAS_CHARS_HEIGHT_TEXELS = 24;
     const ATLAS_FONT = "24px gamefont";
     
     
