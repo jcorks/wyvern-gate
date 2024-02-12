@@ -1,100 +1,16 @@
 var matteWorker = null;
+
+var postMessageWorker = function(data) {
+    if (matteWorker != null)
+        matteWorker.postMessage(JSON.stringify(data));
+};
+
 (function() {
 
-    const isTouchScreen =
-      (  (('ontouchstart' in window) ||
-         (navigator.maxTouchPoints > 0) ||
-         (navigator.msMaxTouchPoints > 0)));
-    
-    const rows = [];
+
     
 
-    document.addEventListener('DOMContentLoaded', function () {
-
-        matteWorker = new Worker("worker.js");
-        
-        matteWorker.postMessage({
-            command: 'deliverSaves',
-            saves: JSON.parse(JSON.stringify(window['localStorage']))
-        });
-
-        matteWorker.onmessage = function(e) {
-            switch(e.data.command) {
-              case 'lines':
-                for(var i = 0; i < e.data.data.length; ++i) {
-                    TextRenderer.setLine(i, e.data.data[i]);
-                }
-                TextRenderer.requestDraw();
-                break;
-                
-              case 'save': {
-                var storage = window['localStorage'];
-                storage[e.data.name] = e.data.data;                
-
-                matteWorker.postMessage({
-                    command: 'deliverSaves',
-                    saves: JSON.parse(JSON.stringify(window['localStorage']))
-                });
-              }             
-            }
-             
-        }
-
-        if (!isTouchScreen) {
-            document.getElementById('arrow-left').addEventListener('mousedown', function(e) {
-                matteWorker.postMessage(0);
-            });
-
-            document.getElementById('arrow-up').addEventListener('mousedown', function(e) {
-                matteWorker.postMessage(1);
-            });
-
-            document.getElementById('arrow-right').addEventListener('mousedown', function(e) {
-                matteWorker.postMessage(2);
-            });
-
-            document.getElementById('arrow-down').addEventListener('mousedown', function(e) {
-                matteWorker.postMessage(3);
-            });
-
-
-            document.getElementById('a-button').addEventListener('mousedown', function(e) {
-                matteWorker.postMessage(4);
-            });
-
-            document.getElementById('b-button').addEventListener('mousedown', function(e) {
-                matteWorker.postMessage(5);
-            });
-        }
-        
-        
-        
-       document.getElementById('arrow-left').addEventListener('touchstart', function(e) {
-            matteWorker.postMessage(0);
-        });
-
-        document.getElementById('arrow-up').addEventListener('touchstart', function(e) {
-            matteWorker.postMessage(1);
-        });
-
-        document.getElementById('arrow-right').addEventListener('touchstart', function(e) {
-            matteWorker.postMessage(2);
-        });
-
-        document.getElementById('arrow-down').addEventListener('touchstart', function(e) {
-            matteWorker.postMessage(3);
-        });
-
-
-        document.getElementById('a-button').addEventListener('touchstart', function(e) {
-            matteWorker.postMessage(4);
-        });
-
-        document.getElementById('b-button').addEventListener('touchstart', function(e) {
-            matteWorker.postMessage(5);
-        });        
-
-    });
+    
 
 
     var currentGamepad = null;
@@ -190,37 +106,155 @@ var matteWorker = null;
 
 })();
 
+var startGame = function() {
+    const isTouchScreen =
+      (  (('ontouchstart' in window) ||
+         (navigator.maxTouchPoints > 0) ||
+         (navigator.msMaxTouchPoints > 0)));
+    
+    const rows = [];
+
+    const body = document.getElementById("gameArea");
+    body.requestFullscreen(
+        {
+            navigationUI : 'hide'
+        }
+    )
+    body.style.display = 'block';
+    
+    
+    
+    const initMessage = document.getElementById("initMessage");
+    initMessage.style.display = 'none';
+    
+    
+    matteWorker = new Worker("worker.js");
+    
+    postMessageWorker({
+        command: 'deliverSaves',
+        saves: JSON.parse(JSON.stringify(window['localStorage']))
+    });
+
+    matteWorker.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+    
+        switch(data.command) {
+          case 'lines':
+            const lines = data.data;
+            for(var i = 0; i < data.data.length; ++i) {
+                TextRenderer.setLine(i, data.data[i]);
+            }
+            TextRenderer.requestDraw();
+            break;
+            
+          case 'save': {
+            var storage = window['localStorage'];
+            storage[data.name] = data.data;                
+
+            postMessageWorker({
+                command: 'deliverSaves',
+                saves: window['localStorage']
+            });
+          } 
+          
+          case 'quit' : {          
+            matteWorker = null;
+            document.exitFullsreen();
+            const endMessage = document.getElementById("endMessage");
+            endMessage.style.display = 'block';
+            
+            
+          }            
+        }
+         
+    }
+
+    if (!isTouchScreen) {
+        document.getElementById('arrow-left').addEventListener('mousedown', function(e) {
+            postMessageWorker(0);
+        });
+
+        document.getElementById('arrow-up').addEventListener('mousedown', function(e) {
+            postMessageWorker(1);
+        });
+
+        document.getElementById('arrow-right').addEventListener('mousedown', function(e) {
+            postMessageWorker(2);
+        });
+
+        document.getElementById('arrow-down').addEventListener('mousedown', function(e) {
+            postMessageWorker(3);
+        });
+
+
+        document.getElementById('a-button').addEventListener('mousedown', function(e) {
+            postMessageWorker(4);
+        });
+
+        document.getElementById('b-button').addEventListener('mousedown', function(e) {
+            postMessageWorker(5);
+        });
+    }
+    
+    
+    
+   document.getElementById('arrow-left').addEventListener('touchstart', function(e) {
+        postMessageWorker(0);
+    });
+
+    document.getElementById('arrow-up').addEventListener('touchstart', function(e) {
+        postMessageWorker(1);
+    });
+
+    document.getElementById('arrow-right').addEventListener('touchstart', function(e) {
+        postMessageWorker(2);
+    });
+
+    document.getElementById('arrow-down').addEventListener('touchstart', function(e) {
+        postMessageWorker(3);
+    });
+
+
+    document.getElementById('a-button').addEventListener('touchstart', function(e) {
+        postMessageWorker(4);
+    });
+
+    document.getElementById('b-button').addEventListener('touchstart', function(e) {
+        postMessageWorker(5);
+    });        
+
+}
 
 
 
 var onPageInput = function (event) {
     switch(event.key) {
       case 'ArrowLeft': 
-        matteWorker.postMessage(0);
+        postMessageWorker(0);
         break;
 
       case 'ArrowRight': 
-        matteWorker.postMessage(2);
+        postMessageWorker(2);
         break;
 
       case 'ArrowUp': 
-        matteWorker.postMessage(1);
+        postMessageWorker(1);
         break;
 
       case 'ArrowDown': 
-        matteWorker.postMessage(3);
+        postMessageWorker(3);
         break;
 
       case 'z': 
       case 'Space': 
       case 'Enter': 
-        matteWorker.postMessage(4);
+        postMessageWorker(4);
         break;
 
       case 'x': 
       case 'Escape': 
       case 'Backspace': 
-        matteWorker.postMessage(5);
+        postMessageWorker(5);
         break;
     }
 };

@@ -60,6 +60,12 @@
 @:external_onListSlots   = getExternalFunction(name:'external_onListSlots');
 
 
+// Called when quitting.
+// arg: none 
+// return: none
+@:external_onQuit   = getExternalFunction(name:'external_onQuit');
+
+
 // Called when getting input.
 // Will hold thread until an input is ready from the device.
 // 
@@ -116,7 +122,9 @@ instance.mainMenu(
         return external_onListSlots();
     },
     
-    onQuit ::{},
+    onQuit ::{
+        external_onQuit();
+    },
 
 
     onLoadState :::(

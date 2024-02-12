@@ -10,14 +10,20 @@ Worker = (function() {
     
     
     onmessage = function(message) {
-        if (!message.data.command)
-            inputs.push(message.data);
+        const data = JSON.parse(message.data);
+        if (!data.command)
+            inputs.push(data);
 
-        switch(message.data.command) {
+        switch(data.command) {
           case 'deliverSaves': 
-            saves = message.data.saves;
+            saves = data.saves;
             
         }
+    }
+    
+    
+    postMessageJSON = function(data) {
+        postMessage(JSON.stringify(data));
     }
     
     return {
@@ -52,7 +58,7 @@ Worker = (function() {
         },
         
         save : function(name, data) {
-            postMessage({
+            postMessageJSON({
                 command: 'save',
                 data : {
                     name: name,
@@ -62,11 +68,17 @@ Worker = (function() {
         },
         
         send : function() {
-            postMessage({
+            postMessageJSON({
                 command: 'lines',
                 data : lines
             });
             lineIter = 0;
+        },
+        
+        quit : function() {
+            postMessageJSON({
+                command: 'Quit'
+            });            
         }
     }
 })();

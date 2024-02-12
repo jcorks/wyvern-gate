@@ -44,6 +44,7 @@ int main(int argc, char ** argv) {
     matteValue_t v = matte_vm_import(
         vm,
         MATTE_VM_STR_CAST(vm, "cli.mt"),
+        NULL,
         matte_store_new_value(store)
     );
     

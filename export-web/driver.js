@@ -149,15 +149,15 @@
 
 
     matte.setExternalFunction('external_onCommitText', ['a'],function(fn, args) {
-        Worker.newLine(args[0].data);
+        Worker.newLine(args[0]);
         return matte.store.createEmpty();        
     });
 
     matte.setExternalFunction('external_onSaveState', ['a', 'b'], function(fn, args) {
-        const slot = args[0].data;
+        const slot = args[0];
         Worker.save({
             name: 'wyvernslot'+slot,
-            data: args[1].data
+            data: args[1]
         });
         return matte.store.createEmpty();            
     });
@@ -178,7 +178,7 @@
 
       
     matte.setExternalFunction('external_onLoadState', ['a'], function(fn, args) {
-        return matte.store.createString(Worker.getSlot(args[0].data));    
+        return matte.store.createString(Worker.getSlot(args[0]));    
     });      
 
 
@@ -187,6 +187,10 @@
 
         if (val == null) return matte.store.createEmpty();
         return matte.store.createNumber(val);
+    });
+
+    matte.setExternalFunction('external_onQuit', [], function(fn, args) {
+        Worker.quit();
     });
 
 
