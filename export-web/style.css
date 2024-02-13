@@ -17,7 +17,14 @@ html, body {
 }
 
 * {
+  font-size: 24pt;
   box-sizing: content-box;
+  font-family: gamefont, monospace;
+  color: #e4F5F5;
+}
+
+button {
+  color: #000000;
 }
 
 body {

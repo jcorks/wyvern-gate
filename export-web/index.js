@@ -1,5 +1,31 @@
 var matteWorker = null;
 
+
+window.onerror = function(errorMessage, url, line) {
+    reportError(
+        "Browser threw an exception:\n" +
+        errorMessage + "\n" +
+        "(" + url + ":" + line + ")"
+    )
+}
+
+window.addEventListener("error", function (e) {
+    reportError(
+        "Browser threw an error:\n" +
+        e.error.message + "\n\n" +
+        (e.error.stack ? e.error.stack : "(no stack)")
+    )
+})
+/*
+window.addEventListener("unhandledrejection", function (e) {
+    reportError(
+        "Browser threw an unhandledrejection:\n" +
+        e.reason.message + "\n\n" +
+        e.reason.stack
+    )
+})
+*/
+
 var postMessageWorker = function(data) {
     if (matteWorker != null)
         matteWorker.postMessage(JSON.stringify(data));
@@ -106,6 +132,75 @@ var postMessageWorker = function(data) {
 
 })();
 
+
+const fullscreenEnter = function(element) {
+    if (element.requestFullscreen) {
+        element.requestFullscreen(
+            {
+                navigationUI : 'hide'
+            }        
+        );
+    } else if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen();
+    } else if (element.webkitRequestFullScreen) {
+        element.webkitRequestFullScreen();
+    } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+    }
+    
+    
+    try {
+        window.o9n.orientation.lock("landscape-primary");
+    } catch(e) {
+    
+    }
+}
+
+const fullscreenExit = function(element) {
+    try {
+        window.o9n.orientation.unlock("landscape-primary");
+    } catch(e) {
+    
+    }
+    if (document.exitFullscreen) {
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        }
+    } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+    } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+    }
+
+}
+
+
+const exitGame = function() {
+    matteWorker = null;
+    fullscreenExit();
+
+    const body = document.getElementById("gameArea");
+    body.style.display = 'none';
+
+}
+
+var reportError__reported = false;
+var reportError = function(message) {
+    if (reportError__reported) return;
+    reportError__reported = true;
+    exitGame();
+    const err = document.getElementById("errorMessage");
+    err.innerText = 
+        "Unfortunately, an error has occured.\n\n"+
+        "Send this to JC or post it as a bug report in the git repo.\n"+
+        message
+    ;
+    err.style.display = "block";  
+}
+
+
 var startGame = function() {
     const isTouchScreen =
       (  (('ontouchstart' in window) ||
@@ -113,13 +208,15 @@ var startGame = function() {
          (navigator.msMaxTouchPoints > 0)));
     
     const rows = [];
+    
+    const imgs = document.getElementsByTagName("img");
+    for(var i = 0; i < imgs.length; ++i) {
+        imgs[i].addEventListener("contextmenu", function(e) {e.preventDefault();});
+    }
+    
 
     const body = document.getElementById("gameArea");
-    body.requestFullscreen(
-        {
-            navigationUI : 'hide'
-        }
-    )
+    fullscreenEnter(body);
     body.style.display = 'block';
     
     
@@ -134,6 +231,9 @@ var startGame = function() {
         command: 'deliverSaves',
         saves: JSON.parse(JSON.stringify(window['localStorage']))
     });
+
+
+
 
     matteWorker.onmessage = function(e) {
         const data = JSON.parse(e.data);
@@ -155,36 +255,63 @@ var startGame = function() {
                 command: 'deliverSaves',
                 saves: window['localStorage']
             });
+            break;
           } 
           
           case 'quit' : {          
-            matteWorker = null;
-            document.exitFullsreen();
+            exitGame();
             const endMessage = document.getElementById("endMessage");
             endMessage.style.display = 'block';
-            
-            
-          }            
+            break;
+          }
+          
+          case 'error' : {
+            reportError(
+                "git info: " + GIT_VERSION + "\n\n" +
+                data.data
+            );
+            break;
+
+          }
         }
          
     }
 
+    const repeaterInput = function(element, input) {
+        postMessageWorker(input);
+
+        var intervalID;
+        var timeoutID = setTimeout(function() {
+            intervalID = setInterval(function() {
+                postMessageWorker(input);
+            }, 80);
+        }, 300);
+        const refID = element.addEventListener('mouseup', function(e) {
+            element.removeEventListener('mouseup', refID);
+            clearInterval(intervalID);
+            clearTimeout(timeoutID);
+        });    
+    }
+
     if (!isTouchScreen) {
         document.getElementById('arrow-left').addEventListener('mousedown', function(e) {
-            postMessageWorker(0);
+            repeaterInput(document.getElementById('arrow-left'), 0);
         });
 
         document.getElementById('arrow-up').addEventListener('mousedown', function(e) {
-            postMessageWorker(1);
+            repeaterInput(document.getElementById('arrow-up'), 1);
         });
 
         document.getElementById('arrow-right').addEventListener('mousedown', function(e) {
-            postMessageWorker(2);
+            repeaterInput(document.getElementById('arrow-right'), 2);
         });
 
         document.getElementById('arrow-down').addEventListener('mousedown', function(e) {
-            postMessageWorker(3);
+            repeaterInput(document.getElementById('arrow-down'), 3);
         });
+
+
+
 
 
         document.getElementById('a-button').addEventListener('mousedown', function(e) {

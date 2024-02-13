@@ -126,6 +126,9 @@ instance.mainMenu(
         external_onQuit();
     },
 
+    preloadMods :: {
+        return [];
+    },
 
     onLoadState :::(
         slot

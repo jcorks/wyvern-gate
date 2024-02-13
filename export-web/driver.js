@@ -132,7 +132,7 @@
     );
 
     matte.unhandledError = function(file, line, value) {
-        console.log(matte.store.valueObjectAccessString(value, 'summary').data);
+        Worker.throwMatteError(matte.store.valueObjectAccessString(value, 'summary'));
     };  
     
 

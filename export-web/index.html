@@ -11,17 +11,30 @@
 
 </head>
 <body id="body" onkeydown="onPageInput(event)" style="touch-action: manipulation">
-    <div id="initMessage">
+    <div id="initMessage", style="max-width:900px">
+        Wyvern Gate </br>
+        Game by Johnthan "Rasa" Corkery</br>
+        https://github.com/jcorks/</br>
+        </br>
+        Explore a text-based game controllable with a gamepad or touch screen. You might not know exactly what to do, but you can try and learn.</br>
+        </br>
+        (If on keyboard, arrow keys + z + x are available as well)                </br>
+
+        </br>
         Are you ready to play?
-        
+        <div>
         <button onClick="startGame()">Play</button> 
+        </div>
     </div>
 
-    <div id="endMessage" style="display:none;">
+    <div id="endMessage" style="display:none;max-width:900px;">
         Thanks for playing! Refresh to play again.
     </div>
 
-    
+    <div id="errorMessage" style="display:none;max-width:900px;">
+    </div>
+        
+        
 
     <div id="gameArea" style="display:none"> 
         <canvas id="canvas" style="width:100vw;height:57vw;max-height:57vw;"></canvas>
@@ -32,17 +45,17 @@
                 <table>
                     <tr>
                         <th></th>
-                        <th id="arrow-up"><img src="arrow-up.png" style="width:10vh;max-width:10vw;min-width:5vw"</th>
+                        <th id="arrow-up"><img src="arrow-up.png" style="width:14vh;max-width:14vw;min-width:5vw"></th>
                         <th></th>
                     </tr>
                     <tr>
-                        <th id="arrow-left"><img src="arrow-left.png" style="width:10vh;max-width:10vw;min-width:5vw;"</th>
+                        <th id="arrow-left"><img src="arrow-left.png" style="width:14vh;max-width:14vw;min-width:5vw;"></th>
                         <th></th>
-                        <th id="arrow-right"><img src="arrow-right.png" style="width:10vh;max-width:10vw;min-width:5vw;"</th>
+                        <th id="arrow-right"><img src="arrow-right.png" style="width:14vh;max-width:14vw;min-width:5vw;"></th>
                     </tr>
                     <tr>
                         <th></th>
-                        <th id="arrow-down"><img src="arrow-down.png" style="width:10vh;max-width:10vw;min-width:5vw;"</th>
+                        <th id="arrow-down"><img src="arrow-down.png" style="width:14vh;max-width:14vw;min-width:5vw;"></th>
                         <th></th>
                     </tr>            
                 </table>
@@ -51,10 +64,10 @@
                 <table>
                     <tr>
                         <th></th>
-                        <th id="b-button"><img src="b-button.png" style="width:15vh;max-width:13vw;min-width:7vw;"</th>
+                        <th id="b-button"><img src="b-button.png" style="width:15vh;max-width:13vw;min-width:7vw;"></th>
                     </tr>
                     <tr>
-                        <th id="a-button"><img src="a-button.png" style="width:15vh;max-width:13vw;min-width:7vw;"</th>
+                        <th id="a-button"><img src="a-button.png" style="width:15vh;max-width:13vw;min-width:7vw;"></th>
                         <th></th>
                     </tr>
                 </table>        
@@ -65,6 +78,8 @@
     </div>
 </body>
 <footer> 
+    <script src="o9n.js"></script>
+    <script src="GIT_VERSION.js"></script>
     <script src="textrenderer-utils.js"></script>
     <script src="textrenderer.js"></script>
     <script src="index.js"></script>

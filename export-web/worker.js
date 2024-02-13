@@ -77,8 +77,15 @@ Worker = (function() {
         
         quit : function() {
             postMessageJSON({
-                command: 'Quit'
+                command: 'quit'
             });            
+        },
+        
+        throwMatteError : function(message) {
+            postMessageJSON({
+                command: 'error',
+                data: message
+            });
         }
     }
 })();

@@ -181,6 +181,8 @@ return class(
                 );
                 
                 
+
+                
                 @:mods = preloadMods();
                 loadMods(mods);
                 
@@ -218,6 +220,8 @@ return class(
                 
                 choiceNames->push(value:'New');
                 choiceActions->push(value:::{
+                    
+                
                     canvas.clear();
                     canvas.blackout();
 
@@ -309,7 +313,7 @@ return class(
                     });
                 }
                 
-                choiceNames->push(value: 'Quit');
+                choiceNames->push(value: 'Exit');
                 choiceActions->push(value ::<- onQuit());
                 
                 

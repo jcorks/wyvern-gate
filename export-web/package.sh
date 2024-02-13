@@ -12,6 +12,7 @@ cd ./export-web/
 ../export-cli/matte/cli/matte compile ../export-cli/matte/src/rom/core/eventsystem.mt "./Matte.Core.EventSystem"
 ../export-cli/matte/cli/matte compile ../export-cli/matte/src/rom/core/introspect.mt "./Matte.Core.Introspect"
 ../export-cli/matte/cli/matte compile ../export-cli/matte/src/rom/core/json.mt "./Matte.Core.JSON"
+echo "var GIT_VERSION=\"`git show --no-patch --format=tformat:'%D %h'`\"" > GIT_VERSION.js
 cp ../export-cli/matte/js/matte.js ./
 GITSHORT=`git rev-parse --short HEAD`
 
