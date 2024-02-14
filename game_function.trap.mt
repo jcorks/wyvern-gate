@@ -171,7 +171,7 @@
                 @:instance = import(module:'game_singleton.instance.mt');
                 
                 if (all)
-                    instance.gameOver(reason:'The party was wiped out.');
+                    instance.gameOver(reason:'The party was wiped out.')
                 else
                     windowEvent.queueMessage(
                         text: 'The rest of the party got free from the web.'

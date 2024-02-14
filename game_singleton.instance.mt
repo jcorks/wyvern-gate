@@ -41,6 +41,7 @@ import(module:'game_mutator.location.mt');
 import(module:'game_mutator.mapentity.mt');
 import(module:'game_mutator.profession.mt');
 import(module:'game_mutator.scenario.mt');
+import(module:'game_function.trap.mt');
 
 @:Database = import(module:'game_class.database.mt');
 
