@@ -141,7 +141,7 @@
         lastAttackedBy : empty,
         
         // number of days employed.
-        daysEmployed : 10,
+        daysEmployed : 0,
         
         // worth of items found
         earned : 0,
