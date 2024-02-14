@@ -125,6 +125,7 @@
             landmark: {},
             onEnd::(result){
                 if (!world.battle.partyWon())::<= {
+                    @:instance = import(module:'game_singleton.instance.mt');
                     instance.gameOver(reason:'The party was wiped out');
                 }            
             }
@@ -167,6 +168,7 @@
                     if (!member.isIncapacitated())
                         all = false
                 }
+                @:instance = import(module:'game_singleton.instance.mt');
                 
                 if (all)
                     instance.gameOver(reason:'The party was wiped out.');
