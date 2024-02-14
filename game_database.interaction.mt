@@ -62,7 +62,8 @@ Interaction.newEntry(
                   },
                   
                   (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                    windowEvent.jumpToTag(name:'MainMenu');
+                    @:instance = import(module:'game_singleton.instance.mt');
+                    instance.gameOver(reason:'The party was wiped out.');
                   }
                 
                 } 
@@ -263,8 +264,9 @@ Interaction.newEntry(
                                 enemies: [talkee],
                                 landmark: {},
                                 onEnd::(result) {
-                                    when(!world.battle.partyWon())
-                                        windowEvent.jumpToTag(name:'MainMenu', clearResolve:true);
+                                    @:instance = import(module:'game_singleton.instance.mt');
+                                    when(!world.battle.partyWon()) 
+                                        instance.gameOver(reason:'The party was wiped out.');
                                 
                                     location.ownedBy = empty;                                                                        
                                 }
@@ -599,8 +601,9 @@ Interaction.newEntry(
                         enemies: [talkee],
                         landmark: {},
                         onEnd::(result) {
+                            @:instance = import(module:'game_singleton.instance.mt');
                             when(!world.battle.partyWon())
-                                windowEvent.jumpToTag(name:'MainMenu');
+                                instance.gameOver(reason:'The party was wiped out.');
                         
                             if (talkee.isDead) ::<= {
                                 windowEvent.queueMessage(
@@ -767,8 +770,9 @@ Interaction.newEntry(
                     enemies: [location.ownedBy],
                     landmark: {},
                     onEnd::(result) {
+                        @:instance = import(module:'game_singleton.instance.mt');
                         if (!world.battle.partyWon()) 
-                            windowEvent.jumpToTag(name:'MainMenu');
+                            instance.gameOver(reason:'The party was wiped out.');
                     }
                 );
             }
@@ -887,8 +891,9 @@ Interaction.newEntry(
                     enemies: [location.ownedBy],
                     landmark: {},
                     onEnd::(result) {
+                        @:instance = import(module:'game_singleton.instance.mt');
                         if (!world.battle.partyWon()) 
-                            windowEvent.jumpToTag(name:'MainMenu');
+                            instance.gameOver(reason:'The party was wiped out.');
                     }
                 );
             }
@@ -1375,8 +1380,9 @@ Interaction.newEntry(
                     enemies: e,
                     landmark: {},
                     onEnd::(result) {
+                        @:instance = import(module:'game_singleton.instance.mt');
                         if (!world.battle.partyWon()) 
-                            windowEvent.jumpToTag(name:'MainMenu');
+                            instance.gameOver(reason:'The party was wiped out.');
 
                     }
                 );

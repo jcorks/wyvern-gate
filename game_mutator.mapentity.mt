@@ -175,21 +175,9 @@ MapEntity.Task.database.newEntry(
                 onEnd::(result) {
                     when(!world.battle.partyWon()) ::<= {
                         @:windowEvent = import(module:'game_singleton.windowevent.mt');
-                        windowEvent.queueMessage(text:'Perhaps these Chosen were not ready...',
-                            renderable : {
-                                render :: {
-                                    @:canvas = import(module:'game_singleton.canvas.mt');
-                                    canvas.blackout();
-                                    canvas.commit();
-                                }
-                            }
-                        );
-                        
-                        windowEvent.queueNoDisplay(
-                            onEnter :: {                                        
-                                windowEvent.jumpToTag(name:'MainMenu');                                        
-                            }
-                        );
+
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        instance.gameOver(reason: 'The party has been wiped out.');
                     }
                 }
             ); 
@@ -379,21 +367,8 @@ MapEntity.Task.database.newEntry(
                             }
                               
                             @:windowEvent = import(module:'game_singleton.windowevent.mt');
-                            windowEvent.queueMessage(text:'The Wyvern Specter claims the items as the Shrine\'s possessions.',
-                                renderable : {
-                                    render :: {
-                                        @:canvas = import(module:'game_singleton.canvas.mt');
-                                        canvas.blackout();
-                                        canvas.commit();
-                                    }
-                                }
-                            );
-                            
-                            windowEvent.queueNoDisplay(
-                                onEnter :: {                                        
-                                    windowEvent.jumpToTag(name:'MainMenu');                                        
-                                }
-                            );
+                            @:instance = import(module:'game_singleton.instance.mt');
+                            instance.gameOver(reason:'The Wyvern Specter claims the items as the Shrine\'s possessions.');
                         }
                     );
                     

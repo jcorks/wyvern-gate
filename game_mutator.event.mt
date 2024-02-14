@@ -178,7 +178,8 @@ Event.database.newEntry(
                             
                             party.inventory.add(item);
                         }                          
-                        windowEvent.jumpToTag(name:'MainMenu');
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        instance.gameOver(reason:'The party was wiped out');
                     }
                 );
             }
@@ -281,7 +282,8 @@ Event.database.newEntry(
                             }
                         };
                           
-                        windowEvent.jumpToTag(name:'MainMenu');
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        instance.gameOver(reason:'The party was wiped out.');
                     }
                 );
             }
@@ -765,8 +767,8 @@ Event.database.newEntry(
                 onEnd::(result){
                 
                     if (!world.battle.partyWon())::<= {
-                        breakpoint();
-                        windowEvent.jumpToTag(name:'MainMenu', clearResolve:true);
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        instance.gameOver(reason:'The party was wiped out.');
                     }
 
                 }

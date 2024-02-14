@@ -121,8 +121,6 @@
                     enemies: [this],
                     landmark: {},
                     onEnd::(result) {
-                        when(!world.battle.partyWon())
-                            windowEvent.jumpToTag(name:'MainMenu');
                     }
                 );                  
             }

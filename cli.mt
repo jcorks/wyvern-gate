@@ -24,7 +24,7 @@
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:JSON = import(module:'Matte.Core.JSON');
 
-@MOD_DIR = './mod_examples';
+@MOD_DIR = './mod';
 
 {:::} {
     MOD_DIR = import(module:'wyvern_gate__native__get_mod_dir')(); 
@@ -177,6 +177,35 @@ instance.mainMenu(
         }
     },
     
+    onLoadSettings ::{
+        return {:::} {
+            return enterNewLocation(
+                path: './',
+                action::(filesystem) {
+                    return filesystem.readString(
+                        path: 'settings'
+                    );
+                }
+            );
+        } : {
+            onError::(message) {
+                return empty;
+            }
+        }
+    },
+    
+    onSaveSettings ::(data){
+        enterNewLocation(
+            path: './',
+            action::(filesystem) {
+                filesystem.writeString(
+                    path: 'settings',
+                    string: data
+                );
+            }
+        );    
+    },
+    
     preloadMods :: {
         @:mods = [];
 
@@ -239,17 +268,22 @@ instance.mainMenu(
                 }
             )
         }
-    
-        enterNewLocation(
-            path: MOD_DIR,
-            action::(filesystem) {
-                foreach(filesystem.directoryContents) ::(k, file) {
-                    when (file.isFile) empty;
-                    
-                    loadModJSON(filesystem, file);
+        {:::} {
+            enterNewLocation(
+                path: MOD_DIR,
+                action::(filesystem) {
+                    foreach(filesystem.directoryContents) ::(k, file) {
+                        when (file.isFile) empty;
+                        
+                        loadModJSON(filesystem, file);
+                    }
                 }
+            );
+        } : {
+            onError ::(message) {
+                // ignore.
             }
-        );
+        }
         return mods;    
     },
     

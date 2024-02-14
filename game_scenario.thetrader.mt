@@ -96,6 +96,24 @@
     SHOPKEEP : 3,
 }
 
+@:MOODS = {
+    TERRIBLE : 0,
+    NOT_GREAT : 1,
+    OK : 2,
+    GOOD : 3,
+    FANTASTIC : 4
+}
+
+@:moodToString::(mood) {
+    return match(mood) {
+      (0): 'Terrible...',
+      (1): 'Not great.',
+      (2): 'Okay.',
+      (3): 'Good!',
+      (4): 'Fantastic!'
+    }
+}
+
 @:roleToString::(role) {
     return match(role) {
       (0): 'Waiting',
@@ -116,11 +134,14 @@
         // Whether the hiree was dispatched for the day.
         role : ROLES.WAITING,
         
+        // mood for the day.
+        mood : MOODS.OK,
+        
         // The last thing that attacked this hiree while exploring
         lastAttackedBy : empty,
         
         // number of days employed.
-        daysEmployed : 0,
+        daysEmployed : 10,
         
         // worth of items found
         earned : 0,
@@ -129,7 +150,13 @@
         sold : 0,
         
         // How much money has been paid out
-        spent : 0
+        spent : 0,
+        
+        // overrides mood when relevant
+        consistentMood : 0,
+        
+        // consistent mood days
+        consistentMoodDays : 0
     },
     define ::(this, state) {
     
@@ -175,6 +202,12 @@
                 get ::<- state.role,
                 set ::(value) <- state.role = value
             },
+
+            mood : {
+                get ::<- if (state.consistentMoodDays > 0) state.consistentMood else state.mood,
+                set ::(value) <- state.mood = value
+            },
+
             
             addToParty ::{
                 @world = import(module:'game_singleton.world.mt');
@@ -212,6 +245,19 @@
             spent : {
                 get ::<- state.spent,
                 set ::(value) <- state.spent = value
+            },
+            
+            setConsistentMood ::(mood, days) {
+                state.consistentMood = mood;
+                state.consistentMoodDays = days;
+            },
+            
+            dayFinished :: {
+                if (state.consistentMoodDays > 0)
+                    state.consistentMoodDays -= 1;
+                    
+                if (state.daysEmployed > 3)
+                    state.mood = random.integer(from:0, to:4);
             },
             
             // dispatches the NPC to go foraging in the shrine
@@ -289,10 +335,18 @@
                                                     when(state.member.isIncapacitated()) send();
                                                     when(other.isIncapacitated()) send();
                                                     
+                                                    @:moodBonus = match(this.mood) {
+                                                      (0): 0.4,
+                                                      (1): 0.8,
+                                                      (2): 1,
+                                                      (3): 1.3,
+                                                      (4): 1.8
+                                                    }
+                                                    
                                                     // give the benefit of the doubt, let our person attack first
                                                     state.member.attack(
                                                         target: other,
-                                                        amount:state.member.stats.ATK * (0.5),
+                                                        amount:state.member.stats.ATK * (0.5) * moodBonus,
                                                         damageType : Damage.TYPE.PHYS,
                                                         damageClass: Damage.CLASS.HP
                                                     );                                                   
@@ -600,26 +654,7 @@
                             );
                             hasNews = true;
                             
-                            @:which = [...Item.database.getAll()]->filter(by::(value) <- value.isUnique == false);
-                            state.popular = [
-                                random.removeArrayItem(list:which),
-                                random.removeArrayItem(list:which),
-                                random.removeArrayItem(list:which),
-                                random.removeArrayItem(list:which),
-                                random.removeArrayItem(list:which),
-                                random.removeArrayItem(list:which),
-                                random.removeArrayItem(list:which)
-                            ]->map(to:::(value) <- value.name);
 
-                            state.unpopular = [
-                                random.removeArrayItem(list:which),
-                                random.removeArrayItem(list:which),
-                                random.removeArrayItem(list:which),
-                                random.removeArrayItem(list:which),
-                                random.removeArrayItem(list:which),
-                                random.removeArrayItem(list:which),
-                                random.removeArrayItem(list:which)
-                            ]->map(to:::(value) <- value.name);
 
                             
                             @popnews = 'These items are now popular. People will pay high prices for them compared to normal.\n\n';
@@ -994,7 +1029,7 @@
                                             text: hiree.entity.name + ' walks away disappointed.'
                                         );
                                     };
-                                    
+                                    hiree.setConsistentMood(mood:MOODS.TERRIBLE, days:3);                           
                                     nextRaise();
                                 }
                                     
@@ -1005,7 +1040,9 @@
                                         '"That went better than I expected, to be honest. Thanks."',
                                         '"Alright! I\'ll get back to it."'
                                     ])
-                                );                                  
+                                );       
+                                
+                                hiree.setConsistentMood(mood:MOODS.FANTASTIC, days:3);                           
                                 
                                 hiree.contractRate += raiseAmount;
                                 if (hiree.contractRate > 1000)
@@ -1041,8 +1078,13 @@
                 nextRaise();
             },
             
-            simulateShopkeep::(itemsSold) {
-                when(state.shopInventory.items->size == 0) -1;
+            simulateShopkeep::(shopkeeper) {
+                when(state.shopInventory.items->size == 0) {
+                    gained : -1,
+                    sold : [],
+                    prices : [],
+                    markup : []                    
+                };
                 @maxPerHour = (
                     (state.shopInventory.items->size / 4.5)
                 )->ceil;
@@ -1059,7 +1101,19 @@
                 @:popular   = state.popular;
                 @:unpopular   = state.unpopular;
 
+                if (shopkeeper.mood == MOODS.NOT_GREAT)
+                    maxPerHour *= 0.6;
 
+                if (shopkeeper.mood == MOODS.TERRIBLE)
+                    maxPerHour *= 0.3;
+
+                maxPerHour = maxPerHour->floor;
+                
+                
+                @:itemsSold    = [];
+                @:itemsPrice   = [];
+                @:itemsMarkup  = [];
+                @:itemsPopular = [];
 
                 {:::} {
                     for(world.TIME.LATE_MORNING, world.TIME.EVENING) ::(i) {
@@ -1073,28 +1127,74 @@
                             when(state.shopInventory.items->size == 0) send();
                             @:sold = random.removeArrayItem(list:state.shopInventory.items);
 
+                            
+                            @isPopular = ::<= {                    
+                                @:popular   = state.popular;
+                                return (popular->findIndex(value:sold.base.name) != -1)
+                            }                    
+
+                            @isUnpopular = ::<= {                    
+                                @:unpopular   = state.unpopular;
+                                return (unpopular->findIndex(value:sold.base.name) != -1)
+                            }          
+
                             @price = 
-                                if (popular->findIndex(value:sold.base.name) != -1) 
+                                if (isPopular) 
                                     ((sold.price / 10)->floor)*2
-                                else if (unpopular->findIndex(value:sold.base.name) != -1)
+                                else if (isUnpopular)
                                     ((sold.price / 20)->floor)
                                 else 
                                     (sold.price / 10)->floor
+                                    
+                            match(shopkeeper.mood) {
+                              (0, 1): ::<= {
+                                if (random.flipCoin())
+                                    price *= 1 - (Number.random() * 0.3)
+                              },
+                              
+                              (2): ::<= {
+                                if (random.flipCoin())
+                                    price *= 1 + (Number.random() * 0.15)
+                              },
+
+                              (3): ::<= {
+                                if (random.flipCoin())
+                                    price *= 1 + (Number.random() * 0.6)
+                              },
+                              (4): ::<= {
+                                price *= 1.1 + (Number.random() * 0.8)
+                              }
+
+                            }
+                                    
                             if (price < 1) ::<= {
                                 state.accolade_soldAWorthlessItem = true;
                                 price = 1;
                             }
+                            price = price->floor;
                                 
                             if (sold.base.name == 'Shipment')
                                 state.accolade_soldAShipment = true;
                                     
                             gained += price;
-                            itemsSold->push(value:sold);
+                          
+                            
+                            @:markup = (((price - (sold.price / 10)) / (sold.price / 10)) * 100)->floor;
+                            itemsSold->push(value:sold.name);
+                            itemsPrice->push(value:g(g:price));
+                            itemsMarkup->push(value:if (markup == 0) '--' else (if (markup < 0)''+markup else '+'+markup)+'%');
+                            itemsPopular->push(value:if (isPopular) 'High' else (if (isUnpopular) 'Low' else ''));
                             state.shopInventory.remove(item:sold);
                         }                                    
                     }
                 }
-                return gained;
+                return {
+                    gained : gained,
+                    sold : itemsSold,
+                    prices : itemsPrice,
+                    markup : itemsMarkup,
+                    popular : itemsPopular
+                }
             },
         
             dayEnd::(onDone) {
@@ -1187,8 +1287,10 @@
                             }
                             foreach([...state.hirees]) ::(i, hiree) {
                                 when (hiree.role != ROLES.SHOPKEEP) empty;
-                                @:itemsSold = [];
-                                @:gained = this.simulateShopkeep(itemsSold);
+                                
+                                @:data = this.simulateShopkeep(shopkeeper:hiree);
+                                @:gained = data.gained;
+                                @:itemsSold = data.sold;
                                 
                                 // < 0 means stock was empty.
                                 when (gained == -1) 
@@ -1206,25 +1308,59 @@
                                 windowEvent.queueMessage(
                                     speaker:hiree.entity.name,
                                     text: random.pickArrayItem(
-                                        list : [
-                                            '"Selling today went great."',
-                                            '"Another great day at the store front."',
-                                            '"Many customers today!"',
-                                            '"It was great to see so many things off the shelves."'
-                                        ]
+                                        list : 
+                                            match(hiree.mood) {
+                                              (0, 1):  
+                                                [
+                                                    '"I had a hard time, I at least got some sales."',
+                                                    '"Not feeling great, but I tried my best."'
+                                                ],
+                                              (2, 3):
+                                                [
+                                                    '"Selling today went great."',
+                                                    '"Another great day at the store front."',                                                
+                                                ],
+                                               (4):
+                                                
+                                                [
+                                                    '"Many customers today!"',
+                                                    '"It was great to see so many things off the shelves!"',
+                                                    '"Truly a great day to shopkeep!"'
+                                                ]
+                                            }
                                     )
                                 );
                                 
                                 
-                                @sold = "Items sold by " + hiree.entity.name + ':\n\n';
-                                foreach(itemsSold) ::(i, item) {
-                                    sold = sold + "- " + item.name + '\n'
-                                }
-                                sold = sold + '\n\n' + 'Total earned: ' + g(g:gained);
-                                windowEvent.queueMessage(
-                                    text:sold,
-                                    pageAfter:14
-                                );                        
+                                @sold = "Items sold by " + hiree.entity.name +  '. Earned: ' + g(g:gained) ;
+
+                                @:choicesColumns = import(module:'game_function.choicescolumns.mt');
+                                choicesColumns(
+                                    onGetChoices ::{
+                                        return [
+                                            data.sold,
+                                            data.popular,
+                                            data.prices,
+                                            data.markup
+                                        ]
+                                    },
+                                    prompt: sold,
+                                    header: ['Item', 'Popularity', 'Sold at...', 'Markup'],
+                                    leftJustified : [true, true, true, true],
+                                    leftWeight: 0.5,
+                                    topWeight: 0.5,
+                                    canCancel: true,
+                                    keep : true,
+                                    jumpTag: 'ItemsSold',
+                                    onChoice ::(choice) {
+                                        windowEvent.jumpToTag(
+                                            name: 'ItemsSold',
+                                            goBeforeTag: true,
+                                            doResolveNext: true
+                                        )
+                                    }
+                                )
+
                                 hiree.sold += gained;
                                 world.party.inventory.addGold(amount:gained);
                                 state.totalEarnedSales += gained;
@@ -1343,15 +1479,42 @@
 
                                 when (cost > currentG)
                                     Scene.start(name:'trader.scene_bankrupt', onDone::{                    
-                                        windowEvent.jumpToTag(name:'MainMenu', clearResolve:true);
+                                        @:instance = import(module:'game_singleton.instance.mt');
+                                        instance.gameOver(reason:'You\'re no longer chosen by the Wyvern of Fortune.');
                                     });        
                                         
+
+
+                                // decide popular items for next day
+                                if (world.island.tier > 0 && state.days % 3 == 1) ::<= {                
+                                    @:which = [...Item.database.getAll()]->filter(by::(value) <- value.isUnique == false);
+                                    state.popular = [
+                                        random.removeArrayItem(list:which),
+                                        random.removeArrayItem(list:which),
+                                        random.removeArrayItem(list:which),
+                                        random.removeArrayItem(list:which),
+                                        random.removeArrayItem(list:which),
+                                        random.removeArrayItem(list:which),
+                                        random.removeArrayItem(list:which)
+                                    ]->map(to:::(value) <- value.name);
+
+                                    state.unpopular = [
+                                        random.removeArrayItem(list:which),
+                                        random.removeArrayItem(list:which),
+                                        random.removeArrayItem(list:which),
+                                        random.removeArrayItem(list:which),
+                                        random.removeArrayItem(list:which),
+                                        random.removeArrayItem(list:which),
+                                        random.removeArrayItem(list:which)
+                                    ]->map(to:::(value) <- value.name);
+                                }
 
 
                                 // return to pool
                                 foreach(state.hirees) ::(i, hiree) {
                                     if (world.party.isMember(entity:hiree.entity))
                                         hiree.returnFromParty();
+                                    hiree.dayFinished();
                                 }
                                 
                                 // Interesting. You seemed to have a phantom employee in your party!
@@ -1625,19 +1788,21 @@
                     onGetChoices ::{
                         @:names  = [];
                         @:wages  = [];
+                        @:moods  = [];
                         @:status = [];
                         foreach(state.hirees) ::(i, hiree) {
                             names->push(value:hiree.entity.name);
                             wages->push(value:g(g:hiree.contractRate));
+                            moods->push(value:moodToString(mood:hiree.mood));
                             status->push(value:roleToString(role:hiree.role));
                         }
                         return [
-                            names, wages, status
+                            names, wages, moods, status
                         ];
                     },
                     prompt: 'Hirees...',
-                    header : ['Name', 'Wage', 'Status'],
-                    leftJustified : [true, true, true],
+                    header : ['Name', 'Wage', 'Mood', 'Status'],
+                    leftJustified : [true, true, true, true],
                     leftWeight: 0.5,
                     topWeight: 0.5,
                     canCancel: true,
@@ -2624,7 +2789,8 @@ return {
 
             
             /*
-            party.inventory.addGold(amount:250000);
+            //party.inventory.addGold(amount:250000);
+            party.inventory.addGold(amount:2500);
             
             world.island.tier = 3;
             
@@ -2790,11 +2956,9 @@ return {
     onDeath ::(data, entity) {
         @:world = import(module:'game_singleton.world.mt')
         when (entity == world.party.members[0]) ::<= {
-            windowEvent.queueMessage(
-                text: 'The Trader ' + entity.name + '\'s journey comes to an end...',
-                onLeave :: {
-                    windowEvent.jumpToTag(name:'MainMenu');                
-                }
+            @:instance = import(module:'game_singleton.instance.mt');
+            instance.gameOver(reason:
+                'The Trader ' + entity.name + '\'s journey comes to an end...'            
             );
         }
         
@@ -2928,8 +3092,8 @@ return {
 
         Accolade.new(
             message: 'A true trader.',
-            info: 'Raise 250,000G for the Wyvern of Fortune in fewer than 42 days.',
-            condition ::(world) <- world.scenario.data.trader.state.days < 42
+            info: 'Raise 250,000G for the Wyvern of Fortune in fewer than 50 days.',
+            condition ::(world) <- world.scenario.data.trader.state.days < 50
         ),
 
         Accolade.new(

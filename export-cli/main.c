@@ -45,6 +45,7 @@ int main(int argc, char ** argv) {
         vm,
         MATTE_VM_STR_CAST(vm, "cli.mt"),
         NULL,
+        0,
         matte_store_new_value(store)
     );
     

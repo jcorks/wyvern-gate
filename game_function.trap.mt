@@ -125,7 +125,7 @@
             landmark: {},
             onEnd::(result){
                 if (!world.battle.partyWon())::<= {
-                    windowEvent.jumpToTag(name:'MainMenu', clearResolve:true);
+                    instance.gameOver(reason:'The party was wiped out');
                 }            
             }
         );
@@ -169,7 +169,7 @@
                 }
                 
                 if (all)
-                    windowEvent.jumpToTag(name:'MainMenu', clearResolve:true)
+                    instance.gameOver(reason:'The party was wiped out.');
                 else
                     windowEvent.queueMessage(
                         text: 'The rest of the party got free from the web.'

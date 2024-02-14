@@ -66,13 +66,22 @@ return ::(wish) {
                 if (accolade.condition(world))
                     displayAccolade(accolade)
             }
-            
+
             windowEvent.queueMessage(
                 text: 'Thanks for playing!' + '\n' +
-                      'Come suggest stuff at https://github.com/jcorks/wyvern-gate',
-                      
+                      'Come suggest stuff at https://github.com/jcorks/wyvern-gate'
+            );
+
+            
+            @:instance = import(module:'game_singleton.instance.mt');
+            instance.queueCredits();
+            
+            
+            windowEvent.queueNoDisplay(
+                onEnter ::{},
                 onLeave ::{
                     windowEvent.jumpToTag(name:'MainMenu');        
+                    instance.unlockScenarios();
                 }
             );
 

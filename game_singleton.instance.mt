@@ -98,6 +98,8 @@ return class(
         @onLoadState;
         @island_;
         @landmark_;
+        @settings;
+        @onSaveSettings_;
         
         // the main.mt results of all mods, ordered based on dependency
         @:modMainOrdered = [];
@@ -170,16 +172,23 @@ return class(
                 onLoadState => Function,
                 onListSlots => Function,
                 preloadMods => Function,
+                onSaveSettings => Function,
+                onLoadSettings => Function,
                 onQuit => Function
             ) {
                 canvas.resize(width:canvasWidth, height:canvasHeight);
                 this.onSaveState = onSaveState;
                 this.onLoadState = onLoadState;                
-                
-                windowEvent.queueMessage(
-                    text: ' Wyvern Gate ' + VERSION + ' '
-                );
-                
+
+                onSaveSettings_ = onSaveSettings;
+                settings = onLoadSettings();
+                if (settings == empty)
+                    settings = {
+                        unlockedScenarios : false,
+                        //  other default settings here
+                    }
+                else 
+                    settings = JSON.decode(string:settings);
                 
 
                 
@@ -231,8 +240,13 @@ return class(
                     @:enterName = import(module:'game_function.name.mt');
 
 
-                    @:choices = Scenario.database.getAll();
-                    @:choiceNames = [...choices]->map(to::(value) <- value.name);
+                    @choices = Scenario.database.getAll();
+                    @choiceNames = [...choices]->map(to::(value) <- value.name);
+                    
+                    if (settings.unlockedScenarios == false || settings.unlockedScenarios == empty) ::<= {
+                        choices = [Scenario.database.find(name:'The Chosen')];
+                        choiceNames = ['The Chosen'];
+                    }
                     
                     
                     windowEvent.queueChoices(
@@ -313,6 +327,12 @@ return class(
                     });
                 }
                 
+                choiceNames->push(value: 'Credits');
+                choiceActions->push(value ::{
+                    this.queueCredits();
+                });
+                
+                
                 choiceNames->push(value: 'Exit');
                 choiceActions->push(value ::<- onQuit());
                 
@@ -324,13 +344,67 @@ return class(
                     jumpTag : 'MainMenu',
                     renderable : {
                         render ::{
+                            @: title = 'Wyvern Gate';
+                            @:subtitle = '~ A Tale of Wishes ~';
                             canvas.blackout();
+                            canvas.movePen(x:
+                                canvas.width / 2 - title->length / 2,
+                                y: 2
+                            );
+                                
+                            canvas.drawText(
+                                text:title
+                            );
+
+                            canvas.movePen(x:
+                                canvas.width / 2 - subtitle->length / 2,
+                                y: 3
+                            );
+                                
+                            canvas.drawText(
+                                text:subtitle
+                            );
+                            
+                            
+                            
+                            @:loc = 'https://github.com/jcorks/wyvern-gate/ (' + VERSION + ')'                            
+                            canvas.movePen(
+                                x: canvas.width / 2 - loc->length / 2,
+                                y: canvas.height - 2
+                            );
+                            
+                            canvas.drawText(
+                                text:loc
+                            );
+
                         }
                     },
                     onChoice ::(choice) {
                         choiceActions[choice-1]();
                     }
                 );
+            },
+
+            queueCredits :: {
+                windowEvent.queueMessage(
+                    text: 'A game by Johnathan "Rasa" Corkery\n'+
+                          'https://github.com/jcorks/\n\n' + 
+                          'Additional support : Adrian "Radscale" Hernik\n' +
+                          'Playtesting        : Caleb Dron\n'
+                );
+                
+                windowEvent.queueMessage(
+                    text: 'Special thanks to:\n' +
+                          'Meiyuu\n' +
+                          'Drassy\n' +
+                          'Nido\n' +
+                          'Maztitos\n' +
+                          'Dr. San'
+                );
+
+                windowEvent.queueMessage(
+                    text: 'Also a special thanks to Rocco Botte, who personally advised me to stop watching a video of his. As difficult as it is, I continue to heed his advice to this day.'
+                );            
             },
             
             startResume ::{                
@@ -380,6 +454,55 @@ return class(
           
                 
             },
+            
+            gameOver ::(reason) {
+
+
+                windowEvent.queueNoDisplay(
+                    keep : true,
+                    jumpTag: "GameOver",
+                    renderable : {
+                        render :: {
+                            @:canvas = import(module:'game_singleton.canvas.mt');
+                            canvas.blackout();
+                            canvas.commit();
+                        }
+                    },
+                    onEnter :: {
+                            
+                        windowEvent.queueMessage(
+                            text: reason
+                        );
+
+                        windowEvent.queueMessage(
+                            text: 'Game Over'
+                        );
+
+                        this.unlockScenarios();
+
+                        
+                        windowEvent.queueNoDisplay(
+                            onEnter :: {
+                                windowEvent.jumpToTag(name:"GameOver", goBeforeTag: true);
+                            }
+                        );                    
+                    }
+                );
+
+                windowEvent.jumpToTag(name:'MainMenu', doResolveNext:true);
+            },
+            
+            unlockScenarios :: {
+                if (settings.unlockedScenarios == false || settings.unlockedScenarios == empty) ::<= {
+                    settings.unlockedScenarios = true;
+                    onSaveSettings_(data:JSON.encode(object:settings));
+                    
+                    windowEvent.queueMessage(
+                        text: "Alternate scenarios of gameplay now unlocked. You can start a new game at anytime to try them."
+                    );
+                }            
+            },
+            
             visitIsland ::(where, restorePos) {
                 if (where != empty) ::<= {
                     world.island = where;

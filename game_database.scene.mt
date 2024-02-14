@@ -75,7 +75,8 @@ Scene.newEntry(
                         
                         windowEvent.queueNoDisplay(
                             onEnter::{
-                                windowEvent.jumpToTag(name:'MainMenu');                                    
+                                @:instance = import(module:'game_singleton.instance.mt');
+                                instance.gameOver(reason:'The party was wiped out.');
                             }
                         );
                     }
@@ -375,7 +376,8 @@ Scene.newEntry(
                         
                         windowEvent.queueNoDisplay(
                             onEnter::{
-                                windowEvent.jumpToTag(name:'MainMenu');                                    
+                                @:instance = import(module:'game_singleton.instance.mt');
+                                instance.gameOver(reason:'The party was wiped out.');
                             }
                         );
                     }
@@ -621,7 +623,8 @@ Scene.newEntry(
                         
                         windowEvent.queueNoDisplay(
                             onEnter::{
-                                windowEvent.jumpToTag(name:'MainMenu');                                    
+                                @:instance = import(module:'game_singleton.instance.mt');
+                                instance.gameOver(reason:'The party was wiped out.');
                             }
                         );
                     }
@@ -1011,7 +1014,8 @@ Scene.newEntry(
                         
                         windowEvent.queueNoDisplay(
                             onEnter::{
-                                windowEvent.jumpToTag(name:'MainMenu');                                    
+                                @:instance = import(module:'game_singleton.instance.mt');
+                                instance.gameOver(reason:'The party was wiped out.');
                             }
                         );
                     }
