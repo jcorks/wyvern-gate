@@ -275,6 +275,7 @@ return {
     options : {
         quit : InteractionMenuEntry.new(
             displayName : 'Quit',
+            keepInteractionMenu : true,
             filter::(island, landmark) <- true,
             onSelect::(island, landmark) {
                 windowEvent.queueChoices(
@@ -294,6 +295,7 @@ return {
         save : InteractionMenuEntry.new(
             displayName : 'Save',
             filter ::(island, landmark) <- landmark == empty,
+            keepInteractionMenu : true,
             onSelect::(island, landmark) {
                 @:instance = import(module:'game_singleton.instance.mt');
                 instance.savestate();
@@ -304,6 +306,7 @@ return {
         
         system : InteractionMenuEntry.new(
             displayName: 'System',
+            keepInteractionMenu : true,
             filter ::(island, landmark) <- true,
             onSelect::(island, landmark) {
             
@@ -313,6 +316,7 @@ return {
     walk : {
         check : InteractionMenuEntry.new(
             displayName : 'Check',
+            keepInteractionMenu : true,
             filter::(island, landmark) <- landmark == empty,
             onSelect::(island, landmark) {
                 windowEvent.queueMessage(speaker: 'About ' + island.name, text: island.description)
@@ -321,6 +325,7 @@ return {
         
         lookAround : InteractionMenuEntry.new(
             displayName : 'Look around',
+            keepInteractionMenu : true,
             filter::(island, landmark) <- landmark == empty,
             onSelect::(island, landmark) {
                 island.incrementTime();
@@ -331,14 +336,60 @@ return {
         
         party : InteractionMenuEntry.new(
             displayName : 'Party',
+            keepInteractionMenu : true,
             filter::(island, landmark) <- true,
             onSelect::(island, landmark) {
                 (import(module:'game_function.partyoptions.mt'))();
             }
         ),
         
+        inventory : InteractionMenuEntry.new(
+            displayName : 'Inventory',
+            keepInteractionMenu : true,
+            filter::(island, landmark) <- true,
+            onSelect::(island, landmark) {
+                @:world = import(module:'game_singleton.world.mt');
+                @:names = [];
+                foreach(world.party.members)::(index, member) {
+                    names->push(value:member.name);
+                }
+                windowEvent.queueChoices(
+                    leftWeight: 1,
+                    topWeight: 1,
+                    keep:true,
+                    prompt: "Who's looking?",
+                    choices: names,
+                    canCancel : true,
+                    onChoice::(choice) {
+                        when(choice == 0) empty;
+                        
+                        @:itemmenu = import(module:'game_function.itemmenu.mt');
+                        itemmenu(
+                            inBattle: false,
+                            user:world.party.members[choice-1], 
+                            party:world.party, 
+                            enemies:[],
+                            onAct::(action) {
+                                when(action == empty) empty;
+                                world.party.members[choice-1].useAbility(
+                                    ability:action.ability,
+                                    targets:action.targets,
+                                    turnIndex : 0,
+                                    extraData : action.extraData
+                                );                              
+                            
+                            }
+                        );
+                        
+                    
+                    }
+                );
+            }
+        ),
+        
         wait : InteractionMenuEntry.new(
             displayName : 'Wait',
+            keepInteractionMenu : false,
             filter::(island, landmark) <- true,
             onSelect::(island, landmark) {
                 windowEvent.queueChoices(
@@ -386,6 +437,7 @@ return {
     person : {
         barter : InteractionMenuEntry.new(
             displayName: 'Barter',
+            keepInteractionMenu : true,
             filter ::(entity)<- true, // everyone can barter,
             onSelect::(entity) {
                 @:this = entity;

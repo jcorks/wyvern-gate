@@ -22,6 +22,7 @@
 
     InteractionMenuEntry.new(
         displayName: 'Hire',
+        keepInteractionMenu: true,
         filter ::(entity)<- true, // everyone can barter,
         onSelect ::(entity) {
             @:this = entity;
@@ -94,6 +95,7 @@
 
     InteractionMenuEntry.new(
         displayName: 'Aggress',
+        keepInteractionMenu: true,
         filter ::(entity)<- true, // everyone can barter,
         onSelect::(entity) {
             @:this = entity;
@@ -441,6 +443,7 @@ return {
         commonInteractions.walk.check,
         commonInteractions.walk.lookAround,
         commonInteractions.walk.party,
+        commonInteractions.walk.inventory,
         commonInteractions.walk.wait
     ],
     interactionsBattle : [
@@ -638,6 +641,7 @@ return {
             data : {
                 displayName : 'Explore Pit',
                 name : 'explore pit',
+                keepInteractionMenu: false,
                 onInteract ::(location, party) {
                     @:world = import(module:'game_singleton.world.mt');
                     @:Event = import(module:'game_mutator.event.mt');

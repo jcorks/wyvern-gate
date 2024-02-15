@@ -5,12 +5,36 @@ Known bugs / concerns:
 - Some time of day displays go offscreen when the island name 
   is too long.
 - In battle, some frames display a previous background image rather than the most current one
+- Certain locations in dungeons need to be made unique per-floor, such as potion shops.
+- After leaving a landmark, prev menu is still open
+- consistency with middle vs right side menus. especially with buildings
+- School, choosing someone to change professions is not able to be backed out of
+- It is vague when an item always requires choosing someone to use it on when sometimes it doesnt make sense.
+
 - In topaz builds, fullscreen disabling doesnt come with window decoration and resizing is impossible
 - Some abilities are not properly implemented currently.
-- Sometimes, using items will not consume them when they will sometimes be consumed normally. Likely due to either entiering or leaving the battle state, or save/loading an inventory.
-- Certain locations in dungeons need to be made unique per-floor, such as potion shops.
 
 Coming changes:
+  . Combat changes:
+    - When doing most attacks, you can choose whether to target the head, body, or limbs.
+        . Head -> 35% dex penalty, but if lands is always a critical
+        . Body -> Increased chance to cause bleed, no dex penalty 
+        . Limbs -> 25% Dex penalty, but if lands, stuns next turn. 25% chance to disarm 
+    - When receiving an attack, you can choose what part of the body to defend 
+        . If correct, it procs the weapons defend action and reduces damage by 80%
+        . Weapons have a block count meaning how many parts of the body they defend.
+        . If INT is higher than your opponent, you have a 50% chance that they telegraphed 
+          their attack and you know where you need to defend
+    - Defending now gives you an additional block point instead of damage reduction
+    - Enchants can have an "on block" condition
+    - Some defend actions:
+        - Retaliate: Attack damage to attacker 
+        - Full block: no damage taken at all 
+        - Stun: attacker is stunned.
+    - weapons have anywhere from 0 to 2 block points 
+  . When selecting a target in battle, party members move to bottom of list.
+  . Being able to choose your starting characters. Theyll still be generated, but you'll get to choose 
+    among a list. Thinking 5 per generated.
     
     The Warrior Scenario
         - This game scenario features a Wyvern's challenge to defeat it 

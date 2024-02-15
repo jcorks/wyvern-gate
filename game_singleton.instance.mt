@@ -266,6 +266,7 @@ return class(
 
                             enterName(
                                 prompt: 'Enter a file name.',
+                                canCancel: true,
                                 onDone ::(name){
                                     @:currentFiles = onListSlots();
 
@@ -391,7 +392,8 @@ return class(
                     text: 'A game by Johnathan "Rasa" Corkery\n'+
                           'https://github.com/jcorks/\n\n' + 
                           'Additional support : Adrian "Radscale" Hernik\n' +
-                          'Playtesting        : Caleb Dron\n'
+                          'Playtesting        : Caleb Dron\n' +
+                          '                     Cane\n'
                 );
                 
                 windowEvent.queueMessage(
@@ -600,6 +602,7 @@ return class(
                         renderable: island.map,
                         canCancel : true,
                         keep: true,
+                        jumpTag: 'LandmarkInteraction',
                         onGetChoices ::{
                             islandOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island));
                             
@@ -621,6 +624,9 @@ return class(
 
                             if (choice-1 < islandOptions->size) ::<= {
                                 islandOptions[choice-1].onSelect(island);
+                                if (!islandOptions[choice-1].keepInteractionMenu && windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
+                                    windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
+                                }
                             } else if (choice-1 == islandOptions->size) ::<= {
                                 @:options = [...world.scenario.base.interactionsOptions]->filter(by::(value) <- value.filter(island));
                                 @:choices = [...options]->map(to::(value) <- value.displayName);
@@ -631,10 +637,13 @@ return class(
                                     prompt: 'Options',
                                     canCancel : true,
                                     keep: true,
+                                    jumpTag: 'LandmarkInteractionOptions',
                                     choices,
                                     onChoice::(choice) {
                                         when(choice == 0) empty;
                                         options[choice-1].onSelect(island);
+                                        if (!options[choice-1].keepInteractionMenu && windowEvent.canJumpToTag(name:'LandmarkInteractionOptions'))
+                                            windowEvent.jumpToTag(name:'LandmarkInteractionOptions', goBeforeTag:true, doResolveNext:true);
                                     }
                                 );
                             } else ::<= {

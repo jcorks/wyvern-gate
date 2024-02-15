@@ -223,8 +223,8 @@
                     cursorPos += 1;
                 }
 
-                if (cursorPos < 0) cursorPos = 0;
-                if (cursorPos >= choices->keycount) cursorPos = choices->keycount-1;
+                if (cursorPos < 0) cursorPos = choices->keycount-1;
+                if (cursorPos >= choices->keycount) cursorPos = 0;
 
                 //if (cursorPos >= cursorPageTop+PAGE_SIZE) cursorPageTop+=1;
                 //if (cursorPos  < cursorPageTop) cursorPageTop -=1;
@@ -307,6 +307,7 @@
             }
                 
             when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
+                if (data.onCancel) data.onCancel();
                 data.keep = empty;
                 return true;
             }
@@ -392,6 +393,7 @@
             }
                 
             when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
+                if (data.onCancel) data.onCancel();
                 data.keep = empty;
                 return true;
             }
@@ -415,8 +417,15 @@
             @:onChoice = data.onChoice;
             @:choice = input;         
             @:onMenu = data.onMenu;            
+            @:canCancel = data.canCancel;
 
             when (requestAutoSkip) false;
+
+            when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
+                if (data.onCancel) data.onCancel();
+                data.keep = empty;
+                return true;
+            }
 
             when(choice == CURSOR_ACTIONS.CANCEL ||
                  choice == CURSOR_ACTIONS.CONFIRM) ::<= {
@@ -445,6 +454,8 @@
                     );*/             
                 });
             }
+            
+            
             return false;    
         }        
     
@@ -541,10 +552,10 @@
                 if (choice == CURSOR_ACTIONS.DOWN)
                     y += 1;
 
-                if (x < 0) x = 0;
-                if (x >= width) x = width-1;
-                if (y < 0) y = 0;
-                if (y >= height) y = height-1;
+                if (x < 0) x = width-1;
+                if (x >= width) x = 0;
+                if (y < 0) y = height-1;
+                if (y >= height) y = 0;
             }                  
             
             ::<= {                
@@ -603,6 +614,7 @@
             }
                 
             if (canCancel && choice == CURSOR_ACTIONS.CANCEL) ::<= {
+                if (data.onCancel) data.onCancel();
                 data.keep = empty;
                 return true;
             }
@@ -854,10 +866,11 @@
             // Like all UI choices, the weight can be chosen.
             // Prompt will be displayed, like speaker in the message callback
             //
-            queueChoices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetChoices, onGetPrompt, jumpTag, onLeave, header, onGetHeader) {
+            queueChoices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetChoices, onGetPrompt, jumpTag, onLeave, header, onGetHeader, onCancel) {
 
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
+                        onCancel : onCancel,
                         mode: CHOICE_MODE.CURSOR,
                         choices: choices,
                         prompt: prompt,
@@ -880,10 +893,11 @@
             },
             
             
-            queueSlider::(defaultValue => Number, increments => Number, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetPrompt, jumpTag, onLeave) {
+            queueSlider::(defaultValue => Number, increments => Number, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetPrompt, jumpTag, onLeave, onCancel) {
 
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
+                        onCancel: onCancel,
                         mode: CHOICE_MODE.SLIDER,
                         increments : increments,
                         prompt: prompt,
@@ -954,9 +968,10 @@
             },
        
             
-            queueChoiceColumns::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function, keep, renderable, jumpTag, onLeave) {
+            queueChoiceColumns::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function, keep, renderable, jumpTag, onLeave, onCancel) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
+                        onCancel: onCancel,
                         mode:if (isCursor) CHOICE_MODE.COLUMN_CURSOR else CHOICE_MODE.COLUMN_NUMBER,
                         choices: choices,
                         prompt: prompt,
@@ -972,9 +987,10 @@
                     });
                 }]);
             },            
-            queueCursorMove ::(prompt, leftWeight, topWeight, onMove, onMenu => Function, renderable, onLeave, jumpTag) {
+            queueCursorMove ::(prompt, leftWeight, topWeight, onMove, onMenu => Function, renderable, onLeave, jumpTag, canCancel) {
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
+                        canCancel: canCancel,
                         mode: CHOICE_MODE.CURSOR_MOVE,
                         prompt: prompt,
                         leftWeight: leftWeight,

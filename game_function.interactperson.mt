@@ -84,7 +84,11 @@ return ::(this, party, location, onDone, overrideChat, skipIntro) {
             interactions[choice-1].onSelect(
                 entity:this
             );
+                
             if (this.onInteract) this.onInteract(interaction:interactions[choice-1].displayName);
+
+            if (!interactions[choice-1].keepInteractionMenu && windowEvent.canJumpToTag(name:'InteractPerson')) 
+                windowEvent.jumpToTag(name:'InteractPerson', goBeforeTag:true, doResolveNext:true);
         }
     );  
 };

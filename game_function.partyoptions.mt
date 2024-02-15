@@ -25,7 +25,7 @@
 
 
 return ::{
-
+    @whom = 0;
     @:menuRenderable = {
         render ::{
             canvas.blackout();
@@ -42,6 +42,17 @@ return ::{
                 @x = (canvas.width - width) / 2;
                 canvas.renderFrame(top, left: (canvas.width - width) / 2, width, height);
                 
+                if (whom == index) ::<= {
+                    canvas.movePen(
+                        x: (canvas.width - width) / 2 - 4,
+                        y: top + height/2
+                    );
+                    canvas.drawText(
+                        text: '--->'
+                    );
+                }
+                    
+                
                 canvas.movePen(x: x+3, y: top + 2);
                 canvas.drawText(text: member.name + ' - (' + member.species.name + ' ' + member.profession.base.name + ')');
                 canvas.movePen(x: x+3, y: top + 3);
@@ -57,322 +68,262 @@ return ::{
         
         }
     }
+    @:names = [];
+    @:party = world.party;
+    foreach(party.members)::(i, member) {
+        names->push(value:member.name);
+    }
 
-    windowEvent.queueChoices(
+    
+    windowEvent.queueCursorMove(
         leftWeight: 1,
         topWeight: 1,
-        prompt: 'Party Options',
-        keep: true,
-        canCancel: true,
+        prompt: 'Choose a member.',
         renderable : menuRenderable,
-        choices: [
-            //'Manage',
-            'Members',
-            'Inventory'
-        ],
-        
-        
-        onChoice ::(choice) {
+        canCancel: true,
+        onMove ::(choice) {
+            when(choice == windowEvent.CURSOR_ACTIONS.LEFT ||
+                 choice == windowEvent.CURSOR_ACTIONS.RIGHT) empty;
+                 
+            if (choice == windowEvent.CURSOR_ACTIONS.UP)
+                whom -= 1;
 
-            match(choice-1) {
-              
-              
-              // members
-              (0)::<= {
-                @:names = [];
-                @:party = world.party;
-                foreach(party.members)::(i, member) {
-                    names->push(value:member.name);
-                }
+            if (choice == windowEvent.CURSOR_ACTIONS.DOWN)
+                whom += 1;
 
-                
-                windowEvent.queueChoices(
-                    leftWeight: 1,
-                    topWeight: 1,
-                    choices: names,
-                    prompt: 'Whom?',
-                    renderable : menuRenderable,
-                    keep: true,
-                    canCancel: true,
-                    onChoice ::(choice) {
-                        when(choice == 0) empty;
-                        @member = party.members[choice-1];
-                        
-                        
+            if(whom < 0) whom = party.members->size-1;
+            if(whom > party.members->size-1) whom = 0;
+        },
+        onMenu :: {
+            @member = party.members[whom];
+            
+            
+            windowEvent.queueChoices(
+                leftWeight: 1,
+                topWeight: 1,
+                choices: [
+                    'Describe',
+                    'Equip'
+                ],
+                prompt: names[whom],
+                keep: true,
+                canCancel: true,
+                renderable : menuRenderable,
+                onChoice ::(choice) {
+                    when(choice == 0) empty;
+                    
+                    
+                    match(choice) {
+
+                      // describe
+                      (1): member.describe(),
+
+
+
+
+                      // Equip / unequip
+                      (2):::<= {
+                        @Entity = import(module:'game_class.entity.mt');
+
+                        @slotToName::(slot) {
+                            return match(slot) {
+                              (Entity.EQUIP_SLOTS.HAND_LR-1)  : 'L.Hand  ',
+                              (Entity.EQUIP_SLOTS.HAND_LR)    : 'R.Hand  ',
+                              (Entity.EQUIP_SLOTS.ARMOR)   : 'Armor   ',
+                              (Entity.EQUIP_SLOTS.AMULET)  : 'Amulet  ',
+                              (Entity.EQUIP_SLOTS.RING_L)  : 'L.Ring  ',
+                              (Entity.EQUIP_SLOTS.RING_R)  : 'R.Ring  ',
+                              (Entity.EQUIP_SLOTS.TRINKET) : 'Trinket '
+                            }                                    
+                        }
+
+                        @:Item = import(module:'game_mutator.item.mt');
+
                         windowEvent.queueChoices(
                             leftWeight: 1,
                             topWeight: 1,
-                            choices: [
-                                'Describe',
-                                'Equip'
-                            ],
-                            prompt: names[choice-1],
-                            keep: true,
-                            canCancel: true,
+                            prompt: member.name + ': Equips',
+                            keep:true,
                             renderable : menuRenderable,
-                            onChoice ::(choice) {
-                                when(choice == 0) empty;
-                                
-                                
-                                match(choice) {
+                            canCancel: true,
+                            onGetChoices:: {
+                                @:choices = [];
+                                for(-1, Entity.EQUIP_SLOTS.TRINKET+1)::(i) {
+                                    @str = slotToName(slot:i);
 
-                                  // describe
-                                  (1): member.describe(),
-
-
-
-
-                                  // Equip / unequip
-                                  (2):::<= {
-                                    @Entity = import(module:'game_class.entity.mt');
-
-                                    @slotToName::(slot) {
-                                        return match(slot) {
-                                          (Entity.EQUIP_SLOTS.HAND_LR-1)  : 'L.Hand  ',
-                                          (Entity.EQUIP_SLOTS.HAND_LR)    : 'R.Hand  ',
-                                          (Entity.EQUIP_SLOTS.ARMOR)   : 'Armor   ',
-                                          (Entity.EQUIP_SLOTS.AMULET)  : 'Amulet  ',
-                                          (Entity.EQUIP_SLOTS.RING_L)  : 'L.Ring  ',
-                                          (Entity.EQUIP_SLOTS.RING_R)  : 'R.Ring  ',
-                                          (Entity.EQUIP_SLOTS.TRINKET) : 'Trinket '
-                                        }                                    
+                                    if (i <= Entity.EQUIP_SLOTS.HAND_LR) ::<= {
+                                        @:item = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
+                                        if (i < Entity.EQUIP_SLOTS.HAND_LR) ::<= {     
+                                            str = str +  if (item.name == 'None') ('------') else item.name;
+                                        } else if (item.base.equipType == Item.TYPE.TWOHANDED) ::<= {
+                                            str = str +  if (item.name == 'None') ('') else item.name;                                                    
+                                        }       
+                                    
+                                    } else ::<= {
+                                        @:item = member.getEquipped(slot:i);
+                                        str = str +  if (item.name == 'None') '------' else item.name;
                                     }
+                                    choices->push(value:str);
+                                }
+                                return choices;
+                            },
+                            onChoice:::(choice) {
+                                when(choice == 0) empty;
 
-                                    @:Item = import(module:'game_mutator.item.mt');
-     
+
+                                @slot = choice-2;
+                                if (slot < 0) slot = 0; // left and right hand point to same slot
+
+
+
+                                @equip = ::{
+
+                                    @:items = party.inventory.items->filter(by:::(value) <- member.getSlotsForItem(item:value)->findIndex(value:slot) != -1);
+                                    @:itemNames = [...items]->map(to:::(value) <- value.name);
+                                    itemNames->push(value:'[Nothing]');
+                                
                                     windowEvent.queueChoices(
                                         leftWeight: 1,
                                         topWeight: 1,
-                                        prompt: member.name + ': Equips',
-                                        keep:true,
-                                        renderable : menuRenderable,
+                                        choices:itemNames,
+                                        prompt: member.name + ': ' + slotToName(slot),
                                         canCancel: true,
-                                        onGetChoices:: {
-                                            @:choices = [];
-                                            for(-1, Entity.EQUIP_SLOTS.TRINKET+1)::(i) {
-                                                @str = slotToName(slot:i);
-
-                                                if (i <= Entity.EQUIP_SLOTS.HAND_LR) ::<= {
-                                                    @:item = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
-                                                    if (i < Entity.EQUIP_SLOTS.HAND_LR) ::<= {     
-                                                        str = str +  if (item.name == 'None') ('------') else item.name;
-                                                    } else if (item.base.equipType == Item.TYPE.TWOHANDED) ::<= {
-                                                        str = str +  if (item.name == 'None') ('') else item.name;                                                    
-                                                    }       
-                                                
-                                                } else ::<= {
-                                                    @:item = member.getEquipped(slot:i);
-                                                    str = str +  if (item.name == 'None') '------' else item.name;
-                                                }
-                                                choices->push(value:str);
-                                            }
-                                            return choices;
-                                        },
+                                        keep:true,
+                                        jumpTag: 'EquipWhich',
+                                        renderable : menuRenderable,
+                                        
                                         onChoice:::(choice) {
-                                            when(choice == 0) empty;
+                                            @:index = choice -1;
 
-
-                                            @slot = choice-2;
-                                            if (slot < 0) slot = 0; // left and right hand point to same slot
-
-
-
-                                            @equip = ::{
-
-                                                @:items = party.inventory.items->filter(by:::(value) <- member.getSlotsForItem(item:value)->findIndex(value:slot) != -1);
-                                                @:itemNames = [...items]->map(to:::(value) <- value.name);
-                                                itemNames->push(value:'[Nothing]');
-                                            
-                                                windowEvent.queueChoices(
-                                                    leftWeight: 1,
-                                                    topWeight: 1,
-                                                    choices:itemNames,
-                                                    prompt: member.name + ': ' + slotToName(slot),
-                                                    canCancel: true,
-                                                    keep:true,
-                                                    jumpTag: 'EquipWhich',
-                                                    renderable : menuRenderable,
-                                                    
-                                                    onChoice:::(choice) {
-                                                        @:index = choice -1;
-
-                                                        // unequip
-                                                        when (index == items->keycount) ::<= {
-                                                            @item = member.getEquipped(slot);
-                                                            if (item != empty && item.base.name != 'None') ::<= {
-                                                                windowEvent.queueMessage(
-                                                                    text: member.name + ' has unequipped the ' + item.name
-                                                                );
-                                                                member.unequipItem(item);
-                                                                party.inventory.add(item);
-                                                                windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);
-                                                            }
-                                                        }
-                                                        
-                                                        @item = items[index];
-
-                                                        windowEvent.queueChoices(
-                                                            choices: ['Equip', 'Check', 'Rename', 'Compare'],
-                                                            prompt: item.name,
-                                                            canCancel: true,
-                                                            leftWeight: 1,
-                                                            topWeight: 1,
-                                                            onChoice::(choice) {
-                                                                when (choice == 0) empty;
-                                                                when(choice == 1) ::<= {
-                                                        
-                                                                    // equip 
-                                                                    member.equip(
-                                                                        item, 
-                                                                        slot, 
-                                                                        inventory:party.inventory
-                                                                    );
-                                                                    windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);
-                                                                }
-                                                                
-                                                                when(choice == 2) 
-                                                                    item.describe();
-
-                                                                when(choice == 3) ::<= {
-                                                                    when (!item.base.canHaveEnchants)
-                                                                        windowEvent.queueMessage(text:item.name + ' cannot be renamed.');
-                                                                
-                                                                
-                                                                    @:name = import(module:"game_function.name.mt");
-                                                                    name(
-                                                                        prompt: 'New item name:',
-                                                                        onDone::(name) {
-                                                                            item.name = name;
-                                                                            windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);
-                                                                        }
-                                                                    );
-                                                                }
-                                                                    
-
-                                                                when(choice == 4) ::<= {
-                                                                    @slot = member.getSlotsForItem(item)[0];
-                                                                    @currentEquip = member.getEquipped(slot);
-                                                                    
-                                                                    currentEquip.equipMod.printDiffRate(
-                                                                        prompt: currentEquip.name + ' -> ' + item.name,
-                                                                        other:item.equipMod
-                                                                    );                                                                     
-                                                                }
-                                                            }
-                                                        )
-                                                    }
-                                                );
+                                            // unequip
+                                            when (index == items->keycount) ::<= {
+                                                @item = member.getEquipped(slot);
+                                                if (item != empty && item.base.name != 'None') ::<= {
+                                                    windowEvent.queueMessage(
+                                                        text: member.name + ' has unequipped the ' + item.name
+                                                    );
+                                                    member.unequipItem(item);
+                                                    party.inventory.add(item);
+                                                    windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);
+                                                }
                                             }
-
-                                            // force equip when nothing equipped yet.
-                                            // slightly less confusing
-                                            when(member.getEquipped(slot).name == 'None')
-                                                equip();
+                                            
+                                            @item = items[index];
 
                                             windowEvent.queueChoices(
+                                                choices: ['Equip', 'Check', 'Rename', 'Compare'],
+                                                prompt: item.name,
+                                                canCancel: true,
                                                 leftWeight: 1,
                                                 topWeight: 1,
-                                                onGetChoices:: {
-                                                    @choices = ['Equip'];
-                                                    return if (member.getEquipped(slot).name != 'None') ::<= {
-                                                        choices->push(value:'Check');
-                                                        choices->push(value:'Improve');
-                                                        choices->push(value:'Rename');
-                                                        return choices;
-                                                    } else empty;
-                                                },
-                                                onGetPrompt::{
-                                                    return member.name + ': ' + member.getEquipped(slot).name + '';
-                                                },
-                                                renderable : menuRenderable,
-                                                canCancel: true,
-                                                keep: true,
-                                                onChoice:::(choice) {
+                                                onChoice::(choice) {
                                                     when (choice == 0) empty;
-                                                    match(choice) {
-                                                        // Equip
-                                                        (1):::<= {
-                                                            equip();
-                                                        },
-                                                        // Check
-                                                        (2):::<= {
-                                                            member.getEquipped(slot).describe();                                                       
-                                                        },
-                                                        // improve
-                                                        (3):::<= {
-                                                            (import(module:'game_function.itemimprove.mt'))(inBattle: false, user:member, item:member.getEquipped(slot));
-                                                        },
-                                                        // Rename 
-                                                        (4):::<= {
-                                                            when (!member.getEquipped(slot).base.canHaveEnchants)
-                                                                windowEvent.queueMessage(text:member.getEquipped(slot).name + ' cannot be renamed.');
-                                                            @:name = import(module:"game_function.name.mt");
-                                                            name(
-                                                                prompt: 'New item name:',
-                                                                onDone::(name) {
-                                                                    member.getEquipped(slot).name = name;
-                                                                }
-                                                            );                                                        
-                                                        }
+                                                    when(choice == 1) ::<= {
+                                            
+                                                        // equip 
+                                                        member.equip(
+                                                            item, 
+                                                            slot, 
+                                                            inventory:party.inventory
+                                                        );
+                                                        windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);
                                                     }
-                                                }                                                            
-                                            );
-                                        }
-                                    );                                   
-                                  }
-                                }
-                            }
-                        );                        
-                        
-                    }
-                );
-                
+                                                    
+                                                    when(choice == 2) 
+                                                        item.describe();
 
-                
-                
-              },
-              
-              
-              // Inventory
-              (1)::<= {
-                @:names = [];
-                foreach(world.party.members)::(index, member) {
-                    names->push(value:member.name);
-                }
-                windowEvent.queueChoices(
-                    leftWeight: 1,
-                    topWeight: 1,
-                    keep:true,
-                    prompt: "Who's looking?",
-                    choices: names,
-                    canCancel : true,
-                    renderable : menuRenderable,
-                    onChoice::(choice) {
-                        when(choice == 0) empty;
-                        
-                        itemmenu(
-                            inBattle: false,
-                            user:world.party.members[choice-1], 
-                            party:world.party, 
-                            enemies:[],
-                            renderable : menuRenderable,
-                            onAct::(action) {
-                                when(action == empty) empty;
-                                world.party.members[choice-1].useAbility(
-                                    ability:action.ability,
-                                    targets:action.targets,
-                                    turnIndex : 0,
-                                    extraData : action.extraData
-                                );                              
-                            
+                                                    when(choice == 3) ::<= {
+                                                        when (!item.base.canHaveEnchants)
+                                                            windowEvent.queueMessage(text:item.name + ' cannot be renamed.');
+                                                    
+                                                    
+                                                        @:name = import(module:"game_function.name.mt");
+                                                        name(
+                                                            prompt: 'New item name:',
+                                                            onDone::(name) {
+                                                                item.name = name;
+                                                                windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);
+                                                            }
+                                                        );
+                                                    }
+                                                        
+
+                                                    when(choice == 4) ::<= {
+                                                        @slot = member.getSlotsForItem(item)[0];
+                                                        @currentEquip = member.getEquipped(slot);
+                                                        
+                                                        currentEquip.equipMod.printDiffRate(
+                                                            prompt: currentEquip.name + ' -> ' + item.name,
+                                                            other:item.equipMod
+                                                        );                                                                     
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    );
+                                }
+
+                                // force equip when nothing equipped yet.
+                                // slightly less confusing
+                                when(member.getEquipped(slot).name == 'None')
+                                    equip();
+
+                                windowEvent.queueChoices(
+                                    leftWeight: 1,
+                                    topWeight: 1,
+                                    onGetChoices:: {
+                                        @choices = ['Equip'];
+                                        return if (member.getEquipped(slot).name != 'None') ::<= {
+                                            choices->push(value:'Check');
+                                            choices->push(value:'Improve');
+                                            choices->push(value:'Rename');
+                                            return choices;
+                                        } else empty;
+                                    },
+                                    onGetPrompt::{
+                                        return member.name + ': ' + member.getEquipped(slot).name + '';
+                                    },
+                                    renderable : menuRenderable,
+                                    canCancel: true,
+                                    keep: true,
+                                    onChoice:::(choice) {
+                                        when (choice == 0) empty;
+                                        match(choice) {
+                                            // Equip
+                                            (1):::<= {
+                                                equip();
+                                            },
+                                            // Check
+                                            (2):::<= {
+                                                member.getEquipped(slot).describe();                                                       
+                                            },
+                                            // improve
+                                            (3):::<= {
+                                                (import(module:'game_function.itemimprove.mt'))(inBattle: false, user:member, item:member.getEquipped(slot));
+                                            },
+                                            // Rename 
+                                            (4):::<= {
+                                                when (!member.getEquipped(slot).base.canHaveEnchants)
+                                                    windowEvent.queueMessage(text:member.getEquipped(slot).name + ' cannot be renamed.');
+                                                @:name = import(module:"game_function.name.mt");
+                                                name(
+                                                    prompt: 'New item name:',
+                                                    onDone::(name) {
+                                                        member.getEquipped(slot).name = name;
+                                                    }
+                                                );                                                        
+                                            }
+                                        }
+                                    }                                                            
+                                );
                             }
-                        );
-                        
-                    
+                        );                                   
+                      }
                     }
-                );
-              }
-            }        
+                }
+            );                        
+            
         }
-    );                  
+    );
+              
 }  

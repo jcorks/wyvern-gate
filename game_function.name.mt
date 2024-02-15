@@ -50,7 +50,7 @@ return ::(
                     pinch = prompt->length;
                     
                 @:centerX = canvas.width / 2;
-                @:centerY = canvas.height / 3;
+                @:centerY = canvas.height / 4;
                 @:height = 5;
                 @:width = 4 + 1 + pinch;
                 
@@ -70,12 +70,19 @@ return ::(
         keep : true,
         jumpTag : 'name',
         onEnter ::{
+        
+        
             windowEvent.queueChoices(
                 choices: select,
                 prompt: "",
                 leftWeight: 0.5,
                 topWeight: 1,
-                canCancel: false,
+                canCancel: if (canCancel == empty) false else canCancel,
+                onCancel ::{
+                    if (canCancel == true)
+                        if (windowEvent.canJumpToTag(name:'name'))
+                            windowEvent.jumpToTag(name:'name', doResolveNext:true, goBeforeTag:true);                                      
+                },
                 onChoice ::(choice) {
                     when(choice == 1) ::<= {
                         name = name + ' ';

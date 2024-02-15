@@ -909,7 +909,8 @@
                         prompt:'Today I will...',
                         choices : [
                             'Open shop',
-                            'Explore'
+                            'Explore',
+                            'Wait until tomorrow'
                         ],
                         renderable : {
                             render ::{
@@ -922,6 +923,18 @@
                             when(choice == 2) ::<={
                                 this.explore();
                             }        
+                            
+                            when(choice == 3) ::<= {
+                                windowEvent.queueAskBoolean(
+                                    prompt: 'Wait until tomorrow?',
+                                    onChoice::(which) {
+                                        when(which) 
+                                            this.preflightCheckStart(onDone::{
+                                                this.finishDay();                                            
+                                            });
+                                    }
+                                );
+                            }
                             this.openShop();
                         }
                     );                
@@ -2597,6 +2610,7 @@
     commonInteractions.person.barter,
     InteractionMenuEntry.new(
         displayName: 'Hire with contract',
+        keepInteractionMenu: true,
         filter ::(entity)<- true,
         onSelect ::(entity) {
             @:this = entity;
@@ -2856,6 +2870,7 @@ return {
     interactionsLocation : [
         InteractionMenuEntry.new(
             displayName : 'Buy property',
+            keepInteractionMenu: true,
             filter ::(location) {
                 @world = import(module:'game_singleton.world.mt');
                 @:Location = import(module:'game_mutator.location.mt');
@@ -2971,6 +2986,7 @@ return {
         commonInteractions.walk.check,
         InteractionMenuEntry.new(
             displayName: 'Finances',
+            keepInteractionMenu: true,
             filter::(island, landmark) <- true,
             onSelect::(island, landmark) {
                 @:world = import(module:'game_singleton.world.mt')
@@ -2978,8 +2994,10 @@ return {
             }
         ),
         commonInteractions.walk.party,
+        commonInteractions.walk.inventory,
         InteractionMenuEntry.new(
             displayName: 'Finish Day',
+            keepInteractionMenu: true,
             filter::(island, landmark) <- landmark == empty || landmark.base.pointOfNoReturn == false,
             onSelect::(island, landmark) {
                 windowEvent.queueAskBoolean(

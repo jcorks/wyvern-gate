@@ -2354,6 +2354,9 @@ Location.database.newEntry(data:{
                             
                             when (!location.landmark.peaceful) ::<= {
                                 interaction.onInteract(location, party);                    
+                                if (!interaction.keepInteractionMenu && windowEvent.canJumpToTag(name:'LocationInteract'))
+                                    windowEvent.jumpToTag(name:'LocationInteract', goBeforeTag:true, doResolveNext:true);
+
                             }
                                 
                             
@@ -2362,6 +2365,8 @@ Location.database.newEntry(data:{
                                 onChoice::(which) {
                                     when(which == false) empty;
                                     interaction.onInteract(location, party);                                                                                
+                                    if (!interaction.keepInteractionMenu && windowEvent.canJumpToTag(name:'LocationInteract'))
+                                        windowEvent.jumpToTag(name:'LocationInteract', goBeforeTag:true, doResolveNext:true);
                                 }
                             );
                         }
@@ -2411,6 +2416,7 @@ Location.database.newEntry(data:{
                     choices:choices,
                     canCancel : true,
                     keep: true,
+                    jumpTag: 'LocationInteract',
                     onChoice::(choice) {
                
                         when(choice == 0) empty;
@@ -2420,14 +2426,23 @@ Location.database.newEntry(data:{
                             aggress(location:this, party);
                         }
                         
-                        when(choice-1 >= interactionNames->size)
-                            scenarioInteractions[choice-(1+interactionNames->size)].onSelect(location:this)
+                        when(choice-1 >= interactionNames->size) ::<= {
+                            @:interaction = scenarioInteractions[choice-(1+interactionNames->size)];
+                            interaction.onSelect(location:this)
+                            if (!interaction.keepInteractionMenu && windowEvent.canJumpToTag(name:'LocationInteract'))
+                                windowEvent.jumpToTag(name:'LocationInteract', goBeforeTag:true, doResolveNext:true);
+                        }
                         
-                        Interaction.find(name:this.base.interactions[choice-1]).onInteract(
+                        @:interaction = Interaction.find(name:this.base.interactions[choice-1])
+                        
+                        interaction.onInteract(
                             location: this,
                             party
-                        );
+                        );                        
                         this.landmark.step();                            
+                        if (!interaction.keepInteractionMenu && windowEvent.canJumpToTag(name:'LocationInteract'))
+                            windowEvent.jumpToTag(name:'LocationInteract', goBeforeTag:true, doResolveNext:true);
+
                     }
                 );            
             }

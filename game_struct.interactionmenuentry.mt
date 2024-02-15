@@ -31,6 +31,10 @@ return struct(
         // option should be added to the menu.
         filter: Function,
         
+        // Whether the interaction menu should be kept after 
+        // selecting this action
+        keepInteractionMenu : Boolean,
+        
         // The action to do when the option is selected.
         onSelect: Function
     }
