@@ -416,12 +416,6 @@ return {
         @:Scene = import(module:'game_database.scene.mt');
         Scene.start(name:'scene_intro', onDone::{                    
             instance.visitIsland();
-            
-            /*island.addEvent(
-                event:Event.database.find(name:'Encounter:Non-peaceful').new(
-                    island, party, landmark //, currentTime
-                )
-            );*/  
         });        
     },
     onNewDay ::(data){},
@@ -441,7 +435,6 @@ return {
     interactionsLandmark : [],
     interactionsWalk : [
         commonInteractions.walk.check,
-        commonInteractions.walk.lookAround,
         commonInteractions.walk.party,
         commonInteractions.walk.inventory,
         commonInteractions.walk.wait
@@ -645,13 +638,14 @@ return {
                 onInteract ::(location, party) {
                     @:world = import(module:'game_singleton.world.mt');
                     @:Event = import(module:'game_mutator.event.mt');
-
+                    @:Scene = import(module:'game_database.scene.mt');                        
                     if (location.contested == true) ::<= {
-                        @:event = Event.new(
-                            base:Event.database.find(name:'Encounter:TreasureBoss'),
-                            currentTime:0, // TODO,
-                            parent:location.landmark
-                        );  
+                        Scene.start(
+                            name: 'scene_keybattle0',
+                            onDone::{},
+                            location:location,
+                            landmark:location.landmark
+                        );
                         location.contested = false;
                     } else ::<= {
                         if (location.targetLandmark == empty) ::<={

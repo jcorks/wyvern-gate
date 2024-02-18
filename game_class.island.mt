@@ -156,10 +156,13 @@
         // augments an entity based on the current tier
         @augmentTiered = ::(entity) {
             match(state.tier) {
-              (0): empty, // tier zero has no mods 
+              (0):::<= {
+                entity.capHP(max:11);
+              }, // tier zero has no mods 
 
               // tier 1: learn 1 to 2 skills
               (1):::<= {
+                entity.capHP(max:14);
                 entity.learnNextAbility();
                 if (Number.random() > 0.5)
                     entity.learnNextAbility();
@@ -169,6 +172,7 @@
 
               // tier 2: learn 1 to 2 skills and get equips
               (2):::<= {
+                entity.capHP(max:16);
                 entity.learnNextAbility();
                 if (Number.random() > 0.5)
                     entity.learnNextAbility();
@@ -195,6 +199,7 @@
 
               // tier 3: learn 1 to 2 skills and get equips
               (3):::<= {
+                entity.capHP(max:20);
                 for(0, 10)::(i) {
                     entity.learnNextAbility();                
                 }
@@ -539,24 +544,14 @@
                 //if (stepsSinceLastEvent > 200000) ::<= {
                 if (state.stepsSinceLastEvent > 13) ::<= {
                     if (Number.random() > 13 - (state.stepsSinceLastEvent-5) / 5) ::<={
-                        // mostly its encounters. 0.1% chance of encounter 
-                        if (Number.random() < 0.001) ::<= {
-                            this.addEvent(
-                                event:Event.new(
-                                    base:Event.database.find(name:'Encounter:Normal'),
-                                    parent:this 
-                                )
-                            );
-                        } else ::<= {
-                            this.addEvent(
-                                event:Event.new(
-                                    base:Event.database.getRandomFiltered(
-                                        filter:::(value) <- !value.name->contains(key:'Encounter')
-                                    ),
-                                    parent:this
-                                )
-                            );                        
-                        }
+                        this.addEvent(
+                            event:Event.new(
+                                base:Event.database.getRandomFiltered(
+                                    filter:::(value) <- !value.name->contains(key:'Encounter')
+                                ),
+                                parent:this
+                            )
+                        );                        
                         state.stepsSinceLastEvent = 0;
                     }
                 }    

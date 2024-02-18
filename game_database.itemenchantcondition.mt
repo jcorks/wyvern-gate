@@ -106,6 +106,18 @@ ItemEnchantCondition.newEntry(
 
 ItemEnchantCondition.newEntry(
     data : {
+        name : 'On Block Attack',
+        description : 'After the wielder blocks an attack',                
+        isState : false,
+        onTurnCheck ::(wielder, item, battle) {
+            return wielder.flags.has(flag:StateFlags.BLOCKED_ATTACK);
+        }                                
+    }
+)   
+
+
+ItemEnchantCondition.newEntry(
+    data : {
         name : 'End Of Turn',
         description : 'At the end of the wielder\'s turn',                
         isState : false,

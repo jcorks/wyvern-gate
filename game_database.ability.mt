@@ -20,11 +20,12 @@
 
 @TARGET_MODE = {
     ONE     : 0,    
-    ALLALLY : 1,    
-    RANDOM  : 2,    
-    NONE    : 3,
-    ALLENEMY: 4,
-    ALL     : 5
+    ONEPART : 1,
+    ALLALLY : 2,    
+    RANDOM  : 3,    
+    NONE    : 4,
+    ALLENEMY: 5,
+    ALL     : 6
 }
 
 @USAGE_HINT = {
@@ -48,18 +49,19 @@
 @:random = import(module:'game_singleton.random.mt');
 @:StateFlags = import(module:'game_class.stateflags.mt');
 @:g = import(module:'game_function.g.mt');
-
+@:Entity = import(module:'game_class.entity.mt');
 Ability.newEntry(
     data: {
         name: 'Attack',
-        targetMode : TARGET_MODE.ONE,
+        targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's ATK.",
         durationTurns: 0,
         hpCost : 0,
         apCost : 0,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' attacks ' + targets[0].name + '!'
             );
@@ -68,12 +70,18 @@ Ability.newEntry(
                 target:targets[0],
                 amount:user.stats.ATK * (0.5),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart:targetParts[0],
+                targetDefendPart:targetDefendParts[0]
             );                        
                                     
         }
     }
 )
+
+
+
+
 Ability.newEntry(
     data: {
         name: 'Headhunter',
@@ -84,7 +92,8 @@ Ability.newEntry(
         apCost : 3,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' attempts to defeat ' + targets[0].name + ' in one attack!'
             );
@@ -93,7 +102,9 @@ Ability.newEntry(
                 target:targets[0],
                 amount:1,
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: Entity.DAMAGE_TARGET.HEAD,
+                targetDefendPart:targetDefendParts[0]
             ) == true)
                 if (random.try(percentSuccess:5)) ::<= {
                     windowEvent.queueMessage(
@@ -121,7 +132,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.DONTUSE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' closes their eyes, lifts their arms, and prays to the Wyverns for guidance!'
             );
@@ -226,14 +238,15 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Precise Strike',
-        targetMode : TARGET_MODE.ONE,
+        targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's ATK and DEX.",
         durationTurns: 0,
         hpCost : 0,
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' takes aim at ' + targets[0].name + '!'
             );
@@ -242,7 +255,9 @@ Ability.newEntry(
                 target:targets[0],
                 amount:user.stats.ATK * (0.2) + user.stats.DEX * (0.5),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart:targetParts[0],
+                targetDefendPart:targetDefendParts[0]
             );                        
                                     
         }
@@ -253,14 +268,15 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Tranquilizer',
-        targetMode : TARGET_MODE.ONE,
+        targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's DEX with a 45% chance to paralyze.",
         durationTurns: 0,
         hpCost : 0,
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' attempts to tranquilize ' + targets[0].name + '!'
             );
@@ -269,7 +285,9 @@ Ability.newEntry(
                 target:targets[0],
                 amount:user.stats.DEX * (0.5),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart:targetParts[0],
+                targetDefendPart:targetDefendParts[0]
             ) == true)                      
                 if (Number.random() < 0.45)
                     targets[0].addEffect(from:user, name:'Paralyzed', durationTurns:2);
@@ -291,7 +309,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' coordinates with others!'
             );
@@ -312,14 +331,15 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Follow Up',
-        targetMode : TARGET_MODE.ONE,
+        targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's ATK, doing 150% more damage if the target was hit since their last turn.",
         durationTurns: 0,
         hpCost : 0,
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' attacks ' + targets[0].name + ' as a follow-up!'
             );
@@ -329,14 +349,18 @@ Ability.newEntry(
                     target:targets[0],
                     amount:user.stats.ATK * (1.25),
                     damageType : Damage.TYPE.PHYS,
-                    damageClass: Damage.CLASS.HP
+                    damageClass: Damage.CLASS.HP,
+                    targetPart:targetParts[0],
+                    targetDefendPart:targetDefendParts[0]
                 )
             else
                 user.attack(
                     target:targets[0],
                     amount:user.stats.ATK * (0.5),
                     damageType : Damage.TYPE.PHYS,
-                    damageClass: Damage.CLASS.HP
+                    damageClass: Damage.CLASS.HP,
+                    targetPart : targetParts[0],
+                    targetDefendPart:targetDefendParts[0]
                 );
         }
     }
@@ -354,21 +378,28 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' attacks twice!'
             );
+            @target = random.pickArrayItem(list:user.enemies);
             user.attack(
-                target:random.pickArrayItem(list:user.enemies),
+                target,
                 amount:user.stats.ATK * (0.4),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: targetParts[user.enemies->findIndex(value:target)],
+                targetDefendPart:targetDefendParts[user.enemies->findIndex(value:target)]
             );
+            target = random.pickArrayItem(list:user.enemies);
             user.attack(
-                target:random.pickArrayItem(list:user.enemies),
+                target,
                 amount:user.stats.ATK * (0.4),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart : targetParts[user.enemies->findIndex(value:target)],
+                targetDefendPart:targetDefendParts[user.enemies->findIndex(value:target)]
             );
 
         }
@@ -387,29 +418,38 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' attacks three times!'
             );
+            @target = random.pickArrayItem(list:user.enemies);
             user.attack(
-                target:random.pickArrayItem(list:user.enemies),
+                target,
                 amount:user.stats.ATK * (0.4),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: targetParts[user.enemies->findIndex(value:target)],
+                targetDefendPart:targetDefendParts[user.enemies->findIndex(value:target)]
             );
+            target = random.pickArrayItem(list:user.enemies);
             user.attack(
-                target:random.pickArrayItem(list:user.enemies),
+                target,
                 amount:user.stats.ATK * (0.4),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: targetParts[user.enemies->findIndex(value:target)],
+                targetDefendPart:targetDefendParts[user.enemies->findIndex(value:target)]
             );
+            target = random.pickArrayItem(list:user.enemies);
             user.attack(
-                target:random.pickArrayItem(list:user.enemies),
+                target,
                 amount:user.stats.ATK * (0.4),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: targetParts[user.enemies->findIndex(value:target)],
+                targetDefendPart:targetDefendParts[user.enemies->findIndex(value:target)]
             );
-
         }
     }
 )
@@ -425,7 +465,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' focuses their perception, increasing their ATK temporarily!');
             user.addEffect(from:user, name: 'Focus Perception', durationTurns: 5);                        
         }
@@ -442,7 +483,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' cheers for the party!');
             foreach(user.allies)::(index, ally) {
                 ally.addEffect(from:user, name: 'Cheered', durationTurns: 5);                        
@@ -463,7 +505,8 @@ Ability.newEntry(
         apCost : 1, 
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:world = import(module:'game_singleton.world.mt');
             {:::} {
                 forever ::{
@@ -488,7 +531,8 @@ Ability.newEntry(
         apCost : 1, 
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:world = import(module:'game_singleton.world.mt');
             {:::} {
                 forever ::{
@@ -507,14 +551,15 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Moonbeam',
-        targetMode : TARGET_MODE.ONE,
+        targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target with Fire based on the user's INT. If night time, the damage is boosted.",
         durationTurns: 0,
         hpCost : 0,
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' fires a glowing beam of moonlight!'
             );      
@@ -531,7 +576,9 @@ Ability.newEntry(
                 target: targets[0],
                 amount:user.stats.INT * (if (world.time >= world.TIME.EVENING) 1.4 else 0.8),
                 damageType : Damage.TYPE.FIRE,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: targetParts[0],
+                targetDefendPart:targetDefendParts[0]
             );
 
         }
@@ -542,14 +589,15 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Sunbeam',
-        targetMode : TARGET_MODE.ONE,
+        targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target with Fire based on the user's INT. If day time, the damage is boosted.",
         durationTurns: 0,
         hpCost : 0,
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' fires a glowing beam of sunlight!'
             );      
@@ -566,7 +614,9 @@ Ability.newEntry(
                 target: targets[0],
                 amount:user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.4 else 0.8),
                 damageType : Damage.TYPE.FIRE,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart : targetParts[0],
+                targetDefendPart:targetDefendParts[0]
             );
 
         }
@@ -584,7 +634,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' lets loose a burst of sunlight!'
             );      
@@ -621,7 +672,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Night Veil on ' + targets[0].name + '!'
             );
@@ -654,7 +706,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Dayshroud on ' + targets[0].name + '!'
             );
@@ -686,7 +739,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Call of the Night on ' + targets[0].name + '!'
             );
@@ -720,7 +774,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Lunacy on ' + targets[0].name + '!'
             );
@@ -752,7 +807,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Moonsong on ' + targets[0].name + '!'
             );
@@ -784,7 +840,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Sol Attunement on ' + targets[0].name + '!'
             );
@@ -816,7 +873,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' tries to ensnare ' + targets[0].name + '!'
             );
@@ -826,7 +884,9 @@ Ability.newEntry(
                 target:targets[0],
                 amount:user.stats.ATK * (0.3),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: Entity.DAMAGE_TARGET.BODY,
+                targetDefendPart:targetDefendParts[0]
             ) == true)                        
                 if (random.try(percentSuccess:80)) ::<= {
                     targets[0].addEffect(from:user, name: 'Ensnared', durationTurns: 3);                        
@@ -848,7 +908,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' makes an eerie call!'
             );
@@ -886,7 +947,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.DONTUSE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' attempts to tame ' + targets[0].name + '!'
             );
@@ -931,7 +993,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' tries to sweep everyone\'s legs!'
             );
@@ -940,7 +1003,9 @@ Ability.newEntry(
                     target:enemy,
                     amount:user.stats.ATK * (0.3),
                     damageType : Damage.TYPE.PHYS,
-                    damageClass: Damage.CLASS.HP
+                    damageClass: Damage.CLASS.HP,
+                    targetPart:Entity.DAMAGE_TARGET.LIMBS,
+                    targetDefendPart:targetDefendParts[i]
                 ) == true)
                     if (Number.random() > 0.5)
                         enemy.addEffect(from:user, name: 'Stunned', durationTurns: 1);    
@@ -960,7 +1025,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' does a big swing!'
             );      
@@ -969,7 +1035,9 @@ Ability.newEntry(
                     target,
                     amount:user.stats.ATK * (0.35),
                     damageType : Damage.TYPE.PHYS,
-                    damageClass: Damage.CLASS.HP
+                    damageClass: Damage.CLASS.HP,
+                    targetPart: Entity.DAMAGE_TARGET.BODY,
+                    targetDefendPart:targetDefendParts[index]
                 );
             }
         }
@@ -988,7 +1056,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' bashes ' + targets[0].name + '!'
             );
@@ -996,7 +1065,9 @@ Ability.newEntry(
                 target:targets[0],
                 amount:user.stats.ATK * (0.7),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: Entity.DAMAGE_TARGET.BODY,
+                targetDefendPart:targetDefendParts[0]
             );
         }
     }
@@ -1005,14 +1076,15 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Throw Item',
-        targetMode : TARGET_MODE.ONE,
+        targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target by throwing an item.",
         durationTurns: 0,
         hpCost : 0,
         apCost : 1,
+        canBlock : true,
         usageHintAI : USAGE_HINT.DONTUSE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:pickItem = import(module:'game_function.pickitem.mt');
             @:world = import(module:'game_singleton.world.mt');
             
@@ -1027,7 +1099,9 @@ Ability.newEntry(
                 from: user,
                 amount:user.stats.ATK * (0.7) * (item.base.weight * 4),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: targetParts[0],
+                targetDefendPart:targetDefendParts[0]
             );
         }
     }
@@ -1045,7 +1119,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' tries to stun ' + targets[0].name + '!'
             );
@@ -1053,7 +1128,9 @@ Ability.newEntry(
                 target:targets[0],
                 amount:user.stats.ATK * (0.3),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: Entity.DAMAGE_TARGET.BODY,
+                targetDefendPart:targetDefendParts[0]
             ) == true)                    
                 if (Number.random() > 0.5)
                     targets[0].addEffect(from:user, name: 'Stunned', durationTurns: 1);                        
@@ -1065,14 +1142,15 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Sheer Cold',
-        targetMode : TARGET_MODE.ONE,
+        targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's strength with a chance to stun.",
         durationTurns: 0,
         hpCost : 0,
         apCost : 3,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: 'A cold air emminates from ' + user.name + '!'
             );
@@ -1080,7 +1158,9 @@ Ability.newEntry(
                 target:targets[0],
                 amount:user.stats.ATK * (0.4),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: targetParts[0],
+                targetDefendPart:targetDefendParts[0]
             ) == true)                    
                 if (Number.random() < 0.9)
                     targets[0].addEffect(from:user, name: 'Frozen', durationTurns: 1);                        
@@ -1100,7 +1180,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' reads ' + targets[0].name + '\'s mind!'
             );
@@ -1137,7 +1218,8 @@ Ability.newEntry(
         apCost : 3,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Flight on ' + targets[0].name + '!'
             );
@@ -1156,7 +1238,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' tries to grapple ' + targets[0].name + '!'
             );
@@ -1173,27 +1256,38 @@ Ability.newEntry(
 
 Ability.newEntry(
     data: {
-        name: 'Swipe Kick',
-        targetMode : TARGET_MODE.ONE,
-        description: "Damages a target based on the user's strength with a possibility to stun",
+        name: 'Combo Strike',
+        targetMode : TARGET_MODE.ONEPART,
+        description: "Damages the same target twice at the same location.",
         durationTurns: 0,
         hpCost : 0,
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
-                text: user.name + ' does a swipe kick on ' + targets[0].name + '!'
+                text: user.name + ' does a combo strike on ' + targets[0].name + '!'
             );
             user.attack(
                 target: targets[0],
-                amount:user.stats.ATK * (0.5),
+                amount:user.stats.ATK * (0.35),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: targetParts[0],
+                targetDefendPart:targetDefendParts[0]
             );
+
+            user.attack(
+                target: targets[0],
+                amount:user.stats.ATK * (0.35),
+                damageType : Damage.TYPE.PHYS,
+                damageClass: Damage.CLASS.HP,
+                targetPart: targetParts[0],
+                targetDefendPart:targetDefendParts[0]
+            );
+
             
-            if (Number.random() > 0.2)
-                targets[0].addEffect(from:user, name: 'Stunned', durationTurns: 1);                        
                 
         }
     }
@@ -1209,7 +1303,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Poison Rune on ' + targets[0].name + '!'
             );
@@ -1227,7 +1322,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' releases all the runes on ' + targets[0].name + '!'
             );
@@ -1282,7 +1378,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Destruction Rune on ' + targets[0].name + '!'
             );
@@ -1302,7 +1399,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.HEAL,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Regeneration Rune on ' + targets[0].name + '!'
             );
@@ -1320,7 +1418,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.HEAL,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Shield Rune on ' + targets[0].name + '!'
             );
@@ -1338,7 +1437,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.HEAL,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Cure Rune on ' + targets[0].name + '!'
             );
@@ -1357,7 +1457,8 @@ Ability.newEntry(
         apCost : 3,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Multiply Runes on ' + targets[0].name + '!'
             );
@@ -1386,22 +1487,25 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Poison Attack',
-        targetMode : TARGET_MODE.ONE,
+        targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's strength with a poisoned weapon.",
         durationTurns: 0,
         hpCost : 0,
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
-                text: user.name + ' attacks ' + targets[0].name + ' with a poisoned weapon!'
+                text: user.name + ' prepares a poison attack against ' + targets[0].name + '!'
             );
             user.attack(
                 target: targets[0],
                 amount:user.stats.ATK * (0.3),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: targetParts[0],
+                targetDefendPart:targetDefendParts[0]
             );
             targets[0].addEffect(from:user, name: 'Poisoned', durationTurns: 4);                        
         }
@@ -1411,14 +1515,15 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Petrify',
-        targetMode : TARGET_MODE.ONE,
+        targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's strength with a special petrification poison.",
         durationTurns: 0,
         hpCost : 0,
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' attacks ' + targets[0].name + ' with a poisoned weapon!'
             );
@@ -1426,7 +1531,9 @@ Ability.newEntry(
                 target: targets[0],
                 amount:user.stats.ATK * (0.3),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: targetParts[0],
+                targetDefendPart:targetDefendParts[0]
             );
             targets[0].addEffect(from:user, name: 'Petrified', durationTurns: 2);                        
         }
@@ -1440,9 +1547,10 @@ Ability.newEntry(
         durationTurns: 0,
         hpCost : 0,
         apCost : 1,
+        canBlock : false,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : true,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' activates the tripwire right under ' + targets[0].name + '!'
             );
@@ -1462,7 +1570,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : true,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' activates the tripwire explosive right under ' + targets[0].name + '!'
             );
@@ -1491,7 +1600,8 @@ Ability.newEntry(
         apCost : 3,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : true,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' activates a floor trap, revealing a spike pit under the enemies!'
             );
@@ -1516,14 +1626,15 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Stab',
-        targetMode : TARGET_MODE.ONE,
+        targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's strength and causes bleeding.",
         durationTurns: 0,
         hpCost : 0,
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' attacks ' + targets[0].name + '!'
             );
@@ -1531,7 +1642,9 @@ Ability.newEntry(
                 target: targets[0],
                 amount:user.stats.ATK * (0.3),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: targetParts[0],
+                targetDefendPart:targetDefendParts[0]
             ) == true)
                 targets[0].addEffect(from:user, name: 'Bleeding', durationTurns: 4);                        
         }
@@ -1548,7 +1661,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.HEAL,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' does first aid on ' + targets[0].name + '!'
             );
@@ -1568,7 +1682,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.HEAL,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' mends ' + targets[0].name + '!'
             );
@@ -1587,7 +1702,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.HEAL,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' gives a snack to ' + targets[0].name + '!'
             );
@@ -1631,7 +1747,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:world = import(module:'game_singleton.world.mt');
 
             windowEvent.queueMessage(
@@ -1690,7 +1807,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' summons an Ice Elemental!'
             );
@@ -1746,7 +1864,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' summons a Thunder Spawn!'
             );
@@ -1801,7 +1920,8 @@ Ability.newEntry(
         apCost : 3,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' summons a Guiding Light!'
             );
@@ -1856,7 +1976,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Unsummon on ' + targets[0].name + '!'
             );
@@ -1894,7 +2015,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Fire on ' + targets[0].name + '!'
             );
@@ -1919,7 +2041,8 @@ Ability.newEntry(
         apCost : 3,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' generates a great amount of heat!'
             );
@@ -1951,7 +2074,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Flare on ' + targets[0].name + '!'
             );
@@ -1976,7 +2100,8 @@ Ability.newEntry(
         apCost : 3,
         usageHintAI : USAGE_HINT.OFFENSIVE,	
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Dematerialize on ' + targets[0].name + '!'
             );
@@ -2011,7 +2136,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Ice!'
             );
@@ -2037,7 +2163,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Frozen Flame!'
             );
@@ -2066,7 +2193,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Telekinesis!'
             );
@@ -2092,7 +2220,8 @@ Ability.newEntry(
         apCost : 3,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Explosion!'
             );
@@ -2118,11 +2247,13 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Flash!'
             );
             foreach(user.enemies)::(index, enemy) {
+                when(enemy.isIncapacitated()) empty;
                 if (random.flipCoin())
                     enemy.addEffect(from:user, name: 'Blind', durationTurns: 5)
                 else 
@@ -2144,7 +2275,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Thunder!'
             );
@@ -2172,7 +2304,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' wildly swings!'
             );
@@ -2182,7 +2315,9 @@ Ability.newEntry(
                     target,
                     amount:user.stats.ATK * (0.9),
                     damageType : Damage.TYPE.PHYS,
-                    damageClass: Damage.CLASS.HP
+                    damageClass: Damage.CLASS.HP,
+                    targetPart: Entity.normalizedDamageTarget(),
+                    targetDefendPart:targetDefendParts[user.enemies->findIndex(value:target)]
                 );
             
             }
@@ -2200,7 +2335,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.HEAL,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Cure on ' + targets[0].name + '!'
             );
@@ -2221,7 +2357,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Cleanse on ' + targets[0].name + '!'
             );
@@ -2251,7 +2388,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.DEBUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             foreach(targets)::(i, target) {
                 windowEvent.queueMessage(
                     text: user.name + ' casts Magic Mist on ' + target.name + '!'
@@ -2273,7 +2411,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:Effect = import(module:'game_database.effect.mt');
             windowEvent.queueMessage(
                 text: user.name + ' casts Antidote on ' + targets[0].name + '!'
@@ -2298,7 +2437,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.HEAL,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Greater Cure on ' + targets[0].name + '!'
             );
@@ -2318,7 +2458,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Protect on ' + targets[0].name + '!'
             );
@@ -2338,7 +2479,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' challenges ' + targets[0].name + ' to a duel!'
             );
@@ -2358,7 +2500,8 @@ Ability.newEntry(
         apCost : 3,
         usageHintAI : USAGE_HINT.HEAL,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Grace on ' + targets[0].name + '!'
             );
@@ -2378,7 +2521,8 @@ Ability.newEntry(
         apCost : 3,
         usageHintAI : USAGE_HINT.HEAL,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Pheonix Soul on ' + targets[0].name + '!'
             );
@@ -2404,7 +2548,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Protect All!'
             );
@@ -2425,7 +2570,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.HEAL,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' meditates!'
             );
@@ -2445,7 +2591,8 @@ Ability.newEntry(
         apCost : 5,
         usageHintAI : USAGE_HINT.HEAL,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' casts Soothe on ' + targets[0].name + '!'
             );
@@ -2466,7 +2613,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.DEBUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:world = import(module:'game_singleton.world.mt');
 
             windowEvent.queueMessage(
@@ -2507,7 +2655,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI : USAGE_HINT.DEBUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             user.addEffect(from:user, name: 'Counter', durationTurns: 3);
         }
     }
@@ -2525,7 +2674,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.DEBUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:world = import(module:'game_singleton.world.mt');
             @:Entity = import(module:'game_class.entity.mt');
             windowEvent.queueMessage(
@@ -2568,7 +2718,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.DEBUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : true,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
                 text: user.name + ' mugs ' + targets[0].name + '!'
             );
@@ -2576,7 +2727,9 @@ Ability.newEntry(
                 target:targets[0],
                 amount:user.stats.ATK * (0.5),
                 damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                targetPart: Entity.DAMAGE_TARGET.BODY,
+                targetDefendPart:targetDefendParts[0]
             );
                 
             // NICE
@@ -2610,7 +2763,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             targets[0].addEffect(from:user, name: 'Sneaked', durationTurns: 2);
 
         }
@@ -2627,7 +2781,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             targets[0].addEffect(from:user, name: 'Mind Focused', durationTurns: 5);
         }
     }
@@ -2646,7 +2801,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             user.addEffect(from:user, name: 'Defend', durationTurns:1);
             user.flags.add(flag:StateFlags.DEFENDED);
         }
@@ -2663,7 +2819,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             user.addEffect(from:user, name: 'Guard', durationTurns:1);
         }
     }
@@ -2680,7 +2837,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             user.addEffect(from:user, name: 'Proceed with Caution', durationTurns:10);
         }
     }
@@ -2696,7 +2854,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             user.addEffect(from:user, name: 'Retaliate', durationTurns:10);
         }
     }
@@ -2712,7 +2871,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
@@ -2731,7 +2891,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
@@ -2750,7 +2911,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
@@ -2769,7 +2931,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
@@ -2788,7 +2951,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
@@ -2807,7 +2971,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
@@ -2827,7 +2992,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
@@ -2846,7 +3012,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
@@ -2865,7 +3032,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:'' + user.name + ' waits.');
         }
     }
@@ -2882,9 +3050,10 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI: USAGE_HINT.DEBUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:targets[0].name + ' was covered in poisonroot seeds!');
-            targets[0].addEffect(from:user, name:'Poisonroot Growing', durationTurns:4);                            
+            targets[0].addEffect(from:user, name:'Poisonroot Growing', durationTurns:2);                            
         }
     }
 )
@@ -2899,9 +3068,10 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI: USAGE_HINT.DEBUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:targets[0].name + ' was covered in triproot seeds!');
-            targets[0].addEffect(from:user, name:'Triproot Growing', durationTurns:4);                            
+            targets[0].addEffect(from:user, name:'Triproot Growing', durationTurns:2);                            
         }
     }
 )
@@ -2916,9 +3086,10 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI: USAGE_HINT.HEAL,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:targets[0].name + ' was covered in triproot seeds!');
-            targets[0].addEffect(from:user, name:'Healroot Growing', durationTurns:4);                            
+            targets[0].addEffect(from:user, name:'Healroot Growing', durationTurns:2);                            
         }
     }
 )
@@ -2934,7 +3105,8 @@ Ability.newEntry(
         apCost : 3,
         usageHintAI: USAGE_HINT.DONTUSE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:effects = targets[0].effects;
             @:toRemove = [];
             foreach(effects)::(i, effect) {
@@ -2963,7 +3135,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI: USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' becomes shrouded in flame!');
             user.addEffect(from:user, name:'Burning', durationTurns:20);                            
         }
@@ -2981,7 +3154,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI: USAGE_HINT.DEBUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:targets[0].name + ' becomes weak to elemental damage!');
             user.addEffect(from:user, name:'Elemental Tag', durationTurns:20);                            
         }
@@ -2999,7 +3173,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI: USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' becomes shielded to elemental damage!');
             user.addEffect(from:user, name:'Elemental Shield', durationTurns:20);                            
         }
@@ -3018,7 +3193,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI: USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' becomes shrouded in an icy wind!');
             user.addEffect(from:user, name:'Icy', durationTurns:20);                            
         }
@@ -3035,7 +3211,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI: USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' becomes shrouded in electric arcs!');
             user.addEffect(from:user, name:'Shock', durationTurns:20);                            
         }
@@ -3052,7 +3229,8 @@ Ability.newEntry(
         apCost : 3,
         usageHintAI: USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' becomes shrouded in light');
             user.addEffect(from:user, name:'Burning', durationTurns:20);                            
             user.addEffect(from:user, name:'Icy',     durationTurns:20);                            
@@ -3072,7 +3250,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI: USAGE_HINT.DONTUSE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:item = extraData[0];
             foreach(item.base.useEffects)::(index, effect) {    
                 foreach(targets)::(t, target) {
@@ -3093,7 +3272,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI: USAGE_HINT.DONTUSE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @item = extraData[0];
             foreach(item.base.useEffects)::(index, effect) {    
                 foreach(targets)::(t, target) {
@@ -3122,7 +3302,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI: USAGE_HINT.DONTUSE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:item = extraData[0];
             user.equip(
                 item, 
@@ -3143,7 +3324,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI: USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             targets[0].addEffect(
                 from:user, name: 'Defend Other', durationTurns: 4 
             );
@@ -3161,7 +3343,8 @@ Ability.newEntry(
         apCost : 2,
         usageHintAI: USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             targets[0].addEffect(
                 from:user, name: 'Perfect Guard', durationTurns: 3 
             );
@@ -3179,7 +3362,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI: USAGE_HINT.BUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:Entity = import(module:'game_class.entity.mt');
             when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).base.name == 'None')
                 windowEvent.queueMessage(text:targets[0].name + ' has no weapon to sharpen!');                    
@@ -3205,7 +3389,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI: USAGE_HINT.DEBUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:Entity = import(module:'game_class.entity.mt');
             when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.ARMOR).base.name == 'None')
                 windowEvent.queueMessage(text:targets[0] + ' has no armor to weaken!');                    
@@ -3231,7 +3416,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI: USAGE_HINT.DEBUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:Entity = import(module:'game_class.entity.mt');
             when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).base.name == 'None')
                 windowEvent.queueMessage(text:targets[0] + ' has no weapon to dull!');                    
@@ -3257,7 +3443,8 @@ Ability.newEntry(
         apCost : 0,
         usageHintAI: USAGE_HINT.DEBUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:Entity = import(module:'game_class.entity.mt');
             when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.ARMOR).base.name == 'None')
                 windowEvent.queueMessage(text:targets[0] + ' has no armor to strengthen!');                    
@@ -3283,7 +3470,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI: USAGE_HINT.DEBUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' tries to convince ' + targets[0].name + ' to wait!');
             
             when(Number.random() < 0.5)
@@ -3308,7 +3496,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.DONTUSE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:world = import(module:'game_singleton.world.mt');
             @inventory;
             if (world.party.isMember(entity:user)) ::<= {
@@ -3345,7 +3534,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.DONTUSE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:world = import(module:'game_singleton.world.mt');
             @inventory;
             if (world.party.isMember(entity:user)) ::<= {
@@ -3387,7 +3577,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.DONTUSE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:world = import(module:'game_singleton.world.mt');
             @inventory;
             if (world.party.isMember(entity:user)) ::<= {
@@ -3429,7 +3620,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.DONTUSE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:world = import(module:'game_singleton.world.mt');
             @inventory;
             if (world.party.isMember(entity:user)) ::<= {
@@ -3470,7 +3662,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.DONTUSE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:world = import(module:'game_singleton.world.mt');
             @inventory;
             if (world.party.isMember(entity:user)) ::<= {
@@ -3512,7 +3705,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI : USAGE_HINT.DONTUSE,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:world = import(module:'game_singleton.world.mt');
             @inventory;
             if (world.party.isMember(entity:user)) ::<= {
@@ -3554,7 +3748,8 @@ Ability.newEntry(
         apCost : 1,
         usageHintAI: USAGE_HINT.DEBUFF,
         oncePerBattle : false,
-        onAction: ::(user, targets, turnIndex, extraData) {
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             when (user.allies->any(condition:::(value) <- value == targets[0]))
                 windowEvent.queueMessage(text: "Are you... trying to bribe me? we're... we're on the same team..");
                 
@@ -3607,6 +3802,39 @@ Ability.newEntry(
         }
     }
 )
+
+/* NOT USED ANYMORE */
+/////////
+    Ability.newEntry(
+        data: {
+            name: 'Swipe Kick',
+            targetMode : TARGET_MODE.ONEPART,
+            description: "Damages a target based on the user's ATK.",
+            durationTurns: 0,
+            hpCost : 0,
+            apCost : 0,
+            usageHintAI : USAGE_HINT.OFFENSIVE,
+            oncePerBattle : false,
+            canBlock : true,
+            onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+                windowEvent.queueMessage(
+                    text: user.name + ' attacks ' + targets[0].name + '!'
+                );
+                
+                user.attack(
+                    target:targets[0],
+                    amount:user.stats.ATK * (0.5),
+                    damageType : Damage.TYPE.PHYS,
+                    damageClass: Damage.CLASS.HP,
+                    targetPart:targetParts[0],
+                    targetDefendPart:targetDefendParts[0]
+                );                        
+                                        
+            }
+        }
+    )
+///////////
+
 };
 
 @:Ability = class(
@@ -3628,6 +3856,7 @@ Ability.newEntry(
         durationTurns : Number, // multiduration turns supercede the choice of action
         apCost : Number,
         hpCost : Number,
+        canBlock : Boolean, // whether the targets get a chance to block
 
         onAction : Function
     },

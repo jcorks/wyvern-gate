@@ -49,9 +49,11 @@ return {
                         
                         @:ability = user.abilitiesAvailable[choice-1];
                         
+                        @:Entity = import(module:'game_class.entity.mt');
                         
                         match(ability.targetMode) {
-                          (Ability.TARGET_MODE.ONE): ::<={
+                          (Ability.TARGET_MODE.ONE,
+                           Ability.TARGET_MODE.ONEPART): ::<={
                             @:all = [];
                             foreach(allies)::(index, ally) {
                                 all->push(value:ally);
@@ -66,6 +68,60 @@ return {
                                 allNames->push(value:person.name);
                             }
                           
+                            @:chooseOnePart ::(onDone) {
+                                @:text = 
+                                [
+                                    [
+                                        'The attack aims for the head.',
+                                        'While fairly difficult to hit, when it lands it will',
+                                        'almost definitely cause a critical hit.'
+                                    ],
+                                    [
+                                        'The attack aims for the body.',
+                                        'While easiest to hit, when it lands it will',
+                                        'cause additional general damage.'
+                                    ],
+                                    [
+                                        'The attack aims for the limbs.',
+                                        'While slightly difficult hit, when it lands it will',
+                                        'has a high chance to stun the target for a turn.'
+                                    ]
+                                ];
+                                
+                                @hovered = 0;
+                                windowEvent.queueChoices(
+                                    prompt: 'Use where?',
+                                    choices : [
+                                        'Aim for the head',
+                                        'Aim for the body',
+                                        'Aim for the limbs',
+                                    ],
+                                    canCancel: true,
+                                    topWeight: 0.2,
+                                    leftWeight: 0.5,
+                                    onHover ::(choice) {
+                                        hovered = choice-1;
+                                    },
+                                    renderable : {
+                                        render :: {
+                                            canvas.renderTextFrameGeneral(
+                                                topWeight: 0.7,
+                                                leftWeight: 0.5,
+                                                lines : text[hovered]
+                                            );
+                                        }
+                                    },
+                                    onChoice::(choice) {
+                                        onDone(
+                                            which:match(choice) {
+                                              (1): Entity.DAMAGE_TARGET.HEAD,
+                                              (2): Entity.DAMAGE_TARGET.BODY,
+                                              (3): Entity.DAMAGE_TARGET.LIMBS
+                                            }
+                                        );
+                                    }
+                                );
+                            }
                           
                             windowEvent.queueChoices(
                               leftWeight: 1,
@@ -77,14 +133,27 @@ return {
                               onChoice::(choice) {
                                 when(choice == 0) empty;
                                 
-                                commitAction(action:
-                                    BattleAction.new(
-                                        ability: ability,
-                                        targets: [all[choice-1]],
-                                        extraData: {}
-                                    )
-                                );
-                              
+                                if (ability.targetMode == Ability.TARGET_MODE.ONEPART) ::<= {
+                                    chooseOnePart(onDone::(which){
+                                        commitAction(action:
+                                            BattleAction.new(
+                                                ability: ability,
+                                                targets: [all[choice-1]],
+                                                targetParts: [which],
+                                                extraData: {}
+                                            )                                    
+                                        )
+                                    });
+                                } else ::<= {
+                                    commitAction(action:
+                                        BattleAction.new(
+                                            ability: ability,
+                                            targets: [all[choice-1]],
+                                            targetParts: [Entity.normalizedDamageTarget()],
+                                            extraData: {}
+                                        )
+                                    );
+                                }
                               }
                             );
                             
@@ -94,6 +163,7 @@ return {
                                 BattleAction.new(
                                     ability: ability,
                                     targets: allies,
+                                    targetParts: [...allies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                                    
                                     extraData: {}
                                 )
                             );                          
@@ -103,6 +173,7 @@ return {
                                 BattleAction.new(
                                     ability: ability,
                                     targets: enemies,
+                                    targetParts: [...enemies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                                    
                                     extraData: {}                                
                                 )
                             );
@@ -113,6 +184,7 @@ return {
                                 BattleAction.new(
                                     ability: ability,
                                     targets: [...allies, ...enemies],
+                                    targetParts: [...allies, ...enemies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                                    
                                     extraData: {}                                
                                 )
                             );
@@ -125,6 +197,7 @@ return {
                                 BattleAction.new(
                                     ability: ability,
                                     targets: [],
+                                    targetParts : [],
                                     extraData: {}                                
                                 )
                             );
@@ -319,18 +392,102 @@ return {
             keepInteractionMenu : true,
             filter::(island, landmark) <- landmark == empty,
             onSelect::(island, landmark) {
-                windowEvent.queueMessage(speaker: 'About ' + island.name, text: island.description)
-            }
-        ),
-        
-        lookAround : InteractionMenuEntry.new(
-            displayName : 'Look around',
-            keepInteractionMenu : true,
-            filter::(island, landmark) <- landmark == empty,
-            onSelect::(island, landmark) {
-                island.incrementTime();
+                @:choices = [
+                    ::{
+                        windowEvent.queueMessage(speaker: 'About ' + island.name, text: island.description)                    
+                    },
+                    
+                    ::{
+                        island.incrementTime();
+                        @:world = import(module:'game_singleton.world.mt');
+                        
+                        when(random.try(percentSuccess:80))
+                            windowEvent.queueMessage(text:'You look around, but fail to find anything of note.');     
+    
+
+
+                        @:openChest = ::(opener){
+
+                            windowEvent.queueMessage(text:'The party opens the chest...'); 
+                            @:Damage = import(module:'game_class.damage.mt');
+                            
+                            when(Number.random() < 0.5) ::<= {
+                                windowEvent.queueMessage(text:'A trap is triggered, and a volley of arrows springs form the chest!'); 
+                                if (Number.random() < 0.5) ::<= {
+                                    windowEvent.queueMessage(text:opener.name + ' narrowly dodges the trap.');                         
+                                } else ::<= {
+                                    opener.damage(
+                                        from: opener,
+                                        damage: Damage.new(
+                                            amount:opener.stats.HP * (0.7),
+                                            damageType : Damage.TYPE.PHYS,
+                                            damageClass: Damage.CLASS.HP
+                                        ),
+                                        dodgeable: false
+                                    );
+                                }
+                            } 
+                            
+                            
+                            @:itemCount = (2+Number.random()*3)->floor;
+                            
+                            windowEvent.queueMessage(text:'The chest contained ' + itemCount + ' items!'); 
+                            
+                        
+                            when(itemCount > party.inventory.slotsLeft) ::<= {
+                                windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
+                            }                
+                            for(0, itemCount)::(index) {
+                                @:item = Item.new(
+                                    base:Item.database.getRandomFiltered(
+                                        filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= island.tier
+                                    ),
+                                    rngEnchantHint:true
+                                );
+                                @message = 'The party found ' + correctA(word:item.name);
+                                windowEvent.queueMessage(text: message);
+
+
+                                party.inventory.add(item);
                                 
-                windowEvent.queueMessage(text:'You look around, but fail to find anything of note.');                          
+                            }
+
+                        }
+
+
+                        
+                        @:party = world.party;
+                        windowEvent.queueMessage(text:'What\'s this?');
+                        windowEvent.queueMessage(text:'The party trips over a hidden chest!');
+                        windowEvent.queueAskBoolean(
+                            prompt: 'Open the chest?',
+                            onChoice ::(which) {
+                                when(which == false) empty;
+                                                    
+                                windowEvent.queueChoices(
+                                    prompt: 'Who opens up the chest?',
+                                    choices : [...party.members]->map(to:::(value) <- value.name),
+                                    canCancel: false,
+                                    onChoice::(choice) {
+                                        openChest(opener:party.members[choice-1]);
+                                    }
+                                );
+                            }
+                        );
+                    }
+                ]
+                windowEvent.queueChoices(
+                    choices: [
+                        'Island',
+                        'Immediate area...'
+                    ],
+                    keep:true,
+                    canCancel:true,
+                    onChoice::(choice) {
+                        choices[choice-1]();
+                    }
+                );
+                
             }
         ),
         

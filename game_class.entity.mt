@@ -50,8 +50,8 @@
     }
             
     stats.add(stats:StatSet.new(
-        HP  : 1+(stat(name:'HP')),
-        AP  : 2+(stat(name:'AP')),
+        HP  : (if(random.flipCoin()) 1 else 0) + (stat(name:'HP')),
+        AP  : (if(random.flipCoin()) 2 else 0) + (stat(name:'AP')),
         ATK : stat(name:'ATK'),
         INT : stat(name:'INT'),
         DEF : stat(name:'DEF'),
@@ -93,13 +93,40 @@
     TRINKET : 5
 }
 
+@:DAMAGE_TARGET = {
+    HEAD : 1,
+    BODY : 2,
+    LIMBS : 4
+};
+
 @none;
 
 @:Entity = LoadableClass.create(
     name : 'Wyvern.Entity', 
     statics : {
-        EQUIP_SLOTS : {get::<- EQUIP_SLOTS}
-   
+        EQUIP_SLOTS : {get::<- EQUIP_SLOTS},
+        DAMAGE_TARGET : {get::<- DAMAGE_TARGET},
+        normalizedDamageTarget ::(blockPoints) {
+            when(blockPoints == 1 || blockPoints == empty) ::<={
+                @:rate = Number.random();
+                when (rate <= 0.25) DAMAGE_TARGET.HEAD;
+                when (rate <  0.75) DAMAGE_TARGET.BODY;
+                return DAMAGE_TARGET.LIMBS
+            };
+            when(blockPoints >= 3)
+                DAMAGE_TARGET.HEAD |
+                DAMAGE_TARGET.BODY |
+                DAMAGE_TARGET.LIMBS
+            
+            @:list = [
+                DAMAGE_TARGET.HEAD,
+                DAMAGE_TARGET.BODY,
+                DAMAGE_TARGET.LIMBS
+            ]
+            
+            return random.removeArrayItem(list) |
+                   random.removeArrayItem(list)
+        }
     },
     items : {
         worldID : empty,
@@ -169,7 +196,6 @@
             }
             
             for(0, EQUIP_SLOTS.RING_R+1)::(slot) {
-                when(slot == EQUIP_SLOTS.HAND_R) empty;
                 @:equip = state.equips[slot];
                 when(equip == empty) empty;
                 foreach(equip.equipEffects)::(index, effect) {
@@ -386,6 +412,22 @@
                 set ::(value) <- owns = value
             },
             
+            blockPoints : {
+                get :: {
+                    when(this.isIncapacitated()) 0;
+                    @wep = this.getEquipped(slot:EQUIP_SLOTS.HAND_LR);
+                    @amount = if (wep.base.name == 'None') 1 else wep.base.blockPoints;
+                    
+                    if (effects != empty) ::<= {
+                        foreach(effects) ::(index, effect) {
+                            amount += effect.effect.blockPoints
+                        }
+                    }
+                        
+                    return amount;
+                }
+            },
+            
 
             // called to signal that a battle has started involving this entity
             battleEnd :: {
@@ -444,7 +486,6 @@
                 
                 foreach(state.equips)::(index, equip) {
                     when(equip == empty) empty;
-                    when(index == EQUIP_SLOTS.HAND_R) empty;
                     state.stats.modRate(stats:equip.equipMod);
                 }
                 
@@ -479,7 +520,8 @@
                         effects->remove(key:index);
                     } else ::<= {
                         if (effect.effect.skipTurn == true) ::<= {
-                            windowEvent.queueMessage(text:this.name + ' is unable to act due to their ' + effect.effect.name + ' status!');                            
+                            if (this.isIncapacitated() == false)
+                                windowEvent.queueMessage(text:this.name + ' is unable to act due to their ' + effect.effect.name + ' status!');                            
                             act = false;
                         }
                         effect.effect.onNextTurn(user:effect.from, turnIndex:effect.turnIndex, turnCount: effect.duration, holder:this, item:effect.item);                    
@@ -574,7 +616,11 @@
             renderHP ::(length) {
                 if (length == empty) length = 12;
                 
-                @:numFilled = ((length - 2) * (state.hp / state.stats.HP))->floor;
+                @ratio = state.hp / state.stats.HP;
+                if (ratio > 1) ratio = 1;
+                if (ratio < 0) ratio = 0;
+                @numFilled = ((length - 2) * (ratio))->floor;
+                if (state.hp > 0 && numFilled < 1) numFilled = 1;
                 
                 @out = ' ';
                 for(0, numFilled)::(i) {
@@ -608,8 +654,14 @@
                 amount => Number,
                 damageType => Number,
                 damageClass => Number,
-                target => Entity.type
+                target => Entity.type,
+                targetPart,
+                targetDefendPart
             ){
+            
+                if (targetPart == empty) targetPart = Entity.normalizedDamageTarget();
+                if (targetDefendPart == empty) targetPart = Entity.normalizedDamageTarget();
+            
                 @:inBattle = effects != empty;
                 if (!inBattle)
                     this.battleStart(); // dummy battle for effect shells.
@@ -638,19 +690,131 @@
 
                     when(dmg.amount <= 0) empty;
 
+
                     @critChance = 0.999 - (this.stats.LUK - state.level) / 100;
                     @isCrit = false;
+                    @isHitHead = false;
+                    @isLimbHit = false;
+                    @isHitBody = false;
                     if (critChance < 0.90) critChance = 0.9;
                     if (Number.random() > critChance) ::<={
                         dmg.amount += this.stats.DEX * 2.5;
                         isCrit = true;
                     }
 
+
+                    @backupStats;
+                    @dexPenalty;
+                    @:which = match(targetPart) {
+                      (Entity.DAMAGE_TARGET.HEAD): 'head',
+                      (Entity.DAMAGE_TARGET.BODY): 'body',
+                      (Entity.DAMAGE_TARGET.LIMBS): 'limbs'
+                    }
+                    @imperfectGuard = false;
+
+                    if (targetPart != empty) ::<= {
+                        if (targetDefendPart == empty)
+                            targetDefendPart = 0;
+                        if (target.species.canBlock == false)
+                            targetDefendPart = 0;
+                            
+                            
+                        if (targetDefendPart == 0 && target.species.canBlock == true) 
+                            windowEvent.queueMessage(text: target.name + ' wasn\'t given a chance to block!');
+
+                        if ((targetPart & targetDefendPart) != 0) ::<= {
+                        
+                            // Cant defend EVERYTHING perfectly. If you guard multiple parts of 
+                            // your body, even with gear, you still arent a perfect fortress
+                            imperfectGuard = (targetDefendPart != Entity.DAMAGE_TARGET.HEAD &&
+                                              targetDefendPart != Entity.DAMAGE_TARGET.BODY &&
+                                              targetDefendPart != Entity.DAMAGE_TARGET.LIMBS &&
+                                              random.flipCoin());
+                            this.flags.add(flag:StateFlags.BLOCKED_ATTACK);
+                            
+                            if (!imperfectGuard) ::<= {
+                                windowEvent.queueMessage(
+                                    text: target.name + ' predicted ' + this.name + '\'s attack to their ' + which + ' and successfully blocked it!'
+                                );
+                                
+                                foreach(target.effects)::(index, effect) {
+                                    effect.effect.onSuccessfulBlock(user:effect.from, item:effect.item, holder:target, from:this, damage:dmg);                
+                                }
+                                dmg.amount = 0;
+                            } else ::<= {
+                                dmg.amount *= .4;
+                            }
+                            
+                        } else ::<= {
+         
+
+
+                            backupStats = this.stats.save();
+                            match(true) {
+                              ((targetPart & DAMAGE_TARGET.HEAD) != 0):::<= {
+                                dexPenalty = 0.3;
+                                if (random.try(percentSuccess:33)) ::<= {
+                                    isCrit = true;
+                                    dmg.amount += this.stats.DEX * 2.5;
+                                } else ::<= {
+                                    dmg.amount *= 0.8;
+                                }
+                                isHitHead = true;
+
+                              },
+
+                              ((targetPart & DAMAGE_TARGET.BODY) != 0):::<= {
+                                dmg.amount *= 1.3;                           
+                                isHitBody = true;   
+                              },
+
+                              ((targetPart & DAMAGE_TARGET.LIMBS) != 0):::<= {
+                                dexPenalty = 0.79;
+                                isLimbHit = true;
+                              }
+
+                            }
+                        }
+                    }
+                    when(dmg.amount <= 0) empty;
+
+
+
                     @:hpWas0 = if (target.hp == 0) true else false;
-                    when(!target.damage(from:this, damage:dmg, dodgeable:true, critical:isCrit)) empty;
+                    @:result = target.damage(from:this, damage:dmg, dodgeable:true, critical:isCrit, dexPenalty);
+                    
+                    if (backupStats != empty)
+                        this.stats.load(serialized:backupStats);
+                    
+                    if (imperfectGuard) ::<= {
+                        if (result)
+                            windowEvent.queueMessage(
+                                text: target.name + ' predicted ' + this.name + '\'s attack to their ' + which + ', but wasn\'t able to fully block the damage!'
+                            )
+                        else                
+                            windowEvent.queueMessage(
+                                text: target.name + ' predicted ' + this.name + '\'s attack to their ' + which + '!'
+                            );
 
+                    }
+                    
+                    when(!result) empty;
 
+                    if (!imperfectGuard) ::<= {
+                        if (isLimbHit) ::<= {
+                            windowEvent.queueMessage(text: 'The hit caused direct damage to the limbs!');
+                            target.addEffect(from:this, name:'Stunned', durationTurns:1);                    
+                        }
 
+                        if (isHitBody) ::<= {
+                            windowEvent.queueMessage(text: 'The hit caused direct damage to the body!');
+                        }
+
+                        
+                        if (isHitHead) ::<= {
+                            windowEvent.queueMessage(text: 'The hit caused direct damage to the head!');
+                        }
+                    }
                     this.flags.add(flag:StateFlags.ATTACKED);
 
 
@@ -673,14 +837,27 @@
                 return retval;
             },
             
-            damage ::(from => Entity.type, damage => Damage.type, dodgeable => Boolean, critical, exact) {
+            damage ::(from => Entity.type, damage => Damage.type, dodgeable => Boolean, critical, exact, dexPenalty) {
                 @:alreadyKnockedOut = this.hp == 0;
                 if (alreadyKnockedOut)
                     dodgeable = false;
                     
+                    
                 @:inBattle = effects != empty;
                 if (!inBattle)
                     this.battleStart(); // dummy battle for effect shells.
+
+
+                @:hitrate::(this, attacker) {
+                    if (dexPenalty != empty)
+                        attacker *= dexPenalty;
+                        
+                    when (attacker <= 1) 0.45;
+                    @:diff = attacker/this; 
+                    when(diff > 1) 1.0; 
+                    return 1 - 0.45 * ((1-diff)**0.9);
+                }
+
                     
                 @:retval = ::<= {
 
@@ -688,14 +865,10 @@
                     @originalAmount = damage.amount;
                     @whiff = false;
                     if (dodgeable) ::<= {
-                        @diffpercent = (from.stats.DEX - this.stats.DEX) / this.stats.DEX;
-                        // if attacker dex is above target dex, hit always connects
-                        when(diffpercent > 0) empty;
-                        
-                        // if less dex, then a percent to miss, up to 50%
-                        diffpercent = diffpercent + (1 - diffpercent) / 3.0;
-                        if (diffpercent < 0.5) diffpercent = 0.5;
-                        if (Number.random() > diffpercent)
+                        if (Number.random() > hitrate(
+                            this:     this.stats.DEX,
+                            attacker: from.stats.DEX
+                        ))
                             whiff = true;
                     }
                     
@@ -713,6 +886,7 @@
 
                     // flat 15% chance to avoid damage with a shield 
                     // pretty nifty!
+                    /*
                     when (dodgeable && 
                           (this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).base.attributes & Item.ATTRIBUTE.SHIELD) && 
                           random.try(percentSuccess:15)) ::<= {
@@ -721,7 +895,7 @@
                         ]));
                         this.flags.add(flag:StateFlags.DODGED_ATTACK);
                         return false;                                                            
-                    }
+                    }*/
                     
                     // flat 15% chance if is Wyvern! because hard
                     when(dodgeable && this.species.name->contains(key:'Wyvern of') && random.try(percentSuccess:15)) ::<= {
@@ -755,7 +929,8 @@
 
 
                     foreach(effects)::(index, effect) {
-                        effect.effect.onDamage(user:effect.from, item:effect.item, holder:this, from, damage);
+                        if (damage.amount > 0 || exact != empty)
+                            effect.effect.onDamage(user:effect.from, item:effect.item, holder:this, from, damage);
                     }
 
                     if (exact)
@@ -818,7 +993,7 @@
                         this.addEffect(from, name:'Petrified',durationTurns:2);
                     
                     
-                    if (world.party.isMember(entity:this) && state.hp == 0 && Number.random() > 0.7) ::<= {
+                    if (world.party.isMember(entity:this) && state.hp == 0 && Number.random() > 0.7 && world.party.members->size > 1) ::<= {
                         windowEvent.queueMessage(
                             speaker: this.name,
                             text: '"' + random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.DEATH]) + '"'
@@ -975,6 +1150,13 @@
                 get :: {
                     return state.stats;
                 }
+            },
+
+            capHP ::(max) {
+                @stats = state.stats.save();
+                if (stats.HP > max) stats.HP = max;
+                state.stats.load(serialized:stats);   
+                if (state.hp > stats.HP) state.hp = stats.HP;             
             },
 
             normalizeStats ::(min, max, maxHP) {
@@ -1323,7 +1505,7 @@
                 return slotOut;
             },
             
-            useAbility::(ability, targets, turnIndex, extraData) {
+            useAbility::(ability, targets, turnIndex, targetDefendParts, targetParts, extraData) {
                 when(state.ap < ability.apCost) windowEvent.queueMessage(
                     text: this.name + " tried to use " + ability.name + ", but couldn\'t muster the mental strength!"
                 );
@@ -1340,7 +1522,7 @@
                 state.hp -= ability.hpCost;
                 ability.onAction(
                     user:this,
-                    targets, turnIndex, extraData                 
+                    targets, turnIndex, targetDefendParts, targetParts, extraData          
                 );            
             },
             
@@ -1480,10 +1662,10 @@
             },
             
             describe:: {
+                @:plainStatsState = this.stats.save();
                 @:plainStats = StatSet.new();
-                state.stats.resetMod();
-                plainStats.add(stats:state.stats);
-                this.recalculateStats();
+                plainStats.load(serialized:plainStatsState);
+                plainStats.resetMod();
 
 
 
@@ -1533,9 +1715,7 @@
                             }
                             return out;
                          } else ::<= {
-                            @out = ' - Effects - \n\n';
-                            out = out + 'Effects only active in battle.'
-                            return out;                         
+                            return '';                         
                          }
                          
                      ]                                   

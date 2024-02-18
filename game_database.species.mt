@@ -49,6 +49,7 @@ Species.newEntry(data:{
         'tail'
     ],
     special : false,
+    canBlock : true,
     passives : [
     ],
     swarms : false
@@ -78,6 +79,7 @@ Species.newEntry(data:{
         'tail'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -109,6 +111,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -140,6 +143,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -171,6 +175,7 @@ Species.newEntry(data:{
     ],
     swarms : false,
     
+    canBlock : true,
     special : false,
     passives : [
     ]
@@ -200,6 +205,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -230,6 +236,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -262,6 +269,7 @@ Species.newEntry(data:{
         'horns'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -294,6 +302,7 @@ Species.newEntry(data:{
         'horns'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -323,6 +332,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -354,6 +364,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -385,6 +396,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -415,6 +427,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -446,6 +459,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -476,6 +490,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -505,6 +520,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -535,6 +551,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -562,6 +579,7 @@ Species.newEntry(data:{
         'body'
     ],        
     swarms : false,
+    canBlock : true,
     special : false,
     passives : [
     ]
@@ -589,6 +607,7 @@ Species.newEntry(data:{
         'body'
     ],        
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -620,8 +639,10 @@ Species.newEntry(data:{
         'tail',
         'body'
     ],
-    swarms : false,
-    
+    // OKAY HEAR ME OUT... THIS COULD BE FUNNY....
+    swarms : true,
+        
+    canBlock : true,
     special : false,
     passives : [
     ]
@@ -651,6 +672,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -681,6 +703,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -712,6 +735,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -743,6 +767,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     passives : [
     ]
@@ -773,6 +798,7 @@ Species.newEntry(data:{
         'body'
     ],
     swarms : false,
+    canBlock : true,
     
     special : false,
     passives : [
@@ -797,6 +823,7 @@ Species.newEntry(data:{
     qualities : [
     ],
     swarms : true,
+    canBlock : false,
     
     special : true,
     passives : [
@@ -823,6 +850,7 @@ Species.newEntry(data:{
 
     ],
     swarms : false,
+    canBlock : false,
     
     special : true,
     passives : [
@@ -847,6 +875,7 @@ Species.newEntry(data:{
 
     ],
     swarms : false,
+    canBlock : false,
     
     special : true,
     passives : [
@@ -871,6 +900,7 @@ Species.newEntry(data:{
 
     ],
     swarms : false,
+    canBlock : false,
     
     special : true,
     passives : [
@@ -896,6 +926,7 @@ Species.newEntry(data:{
 
     ],
     swarms : false,
+    canBlock : false,
     
     special : true,
     passives : [
@@ -921,6 +952,7 @@ Species.newEntry(data:{
     qualities : [
     ],
     swarms : false,
+    canBlock : true,
     
     special : true,
     passives : [
@@ -944,6 +976,7 @@ Species.newEntry(data:{
     qualities : [
     ],
     swarms : false,
+    canBlock : true,
     
     special : true,
     passives : [
@@ -967,6 +1000,7 @@ Species.newEntry(data:{
     qualities : [
     ],
     swarms : false,
+    canBlock : true,
     
     special : true,
     passives : [
@@ -992,6 +1026,7 @@ Species.newEntry(data:{
     qualities : [
     ],
     swarms : false,
+    canBlock : true,
     
     special : true,
     passives : [
@@ -1017,6 +1052,7 @@ Species.newEntry(data:{
     qualities : [
     ],
     swarms : false,
+    canBlock : true,
     
     special : true,
     passives : [
@@ -1043,6 +1079,7 @@ Species.newEntry(data:{
     ],
     swarms: true,
     special : true,
+    canBlock : false,
     passives : [
         'Apparition'
     ]
@@ -1066,6 +1103,7 @@ Species.newEntry(data:{
     qualities : [
     ],
     swarms : true,
+    canBlock : false,
     
     special : true,
     passives : [
@@ -1091,6 +1129,7 @@ Species.newEntry(data:{
     qualities : [
     ],
     swarms : true,
+    canBlock : false,
     
     special : true,
     passives : [
@@ -1117,6 +1156,7 @@ Species.newEntry(data:{
     swarms : true,
     
     special : true,
+    canBlock : false,
     passives : [
     ]
 })
@@ -1133,7 +1173,8 @@ Species.newEntry(data:{
         growth : StatSet.type,
         passives : Object,
         special : Boolean,
-        swarms : Boolean
+        swarms : Boolean,
+        canBlock : Boolean
     },
     reset 
 );

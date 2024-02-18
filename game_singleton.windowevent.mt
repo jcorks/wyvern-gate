@@ -672,7 +672,8 @@
             // Similar to message, but accepts a set of 
             // messages to display
             queueMessageSet::(speaker, set => Object, leftWeight, topWeight, pageAfter, onLeave) {
-                foreach(set)::(i, text) <- 
+                foreach(set)::(i, text) {
+                    when(text == '' || text == empty) empty;
                     this.queueMessage(
                         speaker,
                         text,
@@ -681,6 +682,7 @@
                         pageAfter,
                         onLeave
                     )
+                }
                 
             },
             
@@ -737,44 +739,6 @@
                 );              
             },
             
-            // Similar to display(), but takes in an array of string arrays and 
-            // treats them as columns, appended left-to-right separated with a 
-            // space.
-            queueDisplayColumns::(prompt, columns, leftWeight, topWeight, pageAfter, onLeave, renderable) {
-                @:lines = [];
-                @:widths = [];
-                @rowcount = 0;
-                foreach(columns)::(index, lines) {
-                    @width = 0;
-                    foreach(lines)::(row, line) {
-                        if (line->length > width)
-                            width = line->length;
-
-                        if (row+1 > rowcount)
-                            rowcount = row+1;
-                    }
-                    
-                    widths->push(value:width);                    
-                }
-
-                for(0, rowcount)::(row) {
-                    @line = '';
-                
-                    foreach(columns)::(column, lines) {
-                        line = line + lines[row];
-                        for(lines[row]->length, widths[column])::(i) {
-                            line = line + ' ';
-                        }
-                        line = line + ' ';
-                    }   
-                    
-                    lines->push(value:line);
-                }   
-           
-                this.queueDisplay(
-                    prompt, lines, pageAfter, leftWeight, topWeight, onLeave, renderable
-                );
-            },
             
             // like message, but tried to fit the text on one page.
             // If it doesnt fit, display will try and make it scrollable.

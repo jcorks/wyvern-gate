@@ -1374,25 +1374,23 @@ Landmark.database.newEntry(
             step :: {
 
                 world.stepTime(isStep:true); 
-                this.map.title = this.name + ' - ' + world.timeString + '          ';
+                this.map.title = this.name + if (state.base.dungeonMap) '' else (' - ' + world.timeString);
                 state.mapEntityController.step();
-                when(!state.base.dungeonMap) empty;
+                when(!state.base.dungeonMap) ::<= {
+                    if (this.peaceful == false) ::<= {
+                        if (state.stepsSinceLast >= 14 && Number.random() > 0.7) ::<= {
+                            @:Scene = import(module:'game_database.scene.mt');                        
+                            Scene.start(name:'scene_guards0', onDone::{}, location:empty, landmark:this);
+                            state.stepsSinceLast = 0;
+                        }
+                    }
+                    state.stepsSinceLast += 1;                
+                }
+                
                 foreach(state.events) ::(k, event) {
                     event.step();
                 }
-
-                state.stepsSinceLast += 1;
-                if (this.peaceful == false) ::<= {
-                    if (state.stepsSinceLast >= 5 && Number.random() > 0.7) ::<= {
-                        this.island.addEvent(
-                            event:Event.new(
-                                base:Event.database.find(name:'Encounter:Non-peaceful'),
-                                parent:this //, currentTime
-                            )
-                        );
-                        state.stepsSinceLast = 0;
-                    }
-                }
+                state.stepsSinceLast += 1;                                
 
                 
             },

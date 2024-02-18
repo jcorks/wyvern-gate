@@ -63,7 +63,7 @@ Profession.database.newEntry(data:{
     learnable : true,
     abilities : [
         'First Aid',        //X
-        'Swipe Kick',       //X
+        'Combo Strike',       //X
         'Doublestrike',     //X2 hits RNG targets, 80% of attack
         'Focus Perception', //X + 25% ATK for 5 turns 
         'Cheer',            //X + 30% ATK for whole party 5 turns

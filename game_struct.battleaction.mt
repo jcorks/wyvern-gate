@@ -26,7 +26,8 @@ return struct(
     items : {
         ability: Database.ItemType,
         targets: Object,
+        targetParts: Object,
         turnIndex: Number,
-        extraData: Object
+        extraData: Object,
     }
 );  

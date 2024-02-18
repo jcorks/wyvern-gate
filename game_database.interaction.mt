@@ -32,6 +32,7 @@
 @:Item = import(module:'game_mutator.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:g = import(module:'game_function.g.mt');
+@:Scene = import(module:'game_database.scene.mt');
 
 
 
@@ -223,7 +224,7 @@ Interaction.newEntry(
     data : {
         name : 'talk',
         displayName : 'Talk',
-        keepInteractionMenu : true,
+        keepInteractionMenu : false,
         onInteract ::(location, party) {
             // jumps to the prev menu lock
             @choices = [];
@@ -256,12 +257,7 @@ Interaction.newEntry(
 
                         if (location.landmark.base.guarded == true) ::<= {
                             windowEvent.queueMessage(speaker:talkee.name, text:'Guards! Guards! Help!');
-                            location.landmark.island.addEvent(
-                                event:Event.new(
-                                    base: Event.database.find(name:'Encounter:Non-peaceful'),
-                                    parent:location.landmark //, currentTime
-                                )
-                            );
+                            Scene.start(name:'scene_guards0', onDone::{}, location, landmark:location.landmark);
                         } else ::<= {
                             @:world = import(module:'game_singleton.world.mt');
                             windowEvent.queueMessage(speaker:talkee.name, text:'You never should have come here!');
@@ -1787,12 +1783,12 @@ Interaction.newEntry(
                                                 if ((betOnA && aWon) || (!betOnA && !aWon)) ::<= {
                                                     world.accoladeEnable(name:'wonArenaBet');
                                                     windowEvent.queueMessage(
-                                                        text:'The party won ' + g(g:win) + 'G.'
+                                                        text:'The party won ' + g(g:win) + '.'
                                                     );                                    
                                                     party.inventory.addGold(amount:win);
                                                 } else ::<= {
                                                     windowEvent.queueMessage(
-                                                        text:'The party lost ' + g(g:bet) + 'G.'
+                                                        text:'The party lost ' + g(g:bet) + '.'
                                                     );                                    
                                                     party.inventory.subtractGold(amount:bet);
                                                 }  

@@ -45,7 +45,222 @@ Scene.newEntry(
     }
 )     
 
+Scene.newEntry(
+    data : {
+        name: 'scene_keybattle0',
+        script: [
+            ::(location, landmark, doNext) {
+                
+                @chance = Number.random(); 
+                @:island = landmark.island;   
+                @:party = world.party;
+                @enemies = [];
+                
+                
+                for(0, 3)::(i) {
+                    @:enemy = island.newAggressor();
+                    enemy.inventory.clear();
+                    enemy.anonymize();
+                    enemies->push(value:enemy);
+                }
+                
+                @:boss = enemies[1];
 
+                windowEvent.queueMessage(
+                    speaker: '???',
+                    text: random.pickArrayItem(list:[
+                        'Well, well, well. Look who else is after the key. It\'s ours!',
+                        'Get out of here, the key is ours!',
+                        'Wait, no! The key is ours! Get out of here!',
+                        'We will fight for that key to the death!',
+                        'The key is ours! We are the real Chosen!'
+                    ])
+                );
+
+                @:world = import(module:'game_singleton.world.mt');
+                
+
+                @:battleStart = ::{
+                    world.battle.start(
+                        party,
+
+                        allies: party.members,
+                        enemies,
+                        exp:true,
+                        landmark: {},
+                        onStart :: {
+                        },
+                        onEnd ::(result) {
+                            when(world.battle.partyWon()) ::<= { 
+                                //@message = 'The party found a Skill Crystal!';
+                                //party.inventory.add(item);
+                                @:Story = import(module:'game_singleton.story.mt');
+                                
+                                @:foundMessage ::(itemName){
+                                    windowEvent.queueMessage(text: 'It looks like they dropped something heavy during the fight...');
+                                    windowEvent.queueMessage(text: '.. is that...?');                            
+                                    party.inventory.add(item:Item.new(base:Item.database.find(name:itemName)));
+                                    windowEvent.queueMessage(text: 'The party obtained the ' + itemName + '!');                            
+                                }
+
+
+                                match(island.tier) {
+                                    (0):::<= { 
+                                        if (Story.foundFireKey == false)
+                                            foundMessage(itemName:'Wyvern Key of Fire');
+                                        Story.foundFireKey = true;
+                                    },
+                                    (1):::<= {
+                                        if (Story.foundIceKey == false) 
+                                            foundMessage(itemName:'Wyvern Key of Ice');
+                                        Story.foundIceKey = true;
+                                    },
+                                    (2):::<= {
+                                        if (Story.foundThunderKey == false)                     
+                                            foundMessage(itemName:'Wyvern Key of Thunder');
+                                        Story.foundThunderKey = true;
+                                    },
+                                    (3):::<= {
+                                        if (Story.foundLightKey == false) 
+                                            foundMessage(itemName:'Wyvern Key of Light');
+                                        Story.foundLightKey = true;
+                                    }
+                                }
+                            };
+                              
+                            @:instance = import(module:'game_singleton.instance.mt');
+                            instance.gameOver(reason:'The party was wiped out.');
+                        }
+                    );
+                }
+                battleStart();            
+            }            
+        ]    
+    }
+)
+
+
+Scene.newEntry(
+    data : {
+        name: 'scene_guards0',
+        script: [
+            ['', 'Several guards approach you with haste'],
+            ::(location, landmark, doNext) {
+                @:world = import(module:'game_singleton.world.mt');
+                @chance = Number.random(); 
+                @:island = landmark.island;   
+                @:party = world.party;
+                
+                @:Entity = import(module:'game_class.entity.mt');
+
+                @enemies = if (landmark == empty) ::<= {
+                    @:out = [
+                        island.newAggressor(),
+                        island.newAggressor(),
+                        island.newAggressor()                        
+                    ];
+                    foreach(out) ::(i, e) <- e.anonymize();
+                    return out;
+                } else (if (landmark.base.guarded) ::<= {
+                        
+                        // not only do these places have guards, but the guards are 
+                        // equipped with standard gear.
+                        
+                        
+                        
+                        @:e = [
+                            island.newInhabitant(professionHint:'Guard'),
+                            island.newInhabitant(professionHint:'Guard'),
+                            island.newInhabitant(professionHint:'Guard')                        
+                        ];
+                        
+                        foreach(e)::(index, guard) {
+                            guard.equip(
+                                item:Item.new(
+                                    base:Item.database.find(
+                                        name:'Halberd'
+                                    ),
+                                    qualityHint:'Standard',
+                                    materialHint: 'Mythril',
+                                    rngEnchantHint: true
+                                ),
+                                slot: Entity.EQUIP_SLOTS.HAND_R,
+                                silent:true, 
+                                inventory:guard.inventory
+                            );
+
+                            guard.equip(
+                                item:Item.new(
+                                    base: Item.database.find(
+                                        name:'Plate Armor'
+                                    ),
+                                    qualityHint:'Standard',
+                                    materialHint: 'Mythril',
+                                    rngEnchantHint: true
+                                ),
+                                slot: Entity.EQUIP_SLOTS.ARMOR,
+                                silent:true, 
+                                inventory:guard.inventory
+                            );
+                            guard.anonymize();
+                        }
+                        
+                        windowEvent.queueMessage(speaker:e.name, text:'There they are!');
+                        
+                        
+                        return e;
+                      } else empty);/*,
+                        
+                        
+                      default: match(true) {
+                        (Number.random() > 0.9):
+                          [
+                                island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.01)->floor),
+                                island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.01)->floor),
+                                island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.01)->floor)                        
+                          ],
+                          
+                        (Number.random() > 0.8):
+                          [
+                                island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.10)->floor)
+                          ],
+                          
+                        default:
+                          [
+                                island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.05)->floor),
+                                island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.05)->floor)                                                      
+                          ]
+                      }*/
+                    
+                when(enemies == empty) 0;
+
+
+                
+                world.battle.start(
+                    party,
+                    
+                    allies: party.members,
+                    enemies,
+                    landmark: {},
+                    loot : true,
+                    onEnd::(result){
+                    
+                        if (!world.battle.partyWon())::<= {
+                            @:instance = import(module:'game_singleton.instance.mt');
+                            instance.gameOver(reason:'The party was wiped out.');
+                        }
+
+                    }
+                );
+            
+                
+                
+            
+                return 0; // number of timesteps active            
+            }
+        ]
+    }
+)
 
 Scene.newEntry(
     data : {
@@ -110,7 +325,7 @@ Scene.newEntry(
             },
             ['Kaedjaal', 'Ha ha ha, splendid! Chosen, that was excellent. You have shown how well you can handle yourself.'],
             ['Kaedjaal', 'However, be cautious: you are not the first to have triumphed over me.'],
-            ['Kaedjaal', 'There are many with their own goals and ambitions, and some will be more skilled that you currently are.'],
+            ['Kaedjaal', 'There are many with their own goals and ambitions, and some will be more skilled than you currently are.'],
             ['Kaedjaal', 'Well, I hope you enjoyed this little visit. Come and see me any time.'],
             ['Kaedjaal', 'Along with leading you to me, each of these keys leads to a different island using magic we Wyverns know...'],
             ['Kaedjaal', 'I will use it to bring you to the next island where you may find the next shrine.'],

@@ -1,3 +1,14 @@
+0.1.8
+- Added body / head / limb aiming and defending to combat. Certain moves allow aiming 
+- Added block points to equips.
+- HP bar rendering will always at least show one tick if non-zero 
+- Certain interaction menus will auto-back out, such as "open chest"
+- Added Dual Blades
+- HP has been capped at tiers to make things less drawn out.
+- added custom accolades for The Trader
+- Inventory was moved to its own separate menu as a main interaction.
+- consolidated events and removed treasure as an event. Now it requires active looking.
+
 0.1.7a
 - Added scenarios. Base game before is the "Chosen" scenario.
 - Added the Trader scenario. It's fun! I think anyway.

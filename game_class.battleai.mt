@@ -40,6 +40,7 @@
             },
             
             takeTurn ::(battle, enemies, allies){
+                @:Entity = import(module:'game_class.entity.mt');
                 @:defaultAttack = ::{
                     battle.entityCommitAction(action:BattleAction.new(
                         ability: 
@@ -47,6 +48,9 @@
 
                         targets: [
                             Random.pickArrayItem(list:enemies)
+                        ],
+                        targetParts : [
+                            Entity.normalizedDamageTarget()
                         ],
                         extraData: {}                        
                     ));                  
@@ -56,6 +60,7 @@
                     battle.entityCommitAction(action:BattleAction.new(
                         ability: Ability.find(name:'Wait'),
                         targets: [],
+                        targetParts : [],
                         extraData: {}                        
                     ));
             
@@ -83,8 +88,10 @@
                            (ability.usageHintAI == Ability.USAGE_HINT.DEBUFF);
                 
                 @targets = [];
+                @targetParts = [];
                 match(ability.targetMode) {
-                  (Ability.TARGET_MODE.ONE) :::<= {
+                  (Ability.TARGET_MODE.ONE,
+                   Ability.TARGET_MODE.ONEPART) :::<= {
                     if (atEnemy) 
                         targets->push(value:Random.pickArrayItem(list:enemies))
                     else 
@@ -113,11 +120,14 @@
                   }
 
                 }
-                
+                foreach(targets) ::(index, t) {
+                    targetParts[index] = Entity.normalizedDamageTarget();
+                }
                 
                 battle.entityCommitAction(action:BattleAction.new(
                     ability: ability,
                     targets: targets,
+                    targetParts : targetParts,
                     extraData: {}                        
                 ));
             }

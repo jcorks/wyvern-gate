@@ -17,6 +17,7 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
+@:canvas = import(module:'game_singleton.canvas.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 
@@ -38,6 +39,126 @@
 
         NAMES : {
             get ::<- NAMES
+        },
+        
+        diffToLines ::(stats, other) {
+            return canvas.columnsToLines(columns:[
+                [
+                    'HP:',
+                    'AP:',
+                    'ATK:',
+                    'DEF:',
+                    'INT:',
+                    'SPD:',
+                    'LUK:',
+                    'DEX:'
+                ],
+                
+                [
+                    ''+stats.HP,
+                    ''+stats.AP,
+                    ''+stats.ATK,
+                    ''+stats.DEF,
+                    ''+stats.INT,
+                    ''+stats.SPD,
+                    ''+stats.LUK,
+                    ''+stats.DEX                        
+                ],
+                
+                [
+                    ' -> ',
+                    ' -> ',
+                    ' -> ',
+                    ' -> ',
+                    ' -> ',
+                    ' -> ',
+                    ' -> ',                        
+                    ' -> ',                        
+                ],
+                
+                [
+                    ''+other.HP,
+                    ''+other.AP,
+                    ''+other.ATK,
+                    ''+other.DEF,
+                    ''+other.INT,
+                    ''+other.SPD,
+                    ''+other.LUK,
+                    ''+other.DEX                        
+                ],
+                
+                [
+                    (if (other.HP - stats.HP  != 0) (if (other.HP > stats.HP) '(+' else '(') + (other.HP  - stats.HP)  + ')' else ''),
+                    (if (other.AP - stats.AP  != 0) (if (other.AP > stats.AP) '(+' else '(') + (other.AP  - stats.AP)  + ')' else ''),
+                    (if (other.ATK - stats.ATK  != 0) (if (other.ATK > stats.ATK) '(+' else '(') + (other.ATK  - stats.ATK)  + ')' else ''),
+                    (if (other.DEF - stats.DEF  != 0) (if (other.DEF > stats.DEF)'(+' else '(') + (other.DEF  - stats.DEF)  + ')' else ''),
+                    (if (other.INT - stats.INT  != 0) (if (other.INT > stats.INT)'(+' else '(') + (other.INT  - stats.INT)  + ')' else ''),
+                    (if (other.SPD - stats.SPD  != 0) (if (other.SPD > stats.SPD)'(+' else '(') + (other.SPD  - stats.SPD)  + ')' else ''),
+                    (if (other.LUK - stats.LUK  != 0) (if (other.LUK > stats.LUK)'(+' else '(') + (other.LUK  - stats.LUK)  + ')' else ''),
+                    (if (other.DEX - stats.DEX  != 0) (if (other.DEX > stats.DEX)'(+' else '(') + (other.DEX  - stats.DEX)  + ')' else ''),
+
+                ]                        
+            ]);     
+        },
+        
+        diffRateToLines::(stats, other) {
+            return canvas.columnsToLines(columns:[
+                [
+                    'HP:',
+                    'AP:',
+                    'ATK:',
+                    'DEF:',
+                    'INT:',
+                    'SPD:',
+                    'LUK:',
+                    'DEX:'
+                ],
+                
+                [
+                    ''+stats.HP+'%',
+                    ''+stats.AP+'%',
+                    ''+stats.ATK+'%',
+                    ''+stats.DEF+'%',
+                    ''+stats.INT+'%',
+                    ''+stats.SPD+'%',
+                    ''+stats.LUK+'%',
+                    ''+stats.DEX+'%'                        
+                ],
+                
+                [
+                    ' -> ',
+                    ' -> ',
+                    ' -> ',
+                    ' -> ',
+                    ' -> ',
+                    ' -> ',
+                    ' -> ',                        
+                    ' -> ',                        
+                ],
+                
+                [
+                    ''+other.HP+'%',
+                    ''+other.AP+'%',
+                    ''+other.ATK+'%',
+                    ''+other.DEF+'%',
+                    ''+other.INT+'%',
+                    ''+other.SPD+'%',
+                    ''+other.LUK+'%',
+                    ''+other.DEX+'%'                        
+                ],
+                
+                [
+                    (if (other.HP - stats.HP  != 0) (if (other.HP > stats.HP) '(+' else '(') + (other.HP  - stats.HP)  + ')' else ''),
+                    (if (other.AP - stats.AP  != 0) (if (other.AP > stats.AP) '(+' else '(') + (other.AP  - stats.AP)  + ')' else ''),
+                    (if (other.ATK - stats.ATK  != 0) (if (other.ATK > stats.ATK) '(+' else '(') + (other.ATK  - stats.ATK)  + ')' else ''),
+                    (if (other.DEF - stats.DEF  != 0) (if (other.DEF > stats.DEF)'(+' else '(') + (other.DEF  - stats.DEF)  + ')' else ''),
+                    (if (other.INT - stats.INT  != 0) (if (other.INT > stats.INT)'(+' else '(') + (other.INT  - stats.INT)  + ')' else ''),
+                    (if (other.SPD - stats.SPD  != 0) (if (other.SPD > stats.SPD)'(+' else '(') + (other.SPD  - stats.SPD)  + ')' else ''),
+                    (if (other.LUK - stats.LUK  != 0) (if (other.LUK > stats.LUK)'(+' else '(') + (other.LUK  - stats.LUK)  + ')' else ''),
+                    (if (other.DEX - stats.DEX  != 0) (if (other.DEX > stats.DEX)'(+' else '(') + (other.DEX  - stats.DEX)  + ')' else ''),
+
+                ]                        
+            ]);      
         }
     },
     items : {},
@@ -236,136 +357,21 @@
             },
             
             printDiff ::(other, prompt, renderable) {
-                windowEvent.queueDisplayColumns(
+                windowEvent.queueDisplay(
                     prompt,
                     pageAfter: 10,
                     renderable,
-                    columns: [
-                        [
-                            'HP:',
-                            'AP:',
-                            'ATK:',
-                            'DEF:',
-                            'INT:',
-                            'SPD:',
-                            'LUK:',
-                            'DEX:'
-                        ],
-                        
-                        [
-                            ''+this.HP,
-                            ''+this.AP,
-                            ''+this.ATK,
-                            ''+this.DEF,
-                            ''+this.INT,
-                            ''+this.SPD,
-                            ''+this.LUK,
-                            ''+this.DEX                        
-                        ],
-                        
-                        [
-                            ' -> ',
-                            ' -> ',
-                            ' -> ',
-                            ' -> ',
-                            ' -> ',
-                            ' -> ',
-                            ' -> ',                        
-                            ' -> ',                        
-                        ],
-                        
-                        [
-                            ''+other.HP,
-                            ''+other.AP,
-                            ''+other.ATK,
-                            ''+other.DEF,
-                            ''+other.INT,
-                            ''+other.SPD,
-                            ''+other.LUK,
-                            ''+other.DEX                        
-                        ],
-                        
-                        [
-                            (if (other.HP - this.HP  != 0) (if (other.HP > this.HP) '(+' else '(') + (other.HP  - this.HP)  + ')' else ''),
-                            (if (other.AP - this.AP  != 0) (if (other.AP > this.AP) '(+' else '(') + (other.AP  - this.AP)  + ')' else ''),
-                            (if (other.ATK - this.ATK  != 0) (if (other.ATK > this.ATK) '(+' else '(') + (other.ATK  - this.ATK)  + ')' else ''),
-                            (if (other.DEF - this.DEF  != 0) (if (other.DEF > this.DEF)'(+' else '(') + (other.DEF  - this.DEF)  + ')' else ''),
-                            (if (other.INT - this.INT  != 0) (if (other.INT > this.INT)'(+' else '(') + (other.INT  - this.INT)  + ')' else ''),
-                            (if (other.SPD - this.SPD  != 0) (if (other.SPD > this.SPD)'(+' else '(') + (other.SPD  - this.SPD)  + ')' else ''),
-                            (if (other.LUK - this.LUK  != 0) (if (other.LUK > this.LUK)'(+' else '(') + (other.LUK  - this.LUK)  + ')' else ''),
-                            (if (other.DEX - this.DEX  != 0) (if (other.DEX > this.DEX)'(+' else '(') + (other.DEX  - this.DEX)  + ')' else ''),
-
-                        ]                        
-                    ]
+                    lines : StatSet.diffToLines(stats:this, other)            
                 );
-            
             },
             
             printDiffRate ::(other, prompt) {
                 windowEvent.queueDisplayColumns(
                     prompt,
                     pageAfter: 10,
-                    columns: [
-                        [
-                            'HP:',
-                            'AP:',
-                            'ATK:',
-                            'DEF:',
-                            'INT:',
-                            'SPD:',
-                            'LUK:',
-                            'DEX:'
-                        ],
-                        
-                        [
-                            ''+this.HP+'%',
-                            ''+this.AP+'%',
-                            ''+this.ATK+'%',
-                            ''+this.DEF+'%',
-                            ''+this.INT+'%',
-                            ''+this.SPD+'%',
-                            ''+this.LUK+'%',
-                            ''+this.DEX+'%'                        
-                        ],
-                        
-                        [
-                            ' -> ',
-                            ' -> ',
-                            ' -> ',
-                            ' -> ',
-                            ' -> ',
-                            ' -> ',
-                            ' -> ',                        
-                            ' -> ',                        
-                        ],
-                        
-                        [
-                            ''+other.HP+'%',
-                            ''+other.AP+'%',
-                            ''+other.ATK+'%',
-                            ''+other.DEF+'%',
-                            ''+other.INT+'%',
-                            ''+other.SPD+'%',
-                            ''+other.LUK+'%',
-                            ''+other.DEX+'%'                        
-                        ],
-                        
-                        [
-                            (if (other.HP - this.HP  != 0) (if (other.HP > this.HP) '(+' else '(') + (other.HP  - this.HP)  + ')' else ''),
-                            (if (other.AP - this.AP  != 0) (if (other.AP > this.AP) '(+' else '(') + (other.AP  - this.AP)  + ')' else ''),
-                            (if (other.ATK - this.ATK  != 0) (if (other.ATK > this.ATK) '(+' else '(') + (other.ATK  - this.ATK)  + ')' else ''),
-                            (if (other.DEF - this.DEF  != 0) (if (other.DEF > this.DEF)'(+' else '(') + (other.DEF  - this.DEF)  + ')' else ''),
-                            (if (other.INT - this.INT  != 0) (if (other.INT > this.INT)'(+' else '(') + (other.INT  - this.INT)  + ')' else ''),
-                            (if (other.SPD - this.SPD  != 0) (if (other.SPD > this.SPD)'(+' else '(') + (other.SPD  - this.SPD)  + ')' else ''),
-                            (if (other.LUK - this.LUK  != 0) (if (other.LUK > this.LUK)'(+' else '(') + (other.LUK  - this.LUK)  + ')' else ''),
-                            (if (other.DEX - this.DEX  != 0) (if (other.DEX > this.DEX)'(+' else '(') + (other.DEX  - this.DEX)  + ')' else ''),
-
-                        ]                        
-                    ]
+                    columns: StatSet.diffRateToLines(stats:this, other)
                 );
-            
             },
-            
             
             description : {
                 get :: {

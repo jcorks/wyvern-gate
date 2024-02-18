@@ -20,7 +20,7 @@
 @:world = import(module:'game_singleton.world.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:g = import(module:'game_function.g.mt');
-
+@:StatSet = import(module:'game_class.statset.mt');
 
 
 
@@ -39,12 +39,12 @@ return ::{
             @:height = 7;
             @:width = canvas.width*(2/3);
             foreach(party.members)::(index, member) {
-                @x = (canvas.width - width) / 2;
-                canvas.renderFrame(top, left: (canvas.width - width) / 2, width, height);
+                @x = (canvas.width - width) / 4;
+                canvas.renderFrame(top, left: x, width, height);
                 
                 if (whom == index) ::<= {
                     canvas.movePen(
-                        x: (canvas.width - width) / 2 - 4,
+                        x: (canvas.width - width) / 4 - 4,
                         y: top + height/2
                     );
                     canvas.drawText(
@@ -62,9 +62,34 @@ return ::{
                 
                 top += height;
                 
+                
+
+
+
             }
             canvas.movePen(x: ((canvas.width - width) / 2)+1, y: 1);    
             canvas.drawText(text:'Party: (' + g(g:party.inventory.gold) + ', ' + party.inventory.items->keycount + ' items)');     
+
+
+            @:member = party.members[whom]
+
+            breakpoint();
+            @:plainStatsState = member.stats.save();
+            @:plainStats = StatSet.new();
+            plainStats.load(serialized:plainStatsState);
+            plainStats.resetMod();
+                    
+            canvas.renderTextFrameGeneral(
+                topWeight: 0.1,
+                leftWeight: 1,
+                title: '(Base -> w/Mods.)',
+                lines: StatSet.diffToLines(
+                    stats:plainStats,
+                    other:member.stats
+                      
+                )
+            );
+
         
         }
     }
@@ -204,8 +229,8 @@ return ::{
                                                     );
                                                     member.unequipItem(item);
                                                     party.inventory.add(item);
-                                                    windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);
                                                 }
+                                                windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);
                                             }
                                             
                                             @item = items[index];

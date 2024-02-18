@@ -345,6 +345,71 @@ return class(
                 }          
             },
             
+            // formats columns of text into lines where columns are lined up
+            columnsToLines::(columns, leftJustifieds, spacing) {
+                if (leftJustifieds == empty)
+                    leftJustifieds = [...columns]->map(to::(value) <- true);
+                
+                if (spacing == empty)
+                    spacing = 1;
+                    
+                    
+                    
+                @:lines = [];
+                @:widths = [];
+                @rowcount = 0;
+                foreach(columns)::(index, lines) {
+                    @width = 0;
+                    foreach(lines)::(row, line) {
+                        if (line->length > width)
+                            width = line->length;
+
+                        if (row+1 > rowcount)
+                            rowcount = row+1;
+                    }
+                    
+                    widths->push(value:width);                    
+                }
+
+
+                @:parts = [];
+
+                @:formatColumn::(column, text) {
+                    if (!leftJustifieds[column]) ::<= {
+                        for(text->length, widths[column])::(i) {
+                            parts->push(value:' ');
+                        }
+                    }
+                    parts->push(value:text);                    
+                    if (leftJustifieds[column]) ::<= {
+                        for(text->length, widths[column])::(i) {
+                            parts->push(value:' ');
+                        }
+                    }
+
+                }
+
+
+                for(0, rowcount)::(row) {
+                    @line = '';
+                    parts->setSize(size:0);                
+                    foreach(columns)::(column, lines) {
+                        formatColumn(
+                            column,
+                            text: lines[row]
+                        );
+                        
+                        for(0, spacing) ::(i) {
+                            parts->push(value:' ');
+                        }
+                    }   
+                    
+                    lines->push(value:String.combine(strings:parts));
+                }   
+                return lines;            
+            },
+            
+            
             commit ::(renderNow) {
                 // debug lines happen as the LAST possible thing 
                 // the canvas does to ensure that its always on top.

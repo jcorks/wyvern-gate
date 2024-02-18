@@ -32,7 +32,8 @@
         DEFEATED_ENEMY : {get::<-7},
         DODGED_ATTACK : {get::<-8},
         ATTACKED : {get::<-9},
-        ABILITY : {get::<-10}
+        ABILITY : {get::<-10},
+        BLOCKED_ATTACK : {get::<-11}
     },
     items: {
         set : empty

@@ -2848,11 +2848,6 @@ return {
         @:Scene = import(module:'game_database.scene.mt');
         Scene.start(name:'trader.scene_intro', onDone::{                    
             data.trader.dayStart();                
-            /*island.addEvent(
-                event:Event.database.find(name:'Encounter:Non-peaceful').new(
-                    island, party, landmark //, currentTime
-                )
-            );*/  
         });        
         
         

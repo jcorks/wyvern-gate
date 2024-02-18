@@ -15,23 +15,12 @@ Known bugs / concerns:
 - Some abilities are not properly implemented currently.
 
 Coming changes:
-  . Combat changes:
-    - When doing most attacks, you can choose whether to target the head, body, or limbs.
-        . Head -> 35% dex penalty, but if lands is always a critical
-        . Body -> Increased chance to cause bleed, no dex penalty 
-        . Limbs -> 25% Dex penalty, but if lands, stuns next turn. 25% chance to disarm 
-    - When receiving an attack, you can choose what part of the body to defend 
-        . If correct, it procs the weapons defend action and reduces damage by 80%
-        . Weapons have a block count meaning how many parts of the body they defend.
-        . If INT is higher than your opponent, you have a 50% chance that they telegraphed 
-          their attack and you know where you need to defend
-    - Defending now gives you an additional block point instead of damage reduction
-    - Enchants can have an "on block" condition
-    - Some defend actions:
-        - Retaliate: Attack damage to attacker 
-        - Full block: no damage taken at all 
-        - Stun: attacker is stunned.
-    - weapons have anywhere from 0 to 2 block points 
+  . Avoid showing time of day in dungeons
+  . Show stats of party members in party menu 
+  . Show equip stats on hover in inventory and equip
+  . missing percents on certain stat displays (i.e. enchantment stands)
+  . in topaz builds, prevent auto-firing of confirm / deny
+  . Try to remove timestepping if walking into a wall 
   . When selecting a target in battle, party members move to bottom of list.
   . Being able to choose your starting characters. Theyll still be generated, but you'll get to choose 
     among a list. Thinking 5 per generated.

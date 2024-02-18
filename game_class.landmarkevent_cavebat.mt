@@ -72,7 +72,7 @@
             @:ref = landmark_.mapEntityController.add(
                 x:tileX, 
                 y:tileY, 
-                symbol:'B',
+                symbol:'b',
                 entities : ents,
                 tag : 'cavebat'
             );
