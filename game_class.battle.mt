@@ -925,7 +925,7 @@
                 @:world = import(module:'game_singleton.world.mt');
                 @:targetDefendParts = [];
                 foreach(action.targets) ::(index, target) {
-                    targetDefendParts[index] = if (random.flipCoin()) 0 else Entity.normalizedDamageTarget(blockPoints:target.blockPoints);
+                    targetDefendParts[index] = if (random.try(percentSuccess:35)) 0 else Entity.normalizedDamageTarget(blockPoints:target.blockPoints);
                 }
                 
                 @pendingChoices = [];
@@ -963,7 +963,7 @@
                 @:doNext = ::{
                     when(pendingChoices->size == 0) commit();
                     @:next = pendingChoices->pop;
-                    when(random.flipCoin()) ::<= {
+                    when(random.try(percentSuccess:35)) ::<= {
                         targetDefendParts[index] = 0;
                         doNext();
                     }
