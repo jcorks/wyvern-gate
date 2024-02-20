@@ -323,17 +323,15 @@
                     state.faveWeapon = Item.database.find(name:faveWeapon);
 
                 if (island != empty)  ::<= {
-                    for(0, 3)::(i) {
-                        state.inventory.add(item:
-                            Item.new(
-                                base: Item.database.getRandomFiltered(
-                                    filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                                                                && value.tier <= island.tier
-                                ),
-                                rngEnchantHint:true
-                            )
-                        );
-                    }
+                    state.inventory.add(item:
+                        Item.new(
+                            base: Item.database.getRandomFiltered(
+                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants
+                                                            && value.tier <= island.tier
+                            ),
+                            rngEnchantHint:true
+                        )
+                    );
 
                     if (state.faveWeapon == empty)
                         state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0 && value.tier <= island.tier)
@@ -763,9 +761,12 @@
                             match(true) {
                               ((targetPart & DAMAGE_TARGET.HEAD) != 0):::<= {
                                 dexPenalty = 0.3;
-                                if (random.try(percentSuccess:20)) ::<= {
-                                    isCrit = true;
-                                    dmg.amount += this.stats.DEX * 1.5;
+                                if (random.try(percentSuccess:35)) ::<= {
+                                    if (random.try(percentSuccess:90)) ::<= {
+                                        isCrit = true;
+                                        dmg.amount += this.stats.DEX * 1.5;
+                                    } else
+                                        dmg.amount *= 1.4;
                                     isHitHead = true;
                                 } else ::<= {
                                     missHead = true;

@@ -38,7 +38,7 @@ Worker = (function() {
             const allNames = Object.keys(saves);
             const allNamesOut = [];
             for(var i = 0; i < allNames.length; ++i) {
-                if (allNames[i].indexOf('wyvernslot' !=-1)) {
+                if (allNames[i].indexOf('wyvernslot') == 0) {
                     allNamesOut.push(allNames[i].substring(
                         10
                     ))
@@ -51,6 +51,10 @@ Worker = (function() {
         getSlot : function(name) {
             return saves['wyvernslot'+name];
         },
+        loadSettings : function(name) {
+            return saves['wyvernsettings'];
+        },
+
     
         newLine : function(text) {
             lines[lineIter] = text;
@@ -60,10 +64,8 @@ Worker = (function() {
         save : function(name, data) {
             postMessageJSON({
                 command: 'save',
-                data : {
-                    name: name,
-                    data: data
-                }
+                name: name,
+                data: data
             });
         },
         

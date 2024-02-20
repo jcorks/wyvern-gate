@@ -59,6 +59,13 @@
 // return: array of strings
 @:external_onListSlots   = getExternalFunction(name:'external_onListSlots');
 
+// Called when saving settings.
+// arg: JSON string 
+@:external_onSaveSettings = getExternalFunction(name:'external_onSaveSettings');
+
+// Called when loading settings.
+// return: JSON string
+@:external_onLoadSettings = getExternalFunction(name:'external_onLoadSettings');
 
 // Called when quitting.
 // arg: none 
@@ -124,6 +131,14 @@ instance.mainMenu(
     
     onQuit ::{
         external_onQuit();
+    },
+
+    onLoadSettings ::{
+        return external_onLoadSettings();
+    },
+    
+    onSaveSettings ::(data) {
+        external_onSaveSettings(a:data);
     },
 
     preloadMods :: {

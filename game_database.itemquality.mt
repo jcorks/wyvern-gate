@@ -393,7 +393,7 @@ ItemQuality.newEntry(
             DEX: 1000,
             INT: 1000
         ),
-        rarity: 1000000,
+        rarity: 8000,
         pricePercentMod: 1000000,
         equipEffects : [
         ],

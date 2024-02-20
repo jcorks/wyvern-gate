@@ -155,11 +155,22 @@
 
     matte.setExternalFunction('external_onSaveState', ['a', 'b'], function(fn, args) {
         const slot = args[0];
-        Worker.save({
-            name: 'wyvernslot'+slot,
-            data: args[1]
-        });
+        Worker.save(
+            'wyvernslot'+slot,
+            args[1]
+        );
         return matte.store.createEmpty();            
+    });
+    
+    matte.setExternalFunction('external_onSaveSettings', ['a'], function(fn, args) {
+        Worker.save(
+            'wyvernsettings',
+            args[0]
+        );
+    });
+    
+    matte.setExternalFunction('external_onLoadSettings', [], function(fn, args) {
+        return matte.store.createString(Worker.loadSettings());
     });
 
     matte.setExternalFunction('external_onListSlots', ['a', 'b'], function(fn, args) {
