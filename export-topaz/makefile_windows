@@ -1,0 +1,8 @@
+all:
+	cd ./topaz/system/script/matte/src/m2s && gcc ./mt_to_string.c -o ../m2sc
+	cd ./topaz/system/script/matte/src/ && ./m2sc
+	cd ./topaz/build/make/windows-gcc/ && make 
+	gcc ./c/* -I./topaz/include/  -I./topaz/system/script/matte/src/ -o wyvern-gate-bin ./topaz/build/make/windows-gcc/libtopaz.a -lvorbisfile  -lwinmm -lvorbis -logg -lharfbuzz -lfreetype -lharfbuzz -lfreetype -lglfw3 -lOpenGL32 -lshlwapi  -lusp10 -lgraphite2 -lstdc++ -lpng -lGDI32 -lz  -lbz2 -lrpcrt4 -lole32 -lbrotlidec -lbrotlicommon -static -mwindows
+
+clean:
+	cd ./topaz/build/make/windows-gcc/ && make clean
