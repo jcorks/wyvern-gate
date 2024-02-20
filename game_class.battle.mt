@@ -963,7 +963,10 @@
                 @:doNext = ::{
                     when(pendingChoices->size == 0) commit();
                     @:next = pendingChoices->pop;
-                    when(random.flipCoin()) doNext();
+                    when(random.flipCoin()) ::<= {
+                        targetDefendParts[index] = 0;
+                        doNext();
+                    }
                     combatChooseDefend(
                         targetPart: action.targetParts[action.targets->findIndex(value:next)],
                         attacker:entityTurn,
