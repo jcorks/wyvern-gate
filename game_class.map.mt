@@ -1037,7 +1037,7 @@
                 x,
                 y
             ) {
-                this.movePointerFree(
+                return this.movePointerFree(
                     x:if (x > 0) 1 else if (x < 0) -1 else 0,
                     y:if (y > 0) 1 else if (y < 0) -1 else 0
                 );
@@ -1055,6 +1055,9 @@
 
                 if (changeX &&
                     changeY) empty;
+
+                @oldX = pointer.x;
+                @oldY = pointer.y;
 
                 if(changeX) ::<= {
                     @offset = x;
@@ -1099,8 +1102,9 @@
                 
                 }
 
-
                 this.setPointer(x, y);
+                when(oldX == pointer.x && oldY == pointer.y) false;
+                return true;
             
             },
             

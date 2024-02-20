@@ -176,7 +176,7 @@ Event.database.newEntry(
             
             @needsHealing = false;
             foreach(party.members) ::(i, member) {
-                if (member.hp < member.state.HP)    
+                if (member.hp < member.stats.HP)    
                     needsHealing = true
             }
             

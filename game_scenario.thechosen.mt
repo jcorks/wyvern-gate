@@ -416,6 +416,11 @@ return {
         @:Scene = import(module:'game_database.scene.mt');
         Scene.start(name:'scene_intro', onDone::{                    
             instance.visitIsland();
+            
+            windowEvent.queueMessage(
+                speaker: p0.name,
+                text: '"I should probably open that box now..."'
+            );
         });        
     },
     onNewDay ::(data){},

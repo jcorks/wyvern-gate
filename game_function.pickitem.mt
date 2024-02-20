@@ -20,7 +20,7 @@
 
 
 
-return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, onHover, renderable, filter, keep) {
+return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, onHover, renderable, filter, keep, pageAfter) {
     @names = []
     @items = []
     windowEvent.queueChoices(
@@ -30,6 +30,7 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
         onGetPrompt: onGetPrompt,
         canCancel: canCancel,
         jumpTag: 'pickItem',
+        pageAfter: pageAfter,
         onHover : if (onHover)
             ::(choice) {
                 when(choice == 0) empty;

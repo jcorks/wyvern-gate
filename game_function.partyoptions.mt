@@ -26,6 +26,7 @@
 
 return ::{
     @whom = 0;
+    @chosen = false;
     @:menuRenderable = {
         render ::{
             canvas.blackout();
@@ -70,10 +71,9 @@ return ::{
             canvas.movePen(x: ((canvas.width - width) / 2)+1, y: 1);    
             canvas.drawText(text:'Party: (' + g(g:party.inventory.gold) + ', ' + party.inventory.items->keycount + ' items)');     
 
-
+            when(!chosen) empty;
             @:member = party.members[whom]
 
-            breakpoint();
             @:plainStatsState = member.stats.save();
             @:plainStats = StatSet.new();
             plainStats.load(serialized:plainStatsState);
@@ -107,6 +107,7 @@ return ::{
         renderable : menuRenderable,
         canCancel: true,
         onMove ::(choice) {
+            chosen = false;
             when(choice == windowEvent.CURSOR_ACTIONS.LEFT ||
                  choice == windowEvent.CURSOR_ACTIONS.RIGHT) empty;
                  
@@ -121,6 +122,7 @@ return ::{
         },
         onMenu :: {
             @member = party.members[whom];
+            chosen = true;
             
             
             windowEvent.queueChoices(
@@ -133,6 +135,9 @@ return ::{
                 prompt: names[whom],
                 keep: true,
                 canCancel: true,
+                onCancel ::{
+                    chosen = false;                
+                },
                 renderable : menuRenderable,
                 onChoice ::(choice) {
                     when(choice == 0) empty;
@@ -141,7 +146,7 @@ return ::{
                     match(choice) {
 
                       // describe
-                      (1): member.describe(),
+                      (1): member.describe(excludeStats:true),
 
 
 
@@ -171,6 +176,7 @@ return ::{
                             keep:true,
                             renderable : menuRenderable,
                             canCancel: true,
+                            pageAfter:15,
                             onGetChoices:: {
                                 @:choices = [];
                                 for(-1, Entity.EQUIP_SLOTS.TRINKET+1)::(i) {
@@ -206,16 +212,42 @@ return ::{
                                     @:items = party.inventory.items->filter(by:::(value) <- member.getSlotsForItem(item:value)->findIndex(value:slot) != -1);
                                     @:itemNames = [...items]->map(to:::(value) <- value.name);
                                     itemNames->push(value:'[Nothing]');
-                                
+                                    @hovered;
+                                    @:none = Item.new(base:Item.database.find(name:'None'));
                                     windowEvent.queueChoices(
-                                        leftWeight: 1,
-                                        topWeight: 1,
+                                        leftWeight: 0.8,
+                                        topWeight: 0.5,
                                         choices:itemNames,
                                         prompt: member.name + ': ' + slotToName(slot),
                                         canCancel: true,
                                         keep:true,
+                                        pageAfter: 9,
                                         jumpTag: 'EquipWhich',
-                                        renderable : menuRenderable,
+                                        renderable : {
+                                            render ::{
+                                                menuRenderable.render();
+                                                
+                                                
+                                                when(hovered == empty) empty;
+                                                
+                                                @other = if (items[hovered] == empty) none else items[hovered];
+                                                @:lines = StatSet.diffRateToLines(
+                                                    stats:member.getEquipped(slot).equipMod, 
+                                                    other:other.equipMod
+                                                );
+
+                                                canvas.renderTextFrameGeneral(
+                                                    title:'If equipped...',
+                                                    lines,
+                                                    leftWeight:0,
+                                                    topWeight:0.5
+                                                );                                                
+                                                
+                                            }
+                                        },
+                                        onHover::(choice) {
+                                            hovered = choice-1;
+                                        },
                                         
                                         onChoice:::(choice) {
                                             @:index = choice -1;
@@ -224,6 +256,11 @@ return ::{
                                             when (index == items->keycount) ::<= {
                                                 @item = member.getEquipped(slot);
                                                 if (item != empty && item.base.name != 'None') ::<= {
+                                                    when(party.inventory.isFull)
+                                                        windowEvent.queueMessage(
+                                                            text: member.name + ' cannot unequip the ' + item.name + ' because the party\'s inventory is full.'
+                                                        );
+
                                                     windowEvent.queueMessage(
                                                         text: member.name + ' has unequipped the ' + item.name
                                                     );

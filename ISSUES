@@ -5,22 +5,11 @@ Known bugs / concerns:
 - Some time of day displays go offscreen when the island name 
   is too long.
 - In battle, some frames display a previous background image rather than the most current one
-- Certain locations in dungeons need to be made unique per-floor, such as potion shops.
-- After leaving a landmark, prev menu is still open
-- consistency with middle vs right side menus. especially with buildings
-- School, choosing someone to change professions is not able to be backed out of
-- It is vague when an item always requires choosing someone to use it on when sometimes it doesnt make sense.
-
 - In topaz builds, fullscreen disabling doesnt come with window decoration and resizing is impossible
 - Some abilities are not properly implemented currently.
 
 Coming changes:
-  . Avoid showing time of day in dungeons
-  . Show stats of party members in party menu 
-  . Show equip stats on hover in inventory and equip
-  . missing percents on certain stat displays (i.e. enchantment stands)
   . in topaz builds, prevent auto-firing of confirm / deny
-  . Try to remove timestepping if walking into a wall 
   . When selecting a target in battle, party members move to bottom of list.
   . Being able to choose your starting characters. Theyll still be generated, but you'll get to choose 
     among a list. Thinking 5 per generated.

@@ -67,7 +67,8 @@
 @:USE_TARGET_HINT = {
     ONE     : 0,    
     GROUP   : 1,
-    ALL     : 2
+    ALL     : 2,
+    NONE    : 3
 }
 
 @:SIZE = {
@@ -1390,9 +1391,9 @@ Item.database.newEntry(data : {
     // fatigued
     blockPoints : 0,
     equipMod : StatSet.new(
-        ATK: 15,
-        SPD: 10,
-        DEX: 45
+        ATK: 55,
+        SPD: -10,
+        DEX: 95
     ),
     useEffects : [
         'Fling',
@@ -1881,7 +1882,7 @@ Item.database.newEntry(data : {
     blockPoints : 0,
     equipMod : StatSet.new(
         ATK:  5,
-        INT:  25,
+        INT:  85,
         SPD:  45,
         DEX:  20
     ),
@@ -3464,7 +3465,7 @@ Item.database.newEntry(data : {
     hasQuality : false,
     hasMaterial : false,
     isApparel : false,    isUnique : true,
-    useTargetHint : USE_TARGET_HINT.ONE,
+    useTargetHint : USE_TARGET_HINT.NONE,
     possibleAbilities : [
     ],
 
@@ -3993,7 +3994,7 @@ Item.database.newEntry(data : {
             
             description : {
                 get :: {
-                    return state.description + '\nEquip effects: \n' + state.stats.getRates();
+                    return state.description + '\nEquip effects: \n' + state.stats.descriptionRate;
                 }
             },
             
@@ -4039,7 +4040,7 @@ Item.database.newEntry(data : {
                 
                 windowEvent.queueMessage(
                     speaker:this.name + ' - Equip Stats',
-                    text:state.stats.description,
+                    text:state.stats.descriptionRate,
                     pageAfter:canvas.height-4
                 );
 
@@ -4067,7 +4068,7 @@ Item.database.newEntry(data : {
                         @out = '';
                         when (state.useEffects->keycount == 0) 'None.';
                         foreach(state.useEffects)::(i, effect) {
-                            out = out + '. ' + Effect.find(name:effect).description + '\n';
+                            out = out + '- ' + Effect.find(name:effect).description + '\n';
                         }
                         return out;
                     }

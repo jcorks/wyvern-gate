@@ -415,16 +415,20 @@
             blockPoints : {
                 get :: {
                     when(this.isIncapacitated()) 0;
-                    @wep = this.getEquipped(slot:EQUIP_SLOTS.HAND_LR);
-                    @amount = if (wep.base.name == 'None') 1 else wep.base.blockPoints;
-                    
-                    if (effects != empty) ::<= {
-                        foreach(effects) ::(index, effect) {
-                            amount += effect.effect.blockPoints
-                        }
-                    }
+                    @:am = ::<= {
+                        @wep = this.getEquipped(slot:EQUIP_SLOTS.HAND_LR);
+                        @amount = if (wep.base.name == 'None') 1 else wep.base.blockPoints;
                         
-                    return amount;
+                        if (effects != empty) ::<= {
+                            foreach(effects) ::(index, effect) {
+                                amount += effect.effect.blockPoints
+                            }
+                        }
+                        
+                        return amount;
+                    }
+                    when (am < 0) 0;
+                    return am;
                 }
             },
             
@@ -691,14 +695,18 @@
                     when(dmg.amount <= 0) empty;
 
 
-                    @critChance = 0.999 - (this.stats.LUK - state.level) / 100;
+                    @critChance = 0.999 - (this.stats.LUK/1.2) / 100;
                     @isCrit = false;
                     @isHitHead = false;
                     @isLimbHit = false;
                     @isHitBody = false;
-                    if (critChance < 0.90) critChance = 0.9;
+                    
+                    @missHead = false;
+                    @missBody = false;
+                    @missLimb = false;
+                    if (critChance < 0.75) critChance = 0.75;
                     if (Number.random() > critChance) ::<={
-                        dmg.amount += this.stats.DEX * 2.5;
+                        dmg.amount += this.stats.DEX * 1.5;
                         isCrit = true;
                     }
 
@@ -717,9 +725,11 @@
                             targetDefendPart = 0;
                         if (target.species.canBlock == false)
                             targetDefendPart = 0;
+                        if (target.isIncapacitated())
+                            targetDefendPart = 0;
                             
                             
-                        if (targetDefendPart == 0 && target.species.canBlock == true) 
+                        if (targetDefendPart == 0 && target.species.canBlock == true && target.isIncapacitated() == false) 
                             windowEvent.queueMessage(text: target.name + ' wasn\'t given a chance to block!');
 
                         if ((targetPart & targetDefendPart) != 0) ::<= {
@@ -753,14 +763,14 @@
                             match(true) {
                               ((targetPart & DAMAGE_TARGET.HEAD) != 0):::<= {
                                 dexPenalty = 0.3;
-                                if (random.try(percentSuccess:33)) ::<= {
+                                if (random.try(percentSuccess:20)) ::<= {
                                     isCrit = true;
-                                    dmg.amount += this.stats.DEX * 2.5;
+                                    dmg.amount += this.stats.DEX * 1.5;
+                                    isHitHead = true;
                                 } else ::<= {
-                                    dmg.amount *= 0.8;
+                                    missHead = true;
+                                    dmg.amount *= 0.4;
                                 }
-                                isHitHead = true;
-
                               },
 
                               ((targetPart & DAMAGE_TARGET.BODY) != 0):::<= {
@@ -769,8 +779,13 @@
                               },
 
                               ((targetPart & DAMAGE_TARGET.LIMBS) != 0):::<= {
-                                dexPenalty = 0.79;
-                                isLimbHit = true;
+                                dexPenalty = 0.7;
+                                if (random.try(percentSuccess:50)) ::<= {
+                                    isLimbHit = true;
+                                } else ::<= {
+                                    missLimb = true;
+                                    dmg.amount *= 0.4;
+                                }
                               }
 
                             }
@@ -803,7 +818,8 @@
                     if (!imperfectGuard) ::<= {
                         if (isLimbHit) ::<= {
                             windowEvent.queueMessage(text: 'The hit caused direct damage to the limbs!');
-                            target.addEffect(from:this, name:'Stunned', durationTurns:1);                    
+                            if (!target.isIncapacitated())
+                                target.addEffect(from:this, name:'Stunned', durationTurns:1);                    
                         }
 
                         if (isHitBody) ::<= {
@@ -814,8 +830,19 @@
                         if (isHitHead) ::<= {
                             windowEvent.queueMessage(text: 'The hit caused direct damage to the head!');
                         }
+                        
+                        
+                        if (missHead) ::<= {
+                            windowEvent.queueMessage(text: 'The hit missed the head, but still managed to hit ' + target.name +'!');                        
+                        }
+                        if (missLimb) ::<= {
+                            windowEvent.queueMessage(text: 'The hit missed the limbs, but still managed to hit ' + target.name +'!');                        
+                        }
+
                     }
                     this.flags.add(flag:StateFlags.ATTACKED);
+
+
 
 
                     
@@ -1386,8 +1413,6 @@
                 @:old = this.unequip(slot, silent:true);                
 
 
-                if (old != empty && inventory)
-                    inventory.add(item:old);
 
                 if (item.base.equipType == Item.TYPE.TWOHANDED) ::<={
                     state.equips[EQUIP_SLOTS.HAND_LR] = item;
@@ -1429,6 +1454,10 @@
 
                 if (inventory)
                     inventory.remove(item);
+
+                if (olditem != empty && inventory)
+                    inventory.add(item:olditem);
+
                 
                 this.recalculateStats();
 
@@ -1613,7 +1642,12 @@
 
                         'Their ' + qual.name + 
                                 (if (qual.plural) ' are fairly ' else ' is fairly ') 
+                            + qual.description + '. ',
+                            
+                        'Their ' + qual.name + 
+                                (if (qual.plural) ' are particularly ' else ' is particularly ') 
                             + qual.description + '. '
+     
                     ])[index];
                 }
                 
@@ -1661,17 +1695,17 @@
                 return out;
             },
             
-            describe:: {
+            describe::(excludeStats)  {
                 @:plainStatsState = this.stats.save();
                 @:plainStats = StatSet.new();
                 plainStats.load(serialized:plainStatsState);
                 plainStats.resetMod();
 
 
-
-                plainStats.printDiff(other:state.stats, 
-                    prompt:this.name + '(Base -> w/Mods.)'
-                );
+                if (excludeStats != true)
+                    plainStats.printDiff(other:state.stats, 
+                        prompt:this.name + '(Base -> w/Mods.)'
+                    );
                 
                 @:getRightHandName ::{
                     @:hand = this.getEquipped(slot:EQUIP_SLOTS.HAND_LR);

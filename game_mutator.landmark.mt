@@ -1053,7 +1053,8 @@ Landmark.database.newEntry(
         stepsSinceLast: 0,
         modData : empty,
         events : empty,
-        mapEntityController : empty
+        mapEntityController : empty,
+        overrideTitle : empty
     },
     
     database : Database.new(
@@ -1172,8 +1173,8 @@ Landmark.database.newEntry(
                 this.addLocation(
                     name:which.name
                 );
-                if (which.onePerLandmark) ::<= {
-                    state.possibleLocations->remove(key:state.possibleLocations->findIndex(value:which));
+                if (Location.database.find(name:which.name).onePerLandmark) ::<= {
+                    possibleLocations->remove(key:possibleLocations->findIndex(value:which));
                 }
                 mapIndex += 1;
             }
@@ -1370,11 +1371,24 @@ Landmark.database.newEntry(
             floor : {
                 get :: <- state.floor
             },
+            
+            updateTitle ::(override)  {
+                if (override) 
+                    state.overrideTitle = override;
+                    
+                when (state.overrideTitle)
+                    this.map.title = state.overrideTitle;
+                
+                this.map.title = this.name + 
+                    if (state.base.dungeonMap) ' - Unknown Time' else 
+                    (' - ' + world.timeString)
+                ;            
+            },
 
             step :: {
 
                 world.stepTime(isStep:true); 
-                this.map.title = this.name + if (state.base.dungeonMap) '' else (' - ' + world.timeString);
+                this.updateTitle();
                 state.mapEntityController.step();
                 when(!state.base.dungeonMap) ::<= {
                     if (this.peaceful == false) ::<= {
@@ -1415,7 +1429,10 @@ Landmark.database.newEntry(
                         world.stepTime();
                     }
                 }
-                this.map.title = this.name + ' - ' + world.timeString + '          ';
+                this.map.title = this.name + 
+                    if (state.base.dungeonMap) ' - Unknown Time' else 
+                    (' - ' + world.timeString)
+                ;
             },
             
             kind : {

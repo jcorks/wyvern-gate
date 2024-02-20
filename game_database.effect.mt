@@ -202,17 +202,17 @@ Effect.newEntry(
         },
 
         onAttacked ::(user, item, holder, by, damage) {
-        
+            if (!holder.isIncapacitated() && random.try(percentSuccess:40)) ::<= {
+                windowEvent.queueMessage(text:holder.name + "'s ghostly body bends around the attack!");
+                damage.amount = 0;
+            }        
         },
 
         onSuccessfulBlock::(user, item, holder, from, damage) {
         
         },
         onDamage ::(user, item, holder, from, damage) {
-            if (!holder.isIncapacitated() && random.try(percentSuccess:40)) ::<= {
-                windowEvent.queueMessage(text:holder.name + "'s ghostly body bends around the attack!");
-                damage.amount = 0;
-            }
+
         },
         
         onNextTurn ::(user, item, holder, turnIndex, turnCount) {
@@ -2795,7 +2795,7 @@ Effect.newEntry(
 
 
             windowEvent.queueMessage(
-                text: 'After the battle, ' + holder.name + ' found some food and cooked a meal for the party.'
+                text: '' + holder.name + ' found some food and cooked a meal for the party.'
             );
             foreach(world.party.members)::(index, member) {
                 member.heal(amount:member.stats.HP * 0.1);
@@ -2850,7 +2850,7 @@ Effect.newEntry(
 
             @:amt = (Number.random() * 20)->ceil;
             windowEvent.queueMessage(
-                text: 'After the battle, ' + holder.name + ' found ' + g(g:amt) + ' on the ground dropped from the battling party.'
+                text: '' + holder.name + ' happened to notice ' + g(g:amt) + ' dropped on the ground.'
             );
             world.party.inventory.addGold(amount:amt);
             

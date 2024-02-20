@@ -3253,6 +3253,13 @@ Ability.newEntry(
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:item = extraData[0];
+            when (targets->size == 0) ::<= {
+                foreach(item.base.useEffects)::(index, effect) {    
+                    user.addEffect(from:user, name:effect, item:item, durationTurns:0);                            
+                }
+            }
+
+            
             foreach(item.base.useEffects)::(index, effect) {    
                 foreach(targets)::(t, target) {
                     target.addEffect(from:user, name:effect, item:item, durationTurns:0);                            

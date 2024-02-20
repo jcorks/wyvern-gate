@@ -159,6 +159,7 @@
             @:defaultChoice = data.defaultChoice;
             @:onChoice = data.onChoice;
             @:onHover = data.onHover;
+            @:pageAfter = data.pageAfter;
             @:header = if (data.onGetHeader) data.onGetHeader() else data.header;
             @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
 
@@ -178,7 +179,7 @@
                 
 
 
-                @:PAGE_SIZE = 7;     
+                @:PAGE_SIZE = if (pageAfter == empty) 7 else pageAfter;     
                 @:WIDTH = ::<= {
                     @max = 0;
                     foreach(choices)::(i, text) {
@@ -830,7 +831,7 @@
             // Like all UI choices, the weight can be chosen.
             // Prompt will be displayed, like speaker in the message callback
             //
-            queueChoices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetChoices, onGetPrompt, jumpTag, onLeave, header, onGetHeader, onCancel) {
+            queueChoices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetChoices, onGetPrompt, jumpTag, onLeave, header, onGetHeader, onCancel, pageAfter) {
 
                 nextResolve->push(value:[::{
                     choiceStack->push(value:{
@@ -838,6 +839,7 @@
                         mode: CHOICE_MODE.CURSOR,
                         choices: choices,
                         prompt: prompt,
+                        pageAfter: pageAfter,
                         leftWeight: leftWeight,
                         topWeight: topWeight,
                         canCancel: canCancel,

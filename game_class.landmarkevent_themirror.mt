@@ -47,12 +47,16 @@
                 @:a = member.save();
                 a.stats.SPD -= 1;
                 a.name = a.name + ' (clone)';
-                partyCopy->push(value:
-                    Entity.new(
-                        parent:this,
-                        state: a
-                    )
-                )                
+
+                @:ent = Entity.new(
+                    parent:this,
+                    state: a
+                );
+                
+                ent.heal(amount:ent.stats.HP, silent:true);
+
+
+                partyCopy->push(value:ent)                
             }  
             
             @:inv = Inventory.new();

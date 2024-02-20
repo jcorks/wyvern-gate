@@ -932,7 +932,7 @@ Interaction.newEntry(
                         when(hoveredItem == empty) empty;
                         canvas.renderTextFrameGeneral(
                             title: 'Equip stats:',
-                            lines: hoveredItem.stats.getRates()->split(token:'\n'),
+                            lines: hoveredItem.stats.descriptionRate->split(token:'\n'),
                             leftWeight: 0,
                             topWeight: 0.5
                         )
@@ -1488,11 +1488,11 @@ Interaction.newEntry(
             }
             
             windowEvent.queueChoices(
-                leftWeight: 1,
-                topWeight: 1,
+                leftWeight: 0.5,
+                topWeight: 0.5,
                 choices: names,
                 prompt: 'Whom?',
-                canCancel: false,
+                canCancel: true,
                 onChoice:::(choice) {
 
                     when(choice == 0) empty;
@@ -2151,7 +2151,7 @@ Interaction.newEntry(
             if (isStatBased)
                 windowEvent.queueMessage(
                     speaker:location.data.enchant.name + ' - Enchant Stats',
-                    text:location.data.enchant.base.equipMod.description,
+                    text:location.data.enchant.base.equipMod.descriptionRate,
                     pageAfter:canvas.height-4
                 );
                 

@@ -88,7 +88,7 @@ import(module:'game_class.island.mt');
     return (xd**2 + yd**2)**0.5;
 }
 @:JSON = import(module:'Matte.Core.JSON');
-@:VERSION = '0.1.7a';
+@:VERSION = '0.1.8a';
 @world = import(module:'game_singleton.world.mt');
 import(module:'game_function.newrecord.mt');
 
@@ -664,6 +664,10 @@ return class(
                                     )
                                 }
                                 this.visitLandmark(landmark, where);                            
+                                if (windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
+                                    windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
+                                }
+
                             }
                         }
                     );
@@ -691,7 +695,7 @@ return class(
 
                 @:party = world.party;
                 
-                landmark.map.title = landmark.name + ' - ' + world.timeString + '          ';
+                landmark.updateTitle();
                 landmark.base.onVisit(landmark, island:landmark.island);
 
 
@@ -787,10 +791,10 @@ return class(
                     
                         // move by one unit in that direction
                         // or ON it if its within one unit.
-                        landmark.map.movePointerAdjacent(
+                        when(!landmark.map.movePointerAdjacent(
                             x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
                             y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
-                        );
+                        )) empty;
                         landmark.step();
                         stepCount += 1;
 

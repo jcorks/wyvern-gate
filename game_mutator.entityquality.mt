@@ -164,7 +164,7 @@ EntityQuality.database.newEntry(
             '$0 with $1',
             '$0',
             '$0 with $1',
-            'slightly iridescent $0 with $1',
+            'iridescent $0 with $1',
             'shiny with $1',
         ],
         
@@ -200,7 +200,6 @@ EntityQuality.database.newEntry(
         plural : true,
         descriptions : [
             '$2 with $1',
-            'particularly $0 and $2',
             '$0 and $2',
             '$2 and have $1',
             'mesmerizingly $2',

@@ -54,19 +54,13 @@ return {
                         match(ability.targetMode) {
                           (Ability.TARGET_MODE.ONE,
                            Ability.TARGET_MODE.ONEPART): ::<={
-                            @:all = [];
-                            foreach(allies)::(index, ally) {
-                                all->push(value:ally);
-                            }
-                            foreach(enemies)::(index, enemy) {
-                                all->push(value:enemy);
-                            }
+                            @:all = [
+                                ...enemies,
+                                ...allies
+                            ];
                             
                             
-                            @:allNames = [];
-                            foreach(all)::(index, person) {
-                                allNames->push(value:person.name);
-                            }
+                            @:allNames = [...all]->map(to:::(value)<- value.name);
                           
                             @:chooseOnePart ::(onDone) {
                                 @:text = 
@@ -506,41 +500,35 @@ return {
             filter::(island, landmark) <- true,
             onSelect::(island, landmark) {
                 @:world = import(module:'game_singleton.world.mt');
-                @:names = [];
-                foreach(world.party.members)::(index, member) {
-                    names->push(value:member.name);
+                @firstAwake = empty;
+                {:::} {
+                    foreach(world.party.members)::(index, member) {
+                        if (!member.isIncapacitated()) ::<= {
+                            firstAwake = member
+                            send();
+                        }
+                    }
                 }
-                windowEvent.queueChoices(
-                    leftWeight: 1,
-                    topWeight: 1,
-                    keep:true,
-                    prompt: "Who's looking?",
-                    choices: names,
-                    canCancel : true,
-                    onChoice::(choice) {
-                        when(choice == 0) empty;
-                        
-                        @:itemmenu = import(module:'game_function.itemmenu.mt');
-                        itemmenu(
-                            inBattle: false,
-                            user:world.party.members[choice-1], 
-                            party:world.party, 
-                            enemies:[],
-                            onAct::(action) {
-                                when(action == empty) empty;
-                                world.party.members[choice-1].useAbility(
-                                    ability:action.ability,
-                                    targets:action.targets,
-                                    turnIndex : 0,
-                                    extraData : action.extraData
-                                );                              
-                            
-                            }
-                        );
-                        
-                    
+                @:itemmenu = import(module:'game_function.itemmenu.mt');
+                itemmenu(
+                    inBattle: false,
+                    user:firstAwake, 
+                    party:world.party, 
+                    enemies:[],
+                    limitedMenu:true,
+                    topWeight:0.5,
+                    leftWeight:0.5,
+                    onAct::(action) {
+                        when(action == empty) empty;
+                        firstAwake.useAbility(
+                            ability:action.ability,
+                            targets:action.targets,
+                            turnIndex : 0,
+                            extraData : action.extraData
+                        );                              
                     }
                 );
+
             }
         ),
         

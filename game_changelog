@@ -6,8 +6,14 @@
 - Added Dual Blades
 - HP has been capped at tiers to make things less drawn out.
 - added custom accolades for The Trader
-- Inventory was moved to its own separate menu as a main interaction.
+- Inventory was moved to its own separate menu as a main interaction and simplified.
+- Additional stats displayed in party menu for ease of use.
+- Now, time does not stop in a dungeon or town if walking into a wall.
+- Enemies displayed first as targets in battle.
 - consolidated events and removed treasure as an event. Now it requires active looking.
+- Removed showing time of day in dungeons
+- tweaks to crits, crits are slightly nerfed, but LUK has much more influence. Crits are generally easier to achieve due to the new aiming mechanic.
+- Removed time string from dungeon crawl title.
 
 0.1.7a
 - Added scenarios. Base game before is the "Chosen" scenario.

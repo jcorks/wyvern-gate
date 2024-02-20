@@ -115,14 +115,14 @@
                 ],
                 
                 [
-                    ''+stats.HP+'%',
-                    ''+stats.AP+'%',
-                    ''+stats.ATK+'%',
-                    ''+stats.DEF+'%',
-                    ''+stats.INT+'%',
-                    ''+stats.SPD+'%',
-                    ''+stats.LUK+'%',
-                    ''+stats.DEX+'%'                        
+                    (if(stats.HP>0)'+'+stats.HP+'%' else if (stats.HP==0)'--' else ''+stats.HP+'%'),
+                    (if(stats.AP>0)'+'+stats.AP+'%' else if (stats.AP==0)'--' else ''+stats.AP+'%'),
+                    (if(stats.ATK>0)'+'+stats.ATK+'%' else if (stats.ATK==0)'--' else ''+stats.ATK+'%'),
+                    (if(stats.DEF>0)'+'+stats.DEF+'%' else if (stats.DEF==0)'--' else ''+stats.DEF+'%'),
+                    (if(stats.INT>0)'+'+stats.INT+'%' else if (stats.INT==0)'--' else ''+stats.INT+'%'),
+                    (if(stats.SPD>0)'+'+stats.SPD+'%' else if (stats.SPD==0)'--' else ''+stats.SPD+'%'),
+                    (if(stats.LUK>0)'+'+stats.LUK+'%' else if (stats.LUK==0)'--' else ''+stats.LUK+'%'),
+                    (if(stats.DEX>0)'+'+stats.DEX+'%' else if (stats.DEX==0)'--' else ''+stats.DEX+'%')                        
                 ],
                 
                 [
@@ -137,25 +137,25 @@
                 ],
                 
                 [
-                    ''+other.HP+'%',
-                    ''+other.AP+'%',
-                    ''+other.ATK+'%',
-                    ''+other.DEF+'%',
-                    ''+other.INT+'%',
-                    ''+other.SPD+'%',
-                    ''+other.LUK+'%',
-                    ''+other.DEX+'%'                        
+                    (if(other.HP>0)'+'+other.HP+'%' else if (other.HP==0)'--' else ''+other.HP+'%'),
+                    (if(other.AP>0)'+'+other.AP+'%' else if (other.AP==0)'--' else ''+other.AP+'%'),
+                    (if(other.ATK>0)'+'+other.ATK+'%' else if (other.ATK==0)'--' else ''+other.ATK+'%'),
+                    (if(other.DEF>0)'+'+other.DEF+'%' else if (other.DEF==0)'--' else ''+other.DEF+'%'),
+                    (if(other.INT>0)'+'+other.INT+'%' else if (other.INT==0)'--' else ''+other.INT+'%'),
+                    (if(other.SPD>0)'+'+other.SPD+'%' else if (other.SPD==0)'--' else ''+other.SPD+'%'),
+                    (if(other.LUK>0)'+'+other.LUK+'%' else if (other.LUK==0)'--' else ''+other.LUK+'%'),
+                    (if(other.DEX>0)'+'+other.DEX+'%' else if (other.DEX==0)'--' else ''+other.DEX+'%')                        
                 ],
                 
                 [
-                    (if (other.HP - stats.HP  != 0) (if (other.HP > stats.HP) '(+' else '(') + (other.HP  - stats.HP)  + ')' else ''),
-                    (if (other.AP - stats.AP  != 0) (if (other.AP > stats.AP) '(+' else '(') + (other.AP  - stats.AP)  + ')' else ''),
-                    (if (other.ATK - stats.ATK  != 0) (if (other.ATK > stats.ATK) '(+' else '(') + (other.ATK  - stats.ATK)  + ')' else ''),
-                    (if (other.DEF - stats.DEF  != 0) (if (other.DEF > stats.DEF)'(+' else '(') + (other.DEF  - stats.DEF)  + ')' else ''),
-                    (if (other.INT - stats.INT  != 0) (if (other.INT > stats.INT)'(+' else '(') + (other.INT  - stats.INT)  + ')' else ''),
-                    (if (other.SPD - stats.SPD  != 0) (if (other.SPD > stats.SPD)'(+' else '(') + (other.SPD  - stats.SPD)  + ')' else ''),
-                    (if (other.LUK - stats.LUK  != 0) (if (other.LUK > stats.LUK)'(+' else '(') + (other.LUK  - stats.LUK)  + ')' else ''),
-                    (if (other.DEX - stats.DEX  != 0) (if (other.DEX > stats.DEX)'(+' else '(') + (other.DEX  - stats.DEX)  + ')' else ''),
+                    (if (other.HP - stats.HP  != 0) (if (other.HP > stats.HP) '(+' else '(') + (other.HP  - stats.HP)  + '%)' else ''),
+                    (if (other.AP - stats.AP  != 0) (if (other.AP > stats.AP) '(+' else '(') + (other.AP  - stats.AP)  + '%)' else ''),
+                    (if (other.ATK - stats.ATK  != 0) (if (other.ATK > stats.ATK) '(+' else '(') + (other.ATK  - stats.ATK)  + '%)' else ''),
+                    (if (other.DEF - stats.DEF  != 0) (if (other.DEF > stats.DEF)'(+' else '(') + (other.DEF  - stats.DEF)  + '%)' else ''),
+                    (if (other.INT - stats.INT  != 0) (if (other.INT > stats.INT)'(+' else '(') + (other.INT  - stats.INT)  + '%)' else ''),
+                    (if (other.SPD - stats.SPD  != 0) (if (other.SPD > stats.SPD)'(+' else '(') + (other.SPD  - stats.SPD)  + '%)' else ''),
+                    (if (other.LUK - stats.LUK  != 0) (if (other.LUK > stats.LUK)'(+' else '(') + (other.LUK  - stats.LUK)  + '%)' else ''),
+                    (if (other.DEX - stats.DEX  != 0) (if (other.DEX > stats.DEX)'(+' else '(') + (other.DEX  - stats.DEX)  + '%)' else ''),
 
                 ]                        
             ]);      
@@ -366,10 +366,10 @@
             },
             
             printDiffRate ::(other, prompt) {
-                windowEvent.queueDisplayColumns(
+                windowEvent.queueDisplay(
                     prompt,
                     pageAfter: 10,
-                    columns: StatSet.diffRateToLines(stats:this, other)
+                    lines: StatSet.diffRateToLines(stats:this, other)
                 );
             },
             
@@ -387,18 +387,20 @@
                     ;
                 }
             },
-            
-            getRates :: {
-                return 
-                    'HP:  ' + (if (HP_ > 0) '+' else '')  +HP_ + '%\n' +
-                    'AP:  ' + (if (MP_ > 0) '+' else '')  +MP_ + '%\n' +
-                    'ATK: ' + (if (ATK_ > 0) '+' else '') +ATK_ + '%\n' +
-                    'DEF: ' + (if (DEF_ > 0) '+' else '') +DEF_ + '%\n' +
-                    'INT: ' + (if (INT_ > 0) '+' else '') +INT_ + '%\n' +
-                    'SPD: ' + (if (SPD_ > 0) '+' else '') +SPD_ + '%\n' +
-                    'LUK: ' + (if (LUK_ > 0) '+' else '') +LUK_ + '%\n' +
-                    'DEX: ' + (if (DEX_ > 0) '+' else '') +DEX_ + '%\n'
-                ;
+
+            descriptionRate : {
+                get :: {
+                    return 
+                        'HP:  ' + (if(HP_ > 0) '+' + HP_ + '%\n' else if (HP_ == 0) '--\n' else ''+HP_+ '%\n') +
+                        'AP:  ' + (if(MP_ > 0) '+' + MP_ + '%\n' else if (MP_ == 0) '--\n' else ''+MP_+ '%\n') +
+                        'ATK: ' + (if(ATK_ > 0) '+' + ATK_ + '%\n' else if (ATK_ == 0) '--\n' else ''+ATK_+ '%\n') +
+                        'DEF: ' + (if(DEF_ > 0) '+' + DEF_ + '%\n' else if (DEF_ == 0) '--\n' else ''+DEF_+ '%\n') +
+                        'INT: ' + (if(INT_ > 0) '+' + INT_ + '%\n' else if (INT_ == 0) '--\n' else ''+INT_+ '%\n') +
+                        'SPD: ' + (if(SPD_ > 0) '+' + SPD_ + '%\n' else if (SPD_ == 0) '--\n' else ''+SPD_+ '%\n') +
+                        'LUK: ' + (if(LUK_ > 0) '+' + LUK_ + '%\n' else if (LUK_ == 0) '--\n' else ''+LUK_+ '%\n') +
+                        'DEX: ' + (if(DEX_ > 0) '+' + DEX_ + '%\n' else if (DEX_ == 0) '--\n' else ''+DEX_+ '%\n')
+                    ;
+                }
             }
         }
     }

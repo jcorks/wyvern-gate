@@ -183,8 +183,7 @@ ItemQuality.newEntry(
             DEF: 10,
             ATK: 10,
             SPD: 10,
-            DEX: 10,
-            INT: 10
+            DEX: 10
         ),
         pricePercentMod: 110,
         equipEffects : [
@@ -203,8 +202,7 @@ ItemQuality.newEntry(
         equipMod : StatSet.new(
             DEF: 15,
             ATK: 15,
-            DEX: 15,
-            INT: 15
+            DEX: 15
         ),
         pricePercentMod: 115,
         equipEffects : [
@@ -224,7 +222,6 @@ ItemQuality.newEntry(
             DEF: 20,
             ATK: 20,
             DEX: 20,
-            INT: 20,
             SPD: 20
         ),
         pricePercentMod: 117,
@@ -265,8 +262,7 @@ ItemQuality.newEntry(
             DEF: 50,
             ATK: 50,
             SPD: 50,
-            DEX: 50,
-            INT: 50
+            DEX: 50
         ),
         pricePercentMod: 1200,
         equipEffects : [
@@ -286,8 +282,7 @@ ItemQuality.newEntry(
             DEF: 75,
             ATK: 75,
             SPD: 75,
-            DEX: 75,
-            INT: 75
+            DEX: 75
         ),
         pricePercentMod: 2500,
         equipEffects : [
@@ -307,8 +302,7 @@ ItemQuality.newEntry(
             DEF: 100,
             ATK: 100,
             SPD: 100,
-            DEX: 100,
-            INT: 100
+            DEX: 100
         ),
         rarity: 100,
         pricePercentMod: 3600,
@@ -332,8 +326,7 @@ ItemQuality.newEntry(
             DEF: 150,
             ATK: 150,
             SPD: 150,
-            DEX: 150,
-            INT: 150
+            DEX: 150
         ),
         rarity: 200,
         pricePercentMod: 9600,
@@ -355,7 +348,7 @@ ItemQuality.newEntry(
             ATK: 200,
             SPD: 200,
             DEX: 200,
-            INT: 200
+            INT: 50
         ),
         rarity: 400,
         pricePercentMod: 10600,
@@ -390,7 +383,7 @@ ItemQuality.newEntry(
 
 ItemQuality.newEntry(
     data : {
-        name : 'Null',
+        name : '[  ]',
         description : "It is said this shouldn\'t exist.",
         levelMinimum: 1,
         equipMod : StatSet.new(

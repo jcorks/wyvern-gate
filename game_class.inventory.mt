@@ -34,7 +34,7 @@
             },
             
             defaultLoad::(size) {
-                state.maxItems = 0;
+                state.maxItems = 10;
                 if (size != empty)
                     this.maxItems = size;                        
                 state.items = [];

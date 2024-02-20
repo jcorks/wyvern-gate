@@ -66,7 +66,7 @@
             
             
                 // default: just attack if all you have is defend and attack
-                when(user_.abilitiesAvailable->keycount <= 2 || random.try(percentSuccess:40))
+                when(user_.abilitiesAvailable->keycount <= 2 || random.try(percentSuccess:60))
                     defaultAttack();          
 
                 // else pick a non-defend ability

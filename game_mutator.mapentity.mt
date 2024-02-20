@@ -360,13 +360,13 @@ MapEntity.Task.database.newEntry(
                         },
                         
                         onEnd::(result) {
+                            @:windowEvent = import(module:'game_singleton.windowevent.mt');
                             when(world.battle.partyWon()) ::<= {
                                 windowEvent.queueMessage(
                                     text: 'The apparitions vanished...'
                                 );
                             }
                               
-                            @:windowEvent = import(module:'game_singleton.windowevent.mt');
                             @:instance = import(module:'game_singleton.instance.mt');
                             instance.gameOver(reason:'The Wyvern Specter claims the items as the Shrine\'s possessions.');
                         }

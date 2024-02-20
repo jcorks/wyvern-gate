@@ -50,6 +50,7 @@ Scene.newEntry(
         name: 'scene_keybattle0',
         script: [
             ::(location, landmark, doNext) {
+                @:world = import(module:'game_singleton.world.mt');
                 
                 @chance = Number.random(); 
                 @:island = landmark.island;   
@@ -77,7 +78,6 @@ Scene.newEntry(
                     ])
                 );
 
-                @:world = import(module:'game_singleton.world.mt');
                 
 
                 @:battleStart = ::{
@@ -205,7 +205,7 @@ Scene.newEntry(
                             guard.anonymize();
                         }
                         
-                        windowEvent.queueMessage(speaker:e.name, text:'There they are!');
+                        windowEvent.queueMessage(speaker:e.name, text:'"There they are!"');
                         
                         
                         return e;
@@ -241,7 +241,7 @@ Scene.newEntry(
                     
                     allies: party.members,
                     enemies,
-                    landmark: {},
+                    landmark: landmark,
                     loot : true,
                     onEnd::(result){
                     
@@ -1554,7 +1554,7 @@ Scene.newEntry(
                     base:Item.database.find(name:'Tome'),
                     abilityHint: 'Cure',
                     materialHint: 'Hardstone',
-                    qualityHint: 'Worn'
+                    qualityHint: 'Quality'
                 );
                 world.party.inventory.add(item:tome);                
 

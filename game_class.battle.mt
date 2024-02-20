@@ -149,15 +149,16 @@
             forcedAcquisition->push(value:inv);
     }
 
-
+    breakpoint();
     foreach(forcedAcquisition) ::(i, inv) {
         foreach(inv.items) ::(n, item) {
-            windowEvent.queueMessage(text: 'The party acquired ' + item.name + '.');
+            windowEvent.queueMessage(text: 'The party acquired ' + correctA(word:item.name) + '.');
             party.inventory.add(item);
         }
-        windowEvent.queueMessage(text: 'The party acquired ' + g(g:inv.gold) + '.');
-        if (inv.gold > 0)
+        if (inv.gold > 0) ::<= {
+            windowEvent.queueMessage(text: 'The party acquired ' + g(g:inv.gold) + '.');
             party.inventory.addGold(amount:inv.gold);
+        }
     }
 
 
@@ -881,6 +882,10 @@
                 get ::<- active
             },
             
+            landmark : {
+                get ::<- landmark_
+            },
+            
             join ::(group, sameGroupAs) {
                 foreach(group) ::(i, entity) {
                     when(turn->findIndex(value:entity) != -1) 
@@ -916,7 +921,6 @@
             },
             
             entityCommitAction::(action) {
-                breakpoint();
                 @:Entity = import(module:'game_class.entity.mt');
                 @:world = import(module:'game_singleton.world.mt');
                 @:targetDefendParts = [];
@@ -958,8 +962,8 @@
                 }                    
                 @:doNext = ::{
                     when(pendingChoices->size == 0) commit();
-                    when(random.flipCoin()) doNext();
                     @:next = pendingChoices->pop;
+                    when(random.flipCoin()) doNext();
                     combatChooseDefend(
                         targetPart: action.targetParts[action.targets->findIndex(value:next)],
                         attacker:entityTurn,
