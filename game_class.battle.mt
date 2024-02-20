@@ -658,7 +658,7 @@
                             enemies 
                         )
                     else 
-                        user.battleAI.takeTurn(battle)
+                        user.battleAI.takeTurn(battle, enemies, allies);
                     ;
                 }
                 
@@ -964,7 +964,7 @@
                     when(pendingChoices->size == 0) commit();
                     @:next = pendingChoices->pop;
                     when(random.try(percentSuccess:35)) ::<= {
-                        targetDefendParts[index] = 0;
+                        targetDefendParts[action.targets->findIndex(value:next)] = 0;
                         doNext();
                     }
                     combatChooseDefend(
