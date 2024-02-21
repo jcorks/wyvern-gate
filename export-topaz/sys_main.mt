@@ -19,7 +19,7 @@ display.setName(name:"tOS");
 
 term.setPosition(value:{
     x: -displayWidth()/2,
-    y:  displayHeight()/2 - term.LINE_SPACING*2
+    y:  displayHeight()/2
 });
 display.getViewport().attach(child:term);
 

@@ -108,7 +108,7 @@ return ::(terminal, arg, onDone) {
         @:saveAsset = Topaz.Resources.createAsset(name:'WYVERN_SAVE', type:Topaz.Asset.Type.Data);
         @:settingsAsset = Topaz.Resources.createAsset(name:'settings', type:Topaz.Asset.Type.Data);
         instance.mainMenu(
-            canvasHeight: 28,
+            canvasHeight: 22,
             canvasWidth: 80,
             onSaveState :::(
                 slot,

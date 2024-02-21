@@ -57,9 +57,15 @@ if (ret != empty) ::<= {
 
 
 @:RENDERER_WIDTH = 80;
-@:RENDERER_HEIGHT = 28;
+@:RENDERER_HEIGHT = 24;
 @:LINE_SPACING = 15;
 @:FONT_SIZE = 15;
+
+display.getViewport().resize(
+    width :RENDERER_WIDTH * FONT_SIZE,
+    height:RENDERER_HEIGHT * LINE_SPACING 
+);
+
 
 @:Terminal = {
     new :: {
