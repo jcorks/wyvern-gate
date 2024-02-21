@@ -1,4 +1,5 @@
 #!/bin/sh
+mkdir ./output/
 git clone https://github.com/jcorks/topaz/
 cd ./topaz/ && git pull && cd ..
 cp ../*.mt ./output/

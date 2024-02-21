@@ -72,12 +72,14 @@ return ::(terminal, arg, onDone) {
             when(value < 1) empty;
             match(input) {
                 (Topaz.Key.z,
-                Topaz.Key.enter):::<= {
+                Topaz.Key.enter,
+                Topaz.Key.space):::<= {
                     windowEvent.commitInput(input:4);
                 },
 
                 (Topaz.Key.x,
-                Topaz.Key.backspace):::<= {
+                Topaz.Key.backspace,
+                Topaz.Key.esc):::<= {
                     windowEvent.commitInput(input:5);
                 },
 

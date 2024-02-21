@@ -266,16 +266,14 @@ return class(
                 Topaz.Input.addMappedListener(
                     mappedName: 'confirm',
                     listener : {
-                        onUpdate::(input, value) {
+                        onPress::(input, value) {
                             when(!term.requestStringMappings) empty;
-                            if (value > 0) ::<= {
-                                when (programActive)
-                                    onProgramKeyboard(input:Topaz.Key.z, value:1);
+                            when (programActive)
+                                onProgramKeyboard(input:Topaz.Key.z, value:1);
 
-                                currentCommand = 'start';
-                                printPrompt();                                
-                                runCommand(command:'start', arg:'');
-                            }
+                            currentCommand = 'start';
+                            printPrompt();                                
+                            runCommand(command:'start', arg:'');
                         }
                     }
                 );                
@@ -283,9 +281,9 @@ return class(
                 Topaz.Input.addMappedListener(
                     mappedName: 'deny',
                     listener : {
-                        onUpdate::(input, value) {
+                        onPress::(input, value) {
                             when(!term.requestStringMappings) empty;
-                            if (value > 0)
+                            when (programActive)
                                 onProgramKeyboard(input:Topaz.Key.x, value:1);
                         }
                     }
@@ -309,28 +307,55 @@ return class(
                 )
                 
                 term.attach(child:termManager);
-
+                @altHeld = false;
+                @enterHeld = false;
                 Topaz.Input.addKeyboardListener(
                     listener : {
+                        onPress::(input, value) {
+                            if (((input == Topaz.Key.lalt ||
+                                  input == Topaz.Key.ralt) && enterHeld) 
+                                  ||
+                                ((input == Topaz.Key.enter) && altHeld)
+                            )
+                                Topaz.ViewManager.getDefault().setParameter(
+                                    param:Topaz.Display.Parameter.Fullscreen,
+                                    value: if(Topaz.ViewManager.getDefault().getParameter(param:Topaz.Display.Parameter.Fullscreen)==1) 0 else 1
+                                );                            
+                                
+
+                            when (!programActive) empty;
+                            match(input) {
+                              (Topaz.Key.z,
+                               Topaz.Key.x,
+                               Topaz.Key.enter,
+                               Topaz.Key.backspace,
+                               Topaz.Key.esc,
+                               Topaz.Key.space):
+                                    onProgramKeyboard(input, value:1)
+
+                            }
+                        },
                         onUpdate::(input, value) {
+                            if (input == Topaz.Key.enter)
+                                enterHeld = value != 0;
+                            if (input == Topaz.Key.lalt ||
+                                input == Topaz.Key.ralt)
+                                altHeld = value != 0;
+
+                                
                             when(programActive) ::<= {
-                                {:::} {
-                                    match(input) {
-                                      (Topaz.Key.up,
-                                      Topaz.Key.down,
-                                      Topaz.Key.left,
-                                      Topaz.Key.right): empty,
-                                      default:
-                                        onProgramKeyboard(input, value)
-                                    }
-                                } : {
-                                    onError::(message) {
-                                        endProgramError(message);
-                                    }
-                                }           
+                                match(input) {
+                                    (Topaz.Key.up,
+                                    Topaz.Key.down,
+                                    Topaz.Key.left,
+                                    Topaz.Key.right): empty
+                                }
                             }         
 
                             when(value < 1) empty;
+
+
+
                             match(input) {
                                 (Topaz.Key.enter):::<= {
                                     @:args = currentCommand->split(token:' ');
