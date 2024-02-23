@@ -6,6 +6,8 @@
 
 @:term = Terminal.new();
 
+@:PADDING = 6;
+
 @:display = Topaz.ViewManager.getDefault();
 @:displayWidth = ::{
     return display.getParameter(param:Topaz.Display.Parameter.Width);
@@ -18,10 +20,18 @@
 display.setName(name:"tOS");
 
 term.setPosition(value:{
-    x: -displayWidth()/2,
-    y:  displayHeight()/2
+    x: -term.widthPixels/2 + PADDING/2 - 2,
+    y:  term.heightPixels/2+ PADDING/2
 });
+
+display.getViewport().resize(
+    width :term.widthPixels + PADDING*2,
+    height:term.heightPixels + PADDING*2
+);
+
+
 display.getViewport().attach(child:term);
+//display.getViewport().setFiltered(enabled:false);
 
 
 display.setParameter(

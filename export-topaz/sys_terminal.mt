@@ -28,6 +28,8 @@ display.setParameter(
     value:Topaz.Display.ViewPolicy.None
 );
 
+Topaz.Console.enable(enable:true);
+
 // create font asset
 @:font = Topaz.Resources.createDataAssetFromPath(
     path:'sys_FSEX300.ttf',
@@ -61,10 +63,9 @@ if (ret != empty) ::<= {
 @:LINE_SPACING = 15;
 @:FONT_SIZE = 15;
 
-display.getViewport().resize(
-    width :RENDERER_WIDTH * FONT_SIZE,
-    height:RENDERER_HEIGHT * LINE_SPACING 
-);
+@TERM_WIDTH = RENDERER_WIDTH * FONT_SIZE * (0.54);
+@TERM_HEIGHT = RENDERER_HEIGHT * LINE_SPACING;
+
 
 
 @:Terminal = {
@@ -102,10 +103,10 @@ display.getViewport().resize(
 
         
 
-        bg.formRectangle(width:640, height:480);
+        bg.formRectangle(width:TERM_WIDTH, height:TERM_HEIGHT);
         bg.setColor(color:Topaz.Color.fromString(str:'#242424'));
         this.addComponent(component:bg);
-        bg.setPosition(value:{x:0, y:-480 + LINE_SPACING*2});
+        bg.setPosition(value:{x:0, y:-TERM_HEIGHT});
         for(0, RENDERER_HEIGHT)::(i) {
             lines[i] = createTextLine();
             lines[i].setPosition(value:{x:0, y:-LINE_SPACING*i - LINE_SPACING*2});
@@ -169,6 +170,14 @@ display.getViewport().resize(
 
             WIDTH : {
                 get ::<- RENDERER_WIDTH
+            },
+            
+            widthPixels : {
+                get ::<- TERM_WIDTH
+            },
+            
+            heightPixels : {
+                get ::<- TERM_HEIGHT
             },
             
             requestStringMappings : {

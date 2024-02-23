@@ -296,12 +296,13 @@ return {
         
         
         @:Species = import(module:'game_database.species.mt');
-        @:p0 = island.newInhabitant(speciesHint: island.species[0], levelHint:story.levelHint);
-        @:p1 = island.newInhabitant(speciesHint: island.species[1], levelHint:story.levelHint-2);
-        // theyre just normal people so theyll have some trouble against 
-        // professionals.
-        p0.normalizeStats();
-        p1.normalizeStats();
+        @:choices = [];
+        
+        for(0, 5) ::(i) {
+            @:p0 = island.newInhabitant(levelHint:story.levelHint-1);
+            p0.normalizeStats();        
+            choices->push(value:p0);
+        }
 
         party.inventory.add(item:Item.new(
             base:Item.database.find(name:'Sentimental Box')
@@ -380,8 +381,6 @@ return {
             */
 
 
-        party.add(member:p0);
-        party.add(member:p1);
         
         
         /*
@@ -404,24 +403,168 @@ return {
         */
 
 
+        windowEvent.queueMessage(
+            text: 'Before it begins, we must decide who will be venturing on their journey.'
+        )
 
+        windowEvent.queueMessage(
+            text: 'Who will it be? You may pick 2.'
+        );
+        
 
-
-        @somewhere = LargeMap.getAPosition(map:island.map);
-        island.map.setPointer(
-            x: somewhere.x,
-            y: somewhere.y
-        );               
-        instance.savestate();
-        @:Scene = import(module:'game_database.scene.mt');
-        Scene.start(name:'scene_intro', onDone::{                    
-            instance.visitIsland();
-            
-            windowEvent.queueMessage(
-                speaker: p0.name,
-                text: '"I should probably open that box now..."'
+        
+        @:extendedName::(entity) {
+            return entity.name + ' - the ' + entity.species.name + ' ' + entity.profession.base.name
+        }
+        
+        @:finish ::{
+            @somewhere = LargeMap.getAPosition(map:island.map);
+            island.map.setPointer(
+                x: somewhere.x,
+                y: somewhere.y
+            );               
+            instance.savestate();
+            @:Scene = import(module:'game_database.scene.mt');
+            Scene.start(name:'scene_intro', onDone::{                    
+                instance.visitIsland();
+                
+                windowEvent.queueMessage(
+                    speaker: party.members[0].name,
+                    text: '"I should probably open that box now..."'
+                );
+            });        
+        }
+    
+        @:confirmParty ::{
+            windowEvent.queueAskBoolean(
+                renderable : {
+                    render ::{
+                        canvas.renderTextFrameGeneral(
+                            topWeight: 0.2,
+                            leftWeight: 0.5,
+                            lines : [
+                                'Current party:',
+                                '',                            
+                                extendedName(entity:p0),
+                                if (p1) extendedName(entity:p1) else ''
+                            ]
+                        )
+                    }
+                },
+                topWeight: 0.65,
+                leftWeight: 0.5,
+                prompt: 'Continue with this party?',
+                onChoice::(which) {
+                    when(which == false) ::<= {
+                        p0 = empty;
+                        p1 = empty;
+                        chooseMember();
+                        windowEvent.jumpToTag(name:'ChooseMember', goBeforeTag:true, doResolveNext:true);
+                    }
+                                        
+                    party.add(member:p0);
+                    if (p1) party.add(member:p1);
+                    finish();
+                    windowEvent.jumpToTag(name:'ChooseMember', goBeforeTag:true, doResolveNext:true);
+                }
+                
             );
-        });        
+        }
+
+
+
+        // choose party members
+        @hovered;
+        @p0;
+        @p1;
+
+        @:chooseMember ::{
+            @:choicesMod = [...choices]->filter(by::(value) <- value != p0);
+
+            @:choiceNames = [...choicesMod]->map(to:::(value) {
+                return extendedName(entity:value);  
+            });
+
+            if (p0 != empty) ::<= {
+                choiceNames->push(value:'No one.');
+            }
+        
+        
+            windowEvent.queueChoices(
+                canCancel : true,
+                choices : choiceNames,
+                topWeight: 0.5,
+                leftWeight: 0.5,
+                keep:true,
+                jumpTag: 'ChooseMember',                
+                onCancel ::{
+                    if (p0 != empty) p0 = empty;
+                    chooseMember();
+                },
+                
+                renderable : {
+                    render :: {
+                        when(hovered == empty) empty;
+                        when (hovered == choicesMod->size) empty
+
+                        canvas.renderTextFrameGeneral(
+                            topWeight: 0.5,
+                            leftWeight: 1,
+                            title: 'Stats',
+                            lines: choicesMod[hovered].stats.description->split(token:'\n')
+                        );                    
+                    }
+                },
+                onHover::(choice) {
+                    hovered = choice-1;
+                },
+                onChoice::(choice) {
+                    when (choice-1 == choicesMod->size) ::<= {
+                        windowEvent.queueMessage(
+                            text: 'Continuing with only one party member is a bold move. You may find others to join them, but the journey may be more difficult.'
+                        );
+                        
+                        windowEvent.queueAskBoolean(
+                            prompt: 'Continue with just one party member?',
+                            onChoice::(which) {
+                                when(which == false) empty;
+                                confirmParty();
+                            }
+                        );
+                    }
+                
+                    @:next = choicesMod[choice-1];
+                    windowEvent.queueChoices(
+                        prompt: extendedName(entity:next),
+                        choices : [
+                            'Describe',
+                            'Choose',
+                        ],
+                        canCancel:true,
+                        onChoice::(choice) {
+                            when(choice-1 == 0)
+                                next.describe(excludeStats:true);
+                                
+                            // choose
+                            windowEvent.queueAskBoolean(
+                                prompt: 'Add ' + next.name + ' to the party?',
+                                onChoice::(which) {
+                                    when(which == false) empty;
+                                    when (p0 == empty) ::<= {
+                                        p0 = next;
+                                        chooseMember();
+                                        windowEvent.jumpToTag(name:'ChooseMember', goBeforeTag:true, doResolveNext:true);
+                                    }
+                                    p1 = next;
+                                    confirmParty();
+                                }
+                            );
+                        }
+                    );
+                }        
+            )
+        }
+        chooseMember();
     },
     onNewDay ::(data){},
     
