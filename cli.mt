@@ -23,6 +23,7 @@
 @:instance = import(module:'game_singleton.instance.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:JSON = import(module:'Matte.Core.JSON');
+@:time = import(module:'Matte.System.Time');
 
 @MOD_DIR = './mod';
 
@@ -42,6 +43,8 @@
         console.println(message:line);
     }
     canvasChanged = false;   
+    //time.sleep(milliseconds:1000 * (1 / 40.0));
+    canvas.onFrameComplete();
 }
 canvas.onCommit = ::(lines, renderNow){
     currentCanvas = lines;

@@ -106,9 +106,24 @@ return class(
         @onCommit;
         @debugLines = [];
         @:lines_output = [];
+        @animations = [];
         
         @savestates = [];
         
+        
+        @:animateNext::{
+            foreach(animations) ::(index, queuedFrame) {
+                if (queuedFrame() == this.ANIMATION_FINISHED)
+                    animations->remove(key:index);
+            }
+
+            this.commit();
+        }
+        
+        @onFrameComplete::{
+            when(animations->size == 0) empty;
+            animateNext();
+        }
 
         
         this.interface = {
@@ -135,6 +150,10 @@ return class(
                 ),
                 get ::<- penx
             },
+            
+            ANIMATION_FINISHED : {
+                get ::<- -1
+            },
 
             penY : {
                 set ::(value) <- peny = value,
@@ -144,6 +163,10 @@ return class(
             onCommit : {
                 get ::<- onCommit,
                 set ::(value)<- onCommit = value
+            },
+            
+            onFrameComplete : {
+                get ::<- onFrameComplete
             },
             
             width : {
@@ -407,6 +430,17 @@ return class(
                     lines->push(value:String.combine(strings:parts));
                 }   
                 return lines;            
+            },
+            
+            // Queues a set of frames to render and then play.
+            // These happen as the external environment confirms that a frame has been posted
+            // If multiple animations are queued, their frames will be interleaved.
+            // The function passed is expected to control the canvas. Committing is handled
+            // by the canvas and should not be called unless advanced effects are being used.
+            //
+            // The onRenderFrame function will run until it returns canvas.ANIMATION_FINISHED
+            queueAnimation::(onRenderFrame => Function) {
+                animations->push(value:onRenderFrame);
             },
             
             

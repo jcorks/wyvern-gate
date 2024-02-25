@@ -86,6 +86,26 @@
                 data.rendered = true;
         }
         
+        @:renderThisAnimation ::(data => Object, frame) {
+            when (requestAutoSkip) empty; 
+            if (data.pushedCanvasState == empty) ::<= {
+                canvas.pushState();      
+                data.pushedCanvasState = true;
+            }
+
+            @renderAgain = false;
+            if (data.renderable) ::<= {
+                renderAgain = (data.renderable.render()) == this.RENDER_AGAIN;        
+            }
+            
+            canvas.queueAnimation(onRenderFrame:frame);
+            
+            
+            if (renderAgain == false)
+                data.rendered = true;
+        }        
+        
+        
         @next ::(dontResolveNext) {
             if (choiceStack->keycount > 0) ::<= {
                 @:data = choiceStack->pop;
@@ -629,21 +649,79 @@
         
         
             if (data.rendered == empty) ::<= {
-                renderThis(data, thisRender::{
-                    renderText(
-                        leftWeight: data.leftWeight, 
-                        topWeight: data.topWeight, 
-                        lines: data.lines,
-                        speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
-                        //limitLines : data.pageAfter,
-                        hasNotch: true
-                    );
-                });
-            }
+                data.busy = true;
+                ::<= {
+                
+                    @progressCh = 0;
+                    @progressL = 0;
+                    @maxlen = 0;
+                    foreach(data.lines) ::(i, line) {
+                        if (line->length > maxlen)
+                            maxlen = line->length;
+                    }
         
+                    @:fillLine ::(line, from, to) {
+                        @:bases = [line->substr(from, to)];
+                        for(bases[0]->length, maxlen) ::(i) {
+                            bases->push(value:' ');
+                        }
+                        return String.combine(strings:bases);
+                    }
+
+                    @:progressLines ::{
+                        when(progressL >= data.lines->size || data.busy == false) ::<= {
+                            data.busy = false;
+                            return data.lines;
+                        }
+                        @:out = [];
+                        for(0, progressL) ::(i) {
+                            out->push(value:data.lines[i]);
+                        }
+                        @:line = data.lines[progressL];
+                        out->push(value:
+                            if (line == '') 
+                                '' 
+                            else 
+                                if(progressCh > line->length-1)
+                                    line 
+                                else 
+                                    fillLine(line, from:0, to:progressCh)
+                        );
+                        if (progressCh > line->length) ::<= {
+                            progressCh = 0;
+                            progressL += 1;
+                        }
+                        progressCh+=4;
+                        return out;
+                    }
+
+
+                    @:nextFrame = ::{
+                        canvas.clear();
+                        renderText(
+                            leftWeight: data.leftWeight, 
+                            topWeight: data.topWeight, 
+                            lines: progressLines(),
+                            speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
+                            //limitLines : data.pageAfter,
+                            hasNotch: true
+                        );
+                        when(data.busy == false) 
+                            canvas.ANIMATION_FINISHED;
+                    }
+                                    
+                    renderThisAnimation(data, 
+                        frame:nextFrame
+                    );
+                }
+            }
             return match(input) {
               (CURSOR_ACTIONS.CONFIRM, 
                CURSOR_ACTIONS.CANCEL): ::<= {
+                when (data.busy) ::<= {
+                    data.busy = false;
+                    return false;
+                } 
                 return true;
                },
               default: false
