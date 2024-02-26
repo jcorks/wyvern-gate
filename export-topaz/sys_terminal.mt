@@ -28,7 +28,6 @@ display.setParameter(
     value:Topaz.Display.ViewPolicy.None
 );
 
-Topaz.Console.enable(enable:true);
 
 // create font asset
 @:font = Topaz.Resources.createDataAssetFromPath(

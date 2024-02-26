@@ -1,6 +1,7 @@
 @:Topaz = import(module:'Topaz');
 @Shell = import(module:'sys_shell.mt');
 
+@:FRAME_ANIMATION_POST_MS = 32;
 
 @:SAVEPATH = ::<= {
     return {:::} {
@@ -42,6 +43,7 @@ return ::(terminal, arg, onDone) {
     terminal.print(line:'Starting program...');
     @counter = 10;
     @pendingAction;
+    @pendingActionTime;
 
     Shell.onProgramCycle = ::{
         when(counter > 0) counter-=1;
@@ -61,7 +63,8 @@ return ::(terminal, arg, onDone) {
                     terminal.updateLine(index, text:line);
                 }
                 canvasChanged = false;    
-                pendingAction = canvas.onFrameComplete
+                pendingAction = canvas.onFrameComplete;
+                pendingActionTime = FRAME_ANIMATION_POST_MS;
             }
         }
 
@@ -107,9 +110,13 @@ return ::(terminal, arg, onDone) {
 
         @lastInput;
         Shell.onProgramCycle = ::{
-            if (pendingAction) ::<= {
-                pendingAction()
-                pendingAction = empty;
+            if (pendingActionTime) ::<= {
+                pendingActionTime -= Topaz.getDeltaTime()*1000;
+                when(pendingActionTime <= 0) ::<= {
+                    pendingAction()
+                    pendingAction = empty;
+                    pendingActionTime = empty;
+                }
             }
             
             windowEvent.commitInput(input:lastInput);
