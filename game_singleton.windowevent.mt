@@ -23,11 +23,60 @@
 
 @:MAX_LINES_TEXTBOX = 10;
 @:MAX_COLUMNS = canvas.width - 4;
+@:FRAME_COUNT_RENDER_TEXT = 3;
 
+@:renderTextSingle::(leftWeight, topWeight, lines, speaker, hasNotch) {
+        canvas.renderTextFrameGeneral(
+            leftWeight, 
+            topWeight, 
+            lines:lines, 
+            title:speaker, 
+            notchText:if(hasNotch != empty) "(next)" else empty)
+}
 
-
+// Renders a text box using an animation
 @:renderText ::(leftWeight, topWeight, lines, speaker, hasNotch) {
-    canvas.renderTextFrameGeneral(leftWeight, topWeight, lines, title:speaker, notchText:if(hasNotch != empty) "(next)" else empty)
+    @width = 0;
+    @height = lines->size;
+    @frames = 0;    
+    foreach(lines) ::(index, line) {
+        if (width < line->length)
+            width = line->length
+    }
+
+    @:fillLines ::(amount) {
+        @:strings = [];
+        for(0, amount) ::(i) {
+            strings->push(value:' ');
+        }
+        return String.combine(strings);
+    }
+
+    @:animateLines ::{
+        when(frames >= FRAME_COUNT_RENDER_TEXT) lines;
+        @:frac = frames / FRAME_COUNT_RENDER_TEXT;
+    
+        return lines->subset(from:0, to:(lines->size-1)*frac)->map(to:::(value) {
+            return fillLines(amount:frac * width);
+        });
+        
+    }
+    
+    
+    @:renderFrame ::{
+        
+        canvas.renderTextFrameGeneral(
+            leftWeight, 
+            topWeight, 
+            lines:animateLines(), 
+            title:speaker, 
+            notchText:if(hasNotch != empty) "(next)" else empty)
+        when(frames == FRAME_COUNT_RENDER_TEXT)
+            canvas.ANIMATION_FINISHED;
+        frames += 1;
+    }
+    
+    canvas.queueAnimation(onRenderFrame:renderFrame);
 }
 
 @:createBlankLine::(width, header) {
@@ -88,10 +137,10 @@
         
         @:renderThisAnimation ::(data => Object, frame) {
             when (requestAutoSkip) empty; 
-            if (data.pushedCanvasState == empty) ::<= {
-                canvas.pushState();      
-                data.pushedCanvasState = true;
-            }
+
+            canvas.pushState();      
+            data.pushedCanvasState = true;
+
 
             @renderAgain = false;
             if (data.renderable) ::<= {
@@ -313,12 +362,23 @@
                 renderThis(
                     data,
                     thisRender::{
-                        renderText(
-                            lines: choicesModified,
-                            speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
-                            leftWeight,
-                            topWeight
-                        ); 
+                        if (data.renderedAlready == empty) ::<= {
+                            renderText(
+                                lines: choicesModified,
+                                speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+                                leftWeight,
+                                topWeight
+                            )
+                            data.renderedAlready = true;
+                        } else ::<= {
+                            renderTextSingle(
+                                lines: choicesModified,
+                                speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+                                leftWeight,
+                                topWeight
+                            )
+                        }
+
                     }
                 );
             }
@@ -395,16 +455,31 @@
                             ;
                         }
                         line = line + ']'
-                        renderText(
-                            lines: [
-                                '',
-                                line,
-                                ''
-                            ],
-                            speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
-                            leftWeight,
-                            topWeight
-                        ); 
+                        if (data.renderedAlready == empty) ::<= {
+                            data.renderedAlready = true;
+                            renderText(
+                                lines: [
+                                    '',
+                                    line,
+                                    ''
+                                ],
+                                speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+                                leftWeight,
+                                topWeight
+                            );                         
+                        } else ::<= {
+                            renderTextSingle(
+                                lines: [
+                                    '',
+                                    line,
+                                    ''
+                                ],
+                                speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+                                leftWeight,
+                                topWeight
+                            ); 
+
+                        }
                     }
                 );
             }
@@ -620,12 +695,22 @@
                 onHover(choice:which+1);
 
             renderThis(data, thisRender::{
-                renderText(
-                    lines: choicesModified,
-                    speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
-                    leftWeight,
-                    topWeight
-                ); 
+                if (data.renderedAlready == empty) ::<= {
+                    data.renderedAlready = true;
+                    renderText(
+                        lines: choicesModified,
+                        speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+                        leftWeight,
+                        topWeight
+                    ); 
+                } else ::<= {
+                    renderTextSingle(
+                        lines: choicesModified,
+                        speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+                        leftWeight,
+                        topWeight
+                    );                 
+                }
             });            
                 
                 
@@ -646,9 +731,11 @@
         
         @:commitInput_display ::(data, input) {
             when (requestAutoSkip) true;
+
         
         
             if (data.rendered == empty) ::<= {
+                breakpoint();
                 data.busy = true;
                 ::<= {
                 
@@ -661,7 +748,11 @@
                     }
         
                     @:fillLine ::(line, from, to) {
-                        @:bases = [line->substr(from, to)];
+                        @:bases = [
+                            if (to >= line->length-1)
+                                line 
+                            else line->substr(from, to)
+                        ];
                         for(bases[0]->length, maxlen) ::(i) {
                             bases->push(value:' ');
                         }
@@ -678,15 +769,8 @@
                             out->push(value:data.lines[i]);
                         }
                         @:line = data.lines[progressL];
-                        out->push(value:
-                            if (line == '') 
-                                '' 
-                            else 
-                                if(progressCh > line->length-1)
-                                    line 
-                                else 
-                                    fillLine(line, from:0, to:progressCh)
-                        );
+                        out->push(value:fillLine(line, from:0, to:progressCh))
+                        
                         if (progressCh > line->length) ::<= {
                             progressCh = 0;
                             progressL += 1;
@@ -697,8 +781,8 @@
 
 
                     @:nextFrame = ::{
-                        canvas.clear();
-                        renderText(
+                        //canvas.clear();
+                        renderTextSingle(
                             leftWeight: data.leftWeight, 
                             topWeight: data.topWeight, 
                             lines: progressLines(),
@@ -706,8 +790,9 @@
                             //limitLines : data.pageAfter,
                             hasNotch: true
                         );
-                        when(data.busy == false) 
-                            canvas.ANIMATION_FINISHED;
+                        when(data.busy == false) ::<= {
+                            return canvas.ANIMATION_FINISHED;
+                        }
                     }
                                     
                     renderThisAnimation(data, 

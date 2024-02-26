@@ -113,8 +113,9 @@ return class(
         
         @:animateNext::{
             foreach(animations) ::(index, queuedFrame) {
-                if (queuedFrame() == this.ANIMATION_FINISHED)
+                if (queuedFrame() == this.ANIMATION_FINISHED) ::<= {
                     animations->remove(key:index);
+                }
             }
 
             this.commit();
@@ -441,6 +442,7 @@ return class(
             // The onRenderFrame function will run until it returns canvas.ANIMATION_FINISHED
             queueAnimation::(onRenderFrame => Function) {
                 animations->push(value:onRenderFrame);
+                animateNext();
             },
             
             
