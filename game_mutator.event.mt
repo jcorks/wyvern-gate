@@ -180,7 +180,7 @@ Event.database.newEntry(
                     needsHealing = true
             }
             
-            when(!needsHealing) empty;
+            when(!needsHealing) 0;
             
             if (party.members->keycount == 1) ::<= {
                 windowEvent.queueMessage(
@@ -426,6 +426,8 @@ Event.database.newEntry(
                 state.base = base; 
                 state.startAt = currentTime;
                 state.duration = base.onEventStart(event:this);
+                if (state.duration == empty)    
+                    state.duration = 0;
                 state.timeLeft = state.duration;
                 return this;
             },

@@ -41,9 +41,12 @@ return ::(terminal, arg, onDone) {
     terminal.clear();
     terminal.print(line:'Starting program...');
     @counter = 10;
+    @pendingAction;
 
     Shell.onProgramCycle = ::{
         when(counter > 0) counter-=1;
+        
+
         @:canvas = import(module:'game_singleton.canvas.mt');
         @:instance = import(module:'game_singleton.instance.mt');
         @:windowEvent = import(module:'game_singleton.windowevent.mt');
@@ -58,6 +61,7 @@ return ::(terminal, arg, onDone) {
                     terminal.updateLine(index, text:line);
                 }
                 canvasChanged = false;    
+                pendingAction = canvas.onFrameComplete
             }
         }
 
@@ -103,6 +107,11 @@ return ::(terminal, arg, onDone) {
 
         @lastInput;
         Shell.onProgramCycle = ::{
+            if (pendingAction) ::<= {
+                pendingAction()
+                pendingAction = empty;
+            }
+            
             windowEvent.commitInput(input:lastInput);
             rerender();
         }
