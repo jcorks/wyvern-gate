@@ -41,8 +41,7 @@ return ::(
         'Z'
     ];
     
-    
-    windowEvent.queueNoDisplay(
+    windowEvent.queueChoices(
         renderable :{
             render :: {
                 @pinch = name->length;
@@ -66,44 +65,37 @@ return ::(
                 canvas.movePen(x:left+2, y:(top + height/2)->floor);
                 canvas.drawText(text:name + '_');
             }
+        },    
+        choices: select,
+        prompt: "",
+        leftWeight: 0.5,
+        topWeight: 1,
+        canCancel: if (canCancel == empty) false else canCancel,
+        keep: true,
+        jumpTag: 'name',
+        onCancel ::{
+            if (canCancel == true)
+                if (windowEvent.canJumpToTag(name:'name'))
+                    windowEvent.jumpToTag(name:'name', doResolveNext:true, goBeforeTag:true);                                      
         },
-        keep : true,
-        jumpTag : 'name',
-        onEnter ::{
-        
-        
-            windowEvent.queueChoices(
-                choices: select,
-                prompt: "",
-                leftWeight: 0.5,
-                topWeight: 1,
-                canCancel: if (canCancel == empty) false else canCancel,
-                onCancel ::{
-                    if (canCancel == true)
-                        if (windowEvent.canJumpToTag(name:'name'))
-                            windowEvent.jumpToTag(name:'name', doResolveNext:true, goBeforeTag:true);                                      
-                },
-                onChoice ::(choice) {
-                    when(choice == 1) ::<= {
-                        name = name + ' ';
-                    }
+        onChoice ::(choice) {
+            when(choice == 1) ::<= {
+                name = name + ' ';
+            }
 
-                    when(choice == 2) ::<= {
-                        when(name->length <= 1)
-                            name = '';
-                        name = name->substr(from:0, to:name->length-2);
-                    }
-                    
-                    when(choice == 3) ::<= {
-                        onDone(name);
-                        if (windowEvent.canJumpToTag(name:'name'))
-                            windowEvent.jumpToTag(name:'name', doResolveNext:true, goBeforeTag:true);                      
-                    }
-                    
-                    name = name + select[choice-1];
-                }
-            );
+            when(choice == 2) ::<= {
+                when(name->length <= 1)
+                    name = '';
+                name = name->substr(from:0, to:name->length-2);
+            }
+            
+            when(choice == 3) ::<= {
+                onDone(name);
+                if (windowEvent.canJumpToTag(name:'name'))
+                    windowEvent.jumpToTag(name:'name', doResolveNext:true, goBeforeTag:true);                      
+            }
+            
+            name = name + select[choice-1];
         }
     );
-
 }
