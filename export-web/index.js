@@ -201,7 +201,12 @@ var reportError = function(message) {
 }
 
 
-var startGame = function() {
+var startGame = function(touch) {
+    if (touch != 'use-touch') {
+        document.getElementById('inputArea').style.display = 'none';
+    }
+    
+
     const isTouchScreen =
       (  (('ontouchstart' in window) ||
          (navigator.maxTouchPoints > 0) ||

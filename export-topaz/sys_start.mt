@@ -1,6 +1,7 @@
 @:Topaz = import(module:'Topaz');
 @Shell = import(module:'sys_shell.mt');
 
+@:FRAME_ANIMATION_POST_MS = 32;
 
 @:SAVEPATH = ::<= {
     return {:::} {
@@ -41,9 +42,13 @@ return ::(terminal, arg, onDone) {
     terminal.clear();
     terminal.print(line:'Starting program...');
     @counter = 10;
+    @pendingAction;
+    @pendingActionTime;
 
     Shell.onProgramCycle = ::{
         when(counter > 0) counter-=1;
+        
+
         @:canvas = import(module:'game_singleton.canvas.mt');
         @:instance = import(module:'game_singleton.instance.mt');
         @:windowEvent = import(module:'game_singleton.windowevent.mt');
@@ -58,6 +63,8 @@ return ::(terminal, arg, onDone) {
                     terminal.updateLine(index, text:line);
                 }
                 canvasChanged = false;    
+                pendingAction = canvas.onFrameComplete;
+                pendingActionTime = FRAME_ANIMATION_POST_MS;
             }
         }
 
@@ -103,6 +110,15 @@ return ::(terminal, arg, onDone) {
 
         @lastInput;
         Shell.onProgramCycle = ::{
+            if (pendingActionTime) ::<= {
+                pendingActionTime -= Topaz.getDeltaTime()*1000;
+                when(pendingActionTime <= 0) ::<= {
+                    pendingAction()
+                    pendingAction = empty;
+                    pendingActionTime = empty;
+                }
+            }
+            
             windowEvent.commitInput(input:lastInput);
             rerender();
         }

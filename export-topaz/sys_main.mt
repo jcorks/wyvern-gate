@@ -7,7 +7,6 @@
 @:term = Terminal.new();
 
 @:PADDING = 6;
-
 @:display = Topaz.ViewManager.getDefault();
 @:displayWidth = ::{
     return display.getParameter(param:Topaz.Display.Parameter.Width);
