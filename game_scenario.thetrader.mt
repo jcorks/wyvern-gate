@@ -156,7 +156,10 @@
         consistentMood : 0,
         
         // consistent mood days
-        consistentMoodDays : 0
+        consistentMoodDays : 0,
+        
+        // The named title for the employee
+        title : 'Employee'
     },
     define ::(this, state) {
     
@@ -168,6 +171,24 @@
             
             entity : {
                 get ::<- state.member
+            },
+            
+            title : {
+                get ::<- state.title,
+            },
+            
+            setTitle ::{
+                @:nameFn = import(module:'game_function.name.mt');
+                nameFn(
+                    prompt: state.member.name + '\'s title:',
+                    onDone ::(name) {
+                        when(name->length > 20)
+                            windowEvent.queueMessage(text:'This title is too long.');
+                            
+                        state.title = name;
+                    },
+                    canCancel:true
+                );
             },
             
             lastAttackedBy : {
@@ -634,7 +655,7 @@
                                 hasNews = true;
                                 windowEvent.queueMessage(
                                     speaker: 'Courier',
-                                    text: '"I have unfortunate news... Your hiree ' + hiree.entity.name + ' has not returned from their exploration. Word is that ' + hiree.lastAttackedBy+ ' got them while adventuring. I don\'t think they\'ll be coming back..."'
+                                    text: '"I have unfortunate news... Your ' + hiree.title + ' ' + hiree.entity.name + ' has not returned from their exploration. Word is that ' + hiree.lastAttackedBy+ ' got them while adventuring. I don\'t think they\'ll be coming back..."'
                                 );
                                 state.accolade_noEmployeesLost = false;
                                 
@@ -1022,7 +1043,7 @@
                         speaker: hiree.entity.name,
                         text: random.pickArrayItem(
                             list : [
-                                '"I\'ve worked very hard as your employee. I believe I am in my right to ask for a raise. ',
+                                '"I\'ve worked very hard as your ' + hiree.title + '. I believe I am in my right to ask for a raise. ',
                                 '"So, I\'ve been working very hard for you. Would you be open to raising my wages? ',
                                 '"I\'ll be forward. '
                             ]
@@ -1800,22 +1821,24 @@
                 choicesColumns(
                     onGetChoices ::{
                         @:names  = [];
+                        @:titles = [];
                         @:wages  = [];
                         @:moods  = [];
                         @:status = [];
                         foreach(state.hirees) ::(i, hiree) {
                             names->push(value:hiree.entity.name);
+                            titles->push(value:hiree.title);
                             wages->push(value:g(g:hiree.contractRate));
                             moods->push(value:moodToString(mood:hiree.mood));
                             status->push(value:roleToString(role:hiree.role));
                         }
                         return [
-                            names, wages, moods, status
+                            names, titles, wages, moods, status
                         ];
                     },
                     prompt: 'Hirees...',
-                    header : ['Name', 'Wage', 'Mood', 'Status'],
-                    leftJustified : [true, true, true, true],
+                    header : ['Name', 'Title', 'Wage', 'Mood', 'Status'],
+                    leftJustified : [true, true, true, true, true],
                     leftWeight: 0.5,
                     topWeight: 0.5,
                     canCancel: true,
@@ -1830,6 +1853,7 @@
                             topWeight: 0.5,
                             choices : [
                                 'Describe',
+                                'Set title',
                                 'Financial report',
                                 'Change role',
                                 'Fire'
@@ -1840,9 +1864,10 @@
                                 
                                 match(choice) {
                                   (1): hiree.entity.describe(),
-                                  (2): hiree.report(),
-                                  (3): this.changeRole(hiree),
-                                  (4): this.fire(hiree)
+                                  (2): hiree.setTitle(),
+                                  (3): hiree.report(),
+                                  (4): this.changeRole(hiree),
+                                  (5): this.fire(hiree)
                                 }
                             }
                         );
