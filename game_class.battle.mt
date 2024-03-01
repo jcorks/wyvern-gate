@@ -24,6 +24,7 @@
 @:Party = import(module:'game_class.party.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:StateFlags = import(module:'game_class.stateflags.mt');
+@:Ability = import(module:'game_database.ability.mt');
 @:g = import(module:'game_function.g.mt');
 
 @:combatChooseDefend::(targetPart, attacker, defender, onDone) {
@@ -423,7 +424,7 @@
                 action.turnIndex += 1;
                 
                 
-                ent.useAbility(
+                @:ret = ent.useAbility(
                     ability:action.ability,
                     targets:action.targets,
                     targetParts:action.targetParts,
@@ -434,7 +435,7 @@
                 ent.flags.add(flag:StateFlags.WENT);
 
                 
-                if (action.turnIndex >= action.ability.durationTurns) ::<= {
+                if (action.turnIndex >= action.ability.durationTurns || ret == Ability.CANCEL_MULTITURN) ::<= {
                     actions[ent] = empty;
                 }
                 endTurn();
@@ -635,6 +636,7 @@
                 turn = [];
                 turnIndex = 0;
                 active = true;
+                breakpoint();
                 ended = false;
                 externalRenderable = renderable;
                             
@@ -925,7 +927,7 @@
                 @:world = import(module:'game_singleton.world.mt');
                 @:targetDefendParts = [];
                 foreach(action.targets) ::(index, target) {
-                    targetDefendParts[index] = if (random.try(percentSuccess:35)) 0 else Entity.normalizedDamageTarget(blockPoints:target.blockPoints);
+                    targetDefendParts[index] = if (target.blockPoints <= 0 || random.try(percentSuccess:35)) 0 else Entity.normalizedDamageTarget(blockPoints:target.blockPoints);
                 }
                 
                 @pendingChoices = [];
@@ -935,7 +937,8 @@
             
             
                 @:commit = ::{
-                    entityTurn.useAbility(
+                    action.turnIndex = 0;
+                    @:ret = entityTurn.useAbility(
                         ability:action.ability,
                         targets:action.targets,
                         targetParts:action.targetParts,
@@ -948,11 +951,11 @@
                         action.ability.name != 'Defend' &&
                         action.ability.name != 'Use Item')
                         entityTurn.flags.add(flag:StateFlags.ABILITY);
-            
-                    if (action.ability.durationTurns > 0) ::<= {
-                        action.turnIndex = 0;
+
+                    if (action.ability.durationTurns > 0 && ret != Ability.CANCEL_MULTITURN) ::<= {
                         actions[entityTurn] = action;
                     }  
+            
                     
                     windowEvent.queueNoDisplay(
                         onEnter ::{

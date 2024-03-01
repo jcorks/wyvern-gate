@@ -1499,15 +1499,15 @@ Ability.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' prepares a poison attack against ' + targets[0].name + '!'
             );
-            user.attack(
+            if (user.attack(
                 target: targets[0],
                 amount:user.stats.ATK * (0.3),
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP,
                 targetPart: targetParts[0],
                 targetDefendPart:targetDefendParts[0]
-            );
-            targets[0].addEffect(from:user, name: 'Poisoned', durationTurns: 4);                        
+            ))
+                targets[0].addEffect(from:user, name: 'Poisoned', durationTurns: 4);                        
         }
     }
 )
@@ -1525,17 +1525,17 @@ Ability.newEntry(
         canBlock : true,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
-                text: user.name + ' attacks ' + targets[0].name + ' with a poisoned weapon!'
+                text: user.name + ' prepares a petrifying attack against ' + targets[0].name + '!'
             );
-            user.attack(
+            if (user.attack(
                 target: targets[0],
                 amount:user.stats.ATK * (0.3),
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP,
                 targetPart: targetParts[0],
                 targetDefendPart:targetDefendParts[0]
-            );
-            targets[0].addEffect(from:user, name: 'Petrified', durationTurns: 2);                        
+            ))
+                targets[0].addEffect(from:user, name: 'Petrified', durationTurns: 2);                        
         }
     }
 )            
@@ -3810,6 +3810,92 @@ Ability.newEntry(
     }
 )
 
+Ability.newEntry(
+    data: {
+        name: 'Sweet Song',
+        targetMode : TARGET_MODE.ALLENEMY,
+        description: 'Alluring song that captivates the listener',
+        durationTurns: 0,
+        hpCost : 0,
+        apCost : 1,
+        usageHintAI : USAGE_HINT.OFFENSIVE,
+        oncePerBattle : false,
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+            windowEvent.queueMessage(
+                text: user.name + ' sings a haunting, sweet song!'
+            );
+            foreach(user.enemies)::(index, enemy) {
+                when(enemy.isIncapacitated()) empty;
+                if (random.flipCoin())
+                    enemy.addEffect(from:user, name: 'Mesmerized', durationTurns: 3)
+                else 
+                    windowEvent.queueMessage(
+                        text: enemy.name + ' covered their ears!'
+                    );                                
+            }
+        }
+    }
+)     
+
+
+Ability.newEntry(
+    data: {
+        name: 'Wrap',
+        targetMode : TARGET_MODE.ONE,
+        description: 'Wraps around one enemy, followed by a feast.',
+        durationTurns: 2,
+        hpCost : 0,
+        apCost : 1,
+        usageHintAI : USAGE_HINT.OFFENSIVE,
+        oncePerBattle : false,
+        canBlock : false,
+        onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+            when(turnIndex == 0) ::<= {
+                windowEvent.queueMessage(
+                    text: user.name + ' tries to coil around ' + targets[0].name + '!'
+                );
+
+                when(targets[0].isIncapacitated() == false && random.try(percentSuccess:25)) ::<= {
+                    windowEvent.queueMessage(
+                        text: targets[0].name + ' narrowly escapes!'
+                    );
+                    return Ability.CANCEL_MULTITURN;
+                }
+
+
+                targets[0].addEffect(from:user, name: 'Wrapped', durationTurns: 4)
+            }
+            
+            when(turnIndex == 2) ::<= {
+                breakpoint();
+                when ([...targets[0].effects]->filter(by:::(value) <- value.effect.name == 'Wrapped')->size == 0) empty;
+                
+                windowEvent.queueMessage(
+                    text: 'While wrapping ' + targets[0].name + ' in their coils, ' + user.name + ' tries to devour ' + targets[0].name + '!'
+                );            
+
+                when(targets[0].isIncapacitated() || random.try(percentSuccess:75)) ::<= {
+                    windowEvent.queueMessage(
+                        text: targets[0].name + ' was swallowed whole!'
+                    );                                
+                    targets[0].kill(silent:true);
+                }
+                
+                windowEvent.queueMessage(
+                    text: targets[0].name + ' managed to struggle enough to prevent getting eaten!'
+                );                                
+                
+                targets[0].removeEffectInstance(
+                    instance: targets[0].effects->filter(by:::(value) <- value.from == user && value.effect.name == 'Wrapped')[0]
+                );
+                
+            }
+        }
+    }
+)     
+
+
 /* NOT USED ANYMORE */
 /////////
     Ability.newEntry(
@@ -3849,7 +3935,8 @@ Ability.newEntry(
     define::(this) {
         this.interface = {        
             TARGET_MODE : {get::<- TARGET_MODE},
-            USAGE_HINT : {get::<- USAGE_HINT}  
+            USAGE_HINT : {get::<- USAGE_HINT},
+            CANCEL_MULTITURN : {get::<- -1}
         }
     }    
 ).new(

@@ -6,21 +6,23 @@
 @:StatSet = import(module:'game_class.statset.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
 @:Item = import(module:'game_mutator.item.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 @:ROOM_MAX_ENTITY = 6;
 @:REACHED_DISTANCE = 1.5;
 @:AGGRESSIVE_DISTANCE = 5;
 
 
-@:TheBeast = class(
+@:TheBeast = LoadableClass.create(
     name: 'Wyvern.LandmarkEvent.DungeonEncounters',
-
-    define:::(this) {
+    items : {
+        hasBeast : false,
+        encountersOnFloor : 0
+    },  
+    define:::(this, state) {
         @map_;
         @island_;
         @landmark_;
-        @encountersOnFloor = 0;
-        @hasBeast = false;
 
         @:Entity = import(module:'game_class.entity.mt');
         @:Location = import(module:'game_mutator.location.mt');
@@ -66,7 +68,7 @@
 
             
    
-            encountersOnFloor += 1;
+            state.encountersOnFloor += 1;
 
             @:ref = landmark_.mapEntityController.add(
                 x:tileX, 
@@ -83,18 +85,19 @@
 
     
         this.interface = {
-            initialize::(landmark) {
+            initialize::(parent) {
+                @landmark = parent.landmark;
                 map_ = landmark.map;
                 island_ = landmark.island;
-                landmark_ = landmark;	
-                hasBeast = if (landmark_.floor > 1 && random.try(percentSuccess:15))
+                landmark_ = landmark;
+            },
+            
+            defaultLoad :: {
+                state.hasBeast = if (landmark_.floor > 1 && random.try(percentSuccess:15))
                     true
                 else 
                     false
                 ;
-            	//hasBeast = true;
-
-                return this;
             },
             
             step::{
@@ -102,9 +105,9 @@
             
                 // add additional entities out of spawn points (stairs)
                 //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && Number.random() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
-                if (entities->keycount < 1 && hasBeast) ::<= {
+                if (entities->keycount < 1 && state.hasBeast) ::<= {
                     addEntity();
-                    hasBeast = false;
+                    state.hasBeast = false;
                 }
             }
         }

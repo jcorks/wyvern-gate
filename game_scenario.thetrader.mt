@@ -346,7 +346,7 @@
                                             breakpoint();
                                         } else ::<= {
                                             @:TheBeast = import(module:'game_class.landmarkevent_thebeast.mt');
-                                            other = TheBeast.createBeast();
+                                            other = TheBeast.createEntity();
                                         } 
                                             
                                         state.lastAttackedBy = other.name;
@@ -2300,7 +2300,7 @@
                 //instance.visitIsland();
                 @:landmark = world.island.landmarks->filter(by::(value) <- value.worldID == state.cityID)[0];
                 @:location = landmark.locations->filter(by::(value) <- value.worldID == state.shopID)[0];
-                //instance.visitLandmark(landmark, where:{x:location.x, y:location.y});            
+
                 @:item = landmark.map.getItem(data:location);
                 landmark.map.setPointer(
                     x: item.x,

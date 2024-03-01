@@ -15,10 +15,9 @@
 LandmarkEvent.database.newEntry(
     data : {
         name: 'item-specter',
-        startup ::(landmark) {
+        startup ::(parent) {
             @:ItemSpecter = import(module:'game_class.landmarkevent_itemspecter.mt');
-            @:a = ItemSpecter.new();
-            a.initialize(landmark);
+            @:a = ItemSpecter.new(parent);
             return a;
         },
 
@@ -36,11 +35,10 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
     data : {
         name: 'dungeon-encounters',
-        startup ::(landmark) {
+        startup ::(parent) {
             @:DungeonEncounters = import(module:'game_class.landmarkevent_dungeonencounters.mt');
             // TODO: make dungeon encounters loadable
-            @:a = DungeonEncounters.new();   
-            a.initialize(landmark);
+            @:a = DungeonEncounters.new(parent);   
             return a;
         },
         
@@ -57,10 +55,9 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
     data : {
         name: 'the-beast',
-        startup ::(landmark) {
+        startup ::(parent) {
             @:b = import(module:'game_class.landmarkevent_thebeast.mt');
-            @:a = b.new();
-            a.initialize(landmark);
+            @:a = b.new(parent);
             return a;
         },
 
@@ -78,10 +75,9 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
     data : {
         name: 'the-mirror',
-        startup ::(landmark) {
+        startup ::(parent) {
             @:b = import(module:'game_class.landmarkevent_themirror.mt');
-            @:a = b.new();
-            a.initialize(landmark);
+            @:a = b.new(parent);
             return a;
         },
 
@@ -100,10 +96,9 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
     data : {
         name: 'treasure-golem',
-        startup ::(landmark) {
+        startup ::(parent) {
             @:b = import(module:'game_class.landmarkevent_treasuregolem.mt');
-            @:a = b.new();
-            a.initialize(landmark);
+            @:a = b.new(parent);
             return a;
         },
 
@@ -122,10 +117,9 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
     data : {
         name: 'cave-bat',
-        startup ::(landmark) {
+        startup ::(parent) {
             @:b = import(module:'game_class.landmarkevent_cavebat.mt');
-            @:a = b.new();
-            a.initialize(landmark);
+            @:a = b.new(parent);
             return a;
         },
 
@@ -139,6 +133,29 @@ LandmarkEvent.database.newEntry(
         }
     }
 );
+
+
+LandmarkEvent.database.newEntry(
+    data : {
+        name: 'the-snakesiren',
+        startup ::(parent) {
+            @:b = import(module:'game_class.landmarkevent_thesnakesiren.mt');
+            @:a = b.new(parent);
+            return a;
+        },
+
+        
+        step ::(data, landmark) {
+            data.step();
+        },
+        
+        isActive ::(data) {
+            return data.isActive()
+        }
+    }
+);
+
+
 }
 
 // essentially an opaque wrapper for custom per-step 
@@ -171,7 +188,11 @@ LandmarkEvent.database.newEntry(
                         
             defaultLoad ::(base) {
                 state.base = base;
-                state.data = base.startup(landmark:landmark_);
+                state.data = base.startup(parent:this);
+            },
+            
+            landmark : {
+                get ::<- landmark_
             },
             
             step::{

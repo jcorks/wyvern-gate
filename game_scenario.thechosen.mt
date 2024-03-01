@@ -761,6 +761,14 @@ return {
             message: "Finders, keepers!",
             info: 'Opened more than 15 chests.',
             condition::(world)<- world.accoladeCount(name:'chestsOpened') > 15
+        ),
+        
+        Accolade.new(
+            message: "We're all sentimental creatures, really...",
+            info: 'Kept the Sentimental Box.',
+            condition::(world) <- world.party.inventory.items->filter(by:
+                ::(value) <- value.base.name == 'Sentimental Box'
+            )->size > 0
         )
     ],
     
@@ -805,11 +813,12 @@ return {
                                     base:Landmark.database.find(name:'Treasure Room')
                                 )
                             ;
+                            location.targetLandmark.loadContent();
                             location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
                         }
                         @:instance = import(module:'game_singleton.instance.mt');
 
-                        instance.visitLandmark(landmark:location.targetLandmark, where:location.targetLandmarkEntry);
+                        instance.visitLandmark(landmark:location.targetLandmark, where::(landmark)<-location.targetLandmarkEntry);
 
 
                         canvas.clear();

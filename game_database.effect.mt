@@ -4945,6 +4945,95 @@ Effect.newEntry(
     }
 ) 
 
+
+Effect.newEntry(
+    data : {
+        name : 'Mesmerized',
+        description: 'SPD,DEF -100%',
+        battleOnly : true,
+        skipTurn : true,
+        stackable: false,
+        blockPoints : -3,
+        stats: StatSet.new(
+            SPD: -100,
+            DEF: -100
+        ),
+        onAffliction ::(user, item, holder) {
+            windowEvent.queueMessage(text:holder.name + " was mesmerized!");
+        
+        },
+        
+        onRemoveEffect ::(user, item, holder) {
+            windowEvent.queueMessage(text:holder.name + " is no longer mesmerized.");
+        },                
+        onPostAttackOther ::(user, item, holder, to) {
+        },
+
+        onPreAttackOther ::(user, item, holder, to, damage) {
+        },
+        onAttacked ::(user, item, holder, by, damage) {
+        
+        },
+
+        onSuccessfulBlock::(user, item, holder, from, damage) {
+        
+        },
+        onDamage ::(user, item, holder, from, damage) {
+            
+        },
+        
+        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
+        },
+        onStatRecalculate ::(user, item, holder, stats) {
+        
+        }
+    }
+) 
+
+
+Effect.newEntry(
+    data : {
+        name : 'Wrapped',
+        description: 'Can\'t move.',
+        battleOnly : true,
+        skipTurn : true,
+        stackable: false,
+        blockPoints : -3,
+        stats: StatSet.new(
+        ),
+        onAffliction ::(user, item, holder) {
+            windowEvent.queueMessage(text:holder.name + " was wrapped and encoiled!");
+        
+        },
+        
+        onRemoveEffect ::(user, item, holder) {
+            windowEvent.queueMessage(text:holder.name + " is no longer wrapped.");
+        },                
+        onPostAttackOther ::(user, item, holder, to) {
+        },
+
+        onPreAttackOther ::(user, item, holder, to, damage) {
+        },
+        onAttacked ::(user, item, holder, by, damage) {
+        
+        },
+
+        onSuccessfulBlock::(user, item, holder, from, damage) {
+        
+        },
+        onDamage ::(user, item, holder, from, damage) {
+            
+        },
+        
+        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
+        },
+        onStatRecalculate ::(user, item, holder, stats) {
+        
+        }
+    }
+) 
+
+
 Effect.newEntry(
     data : {
         name : 'Petrified',

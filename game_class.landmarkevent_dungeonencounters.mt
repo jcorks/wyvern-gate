@@ -3,6 +3,8 @@
 @:distance = import(module:'game_function.distance.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+
 
 @:ROOM_MAX_ENTITY = 6;
 @:REACHED_DISTANCE = 1.5;
@@ -10,15 +12,17 @@
 @:MAX_ENCOUNTERS = 30;
 
 
-@:DungeonEncounters = class(
+@:DungeonEncounters = LoadableClass.create(
     name: 'Wyvern.LandmarkEvent.DungeonEncounters',
+    items : {
+        encountersOnFloor : 0,
+        isBusy : false
+    },
 
-    define:::(this) {
+    define:::(this, state) {
         @map_;
         @island_;
         @landmark_;
-        @encountersOnFloor = 0;
-        @isBusy = false;
 
         @:Entity = import(module:'game_class.entity.mt');
         @:Location = import(module:'game_mutator.location.mt');
@@ -26,7 +30,7 @@
     
     
         @:addEntity ::{
-            when (encountersOnFloor > MAX_ENCOUNTERS) empty;
+            when (state.encountersOnFloor > MAX_ENCOUNTERS) empty;
 
             @ar = map_.getRandomArea();;
             @:tileX = ar.x + (ar.width /2)->floor;
@@ -41,7 +45,7 @@
             // the inhabitants of the island.
             @ents = [landmark_.island.newInhabitant()]
    
-            encountersOnFloor += 1;
+            state.encountersOnFloor += 1;
             
             
 
@@ -82,7 +86,7 @@
             ref.addUpkeepTask(name:'aggressive');
             ref.addUpkeepTask(name:'exit');
 
-            if (encountersOnFloor == 1) ::<= {
+            if (state.encountersOnFloor == 1) ::<= {
                 windowEvent.queueMessage(
                     text:random.pickArrayItem(list:[
                         'Are those foosteps? Be careful.',
@@ -91,7 +95,7 @@
                     ])
                 );
 
-                if (isBusy)
+                if (state.isBusy)
                     windowEvent.queueMessage(
                         text:random.pickArrayItem(list:[
                             'There seems to be a lot of commotion around on this floor...',
@@ -106,14 +110,15 @@
 
     
         this.interface = {
-            initialize::(landmark) {
+            initialize::(parent) {
+                @landmark = parent.landmark;
                 map_ = landmark.map;
                 island_ = landmark.island;
                 landmark_ = landmark;
-                isBusy = if (landmark_.floor == 0) false else random.try(percentSuccess:10);
+            },
 
-                    
-                return this;
+            defaultLoad ::{
+                state.isBusy = if (landmark_.floor == 0) false else random.try(percentSuccess:10);
             },
             
             step::{
@@ -121,7 +126,7 @@
             
             
                 // add additional entities out of spawn points (stairs)
-                @recCount = if (isBusy) 
+                @recCount = if (state.isBusy) 
                     5
                 else 
                     (if (landmark_.floor == 0) 
@@ -137,9 +142,9 @@
                     entities->keycount < recCount && 
                     landmark_.base.peaceful == false && 
                         (   
-                            isBusy 
+                            state.isBusy 
                                 || 
-                            (Number.random() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1))
+                            (Number.random() < 0.1 / (state.encountersOnFloor*(10 / (island_.tier+1))+1))
                         )
                     ) ::<= {
                     

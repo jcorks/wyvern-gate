@@ -107,7 +107,7 @@ Event.database.newEntry(
                     windowEvent.queueMessage(text:'The party is given some food.');
 
                     @StatSet = import(module:'game_class.statset.mt');
-                    if (Number.random() < 0.8) ::<= {
+                    if (random.flipCoin()) ::<= {
                         windowEvent.queueMessage(text:'The food is delicious.');
                         foreach(event.party.members)::(index, member) {
                             @oldStats = StatSet.new();

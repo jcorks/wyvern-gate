@@ -2180,7 +2180,7 @@ Location.database.newEntry(data:{
         
         this.interface = {
             initialize ::(landmark, parent) {
-                @:landmark = if (landmark) landmark else parent.parent; // parents of locations are always maps
+                landmark = if (landmark) landmark else parent.parent; // parents of locations are always maps
                 landmark_ = landmark;     
             },
             defaultLoad ::(base, xHint, yHint, ownedByHint) {

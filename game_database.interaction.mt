@@ -1259,7 +1259,7 @@ Interaction.newEntry(
             
             
             @:instance = import(module:'game_singleton.instance.mt');
-            instance.visitLandmark(landmark:location.targetLandmark, where:location.targetLandmarkEntry);
+            instance.visitLandmark(landmark:location.targetLandmark, where::(landmark) <- location.targetLandmarkEntry);
         },
     }
 )  
@@ -1298,11 +1298,12 @@ Interaction.newEntry(
                         base:Landmark.database.find(name:'Treasure Room')
                     )
                 ;
+                location.targetLandmark.loadContent();
                 location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
             }
             @:instance = import(module:'game_singleton.instance.mt');
 
-            instance.visitLandmark(landmark:location.targetLandmark, where:location.targetLandmarkEntry);
+            instance.visitLandmark(landmark:location.targetLandmark, where::(landmark)<-location.targetLandmarkEntry);
             canvas.clear();
         }
     }

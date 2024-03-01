@@ -735,7 +735,20 @@
         
         
             if (data.rendered == empty) ::<= {
-                breakpoint();
+                when(data.skipAnimation) ::<= {
+                    data.busy = false;
+                    renderThis(data, thisRender::{
+                        renderTextSingle(
+                            leftWeight: data.leftWeight, 
+                            topWeight: data.topWeight, 
+                            lines: data.lines,
+                            speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
+                            //limitLines : data.pageAfter,
+                            hasNotch: true
+                        );         
+                    })           
+                }
+            
                 data.busy = true;
                 ::<= {
                 
@@ -915,10 +928,14 @@
 
                 @:queuePage ::(iter, width, more){
                     nextResolve->push(value:[::{
+                        @:limit = min(a:iter+pageAfter, b:lines->keycount)-1;
                         @:linesOut = lines->subset(
                             from:iter, 
-                            to:min(a:iter+pageAfter, b:lines->keycount)-1
+                            to:limit
                         )
+                        
+                        // MORE text is never animated.
+                        @:skipAnimation = !(iter == 0 && limit == lines->keycount-1);
                         
                         if (width != empty)
                             linesOut->push(value:createBlankLine(width, header:if (more) '-More-' else ''));
@@ -931,7 +948,8 @@
                             prompt: prompt,
                             onLeave: onLeave,
                             mode: CHOICE_MODE.DISPLAY,
-                            renderable: renderable
+                            renderable: renderable,
+                            skipAnimation : skipAnimation
                         });
                     }]);
                 }

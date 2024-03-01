@@ -1503,7 +1503,7 @@ Scene.newEntry(
                 doNext();
             },
             ['', 'Opening the box reveals items inside!'],
-            ['', 'The party receives 250G.'],
+            ['', 'The party receives 125G.'],
             ['', 'The party receives 3 Pink Potions.'],
             ['', 'The party receives a Life Crystal.'],
             ['', 'The party receives a Skill Crystal.'],
@@ -1526,7 +1526,7 @@ Scene.newEntry(
                 );
 
                 @:world = import(module:'game_singleton.world.mt');
-                world.party.inventory.addGold(amount:250);
+                world.party.inventory.addGold(amount:125);
 
                 world.party.inventory.add(item:Item.new(base:Item.database.find(name:'Life Crystal'
                 )));
@@ -1558,8 +1558,28 @@ Scene.newEntry(
                 );
                 world.party.inventory.add(item:tome);                
 
-                
-                doNext();
+                windowEvent.queueAskBoolean(
+                    prompt: 'Toss the box?',
+                    onChoice::(which) {
+                        if (which) ::<= {
+                            windowEvent.queueMessage(
+                                text: 'The sentimental box was tossed out.'
+                            );
+                            world.party.inventory.remove(item: 
+                                world.party.inventory.items->filter(by:
+                                    ::(value) <- value.base.name == 'Sentimental Box'
+                                )[0]
+                            );
+                        } else ::<= {
+                            windowEvent.queueMessage(
+                                speaker:world.party.members[0].name,
+                                text:'"We probably could sell it later if we needed to."'
+                            );
+                        }                    
+                    
+                        doNext();
+                    }
+                );
                 
             }
         ]

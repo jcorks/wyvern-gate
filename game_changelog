@@ -1,4 +1,11 @@
-0.1.8
+0.1.8b
+- Made forest ephemeral, allowing for continual use. BUT, it is now dangerous.
+- The sentimental box is now worth more to sell, and you can optionally toss it when done opening.
+- Added a note that aces are high in the sorcerer game.
+- Added a display of current challenge in the sorcerer game.
+
+
+0.1.8a
 - Added body / head / limb aiming and defending to combat. Certain moves allow aiming 
 - Added block points to equips.
 - HP bar rendering will always at least show one tick if non-zero 

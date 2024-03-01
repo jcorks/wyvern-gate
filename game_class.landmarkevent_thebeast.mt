@@ -4,21 +4,22 @@
 @:Species = import(module:'game_database.species.mt');
 @:Profession = import(module:'game_mutator.profession.mt');
 @:StatSet = import(module:'game_class.statset.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 @:ROOM_MAX_ENTITY = 6;
 @:REACHED_DISTANCE = 1.5;
 @:AGGRESSIVE_DISTANCE = 5;
 
 
-@:TheBeast = class(
-    name: 'Wyvern.LandmarkEvent.DungeonEncounters',
+@:TheBeast = LoadableClass.create(
+    name: 'Wyvern.LandmarkEvent.TheBeast',
     
     statics : {
-        createBeast ::{
+        createEntity ::{
             @:Entity = import(module:'game_class.entity.mt');
             @world = import(module:'game_singleton.world.mt');
             @:beast = world.island.newInhabitant();
-            beast.name = 'the Beast';
+            beast.name = 'the Dungeon Beast';
             beast.species = Species.find(name:'Beast');
             beast.profession = Profession.new(base:Profession.database.find(name:'Beast'));               
             beast.clearAbilities();
@@ -43,13 +44,16 @@
             return beast;        
         }
     },
+    
+    items : {
+        encountersOnFloor : 0,
+        hasBeast : false
+    },
 
-    define:::(this) {
+    define:::(this, state) {
         @map_;
         @island_;
         @landmark_;
-        @encountersOnFloor = 0;
-        @hasBeast = false;
 
         @:Entity = import(module:'game_class.entity.mt');
         @:Location = import(module:'game_mutator.location.mt');
@@ -75,7 +79,7 @@
             // the inhabitants of the island.
             @ents = [beast]
    
-            encountersOnFloor += 1;
+            state.encountersOnFloor += 1;
 
             @:ref = landmark_.mapEntityController.add(
                 x:tileX, 
@@ -86,41 +90,48 @@
             );
             ref.addUpkeepTask(name:'thebeast-roam');
             ref.addUpkeepTask(name:'aggressive');
-            
-            if (encountersOnFloor == 1)
+            ref.addUpkeepTask(name:'thesnakesiren-song');
+
+            if (state.encountersOnFloor == 1)
                 windowEvent.queueMessage(
                     text:random.pickArrayItem(list:[
                         'That was definitely a roar or snarl just now. Something\'s near.',
                         'Something heavy is stomping nearby.',
                     ])
-                );
+                );            
+
         }
         
 
     
         this.interface = {
-            initialize::(landmark) {
+            initialize::(parent) {
+                @landmark = parent.landmark;
+
                 map_ = landmark.map;
                 island_ = landmark.island;
                 landmark_ = landmark;
-                hasBeast = if (landmark_.floor > 1 && random.try(percentSuccess:15))
+            },
+            
+            defaultLoad ::{
+                state.hasBeast = if (landmark_.floor > 1 && random.try(percentSuccess:15))
                     true
                 else 
                     false
                 ;
-                //hasBeast = true;
-
-                return this;
+            
             },
+            
+            
             
             step::{
                 @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'thebeast');
             
                 // add additional entities out of spawn points (stairs)
                 //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && Number.random() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
-                if (entities->keycount < 1 && hasBeast) ::<= {
+                if (entities->keycount < 1 && state.hasBeast) ::<= {
                     addEntity();
-                    hasBeast = false;
+                    state.hasBeast = false;
                 }
             }
         }

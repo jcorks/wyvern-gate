@@ -149,6 +149,7 @@
         faveWeapon : empty,
         adventurous : empty,
         battleAI : empty,
+        aiAbilityChance : empty,
         professions : empty,
         canMake : empty,
         innateEffects : empty,
@@ -408,6 +409,11 @@
             owns : {
                 get ::<- owns,
                 set ::(value) <- owns = value
+            },
+            
+            aiAbilityChance : {
+                set ::(value) <- state.aiAbilityChance = value,
+                get ::<- state.aiAbilityChance
             },
             
             blockPoints : {
@@ -1311,6 +1317,7 @@
             
             
             removeEffects::(effectBases => Object) {
+                when(effects == empty) empty;
                 effects = effects->filter(by:::(value) {
                     @:current = value.effect;
                     @:keep = effectBases->all(condition:::(value) <-
@@ -1326,6 +1333,19 @@
                         );
                     }
                 });
+            },
+            
+            removeEffectInstance::(instance) {
+                when(effects == empty) empty;
+                @index = effects->findIndex(value:instance);
+                when(index == -1) empty;
+                @value = effects[index];
+                effects->remove(key:index);
+                value.effect.onRemoveEffect(
+                    user:value.from, 
+                    holder:this,
+                    item:value.item
+                );
             },
             
             abilitiesAvailable : {
@@ -1550,7 +1570,7 @@
                 
                 state.ap -= ability.apCost;
                 state.hp -= ability.hpCost;
-                ability.onAction(
+                return ability.onAction(
                     user:this,
                     targets, turnIndex, targetDefendParts, targetParts, extraData          
                 );            

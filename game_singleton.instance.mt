@@ -88,7 +88,8 @@ import(module:'game_class.island.mt');
     return (xd**2 + yd**2)**0.5;
 }
 @:JSON = import(module:'Matte.Core.JSON');
-@:VERSION = '0.1.8a';
+@:GIT_COMMIT = import(module:'GIT_COMMIT');
+@:VERSION = '0.1.8b - ' + GIT_COMMIT;
 @world = import(module:'game_singleton.world.mt');
 import(module:'game_function.newrecord.mt');
 
@@ -198,149 +199,156 @@ return class(
                 
 
 
-                @:choiceNames = [];
                 @:choiceActions = [];
                 
+                @:genChoices ::{
+                    choiceActions->setSize(size:0);
+                    @:choiceNames = [];
+                    if (onListSlots()->size != 0) ::<= {
+                        choiceNames->push(value:'Load');
+                        choiceActions->push(value: ::{
+                            @:choices = onListSlots();
+                            when (choices->size == 0) ::<= {
+                                windowEvent.queueMessage(text: 'No save files were found.');
+                            }
+                            windowEvent.queueChoices(
+                                choices,
+                                prompt: 'Load which save?',
+                                canCancel: true,
+                                onChoice::(choice) {
+                                    when(choice == 0) empty;
+                                    @:data = onLoadState(slot:choices[choice-1]);
+
+                                    this.resetDatabase();
+
+                                                                            
+                                    this.load(serialized:JSON.decode(string:data));
+                                    this.startResume();
+                                
+                                }
+                            );                    
+                        });
+                    }
                 
-                if (onListSlots()->size != 0) ::<= {
-                    choiceNames->push(value:'Load');
-                    choiceActions->push(value: ::{
-                        @:choices = onListSlots();
-                        when (choices->size == 0) ::<= {
-                            windowEvent.queueMessage(text: 'No save files were found.');
+                
+                
+                    choiceNames->push(value:'New');
+                    choiceActions->push(value:::{
+                        
+                    
+                        canvas.clear();
+                        canvas.blackout();
+
+                        this.resetDatabase();
+
+
+                        @:enterName = import(module:'game_function.name.mt');
+
+
+                        @choices = Scenario.database.getAll();
+                        @choiceNames = [...choices]->map(to::(value) <- value.name);
+                        
+                        if (settings.unlockedScenarios == false || settings.unlockedScenarios == empty) ::<= {
+                            choices = [Scenario.database.find(name:'The Chosen')];
+                            choiceNames = ['The Chosen'];
                         }
+                        
+                        
                         windowEvent.queueChoices(
-                            choices,
-                            prompt: 'Load which save?',
+                            prompt: 'Select a scenario:',
+                            choices: choiceNames,
                             canCancel: true,
                             onChoice::(choice) {
-                                when(choice == 0) empty;
-                                @:data = onLoadState(slot:choices[choice-1]);
+                                when(choice <= 0) empty;
+                                world.scenario = Scenario.new(base:choices[choice-1]);
 
-                                this.resetDatabase();
-
-                                                                        
-                                this.load(serialized:JSON.decode(string:data));
-                                this.startResume();
-                            
-                            }
-                        );                    
-                    });
-                }
-                
-                choiceNames->push(value:'New');
-                choiceActions->push(value:::{
-                    
-                
-                    canvas.clear();
-                    canvas.blackout();
-
-                    this.resetDatabase();
-
-
-                    @:enterName = import(module:'game_function.name.mt');
-
-
-                    @choices = Scenario.database.getAll();
-                    @choiceNames = [...choices]->map(to::(value) <- value.name);
-                    
-                    if (settings.unlockedScenarios == false || settings.unlockedScenarios == empty) ::<= {
-                        choices = [Scenario.database.find(name:'The Chosen')];
-                        choiceNames = ['The Chosen'];
-                    }
-                    
-                    
-                    windowEvent.queueChoices(
-                        prompt: 'Select a scenario:',
-                        choices: choiceNames,
-                        canCancel: true,
-                        onChoice::(choice) {
-                            when(choice <= 0) empty;
-                            world.scenario = Scenario.new(base:choices[choice-1]);
-
-                            @:startNewWorld = ::(name){
-                                world.saveName = name;                        
-                                this.startNew();
-                                //this.startInstance();                            
-                            }
-
-                            enterName(
-                                prompt: 'Enter a file name.',
-                                canCancel: true,
-                                onDone ::(name){
-                                    @:currentFiles = onListSlots();
-
-                                    when (currentFiles->findIndex(value:name) != -1) ::<= {
-                                        windowEvent.queueMessage(text:'There\'s already a file named ' + name);
-                                        windowEvent.queueAskBoolean(
-                                            prompt: 'Overwrite ' + name + '?',
-                                            onChoice ::(which) {
-                                                when(!which) empty;
-                                                startNewWorld(name);
-                                            }
-                                        );
-                                    }
-                                
-                                    startNewWorld(name);
+                                @:startNewWorld = ::(name){
+                                    world.saveName = name;                        
+                                    this.startNew();
+                                    //this.startInstance();                            
                                 }
-                            )
-                        }
-                    );                
-                });
-                
-                
-                if (mods->size != 0) ::<= {
-                    choiceNames->push(value:'Mods...');
 
-                    @:modNames = [];
-                    @:modList = [];
-                    
-                    foreach(mods) ::(k, mod) {
-                        modNames->push(value:mod.displayName);
-                        modList->push(value:mod);
-                    }
+                                enterName(
+                                    prompt: 'Enter a file name.',
+                                    canCancel: true,
+                                    onDone ::(name){
+                                        @:currentFiles = onListSlots();
 
-                    choiceActions->push(value:::{
-                        windowEvent.queueChoices(
-                            prompt: 'Loaded mods:',
-                            keep:true,
-                            canCancel:true,
-                            choices: modNames,
-                            onChoice ::(choice) {
-                                @:mod = modList[choice-1];
-                                windowEvent.queueMessage(
-                                    speaker: 'Mod info...',
-                                    text: 
-                                        'Name    : ' + mod.displayName + '\n'+
-                                        '         (' + mod.name + ')\n' +
-                                        'Author  : ' + mod.author + '\n' +
-                                        'Website : ' + mod.website + '\n\n' +
-                                        mod.description + 
-                                        '\n\nDepends on ' + mod.loadFirst->size + ' mods:\n' + ::<= {
-                                            @out = '';
-                                            foreach(mod.loadFirst) ::(i, depends) {
-                                                out = out + ' - ' + depends + '\n'
-                                            }
-                                            return out;
+                                        when (currentFiles->findIndex(value:name) != -1) ::<= {
+                                            windowEvent.queueMessage(text:'There\'s already a file named ' + name);
+                                            windowEvent.queueAskBoolean(
+                                                prompt: 'Overwrite ' + name + '?',
+                                                onChoice ::(which) {
+                                                    when(!which) empty;
+                                                    startNewWorld(name);
+                                                }
+                                            );
                                         }
+                                    
+                                        startNewWorld(name);
+                                    }
                                 )
                             }
-                        );
+                        );                
                     });
+                    
+                    
+                    if (mods->size != 0) ::<= {
+                        choiceNames->push(value:'Mods...');
+
+                        @:modNames = [];
+                        @:modList = [];
+                        
+                        foreach(mods) ::(k, mod) {
+                            modNames->push(value:mod.displayName);
+                            modList->push(value:mod);
+                        }
+
+                        choiceActions->push(value:::{
+                            windowEvent.queueChoices(
+                                prompt: 'Loaded mods:',
+                                keep:true,
+                                canCancel:true,
+                                choices: modNames,
+                                onChoice ::(choice) {
+                                    @:mod = modList[choice-1];
+                                    windowEvent.queueMessage(
+                                        speaker: 'Mod info...',
+                                        text: 
+                                            'Name    : ' + mod.displayName + '\n'+
+                                            '         (' + mod.name + ')\n' +
+                                            'Author  : ' + mod.author + '\n' +
+                                            'Website : ' + mod.website + '\n\n' +
+                                            mod.description + 
+                                            '\n\nDepends on ' + mod.loadFirst->size + ' mods:\n' + ::<= {
+                                                @out = '';
+                                                foreach(mod.loadFirst) ::(i, depends) {
+                                                    out = out + ' - ' + depends + '\n'
+                                                }
+                                                return out;
+                                            }
+                                    )
+                                }
+                            );
+                        });
+                    }
+                    
+                    choiceNames->push(value: 'Credits');
+                    choiceActions->push(value ::{
+                        this.queueCredits();
+                    });
+                    
+                    
+                    choiceNames->push(value: 'Exit');
+                    choiceActions->push(value ::<- onQuit());    
+                    return choiceNames;            
                 }
-                
-                choiceNames->push(value: 'Credits');
-                choiceActions->push(value ::{
-                    this.queueCredits();
-                });
-                
-                
-                choiceNames->push(value: 'Exit');
-                choiceActions->push(value ::<- onQuit());
-                
+
                 
                 windowEvent.queueChoices(
-                    choices: choiceNames,
+                    onGetChoices ::{
+                        return genChoices();
+                    },
                     topWeight: 0.75,
                     keep : true,
                     jumpTag : 'MainMenu',
@@ -649,7 +657,7 @@ return class(
                             } else ::<= {
                                 @:landmark = visitable[choice-(islandOptions->size + 1 + 1)].data;
 
-                                @where = landmark.gate;
+                                @where = ::(landmark) <- landmark.gate;
 
                                 when (landmark.base.pointOfNoReturn == true) ::<= {
                                     windowEvent.queueMessage(
@@ -680,13 +688,16 @@ return class(
             visitLandmark ::(landmark, where) {
                 if (landmark_ != empty && landmark_.base.ephemeral)
                     landmark_.unloadContent();
-                landmark_ = landmark;
-                if (where != empty)
-                    landmark.map.setPointer(
-                        x:where.x,
-                        y:where.y
-                    );                 
+                landmark_ = landmark;                
                 landmark.loadContent();
+                if (where != empty) ::<= {
+                    where = where(landmark);
+                    if (where != empty)
+                        landmark.map.setPointer(
+                            x:where.x,
+                            y:where.y
+                        ); 
+                }
                 @:windowEvent = import(module:'game_singleton.windowevent.mt');
                 @:partyOptions = import(module:'game_function.partyoptions.mt');
                 @:world = import(module:'game_singleton.world.mt');

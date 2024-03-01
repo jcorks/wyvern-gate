@@ -930,7 +930,7 @@ Landmark.database.newEntry(
         isUnique : false,
         dungeonMap : true,
         pointOfNoReturn : false,
-        ephemeral : false,
+        ephemeral : true,
         dungeonForceEntrance: true,
         minLocations : 3,
         maxLocations : 5,
@@ -943,6 +943,7 @@ Landmark.database.newEntry(
             'Small Chest'
         ],
         startingEvents : [
+            'the-snakesiren'
         ],
         mapHint: {
             roomSize: 60,
@@ -1333,7 +1334,7 @@ Landmark.database.newEntry(
             },
             
             unloadContent ::{
-                state.map == empty;
+                state.map = empty;
             },
             
             name : {

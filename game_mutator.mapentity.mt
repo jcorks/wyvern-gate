@@ -531,6 +531,90 @@ MapEntity.Task.database.newEntry(
         }
     );
 }
+
+
+@:THESNAKESIREN_SONG_DISTANCE = 18;
+MapEntity.Task.database.newEntry(
+    data : {
+        name: 'thesnakesiren-song',
+        startup ::{
+            
+        },
+        
+        do ::(data, mapEntity) {
+            @:map = mapEntity.controller.map;
+            @:item = map.getItem(data:mapEntity);
+
+            @:siren = mapEntity.entities[0];
+
+            when (siren.modData.thesnakesiren_heardsong == true) ::<= {
+                map.movePointerToward(
+                    x: item.x,
+                    y: item.y
+                );
+            }
+        
+
+            when(distance(
+                x0:map.pointerX, y0:map.pointerX,
+                x1:item.x, y1:item.y
+            ) > THESNAKESIREN_SONG_DISTANCE) empty;
+
+
+            when (siren.modData.thesnakesiren_heardsong == false) empty;        
+        
+        
+            windowEvent.queueMessage(
+                text: 'The party hears a sweet, pleasant song in the distance...'
+            );
+            
+            windowEvent.queueAskBoolean(
+                prompt: 'Listen to the song?',
+                onChoice::(which) {
+                    when(which == false) ::<= {
+                        windowEvent.queueMessage(
+                            text: 'The party ignores the pleasant-yet-harrowing song.'
+                        );
+                        siren.modData.thesnakesiren_heardsong = false;
+                    }
+                    
+                    siren.modData.thesnakesiren_heardsong = true;
+                    windowEvent.queueMessage(
+                        text: 'The party takes a second to listen to the song.'
+                    );
+
+                    windowEvent.queueMessage(
+                        text: 'The party suddenly feels compelled to go to the source of the song.'
+                    );
+                }
+            );
+            // to prevent multi-steps
+            siren.modData.thesnakesiren_heardsong = false;
+
+        }
+    }
+);
+
+
+
+MapEntity.Task.database.newEntry(
+    data : {
+        name: 'thesnakesiren-roam',
+        startup ::{
+            
+        },
+        
+        do ::(data, mapEntity) {
+            @:map = mapEntity.controller.map;        
+            mapEntity.newPathTo(
+                x:map.pointerX,
+                y:map.pointerY,
+                speed: if (random.flipCoin()) 1/2 else 1
+            );
+        }
+    }
+);
+
 }
 
 @:MapEntity = LoadableClass.create(
@@ -886,7 +970,12 @@ MapEntity.Task = databaseItemMutatorClass(
     }
 );
 
-
+import(module:'game_class.landmarkevent_thebeast.mt');
+import(module:'game_class.landmarkevent_cavebat.mt');
+import(module:'game_class.landmarkevent_dungeonencounters.mt');
+import(module:'game_class.landmarkevent_itemspecter.mt');
+import(module:'game_class.landmarkevent_themirror.mt');
+import(module:'game_class.landmarkevent_thesnakesiren.mt');
 
 
 

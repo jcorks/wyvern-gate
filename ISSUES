@@ -5,15 +5,10 @@ Known bugs / concerns:
 - Some time of day displays go offscreen when the island name 
   is too long.
 - In battle, some frames display a previous background image rather than the most current one
-- In topaz builds, fullscreen disabling doesnt come with window decoration and resizing is impossible
 - Some abilities are not properly implemented currently.
 
 Coming changes:
-  . in topaz builds, prevent auto-firing of confirm / deny
-  . When selecting a target in battle, party members move to bottom of list.
-  . Being able to choose your starting characters. Theyll still be generated, but you'll get to choose 
-    among a list. Thinking 5 per generated.
-    
+          
     The Warrior Scenario
         - This game scenario features a Wyvern's challenge to defeat it 
         - This is a gauntlet with no saving

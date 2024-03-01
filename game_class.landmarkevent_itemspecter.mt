@@ -8,33 +8,22 @@
 @:Battle = import(module:'game_class.battle.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
 @:Item = import(module:'game_mutator.item.mt');
+@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 @:ROOM_SPECTER_COUNT = 3;
-@:ItemSpecter = class(
-    define::(this) {
-        @:Entity = import(module:'game_class.entity.mt');
-        @:Location = import(module:'game_mutator.location.mt');
-
-        @map_;
-        @island_;
-        @landmark_;
-        @addedSpecters = false;
-        
-        
-        @:addSpecter ::{
-            @:windowEvent = import(module:'game_singleton.windowevent.mt');
-            @ar = map_.getRandomArea();;
-            @:tileX = ar.x + (ar.width /2)->floor;
-            @:tileY = ar.y + (ar.height/2)->floor;
-            
-            // only add an entity when not visible. Makes it 
-            // feel more alive and unknown
-            when (map_.isLocationVisible(x:tileX, y:tileY)) empty;
-            
+@:ItemSpecter = LoadableClass.create(
+    name : 'Wyvern.LandmarkEvent.ItemSpecter',
+    items : {
+        addedSpecters : false
+    },
+    
+    statics : {
+        createEntity ::{
+            @:Entity = import(module:'game_class.entity.mt');
+            @world = import(module:'game_singleton.world.mt');
 
 
-
-            @:specter = island_.newInhabitant();
+            @:specter = world.island.newInhabitant();
             specter.name = 'the Wyvern Specter';
             specter.species = Species.find(name:'Wyvern Specter');
             specter.profession = Profession.new(base:Profession.database.find(name:'Wyvern Specter'));               
@@ -63,7 +52,32 @@
             specter.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
             specter.heal(amount:9999, silent:true); 
             specter.healAP(amount:9999, silent:true);     
+            return specter;
+        }
+    },
+    define::(this, state) {
+        @:Entity = import(module:'game_class.entity.mt');
+        @:Location = import(module:'game_mutator.location.mt');
 
+        @map_;
+        @island_;
+        @landmark_;
+        
+        
+        @:addSpecter ::{
+            @:windowEvent = import(module:'game_singleton.windowevent.mt');
+            @ar = map_.getRandomArea();;
+            @:tileX = ar.x + (ar.width /2)->floor;
+            @:tileY = ar.y + (ar.height/2)->floor;
+            
+            // only add an entity when not visible. Makes it 
+            // feel more alive and unknown
+            when (map_.isLocationVisible(x:tileX, y:tileY)) empty;
+            
+
+
+
+            @:specter = ItemSpecter.createEntity();
 
 
 
@@ -80,31 +94,35 @@
                 targetX:tileX, 
                 targetY:tileY
             }
-            if (addedSpecters == false)
+            if (state.addedSpecters == false)
                 windowEvent.queueMessage(
                     text:random.pickArrayItem(list:[
                         'Something\'s off... It\'s not safe here.',
                         'Do you feel that? Something... different... is here.',
                     ])
                 );
-            addedSpecters = true;
+            state.addedSpecters = true;
                 
         }        
 
 
         this.interface = {
-            initialize::(landmark) {
+            initialize::(parent) {
+                @landmark = parent.landmark;
                 map_ = landmark.map;
                 island_ = landmark.island;
                 landmark_ = landmark;
-                return this;
+            },
+            
+            defaultLoad ::{
+                state.addedSpecters = false;
             },
             
             step::{ 
                 @:specters = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'specter');
                 
                 // the specters have been appeased. They leave now
-                when(addedSpecters == true && specters->size == 0) empty;
+                when(state.addedSpecters == true && specters->size == 0) empty;
                 when(landmark_.floor < 1 || (landmark_.floor%3 != 0)) empty;
 
             

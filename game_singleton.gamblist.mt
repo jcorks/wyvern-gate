@@ -54,7 +54,7 @@ Playing the Game
   chosen, the cards are flipped. This is called a "challenge".
   
     . IF the attacker's card is of HIGHER value, the attacker
-      wins the challenge. 
+      wins the challenge. Aces are the highest value card.
 
     . IF the attacker wins the first challenge, 
       the defender MAY choose to increase the stakes by challenging 
@@ -467,6 +467,14 @@ Playing the Game
                 }
                 return out
             });
+            
+            canvas.movePen(x:canvas.width/2-(22/2), y:canvas.height-1);
+            canvas.drawText(text: 
+                if (phase < PHASE.CHOOSE_CARD2)
+                    " - First Challenge - "
+                else
+                    " - Second Challenge - "
+            );            
     
             
         }}
@@ -790,13 +798,14 @@ Playing the Game
             choices: ['Play', 'Rules'],
             keep : true,
             canCancel : false,
+            prompt: 'Sorcerer - A Duel of Magic',
             onChoice::(choice) {
                 when(choice == 1) doTurn();     
                 
                 windowEvent.queueDisplay(
                     prompt: 'Rules',
                     lines: [
-                        "Sorcerer",
+                        "Sorcerer - A Duel of Magic",
                         "",
                         "Overview",
                         "- This game is played with 2 players and",
@@ -848,6 +857,7 @@ Playing the Game
                         "",
                         " . IF the attacker's card is of HIGHER", 
                         "   value, the attacker wins the challenge.", 
+                        "   Aces are the highest value card.",
                         "",
                         " . IF the attacker wins the first", 
                         "   challenge, the defender MAY choose to", 
@@ -981,6 +991,7 @@ Playing the Game
                     canvas.movePen(x:8+i, y:1);
                     canvas.drawChar(text: 'x')
                 }
+
 
                 // draw cards
                 @centerX = (canvas.width  / 2)->floor;

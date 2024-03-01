@@ -3454,7 +3454,7 @@ Item.database.newEntry(data : {
     rarity : 100,
     weight : 10,
     canBeColored : false,
-    basePrice: 100,
+    basePrice: 400,
     keyItem : false,
     hasSize : false,
     tier: 0,
