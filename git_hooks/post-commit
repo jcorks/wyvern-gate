@@ -1,0 +1,3 @@
+#!/bin/sh
+LOC="`git rev-parse --git-dir`/../GIT_COMMIT"
+echo "return \"`git rev-parse --short HEAD`\"" > "$LOC"
