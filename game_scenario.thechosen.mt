@@ -262,7 +262,6 @@ return {
         @:LargeMap = import(module:'game_singleton.largemap.mt');
         @party = world.party;            
     
-            //story.tier = 2;
         @:keyhome = Item.new(
             base: Item.database.find(name:'Wyvern Key')
         );
@@ -275,8 +274,6 @@ return {
             tierHint: 0    
         )
         keyhome.addIslandEntry(world);
-        world.island = keyhome.islandEntry;
-        @:island = world.island;
         party = world.party;
         party.reset();
 
@@ -316,11 +313,6 @@ return {
             //).new(from:island.newInhabitant(),rngEnchantHint:true));
             
             @:story = import(module:'game_singleton.story.mt');
-            story.foundFireKey = true;
-            story.foundIceKey = true;
-            story.foundThunderKey = true;
-            story.foundLightKey = true;
-            story.tier = 3;
             
             party.inventory.addGold(amount:20000);
             
@@ -426,7 +418,7 @@ return {
             instance.savestate();
             @:Scene = import(module:'game_database.scene.mt');
             Scene.start(name:'scene_intro', onDone::{                    
-                instance.visitIsland();
+                instance.visitIsland(key:keyhome);
                 
                 windowEvent.queueMessage(
                     speaker: party.members[0].name,
@@ -795,7 +787,7 @@ return {
                     @:world = import(module:'game_singleton.world.mt');
                     @:Event = import(module:'game_mutator.event.mt');
                     @:Scene = import(module:'game_database.scene.mt');                        
-                    if (location.contested == true) ::<= {
+                    if (location.contested == true && island.tier <= 3) ::<= {
                         Scene.start(
                             name: 'scene_keybattle0',
                             onDone::{},

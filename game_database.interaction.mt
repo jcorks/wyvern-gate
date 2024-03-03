@@ -1915,14 +1915,14 @@ Interaction.newEntry(
                             
                             party.inventory.remove(item);
                         }
-                        @:story = import(module:'game_singleton.story.mt');
+                        @:world = import(module:'game_singleton.world.mt');
                         
                         windowEvent.queueMessage(text:'After the 3rd item, the chest shines brightly.');
                         windowEvent.queueMessage(text:'Something is rising out...');
                         
                         @:item = Item.new(
                             base:Item.database.getRandomFiltered(
-                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= story.tier+2
+                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= world.island.tier+2
                             ),
                             rngEnchantHint:true
                         );

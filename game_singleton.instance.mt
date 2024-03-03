@@ -514,10 +514,8 @@ return class(
                 }            
             },
             
-            visitIsland ::(where, restorePos) {
-                if (where != empty) ::<= {
-                    world.island = where;
-                }
+            visitIsland ::(key => Item.type, restorePos) {            
+                world.island = key.islandEntry;
                 @:island = world.island;
                 island_ = island;
                 
@@ -681,11 +679,13 @@ return class(
                     );
                 }
                 islandTravel();
+                if (windowEvent.canJumpToTag(name:'VisitIsland'))
+                    windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
 
 
             },  
             
-            visitLandmark ::(landmark, where) {
+            visitLandmark ::(landmark => Landmark.type, where) {
                 if (landmark_ != empty && landmark_.base.ephemeral)
                     landmark_.unloadContent();
                 landmark_ = landmark;                

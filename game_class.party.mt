@@ -57,6 +57,23 @@
                 
             },
             
+            hasItemAtAll ::(name) {
+                @key = world.party.inventory.items->filter(by:::(value) <- value.name == name);
+                when (key != empty) key[0];
+
+                // could be equipped
+                return {:::} {
+                    foreach(world.party.members)::(i, member) {
+                        foreach(Entity.EQUIP_SLOTS) ::(n, slot) {
+                            @:wep = member.getEquipped(slot);
+                            if (wep.name == name) ::<= {
+                                send(message:wep);
+                            }
+                        }
+                    }
+                }                
+            },
+            
             inventory : {
                 get :: <- state.inventory
             },

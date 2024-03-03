@@ -6,6 +6,7 @@ Known bugs / concerns:
   is too long.
 - In battle, some frames display a previous background image rather than the most current one
 - Some abilities are not properly implemented currently.
+- On Windows in topaz, sometimes the settings arent read to unlock scenarios.
 
 Coming changes:
           

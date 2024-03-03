@@ -137,6 +137,9 @@
         //Within these, there are 2-6 predominant races per island,
         //usually in order of population distribution
         species : empty,
+        
+        // Whether the island experiences the normal set of possible events
+        possibleEvents : empty,
 
         modData : empty
     },
@@ -150,7 +153,6 @@
         // current party
         @party_;
 
-        
         
 
         // augments an entity based on the current tier
@@ -294,8 +296,7 @@
 
 
             // guaranteed shrine
-            @:story = import(module:'game_singleton.story.mt');
-            match(story.tier) {
+            match(state.tier) {
                 (0):// nothign defeated
                     LargeMap.addLandmark(
                         map:state.map,
@@ -323,13 +324,13 @@
                         base:Landmark.database.find(name:'Shrine of Light'),
                         island:this
                     )
-                /*
+                    
+                (4):// default
                     LargeMap.addLandmark(
                         map:state.map,
                         base:Landmark.database.find(name:'Lost Shrine'),
                         island:this
                     )
-                */
             }                        
 
             
@@ -381,19 +382,28 @@
 
             },
             
-            defaultLoad::(levelHint, nameHint, tierHint, landmarksHint) {
+            defaultLoad::(levelHint, nameHint, tierHint, landmarksHint, sizeWHint, sizeHHint, possibleEventsHint) {
+                @:world = import(module:'game_singleton.world.mt');
+
+                @:oldIsland = world.island;
+                world.island = this;
+ 
                 ::<= {
                     @factor = Number.random()*50 + 80;
                     @sizeW  = (factor)->floor;
                     @sizeH  = (factor*0.5)->floor;
-                    @:world = import(module:'game_singleton.world.mt');
                     
                     state.name = NameGen.island();
                     state.levelMin = 0;
                     state.levelMax = 0;
+                    state.possibleEvents = if (possibleEventsHint) possibleEventsHint else [
+                        'BBQ',
+                        'Weather:1',
+                        'Camp out'
+                    ];
                     state.encounterRate = Number.random();
-                    state.sizeW  = sizeW;
-                    state.sizeH  = sizeH;
+                    state.sizeW  = if (sizeWHint != empty) sizeWHint else sizeW;
+                    state.sizeH  = if (sizeHHint != empty) sizeHHint else sizeH;
                     state.stepsSinceLastEvent = 0;
                     state.map = LargeMap.create(parent:this, sizeW, sizeH);
                     state.worldID = world.getNextID();
@@ -451,7 +461,7 @@
                     }
                 }
                 
-
+                world.island = oldIsland;
                 return this;
             },
 
@@ -514,7 +524,6 @@
             incrementTime:: {
                 @:world = import(module:'game_singleton.world.mt');
                 world.stepTime(); 
-            
                 foreach(state.events)::(index, event) {
                     event.stepTime();
                 }
@@ -539,6 +548,8 @@
             
             takeStep :: {            
                 state.stepsSinceLastEvent += 1;        
+                
+                when(state.possibleEvents->size == 0) empty;
             
                 // every step, an event can occur.
                 //if (stepsSinceLastEvent > 200000) ::<= {
@@ -546,9 +557,7 @@
                     if (Number.random() > 13 - (state.stepsSinceLastEvent-5) / 5) ::<={
                         this.addEvent(
                             event:Event.new(
-                                base:Event.database.getRandomFiltered(
-                                    filter:::(value) <- !value.name->contains(key:'Encounter')
-                                ),
+                                base:Event.database.find(name:random.pickArrayItem(list:state.possibleEvents)),
                                 parent:this
                             )
                         );                        

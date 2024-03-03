@@ -249,13 +249,7 @@
                     return state.saveName
                 }
             },
-            
-            
-            discoverIsland ::(levelHint => Number, tierHint => Number, nameHint, landmarksHint) {
-                @:out = Island.new(parent:this, levelHint, nameHint, tierHint, landmarksHint);
-                return out;
-            },
-            
+                        
             time : {
                 get ::<- state.time
             },

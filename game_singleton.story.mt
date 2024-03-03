@@ -23,20 +23,6 @@
 
 
 @:ITEM_SOURCE = {
-    // whether the Fire Key is has been given to the party
-    foundFireKey : false,
-
-    // whether the Ice Key has been given to the party
-    foundIceKey : false,
-
-    // whether the thunder key has been given to the party
-    foundThunderKey : false,
-
-    // whether the light key has been given to the party        
-    foundLightKey : false,
-    
-    // whether the dark key has been given to the party
-    hasDarkKey : false,
     
     // Whether the initial box has been opened.
     openedSentimentalBox : false,
@@ -48,14 +34,7 @@
     npcs: {},
     
     
-    // progression of defeated wyverns
-    // tier 0 -> none 
-    // tier 1 -> fire 
-    // tier 2 -> ice 
-    // tier 3 -> thunder 
-    // tier 4 -> light 
-    tier : 0,
-    
+    // base level hint. If this changes... well....
     levelHint : 6,
     
     // Number of discovered locations

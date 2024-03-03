@@ -3411,7 +3411,7 @@ Item.database.newEntry(data : {
     rarity : 100,
     weight : 10,
     canBeColored : false,
-    basePrice: 100,
+    basePrice: 1000,
     keyItem : false,
     hasSize : false,
     tier: 0,
@@ -3768,12 +3768,12 @@ Item.database.newEntry(data : {
                     }
                 }
                 
-                @:story = import(module:'game_singleton.story.mt');
+                @:world = import(module:'game_singleton.world.mt');
 
                 if (base.hasMaterial) ::<= {
                     if (materialHint == empty) ::<= {
                         state.material = Material.getRandomWeightedFiltered(
-                            filter::(value) <- value.tier <= story.tier
+                            filter::(value) <- value.tier <= world.island.tier
                         );
                     } else ::<= {
                         state.material = Material.find(name:materialHint);                
@@ -3784,7 +3784,7 @@ Item.database.newEntry(data : {
                 if (base.isApparel) ::<= {
                     if (apparelHint == empty) ::<= {
                         state.apparel = ApparelMaterial.getRandomWeightedFiltered(
-                            filter::(value) <- value.tier <= story.tier
+                            filter::(value) <- value.tier <= world.island.tier
                         );
                     } else ::<= {
                         state.apparel = ApparelMaterial.find(name:apparelHint);                
@@ -3802,7 +3802,7 @@ Item.database.newEntry(data : {
 
                     
                     if (rngEnchantHint != empty && (random.try(percentSuccess:60) || forceEnchant)) ::<= {
-                        @enchantCount = random.integer(from:1, to:match(story.tier) {
+                        @enchantCount = random.integer(from:1, to:match(world.island.tier) {
                             (6, 7, 8, 9, 10):    8,
                             (3,4,5):    4,
                             (1, 2):    2,
@@ -3814,7 +3814,7 @@ Item.database.newEntry(data : {
                         for(0, enchantCount)::(i) {
                             @mod = ItemEnchant.new(
                                 base:ItemEnchant.database.getRandomFiltered(
-                                    filter::(value) <- value.tier <= story.tier && (if (base.canHaveTriggerEnchants == false) value.triggerConditionEffects->keycount == 0 else true)
+                                    filter::(value) <- value.tier <= world.island.tier && (if (base.canHaveTriggerEnchants == false) value.triggerConditionEffects->keycount == 0 else true)
                                 )
                             )
                             this.addEnchant(mod);
@@ -3915,6 +3915,12 @@ Item.database.newEntry(data : {
             },
             
             islandEntry : {
+                set ::(value) {
+                    state.island = value;
+                    state.price *= 1 + ((state.island.levelMin) / (5 + 5*Number.random()));
+                    state.price = state.price->ceil;
+                
+                },
                 get ::<- state.island
             },
             
@@ -3932,19 +3938,18 @@ Item.database.newEntry(data : {
                 when (state.island != empty) empty;
 
                 if (island == empty) ::<= {
-                    state.island = world.discoverIsland(
+                    this.islandEntry = island.new(
                         levelHint: (state.islandLevelHint)=>Number,
                         nameHint: (state.islandNameHint)=>String,
                         tierHint: (state.islandTierHint)=>Number
                     );                
                 } else 
-                    state.island = island;
+                    state.islandEntry = island;
 
 
                 
                                 
-                state.price *= 1 + ((state.island.levelMin) / (5 + 5*Number.random()));
-                state.price = state.price->ceil;
+                
                 /*
                 @:levelToStratum = ::(level) {
                     return match((level / 5)->floor) {

@@ -98,32 +98,43 @@ Scene.newEntry(
                                 
                                 @:foundMessage ::(itemName){
                                     windowEvent.queueMessage(text: 'It looks like they dropped something heavy during the fight...');
-                                    windowEvent.queueMessage(text: '.. is that...?');                            
-                                    party.inventory.add(item:Item.new(base:Item.database.find(name:itemName)));
+                                    if (itemName != empty && world.party.hasItemAtAll(name:itemName) == false)
+                                        windowEvent.queueMessage(text: '.. is that...?');                            
+                                        party.inventory.add(item:Item.new(base:Item.database.find(name:itemName)));
+                                    else ::<= {
+                                        windowEvent.queueMessage(text: '.. huh...? This is just a normal key to another island...');                            
+
+                                        @:key = Item.new(base:Item.database.find(name:'Wyvern Key'));
+                                        @:name = namegen.island();
+                                        key.setIslandGenAttributes(
+                                            levelHint: world.island.levelMax = 1 + (world.island.levelMax * 1.2)->floor,
+                                            nameHint: name,
+                                            tierHint: world.island.tier + 1
+                                        ); 
+                                        key.name = 'Key to ' + name;
+                                        party.inventory.add(item:key);                                       
+                                        itemName = key.name;
+                                    } 
+                                        
                                     windowEvent.queueMessage(text: 'The party obtained the ' + itemName + '!');                            
                                 }
 
 
                                 match(island.tier) {
                                     (0):::<= { 
-                                        if (Story.foundFireKey == false)
-                                            foundMessage(itemName:'Wyvern Key of Fire');
-                                        Story.foundFireKey = true;
+                                        foundMessage(itemName:'Wyvern Key of Fire');
                                     },
                                     (1):::<= {
-                                        if (Story.foundIceKey == false) 
-                                            foundMessage(itemName:'Wyvern Key of Ice');
-                                        Story.foundIceKey = true;
+                                        foundMessage(itemName:'Wyvern Key of Ice');
                                     },
                                     (2):::<= {
-                                        if (Story.foundThunderKey == false)                     
-                                            foundMessage(itemName:'Wyvern Key of Thunder');
-                                        Story.foundThunderKey = true;
+                                        foundMessage(itemName:'Wyvern Key of Thunder');
                                     },
                                     (3):::<= {
-                                        if (Story.foundLightKey == false) 
-                                            foundMessage(itemName:'Wyvern Key of Light');
-                                        Story.foundLightKey = true;
+                                        foundMessage(itemName:'Wyvern Key of Light');
+                                    },
+                                    default ::{
+                                        foundMessage();
                                     }
                                 }
                             };
@@ -381,8 +392,6 @@ Scene.newEntry(
 
                 
                 @:story = import(module:'game_singleton.story.mt');
-                if (story.tier < 1)
-                    story.tier = 1;
                 
                 @:instance = import(module:'game_singleton.instance.mt');
                 // cancel and flush current VisitIsland session
@@ -666,8 +675,6 @@ Scene.newEntry(
                 }
                 
                 @:story = import(module:'game_singleton.story.mt');
-                if (story.tier < 2)
-                    story.tier = 2;
                 
                 @:instance = import(module:'game_singleton.instance.mt');
                 // cancel and flush current VisitIsland session
@@ -931,8 +938,6 @@ Scene.newEntry(
                 }
                 
                 @:story = import(module:'game_singleton.story.mt');
-                if (story.tier < 3)
-                    story.tier = 3;
                 
                 @:instance = import(module:'game_singleton.instance.mt');
                 // cancel and flush current VisitIsland session
@@ -1306,8 +1311,6 @@ Scene.newEntry(
                 @:world = import(module:'game_singleton.world.mt');
                 @doQuest = false;
                 @:story = import(module:'game_singleton.story.mt');
-                if (story.tier < 4)
-                    story.tier = 4;
 
                 @:ask = ::{
                     windowEvent.queueChoices(
@@ -1395,42 +1398,7 @@ Scene.newEntry(
             ['Shaarraeziil', 'I forged this in hopes that our Chosen would be able to wield it.'],
             ['Shaarraeziil', 'Perhaps you don\'t need it, but it is for you regardless. Do with it as you like.'],
 
-
-
-            ::(location, landmark, doNext) {
-                windowEvent.queueNoDisplay(
-                    keep : true,
-                    onEnter ::{
-                        doNext()
-                    },
-                    renderable : {
-                        render ::{
-                            canvas.blackout()
-                        }
-                    }
-                );
-            },
             
-            ['', '(So! Congratulations, you would have gotten to the "good" ending if you continued!)'],
-            ['', '(But, it\'s not ready yet. So let\'s just pretend you did it.)'],
-            ['Shaarraeziil', 'Now.. What is your wish?'],
-
-            ::(location, landmark, doNext) {
-                @:world = import(module:'game_singleton.world.mt')
-                world.accoladeEnable(name:'acceptedQuest');
-                @:instance = import(module:'game_singleton.instance.mt');
-                @:enter = import(module:'game_function.name.mt');
-                enter(
-                    prompt: 'What is your wish?',
-                    onDone ::(name) {
-                        world.setWish(wish:name);
-                        instance.savestate();
-                        (import(module:'game_function.newrecord.mt'))(wish:name);
-                    }
-                );
-            }
-
-            /*
             ::(location, landmark, doNext) {
                 location.ownedBy.name = 'Shaarraeziil';
                 @:world = import(module:'game_singleton.world.mt');
@@ -1481,13 +1449,60 @@ Scene.newEntry(
 
                 breakpoint();
                 doNext();
-            },  
-            */
+            }, 
+            
             
 
         ]
     }
 )
+
+
+Scene.newEntry(
+    data : {
+        name : 'scene_wyvernlight1_quest',
+        script: [
+            ['Shaarraeziil', '...'],
+            ['Shaarraeziil', 'Chosen, are you ready?'],
+            ['Shaarraeziil', 'It will be treacherous...'],
+            ::(location, landmark, doNext) {
+                windowEvent.queueAskBoolean(
+                    prompt: 'Venture forth?',
+                    onChoice::(which) {
+                        
+                    }
+                );
+            }
+        ]
+    }
+);
+
+
+Scene.newEntry(
+    data : {
+        name : 'scene_wyvernlight2_quest',
+        script : [
+
+            ['Shaarraeziil', 'Now.. What is your wish?'],
+
+            ::(location, landmark, doNext) {
+                @:world = import(module:'game_singleton.world.mt')
+                world.accoladeEnable(name:'acceptedQuest');
+                @:instance = import(module:'game_singleton.instance.mt');
+                @:enter = import(module:'game_function.name.mt');
+                enter(
+                    prompt: 'What is your wish?',
+                    onDone ::(name) {
+                        world.setWish(wish:name);
+                        instance.savestate();
+                        (import(module:'game_function.newrecord.mt'))(wish:name);
+                    }
+                );
+            }        
+        ]
+    }
+);
+
 
 Scene.newEntry(
     data : {
