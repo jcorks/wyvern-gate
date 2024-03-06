@@ -700,8 +700,10 @@
                                     text: '"I have received news that the Mysterious Shrine has shifted. I am told this means the quality of items from exploration will increase."'
                                 );
                                 hasNews = true;
-                            }
-                            world.island.tier += 1;
+                                world.island.tier += 1;
+                            } else                         
+                                if (state.days % 10 == 0)
+                                    world.island.tier += 1;
                         }
 
                         if (state.recession < 0)
@@ -1961,7 +1963,7 @@
                                             hiree.addToParty();
                                     }
 
-                                    instance.visitIsland();            
+                                    instance.islandTravel();            
                                     windowEvent.jumpToTag(name:'day-start', goBeforeTag:true, doResolveNext:true);
                                 }
                             )
@@ -2747,8 +2749,8 @@ return {
         );
         keyhome.name = 'Wyvern Key: Home';
         
-            
-        keyhome.addIslandEntry(island:world.discoverIsland(
+        @:Island = import(module:'game_class.island.mt');
+        keyhome.addIslandEntry(island:Island.new(
             nameHint:namegen.island(), 
             levelHint:story.levelHint,
             tierHint: 0,

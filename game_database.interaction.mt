@@ -1164,7 +1164,7 @@ Interaction.newEntry(
             @:keys = [];
             @:keynames = [];
             foreach(party.inventory.items)::(index, item) {
-                if (item.base.name->contains(key:'Wyvern Key')) ::<= {
+                if (item.base.name->contains(key:'Key')) ::<= {
                     keys->push(value: item);
                     keynames->push(value: item.name);
                 }
@@ -1193,17 +1193,25 @@ Interaction.newEntry(
                         @:world = import(module:'game_singleton.world.mt');
                         @:instance = import(module:'game_singleton.instance.mt');
 
-                        @:d = location.landmark.island.newLandmark(
-                            base:Landmark.database.find(name:match(keys[choice-1].name) {
-                                ('Wyvern Key of Fire'):    'Fire Wyvern Dimension',
-                                ('Wyvern Key of Ice'):     'Ice Wyvern Dimension',
-                                ('Wyvern Key of Thunder'): 'Thunder Wyvern Dimension',
-                                ('Wyvern Key of Light'):   'Light Wyvern Dimension',
-                                default: 'Unknown Wyvern Dimension'
-                            })
-                        );
-                        instance.visitLandmark(landmark:d);                        
-                    
+                        @base = Landmark.database.find(name:match(keys[choice-1].name) {
+                            ('Wyvern Key of Fire'):    'Fire Wyvern Dimension',
+                            ('Wyvern Key of Ice'):     'Ice Wyvern Dimension',
+                            ('Wyvern Key of Thunder'): 'Thunder Wyvern Dimension',
+                            ('Wyvern Key of Light'):   'Light Wyvern Dimension'
+                        })
+                        if (base) ::<= {
+                            @:d = location.landmark.island.newLandmark(
+                                base
+                            );
+                            instance.visitLandmark(landmark:d);                        
+                        } else ::<= {
+                            if (keys[choice-1].islandEntry == empty)
+                                keys[choice-1].addIslandEntry();
+                            instance.visitIsland(
+                                key:keys[choice-1],
+                                atGate:true
+                            );
+                        }
                     });
                 }
             );

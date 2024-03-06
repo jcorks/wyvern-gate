@@ -18,6 +18,8 @@
 
 // database loading 
 
+
+
 import(module:'game_database.ability.mt');
 import(module:'game_database.apparelmaterial.mt');
 import(module:'game_database.effect.mt');
@@ -64,7 +66,6 @@ import(module:'game_function.trap.mt');
 import(module:'game_function.pickpartyitem.mt');
 
 
-
 /* make sure base loadable classes are available */
 
 import(module:'game_class.statset.mt');
@@ -78,6 +79,7 @@ import(module:'game_class.stateflags.mt');
 import(module:'game_class.entity.mt');
 import(module:'game_class.island.mt');
 
+@:loading = import(module:'game_function.loading.mt');
 
 
 
@@ -235,61 +237,64 @@ return class(
                     choiceNames->push(value:'New');
                     choiceActions->push(value:::{
                         
-                    
-                        canvas.clear();
-                        canvas.blackout();
-
-                        this.resetDatabase();
+                        loading(
+                            message: 'Loading scenarios...',
+                            do ::{
 
 
-                        @:enterName = import(module:'game_function.name.mt');
+                                this.resetDatabase();
 
 
-                        @choices = Scenario.database.getAll();
-                        @choiceNames = [...choices]->map(to::(value) <- value.name);
-                        
-                        if (settings.unlockedScenarios == false || settings.unlockedScenarios == empty) ::<= {
-                            choices = [Scenario.database.find(name:'The Chosen')];
-                            choiceNames = ['The Chosen'];
-                        }
-                        
-                        
-                        windowEvent.queueChoices(
-                            prompt: 'Select a scenario:',
-                            choices: choiceNames,
-                            canCancel: true,
-                            onChoice::(choice) {
-                                when(choice <= 0) empty;
-                                world.scenario = Scenario.new(base:choices[choice-1]);
+                                @:enterName = import(module:'game_function.name.mt');
 
-                                @:startNewWorld = ::(name){
-                                    world.saveName = name;                        
-                                    this.startNew();
-                                    //this.startInstance();                            
+
+                                @choices = Scenario.database.getAll();
+                                @choiceNames = [...choices]->map(to::(value) <- value.name);
+                                
+                                if (settings.unlockedScenarios == false || settings.unlockedScenarios == empty) ::<= {
+                                    choices = [Scenario.database.find(name:'The Chosen')];
+                                    choiceNames = ['The Chosen'];
                                 }
-
-                                enterName(
-                                    prompt: 'Enter a file name.',
+                                
+                                
+                                windowEvent.queueChoices(
+                                    prompt: 'Select a scenario:',
+                                    choices: choiceNames,
                                     canCancel: true,
-                                    onDone ::(name){
-                                        @:currentFiles = onListSlots();
+                                    onChoice::(choice) {
+                                        when(choice <= 0) empty;
+                                        world.scenario = Scenario.new(base:choices[choice-1]);
 
-                                        when (currentFiles->findIndex(value:name) != -1) ::<= {
-                                            windowEvent.queueMessage(text:'There\'s already a file named ' + name);
-                                            windowEvent.queueAskBoolean(
-                                                prompt: 'Overwrite ' + name + '?',
-                                                onChoice ::(which) {
-                                                    when(!which) empty;
-                                                    startNewWorld(name);
-                                                }
-                                            );
+                                        @:startNewWorld = ::(name){
+                                            world.saveName = name;                        
+                                            this.startNew();
+                                            //this.startInstance();                            
                                         }
-                                    
-                                        startNewWorld(name);
+
+                                        enterName(
+                                            prompt: 'Enter a file name.',
+                                            canCancel: true,
+                                            onDone ::(name){
+                                                @:currentFiles = onListSlots();
+
+                                                when (currentFiles->findIndex(value:name) != -1) ::<= {
+                                                    windowEvent.queueMessage(text:'There\'s already a file named ' + name);
+                                                    windowEvent.queueAskBoolean(
+                                                        prompt: 'Overwrite ' + name + '?',
+                                                        onChoice ::(which) {
+                                                            when(!which) empty;
+                                                            startNewWorld(name);
+                                                        }
+                                                    );
+                                                }
+                                            
+                                                startNewWorld(name);
+                                            }
+                                        )
                                     }
-                                )
-                            }
-                        );                
+                                );  
+                            }    
+                        )          
                     });
                     
                     
@@ -427,34 +432,13 @@ return class(
         
             startNew ::{
             
-                @:loadingScreen = ::(message, do) {
-                    windowEvent.queueNoDisplay(
-                        renderable : {
-                            render :: {
-                                canvas.blackout();
-                                canvas.clear();
-                                canvas.blackout();
-                                canvas.movePen(
-                                    x: canvas.width/2 - message->length/2,
-                                    y: canvas.height/2
-                                );
-                                canvas.drawText(text:message);
-                                canvas.commit(renderNow:true);                         
-                            }
-                        },
-                        onEnter ::{},
-                        onLeave ::{                        
-                            do();
-                        }                    
-                    )                
-                }
+
 
             
             
                 
                 
-                loadingScreen(
-                    message: 'Loading...',
+                loading(
                     do ::{
                         world.scenario.base.onBegin(data:world.scenario.data);
                     }
@@ -514,7 +498,7 @@ return class(
                 }            
             },
             
-            visitIsland ::(key => Item.type, restorePos) {            
+            visitIsland ::(key => Item.type, restorePos, noMenu, atGate) {            
                 world.island = key.islandEntry;
                 @:island = world.island;
                 island_ = island;
@@ -523,13 +507,45 @@ return class(
                 island.map.title = "(Map of " + island.name + ')';
 
                 if (restorePos == empty) ::<= {
-                    @somewhere = LargeMap.getAPosition(map:island.map);
-                    island.map.setPointer(
-                        x: somewhere.x,
-                        y: somewhere.y
-                    );               
+                    if (atGate == empty) ::<= {
+                        @somewhere = LargeMap.getAPosition(map:island.map);
+                        island.map.setPointer(
+                            x: somewhere.x,
+                            y: somewhere.y
+                        );               
+                    }
                 }
 
+                if (noMenu == empty || noMenu == false) ::<= {
+                    this.islandTravel();
+                    if (windowEvent.canJumpToTag(name:'VisitIsland'))
+                        windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
+                }
+                
+                if (restorePos == empty && atGate != empty) ::<= {
+                    @gate = island.landmarks->filter(by:::(value) <- value.base.name == 'Wyvern Gate');
+                    when(gate->size == 0) empty;
+                    
+                    gate = gate[0];
+                    
+                    
+                    @gategate = gate.locations->filter(by:::(value) <- value.base.name == 'Gate');
+                    when(gategate->size == 0) empty;
+                    
+                    this.visitLandmark(
+                        landmark:gate,
+                        where: gategate
+                    );                
+                }
+
+            },  
+
+            islandTravel ::{
+                @:island = world.island;
+                
+                when(island == empty)
+                    error(detail:'No island to make a menu for! Use visitIsland() to set the current island.');
+                
                 @enteredChoices = false;
                 @underFoot;
                 @islandTravel = ::{
@@ -677,13 +693,9 @@ return class(
                             }
                         }
                     );
-                }
-                islandTravel();
-                if (windowEvent.canJumpToTag(name:'VisitIsland'))
-                    windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
+                }            
+            },
 
-
-            },  
             
             visitLandmark ::(landmark => Landmark.type, where) {
                 if (landmark_ != empty && landmark_.base.ephemeral)

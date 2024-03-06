@@ -519,6 +519,62 @@ Landmark.database.newEntry(
 
 Landmark.database.newEntry(
     data: {
+        name : 'Lost Shrine',
+        symbol : 'M',
+        legendName: 'Shrine',
+        rarity : 100000,      
+        isUnique : true,
+        minLocations : 2,
+        maxLocations : 4,
+        peaceful: false,
+        guarded : false,
+        dungeonMap : true,
+        canSave : false,
+        pointOfNoReturn : true,
+        ephemeral : true,
+        dungeonForceEntrance: false,
+        startingEvents : [
+            'dungeon-encounters',
+            'item-specter',
+            'the-beast',
+            'the-mirror',
+            'treasure-golem',
+            'cave-bat'
+        ],
+        possibleLocations : [
+//                    {name: 'Stairs Down', rarity:1},
+            {name: 'Fountain', rarity:18},
+            {name: 'Potion Shop', rarity: 17},
+            {name: 'Enchantment Stand', rarity: 11},
+            {name: 'Wyvern Statue', rarity: 15},
+            {name: 'Small Chest', rarity: 16},
+            {name: 'Locked Chest', rarity: 11},
+            {name: 'Magic Chest', rarity: 15},
+
+            {name: 'Healing Circle', rarity:35},
+
+            {name: 'Clothing Shop', rarity: 100},
+            {name: 'Fancy Shop', rarity: 50}
+
+        ],
+        requiredLocations : [
+            'Enchantment Stand',
+            'Stairs Down',
+            'Locked Chest',
+            'Small Chest'
+        ],
+        mapHint:{
+            layoutType: DungeonMap.LAYOUT_DELTA
+        },
+        onCreate ::(landmark, island){
+        },
+        onVisit ::(landmark, island) {}
+        
+    }
+)
+
+Landmark.database.newEntry(
+    data: {
         name : 'Shrine: Lost Floor',
         symbol : 'M',
         legendName: 'Shrine',

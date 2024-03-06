@@ -254,6 +254,10 @@
                 get ::<- state.time
             },
             
+            MAX_NORMAL_TIER : {
+                get ::<- 3
+            },
+            
             day : {
                 get ::<- state.day
             },
@@ -277,7 +281,8 @@
             island : {
                 get :: <- island,
                 set ::(value) {
-                    state.islandID = value.worldID;
+                    if (value)
+                        state.islandID = value.worldID;
                     island = value;
                 }
             },
@@ -388,6 +393,12 @@
                 @:EntityQuality = import(module:'game_mutator.entityquality.mt');
                 @:Item = import(module:'game_mutator.item.mt');
                 @:story = import(module:'game_singleton.story.mt');
+                
+                @:currentIsland = this.island;
+                this.island = Island.new(
+                    tierHint: 0,
+                    levelHint : 6
+                );
                 
                 state.npcs = {
                     faus : ::<= {
@@ -657,7 +668,10 @@
                         ent.name = 'Skie';
                         return ent;                    
                     }
-                }       
+                } 
+                this.island = currentIsland;
+                
+                      
             },
             
             modData : {

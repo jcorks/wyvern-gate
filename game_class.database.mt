@@ -109,7 +109,11 @@
                 return Random.pickTableItem(table:items_);
             },
 
-            getRandomWeighted :: {
+            getRandomWeighted ::(knockout)  {
+                // knockout removes the weighted property and randomly returns something
+                when (knockout != empty && Random.try(percentSuccess:knockout))
+                    Random.pickArrayItem(list:items_->values);
+                    
                 return Random.pickArrayItemWeighted(list:items_->values);
             },
 
@@ -135,7 +139,16 @@
                 return l;            
             },
 
-            getRandomWeightedFiltered ::(filter => Function) {
+            getRandomWeightedFiltered ::(filter => Function, knockout) {
+                // knockout removes the weighted property and randomly returns something
+                when (knockout != empty && Random.try(percentSuccess:knockout))
+                    Random.pickArrayItem(
+                        list: (
+                            items_->values->filter(by:filter)                   
+                        )                    
+                    )
+                ; 
+                
                 return Random.pickArrayItemWeighted(
                     list: (
                         items_->values->filter(by:filter)                   

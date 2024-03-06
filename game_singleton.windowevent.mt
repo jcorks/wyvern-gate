@@ -561,11 +561,22 @@
             //    choicesModified->push(value:'(Cancel)');
             //}
             
-            if (data.rendered == empty || input != empty)
-                renderThis(data);
-
+            if (data.rendered == empty || input != empty) ::<= {
+                if (data.isAnimation == true) ::<= {
+                    data.busy = true;
+                    renderThisAnimation(data, frame ::{
+                        @:output = data.animationFrame();
+                        when(output != canvas.ANIMATION_FINISHED) empty;
+                        data.busy = false;
+                        return canvas.ANIMATION_FINISHED;
+                    });
+                } else ::<= {
+                    renderThis(data);
+                }
+            }
             data.onEnter();
           
+            when(data.busy) false;
             return true;    
         }       
     
@@ -984,7 +995,7 @@
             // A place holder action. This can be used to run a function 
             // in order, or for rendering graphics.
             // onEnter runs whenever the display is entered.
-            queueNoDisplay::(renderable, keep, onEnter => Function, jumpTag, onLeave) {
+            queueNoDisplay::(renderable, keep, onEnter => Function, jumpTag, onLeave, isAnimation, animationFrame) {
                 when(requestAutoSkip) ::<= {
                     if (onEnter) onEnter();
                     if (onLeave) onLeave();
@@ -997,7 +1008,9 @@
                         renderable:renderable,
                         onEnter:onEnter,
                         jumpTag: jumpTag,
-                        onLeave: onLeave
+                        onLeave: onLeave,
+                        isAnimation : isAnimation,
+                        animationFrame : animationFrame
                     });
                 }]);                
             },

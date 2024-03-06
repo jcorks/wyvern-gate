@@ -98,13 +98,14 @@ Scene.newEntry(
                                 
                                 @:foundMessage ::(itemName){
                                     windowEvent.queueMessage(text: 'It looks like they dropped something heavy during the fight...');
-                                    if (itemName != empty && world.party.hasItemAtAll(name:itemName) == false)
+                                    if (itemName != empty && world.party.hasItemAtAll(name:itemName) == false) ::<= {
                                         windowEvent.queueMessage(text: '.. is that...?');                            
                                         party.inventory.add(item:Item.new(base:Item.database.find(name:itemName)));
-                                    else ::<= {
+                                    } else ::<= {
                                         windowEvent.queueMessage(text: '.. huh...? This is just a normal key to another island...');                            
 
                                         @:key = Item.new(base:Item.database.find(name:'Wyvern Key'));
+                                        @:namegen = import(module:'game_singleton.nameget.mt');
                                         @:name = namegen.island();
                                         key.setIslandGenAttributes(
                                             levelHint: world.island.levelMax = 1 + (world.island.levelMax * 1.2)->floor,
@@ -133,7 +134,7 @@ Scene.newEntry(
                                     (3):::<= {
                                         foundMessage(itemName:'Wyvern Key of Light');
                                     },
-                                    default ::{
+                                    default: ::{
                                         foundMessage();
                                     }
                                 }
@@ -399,10 +400,7 @@ Scene.newEntry(
                     key.addIslandEntry(world);
 
                 
-                instance.visitIsland(where:key.islandEntry);
-                if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
-                    windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
-                }
+                instance.visitIsland(where:key.islandEntry, atGate:true);
 
                 breakpoint();
                 doNext();
@@ -566,7 +564,7 @@ Scene.newEntry(
                 );
 
                 @:instance = import(module:'game_singleton.instance.mt');
-                instance.visitIsland(where:key.islandEntry);
+                instance.visitIsland(where:key.islandEntry, atGate:true);
                 doNext();                    
             }
         ]
@@ -682,10 +680,7 @@ Scene.newEntry(
                     key.addIslandEntry(world);
 
 
-                instance.visitIsland(where:key.islandEntry);
-                if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
-                    windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
-                }
+                instance.visitIsland(where:key.islandEntry, atGate:true);
 
                 breakpoint();
                 doNext();
@@ -809,7 +804,7 @@ Scene.newEntry(
                 );
 
                 @:instance = import(module:'game_singleton.instance.mt');
-                instance.visitIsland(where:key.islandEntry);
+                instance.visitIsland(where:key.islandEntry, atGate:true);
                 doNext();                    
             }
         ]
@@ -945,10 +940,7 @@ Scene.newEntry(
                     key.addIslandEntry(world);
 
 
-                instance.visitIsland(where:key.islandEntry);
-                if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
-                    windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
-                }
+                instance.visitIsland(where:key.islandEntry, atGate:true);
 
                 breakpoint();
                 doNext();
@@ -1195,7 +1187,7 @@ Scene.newEntry(
                 );
 
                 @:instance = import(module:'game_singleton.instance.mt');
-                instance.visitIsland(where:key.islandEntry);
+                instance.visitIsland(where:key.islandEntry, atGate:true);
                 doNext();                    
             }
         ]
@@ -1442,12 +1434,8 @@ Scene.newEntry(
                     key.addIslandEntry(world);
 
 
-                instance.visitIsland(where:key.islandEntry);
-                if (windowEvent.canJumpToTag(name:'VisitIsland')) ::<= {
-                    windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
-                }
+                instance.visitIsland(where:key.islandEntry, atGate:true);
 
-                breakpoint();
                 doNext();
             }, 
             
@@ -1680,7 +1668,7 @@ Scene.newEntry(
                 @:instance = import(module:'game_singleton.instance.mt');
 
 
-                instance.visitIsland(restorePos:true);                
+                instance.visitIsland(restorePos:true, atGate:true);                
             }
         ]
     }
@@ -1707,7 +1695,7 @@ Scene.newEntry(
                 @:instance = import(module:'game_singleton.instance.mt');
 
 
-                instance.visitIsland(restorePos:true);                
+                instance.visitIsland(restorePos:true, atGate:true);                
             }
         ]
     }

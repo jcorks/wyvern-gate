@@ -37,8 +37,6 @@
       can be globally unique. Their base is a standard item 
       class
 
-
-
 */
 
 
@@ -3715,6 +3713,7 @@ Item.database.newEntry(data : {
         this.interface = {
             initialize ::{},
             defaultLoad::(base, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, abilityHint, forceEnchant) {
+                @:world = import(module:'game_singleton.world.mt');
 
                 state.enchants = []; // ItemMod
                 state.equipEffects = [];
@@ -3760,7 +3759,9 @@ Item.database.newEntry(data : {
                     
                     if (random.try(percentSuccess:30) || (qualityHint != empty)) ::<= {
                         state.quality = if (qualityHint == empty)
-                            ItemQuality.getRandomWeighted()
+                            ItemQuality.getRandomWeighted(
+                                knockout : if (world.island.tier > world.MAX_NORMAL_TIER) (world.island.tier  - world.MAX_NORMAL_TIER)*1.4                            
+                            )
                         else 
                             ItemQuality.find(name:qualityHint);
                         state.stats.add(stats:state.quality.equipMod);
@@ -3768,12 +3769,12 @@ Item.database.newEntry(data : {
                     }
                 }
                 
-                @:world = import(module:'game_singleton.world.mt');
 
                 if (base.hasMaterial) ::<= {
                     if (materialHint == empty) ::<= {
                         state.material = Material.getRandomWeightedFiltered(
-                            filter::(value) <- value.tier <= world.island.tier
+                            filter::(value) <- value.tier <= world.island.tier,
+                            knockout : if (world.island.tier > world.MAX_NORMAL_TIER) (world.island.tier  - world.MAX_NORMAL_TIER)*1.4
                         );
                     } else ::<= {
                         state.material = Material.find(name:materialHint);                
@@ -3784,7 +3785,8 @@ Item.database.newEntry(data : {
                 if (base.isApparel) ::<= {
                     if (apparelHint == empty) ::<= {
                         state.apparel = ApparelMaterial.getRandomWeightedFiltered(
-                            filter::(value) <- value.tier <= world.island.tier
+                            filter::(value) <- value.tier <= world.island.tier,
+                            knockout : if (world.island.tier > world.MAX_NORMAL_TIER) (world.island.tier  - world.MAX_NORMAL_TIER)*1.4
                         );
                     } else ::<= {
                         state.apparel = ApparelMaterial.find(name:apparelHint);                
@@ -3806,7 +3808,8 @@ Item.database.newEntry(data : {
                             (6, 7, 8, 9, 10):    8,
                             (3,4,5):    4,
                             (1, 2):    2,
-                            default: 1
+                            (0): 1,
+                            default: 12
                         });
                         
                         
@@ -3938,7 +3941,7 @@ Item.database.newEntry(data : {
                 when (state.island != empty) empty;
 
                 if (island == empty) ::<= {
-                    this.islandEntry = island.new(
+                    this.islandEntry = Island.new(
                         levelHint: (state.islandLevelHint)=>Number,
                         nameHint: (state.islandNameHint)=>String,
                         tierHint: (state.islandTierHint)=>Number

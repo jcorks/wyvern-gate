@@ -323,7 +323,7 @@
                         map:state.map,
                         base:Landmark.database.find(name:'Shrine of Light'),
                         island:this
-                    )
+                    ),
                     
                 (4):// default
                     LargeMap.addLandmark(

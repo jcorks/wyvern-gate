@@ -274,9 +274,11 @@ return {
             tierHint: 0    
         )
         keyhome.addIslandEntry(world);
+        instance.visitIsland(noMenu:true, key:keyhome);
+
         party = world.party;
         party.reset();
-
+        @:island = keyhome.islandEntry;
 
 
         
@@ -286,7 +288,7 @@ return {
         
         // since both the party members are from this island, 
         // they will already know all its locations
-        foreach(island.landmarks)::(index, landmark) {
+        foreach(keyhome.islandEntry.landmarks)::(index, landmark) {
             landmark.discover(); 
         }
         
@@ -296,7 +298,7 @@ return {
         @:choices = [];
         
         for(0, 5) ::(i) {
-            @:p0 = island.newInhabitant(levelHint:story.levelHint-1);
+            @:p0 = keyhome.islandEntry.newInhabitant(levelHint:story.levelHint-1);
             p0.normalizeStats();        
             choices->push(value:p0);
         }
@@ -787,7 +789,7 @@ return {
                     @:world = import(module:'game_singleton.world.mt');
                     @:Event = import(module:'game_mutator.event.mt');
                     @:Scene = import(module:'game_database.scene.mt');                        
-                    if (location.contested == true && island.tier <= 3) ::<= {
+                    if (location.contested == true && world.island.tier <= 3) ::<= {
                         Scene.start(
                             name: 'scene_keybattle0',
                             onDone::{},
