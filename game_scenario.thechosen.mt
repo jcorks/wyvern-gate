@@ -15,6 +15,7 @@
 @:Personality = import(module:'game_database.personality.mt');
 @:g = import(module:'game_function.g.mt');
 @:Accolade = import(module:'game_struct.accolade.mt');
+@:loading = import(module:'game_function.loading.mt');
 
 
 @:interactionsPerson = [
@@ -408,25 +409,30 @@ return {
 
         
         @:extendedName::(entity) {
-            return entity.name + ' - the ' + entity.species.name + ' ' + entity.profession.base.name
+            return 'the ' + entity.species.name + ' ' + entity.profession.base.name
         }
         
         @:finish ::{
-            @somewhere = LargeMap.getAPosition(map:island.map);
-            island.map.setPointer(
-                x: somewhere.x,
-                y: somewhere.y
-            );               
-            instance.savestate();
-            @:Scene = import(module:'game_database.scene.mt');
-            Scene.start(name:'scene_intro', onDone::{                    
-                instance.visitIsland(key:keyhome);
-                
-                windowEvent.queueMessage(
-                    speaker: party.members[0].name,
-                    text: '"I should probably open that box now..."'
-                );
-            });        
+            loading(
+                message: 'Saving...',
+                do :: {
+                    @somewhere = LargeMap.getAPosition(map:island.map);
+                    island.map.setPointer(
+                        x: somewhere.x,
+                        y: somewhere.y
+                    );               
+                    instance.savestate();
+                    @:Scene = import(module:'game_database.scene.mt');
+                    Scene.start(name:'scene_intro', onDone::{                    
+                        instance.visitIsland(key:keyhome);
+                        
+                        windowEvent.queueMessage(
+                            speaker: party.members[0].name,
+                            text: '"I should probably open that box now..."'
+                        );
+                    });        
+                }
+            )
         }
     
         @:confirmParty ::{
@@ -476,17 +482,30 @@ return {
             @:choicesMod = [...choices]->filter(by::(value) <- value != p0);
 
             @:choiceNames = [...choicesMod]->map(to:::(value) {
+                return value.name;
+            });
+
+            @:choiceTitles = [...choicesMod]->map(to:::(value) {
                 return extendedName(entity:value);  
             });
 
             if (p0 != empty) ::<= {
                 choiceNames->push(value:'No one.');
+                choiceTitles->push(value:'');
             }
+            @:choicesColumns = import(module:'game_function.choicescolumns.mt');
         
-        
-            windowEvent.queueChoices(
+            
+            choicesColumns(
                 canCancel : true,
-                choices : choiceNames,
+                columns : [
+                    choiceNames,
+                    choiceTitles
+                ],
+                leftJustified: [
+                    true,
+                    true
+                ],
                 topWeight: 0.5,
                 leftWeight: 0.5,
                 keep:true,
@@ -564,7 +583,7 @@ return {
     
     onResume ::(data) {
         @:instance = import(module:'game_singleton.instance.mt');
-        instance.visitIsland(restorePos:true);                
+        instance.islandTravel();           
     },
     
     onDeath ::(data, entity) {

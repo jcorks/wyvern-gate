@@ -794,12 +794,17 @@
                         }
                         @:line = data.lines[progressL];
                         out->push(value:fillLine(line, from:0, to:progressCh))
+                        for(progressL+1, data.lines->size) ::(i) {
+                            out->push(value:'');
+                        }
+
                         
                         if (progressCh > line->length) ::<= {
                             progressCh = 0;
                             progressL += 1;
                         }
                         progressCh+=4;
+
                         return out;
                     }
 

@@ -5,6 +5,7 @@
 return ::(
     onDone => Function,
     prompt => String,
+    renderable,
     canCancel
 ) {
     @name = '';
@@ -44,6 +45,8 @@ return ::(
     windowEvent.queueChoices(
         renderable :{
             render :: {
+                if (renderable)
+                    renderable.render();
                 @pinch = name->length;
                 if (prompt->length > pinch)
                     pinch = prompt->length;

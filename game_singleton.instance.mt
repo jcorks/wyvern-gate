@@ -220,12 +220,20 @@ return class(
                                 onChoice::(choice) {
                                     when(choice == 0) empty;
                                     @:data = onLoadState(slot:choices[choice-1]);
-
-                                    this.resetDatabase();
-
-                                                                            
-                                    this.load(serialized:JSON.decode(string:data));
-                                    this.startResume();
+                                    
+                                    loading(
+                                        message: 'Loading scenario...',
+                                        do:: {
+                                            this.resetDatabase();
+                                            loading(
+                                                message: 'Loading save...',
+                                                do :: {
+                                                    this.load(serialized:JSON.decode(string:data));
+                                                    this.startResume();
+                                                }
+                                            )
+                                        }
+                                    );
                                 
                                 }
                             );                    
@@ -395,7 +403,17 @@ return class(
                         }
                     },
                     onChoice ::(choice) {
-                        choiceActions[choice-1]();
+                        windowEvent.queueNoDisplay(
+                            keep:true,
+                            renderable : {
+                                render :: {
+                                    canvas.blackout();
+                                }
+                            },
+                            onEnter :: {
+                                choiceActions[choice-1]();                            
+                            }
+                        );
                     }
                 );
             },
@@ -439,6 +457,7 @@ return class(
                 
                 
                 loading(
+                    message: 'Creating world...',
                     do ::{
                         world.scenario.base.onBegin(data:world.scenario.data);
                     }
@@ -693,7 +712,8 @@ return class(
                             }
                         }
                     );
-                }            
+                } 
+                islandTravel();           
             },
 
             
