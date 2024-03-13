@@ -504,6 +504,8 @@ return class(
                 }
                 
                 
+                // This helps debug which savestates are active.
+                /*
                     @:trackWindows ::{
                         @out = '{';
                         foreach(this.states) ::(i, state) {
@@ -514,7 +516,7 @@ return class(
 
                     this.movePen(x:0, y:1);
                     this.drawText(text: trackWindows());
-
+                */
 
                 for(0, CANVAS_HEIGHT)::(row) {
                     lines_output[row] = String.combine(strings:canvas->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1));

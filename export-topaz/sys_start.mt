@@ -23,7 +23,7 @@
 
 @:enterLocation = ::(location, action) {
     @:oldPath = Topaz.Resources.getPath();
-    Topaz.Resources.setPath(path:SAVEPATH);
+    Topaz.Resources.setPath(path:location);
     
     {:::} {
         action();
@@ -150,20 +150,27 @@ return ::(terminal, arg, onDone) {
             },
 
             onLoadSettings :: {
-                @:asset = Topaz.Resources.createDataAssetFromPath(path:'settings', name:'settings');
-                when (asset == empty) empty;
-                @:data = asset.getAsString();
-                Topaz.Resources.removeAsset(asset);
-                when (data == '') empty;
+                @data;
+                enterLocation(location:SAVEPATH, action::{
+                    Topaz.Resources.readDataAssetFromPath(asset:settingsAsset, path:'settings');
+                    @:asset = settingsAsset;
+
+                    when (asset == empty) empty;
+                    data = asset.getAsString();
+                    Topaz.Resources.removeAsset(asset);
+                    when (data == '') empty;
+                });
                 return data;
             },
             onSaveSettings ::(data) {
-                settingsAsset.setFromString(string:data);
-                if (Topaz.Resources.writeAsset(
-                    asset:settingsAsset,
-                    fileType: 'text',
-                    outputPath:'settings'
-                ) == 0) error(detail:'settings could not be written!');
+                enterLocation(location:SAVEPATH, action::{                
+                    settingsAsset.setFromString(string:data);
+                    if (Topaz.Resources.writeAsset(
+                        asset:settingsAsset,
+                        fileType: 'text',
+                        outputPath:'settings'
+                    ) == 0) error(detail:'settings could not be written!');
+                });
             },
 
             onListSlots ::{
@@ -175,7 +182,6 @@ return ::(terminal, arg, onDone) {
                 }
                 return output;
             },
-            
 
             onLoadState :::(
                 slot
