@@ -43,6 +43,7 @@
         "game_class.landmarkevent_itemspecter.mt",
         "game_class.landmarkevent_thebeast.mt",
         "game_class.landmarkevent_themirror.mt",
+        "game_class.landmarkevent_thesnakesiren.mt",
         "game_class.landmarkevent_treasuregolem.mt",
         "game_class.logtimer.mt",
         "game_class.map.mt",
@@ -73,6 +74,7 @@
         "game_function.interactperson.mt",
         "game_function.itemimprove.mt",
         "game_function.itemmenu.mt",
+        "game_function.loading.mt",
         "game_function.name.mt",
         "game_function.newrecord.mt",
         "game_function.partyoptions.mt",
@@ -114,7 +116,8 @@
         'Matte.Core',
         'Matte.Core.JSON',
         'Matte.Core.Introspect',
-        'Matte.Core.EventSystem'
+        'Matte.Core.EventSystem',
+        "GIT_COMMIT"
 
     ];
 

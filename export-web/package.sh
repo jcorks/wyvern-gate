@@ -6,6 +6,7 @@ for f in `ls -1`; do
 		./export-cli/matte/cli/matte compile "$f" "./export-web/$f"
 	fi
 done
+./export-cli/matte/cli/matte compile "GIT_COMMIT" "./export-web/GIT_COMMIT"
 cd ./export-web/
 ../export-cli/matte/cli/matte compile ../export-cli/matte/src/rom/core/class.mt "./Matte.Core.Class"
 ../export-cli/matte/cli/matte compile ../export-cli/matte/src/rom/core/core.mt "./Matte.Core"
