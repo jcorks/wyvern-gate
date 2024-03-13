@@ -109,6 +109,9 @@ return class(
         @animations = [];
         
         @savestates = [];
+        @idStatePool = 0;
+        @idStatePool_dead = [];
+        @backgrounds = {};
         
         
         @:animateNext::{
@@ -285,20 +288,55 @@ return class(
                 }                
             },
             
+            addBackground::(render) {
+                @:key = {};
+                backgrounds[key] = render;
+                breakpoint();
+                return key;
+            },
+            
+            removeBackground::(id) {
+                backgrounds->remove(key:id);
+            },
+            
             pushState ::{
                 @:canvasCopy = [...canvas];
                 
+                @id = if (idStatePool_dead->size) 
+                        idStatePool_dead->pop 
+                      else ::<= {
+                        idStatePool += 1;
+                        return idStatePool;
+                      }
                 savestates->push(value:{
+                    id : id,
                     text : canvasCopy
                 });
+                
+                return id;
             },
             
-            popState ::{
-                when(savestates->keycount == 0)
-                    error(detail:'Tried to call popState() when canvas savestate stack was empty. Fix ur gosh darn application');
+            replaceState ::(id){
+                @w = savestates->filter(by::(value) <- value.id == id);
+                if (w->size != 1)
+                    error(detail:'Tried to replaceState() on something that isnt a state!');
 
-                @top = savestates->pop;
-                canvas = top.text;
+                w[0].text = [...canvas];
+                return id;
+            },            
+            
+            states : {
+                get ::<- [...savestates]
+            },
+            
+            removeState ::(id) {
+                @w = savestates->filter(by::(value) <- value.id == id);
+                if (w->size != 1)
+                    error(detail:'Tried to removeState() on something that isnt a state!');
+
+                idStatePool_dead->push(value:w[0].id);
+                savestates->remove(key:savestates->findIndex(value:w[0]));
+                this.clear();
             },
             
             stateCount : {
@@ -355,18 +393,28 @@ return class(
                 when (savestates->keycount) ::<= {
                     @prevCanvas = savestates[savestates->keycount-1].text;
                     canvas = [...prevCanvas];
+                    foreach(backgrounds) ::(k, v) {
+                        v();
+                    }
                 }
                 this.blackout();
             },
             
-            blackout ::{
+            blackout ::(with){
+                if (with == empty) with = ' ';
                 @iter = 0;
                 for(0, CANVAS_HEIGHT)::(i) {
                     for(0, CANVAS_WIDTH)::(ch) {
-                        canvas[iter] = ' ';
+                        canvas[iter] = with;
                         iter += 1;
                     }
-                }          
+                }  
+                breakpoint();        
+                when(backgrounds->size == 0) empty;
+                foreach(backgrounds) ::(k, v) {
+                    v();
+                }
+
             },
             
             // formats columns of text into lines where columns are lined up
@@ -450,44 +498,26 @@ return class(
                 // debug lines happen as the LAST possible thing 
                 // the canvas does to ensure that its always on top.
                 if (debugLines[0] != empty) ::<= {
+                
                     this.movePen(x:0, y:0);
                     this.drawText(text: debugLines[0]);
                 }
                 
+                
+                    @:trackWindows ::{
+                        @out = '{';
+                        foreach(this.states) ::(i, state) {
+                            out = out + state.id + ' ';
+                        }
+                        return out + '}';
+                    }                
+
+                    this.movePen(x:0, y:1);
+                    this.drawText(text: trackWindows());
+
 
                 for(0, CANVAS_HEIGHT)::(row) {
                     lines_output[row] = String.combine(strings:canvas->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1));
-                    /*
-                    @:line = canvas[row];
-                    @:lineColors = canvasColors[row];
-
-                    @:iters = [];
-                    @last = 0;
-                    @iter = TextIter.new(
-                        state : {
-                            text : '',
-                            color : lineColors[0]
-                        }
-                    );
-                    
-                    
-                    [0, CANVAS_WIDTH]->for(do:::(x) {
-                        if (iter.color != lineColors[x]) ::<= {
-                            iter.text = String.combine(strings:line->subset(from:last, to:x));
-                            iters->push(iter);
-                            last = x;                            
-                            iter = TextIter.new(
-                                state : {
-                                    text : '',
-                                    color : lineColors[x]
-                                }
-                            );
-                        }
-                    });
-                    iter.text = String.combine(strings:line->subset(from:last, to:CANVAS_WIDTH-1));
-                    iters->push(value:iter);                    
-                    lines->push(value:iters);
-                    */
                 }
                 
                 

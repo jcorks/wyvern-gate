@@ -365,9 +365,15 @@ return {
             keepInteractionMenu : true,
             onSelect::(island, landmark) {
                 @:instance = import(module:'game_singleton.instance.mt');
-                instance.savestate();
-                @:world = import(module:'game_singleton.world.mt');
-                windowEvent.queueMessage(text:'Successfully saved world ' + world.saveName);                        
+                @:loading = import(module:'game_function.loading.mt');
+                loading(
+                    message : 'Saving world...',
+                    do::{
+                        instance.savestate();
+                        @:world = import(module:'game_singleton.world.mt');
+                        windowEvent.queueMessage(text:'Successfully saved world ' + world.saveName);                        
+                    }
+                );
             }
         ),
         

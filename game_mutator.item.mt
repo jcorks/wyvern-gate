@@ -3697,8 +3697,8 @@ Item.database.newEntry(data : {
                 if (base.hasQuality && state.quality != empty) state.quality.description + ' ' else '',
                 if (base.hasMaterial) state.material.description + ' ' else '',
                 if (base.isApparel) state.apparel.description + ' ' else '',
-                if (base.blockPoints == 0) 'Blocking in combat is not possible while equipping this.' else '',
-                if (base.blockPoints > 1) 'It is possible to block multiple parts of the body while equipped in combat.' else '',
+                if (base.blockPoints == 1) 'This equipment helps block an additional part of the body while equipped in combat.' else '',
+                if (base.blockPoints > 1) 'This equipment helps block multiple additional parts of the body while equipped in combat.' else '',
             ]);
             if (base.canBeColored) ::<= {
                 state.description = state.description->replace(key:'$color$', with:state.color.name);
@@ -3947,7 +3947,7 @@ Item.database.newEntry(data : {
                         tierHint: (state.islandTierHint)=>Number
                     );                
                 } else 
-                    state.islandEntry = island;
+                    this.islandEntry = island;
 
 
                 

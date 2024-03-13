@@ -299,7 +299,10 @@ return {
         @:choices = [];
         
         for(0, 5) ::(i) {
-            @:p0 = keyhome.islandEntry.newInhabitant(levelHint:story.levelHint-1);
+            @:p0 = keyhome.islandEntry.newInhabitant(
+                speciesHint: Species.getRandomFiltered(filter::(value) <- value.special == false).name,
+                levelHint:story.levelHint-1
+            );
             p0.normalizeStats();        
             choices->push(value:p0);
         }
@@ -349,21 +352,21 @@ return {
             @:sword = Item.new(
                 base: Item.database.find(name:'Glaive'),
                 materialHint: 'Ray',
-                qualityHint: 'Null',
+                qualityHint: '[  ]',
                 rngEnchantHint: false
             );
 
             @:tome = Item.new(
                 base:Item.database.find(name:'Tome'),
                 materialHint: 'Ray',
-                qualityHint: 'Null',
+                qualityHint: '[  ]',
                 rngEnchantHint: false,
                 abilityHint: 'Cure'
             );
             party.inventory.add(item:sword);
             party.inventory.add(item:tome);
-            
             */
+            
 
             /*
             @:pan = Item.new(
@@ -424,8 +427,7 @@ return {
                     instance.savestate();
                     @:Scene = import(module:'game_database.scene.mt');
                     Scene.start(name:'scene_intro', onDone::{                    
-                        instance.visitIsland(key:keyhome);
-                        
+                        instance.visitIsland(key:keyhome);                        
                         windowEvent.queueMessage(
                             speaker: party.members[0].name,
                             text: '"I should probably open that box now..."'
@@ -477,6 +479,23 @@ return {
         @hovered;
         @p0;
         @p1;
+        
+        @whatDoStatsMean ::{
+            windowEvent.queueMessage(
+                text: 
+                    "Stats are the basic qualities that everyone has. They determine the person's ability to face a variety of challenges.\n\n" +
+                    "HP - This stat indicates how much a person can withstand before succumbing to a knockout. The higher this stat, the more damage they can withstand.\n\n"+
+                    "AP - This stat indicates how often a person can use special abilities. The higher this stat, the more a person can do outside of normal actions.\n\n"+
+                    "ATK - This stat measures the physical strength a person possesses. The higher this stat, the more physical damage this person can do to foes.\n\n"+
+                    "DEF - This stat measures how a person's body will naturally reduce harm. The higher this stat, the less damage a person will take.\n\n"+
+                    "INT - This stat measures the intellect and intuition of a person. The higher this stat, the more a user is aware of the world around them. Certain abilities, such as spells, will benefit from this as well.\n\n"+
+                    "SPD - This stat measures how fast a person can move. The higher this stat, the more apt they are at acting before others.\n\n"+
+                    "LUK - This stat measures how lucky a person is. The higher this stat, the more a person may get out of difficult situations.\n\n"+
+                    "DEX - This stat measures the precision and grace with which a person acts. The higher this stat, the more accurate their actions and the more they avoid danger.\n\n"+
+                    "All stats are important, but some stats may be more important at times than others."                    
+            );
+        };
+        
 
         @:chooseMember ::{
             @:choicesMod = [...choices]->filter(by::(value) <- value != p0);
@@ -534,7 +553,7 @@ return {
                 onChoice::(choice) {
                     when (choice-1 == choicesMod->size) ::<= {
                         windowEvent.queueMessage(
-                            text: 'Continuing with only one party member is a bold move. You may find others to join them, but the journey may be more difficult.'
+                            text: 'Continuing with only one party member is a bold move. You may find others to join them later, but the journey may be more difficult.'
                         );
                         
                         windowEvent.queueAskBoolean(
@@ -551,6 +570,7 @@ return {
                         prompt: extendedName(entity:next),
                         choices : [
                             'Describe',
+                            'What do the stats mean?',
                             'Choose',
                         ],
                         canCancel:true,
@@ -558,6 +578,8 @@ return {
                             when(choice-1 == 0)
                                 next.describe(excludeStats:true);
                                 
+                            when(choice-1 == 1)
+                                whatDoStatsMean();
                             // choose
                             windowEvent.queueAskBoolean(
                                 prompt: 'Add ' + next.name + ' to the party?',

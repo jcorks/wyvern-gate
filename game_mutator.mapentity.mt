@@ -6,6 +6,7 @@
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
 @:random = import(module:'game_singleton.random.mt');
+@:Map = import(module:'game_class.map.mt');
 /*
     Some tasks to implement:
         "fight" -> when with party, fights normal, when with npc v npc, does damage to both every step.
@@ -609,7 +610,7 @@ MapEntity.Task.database.newEntry(
             mapEntity.newPathTo(
                 x:map.pointerX,
                 y:map.pointerY,
-                speed: if (random.flipCoin()) 1/2 else 1
+                speed: 2/3
             );
         }
     }
@@ -646,6 +647,7 @@ MapEntity.Task.database.newEntry(
         onCancel : empty, // MapEntity.Task to do when cancelling.
         onStepSet: empty, // MapEntity.Task array to do each step
         steps : 0,
+        speedSteps : 0,
         speed : 1
     },
     define:::(this, state) {
@@ -657,22 +659,22 @@ MapEntity.Task.database.newEntry(
         @:Entity = import(module:'game_class.entity.mt');
     
 
-        @controller_;
+        @map_;
         @isRemoved = false;
 
         
         
         this.interface = {
             initialize ::(parent) {
-                parent => MapEntity.Controller.type
-                controller_ = parent;
+                parent => Map.type
+                map_ = parent;
             },
             
             defaultLoad::(x, y, symbol, entities => Object, tag) {
                 state.entities = entities;
                 state.tag = tag;
                 state.onStepSet = [];
-                controller_.map.setItem(data:this, x, y, discovered:true, symbol);            
+                map_.setItem(data:this, x, y, discovered:true, symbol);            
             },
             
             steps : {
@@ -686,6 +688,7 @@ MapEntity.Task.database.newEntry(
             step :: {
                 when(isRemoved) empty;
                 state.steps += 1;
+                state.speedSteps += state.speed;
                 foreach(state.onStepSet) ::(k, task) {
                     task.do(mapEntity:this);
                 }
@@ -693,14 +696,15 @@ MapEntity.Task.database.newEntry(
             
                 @path = state.path;
                 when(path == empty) empty;
-                when(state.steps % state.speed != 0) empty;
+                when(state.speedSteps < 1) empty;
+                state.speedSteps -= 1;
                 when(isRemoved) empty;
                 when (
                     distance(x0:state.targetX,
                              y0:state.targetY,
                              
-                             x1:controller_.map.getItem(data:this).x,
-                             y1:controller_.map.getItem(data:this).y
+                             x1:map_.getItem(data:this).x,
+                             y1:map_.getItem(data:this).y
                 ) < 2) ::<={
                     state.onCancel = empty;
                     if (state.onArrive) ::<= {
@@ -723,15 +727,15 @@ MapEntity.Task.database.newEntry(
                 
                 // looks like the map was updated and we bumped 
                 // into a wall! get a new route.
-                if (controller_.map.isWalled(x:next.x, y:next.y))
-                    state.path = controller_.map.getPathTo(
+                if (map_.isWalled(x:next.x, y:next.y))
+                    state.path = map_.getPathTo(
                         data:this,
                         x:state.targetX,
                         y:state.targetY,
                         useBFS:true
                     );
                 
-                controller_.map.moveItem(data:this, x:next.x, y:next.y);
+                map_.moveItem(data:this, x:next.x, y:next.y);
                 
             },
             
@@ -750,7 +754,7 @@ MapEntity.Task.database.newEntry(
             },
             
             controller : {
-                get ::<- controller_
+                get ::<- map_.parent.mapEntityController
             },
             
             // for non-battle fighting between NPCs.
@@ -785,15 +789,15 @@ MapEntity.Task.database.newEntry(
                 
                 
                 if (defeated) ::<= {
-                    @:otherItem = controller_.map.getItem(data:other);
+                    @:otherItem = map_.getItem(data:other);
                     other.remove();
                     
                     // Not really needed it seems since we have Bodies appearing 
                     // for fallen teams.
                     /*
                     if (distance(   
-                        x0: controller_.map.pointerX,
-                        y0: controller_.map.pointerY,
+                        x0: map_.pointerX,
+                        y0: map_.pointerY,
                         x1: otherItem.x,
                         y1: otherItem.y
                     ) < 15)
@@ -808,7 +812,7 @@ MapEntity.Task.database.newEntry(
                     */
                         
                     @coversEntranceExit = {:::} {
-                        foreach(controller_.map.getItemsWithinRadius(
+                        foreach(map_.getItemsWithinRadius(
                             x:otherItem.x,
                             y:otherItem.y,
                             radius: 2
@@ -826,7 +830,7 @@ MapEntity.Task.database.newEntry(
                     
                     if (!coversEntranceExit) ::<= {
                         foreach(other.entities) ::(i, entity) {
-                            controller_.landmark.addLocation(
+                            this.controller.landmark.addLocation(
                                 x:otherItem.x,
                                 y:otherItem.y,
                                 ownedByHint: entity,
@@ -840,7 +844,7 @@ MapEntity.Task.database.newEntry(
             remove :: {
                 when(isRemoved) empty;
                 isRemoved = true;
-                controller_.remove(entity:this);
+                this.controller.remove(entity:this);
             },
             
             entities : {
@@ -851,12 +855,12 @@ MapEntity.Task.database.newEntry(
             newPathTo ::(x => Number, y => Number, onArrive, onCancel, speed) {
                 when(isRemoved) empty;
                 this.clearPath();
-                state.speed = if (speed != empty) (1/speed)->round else 1;
+                state.speed = if (speed == empty) 1 else speed;
                 state.targetX = x;
                 state.targetY = y;
                 state.onArrive = onArrive;
                 state.onCancel = onCancel;
-                state.path = controller_.map.getPathTo(
+                state.path = map_.getPathTo(
                     data:this,
                     x,
                     y,
@@ -917,7 +921,7 @@ MapEntity.Controller = LoadableClass.create(
             },
             
             add::(x, y, symbol, entities => Object, tag) {
-                return MapEntity.new(parent:this, x, y, symbol, entities, tag); // automatically gets added to mapEntities
+                return MapEntity.new(parent:map_, x, y, symbol, entities, tag); // automatically gets added to mapEntities
             },
             
             mapEntities : {

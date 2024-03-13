@@ -913,7 +913,7 @@ return ::(onFinish => Function) {
     }
 
 
-    windowEvent.queueNoDisplay(
+    windowEvent.queueCustom(
         renderable : {
             render::{canvas.blackout();}
         },

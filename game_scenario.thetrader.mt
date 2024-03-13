@@ -21,6 +21,9 @@
 @:WORK_ORDER__SPACE = 1;
 @:WORK_ORDER__FRONT = 2;
 
+
+
+
 @:hireeContractWorth::(entity)<- 5+((entity.stats.sum/8 + entity.level)*2.5)->ceil;
 @:pickItemStock = ::(*args) {
     @:choicesColumns = import(module:'game_function.choicescolumns.mt');
@@ -608,7 +611,7 @@
                     windowEvent.jumpToTag(name:'courierReport', goBeforeTag:true, doResolveNext:true);
                 }
                 
-                windowEvent.queueNoDisplay(
+                windowEvent.queueCustom(
                     renderable : {
                         render :: {
                             canvas.blackout();
@@ -773,7 +776,7 @@
                             text: '"Well, that\'s all the news for today. Have a good day."'
                         );
                         
-                        windowEvent.queueNoDisplay(
+                        windowEvent.queueCustom(
                             onEnter ::{
                                 onDoneReal();
                             }
@@ -931,8 +934,8 @@
                     windowEvent.queueChoices(
                         prompt:'Today I will...',
                         choices : [
-                            'Open shop',
-                            'Explore',
+                            'Open shop...',
+                            'Explore...',
                             'Wait until tomorrow'
                         ],
                         renderable : {
@@ -1004,11 +1007,15 @@
                         
                         state.propertiesForSale->remove(key:state.propertiesForSale->findIndex(value:id));
                         location.modData.trader.listPrice = price;
-                        world.party.inventory.addGold(amount:price);
+                        world.party.addGoldAnimated(
+                            amount:price,
+                            onDone ::{
+                                if (price > location.modData.trader.boughtPrice)
+                                    state.accolade_soldAPropertyProfit = true;
+                                onDone();                            
+                            }
+                        );
 
-                        if (price > location.modData.trader.boughtPrice)
-                            state.accolade_soldAPropertyProfit = true;
-                        onDone();
                     }
                 );
                 
@@ -1122,14 +1129,12 @@
                     markup : []                    
                 };
                 @maxPerHour = (
-                    (state.shopInventory.items->size / 4.5)
+                    (state.shopInventory.items->size / 6)
                 )->ceil;
                 
-                if (maxPerHour < 3)
-                    maxPerHour = 3;
                     
-                if (maxPerHour > 8)
-                    maxPerHour = 8;
+                if (maxPerHour > 5)
+                    maxPerHour = 5;
 
                 @gained = 0;
                 @world = import(module:'game_singleton.world.mt');
@@ -1236,365 +1241,414 @@
             dayEnd::(onDone) {
                 @:onDoneReal ::{
                     @:instance = import(module:'game_singleton.instance.mt');
-                    instance.savestate();
-                    onDone();
-                    windowEvent.jumpToTag(name:'dayEnd', goBeforeTag:true, doResolveNext:true);
-                }
-                
-                windowEvent.queueNoDisplay(
-                    renderable : {
-                        render :: {
-                            canvas.blackout();
+                    @:loading = import(module:'game_function.loading.mt');
+                    loading(
+                        message: 'Ending day...',
+                        do::{
+                            instance.savestate();
+                            onDone();
+
                         }
-                    },
-                    keep:true,
-                    jumpTag : 'dayEnd',
-                    onEnter ::{
+                    );
+                    windowEvent.jumpToTag(name:'dayEnd', goBeforeTag:true, doResolveNext:true);
+
+                }
+
+
+                @:dayEndCommit ::{
                         
-                        @world = import(module:'game_singleton.world.mt');
+                    @world = import(module:'game_singleton.world.mt');
 
-                        windowEvent.queueMessage(
-                            text: 'The day is over.'
-                        );
-
-
-
-                        // called once all the event based stuff is done.
-                        @:wrapUp = ::{
-                            if (state.hirees->size > 0 && [...state.hirees]->filter(by:::(value) <- value.role == ROLES.DISPATCHED)->size > 0) ::<= {
+                    windowEvent.queueMessage(
+                        text: 'The day is over.'
+                    );
+                    
+                    @:hireesEnd ::(onDone) {
+                        if (state.hirees->size > 0 && [...state.hirees]->filter(by:::(value) <- value.role == ROLES.DISPATCHED)->size > 0) ::<= {
+                            windowEvent.queueMessage(
+                                text: 'Your dispatched hirees should be coming to you with news...'
+                            );
+                        }
+                        
+                        
+                        @:nextHireeReport = ::(hiree) {
+                        
+                        }
+                        
+                        
+                        foreach([...state.hirees]) ::(i, hiree) {
+                            when (hiree.role != ROLES.DISPATCHED) empty;
+                            @:spoils = hiree.dispatch();
+                            
+                            when (hiree.entity.isDead) ::<= {
                                 windowEvent.queueMessage(
-                                    text: 'Your dispatched hirees should be coming to you with news...'
+                                    text: 'You hear no word from ' + hiree.entity.name + ' on their whereabouts...'
                                 );
                             }
-                            foreach([...state.hirees]) ::(i, hiree) {
-                                when (hiree.role != ROLES.DISPATCHED) empty;
-                                @:spoils = hiree.dispatch();
-                                
-                                when (hiree.entity.isDead) ::<= {
-                                    windowEvent.queueMessage(
-                                        text: 'You hear no word from ' + hiree.entity.name + ' on their whereabouts...'
-                                    );
-                                }
-                                
-                                if (hiree.entity.isIncapacitated() || spoils->size == 0) ::<= {
-                                    windowEvent.queueMessage(
-                                        speaker: hiree.entity.name,
-                                        text: '"I\'ve returned, but barely in one piece..."'
-                                    );
-                                } else ::<= {
-                                    windowEvent.queueMessage(
-                                        speaker: hiree.entity.name,
-                                        text: '"Exploration was a success!"'
-                                    );          
-                                }                    
-                                
-                                if (spoils->size == 0) ::<= {
-                                    windowEvent.queueMessage(
-                                        text:hiree.entity.name + ' was not able to find anything...'
-                                    );                        
+                            
+                            if (hiree.entity.isIncapacitated() || spoils->size == 0) ::<= {
+                                windowEvent.queueMessage(
+                                    speaker: hiree.entity.name,
+                                    text: '"I\'ve returned, but barely in one piece..."'
+                                );
+                            } else ::<= {
+                                windowEvent.queueMessage(
+                                    speaker: hiree.entity.name,
+                                    text: '"Exploration was a success!"'
+                                );          
+                            }                    
+                            
+                            if (spoils->size == 0) ::<= {
+                                windowEvent.queueMessage(
+                                    text:hiree.entity.name + ' was not able to find anything...'
+                                );                        
 
-                                } else ::<= {
-                                    if (!world.party.inventory.isFull) ::<= {
-                                        @itemsFound = "Items found by " + hiree.entity.name + ':\n\n';
-                                        foreach(spoils) ::(i, item) {
-                                            if (!world.party.inventory.isFull) ::<= {
-                                                itemsFound = itemsFound + "- " + item.name + '\n'
-                                                hiree.earned += (item.price / 10)->floor;
-                                                world.party.inventory.add(item);
-                                            }
+                            } else ::<= {
+                                if (!world.party.inventory.isFull) ::<= {
+                                    @itemsFound = "Items found by " + hiree.entity.name + ':\n\n';
+                                    foreach(spoils) ::(i, item) {
+                                        if (!world.party.inventory.isFull) ::<= {
+                                            itemsFound = itemsFound + "- " + item.name + '\n'
+                                            hiree.earned += (item.price / 10)->floor;
+                                            world.party.inventory.add(item);
                                         }
-                                        windowEvent.queueMessage(
-                                            text:itemsFound
-                                        );   
                                     }
-                                    if (world.party.inventory.isFull)
-                                        windowEvent.queueMessage(
-                                            text:'"I found more stuff, but we didn\'t have any space left to hold it."'
-                                        );   
+                                    windowEvent.queueMessage(
+                                        text:itemsFound
+                                    );   
                                 }
-                                hiree.entity.heal(amount:hiree.entity.stats.HP, silent:true);
-                                
-                            }
-
-                            if (state.hirees->size > 0 && [...state.hirees]->filter(by:::(value) <- value.role == ROLES.SHOPKEEP)->size > 0) ::<= {
-                                windowEvent.queueMessage(
-                                    text: 'Your shopkeeps are here with news.'
-                                );
-                            }
-                            foreach([...state.hirees]) ::(i, hiree) {
-                                when (hiree.role != ROLES.SHOPKEEP) empty;
-                                
-                                @:data = this.simulateShopkeep(shopkeeper:hiree);
-                                @:gained = data.gained;
-                                @:itemsSold = data.sold;
-                                
-                                // < 0 means stock was empty.
-                                when (gained == -1) 
+                                if (world.party.inventory.isFull)
                                     windowEvent.queueMessage(
-                                        speaker:hiree.entity.name,
-                                        text: '"Unforunately, no sales were made today due to the store stock being depleted."'
-                                    );
+                                        text:'"I found more stuff, but we didn\'t have any space left to hold it."'
+                                    );   
+                            }
+                            hiree.entity.heal(amount:hiree.entity.stats.HP, silent:true);
+                            
+                        }
 
-                                when (gained == 0) 
-                                    windowEvent.queueMessage(
-                                        speaker:hiree.entity.name,
-                                        text: '"Unforunately, no sales were made today."'
-                                    );
-
+                        @noShopkeeps = false;
+                        if (state.hirees->size > 0 && [...state.hirees]->filter(by:::(value) <- value.role == ROLES.SHOPKEEP)->size > 0) ::<= {
+                            windowEvent.queueMessage(
+                                text: 'Your shopkeeps are here with news.'
+                            );
+                        } else 
+                            noShopkeeps = true;
+                        
+                        
+                        // no event based stuff, continue;
+                        when(noShopkeeps) onDone();
+                        
+                        
+                        @:shopkeeps = [...state.hirees];
+                        @:nextShopkeep :: {
+                            breakpoint();
+                            when(shopkeeps->size == 0) onDone(); 
+                            @:hiree = shopkeeps->pop;
+                            when(hiree.role != ROLES.SHOPKEEP) nextShopkeep();
+                             
+                            
+                            @:data = this.simulateShopkeep(shopkeeper:hiree);
+                            @:gained = data.gained;
+                            @:itemsSold = data.sold;
+                            
+                            // < 0 means stock was empty.
+                            when (gained == -1) ::<= {
                                 windowEvent.queueMessage(
                                     speaker:hiree.entity.name,
-                                    text: random.pickArrayItem(
-                                        list : 
-                                            match(hiree.mood) {
-                                              (0, 1):  
-                                                [
-                                                    '"I had a hard time, I at least got some sales."',
-                                                    '"Not feeling great, but I tried my best."'
-                                                ],
-                                              (2, 3):
-                                                [
-                                                    '"Selling today went great."',
-                                                    '"Another great day at the store front."',                                                
-                                                ],
-                                               (4):
-                                                
-                                                [
-                                                    '"Many customers today!"',
-                                                    '"It was great to see so many things off the shelves!"',
-                                                    '"Truly a great day to shopkeep!"'
-                                                ]
-                                            }
-                                    )
-                                );
-                                
-                                
-                                @sold = "Items sold by " + hiree.entity.name +  '. Earned: ' + g(g:gained) ;
-
-                                @:choicesColumns = import(module:'game_function.choicescolumns.mt');
-                                choicesColumns(
-                                    onGetChoices ::{
-                                        return [
-                                            data.sold,
-                                            data.popular,
-                                            data.prices,
-                                            data.markup
-                                        ]
-                                    },
-                                    prompt: sold,
-                                    header: ['Item', 'Popularity', 'Sold at...', 'Markup'],
-                                    leftJustified : [true, true, true, true],
-                                    leftWeight: 0.5,
-                                    topWeight: 0.5,
-                                    canCancel: true,
-                                    keep : true,
-                                    jumpTag: 'ItemsSold',
-                                    onChoice ::(choice) {
-                                        windowEvent.jumpToTag(
-                                            name: 'ItemsSold',
-                                            goBeforeTag: true,
-                                            doResolveNext: true
-                                        )
-                                    }
+                                    text: '"Unforunately, no sales were made today due to the store stock being depleted."'
                                 )
-
-                                hiree.sold += gained;
-                                world.party.inventory.addGold(amount:gained);
-                                state.totalEarnedSales += gained;
+                                nextShopkeep();
                             }
 
+                            when (gained == 0) ::<= {
+                                windowEvent.queueMessage(
+                                    speaker:hiree.entity.name,
+                                    text: '"Unforunately, no sales were made today."'
+                                );
+                                nextShopkeep();                                
+                            }
 
-                            @:endWrapUp :: {
-                                @status = "Todays profit:\n";
-                                
-                                @earnings = world.party.inventory.gold - state.startingG;
-                                status = status + "  Earnings     : "+ (if (earnings < 0) g(g:earnings) else "+" + g(g:earnings)) + "\n\n";
+                            windowEvent.queueMessage(
+                                speaker:hiree.entity.name,
+                                text: random.pickArrayItem(
+                                    list : 
+                                        match(hiree.mood) {
+                                          (0, 1):  
+                                            [
+                                                '"I had a hard time, I at least got some sales."',
+                                                '"Not feeling great, but I tried my best."'
+                                            ],
+                                          (2, 3):
+                                            [
+                                                '"Selling today went great."',
+                                                '"Another great day at the store front."',                                                
+                                            ],
+                                           (4):
+                                            
+                                            [
+                                                '"Many customers today!"',
+                                                '"It was great to see so many things off the shelves!"',
+                                                '"Truly a great day to shopkeep!"'
+                                            ]
+                                        }
+                                )
+                            );
+                            
+                            
+                            @sold = "Items sold by " + hiree.entity.name +  '. Earned: ' + g(g:gained) ;
 
-
-                                @:Location = import(module:'game_mutator.location.mt');
-
-                                @rent = 0;
-                                foreach(state.ownedProperties) ::(i, id) {
-                                    @:location = world.island.findLocation(id);
-                                    
-                                    if (location.base.category == Location.CATEGORY.RESIDENTIAL) ::<= {
-                                        rent += (location.modData.trader.boughtPrice * 0.07)->ceil;
-                                        @current = location.modData.trader.listPrice;
-                                        current += (((Number.random() - 0.5) * 0.05) * location.modData.trader.boughtPrice)->floor;
-
-                                        if (state.recession > 0)
-                                            current *= 0.92;
-                                        current = current->floor;
-
-
-                                        if (current < 2000)
-                                            current = 2000;
-                                        location.modData.trader.listPrice = current;
-                                    }
+                            @:choicesColumns = import(module:'game_function.choicescolumns.mt');
+                            choicesColumns(
+                                onGetChoices ::{
+                                    return [
+                                        data.sold,
+                                        data.popular,
+                                        data.prices,
+                                        data.markup
+                                    ]
+                                },
+                                prompt: sold,
+                                header: ['Item', 'Popularity', 'Sold at...', 'Markup'],
+                                leftJustified : [true, true, true, true],
+                                leftWeight: 0.5,
+                                topWeight: 0.5,
+                                canCancel: true,
+                                keep : true,
+                                jumpTag: 'ItemsSold',
+                                onChoice ::(choice) {
+                                    windowEvent.jumpToTag(
+                                        name: 'ItemsSold',
+                                        goBeforeTag: true,
+                                        doResolveNext: true
+                                    )
                                 }
-                                state.totalEarnedInvestments += rent;
-                                world.party.inventory.addGold(amount:rent);
-                                @investments = rent;
-                                if (rent > 0)
-                                    status = status + "  Rent         : +" + g(g:rent) + "\n";
+                            )
+
+                            hiree.sold += gained;
+                            world.party.addGoldAnimated(
+                                amount:gained,
+                                onDone ::{
+                                    nextShopkeep()
+                                }
+                            );
+                            state.totalEarnedSales += gained;
+                        } 
+                        nextShopkeep();                                         
+                    }
+                    
+
+
+
+                    // called once all the event based stuff is done.
+                    @:wrapUp = ::{
+                        @:endWrapUp :: {
+                            @status = "Todays profit:\n";
+                            
+                            @earnings = world.party.inventory.gold - state.startingG;
+                            status = status + "  Earnings     : "+ (if (earnings < 0) g(g:earnings) else "+" + g(g:earnings)) + "\n\n";
+
+
+                            @:Location = import(module:'game_mutator.location.mt');
+
+                            @rent = 0;
+                            foreach(state.ownedProperties) ::(i, id) {
+                                @:location = world.island.findLocation(id);
                                 
-
-                                rent = 0;
-                                foreach(state.ownedProperties) ::(i, id) {
-                                    @:location = world.island.findLocation(id);
-                                    when (location.base.category == Location.CATEGORY.RESIDENTIAL) empty
-                                    
-                                    @profit = location.modData.trader.listPrice * 0.15;
-                                    profit = random.integer(from:(profit * 0.5)->floor, to:(profit * 1.5)->floor);
-                                    
-                                    if (state.recession > 0 && random.try(percentSuccess:65))
-                                        rent -= profit
-                                    else
-                                        rent += profit;
-
-
+                                if (location.base.category == Location.CATEGORY.RESIDENTIAL) ::<= {
+                                    rent += (location.modData.trader.boughtPrice * 0.07)->ceil;
                                     @current = location.modData.trader.listPrice;
-                                    current += (((Number.random() - 0.5) * 0.15) * location.modData.trader.listPrice)->floor;
+                                    current += (((Number.random() - 0.5) * 0.05) * location.modData.trader.boughtPrice)->floor;
 
                                     if (state.recession > 0)
                                         current *= 0.92;
                                     current = current->floor;
 
-                                    if (current < 9000)
-                                        current = 9000;
+
+                                    if (current < 2000)
+                                        current = 2000;
                                     location.modData.trader.listPrice = current;
                                 }
-                                state.totalEarnedInvestments += rent;
-                                world.party.inventory.addGold(amount:rent);
-                                investments += rent;
-                                if (rent != 0)
-                                    status = status + "  Businesses   : " + (if (rent >= 0) '+' + g(g:rent) else g(g:rent)) + "\n";
+                            }
+                            state.totalEarnedInvestments += rent;
+                            world.party.inventory.addGold(amount:rent);
+                            @investments = rent;
+                            if (rent > 0)
+                                status = status + "  Rent         : +" + g(g:rent) + "\n";
+                            
 
-
-                                status 
-
-                                @cost = 0;
-                                foreach(state.hirees) ::(i, hiree) {
-                                    when (hiree.entity.isDead) empty;
-                                    cost += hiree.contractRate;
-                                    hiree.spent += hiree.contractRate;
-                                    hiree.daysEmployed += 1;
-                                }
-                                status = status + "  Contracts    : -" + g(g:cost) + "\n";
+                            rent = 0;
+                            foreach(state.ownedProperties) ::(i, id) {
+                                @:location = world.island.findLocation(id);
+                                when (location.base.category == Location.CATEGORY.RESIDENTIAL) empty
                                 
-                                cost += state.upkeep;
-                                status = status + "  Upkeep       : -" + g(g:state.upkeep) + "\n";
+                                @profit = location.modData.trader.listPrice * 0.15;
+                                profit = random.integer(from:(profit * 0.5)->floor, to:(profit * 1.5)->floor);
                                 
-                                @currentG = world.party.inventory.gold
-                                @:profit = (earnings + investments) - cost;
-                                state.days += 1;
-                                if (profit > state.bestProfit)            
-                                    state.bestProfit = profit;
-                                if (state.days % 2 == 0 && profit > 0) 
-                                    state.upkeep += (profit * 0.01)->floor;
-                                
-                                status = status + "_________________________________\n";
-                                status = status + "  Profit       : " + (if (profit < 0) g(g:profit) else "+" + g(g:profit)) + "\n\n";
-                                
-
-                                world.party.inventory.subtractGold(amount:cost);
-
-                                state.ledger->push(value:{
-                                    earnings : earnings,
-                                    expenses : cost,
-                                    investments : investments,
-                                    balance : world.party.inventory.gold
-                                });
+                                if (state.recession > 0 && random.try(percentSuccess:65))
+                                    rent -= profit
+                                else
+                                    rent += profit;
 
 
+                                @current = location.modData.trader.listPrice;
+                                current += (((Number.random() - 0.5) * 0.15) * location.modData.trader.listPrice)->floor;
+
+                                if (state.recession > 0)
+                                    current *= 0.92;
+                                current = current->floor;
+
+                                if (current < 9000)
+                                    current = 9000;
+                                location.modData.trader.listPrice = current;
+                            }
+                            state.totalEarnedInvestments += rent;
+                            world.party.inventory.addGold(amount:rent);
+                            investments += rent;
+                            if (rent != 0)
+                                status = status + "  Businesses   : " + (if (rent >= 0) '+' + g(g:rent) else g(g:rent)) + "\n";
 
 
-                                if (cost > currentG)
-                                    status = status + "Remaining: [BANKRUPT]"
-                                else 
-                                    status = status + "Remaining: " + g(g:world.party.inventory.gold)
+                            status 
 
-                                when (cost > currentG)
-                                    Scene.start(name:'trader.scene_bankrupt', onDone::{                    
-                                        @:instance = import(module:'game_singleton.instance.mt');
-                                        instance.gameOver(reason:'You\'re no longer chosen by the Wyvern of Fortune.');
-                                    });        
-                                        
+                            @cost = 0;
+                            foreach(state.hirees) ::(i, hiree) {
+                                when (hiree.entity.isDead) empty;
+                                cost += hiree.contractRate;
+                                hiree.spent += hiree.contractRate;
+                                hiree.daysEmployed += 1;
+                            }
+                            status = status + "  Contracts    : -" + g(g:cost) + "\n";
+                            
+                            cost += state.upkeep;
+                            status = status + "  Upkeep       : -" + g(g:state.upkeep) + "\n";
+                            
+                            @currentG = world.party.inventory.gold
+                            @:profit = (earnings + investments) - cost;
+                            state.days += 1;
+                            if (profit > state.bestProfit)            
+                                state.bestProfit = profit;
+                            if (state.days % 2 == 0 && profit > 0) 
+                                state.upkeep += (profit * 0.01)->floor;
+                            
+                            status = status + "_________________________________\n";
+                            status = status + "  Profit       : " + (if (profit < 0) g(g:profit) else "+" + g(g:profit)) + "\n\n";
+                            
 
+                            world.party.inventory.subtractGold(amount:cost);
 
-                                // decide popular items for next day
-                                if (world.island.tier > 0 && state.days % 3 == 1) ::<= {                
-                                    @:which = [...Item.database.getAll()]->filter(by::(value) <- value.isUnique == false);
-                                    state.popular = [
-                                        random.removeArrayItem(list:which),
-                                        random.removeArrayItem(list:which),
-                                        random.removeArrayItem(list:which),
-                                        random.removeArrayItem(list:which),
-                                        random.removeArrayItem(list:which),
-                                        random.removeArrayItem(list:which),
-                                        random.removeArrayItem(list:which)
-                                    ]->map(to:::(value) <- value.name);
-
-                                    state.unpopular = [
-                                        random.removeArrayItem(list:which),
-                                        random.removeArrayItem(list:which),
-                                        random.removeArrayItem(list:which),
-                                        random.removeArrayItem(list:which),
-                                        random.removeArrayItem(list:which),
-                                        random.removeArrayItem(list:which),
-                                        random.removeArrayItem(list:which)
-                                    ]->map(to:::(value) <- value.name);
-                                }
+                            state.ledger->push(value:{
+                                earnings : earnings,
+                                expenses : cost,
+                                investments : investments,
+                                balance : world.party.inventory.gold
+                            });
 
 
-                                // return to pool
-                                foreach(state.hirees) ::(i, hiree) {
-                                    if (world.party.isMember(entity:hiree.entity))
-                                        hiree.returnFromParty();
-                                    hiree.dayFinished();
-                                }
-                                
-                                // Interesting. You seemed to have a phantom employee in your party!
-                                // This is possible with Skie, but could be done through other 
-                                // means perhaps. They are now your free employees!
-                                if (world.party.members->size > 1) ::<= {
-                                    {:::} {
-                                        forever ::{
-                                            when(world.party.members->size == 1) send();
-                                            
-                                            @:newMem = world.party.members->pop;
-                                            this.addHiree(
-                                                entity: newMem,
-                                                rate: 0
-                                            );
-                                        }
-                                    }   
-                                }
-                                
-                                state.startingG = world.party.inventory.gold;                
-                                windowEvent.queueMessage(text:status, pageAfter:14);
-                                
-                                windowEvent.queueNoDisplay(
-                                    onEnter ::{
-                                        onDoneReal();
-                                    }
-                                );
+
+
+                            if (cost > currentG)
+                                status = status + "Remaining: [BANKRUPT]"
+                            else 
+                                status = status + "Remaining: " + g(g:world.party.inventory.gold)
+
+                            when (cost > currentG)
+                                Scene.start(name:'trader.scene_bankrupt', onDone::{                    
+                                    @:instance = import(module:'game_singleton.instance.mt');
+                                    instance.gameOver(reason:'You\'re no longer chosen by the Wyvern of Fortune.');
+                                });        
+                                    
+
+
+                            // decide popular items for next day
+                            if (world.island.tier > 0 && state.days % 3 == 1) ::<= {                
+                                @:which = [...Item.database.getAll()]->filter(by::(value) <- value.isUnique == false);
+                                state.popular = [
+                                    random.removeArrayItem(list:which),
+                                    random.removeArrayItem(list:which),
+                                    random.removeArrayItem(list:which),
+                                    random.removeArrayItem(list:which),
+                                    random.removeArrayItem(list:which),
+                                    random.removeArrayItem(list:which),
+                                    random.removeArrayItem(list:which)
+                                ]->map(to:::(value) <- value.name);
+
+                                state.unpopular = [
+                                    random.removeArrayItem(list:which),
+                                    random.removeArrayItem(list:which),
+                                    random.removeArrayItem(list:which),
+                                    random.removeArrayItem(list:which),
+                                    random.removeArrayItem(list:which),
+                                    random.removeArrayItem(list:which),
+                                    random.removeArrayItem(list:which)
+                                ]->map(to:::(value) <- value.name);
+                            }
+
+
+                            // return to pool
+                            foreach(state.hirees) ::(i, hiree) {
+                                if (world.party.isMember(entity:hiree.entity))
+                                    hiree.returnFromParty();
+                                hiree.dayFinished();
                             }
                             
-                            this.allocateRaises(onDone:endWrapUp);
-                        }
-
-                        /// property sales. Event-based so it may be a bit confusing...
-                        @:trySell = [...state.propertiesForSale];
-                        @:nextSale = ::{
-                            when(trySell->size == 0) wrapUp();
-                            @:id = trySell->pop;
-                            when(random.try(percentSuccess:75)) nextSale();
+                            // Interesting. You seemed to have a phantom employee in your party!
+                            // This is possible with Skie, but could be done through other 
+                            // means perhaps. They are now your free employees!
+                            if (world.party.members->size > 1) ::<= {
+                                {:::} {
+                                    forever ::{
+                                        when(world.party.members->size == 1) send();
+                                        
+                                        @:newMem = world.party.members->pop;
+                                        this.addHiree(
+                                            entity: newMem,
+                                            rate: 0
+                                        );
+                                    }
+                                }   
+                            }
                             
-                            this.attemptSellProperty(id, onDone:nextSale);
-                        }              
-                        nextSale();   
+                            state.startingG = world.party.inventory.gold;                
+                            windowEvent.queueMessage(text:status, pageAfter:14);
+                            
+                            windowEvent.queueCustom(
+                                onEnter ::{
+                                    onDoneReal();
+                                }
+                            );
+                        }
+                        
+                        hireesEnd(onDone::{
+                            this.allocateRaises(
+                                onDone:endWrapUp
+                            );
+                        });
                     }
-                )
+
+                    /// property sales. Event-based so it may be a bit confusing...
+                    @:trySell = [...state.propertiesForSale];
+                    @:nextSale = ::{
+                        when(trySell->size == 0) wrapUp();
+                        @:id = trySell->pop;
+                        when(random.try(percentSuccess:75)) nextSale();
+                        
+                        this.attemptSellProperty(id, onDone:nextSale);
+                    }              
+                    nextSale();                   
+                }
+                windowEvent.queueCustom(
+                    onEnter::{
+                        dayEndCommit();
+                    },
+                    keep:true,
+                    jumpTag: 'dayEnd',
+                    renderable : {
+                        render ::{
+                            canvas.blackout()
+                        }
+                    }
+                );
+                    
 
             },
             
@@ -2312,7 +2366,7 @@
 
 
 
-                windowEvent.queueNoDisplay(
+                windowEvent.queueCustom(
                     keep:true,
                     renderable:landmark.map,
                     jumpTag: 'day-start-shop',
@@ -2435,17 +2489,25 @@
                                 standardPrice: (item.price / 10)->ceil,
                                 onDone::(bought, price) {
                                     if (bought) ::<= {
-                                        world.party.inventory.addGold(amount:price);
                                         windowEvent.queueMessage(
                                             text: shopper.name + ' bought the ' + item.name + ' for ' + g(g:price) + '.'
                                         );
                                         state.shopInventory.remove(item);
+                                        
+
+                                        
+                                        world.party.addGoldAnimated(
+                                            amount:price,
+                                            onDone :: {
+                                                nextShopper();
+                                            }
+                                        )                                        
                                     } else ::<= {
                                         windowEvent.queueMessage(
                                             text: shopper.name + ' left without buying anything.'
                                         );                                    
+                                        nextShopper();                        
                                     }
-                                    nextShopper();                        
                                 
                                 }
                             )                            
@@ -2523,7 +2585,12 @@
                                 text: 'Your work order upgrade should finish tomorrow.'
                             );
                             
-                            world.party.inventory.addGold(amount:costNext);
+                            world.party.addGoldAnimated(
+                                amount:-costNext,
+                                onDone::{
+                                
+                                }
+                            )
                             state.workOrder = WORK_ORDER__SPACE;
                         }
                     );
@@ -2573,7 +2640,10 @@
                                 text: 'Your work order upgrade should finish tomorrow.'
                             );
                             
-                            world.party.inventory.subtractGold(amount:costNext);
+                            world.party.addGoldAnimated(
+                                amount:-costNext,
+                                onDone::{}
+                            );
                             state.workOrder = WORK_ORDER__FRONT;
                         }
                     );
@@ -2761,16 +2831,16 @@ return {
                 'Mysterious Shrine',
                 'Mine',
                 'Mine',
-                'Forest'
+                'Forest',
+                'Wyvern Gate'
             ]
         ));
-        world.island = keyhome.islandEntry;
-        @:island = world.island;
-        instance.island = island;
+        instance.visitIsland(key:keyhome, noMenu:true);
+
         party = world.party;
         party.reset();
         party.inventory.maxItems = 70;
-
+        @:island = world.island;
 
 
         
@@ -2780,7 +2850,7 @@ return {
         
         // since both the party members are from this island, 
         // they will already know all its locations
-        foreach(island.landmarks)::(index, landmark) {
+        foreach(world.island.landmarks)::(index, landmark) {
             landmark.discover(); 
         }
         
@@ -2954,30 +3024,34 @@ return {
                     onChoice::(which) {
                         when(which == false) empty;
                         
-                        world.party.inventory.subtractGold(amount: location.modData.trader.listPrice);
-                        location.modData.trader.boughtPrice = location.modData.trader.listPrice;
+                        world.party.addGoldAnimated(
+                            amount: -location.modData.trader.listPrice,
+                            onDone ::{
 
-                        
-                        @:trader = world.scenario.data.trader;
-                        trader.ownedProperties->push(value: location.worldID);
+                                location.modData.trader.boughtPrice = location.modData.trader.listPrice;
 
-                        if (location.modData.trader.listPrice > 100000)
-                            trader.state.accolade_boughtBusinessOver100000G = true;
+                                
+                                @:trader = world.scenario.data.trader;
+                                trader.ownedProperties->push(value: location.worldID);
 
-                        windowEvent.queueMessage(
-                            text: 'Congratulations! You now own ' + location.ownedBy.name + '\'s ' + location.base.name + '.'
+                                if (location.modData.trader.listPrice > 100000)
+                                    trader.state.accolade_boughtBusinessOver100000G = true;
+
+                                windowEvent.queueMessage(
+                                    text: 'Congratulations! You now own ' + location.ownedBy.name + '\'s ' + location.base.name + '.'
+                                );
+                                
+                                if (location.base.category == Location.CATEGORY.RESIDENTIAL)
+                                    windowEvent.queueMessage(
+                                        text: 'This residence will pay you rent daily based on a percentage of the price you bought it at.'
+                                    )
+                                else                            
+                                    windowEvent.queueMessage(
+                                        text: 'This business will pay you a percentage of their profits at the end of the day. This rate will be variable, but scales with how expensive the business is.'
+                                    )
+                            
+                            }
                         );
-                        
-                        if (location.base.category == Location.CATEGORY.RESIDENTIAL)
-                            windowEvent.queueMessage(
-                                text: 'This residence will pay you rent daily based on a percentage of the price you bought it at.'
-                            )
-                        else                            
-                            windowEvent.queueMessage(
-                                text: 'This business will pay you a percentage of their profits at the end of the day. This rate will be variable, but scales with how expensive the business is.'
-                            )
-
-
                     }
                 );
                     

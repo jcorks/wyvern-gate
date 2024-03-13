@@ -257,7 +257,7 @@ Effect.newEntry(
         },
         onDamage ::(user, item, holder, from, damage) {
             if (!holder.isIncapacitated() && random.try(percentSuccess:35)) ::<= {
-                windowEvent.queueMessage(text:holder.name + " repels the attack in their rage!");
+                windowEvent.queueMessage(text:holder.name + " ferociously repels the attack!");
                 damage.amount = 0;
             }
         },
@@ -2563,7 +2563,7 @@ Effect.newEntry(
                 text: user.name + ' flung the ' + item.name + ' at ' + holder.name + '!'
             );
             
-            windowEvent.queueNoDisplay(
+            windowEvent.queueCustom(
                 onEnter::{
                     if (Number.random() > 0.8) ::<= {
                         holder.inventory.add(item);

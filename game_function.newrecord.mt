@@ -11,7 +11,7 @@
 
 return ::(wish) {
 
-    windowEvent.queueNoDisplay(
+    windowEvent.queueCustom(
         keep : true,
         onEnter ::{
 
@@ -77,7 +77,7 @@ return ::(wish) {
             instance.queueCredits();
             
             
-            windowEvent.queueNoDisplay(
+            windowEvent.queueCustom(
                 onEnter ::{},
                 onLeave ::{
                     windowEvent.jumpToTag(name:'MainMenu');        

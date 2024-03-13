@@ -782,7 +782,7 @@ Playing the Game
             
         }
                 
-        windowEvent.queueNoDisplay(
+        windowEvent.queueCustom(
             renderable : {
                 render::{canvas.blackout();}
             },
@@ -1169,7 +1169,7 @@ Playing the Game
         );
     }
     
-    windowEvent.queueNoDisplay(
+    windowEvent.queueCustom(
         renderable : {
             render::{canvas.blackout();}
         },

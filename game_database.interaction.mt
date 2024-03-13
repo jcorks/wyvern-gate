@@ -314,7 +314,7 @@ Interaction.newEntry(
             when (party.inventory.gold < 5)
                 windowEvent.queueMessage(text:'Not enough gold...');
             
-                party.inventory.subtractGold(amount:5);
+                party.inventory.subtractGold(amount:1);
                 world.accoladeIncrement(name:'drinksTaken');                                        
                 
                 windowEvent.queueMessage(
@@ -829,12 +829,12 @@ Interaction.newEntry(
                             
                             windowEvent.queueMessage(text: 'Sold the ' + item.name + ' for ' + g(g:price) + '.');
 
-                            party.inventory.addGold(amount:price);
-                            party.inventory.remove(item);
-                            
+                            party.addGoldAnimated(
+                                amount:price,
+                                onDone::{}
+                            );
+                            party.inventory.remove(item);                            
                             location.inventory.add(item);
-
-
                         }
                     )
                 }
@@ -862,7 +862,7 @@ Interaction.newEntry(
                     
                     party.inventory.maxItems += 5;
                     windowEvent.queueMessage(text: 'The party\'s bag can now hold ' + party.inventory.maxItems + ' items.');
-                    party.inventory.subtractGold(amount:cost);
+                    party.addGoldAnimated(amount:-cost, onDone::{});
                 }
             );                            
                         
@@ -967,30 +967,35 @@ Interaction.newEntry(
                                     price = 1;
                                 }
 
-                                
-                                when(!party.inventory.subtractGold(amount:price)) windowEvent.queueMessage(text:'The party cannot afford this.');
-                                location.inventory.remove(item);
+                                when (party.inventory.gold < price)
+                                    windowEvent.queueMessage(text:'The party cannot afford this.');
+                                party.addGoldAnimated(
+                                    amount:-price,
+                                    onDone :: {
+                                        location.inventory.remove(item);
 
-                                if (price > 2000) ::<= {
-                                    world.accoladeEnable(name:'boughtItemOver2000G');
-                                }
-                                
-                                if (item.base.name == 'Wyvern Key' && world.storyFlags.foundFirstKey == false) ::<= {
-                                    location.landmark.island.world.storyFlags.foundFirstKey = true;
-                                    windowEvent.queueMessage(
-                                        speaker:location.ownedBy.name,
-                                        text: 'Going up the strata, eh? Best of luck to ye. Pretty treacherous stuff.'
-                                    );
-                                    windowEvent.queueMessage(
-                                        speaker:location.ownedBy.name,
-                                        text: 'Though, can\'t say I\'m not curious what lies at the top...'
-                                    );
+                                        if (price > 2000) ::<= {
+                                            world.accoladeEnable(name:'boughtItemOver2000G');
+                                        }
+                                        
+                                        if (item.base.name == 'Wyvern Key' && world.storyFlags.foundFirstKey == false) ::<= {
+                                            location.landmark.island.world.storyFlags.foundFirstKey = true;
+                                            windowEvent.queueMessage(
+                                                speaker:location.ownedBy.name,
+                                                text: 'Going up the strata, eh? Best of luck to ye. Pretty treacherous stuff.'
+                                            );
+                                            windowEvent.queueMessage(
+                                                speaker:location.ownedBy.name,
+                                                text: 'Though, can\'t say I\'m not curious what lies at the top...'
+                                            );
 
-                                }
-                                
-                                
-                                windowEvent.queueMessage(text: 'Bought ' + correctA(word:item.name));
-                                party.inventory.add(item);                              
+                                        }
+                                        
+                                        
+                                        windowEvent.queueMessage(text: 'Bought ' + correctA(word:item.name));
+                                        party.inventory.add(item);                              
+                                    }
+                                ) 
                               },
                               // check
                               (1)::<= {
@@ -1065,8 +1070,6 @@ Interaction.newEntry(
                             }
                         )) empty;
                         
-                        if (charge)
-                            party.inventory.subtractGold(amount:300);                            
                         
                         @:canMake = smith.getCanMake();
                         windowEvent.queueChoices(
@@ -1075,25 +1078,31 @@ Interaction.newEntry(
                             canCancel: true,
                             onChoice::(choice) {
                                 when(choice == 0) empty;
-                                @:output = Item.new(
-                                    base:Item.database.find(name:canMake[choice-1]),
-                                    materialHint: ore.base.name->split(token:' ')[0]
-                                );
-                                
-                                windowEvent.queueMessage(
-                                    speaker: smith.name,
-                                    text: 'No problem!'
-                                );
-                                
-                                windowEvent.queueMessage(
-                                    text:smith.name + ' forged a ' + output.name
-                                );
-                                
-                                windowEvent.queueNoDisplay(
-                                    onEnter ::{
-                                        party.inventory.remove(item:ore);
-                                        party.inventory.add(item:output);                                                                                                        
-                                    }
+
+                                party.addGoldAnimated(
+                                    amount:-300,
+                                    onDone ::{
+                                        @:output = Item.new(
+                                            base:Item.database.find(name:canMake[choice-1]),
+                                            materialHint: ore.base.name->split(token:' ')[0]
+                                        );
+                                        
+                                        windowEvent.queueMessage(
+                                            speaker: smith.name,
+                                            text: 'No problem!'
+                                        );
+                                        
+                                        windowEvent.queueMessage(
+                                            text:smith.name + ' forged a ' + output.name
+                                        );
+                                        
+                                        windowEvent.queueCustom(
+                                            onEnter ::{
+                                                party.inventory.remove(item:ore);
+                                                party.inventory.add(item:output);                                                                                                        
+                                            }
+                                        );                                     
+                                    }                                    
                                 );                            
                             }
                         )
@@ -1186,7 +1195,7 @@ Interaction.newEntry(
                     windowEvent.queueMessage(text:'As you enter, you feel the world around you fade.', renderable:{render::{canvas.blackout();}});
                     windowEvent.queueMessage(text:'...', renderable:{render::{canvas.blackout();}});
                     
-                    windowEvent.queueNoDisplay( 
+                    windowEvent.queueCustom( 
                         onEnter::{
                         @:Event = import(module:'game_mutator.event.mt');
                         @:Landmark = import(module:'game_mutator.landmark.mt');
@@ -1232,7 +1241,7 @@ Interaction.newEntry(
         name : 'next floor',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
-
+            breakpoint();
             if (location.targetLandmark == empty) ::<={
             
                 if (location.landmark.floor > 5 && Number.random() > 0.5 - (0.2*(location.landmark.floor - 5))) ::<= {
@@ -1281,7 +1290,7 @@ Interaction.newEntry(
         onInteract ::(location, party) {
 
             windowEvent.queueMessage(text:'The party uses the ladder to climb up to the surface.', renderable:{render::{canvas.blackout();}});
-            windowEvent.queueNoDisplay(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});                    
+            windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});                    
         },
     }
 )  
@@ -1537,13 +1546,16 @@ Interaction.newEntry(
                         prompt: 'Continue?',
                         onChoice:::(which) {
                             when(which == false) empty;
-                            party.inventory.subtractGold(amount:cost);       
-                            whom.profession = Profession.new(base:Profession.database.find(name: location.ownedBy.profession.base.name));
+                            party.addGoldAnimated(
+                                amount:cost,
+                                onDone::{
+                                    whom.profession = Profession.new(base:Profession.database.find(name: location.ownedBy.profession.base.name));
 
-                            windowEvent.queueMessage(
-                                text: '' + whom.name + " is now " + correctA(word:whom.profession.base.name) + '.'
-
-                            );
+                                    windowEvent.queueMessage(
+                                        text: '' + whom.name + " is now " + correctA(word:whom.profession.base.name) + '.'
+                                    );                                
+                                }
+                            );       
                         }
                     );
                 }
@@ -1794,14 +1806,23 @@ Interaction.newEntry(
                                                     windowEvent.queueMessage(
                                                         text:'The party won ' + g(g:win) + '.'
                                                     );                                    
-                                                    party.inventory.addGold(amount:win);
+                                                    party.addGoldAnimated(
+                                                        amount:win,
+                                                        onDone::{
+                                                            windowEvent.jumpToTag(name:'Bet', goBeforeTag:true, doResolveNext:true);                                                        
+                                                        }
+                                                    );
                                                 } else ::<= {
                                                     windowEvent.queueMessage(
                                                         text:'The party lost ' + g(g:bet) + '.'
                                                     );                                    
-                                                    party.inventory.subtractGold(amount:bet);
+                                                    party.addGoldAnimated(
+                                                        amount:-bet,
+                                                        onDone::{
+                                                            windowEvent.jumpToTag(name:'Bet', goBeforeTag:true, doResolveNext:true);                                                        
+                                                        }
+                                                    );
                                                 }  
-                                                windowEvent.jumpToTag(name:'Bet', goBeforeTag:true, doResolveNext:true);
                                                 
                                             }  
                                         );                                           
@@ -1859,7 +1880,7 @@ Interaction.newEntry(
         
             @:amount = (20 + Number.random()*75)->floor;
             windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
-            world.party.inventory.addGold(amount);    
+            world.party.addGoldAnimated(amount, onDone::{});    
 
         }
     }

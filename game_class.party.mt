@@ -21,6 +21,8 @@
 @:Inventory = import(module:'game_class.inventory.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:canvas = import(module:'game_singleton.canvas.mt');
+@:g = import(module:'game_function.g.mt');
 
 
 @:Party = LoadableClass.create(
@@ -57,9 +59,9 @@
                 
             },
             
-            hasItemAtAll ::(name) {
+            getItemAtAll ::(name) {
                 @key = this.inventory.items->filter(by:::(value) <- value.name == name);
-                when (key != empty) key[0];
+                when (key->size != 0) key[0];
 
                 // could be equipped
                 return {:::} {
@@ -103,6 +105,65 @@
                 return state.members->all(condition:::(value) <- value.isIncapacitated());
             },
             
+            addGoldAnimated ::(amount, onDone) {
+                @gained = amount;
+                @oldG = this.inventory.gold;
+                @price = gained;
+                windowEvent.queueCustom(
+                    onEnter ::{},
+                    isAnimation: true,
+                    onInput ::(input) {
+                        match(input) {
+                          (windowEvent.CURSOR_ACTIONS.CONFIRM,
+                           windowEvent.CURSOR_ACTIONS.CANCEL):
+                            price = 0
+                        }
+                    },
+                    animationFrame ::{
+                        canvas.renderTextFrameGeneral(
+                            leftWeight: 0.5,
+                            topWeight : 0.5,
+                            lines : [
+                                'Current funds: ' + g(g:oldG),
+                                if (price >= 0)
+                                '              +' + g(g:price)
+                                else
+                                '              ' + g(g:price)
+                            ]
+                        );
+                        
+                        when(price->abs <= 0) ::<= {
+                            if (gained > 0)
+                                this.inventory.addGold(amount:gained)
+                            else
+                                this.inventory.subtractGold(amount:-gained);
+
+                            return canvas.ANIMATION_FINISHED
+                        }
+                        
+                        @newPrice = if (price < 0) (price * 0.9)->ceil else (price*0.9)->floor;
+                        @red = newPrice - price;
+                        price += red;
+                        oldG -= red;
+                    }
+                );
+                
+                windowEvent.queueDisplay(
+                    leftWeight: 0.5,
+                    topWeight : 0.5,
+                    lines : [
+                        'Current funds: ' + g(g:oldG + gained),
+                        '               '
+                    ],
+                    skipAnimation : true
+                )
+                
+                windowEvent.queueCustom(
+                    onEnter :: {
+                        onDone();
+                    }
+                );
+            },
             
         
             members : {

@@ -220,7 +220,7 @@ Event.database.newEntry(
                     );
                     @StatSet = import(module:'game_class.statset.mt');
                     
-                    windowEvent.queueNoDisplay(
+                    windowEvent.queueCustom(
                         onLeave::{
                             @:world = import(module:'game_singleton.world.mt');
                             for(0, 5*3)::(i) {

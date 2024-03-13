@@ -114,12 +114,18 @@
         @autoSkipIndex = empty;
 
     
+        @:choiceStackPush::(value) {
+            if (choiceStack->size) ::<= {
+                @:val = choiceStack[choiceStack->size-1];
+                if (val.stateID == empty) ::<= {
+                    val.stateID = canvas.pushState();      
+                }
+            }
+            choiceStack->push(value);
+        }
+    
         @:renderThis ::(data => Object, thisRender) {
             when (requestAutoSkip) empty; 
-            if (data.pushedCanvasState == empty) ::<= {
-                canvas.pushState();      
-                data.pushedCanvasState = true;
-            }
             canvas.clear();
 
             @renderAgain = false;
@@ -129,7 +135,7 @@
             if (thisRender)
                 thisRender();
             canvas.commit();
-            
+
             
             if (renderAgain == false)
                 data.rendered = true;
@@ -138,32 +144,31 @@
         @:renderThisAnimation ::(data => Object, frame) {
             when (requestAutoSkip) empty; 
 
-            canvas.pushState();      
-            data.pushedCanvasState = true;
+            canvas.queueAnimation(onRenderFrame::{
+                canvas.clear();
+                if (data.renderable)
+                    data.renderable.render()
 
-
-            @renderAgain = false;
-            if (data.renderable) ::<= {
-                renderAgain = (data.renderable.render()) == this.RENDER_AGAIN;        
-            }
+                return frame();
+            });
             
-            canvas.queueAnimation(onRenderFrame:frame);
-            
-            
-            if (renderAgain == false)
-                data.rendered = true;
+            data.rendered = true;            
         }        
         
         
-        @next ::(dontResolveNext) {
+        @next ::(toRemove, dontResolveNext) {
             if (choiceStack->keycount > 0) ::<= {
-                @:data = choiceStack->pop;
+                @:data = if (toRemove == empty) choiceStack[choiceStack->size-1] else toRemove;
                 if (data.keep) ::<= {
-                    choiceStack->push(value:data);
                 } else ::<= {
+                    if (toRemove == empty) 
+                        choiceStack->pop 
+                    else 
+                        choiceStack->remove(key:choiceStack->findIndex(value:toRemove));
+
                     if (!requestAutoSkip) ::<= {
-                        if (data.pushedCanvasState)
-                            canvas.popState();
+                        if (data.stateID != empty)
+                            canvas.removeState(id:data.stateID);
                     }
                     
                     if (data.onLeave)
@@ -180,8 +185,14 @@
         
         @:commitInput ::(input) {
             @continue; 
+            @val;
             if (choiceStack->keycount > 0) ::<= {
-                @val = choiceStack[choiceStack->keycount-1];
+                val = choiceStack[choiceStack->keycount-1];
+                    
+                if (val.stateID != empty) ::<= {
+                    canvas.removeState(id:val.stateID);
+                    val.stateID = empty;
+                }
                     
                 //if (val.jail == true) ::<= {
                 //    choiceStack->push(value:val);
@@ -191,7 +202,7 @@
                   (CHOICE_MODE.COLUMN_CURSOR):  commitInput_columnCursor(data:val, input),
                   (CHOICE_MODE.DISPLAY):        commitInput_display(data:val, input),
                   (CHOICE_MODE.CURSOR_MOVE):    commitInput_cursorMove(data:val, input),
-                  (CHOICE_MODE.NODISPLAY):      commitInput_noDisplay(data:val, input),
+                  (CHOICE_MODE.CUSTOM):         commitInput_custom(data:val, input),
                   (CHOICE_MODE.SLIDER):         commitInput_slider(data:val, input)
                 }        
                 
@@ -202,7 +213,7 @@
             }
             // true means done
             if (continue == true || choiceStack->keycount == 0) ::<= {
-                next();
+                next(toRemove:val);
             }
         }
 
@@ -215,6 +226,9 @@
                 @:cbs = nextResolve[0];
                 nextResolve->remove(key:0);
                 foreach(cbs)::(i, cb) <- cb();
+            } else ::<= {
+                if (choiceStack->size == 0)
+                    error(detail:'The windowEvent queue and menu stack are empty. There should always be an active menu or a queued menu request!');
             }
         }
 
@@ -303,7 +317,12 @@
                 if (cursorPageTop > choices->keycount - PAGE_SIZE) cursorPageTop = choices->keycount-PAGE_SIZE;
                 if (cursorPageTop < 0) cursorPageTop = 0;
                 
-                @:choicesModified = [];
+                @:choicesModified = if (data.choicesModified == empty) ::<= {
+                    data.choicesModified = [];
+                    return data.choicesModified; 
+                } else data.choicesModified;
+                
+                choicesModified->setSize(size:0);
                 
                 
                 if (choices->keycount > PAGE_SIZE) ::<= {
@@ -358,7 +377,6 @@
                 
                 if (onHover != empty)
                     onHover(choice:cursorPos+1);
-                
                 renderThis(
                     data,
                     thisRender::{
@@ -514,7 +532,6 @@
             @:choice = input;         
             @:onMenu = data.onMenu;            
             @:canCancel = data.canCancel;
-
             when (requestAutoSkip) false;
 
             when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
@@ -537,7 +554,6 @@
                   data.rendered == empty) ::<= {
                 if (choice != empty) ::<= {
                     onChoice(choice);
-                    resolveNext();
                 }
                 
                 renderThis(data, thisRender::{
@@ -549,19 +565,23 @@
                         limitLines:13
                     );*/             
                 });
+
+                if (choice != empty)
+                    resolveNext();
+
             }
             
             
             return false;    
         }        
     
-        @:commitInput_noDisplay ::(data => Object, input) {
+        @:commitInput_custom ::(data => Object, input) {
             
             //if (canCancel) ::<= {
             //    choicesModified->push(value:'(Cancel)');
             //}
             
-            if (data.rendered == empty || input != empty) ::<= {
+            if (data.rendered == empty) ::<= {
                 if (data.isAnimation == true) ::<= {
                     data.busy = true;
                     renderThisAnimation(data, frame ::{
@@ -574,8 +594,18 @@
                     renderThis(data);
                 }
             }
-            data.onEnter();
-          
+            if (data.entered == empty) ::<= {
+                if (data.onEnter)
+                    data.onEnter();
+                data.entered = true;
+            }
+            
+            if (data.onUpdate)
+                data.onUpdate();
+            
+            if (data.onInput != empty && input != empty)
+                data.onInput(input);
+            
             when(data.busy) false;
             return true;    
         }       
@@ -850,7 +880,7 @@
             COLUMN_NUMBER : 3,
             CURSOR_MOVE: 4,
             DISPLAY: 5,
-            NODISPLAY: 6,
+            CUSTOM: 6,
             SLIDER : 7
         }
         
@@ -937,7 +967,7 @@
             // If it doesnt fit, display will try and make it scrollable.
             //
             // lines should be an array of strings.
-            queueDisplay::(prompt, lines, pageAfter, leftWeight, topWeight, renderable, onLeave) {
+            queueDisplay::(prompt, lines, pageAfter, leftWeight, topWeight, renderable, onLeave, skipAnimation) {
                 when(requestAutoSkip) ::<= {
                     if (onLeave) onLeave();
                 }
@@ -951,12 +981,13 @@
                         )
                         
                         // MORE text is never animated.
-                        @:skipAnimation = !(iter == 0 && limit == lines->keycount-1);
+                        if (!(iter == 0 && limit == lines->keycount-1))
+                            skipAnimation = true;
                         
                         if (width != empty)
                             linesOut->push(value:createBlankLine(width, header:if (more) '-More-' else ''));
                         
-                        choiceStack->push(value:{
+                        choiceStackPush(value:{
                             topWeight: topWeight,
                             leftWeight : leftWeight,
                             lines : linesOut,
@@ -992,30 +1023,31 @@
                         when (last) send();
                         iter += 1;
                         
-                        breakpoint();
                     }
                 }
             },
             
-            // A place holder action. This can be used to run a function 
-            // in order, or for rendering graphics.
-            // onEnter runs whenever the display is entered.
-            queueNoDisplay::(renderable, keep, onEnter => Function, jumpTag, onLeave, isAnimation, animationFrame) {
+            // An empty action. Can be used to make custom inputs.
+            // If consistency is required, keep can be true and use forceExit() 
+            // when done with the widget.
+            queueCustom::(renderable, keep, onEnter, onUpdate, onInput, jumpTag, onLeave, isAnimation, animationFrame) {
                 when(requestAutoSkip) ::<= {
                     if (onEnter) onEnter();
                     if (onLeave) onLeave();
                 }
 
                 nextResolve->push(value:[::{
-                    choiceStack->push(value:{
-                        mode: CHOICE_MODE.NODISPLAY,
+                    choiceStackPush(value:{
+                        mode: CHOICE_MODE.CUSTOM,
                         keep: keep,
                         renderable:renderable,
                         onEnter:onEnter,
+                        onUpdate:onUpdate,
                         jumpTag: jumpTag,
                         onLeave: onLeave,
                         isAnimation : isAnimation,
-                        animationFrame : animationFrame
+                        animationFrame : animationFrame,
+                        onInput : onInput
                     });
                 }]);                
             },
@@ -1033,7 +1065,7 @@
             queueChoices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetChoices, onGetPrompt, jumpTag, onLeave, header, onGetHeader, onCancel, pageAfter) {
 
                 nextResolve->push(value:[::{
-                    choiceStack->push(value:{
+                    choiceStackPush(value:{
                         onCancel : onCancel,
                         mode: CHOICE_MODE.CURSOR,
                         choices: choices,
@@ -1061,7 +1093,7 @@
             queueSlider::(defaultValue => Number, increments => Number, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetPrompt, jumpTag, onLeave, onCancel) {
 
                 nextResolve->push(value:[::{
-                    choiceStack->push(value:{
+                    choiceStackPush(value:{
                         onCancel: onCancel,
                         mode: CHOICE_MODE.SLIDER,
                         increments : increments,
@@ -1112,8 +1144,10 @@
                     }
                 }
                 if (goBeforeTag != empty) ::<= {
-                    canvas.popState();
                     @:data = choiceStack->pop; 
+                    if (data.stateID != empty)
+                        canvas.removeState(id:data.stateID);
+
                     if (data.onLeave)
                         data.onLeave();                  
                 }
@@ -1135,7 +1169,7 @@
             
             queueChoiceColumns::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function, keep, renderable, jumpTag, onLeave, onCancel) {
                 nextResolve->push(value:[::{
-                    choiceStack->push(value:{
+                    choiceStackPush(value:{
                         onCancel: onCancel,
                         mode:if (isCursor) CHOICE_MODE.COLUMN_CURSOR else CHOICE_MODE.COLUMN_NUMBER,
                         choices: choices,
@@ -1154,7 +1188,7 @@
             },            
             queueCursorMove ::(prompt, leftWeight, topWeight, onMove, onMenu => Function, renderable, onLeave, jumpTag, canCancel) {
                 nextResolve->push(value:[::{
-                    choiceStack->push(value:{
+                    choiceStackPush(value:{
                         canCancel: canCancel,
                         mode: CHOICE_MODE.CURSOR_MOVE,
                         prompt: prompt,
@@ -1170,6 +1204,18 @@
                 }]);
             },  
             
+            // Pushes through all queued actions to the top 
+            // of the window stack in order. This is normally not needed, but 
+            // may be needed in particular contexts and effects.
+            resolveAllQueued :: {
+                {:::} {
+                    forever ::{
+                        when(nextResolve->keycount == 0) send();
+                        resolveNext();
+                    }
+                }
+                commitInput();
+            },
               
             // request to not render or wait for nodisplay and display 
             // events. If auto skip is enabled and any of the other events 

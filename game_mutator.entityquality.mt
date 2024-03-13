@@ -41,13 +41,23 @@ EntityQuality.database.newEntry(
         descriptions : [
             '$0',
             '$0 with $1',
-            'slightly iridescent $0 with $1',
+            '$0 with great length and $1',
             '$0 with stripes of $2',
-            'thick and has $1',
             '$0 with $2 spots',
             '$0 with a $2 color at their extremities'
         ],
         
+        trait0qualifiers : [
+            'iridescent',
+            'soft',
+            'pure',
+            'deep',
+            'mesmerizing',
+            'light',
+            'dark',
+            'quite'
+        ],
+        trait0qualifierChance: 0.20,
         trait0 : [
             'brown',
             'white',
@@ -57,27 +67,46 @@ EntityQuality.database.newEntry(
             'orange',
             'yellow',
             'goldenrod',
-            'pure white',
-            'soft grey',
+            'grey',
             'tan',
         ],
         
+        
+        trait1qualifiers : [
+            'curious',
+            'various',
+            'interesting',
+            'striking',
+        ],
+        trait1qualifierChance: 1,
         trait1 : [
-            'curious markings',
-            'various battlescars',
-            'great length',
-            'short length',
-            'blonde highlights'
+            'markings',
+            'battlescars',
+            'highlights'
         ],
         
+        trait2qualifiers : [
+            'iridescent',
+            'soft',
+            'pure',
+            'deep',
+            'mesmerizing',
+            'light',
+            'dark',
+        ],
+        trait2qualifierChance: 0.20,
         trait2 : [
+            'brown',
+            'white',
             'light brown',
-            'bright white',
-            'hazelnut',
-            'deep black',
-            'light grey',
-            'shiny grey'
-        ]             
+            'black',
+            'grey',
+            'orange',
+            'yellow',
+            'goldenrod',
+            'grey',
+            'tan',
+        ],          
     }
 )
 
@@ -88,11 +117,18 @@ EntityQuality.database.newEntry(
         plural : false,
         descriptions : [
             '$0',
-            '$0',
+            'hard to read but seems $0',
             '$0',
             '$0',
             '$0 with $1',
         ],
+        trait0qualifiers : [
+            'quite',
+            'fairly',
+            'especially'
+        ],
+        
+        trait0qualifierChance : 0.2,
         
         trait0 : [
             'soft',
@@ -102,12 +138,22 @@ EntityQuality.database.newEntry(
             'stern',
             'neutral',
         ],
+
+        trait1qualifiers : [
+            'small',
+            'scattered'
+        ],
         
+        trait1qualifierChance : 0.2,
+
         trait1 : [
             'freckles',
             'markings'
         ],
         
+        trait2qualifierChance : 0,
+        trait2qualifiers : [
+        ],
         trait2 : [
         ]             
     }
@@ -122,11 +168,24 @@ EntityQuality.database.newEntry(
         descriptions : [
             '$0',
             '$0 with $1',
-            'slightly iridescent $0 with $1',
-            '$0 with a checkered pattern of $2',
-            'shiny and $1',
+            '$0',
+            '$0 with $1',
+            '$0 with an interesting pattern of $2',
+            '$0 with various patterns of $2',
         ],
         
+        
+        trait0qualifiers : [
+            'iridescent',
+            'soft',
+            'pure',
+            'deep',
+            'light',
+            'dark',
+            'quite',
+            'seemingly'
+        ],
+        trait0qualifierChance: 0.20,
         trait0 : [
             'brown',
             'white',
@@ -135,13 +194,37 @@ EntityQuality.database.newEntry(
             'blue',
             'red',
             'purple',
+            'tan'
         ],
         
+        
+        
+        trait1qualifiers : [
+            'curious',
+            'various',
+            'interesting',
+            'striking',
+        ],
+        trait1qualifierChance: 1,
         trait1 : [
-            'curious tattoos',
-            'various battlescars',
+            'markings',
+            'battlescars',
+            'highlights',
+            'tattoos',
         ],
-        
+
+        trait2qualifiers : [
+            'iridescent',
+            'soft',
+            'pure',
+            'deep',
+            'mesmerizing',
+            'light',
+            'dark',
+            'quite',
+            'seemingly'
+        ],
+        trait2qualifierChance: 0.20,
         trait2 : [
             'brown',
             'white',
@@ -149,8 +232,11 @@ EntityQuality.database.newEntry(
             'green',
             'blue',
             'red',
-        ]             
-    }
+            'purple',
+            'tan'
+        ],
+                  
+    }        
 )        
 
 
@@ -160,36 +246,42 @@ EntityQuality.database.newEntry(
         appearanceChance : 1,
         plural : true,
         descriptions : [
-            '$0',
-            '$0 with $1',
-            '$0',
-            '$0 with $1',
-            'iridescent $0 with $1',
-            'shiny with $1',
+            '$0'
         ],
-        
+        trait0qualifiers : [
+            'iridescent',
+            'soft',
+            'pure',
+            'deep',
+            'light',
+            'dark',
+            'quite',
+            'seemingly'
+        ],
+        trait0qualifierChance: 0.20,
         trait0 : [
             'brown',
             'white',
             'black',
-            'green',
             'blue',
             'red',
             'purple',
+            'tan'
         ],
         
+        
+        
+        trait1qualifiers : [
+        ],
+        trait1qualifierChance: 1,
         trait1 : [
-            'curious markings',
         ],
-        
+
+        trait2qualifiers : [
+        ],
+        trait2qualifierChance: 0.20,
         trait2 : [
-            'brown',
-            'white',
-            'black',
-            'green',
-            'blue',
-            'red',
-        ]             
+        ],                  
     }
 )   
 
@@ -202,15 +294,31 @@ EntityQuality.database.newEntry(
             '$2 with $1',
             '$0 and $2',
             '$2 and have $1',
-            'mesmerizingly $2',
+            '$2 with $1',
+            '$0 and $2',
+            '$2 and have $1',
+            '$2 with $1',
+            '$0 and $2',
+            '$2 and have $1',
             'covered with a fabric of some kind',
         ],
+        
+        trait0qualifierChance : 0.2,
+        trait0qualifiers : [
+            'especially',
+            'quite',
+            'noticeably'
+        ],
+        
         trait0 : [
-            'rather thin',
+            'thin',
             'large',
             'small',
         ],        
         
+        trait1qualifierChance : 0.1,
+        trait1qualifiers : [
+        ],
         trait1 : [
             'a gentle affect',
             'a piercing stare',
@@ -220,6 +328,16 @@ EntityQuality.database.newEntry(
         ],
 
         
+        trait2qualifiers : [
+            'soft',
+            'pure',
+            'deep',
+            'mesmerizing',
+            'light',
+            'dark',
+            'quite'
+        ],
+        trait2qualifierChance : 0.2,
         trait2 : [
             'green',
             'blue',
@@ -243,16 +361,21 @@ EntityQuality.database.newEntry(
             '$0 and emotive',
             'pierced and $0',
         ],
-        
+        trait0qualifierChance : 0.2,
+        trait0qualifiers : [],
         trait0 : [
             'small',
             'large',
             'medium-size',
         ],
         
+        trait1qualifierChance : 0.2,
+        trait1qualifiers : [],
         trait1 : [
         ],
         
+        trait2qualifierChance : 0.2,
+        trait2qualifiers : [],        
         trait2 : [
         ]             
     }
@@ -273,19 +396,34 @@ EntityQuality.database.newEntry(
             'in multiple sets which are $1'
         ],
         
+        trait0qualifierChance : 0.2,
+        trait0qualifiers : [
+            'notably',
+            'especially'     
+        ],
+        
         trait0 : [
             'short',
             'large',
-            'medium-size',
+            'small',
             'long'
         ],
         
+        
+        
+        trait1qualifierChance : 0.2,
+        trait1qualifiers : [
+            'quite'
+        ],
         trait1 : [
             'sharp',
             'curled',
-            'dulled'
+            'dulled',
+            'intimidating'
         ],
         
+        trait2qualifierChance : 0.2,
+        trait2qualifiers : [],
         trait2 : [
         ]             
     }
@@ -299,18 +437,37 @@ EntityQuality.database.newEntry(
         appearanceChance : 1,
         descriptions : [
             '$0',
-            '$0 and particularly expressive',
+            '$0',
+            '$0',
+            '$0',
+            '$0',
+            '$0',
+            '$0 and $1',
         ],
         
+        trait0qualifierChance : 0.2,
+        trait0qualifiers : [
+            'quite',
+            'distractingly'
+        ],
         trait0 : [
             'small',
             'large',
             'medium-size',
+            'long'
         ],
         
+        
+        trait1qualifierChance : 0.2,
+        trait1qualifiers : [],
         trait1 : [
+            'expressive'
         ],
         
+        
+        
+        trait2qualifierChance : 0.2,
+        trait2qualifiers : [],
         trait2 : [
         ]             
     }
@@ -326,15 +483,23 @@ EntityQuality.database.newEntry(
             '$0',
         ],
         
+        trait0qualifierChance : 0,
+        trait0qualifiers : [],
         trait0 : [
             'short',
             'long',
             'medium-length',
+            'small',
+            'large'
         ],
         
+        trait1qualifierChance : 0,
+        trait1qualifiers : [],
         trait1 : [
         ],
         
+        trait2qualifierChance : 0,
+        trait2qualifiers : [],
         trait2 : [
         ]             
     }
@@ -351,12 +516,25 @@ EntityQuality.database.newEntry(
             '$0 and $1',
         ],
         
+        
+        trait0qualifierChance : 0.2,
+        trait0qualifiers : [
+            'notably',
+        ],        
         trait0 : [
             'short',
             'tall',
-            'of medium height',
+            'medium-height',
+            'small',
+            'large'
         ],
         
+        trait1qualifierChance : 0.2,
+        trait1qualifiers : [
+            'notably',
+            'exceedingly',
+            'rather',
+        ],        
         trait1 : [
             'stocky',
             'stout',
@@ -364,8 +542,13 @@ EntityQuality.database.newEntry(
             'lithe',
             'well-toned',
             'rotund',
+            'muscular',
+            'well-built'
         ],
         
+        trait2qualifierChance : 0.2,
+        trait2qualifiers : [
+        ],        
         trait2 : [
         ]             
     }
@@ -389,15 +572,53 @@ EntityQuality.database.newEntry(
             appearanceChance : Number,
             descriptions : Object,
             trait0 : Object,
+            trait0qualifierChance : Number,
+            trait0qualifiers : Object,
+            
             trait1 : Object,
-            trait2 : Object
+            trait1qualifierChance : Number,
+            trait1qualifiers : Object,
+
+            trait2 : Object,
+            trait2qualifierChance : Number,
+            trait2qualifiers : Object
         },
         reset 
     ),
 
     define:::(this, state) {
         
-        
+        @:generateTrait::(which, index) {
+            @traits;
+            @qualifiers;
+            @qualifyChance;
+            
+            match(which) {
+              (0) ::<= {
+                traits = state.base.trait0;
+                qualifiers = state.base.trait0qualifiers;
+                qualifyChance = state.base.trait0qualifierChance;
+              },
+
+              (1) ::<= {
+                traits = state.base.trait1;
+                qualifiers = state.base.trait1qualifiers;
+                qualifyChance = state.base.trait1qualifierChance;
+              },
+
+              (2) ::<= {
+                traits = state.base.trait2;
+                qualifiers = state.base.trait2qualifiers;
+                qualifyChance = state.base.trait2qualifierChance;
+              }
+            }
+            @base = traits[index];
+            if (qualifiers->size > 0 && random.try(percentSuccess:100*qualifyChance)) ::<= {
+                base = random.pickArrayItem(list:qualifiers) + ' ' + base;
+            }
+
+            return base;
+        }
         
         this.interface = {
             initialize ::{},
@@ -448,9 +669,9 @@ EntityQuality.database.newEntry(
             description : {
                 get ::{
                     @base = state.base.descriptions[state.descIndex];
-                    if (base->contains(key:'$0')) base = base->replace(key:'$0', with:state.base.trait0[state.trait0]);
-                    if (base->contains(key:'$1')) base = base->replace(key:'$1', with:state.base.trait1[state.trait1]);
-                    if (base->contains(key:'$2')) base = base->replace(key:'$2', with:state.base.trait2[state.trait2]);
+                    if (base->contains(key:'$0')) base = base->replace(key:'$0', with:generateTrait(which:0, index:state.trait0));
+                    if (base->contains(key:'$1')) base = base->replace(key:'$1', with:generateTrait(which:1, index:state.trait1));
+                    if (base->contains(key:'$2')) base = base->replace(key:'$2', with:generateTrait(which:2, index:state.trait2));
                     return base;
                 }
             }           

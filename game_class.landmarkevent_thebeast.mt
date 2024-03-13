@@ -72,7 +72,7 @@
             when (map_.isLocationVisible(x:tileX, y:tileY)) empty;
             
 
-            @beast = TheBeast.createBeast();
+            @beast = TheBeast.createEntity();
 
             
             // who knows whos down here. Can be anything and anyone, regardless of 
@@ -90,7 +90,6 @@
             );
             ref.addUpkeepTask(name:'thebeast-roam');
             ref.addUpkeepTask(name:'aggressive');
-            ref.addUpkeepTask(name:'thesnakesiren-song');
 
             if (state.encountersOnFloor == 1)
                 windowEvent.queueMessage(

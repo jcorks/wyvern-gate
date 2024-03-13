@@ -46,7 +46,7 @@ return ::(this, party, location, onDone, overrideChat, skipIntro) {
         windowEvent.queueMessage(
             text: 'It appears that you cannot interact with ' + this.name + '.'
         )                
-        windowEvent.queueNoDisplay(
+        windowEvent.queueCustom(
             onEnter ::{
                 onDone();
             },

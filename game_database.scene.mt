@@ -77,9 +77,58 @@ Scene.newEntry(
                         'The key is ours! We are the real Chosen!'
                     ])
                 );
+                
+                
+                @:getKey ::{
+                    @:Story = import(module:'game_singleton.story.mt');
+                    
+                    @:foundMessage ::(itemName){
+                        windowEvent.queueMessage(text: 'It looks like they dropped something heavy during the fight...');
+                        breakpoint();
+                        if (itemName != empty && world.party.getItemAtAll(name:itemName) == empty) ::<= {
+                            windowEvent.queueMessage(text: '.. is that...?');                            
+                            party.inventory.add(item:Item.new(base:Item.database.find(name:itemName)));
+                        } else ::<= {
+                            windowEvent.queueMessage(text: '.. huh...? This is just a normal key to another island...');                            
+
+                            @:key = Item.new(base:Item.database.find(name:'Wyvern Key'));
+                            @:namegen = import(module:'game_singleton.namegen.mt');
+                            @:name = namegen.island();
+                            key.setIslandGenAttributes(
+                                levelHint: world.island.levelMax + 1 + (world.island.levelMax * 1.2)->floor,
+                                nameHint: name,
+                                tierHint: world.island.tier + 1
+                            ); 
+                            key.name = 'Key to ' + name;
+                            party.inventory.add(item:key);                                       
+                            itemName = key.name;
+                        } 
+                            
+                        windowEvent.queueMessage(text: 'The party obtained the ' + itemName + '!');                            
+                    }
+
+
+                    match(island.tier) {
+                        (0):::<= { 
+                            foundMessage(itemName:'Wyvern Key of Fire');
+                        },
+                        (1):::<= {
+                            foundMessage(itemName:'Wyvern Key of Ice');
+                        },
+                        (2):::<= {
+                            foundMessage(itemName:'Wyvern Key of Thunder');
+                        },
+                        (3):::<= {
+                            foundMessage(itemName:'Wyvern Key of Light');
+                        },
+                        default: ::{
+                            foundMessage();
+                        }
+                    }   
+           
+                }
 
                 
-
                 @:battleStart = ::{
                     world.battle.start(
                         party,
@@ -92,52 +141,7 @@ Scene.newEntry(
                         },
                         onEnd ::(result) {
                             when(world.battle.partyWon()) ::<= { 
-                                //@message = 'The party found a Skill Crystal!';
-                                //party.inventory.add(item);
-                                @:Story = import(module:'game_singleton.story.mt');
-                                
-                                @:foundMessage ::(itemName){
-                                    windowEvent.queueMessage(text: 'It looks like they dropped something heavy during the fight...');
-                                    if (itemName != empty && world.party.hasItemAtAll(name:itemName) == false) ::<= {
-                                        windowEvent.queueMessage(text: '.. is that...?');                            
-                                        party.inventory.add(item:Item.new(base:Item.database.find(name:itemName)));
-                                    } else ::<= {
-                                        windowEvent.queueMessage(text: '.. huh...? This is just a normal key to another island...');                            
-
-                                        @:key = Item.new(base:Item.database.find(name:'Wyvern Key'));
-                                        @:namegen = import(module:'game_singleton.nameget.mt');
-                                        @:name = namegen.island();
-                                        key.setIslandGenAttributes(
-                                            levelHint: world.island.levelMax = 1 + (world.island.levelMax * 1.2)->floor,
-                                            nameHint: name,
-                                            tierHint: world.island.tier + 1
-                                        ); 
-                                        key.name = 'Key to ' + name;
-                                        party.inventory.add(item:key);                                       
-                                        itemName = key.name;
-                                    } 
-                                        
-                                    windowEvent.queueMessage(text: 'The party obtained the ' + itemName + '!');                            
-                                }
-
-
-                                match(island.tier) {
-                                    (0):::<= { 
-                                        foundMessage(itemName:'Wyvern Key of Fire');
-                                    },
-                                    (1):::<= {
-                                        foundMessage(itemName:'Wyvern Key of Ice');
-                                    },
-                                    (2):::<= {
-                                        foundMessage(itemName:'Wyvern Key of Thunder');
-                                    },
-                                    (3):::<= {
-                                        foundMessage(itemName:'Wyvern Key of Light');
-                                    },
-                                    default: ::{
-                                        foundMessage();
-                                    }
-                                }
+                                getKey();
                             };
                               
                             @:instance = import(module:'game_singleton.instance.mt');
@@ -300,7 +304,7 @@ Scene.newEntry(
                             text:'Perhaps it was not meant to be...'
                         );
                         
-                        windowEvent.queueNoDisplay(
+                        windowEvent.queueCustom(
                             onEnter::{
                                 @:instance = import(module:'game_singleton.instance.mt');
                                 instance.gameOver(reason:'The party was wiped out.');
@@ -346,19 +350,7 @@ Scene.newEntry(
             ::(location, landmark, doNext) {
                 location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
                 @:world = import(module:'game_singleton.world.mt');
-                @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Fire');
-                if (key != empty) key = key[0];
-                // could be equipped by hooligans and jokesters
-                if (key == empty) ::<= {
-                    key = {:::} {
-                        foreach(world.party.members)::(i, member) {
-                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_LR);
-                            if (wep.name == 'Wyvern Key of Fire') ::<= {
-                                send(message:key);
-                            }
-                        }
-                    }
-                }
+                @key = world.party.getItemAtAll(name:'Wyvern Key of Fire');
                 // you can technically throw it out or Literally Throw It.
                 when(key == empty) ::<= {
                     windowEvent.queueMessage(
@@ -393,17 +385,11 @@ Scene.newEntry(
 
                 
                 @:story = import(module:'game_singleton.story.mt');
+                story.fireWyvernDefeated = true;
                 
                 @:instance = import(module:'game_singleton.instance.mt');
-                // cancel and flush current VisitIsland session
-                if (key.islandEntry == empty)
-                    key.addIslandEntry(world);
 
-                
-                instance.visitIsland(where:key.islandEntry, atGate:true);
-
-                breakpoint();
-                doNext();
+                instance.visitIsland(key, atGate:true, onReady:doNext);
             }
             
             
@@ -428,7 +414,7 @@ Scene.newEntry(
                     onChoice::(which) {
                         when(which == false) ::<= {
                             windowEvent.queueMessage(speaker:'Kaedjaal', text:'Ah I see. That is understandable. I will still be here if you change your mind.');
-                            windowEvent.queueNoDisplay(
+                            windowEvent.queueCustom(
                                 onEnter::{},
                                 onLeave::{doNext();}                                    
                             );
@@ -437,7 +423,7 @@ Scene.newEntry(
 
                         when(world.party.inventory.items->keycount < 3) ::<= {
                             windowEvent.queueMessage(speaker:'Kaedjaal', text:'Djiiroshuhzolii, Chosen. You have not enough items to complete a trade.');
-                            windowEvent.queueNoDisplay(
+                            windowEvent.queueCustom(
                                 onEnter::{},
                                 onLeave::{doNext();}                                    
                             );
@@ -455,7 +441,7 @@ Scene.newEntry(
                                 }
                                 // cancelled by user
                                 windowEvent.queueMessage(speaker:'Kaedjaal', text:'Having second thoughts? No matter. I will still be here if you change your mind.');    
-                                windowEvent.queueNoDisplay(
+                                windowEvent.queueCustom(
                                     onEnter::{},
                                     onLeave::{doNext();}                                    
                                 );                            
@@ -543,29 +529,21 @@ Scene.newEntry(
             ['Kaedjaal', 'Zaashael kaaluh-lo zohppuh-zodjii shiirr kohggaelaarr...'], 
             ::(location, landmark, doNext) {
                 @:world = import(module:'game_singleton.world.mt');
-                @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Fire');
-                if (key != empty) key = key[0];
-                // could be equipped by hooligans and jokesters
-                if (key == empty) ::<= {
-                    @:Entity = import(module:'game_class.entity.mt');
-                    key = {:::} {
-                        foreach(world.party.members)::(i, member) {
-                            @:wep = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
-                            if (wep.name == 'Wyvern Key of Fire') ::<= {
-                                send(message:key);
-                            }
-                        }
-                    }
-                }
+                @key = world.party.getItemAtAll(name:'Wyvern Key of Fire');
+
                 @:canvas = import(module:'game_singleton.canvas.mt');
                 windowEvent.queueMessage(
                     renderable:{render::{canvas.blackout();}},
-                    text: 'You are whisked away to the island of Ice...'
+                    text: 'You are whisked away to an island of Ice...'
                 );
 
-                @:instance = import(module:'game_singleton.instance.mt');
-                instance.visitIsland(where:key.islandEntry, atGate:true);
-                doNext();                    
+                windowEvent.queueCustom(
+                    onEnter ::{
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        instance.visitIsland(key, atGate:true);
+                        doNext();      
+                    }
+                );              
             }
         ]
     }
@@ -596,7 +574,7 @@ Scene.newEntry(
                             text:'Hm. As expected.'
                         );
                         
-                        windowEvent.queueNoDisplay(
+                        windowEvent.queueCustom(
                             onEnter::{
                                 @:instance = import(module:'game_singleton.instance.mt');
                                 instance.gameOver(reason:'The party was wiped out.');
@@ -639,20 +617,8 @@ Scene.newEntry(
             ::(location, landmark, doNext) {
                 location.ownedBy.name = 'Kaedjaal, Wyvern of Ice';
                 @:world = import(module:'game_singleton.world.mt');
-                @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Ice');
-                if (key != empty) key = key[0];
-                // could be equipped by hooligans and jokesters
-                if (key == empty) ::<= {
-                    @:Entity = import(module:'game_class.entity.mt');
-                    key = {:::} {
-                        foreach(world.party.members)::(i, member) {
-                            @:wep = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
-                            if (wep.name == 'Wyvern Key of Ice') ::<= {
-                                send(message:key);
-                            }
-                        }
-                    }
-                }
+                @key = world.party.getItemAtAll(name:'Wyvern Key of Ice');
+
                 // you can technically throw it out or Literally Throw It.
                 when(key == empty) ::<= {
                     windowEvent.queueMessage(
@@ -673,17 +639,11 @@ Scene.newEntry(
                 }
                 
                 @:story = import(module:'game_singleton.story.mt');
+                story.iceWyvernDefeated = true;
                 
                 @:instance = import(module:'game_singleton.instance.mt');
-                // cancel and flush current VisitIsland session
-                if (key.islandEntry == empty)
-                    key.addIslandEntry(world);
 
-
-                instance.visitIsland(where:key.islandEntry, atGate:true);
-
-                breakpoint();
-                doNext();
+                instance.visitIsland(key, atGate:true, onReady:doNext);
             }
             
             
@@ -784,28 +744,21 @@ Scene.newEntry(
             ['Ziikkaettaal', 'I\'ll take you back to your world.'],                     
             ::(location, landmark, doNext) {
                 @:world = import(module:'game_singleton.world.mt');
-                @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Ice');
-                if (key != empty) key = key[0];
-                // could be equipped by hooligans and jokesters
-                if (key == empty) ::<= {
-                    key = {:::} {
-                        foreach(world.party.members)::(i, member) {
-                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_LR);
-                            if (wep.name == 'Wyvern Key of Ice') ::<= {
-                                send(message:key);
-                            }
-                        }
-                    }
-                }
+                @key = world.party.getItemAtAll(name:'Wyvern Key of Ice');
+
                 @:canvas = import(module:'game_singleton.canvas.mt');
                 windowEvent.queueMessage(
                     renderable:{render::{canvas.blackout();}},
-                    text: 'You are whisked away to the island of Thunder...'
+                    text: 'You are whisked away to an island of Thunder...'
                 );
 
-                @:instance = import(module:'game_singleton.instance.mt');
-                instance.visitIsland(where:key.islandEntry, atGate:true);
-                doNext();                    
+                windowEvent.queueCustom(
+                    onEnter ::{
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        instance.visitIsland(key, atGate:true);
+                        doNext();      
+                    }
+                );              
             }
         ]
     }
@@ -838,7 +791,7 @@ Scene.newEntry(
                             text:'Djiirohshuhlo jiin.'
                         );
                         
-                        windowEvent.queueNoDisplay(
+                        windowEvent.queueCustom(
                             onEnter::{
                                 @:instance = import(module:'game_singleton.instance.mt');
                                 instance.gameOver(reason:'The party was wiped out.');
@@ -901,19 +854,8 @@ Scene.newEntry(
             ::(location, landmark, doNext) {
                 location.ownedBy.name = 'Juhriikaal, Wyvern of Thunder';
                 @:world = import(module:'game_singleton.world.mt');
-                @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Thunder');
-                if (key != empty) key = key[0];
-                // could be equipped by hooligans and jokesters
-                if (key == empty) ::<= {
-                    key = {:::} {
-                        foreach(world.party.members)::(i, member) {
-                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_LR);
-                            if (wep.name == 'Wyvern Key of Thunder') ::<= {
-                                send(message:key);
-                            }
-                        }
-                    }
-                }
+                @key = world.party.getItemAtAll(name:'Wyvern Key of Thunder');
+
                 // you can technically throw it out or Literally Throw It.
                 when(key == empty) ::<= {
                     windowEvent.queueMessage(
@@ -933,6 +875,7 @@ Scene.newEntry(
                 }
                 
                 @:story = import(module:'game_singleton.story.mt');
+                story.thunderWyvernDefeated = true;
                 
                 @:instance = import(module:'game_singleton.instance.mt');
                 // cancel and flush current VisitIsland session
@@ -940,10 +883,7 @@ Scene.newEntry(
                     key.addIslandEntry(world);
 
 
-                instance.visitIsland(where:key.islandEntry, atGate:true);
-
-                breakpoint();
-                doNext();
+                instance.visitIsland(key, atGate:true, onReady:doNext);
             }
             
             
@@ -972,7 +912,7 @@ Scene.newEntry(
                     onChoice::(which) {
                         when(which == false) ::<= {
                             windowEvent.queueMessage(speaker:'Juhriikaal', text:'Ah I see. That is understandable. I will still be here if you change your mind.');
-                            windowEvent.queueNoDisplay(
+                            windowEvent.queueCustom(
                                 onEnter::{},
                                 onLeave::{doNext();}                                    
                             );
@@ -1078,7 +1018,7 @@ Scene.newEntry(
 
                             when(world.party.inventory.items->keycount < 1) ::<= {
                                 windowEvent.queueMessage(speaker:'Juhriikaal', text:'Djiiroshuhzolii, Chosen. You have not enough items to let me attempt my magic.');
-                                windowEvent.queueNoDisplay(
+                                windowEvent.queueCustom(
                                     onEnter::{},
                                     onLeave::{doNext();} // always since no inventory anyway. cant change that.                          
                                 );
@@ -1086,7 +1026,7 @@ Scene.newEntry(
 
                             when(world.party.inventory.gold < 500) ::<= {
                                 windowEvent.queueMessage(speaker:'Juhriikaal', text:'Djiiroshuhzolii, Chosen. You have not enough gold for my services. You need at least 500G.');
-                                windowEvent.queueNoDisplay(
+                                windowEvent.queueCustom(
                                     onEnter::{},
                                     onLeave::{doNext();} // always since no inventory anyway. cant change that.                          
                                 );
@@ -1104,7 +1044,7 @@ Scene.newEntry(
                                     when (item == empty) ::<= {
                                         windowEvent.queueMessage(speaker:'Juhriikaal', text:'Ah I see. I will still be here if you change your mind.');
                                         windowEvent.jumpToTag(name:'pickItem', goBeforeTag: true, doResolveNext:true);
-                                        windowEvent.queueNoDisplay(
+                                        windowEvent.queueCustom(
                                             onEnter::{},
                                             onLeave::{doNext();}                                    
                                         );                                
@@ -1166,29 +1106,21 @@ Scene.newEntry(
             ['Juhriikaal', 'Allow me to return you to the land that the Key of Thunder leads to.'],                     
             ::(location, landmark, doNext) {
                 @:world = import(module:'game_singleton.world.mt');
-                @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Thunder');
-                if (key != empty) key = key[0];
-                // could be equipped by hooligans and jokesters
-                if (key == empty) ::<= {
-                    @:Entity = import(module:'game_class.entity.mt');
-                    key = {:::} {
-                        foreach(world.party.members)::(i, member) {
-                            @:wep = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
-                            if (wep.name == 'Wyvern Key of Thunder') ::<= {
-                                send(message:key);
-                            }
-                        }
-                    }
-                }
+                @key = world.party.getItemAtAll(name:'Wyvern Key of Thunder');
+
                 @:canvas = import(module:'game_singleton.canvas.mt');
                 windowEvent.queueMessage(
                     renderable:{render::{canvas.blackout();}},
-                    text: 'You are whisked away to another island...'
+                    text: 'You are whisked away to an island of Light...'
                 );
 
-                @:instance = import(module:'game_singleton.instance.mt');
-                instance.visitIsland(where:key.islandEntry, atGate:true);
-                doNext();                    
+                windowEvent.queueCustom(
+                    onEnter :: {
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        instance.visitIsland(key, atGate:true);
+                        doNext();       
+                    }
+                );             
             }
         ]
     }
@@ -1224,7 +1156,7 @@ Scene.newEntry(
                             text:'Alas. Another one will come, more worthy.'
                         );
                         
-                        windowEvent.queueNoDisplay(
+                        windowEvent.queueCustom(
                             onEnter::{
                                 @:instance = import(module:'game_singleton.instance.mt');
                                 instance.gameOver(reason:'The party was wiped out.');
@@ -1303,6 +1235,7 @@ Scene.newEntry(
                 @:world = import(module:'game_singleton.world.mt');
                 @doQuest = false;
                 @:story = import(module:'game_singleton.story.mt');
+                story.lightWyvernDefeated = true;
 
                 @:ask = ::{
                     windowEvent.queueChoices(
@@ -1394,19 +1327,8 @@ Scene.newEntry(
             ::(location, landmark, doNext) {
                 location.ownedBy.name = 'Shaarraeziil';
                 @:world = import(module:'game_singleton.world.mt');
-                @key = world.party.inventory.items->filter(by:::(value) <- value.name == 'Wyvern Key of Light');
-                if (key != empty) key = key[0];
-                // could be equipped by hooligans and jokesters
-                if (key == empty) ::<= {
-                    key = {:::} {
-                        foreach(world.party.members)::(i, member) {
-                            @:wep = member.getEquipped(slot:Item.EQUIP_SLOTS.HAND_LR);
-                            if (wep.name == 'Wyvern Key of Light') ::<= {
-                                send(message:key);
-                            }
-                        }
-                    }
-                }
+                @key = world.party.getItemAtAll(name:'Wyvern Key of Light');
+
                 // you can technically throw it out or Literally Throw It.
                 when(key == empty) ::<= {
                     windowEvent.queueMessage(
@@ -1434,9 +1356,7 @@ Scene.newEntry(
                     key.addIslandEntry(world);
 
 
-                instance.visitIsland(where:key.islandEntry, atGate:true);
-
-                doNext();
+                instance.visitIsland(key, atGate:true, onReady:doNext);
             }, 
             
             
@@ -1599,7 +1519,7 @@ Scene.newEntry(
         name : 'trader.scene_intro',
         script: [
             ['???', '...Greetings, mortal.'],
-            ['???', 'Congratulations! For I, Shiikaakael, the Wyvern of Fortune, have chosen YOU for a once-in-alifetime opportunity.'],
+            ['???', 'Congratulations! For I, Shiikaakael, the Wyvern of Fortune, have chosen YOU for a once-in-a-lifetime opportunity.'],
             ['Shiikaakael, Wyvern of Fortune', 'You see, my hoard of treasure is looking a bit... small. I require riches.'],
             ['Shiikaakael, Wyvern of Fortune', 'If you bring me gold, I will grant you a wish. Anything you like. Doesn\'t that sound wonderful?'],
             ['Shiikaakael, Wyvern of Fortune', 'Bring me.... Hummm... Let us say, 10,000G and a wish shall be yours.'],
@@ -1668,7 +1588,7 @@ Scene.newEntry(
                 @:instance = import(module:'game_singleton.instance.mt');
 
 
-                instance.visitIsland(restorePos:true, atGate:true);                
+                instance.visitIsland(atGate:true);                
             }
         ]
     }
@@ -1695,7 +1615,7 @@ Scene.newEntry(
                 @:instance = import(module:'game_singleton.instance.mt');
 
 
-                instance.visitIsland(restorePos:true, atGate:true);                
+                instance.visitIsland(atGate:true);                
             }
         ]
     }
@@ -1754,7 +1674,7 @@ Scene.newEntry(
                       
                       (Object): ::<= {
                         windowEvent.queueMessage(speaker: action[0], text: action[1]);
-                        windowEvent.queueNoDisplay(onEnter:doNext);
+                        windowEvent.queueCustom(onEnter:doNext);
                       },
                       default:
                         error(detail:'Scene scripts only accept arrays or functions')

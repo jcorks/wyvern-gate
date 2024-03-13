@@ -439,7 +439,7 @@ Location.database.newEntry(data:{
 
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
-            if (Story.tier < 1) ::<= {
+            if (Story.fireWyvernDefeated == false) ::<= {
                 Scene.start(name:'scene_wyvernfire0', onDone::{}, location, landmark:location.landmark);
             } else ::<= {
                 // just visiting!
@@ -521,7 +521,7 @@ Location.database.newEntry(data:{
 
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
-            if (Story.tier < 2) ::<= {
+            if (Story.iceWyvernDefeated == false) ::<= {
                 Scene.start(name:'scene_wyvernice0', onDone::{}, location, landmark:location.landmark);
             } else ::<= {
                 // just visiting!
@@ -603,7 +603,7 @@ Location.database.newEntry(data:{
 
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
-            if (Story.tier < 3) ::<= {
+            if (Story.thunderWyvernDefeated == false) ::<= {
                 Scene.start(name:'scene_wyvernthunder0', onDone::{}, location, landmark:location.landmark);
             } else ::<= {
                 // just visiting!
@@ -686,7 +686,7 @@ Location.database.newEntry(data:{
 
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
-            if (Story.tier < 4) ::<= {
+            if (Story.lightWyvernDefeated == false) ::<= {
                 Scene.start(name:'scene_wyvernlight0', onDone::{}, location, landmark:location.landmark);
             } else ::<= {
                 // just visiting!
@@ -2438,8 +2438,11 @@ Location.database.newEntry(data:{
                         interaction.onInteract(
                             location: this,
                             party
-                        );                        
-                        this.landmark.step();                            
+                        );                    
+                        // the action CAN unload ephemeral landmarks, so check if its valid. 
+                        if (this.landmark.map != empty)   
+                            this.landmark.step();
+                                                        
                         if (!interaction.keepInteractionMenu && windowEvent.canJumpToTag(name:'LocationInteract'))
                             windowEvent.jumpToTag(name:'LocationInteract', goBeforeTag:true, doResolveNext:true);
 

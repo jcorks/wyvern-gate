@@ -100,7 +100,7 @@
 };
 
 @none;
-
+@displayedHurt = {};
 @:Entity = LoadableClass.create(
     name : 'Wyvern.Entity', 
     statics : {
@@ -126,7 +126,15 @@
             
             return random.removeArrayItem(list) |
                    random.removeArrayItem(list)
-        }
+        },
+        
+        displayedHurt : {
+            get ::<- displayedHurt->keys()
+        },
+        
+        isDisplayedHurt::(entity) {
+            return displayedHurt[entity] == true;
+        },
     },
     items : {
         worldID : empty,
@@ -621,7 +629,7 @@
                 }
             },
             
-            renderHP ::(length) {
+            renderHP ::(length, x) {
                 if (length == empty) length = 12;
                 
                 @ratio = state.hp / state.stats.HP;
@@ -666,7 +674,7 @@
                 targetPart,
                 targetDefendPart
             ){
-            
+                displayedHurt[target] = true;
                 if (targetPart == empty) targetPart = Entity.normalizedDamageTarget();
                 if (targetDefendPart == empty) targetPart = Entity.normalizedDamageTarget();
             
@@ -868,6 +876,12 @@
                 
                 if (!inBattle)
                     this.battleEnd();
+                    
+                windowEvent.queueCustom(
+                    onEnter :: {
+                        displayedHurt->remove(key:target);
+                    }
+                );
                 return retval;
             },
             
@@ -1027,7 +1041,7 @@
                         this.addEffect(from, name:'Petrified',durationTurns:2);
                     
                     
-                    if (world.party.isMember(entity:this) && state.hp == 0 && Number.random() > 0.7 && world.party.members->size > 1) ::<= {
+                    if (!alreadyKnockedOut && world.party.isMember(entity:this) && state.hp == 0 && Number.random() > 0.7 && world.party.members->size > 1) ::<= {
                         windowEvent.queueMessage(
                             speaker: this.name,
                             text: '"' + random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.DEATH]) + '"'
@@ -1621,59 +1635,51 @@
                 }
             
                 @out = this.name + ' is ' + correctA(word:state.species.name) + '. ';
-                @:quals = [...qualities];
+                @:quals = random.scrambled(list:qualities);
 
                 // inefficient, but idc                
                 @:describeDual::(qual0, qual1, index) {
-                    return ([
+                    return random.pickArrayItem(list:[
                         'They have ' + qual0.name + 
                                 (if (qual0.plural) ' that are ' else ' that is ') 
                             + qual0.description + ', and their '
                             + qual1.name + 
                                 (if (qual1.plural) ' are ' else ' is ') 
                             + qual1.description + '. ',
+
+                        'They have ' + qual0.name + 
+                                (if (qual0.plural) ' that are ' else ' that is ') 
+                            + qual0.description + ', and their '
+                            + qual1.name + 
+                                (if (qual1.plural) ' are ' else ' is ') 
+                            + qual1.description + '. ',
+
                             
                         this.name + '\'s ' + qual0.name + 
                                 (if (qual0.plural) ' are ' else ' is ') 
                             + qual0.description + ', and they have '
-                            + qual1.name + 
+                            + (if (qual1.plural == false) correctA(word:qual1.name) else qual1.name) + 
                                 (if (qual1.plural) ' which are ' else ' which is ') 
                             + qual1.description + '. ',
-                    ])[index];
+                    ]);
                 }
 
                 @:describeSingle::(qual, index) {
-                    return ([
+                    return random.pickArrayItem(list:[
                         this.name + '\'s ' + qual.name + 
                                 (if (qual.plural) ' are ' else ' is ') 
                             + qual.description + '. ',
 
                         'Their ' + qual.name + 
-                                (if (qual.plural) ' are quite ' else ' is quite ') 
-                            + qual.description + '. ',
-                            
+                                (if (qual.plural) ' are ' else ' is ') 
+                            + qual.description + '. ',                            
 
                         'Their ' + qual.name + 
                                 (if (qual.plural) ' are ' else ' is ') 
-                            + qual.description + '. ',
-
-                        'Their ' + qual.name + 
-                                (if (qual.plural) ' are seemingly ' else ' is seemingly ') 
-                            + qual.description + '. ',
-
-                        'Their ' + qual.name + 
-                                (if (qual.plural) ' are fairly ' else ' is fairly ') 
-                            + qual.description + '. ',
-                            
-                        'Their ' + qual.name + 
-                                (if (qual.plural) ' are particularly ' else ' is particularly ') 
-                            + qual.description + '. '
-     
-                    ])[index];
+                            + qual.description + '. '     
+                    ]);
                 }
                 
-                @:singleChoices = [0, 1, 2, 3, 4];
-                @:dualChoices = [0, 1];
                 
                 @:pickDescriptionChoice::(list) {
                     @:index = random.integer(from:0, to:list->keycount-1);
@@ -1694,20 +1700,12 @@
                         if (!single) ::<= {
                             @qual0 = quals->pop;
                             @qual1 = quals->pop;
-                            
-                            @index = if(dualChoices->keycount == 0)
-                                0
-                            else                                
-                                pickDescriptionChoice(list:dualChoices);                                
-                            out = out + describeDual(qual0, qual1, index);
+                                                           
+                            out = out + describeDual(qual0, qual1);
                         } else ::<= {
                             @qual = quals->pop;
                             
-                            @index = if(singleChoices->keycount == 0)
-                                2
-                            else                                
-                                pickDescriptionChoice(list:singleChoices);                                
-                            out = out + describeSingle(qual, index);                        
+                            out = out + describeSingle(qual);                        
                         }
                     }
                     

@@ -53,7 +53,6 @@ return ::(
         jumpTag: 'BattleMenu',
         keep: true,
         itemsPerColumn: 3,
-        renderable: battle,
         prompt: 'What will ' + user.name + ' do?',
         canCancel: false,
         onChoice::(choice) {

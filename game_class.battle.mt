@@ -26,6 +26,7 @@
 @:StateFlags = import(module:'game_class.stateflags.mt');
 @:Ability = import(module:'game_database.ability.mt');
 @:g = import(module:'game_function.g.mt');
+@:Entity = import(module:'game_class.entity.mt');
 
 @:combatChooseDefend::(targetPart, attacker, defender, onDone) {
     when (defender.blockPoints == 0) onDone(which:0);
@@ -59,7 +60,7 @@
             attacker.name + ' is preparing to attack ' + defender.name + '.',
             'How will ' + defender.name + ' respond?',
             '',
-            defender.name + ' is currently capable of defending ' + defender.blockPoints + ' part(s) of their body',
+            defender.name + ' is currently capable of defending ' + defender.blockPoints + ' ' + (if (defender.blockPoints == 1) 'part' else 'parts') + ' of their body.',
             '',
             if (defender.stats.INT > attacker.stats.INT) defender.name + '\'s intuition tells them that the enemy will:' else '',
             if (defender.stats.INT > attacker.stats.INT)
@@ -150,7 +151,6 @@
             forcedAcquisition->push(value:inv);
     }
 
-    breakpoint();
     foreach(forcedAcquisition) ::(i, inv) {
         foreach(inv.items) ::(n, item) {
             windowEvent.queueMessage(text: 'The party acquired ' + correctA(word:item.name) + '.');
@@ -163,7 +163,7 @@
     }
 
 
-    if (rngLoot && random.try(percentSuccess:45)) ::<= {
+    if (rngLoot && random.try(percentSuccess:7)) ::<= {
         windowEvent.queueMessage(text: 'What\'s this? They dropped something during the fight...');
 
         @:lootTable = [
@@ -177,61 +177,60 @@
             {   
                 func::{
                     windowEvent.queueMessage(text: 'Jackpot! They dropped some gold!');
-                    @:amount = (20 + Number.random()*75)->floor;
+                    @:amount = (200 + Number.random()*300)->floor;
                     windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
                     party.inventory.addGold(amount);    
                 },
+                rarity: 100 / 40
+            },
+
+            {   
+                func::{
+                    windowEvent.queueMessage(text: 'Oh wow, they dropped something rare-looking!');
+                    
+                    when(party.inventory.slotsLeft < 1) ::<= {
+                        windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
+                    }
+                    @itemMaterials = [
+                        'Gold',
+                        'Crystal',
+                        'Mythril',
+                        'Quicksilver',
+                        'Dragonglass',
+                        'Sunstone',
+                        'Moonstone',
+                        'Adamantine'
+                    ]
+                    
+                    @itemQualities = [
+                        'King\'s',
+                        'Queen\'s',
+                        'Masterwork',
+                        'Legendary'
+                    ]
+                    
+                    @item = Item.new(
+                        base: Item.database.getRandomFiltered(
+                            filter::(value) <- (
+                                value.isUnique == false &&
+                                value.hasMaterial == true &&
+                                value.hasQuality == true
+                            )
+                        ),
+                        rngEnchantHint:true,         
+                        qualityHint : random.pickArrayItem(list:itemQualities),
+                        materialHint : random.pickArrayItem(list:itemMaterials)
+                    )    
+
+
+                    @message = 'The party found ' + correctA(word:item.name);
+                    windowEvent.queueMessage(text: message);
+
+
+                    party.inventory.add(item);
+                        
+                },
                 rarity: 100 / 30
-            },
-            
-            {   
-                func::{
-                    windowEvent.queueMessage(text: 'Whoa! It\'s a bag of stuff!');
-                    
-                    when(3 > party.inventory.slotsLeft) ::<= {
-                        windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
-                    }
-                    for(0, 3)::(index) {
-                        @:item = Item.new(
-                            base:Item.database.getRandomFiltered(
-                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= landmark.island.tier+1
-                            ),
-                            rngEnchantHint:true
-                        );
-                        @message = 'The party found ' + correctA(word:item.name);
-                        windowEvent.queueMessage(text: message);
-
-
-                        party.inventory.add(item);
-                        
-                    }
-                },
-                rarity: 100 / 20
-            },
-
-            {   
-                func::{
-                    windowEvent.queueMessage(text: 'Oh wow, they dropped a rare-looking bag!');
-                    
-                    when(3 > party.inventory.slotsLeft) ::<= {
-                        windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
-                    }
-                    for(0, 3)::(index) {
-                        @:item = Item.new(
-                            base:Item.database.getRandomFiltered(
-                                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= landmark.island.tier+2
-                            ),
-                            rngEnchantHint:true
-                        );
-                        @message = 'The party found ' + correctA(word:item.name);
-                        windowEvent.queueMessage(text: message);
-
-
-                        party.inventory.add(item);
-                        
-                    }
-                },
-                rarity: 100 / 20
             },
 
             
@@ -245,7 +244,7 @@
         
         
         
-    windowEvent.queueNoDisplay(
+    windowEvent.queueCustom(
         onEnter ::{},
         onLeave ::{
             finishEnd();            
@@ -276,6 +275,7 @@
         @onTurn_;
         @onAct_;
         @defeated;
+        @backgroundID;
         
     
         // some actions last multiple turns.
@@ -521,7 +521,15 @@
             }
         }
                 
-        
+        @:renderFrac::(value, outOf) {
+            when (outOf > 99 || value < 0) 
+                '?? / ??';
+                
+            return 
+                (if (value < 10) ''+value+' ' else ''+value)
+                + ' / ' +
+                (if (outOf < 10) ''+outOf+' ' else ''+outOf)
+        }
         @:renderStatusBox::{
             
                 
@@ -539,8 +547,15 @@
                                    
                 }
                 foreach(group)::(index, ally) {
-                    lines->push(value:ally.renderHP() + '  ' + ally.name);// + ' - Lv ' + ally.level);
-                    lines->push(value:'HP: ' + ally.hp + ' / ' + ally.stats.HP + '    AP: ' + ally.ap + ' / ' + ally.stats.AP);
+                    if (Entity.isDisplayedHurt(entity:ally)) ::<= {
+                        lines->push(value:' ////////// ' + '  ' + ally.name);// + ' - Lv ' + ally.level);
+                        lines->push(value:'HP: ' + 'X  / X ' + '    AP: ' + 'X  / X');
+                    } else ::<= {
+                        lines->push(value:ally.renderHP() + '  ' + ally.name);// + ' - Lv ' + ally.level);
+                        lines->push(value:
+                            'HP: ' + renderFrac(value:ally.hp, outOf:ally.stats.HP) + 
+                            '    AP: ' + renderFrac(value:ally.ap, outOf:ally.stats.AP));                    
+                    }
                 }
             }
             
@@ -636,7 +651,6 @@
                 turn = [];
                 turnIndex = 0;
                 active = true;
-                breakpoint();
                 ended = false;
                 externalRenderable = renderable;
                             
@@ -736,7 +750,7 @@
                         );
 
 
-                        windowEvent.queueNoDisplay(
+                        windowEvent.queueCustom(
                             onEnter ::{},
                             onLeave ::{
 
@@ -811,7 +825,7 @@
                             message: 'The battle is lost.'
                         );
 
-                        windowEvent.queueNoDisplay(onEnter::{
+                        windowEvent.queueCustom(onEnter::{
                             onEnd(result); 
                         });                       
                     }
@@ -819,25 +833,29 @@
 
 
                 @started = false;
-                windowEvent.queueNoDisplay(
-                    renderable :{
-                        render::{
-                            if (externalRenderable)
-                                externalRenderable.render()
-                            else 
-                                canvas.blackout()
-                            ;
-                            this.render();
-                            return windowEvent.RENDER_AGAIN;
-                        }
-                    },
+                windowEvent.queueCustom(
                     keep: true,
                     jumpTag: 'Battle',
-                    onEnter::{
+                    onEnter :: {
+                        backgroundID = canvas.addBackground(render::{
+                            breakpoint();
+                            this.render();
+                        });
+                    },
+                    onLeave ::{
+                        canvas.removeBackground(
+                            id:backgroundID
+                        );
+                    },
+                    renderable : {
+                        render ::{
+                            canvas.blackout();
+                        }
+                    },
+                    onUpdate::{
                         when(ended) ::<= {
                             if (windowEvent.hasAnyQueued() == false) ::<= {
-                                battleEnd();
-                                
+                                battleEnd();                                
                             }
                         }
 
@@ -957,7 +975,7 @@
                     }  
             
                     
-                    windowEvent.queueNoDisplay(
+                    windowEvent.queueCustom(
                         onEnter ::{
                             endTurn();
                         }
