@@ -103,6 +103,21 @@
     CANCEL : 5
 }
 
+
+// When dealing with kept commitInput handlers that immediately 
+// return, some can get stuck and never give back control.
+// This is most common when commitInput handlers are kept but 
+// dont actually add any new queued window events.
+// Sometimes this is intentional for a few frames, but sometimes 
+// it is done erroneously. This limit safely gives control 
+// back to the program if too many recursive updates happen in 
+// this case
+//
+// In the future, exceeding this may throw an error just to let 
+// the programmer know whats up.
+//
+@:KEEP_STACK_INPUT_SAFETY_LIMIT = 20;
+
 @:WindowEvent = class(
     name: 'Wyvern.WindowEvent',
     define:::(this) {
@@ -156,10 +171,12 @@
         }        
         
         
-        @next ::(toRemove, dontResolveNext) {
+        @next ::(toRemove, dontResolveNext, level) {
+            @kept;
             if (choiceStack->keycount > 0) ::<= {
                 @:data = if (toRemove == empty) choiceStack[choiceStack->size-1] else toRemove;
                 if (data.keep) ::<= {
+                    kept = true;
                 } else ::<= {
                     if (toRemove == empty) 
                         choiceStack->pop 
@@ -177,13 +194,13 @@
                         choiceStack[choiceStack->keycount-1].rendered = empty;
                 }
             }
-            if (dontResolveNext == empty) ::<= {
+            if (dontResolveNext == empty && ((level == empty) || (level < KEEP_STACK_INPUT_SAFETY_LIMIT))) ::<= {
                 resolveNext();
-                this.commitInput();        
+                this.commitInput(level);        
             }
         }
         
-        @:commitInput ::(input) {
+        @:commitInput ::(input, level) {
             @continue; 
             @val;
             if (choiceStack->keycount > 0) ::<= {
@@ -213,7 +230,7 @@
             }
             // true means done
             if (continue == true || choiceStack->keycount == 0) ::<= {
-                next(toRemove:val);
+                next(toRemove:val, level:if (level == empty) 0 else level);
             }
         }
 

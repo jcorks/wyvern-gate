@@ -2393,8 +2393,8 @@
                         @shopperList = [];
 
                         @:endShopDay :: {
-                            windowEvent.jumpToTag(name:'day-start-shop', goBeforeTag:true);
                             this.finishDay();               
+                            windowEvent.jumpToTag(name:'day-start-shop', goBeforeTag:true, doResolveNext:true);
                         }
                             
                         @:startHour ::{
