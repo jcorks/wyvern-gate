@@ -437,7 +437,7 @@
                         spoilsFiltered->push(value:item);
                     
                     // simply take
-                    when (current.base.name == 'None')
+                    when (current.base.id == 'base:none')
                         state.member.equip(item, slot, silent:true);
 
 
@@ -917,7 +917,7 @@
                 ];
                   
                 when (party.inventory.gold > tiers[state.goldTier]) ::<= {
-                    Scene.start(name:'trader.scene_gold0', onDone ::{
+                    Scene.start(id:'thetrader:scene_gold0', onDone ::{
                     });
                 }
 
@@ -992,7 +992,7 @@
                 
                 this.haggle(
                     displayName:name,
-                    name:name,
+                    id:name,
                     standardPrice: location.modData.trader.listPrice,
                     shopper: buyer,
                     onDone ::(bought, price) {
@@ -1171,12 +1171,12 @@
                             
                             @isPopular = ::<= {                    
                                 @:popular   = state.popular;
-                                return (popular->findIndex(value:sold.base.name) != -1)
+                                return (popular->findIndex(value:sold.base.id) != -1)
                             }                    
 
                             @isUnpopular = ::<= {                    
                                 @:unpopular   = state.unpopular;
-                                return (unpopular->findIndex(value:sold.base.name) != -1)
+                                return (unpopular->findIndex(value:sold.base.id) != -1)
                             }          
 
                             @price = 
@@ -1214,7 +1214,7 @@
                             }
                             price = price->floor;
                                 
-                            if (sold.base.name == 'Shipment')
+                            if (sold.base.id == 'thetrader:shipment')
                                 state.accolade_soldAShipment = true;
                                     
                             gained += price;
@@ -1552,7 +1552,7 @@
                                 status = status + "Remaining: " + g(g:world.party.inventory.gold)
 
                             when (cost > currentG)
-                                Scene.start(name:'trader.scene_bankrupt', onDone::{                    
+                                Scene.start(id:'thetrader:scene_bankrupt', onDone::{                    
                                     @:instance = import(module:'game_singleton.instance.mt');
                                     instance.gameOver(reason:'You\'re no longer chosen by the Wyvern of Fortune.');
                                 });        
@@ -1570,7 +1570,7 @@
                                     random.removeArrayItem(list:which),
                                     random.removeArrayItem(list:which),
                                     random.removeArrayItem(list:which)
-                                ]->map(to:::(value) <- value.name);
+                                ]->map(to:::(value) <- value.id);
 
                                 state.unpopular = [
                                     random.removeArrayItem(list:which),
@@ -1580,7 +1580,7 @@
                                     random.removeArrayItem(list:which),
                                     random.removeArrayItem(list:which),
                                     random.removeArrayItem(list:which)
-                                ]->map(to:::(value) <- value.name);
+                                ]->map(to:::(value) <- value.id);
                             }
 
 
@@ -2150,7 +2150,7 @@
             // When done, onDone is called with the following arguments:
             // - bought, a boolean saying whether it was bought 
             // - price, the final offer that was given before buying or not buying.
-            haggle::(shopper, displayName, name, standardPrice, onDone) {
+            haggle::(shopper, displayName, id, standardPrice, onDone) {
                 @worthless = standardPrice < 1;
                 if (standardPrice < 1) standardPrice = 1;
             
@@ -2160,12 +2160,12 @@
 
                 @isPopular = ::<= {                    
                     @:popular   = state.popular;
-                    return (popular->findIndex(value:name) != -1)
+                    return (popular->findIndex(value:id) != -1)
                 }                    
 
                 @isUnpopular = ::<= {                    
                     @:unpopular   = state.unpopular;
-                    return (unpopular->findIndex(value:name) != -1)
+                    return (unpopular->findIndex(value:id) != -1)
                 }                    
 
                 
@@ -2318,7 +2318,7 @@
                                         ]
                                     )
                                 );  
-                                if (name == 'Shipment')
+                                if (id == 'thetrader:shipment')
                                     state.accolade_soldAShipment = true;
                                     
                                 if (worthless)
@@ -2485,7 +2485,7 @@
                             this.haggle(
                                 shopper,
                                 displayName:item.name,
-                                name : item.base.name,
+                                id : item.base.id,
                                 standardPrice: (item.price / 10)->ceil,
                                 onDone::(bought, price) {
                                     if (bought) ::<= {
@@ -2706,7 +2706,7 @@
 @:interactionsPerson = [
     commonInteractions.person.barter,
     InteractionMenuEntry.new(
-        displayName: 'Hire with contract',
+        name: 'Hire with contract',
         keepInteractionMenu: true,
         filter ::(entity)<- true,
         onSelect ::(entity) {
@@ -2797,6 +2797,7 @@
 
 return {
     name : 'The Trader',
+    id : 'rasa:thetrader',
     onBegin ::(data) {
     
     
@@ -2815,7 +2816,7 @@ return {
         }
     
         @:keyhome = Item.new(
-            base: Item.database.find(name:'Wyvern Key')
+            base: Item.database.find(id:'base:wyvern-key')
         );
         keyhome.name = 'Wyvern Key: Home';
         
@@ -2825,14 +2826,14 @@ return {
             levelHint:story.levelHint,
             tierHint: 0,
             landmarksHint: [
-                'City',
-                'City',
-                'Town',
-                'Mysterious Shrine',
-                'Mine',
-                'Mine',
-                'Forest',
-                'Wyvern Gate'
+                'base:city',
+                'base:city',
+                'base:town',
+                'base:mysterious-shrine',
+                'base:mine',
+                'base:mine',
+                'base:forest',
+                'base:wyvern-gate'
             ]
         ));
         instance.visitIsland(key:keyhome, noMenu:true);
@@ -2857,7 +2858,7 @@ return {
         
         
         @:Species = import(module:'game_database.species.mt');
-        @:p0 = island.newInhabitant(professionHint: 'Trader', levelHint:story.levelHint);
+        @:p0 = island.newInhabitant(professionHint: 'base:trader', levelHint:story.levelHint);
         p0.normalizeStats();
 
         
@@ -2882,8 +2883,8 @@ return {
         
         
         // setup shop
-        @:city = island.landmarks->filter(by::(value) <- value.base.name == 'City')[0];            
-        @:shop = city.locations->filter(by::(value) <- value.base.name == 'Shop')[0];
+        @:city = island.landmarks->filter(by::(value) <- value.base.id == 'base:city')[0];            
+        @:shop = city.locations->filter(by::(value) <- value.base.id == 'base:shop')[0];
         shop.ownedBy = empty;
 
         data.trader = TraderState.new(
@@ -2892,7 +2893,7 @@ return {
         );
         party.inventory.add(item:
             Item.new(
-                base:Item.database.find(name:'Gold Pouch'),
+                base:Item.database.find(id:'Gold Pouch'),
                 from:p0
             )
         );
@@ -2922,14 +2923,14 @@ return {
                   
             party.inventory.add(item:
                 Item.new(
-                    base:Item.database.find(name:'Shipment'),
+                    base:Item.database.find(id:'Shipment'),
                     from:p0
                 )
             );
 
             party.inventory.add(item:
                 Item.new(
-                    base:Item.database.find(name:'Crate'),
+                    base:Item.database.find(id:'Crate'),
                     from:p0
                 )
             );
@@ -2943,7 +2944,7 @@ return {
         );               
         instance.savestate();
         @:Scene = import(module:'game_database.scene.mt');
-        Scene.start(name:'trader.scene_intro', onDone::{                    
+        Scene.start(id:'thetrader:scene_intro', onDone::{                    
             data.trader.dayStart();                
         });        
         
@@ -2961,7 +2962,7 @@ return {
     interactionsPerson : interactionsPerson,
     interactionsLocation : [
         InteractionMenuEntry.new(
-            displayName : 'Buy property',
+            name : 'Buy property',
             keepInteractionMenu: true,
             filter ::(location) {
                 @world = import(module:'game_singleton.world.mt');
@@ -3081,7 +3082,7 @@ return {
     interactionsWalk : [
         commonInteractions.walk.check,
         InteractionMenuEntry.new(
-            displayName: 'Finances',
+            name: 'Finances',
             keepInteractionMenu: true,
             filter::(island, landmark) <- true,
             onSelect::(island, landmark) {
@@ -3092,7 +3093,7 @@ return {
         commonInteractions.walk.party,
         commonInteractions.walk.inventory,
         InteractionMenuEntry.new(
-            displayName: 'Finish Day',
+            name: 'Finish Day',
             keepInteractionMenu: true,
             filter::(island, landmark) <- landmark == empty || landmark.base.pointOfNoReturn == false,
             onSelect::(island, landmark) {
@@ -3232,8 +3233,134 @@ return {
     },
     
     databaseOverrides ::{
+    
+    
+        @:Landmark = import(module:'game_mutator.landmark.mt');
+
+
+        Landmark.database.newEntry(
+            data: {
+                name : 'Fortune Wyvern Dimension',
+                id : 'thetrader:fortune-wyvern-dimension',
+                legendName: '???',
+                symbol : 'M',
+                rarity : 1,      
+                isUnique : true,
+                minLocations : 2,
+                maxLocations : 2,
+                guarded : false,
+                peaceful: true,
+                landmarkType : TYPE.DUNGEON,
+                canSave : true,
+                pointOfNoReturn : false,
+                ephemeral : false,
+                dungeonForceEntrance: false,
+                startingEvents : [
+                ],
+                possibleLocations : [
+                ],
+                requiredLocations : [
+                    'thetrader:fortune-throne',
+                ],
+                
+                mapHint : {
+                    roomSize: 20,
+                    roomAreaSize: 15,
+                    roomAreaSizeLarge: 15,
+                    emptyAreaCount: 1,
+                    wallCharacter: ' ',
+                    outOfBoundsCharacter: '$'
+                },
+                onCreate ::(landmark, island){},
+                onVisit ::(landmark, island) {}
+                
+            }
+        )
+        
+        
+    
+    
+        Location.database.newEntry(data:{
+            id: 'thetrader:fortune-throne',
+            name: 'Wyvern Throne of Fortune'
+            rarity: 1,
+            ownVerb : 'owned',
+            category : Location.CATEGORY.DUNGEON_SPECIAL,
+            symbol: 'W',
+            onePerLandmark : true,
+            minStructureSize : 1,
+
+            descriptions: [
+                "What seems to be a gold throne",
+            ],
+            interactions : [
+                'base:talk',
+                'base:examine'
+            ],
+            
+            aggressiveInteractions : [
+            ],
+
+
+            
+            minOccupants : 0,
+            maxOccupants : 0,
+            
+            onFirstInteract ::(location) {
+            },
+            onInteract ::(location) {
+                return true;
+
+            },            
+            
+            onCreate ::(location) {
+                location.name = 'Wyvern Throne';
+                @:Profession = import(module:'game_mutator.profession.mt');
+                @:Species = import(module:'game_database.species.mt');
+                @:Story = import(module:'game_singleton.story.mt');
+                @:Scene = import(module:'game_database.scene.mt');
+                @:StatSet = import(module:'game_class.statset.mt');
+                location.ownedBy = location.landmark.island.newInhabitant();
+                location.ownedBy.name = 'Wyvern of Fortune';
+                location.ownedBy.species = Species.find(id:'Wyvern of Fire');
+                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'Wyvern of Fire'));               
+                location.ownedBy.clearAbilities();
+                foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
+                    location.ownedBy.learnAbility(id:ability);
+                }
+
+                
+                location.ownedBy.overrideInteract = ::(party, location, onDone) {
+                    @:world = import(module:'game_singleton.world.mt');
+                    @:trader = world.scenario.data.trader;
+
+                    Scene.start(id:'thetrader:scene_gold1-' + trader.goldTier, onDone::{}, location, landmark:location.landmark);
+                    trader.goldTier += 1;
+                }
+                location.ownedBy.stats.load(serialized:StatSet.new(
+                    HP:   150,
+                    AP:   999,
+                    ATK:  12,
+                    INT:  5,
+                    DEF:  11,
+                    LUK:  8,
+                    SPD:  25,
+                    DEX:  11
+                ).save());
+                location.ownedBy.heal(amount:9999, silent:true); 
+                location.ownedBy.healAP(amount:9999, silent:true); 
+            },
+            
+            onTimeChange::(location, time) {
+            
+            }
+        })
+    
+    
+    
         Item.database.newEntry(data : {
             name : "Crate",
+            id : 'thetrader:crate',
             description: 'A sizeable container full of raw material. Can be quite expensive.',
             examine : '',
             equipType: Item.TYPE.HAND,
@@ -3277,6 +3404,7 @@ return {
 
         Item.database.newEntry(data : {
             name : "Shipment",
+            id : 'thetrader:shipment',
             description: 'A large container full of raw material. One person can barely lift it alone. Can be quite expensive.',
             examine : '',
             equipType: Item.TYPE.HAND,
@@ -3317,6 +3445,147 @@ return {
 
         })   
 
+        @:Scene = import(module:'game_database.scene.mt');
+
+        Scene.newEntry(
+            data : {
+                id : 'thetrader:scene_intro',
+                script: [
+                    ['???', '...Greetings, mortal.'],
+                    ['???', 'Congratulations! For I, Shiikaakael, the Wyvern of Fortune, have chosen YOU for a once-in-a-lifetime opportunity.'],
+                    ['Shiikaakael, Wyvern of Fortune', 'You see, my hoard of treasure is looking a bit... small. I require riches.'],
+                    ['Shiikaakael, Wyvern of Fortune', 'If you bring me gold, I will grant you a wish. Anything you like. Doesn\'t that sound wonderful?'],
+                    ['Shiikaakael, Wyvern of Fortune', 'Bring me.... Hummm... Let us say, 10,000G and a wish shall be yours.'],
+                    ['Shiikaakael, Wyvern of Fortune', 'Your meager, drab existence as a simple trader is no more! Now you have something to drive you!'],
+                    ['Shiikaakael, Wyvern of Fortune', 'Go forth, mortal! Get riches! Exploit! Your wish awaits!'],
+                ]
+            }
+        )     
+
+        Scene.newEntry(
+            data : {
+                id : 'thetrader:scene_bankrupt',
+                script: [
+                    ['???', '...'],
+                    ['Shiikaakael, Wyvern of Fortune', '...Mortal... I have sensed something...'],
+                    ['Shiikaakael, Wyvern of Fortune', '...most disappointing. The absence of riches.'],
+                    ['Shiikaakael, Wyvern of Fortune', 'What\'s worse is those were MY riches that you lost...'],
+                    ['Shiikaakael, Wyvern of Fortune', '...Bah. Dreadful. Disgusting, even.'],
+                    ['Shiikaakael, Wyvern of Fortune', 'This is why I don\'t do anything with lesser creatures... Be gone, you.'],
+                ]
+            }
+        )
+
+
+        Scene.newEntry(
+            data : {
+                id : 'thetrader:scene_gold0',
+                script: [
+                    ['???', '...'],
+                    ['Shiikaakael, Wyvern of Fortune', '...Mortal... I have sensed that you have my riches ready!'],
+                    ['Shiikaakael, Wyvern of Fortune', 'I can hardly wait. I will bring you to me at once!'],
+                    ['', 'Magic lifts you off your feet and transports you to a new land...'],
+                    ::(location, landmark, doNext) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        @:Landmark = import(module:'game_mutator.landmark.mt');
+
+                        @:d = world.island.newLandmark(
+                            base:Landmark.database.find(id:'Fortune Wyvern Dimension')
+                        );
+                        instance.visitLandmark(landmark:d);             
+                        doNext();
+                    }
+                ]
+            }
+        )
+
+
+        Scene.newEntry(
+            data : {
+                id : 'thetrader:scene_gold1-0',
+                script: [
+                    ['Shiikaakael, Wyvern of Fortune', 'Mortal, show me the fruits of your labor...!'],
+                    ['Shiikaakael, Wyvern of Fortune', '...'],
+                    ['Shiikaakael, Wyvern of Fortune', '.......'],
+                    ['Shiikaakael, Wyvern of Fortune', '..........'],
+                    ['Shiikaakael, Wyvern of Fortune', 'I\'ll be honest. 10,000G looks a tad... smaller... in person than I was hoping.'],
+                    ['Shiikaakael, Wyvern of Fortune', 'Surely, you are capable of much more! Let me think...'],
+                    ['Shiikaakael, Wyvern of Fortune', '...Perhaps If you came back with 80,000G! Yes! That would be wonderful.'],
+                    ['Shiikaakael, Wyvern of Fortune', 'Obedient mortal, I have decided. Keep your 10,000G. Instead, I will come for you when you have 80,000G. This feels much more befitting of the cost of a wish, does it not?'],
+                    ['Shiikaakael, Wyvern of Fortune', '...'],
+                    ['Shiikaakael, Wyvern of Fortune', 'Well. Go get my riches! Shoo!'],
+                    ['', 'The Wyvern\'s magic lifts you off your feet and transports you home...'],
+                    ::(location, landmark, doNext) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @:instance = import(module:'game_singleton.instance.mt');
+
+
+                        instance.visitIsland(atGate:true);                
+                    }
+                ]
+            }
+        )
+
+        Scene.newEntry(
+            data : {
+                id : 'thetrader:scene_gold1-1',
+                script: [
+                    ['Shiikaakael, Wyvern of Fortune', 'Mortal, you have done it! 80,000G in all its glory!'],
+                    ['Shiikaakael, Wyvern of Fortune', '...'],
+                    ['Shiikaakael, Wyvern of Fortune', '.......'],
+                    ['Shiikaakael, Wyvern of Fortune', '..........'],
+                    ['Shiikaakael, Wyvern of Fortune', 'Hmm. I was thinking it would fill me with joy seeing all these riches. But something about it still feels...'],
+                    ['Shiikaakael, Wyvern of Fortune', '...too small.'],
+                    ['Shiikaakael, Wyvern of Fortune', 'Surely, you are capable of much more! Let me think...'],
+                    ['Shiikaakael, Wyvern of Fortune', '...Perhaps If you came back with 250,000G! Yes! That would be perfect.'],
+                    ['Shiikaakael, Wyvern of Fortune', 'Obedient mortal, I have decided. Keep your 80,000G. Instead, I will come for you when you have 250,000G. This feels much more befitting of the cost of a wish, does it not?'],
+                    ['Shiikaakael, Wyvern of Fortune', '...'],
+                    ['Shiikaakael, Wyvern of Fortune', 'Well. Go get my riches! Shoo!'],
+                    ['', 'The Wyvern\'s magic lifts you off your feet and transports you home...'],
+                    ::(location, landmark, doNext) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @:instance = import(module:'game_singleton.instance.mt');
+
+
+                        instance.visitIsland(atGate:true);                
+                    }
+                ]
+            }
+        )
+
+
+        Scene.newEntry(
+            data : {
+                id : 'thetrader:scene_gold1-2',
+                script: [
+                    ['Shiikaakael, Wyvern of Fortune', 'Mortal... Let me see it. What you have done. What you have brought me!'],
+                    ['Shiikaakael, Wyvern of Fortune', '...'],
+                    ['Shiikaakael, Wyvern of Fortune', '.......'],
+                    ['Shiikaakael, Wyvern of Fortune', '..........'],
+                    ['Shiikaakael, Wyvern of Fortune', '...It\'s glorious! It\'s perfect!'],
+                    ['Shiikaakael, Wyvern of Fortune', 'Never have I seen so much mortal gold! This will be a wonderful addition to my hoard.'],
+                    ['Shiikaakael, Wyvern of Fortune', '...Yes, oh yes!'],
+                    ['Shiikaakael, Wyvern of Fortune', 'I\'m unable to fathom how are able to even carry that with you! 250,000G is enough to swim in, even for a creature such as me!'],
+                    ['Shiikaakael, Wyvern of Fortune', '...Well. You have earned it. Here is your wish.'],
+                    ::(location, landmark, doNext) {
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        @:enter = import(module:'game_function.name.mt');
+                        enter(
+                            prompt: 'What is your wish?',
+                            onDone ::(name) {
+                                @:world = import(module:'game_singleton.world.mt')
+                                world.setWish(wish:name);
+                                instance.savestate();
+                                (import(module:'game_function.newrecord.mt'))(wish:name);
+                            }
+                        );
+                    }
+                ]
+            }
+        )
+    
+    
     
     },
     onSaveLoad ::(data) {

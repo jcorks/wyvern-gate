@@ -821,11 +821,76 @@
             
             sceneryAt::(x, y) {
                 @at = x+(y*width);
+                when(x < 0 || y < 0)
+                    outOfBoundsCharacter;
+                    
+                when(x >= width || y >= height)
+                    outOfBoundsCharacter;
+                    
                 @:index = scenery[at] & (~SETTINGS_MASK);
                 when(index == 0) empty;
                 return sceneryValues[index-1];
             },
 
+            // loads a whole block of graphical scenery 
+            // in a visual way
+            paintScenery::(
+                lines,
+                wallCharacters,
+                x,
+                y
+            ) {
+                if (x == empty) x = 0;
+                if (y == empty) y = 0;
+            
+                @:charIndex = {};
+                @:wallIndex = {};
+                if (wallCharacters != empty) ::<= {
+                    foreach(wallCharacters) ::(i, ch) {
+                        wallIndex[ch] = true;
+                    }
+                }
+                
+                foreach(lines) ::(i, line) {
+                    for(0, line->length) ::(i) {
+                        @:ch = line->charAt(index:i);
+                        
+                        if (charIndex[ch] == empty)
+                            charIndex[ch] = this.addScenerySymbol(symbol:ch);
+                    }
+                }
+
+                foreach(lines) ::(i, line) {
+                    for(0, line->length) ::(i) {
+                        @:ch = line->charAt(index:i);
+                        this.setSceneryIndex(x, y, symbol:charIndex[ch]);
+                        if (wallIndex[ch] != empty)
+                            this.enableWall(x, y);
+                        x += 1;
+                    }
+                    y += 1;
+                }
+            },
+            
+            paintScenerySolidRectangle::(
+                symbol => Number,
+                isWall,
+                x => Number,
+                y => Number,
+                width => Number,
+                height => Number
+            ) {
+                for(y, y+height) ::(iy) {
+                    for(x, x+width) ::(ix) {
+                        this.setSceneryIndex(x:ix, y:iy, symbol);
+                        if (isWall == true)
+                            this.enableWall(x:ix, y:iy)
+                        else 
+                            this.disableWall(x:ix, y:iy)
+                        ;
+                    }
+                }
+            },
 
 
             setItem::(

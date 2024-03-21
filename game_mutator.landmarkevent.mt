@@ -14,7 +14,7 @@
 @:reset ::{
 LandmarkEvent.database.newEntry(
     data : {
-        name: 'item-specter',
+        id: 'base:item-specter',
         startup ::(parent) {
             @:ItemSpecter = import(module:'game_class.landmarkevent_itemspecter.mt');
             @:a = ItemSpecter.new(parent);
@@ -34,7 +34,7 @@ LandmarkEvent.database.newEntry(
 
 LandmarkEvent.database.newEntry(
     data : {
-        name: 'dungeon-encounters',
+        id: 'base:dungeon-encounters',
         startup ::(parent) {
             @:DungeonEncounters = import(module:'game_class.landmarkevent_dungeonencounters.mt');
             // TODO: make dungeon encounters loadable
@@ -54,7 +54,7 @@ LandmarkEvent.database.newEntry(
 
 LandmarkEvent.database.newEntry(
     data : {
-        name: 'the-beast',
+        id: 'base:the-beast',
         startup ::(parent) {
             @:b = import(module:'game_class.landmarkevent_thebeast.mt');
             @:a = b.new(parent);
@@ -74,7 +74,7 @@ LandmarkEvent.database.newEntry(
 
 LandmarkEvent.database.newEntry(
     data : {
-        name: 'the-mirror',
+        id: 'base:the-mirror',
         startup ::(parent) {
             @:b = import(module:'game_class.landmarkevent_themirror.mt');
             @:a = b.new(parent);
@@ -95,7 +95,7 @@ LandmarkEvent.database.newEntry(
 
 LandmarkEvent.database.newEntry(
     data : {
-        name: 'treasure-golem',
+        id: 'base:treasure-golem',
         startup ::(parent) {
             @:b = import(module:'game_class.landmarkevent_treasuregolem.mt');
             @:a = b.new(parent);
@@ -116,7 +116,7 @@ LandmarkEvent.database.newEntry(
 
 LandmarkEvent.database.newEntry(
     data : {
-        name: 'cave-bat',
+        id: 'base:cave-bat',
         startup ::(parent) {
             @:b = import(module:'game_class.landmarkevent_cavebat.mt');
             @:a = b.new(parent);
@@ -137,7 +137,7 @@ LandmarkEvent.database.newEntry(
 
 LandmarkEvent.database.newEntry(
     data : {
-        name: 'the-snakesiren',
+        id: 'base:the-snakesiren',
         startup ::(parent) {
             @:b = import(module:'game_class.landmarkevent_thesnakesiren.mt');
             @:a = b.new(parent);
@@ -169,7 +169,7 @@ LandmarkEvent.database.newEntry(
     database : Database.new(
         name:'Wyvern.LandmarkEvent.Base',
         attributes : {
-            name : String,
+            id : String,
             startup : Function,
             step : Function,
             isActive : Function

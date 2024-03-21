@@ -25,17 +25,17 @@
 
             @:specter = world.island.newInhabitant();
             specter.name = 'the Wyvern Specter';
-            specter.species = Species.find(name:'Wyvern Specter');
-            specter.profession = Profession.new(base:Profession.database.find(name:'Wyvern Specter'));               
+            specter.species = Species.find(id:'base:wyvern-specter');
+            specter.profession = Profession.new(base:Profession.database.find(id:'base:wyvern-specter'));               
 
             @:inv = Inventory.new();
-            inv.add(item:Item.new(base:Item.database.find(name:'Life Crystal'
+            inv.add(item:Item.new(base:Item.database.find(id:'base:life-crystal'
             )));            
             specter.forceDrop = inv;
             
             specter.clearAbilities();
             foreach(specter.profession.gainSP(amount:10))::(i, ability) {
-                specter.learnAbility(name:ability);
+                specter.learnAbility(id:ability);
             }
 
             specter.stats.load(serialized:StatSet.new(
@@ -88,7 +88,7 @@
                 entities : [specter],
                 tag : 'specter'
             );
-            ent.addUpkeepTask(name:'specter');
+            ent.addUpkeepTask(id:'base:specter');
             
             @ent = {
                 targetX:tileX, 

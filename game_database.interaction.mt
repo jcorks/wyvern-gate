@@ -38,11 +38,12 @@
 
 Interaction.newEntry(
     data : {
-        name : 'exit',
-        displayName : 'Exit',
+        id :  'base:exit',
+        name : 'Exit',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
-            when (location.peaceful == false && (location.landmark.name == 'town' || location.landmark.name == 'city')) ::<= {
+            when (location.peaceful == false && 
+                (location.landmark.base.id == 'base:town' || location.landmark.base.id == 'base:city')) ::<= {
                 windowEvent.queueMessage(
                     speaker: '???',
                     text: "There they are!!"
@@ -53,9 +54,9 @@ Interaction.newEntry(
                     party,                            
                     allies: party.members,
                     enemies: [
-                        location.landmark.island.newInhabitant(professionHint:'Guard'),
-                        location.landmark.island.newInhabitant(professionHint:'Guard'),
-                        location.landmark.island.newInhabitant(professionHint:'Guard'),                        
+                        location.landmark.island.newInhabitant(professionHint:'base:guard'),
+                        location.landmark.island.newInhabitant(professionHint:'base:guard'),
+                        location.landmark.island.newInhabitant(professionHint:'base:guard'),                        
                     ]->map(to:::(value){ value.anonymize(); return value;}),
                     landmark: {}
                 ).result) {
@@ -78,8 +79,8 @@ Interaction.newEntry(
 )
 Interaction.newEntry(
     data : {
-        displayName : 'Examine',
-        name : 'examine',
+        name : 'Examine',
+        id :  'base:examine',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
             // jumps to the prev menu lock
@@ -90,8 +91,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Vandalize',
-        name : 'vandalize',
+        name : 'Vandalize',
+        id :  'base:vandalize',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
             // this is so silly but ill make it do something one day
@@ -111,8 +112,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
+        id :  'base:stairs',
         name : 'Stairs',
-        displayName : 'Stairs',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
             
@@ -123,8 +124,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        name : 'press-pressure-plate',
-        displayName : 'Press',
+        id :  'base:press-pressure-plate',
+        name : 'Press',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
             
@@ -164,8 +165,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        name : 'examine-plate',
-        displayName : 'Is this a trap...?',
+        id :  'base:examine-plate',
+        name : 'Is this a trap...?',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
             @:displayState ::(speaker){
@@ -222,8 +223,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        name : 'talk',
-        displayName : 'Talk',
+        id :  'base:talk',
+        name : 'Talk',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
             // jumps to the prev menu lock
@@ -257,7 +258,7 @@ Interaction.newEntry(
 
                         if (location.landmark.base.guarded == true) ::<= {
                             windowEvent.queueMessage(speaker:talkee.name, text:'Guards! Guards! Help!');
-                            Scene.start(name:'scene_guards0', onDone::{}, location, landmark:location.landmark);
+                            Scene.start(id:'base:scene_guards0', onDone::{}, location, landmark:location.landmark);
                         } else ::<= {
                             @:world = import(module:'game_singleton.world.mt');
                             windowEvent.queueMessage(speaker:talkee.name, text:'You never should have come here!');
@@ -294,8 +295,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName: 'Buy Drink',
-        name : 'drink:tavern',
+        name: 'Buy Drink',
+        id :  'base:drink:tavern',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
             @:story = import(module:'game_singleton.story.mt');
@@ -492,22 +493,22 @@ Interaction.newEntry(
                                                 @itemChoices = [];
                                                 
                                                 @itemMaterials = [
-                                                    'Gold',
-                                                    'Crystal',
-                                                    'Mythril',
-                                                    'Quicksilver',
-                                                    'Dragonglass',
-                                                    'Sunstone',
-                                                    'Moonstone',
+                                                    'base:gold',
+                                                    'base:crystal',
+                                                    'base:mythril',
+                                                    'base:quicksilver',
+                                                    'base:dragonglass',
+                                                    'base:sunstone',
+                                                    'base:moonstone',
                                                 ]
                                                 
                                                 @itemQualities = [
-                                                    'Durable',
-                                                    'Standard',
-                                                    'King\'s',
-                                                    'Queen\'s',
-                                                    'Masterwork',
-                                                    'Legendary'
+                                                    'base:durable',
+                                                    'base:standard',
+                                                    'base:kings',
+                                                    'base:queens',
+                                                    'base:masterwork',
+                                                    'base:legendary'
                                                 ]
                                                 
                                                 for(0, 50)::(i) {
@@ -651,8 +652,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Mine',
-        name : 'mine',
+        name : 'Mine',
+        id :  'base:mine',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
             @:Entity = import(module:'game_class.entity.mt');
@@ -680,7 +681,7 @@ Interaction.newEntry(
                 if (Number.random() > 0.9) ::<= {
                     windowEvent.queueMessage(speaker:miner.name, text:'Oh...?');
 
-                    @:item = Item.new(base:Item.database.find(name:'Ore'));
+                    @:item = Item.new(base:Item.database.find(id:'base:ore'));
                     
                     windowEvent.queueMessage(text:'The party obtained some Ore!');     
 
@@ -726,8 +727,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Smelt Ore',
-        name : 'smelt ore',
+        name : 'Smelt Ore',
+        id :  'base:smelt-ore',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
             @:ores = party.inventory.items->filter(by:::(value) <- value.base.name == 'Ore');
@@ -750,8 +751,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Sell',
-        name : 'sell:shop',
+        name : 'Sell',
+        id :  'base:sell:shop',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
 
@@ -847,8 +848,8 @@ Interaction.newEntry(
 )
 Interaction.newEntry(
     data : {
-        displayName : 'Expand Bag',
-        name : 'bag:shop',
+        name : 'Expand Bag',
+        id :  'base:bag:shop',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
             @:cost = (200 + 30*(party.inventory.maxItems - 10)**1.3)->floor;
@@ -873,8 +874,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Buy',
-        name : 'buy:shop',
+        name : 'Buy',
+        id :  'base:buy:shop',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
             @:world = import(module:'game_singleton.world.mt');
@@ -978,19 +979,6 @@ Interaction.newEntry(
                                             world.accoladeEnable(name:'boughtItemOver2000G');
                                         }
                                         
-                                        if (item.base.name == 'Wyvern Key' && world.storyFlags.foundFirstKey == false) ::<= {
-                                            location.landmark.island.world.storyFlags.foundFirstKey = true;
-                                            windowEvent.queueMessage(
-                                                speaker:location.ownedBy.name,
-                                                text: 'Going up the strata, eh? Best of luck to ye. Pretty treacherous stuff.'
-                                            );
-                                            windowEvent.queueMessage(
-                                                speaker:location.ownedBy.name,
-                                                text: 'Though, can\'t say I\'m not curious what lies at the top...'
-                                            );
-
-                                        }
-                                        
                                         
                                         windowEvent.queueMessage(text: 'Bought ' + correctA(word:item.name));
                                         party.inventory.add(item);                              
@@ -1037,8 +1025,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Forge',
-        name : 'forge',
+        name : 'Forge',
+        id :  'base:forge',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
         
@@ -1083,7 +1071,7 @@ Interaction.newEntry(
                                     amount:-300,
                                     onDone ::{
                                         @:output = Item.new(
-                                            base:Item.database.find(name:canMake[choice-1]),
+                                            base:Item.database.find(id:canMake[choice-1]),
                                             materialHint: ore.base.name->split(token:' ')[0]
                                         );
                                         
@@ -1111,7 +1099,7 @@ Interaction.newEntry(
             }
 
         
-            @:smiths = party.members->filter(by:::(value) <- value.profession.base.name == 'Blacksmith');
+            @:smiths = party.members->filter(by:::(value) <- value.profession.base.id == 'base:blacksmith');
             if (smiths->keycount == 0) ::<= {
                 windowEvent.queueMessage(text:'No one in your party can work the forge (no one is a Blacksmith)');
 
@@ -1144,7 +1132,7 @@ Interaction.newEntry(
                     onChoice::(choice) {
                         when(choice == 0) empty;
                         @:hammer = smiths[choice-1].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
-                        when (hammer == empty || hammer.base.name != 'Smithing Hammer')
+                        when (hammer == empty || hammer.base.id != 'base:smithing-hammer')
                             windowEvent.queueMessage(text:'Smithing requires a Smithing Hammer to be equipped.');
 
 
@@ -1165,8 +1153,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Enter Gate',
-        name : 'enter gate',
+        name : 'Enter Gate',
+        id :  'base:enter-gate',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
 
@@ -1202,43 +1190,25 @@ Interaction.newEntry(
                         @:world = import(module:'game_singleton.world.mt');
                         @:instance = import(module:'game_singleton.instance.mt');
 
-                        @base = Landmark.database.find(name:match(keys[choice-1].name) {
-                            ('Wyvern Key of Fire'):    'Fire Wyvern Dimension',
-                            ('Wyvern Key of Ice'):     'Ice Wyvern Dimension',
-                            ('Wyvern Key of Thunder'): 'Thunder Wyvern Dimension',
-                            ('Wyvern Key of Light'):   'Light Wyvern Dimension'
-                        })
-                        if (base) ::<= {
-                            @:d = location.landmark.island.newLandmark(
-                                base
-                            );
-                            instance.visitLandmark(landmark:d);                        
-                        } else ::<= {
-                            if (keys[choice-1].islandEntry == empty)
-                                keys[choice-1].addIslandEntry();
-                            instance.visitIsland(
-                                key:keys[choice-1],
-                                atGate:true
-                            );
-                        }
+
+                        if (keys[choice-1].islandEntry == empty)
+                            keys[choice-1].addIslandEntry();
+                        instance.visitIsland(
+                            key:keys[choice-1],
+                            atGate:true
+                        );
                     });
                 }
             );
-
-
-
         },
-        
-
-        
     }
 )
     
 // specifically for exploring different areas of dungeons.
 Interaction.newEntry(
     data : {
-        displayName : 'Next Floor',
-        name : 'next floor',
+        name : 'Next Floor',
+        id :  'base:next-floor',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
             breakpoint();
@@ -1249,7 +1219,7 @@ Interaction.newEntry(
                     
                     location.targetLandmark = 
                         location.landmark.island.newLandmark(
-                            base:Landmark.database.find(name:'Shrine: Lost Floor')
+                            base:Landmark.database.find(id:'base:shrine-lost-floor')
                         )
                     ;
                     location.targetLandmark.loadContent();
@@ -1259,7 +1229,7 @@ Interaction.newEntry(
                     
                     location.targetLandmark = 
                         location.landmark.island.newLandmark(
-                            base:Landmark.database.find(name:location.landmark.base.name),
+                            base:Landmark.database.find(id:location.landmark.base.id),
                             floorHint:location.landmark.floor+1
                         )
                     ;
@@ -1284,8 +1254,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Climb Up',
-        name : 'climb up',
+        name : 'Climb Up',
+        id :  'base:climb-up',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
 
@@ -1299,8 +1269,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Explore Pit',
-        name : 'explore pit',
+        name : 'Explore Pit',
+        id :  'base:explore-pit',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
             @:world = import(module:'game_singleton.world.mt');
@@ -1312,7 +1282,7 @@ Interaction.newEntry(
 
                 location.targetLandmark = 
                     location.landmark.island.newLandmark(
-                        base:Landmark.database.find(name:'Treasure Room')
+                        base:Landmark.database.find(id:'base:treasure-room')
                     )
                 ;
                 location.targetLandmark.loadContent();
@@ -1329,8 +1299,8 @@ Interaction.newEntry(
     
 Interaction.newEntry(
     data : {
-        displayName : 'Steal',
-        name : 'steal',
+        name : 'Steal',
+        id :  'base:steal',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
             @:Entity = import(module:'game_class.entity.mt');
@@ -1376,10 +1346,10 @@ Interaction.newEntry(
                     guard.equip(
                         item:Item.new(
                             base:Item.database.find(
-                                name:'Halberd'
+                                id:'base:halberd'
                             ),
-                            qualityHint:'Standard',
-                            materialHint: 'Mythril',
+                            qualityHint:'base:standard',
+                            materialHint: 'base:mythril',
                             rngEnchantHint: true
                         ),
                         slot: Entity.EQUIP_SLOTS.HAND_R,
@@ -1390,10 +1360,10 @@ Interaction.newEntry(
                     guard.equip(
                         item:Item.new(
                             base: Item.database.find(
-                                name:'Plate Armor'
+                                id:'base:plate-armor'
                             ),
-                            qualityHint:'Standard',
-                            materialHint: 'Mythril',
+                            qualityHint:'base:standard',
+                            materialHint: 'base:mythril',
                             rngEnchantHint: true
                         ),
                         slot: Entity.EQUIP_SLOTS.ARMOR,
@@ -1441,8 +1411,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Rest',
-        name : 'rest',
+        name : 'Rest',
+        id :  'base:rest',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
             @level = party.members[0].level;
@@ -1496,8 +1466,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Change Profession',
-        name : 'change profession',
+        name : 'Change Profession',
+        id :  'base:change-profession',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
             @:names = [];
@@ -1518,7 +1488,7 @@ Interaction.newEntry(
                     @:whom = party.members[choice-1];
                     @cost = ((whom.level + whom.stats.sum/30)*10)->ceil;
 
-                    when(whom.profession.base.name == location.ownedBy.profession.base.name)
+                    when(whom.profession.base.id == location.ownedBy.profession.base.id)
                         windowEvent.queueMessage(
                             text: whom.name + ' is already ' + correctA(word:location.ownedBy.profession.base.name) + '.'
                         );
@@ -1527,7 +1497,7 @@ Interaction.newEntry(
                         text:
                             'Profession: ' + location.ownedBy.profession.base.name + '\n\n' +
                             location.ownedBy.profession.base.description + '\n' +
-                            'Weapon affinity: ' + location.ownedBy.profession.base.weaponAffinity
+                            'Weapon affinity: ' + Item.find(id:location.ownedBy.profession.base.weaponAffinity).name
                     );
 
 
@@ -1549,7 +1519,7 @@ Interaction.newEntry(
                             party.addGoldAnimated(
                                 amount:cost,
                                 onDone::{
-                                    whom.profession = Profession.new(base:Profession.database.find(name: location.ownedBy.profession.base.name));
+                                    whom.profession = Profession.new(base:Profession.database.find(id: location.ownedBy.profession.base.id));
 
                                     windowEvent.queueMessage(
                                         text: '' + whom.name + " is now " + correctA(word:whom.profession.base.name) + '.'
@@ -1566,8 +1536,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Bet',
-        name : 'bet',
+        name : 'Bet',
+        id :  'base:bet',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
             @:Entity = import(module:'game_class.entity.mt');
@@ -1852,8 +1822,8 @@ Interaction.newEntry(
 ) 
 Interaction.newEntry(
     data : {
-        displayName : 'Open Chest',
-        name : 'open-chest',
+        name : 'Open Chest',
+        id :  'base:open-chest',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
             @:world = import(module:'game_singleton.world.mt');
@@ -1888,8 +1858,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Open Chest',
-        name : 'open-magic-chest',
+        name : 'Open Chest',
+        id :  'base:open-magic-chest',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
             @:world = import(module:'game_singleton.world.mt');
@@ -1971,8 +1941,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Drink Water',
-        name : 'drink-fountain',
+        name : 'Drink Water',
+        id :  'base:drink-fountain',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
             @:world = import(module:'game_singleton.world.mt');
@@ -2000,8 +1970,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Heal',
-        name : 'healing-circle',
+        name : 'Heal',
+        id :  'base:healing-circle',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
             when(location.data.used)
@@ -2030,8 +2000,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Approach',
-        name : 'pray-statue',
+        name : 'Approach',
+        id :  'base:pray-statue',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
             @:world = import(module:'game_singleton.world.mt');
@@ -2160,8 +2130,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Enchant',
-        name : 'enchant-once',
+        name : 'Enchant',
+        id :  'base:enchant-once',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
             @:world = import(module:'game_singleton.world.mt');
@@ -2240,8 +2210,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Loot',
-        name : 'loot',
+        name : 'Loot',
+        id :  'base:loot',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
             @:world = import(module:'game_singleton.world.mt');
@@ -2271,17 +2241,19 @@ Interaction.newEntry(
 
 Interaction.newEntry(
     data : {
-        displayName : 'Compete',
-        name : 'compete',
+        name : 'Compete',
+        id :  'base:compete',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
         }
     }
 )
+
+/*
 Interaction.newEntry(
     data : {
-        displayName : 'Rune Research',
-        name : 'sylvia-research',
+        name : 'Rune Research',
+        id :  'base:sylvia-research',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
             @:world = import(module:'game_singleton.world.mt');
@@ -2295,11 +2267,12 @@ Interaction.newEntry(
             }
         }
     }
-)        
+)    
+ 
 Interaction.newEntry(
     data : {
-        displayName : 'Tablet Trading',
-        name : 'sylvia-tablet',
+        name : 'Tablet Trading',
+        id :  'base:sylvia-tablet',
         keepInteractionMenu : true,
         onInteract ::(location, party) {
             @:world = import(module:'game_singleton.world.mt');
@@ -2392,13 +2365,15 @@ Interaction.newEntry(
         }
     }
 )      
+*/
 }
 
 @:Interaction = Database.new(
     name : 'Wyvern.Interaction',
     attributes : {
         name : String,
-        displayName : String,
+        id : String,
+        name : String,
         onInteract : Function,
         keepInteractionMenu : Boolean
     },

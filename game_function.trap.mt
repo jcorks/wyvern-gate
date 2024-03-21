@@ -21,7 +21,7 @@
             
             location.targetLandmark = 
                 location.landmark.island.newLandmark(
-                    base:Landmark.database.find(name:location.landmark.base.name),
+                    base:Landmark.database.find(id:location.landmark.base.name),
                     floorHint:location.landmark.floor+1
                 )
             ;

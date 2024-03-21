@@ -30,6 +30,7 @@
 ItemEnchantCondition.newEntry(
     data : {
         name : 'On Defend',
+        id : 'base:on-defend',
         description : 'After the wielder defends',
         isState : false,
         onTurnCheck ::(wielder, item, battle) {
@@ -41,6 +42,7 @@ ItemEnchantCondition.newEntry(
 ItemEnchantCondition.newEntry(
     data : {
         name : 'On Attack',
+        id : 'base:on-attack',
         description : 'After the wielder attacks',
         isState : false,
         onTurnCheck ::(wielder, item, battle) {
@@ -52,6 +54,7 @@ ItemEnchantCondition.newEntry(
 ItemEnchantCondition.newEntry(
     data : {
         name : 'On Ability',
+        id : 'base:on-ability',
         description : 'After the wielder uses an ability',
         isState : false,
         onTurnCheck ::(wielder, item, battle) {
@@ -63,6 +66,7 @@ ItemEnchantCondition.newEntry(
 ItemEnchantCondition.newEntry(
     data : {
         name : 'On Heal',
+        id : 'base:on-heal',
         description : 'After the wielder heals',                
         isState : false,
         onTurnCheck ::(wielder, item, battle) {
@@ -74,6 +78,7 @@ ItemEnchantCondition.newEntry(
 ItemEnchantCondition.newEntry(
     data : {
         name : 'On Hurt',
+        id : 'base:on-hurt',
         description : 'After the wielder is hurt',                
         isState : false,
         onTurnCheck ::(wielder, item, battle) {
@@ -85,6 +90,7 @@ ItemEnchantCondition.newEntry(
 ItemEnchantCondition.newEntry(
     data : {
         name : 'On Defeat Enemy',
+        id : 'base:on-defeat-enemy',
         description : 'After the wielder defeats an enemy',                
         isState : false,
         onTurnCheck ::(wielder, item, battle) {
@@ -96,6 +102,7 @@ ItemEnchantCondition.newEntry(
 ItemEnchantCondition.newEntry(
     data : {
         name : 'On Dodge Attack', // Dex build!
+        id : 'base:on-dodge-attack',
         description : 'After the wielder dodges an attack',                
         isState : false,
         onTurnCheck ::(wielder, item, battle) {
@@ -107,6 +114,7 @@ ItemEnchantCondition.newEntry(
 ItemEnchantCondition.newEntry(
     data : {
         name : 'On Block Attack',
+        id : 'base:on-block-attack',
         description : 'After the wielder blocks an attack',                
         isState : false,
         onTurnCheck ::(wielder, item, battle) {
@@ -119,6 +127,7 @@ ItemEnchantCondition.newEntry(
 ItemEnchantCondition.newEntry(
     data : {
         name : 'End Of Turn',
+        id : 'base:end-of-turn',
         description : 'At the end of the wielder\'s turn',                
         isState : false,
         onTurnCheck ::(wielder, item, battle) {
@@ -133,6 +142,7 @@ ItemEnchantCondition.newEntry(
     name : 'Wyvern.ItemEnchantCondition',
     attributes : {
         name : String,
+        id : String,
         description : String,
         isState : Boolean,
         onTurnCheck : Function

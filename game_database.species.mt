@@ -27,6 +27,7 @@
 
 Species.newEntry(data:{
     name : 'Wolf',
+    id : 'base:wolf',
     rarity : 10,
     description: 'A common canid race.',
     growth : StatSet.new(
@@ -40,13 +41,13 @@ Species.newEntry(data:{
         DEX: 8
     ),        
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'body',
-        'tail'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:body',
+        'base:tail'
     ],
     special : false,
     canBlock : true,
@@ -57,6 +58,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Lynx',
+    id : 'base:lynx',
     rarity : 10,
     description: 'A felid race.',
     growth : StatSet.new(
@@ -70,13 +72,13 @@ Species.newEntry(data:{
         DEX: 4
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'body',
-        'tail'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:body',
+        'base:tail'
     ],
     swarms : false,
     canBlock : true,
@@ -89,6 +91,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Rabbit',
+    id : 'base:rabbit',
     rarity : 10,
     description: 'A mammal race of medium stature.',
     growth : StatSet.new(
@@ -102,13 +105,13 @@ Species.newEntry(data:{
         DEX: 8
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -121,6 +124,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Fox',
+    id : 'base:fox',
     rarity : 10,
     description: 'A canid race.',
     growth : StatSet.new(
@@ -134,13 +138,13 @@ Species.newEntry(data:{
         DEX: 4
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -152,6 +156,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Kitsune',
+    id : 'base:kitsune',
     rarity : 10,
     description: 'A canid race.',
     growth : StatSet.new(
@@ -165,13 +170,13 @@ Species.newEntry(data:{
         DEX: 8
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     
@@ -183,6 +188,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Tiger',
+    id : 'base:tiger',
     description: 'A common felid race.',
     rarity : 45,
     growth : StatSet.new(
@@ -196,13 +202,13 @@ Species.newEntry(data:{
         DEX: 7
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -214,6 +220,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Deer',
+    id : 'base:deer',
     description: 'A common ungulate race.',
     rarity : 10,
     growth : StatSet.new(
@@ -227,13 +234,13 @@ Species.newEntry(data:{
         DEX: 6
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -246,6 +253,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Goat',
+    id : 'base:goat',
     description: 'A common ungulate race.',
     rarity : 10,
     growth : StatSet.new(
@@ -259,14 +267,14 @@ Species.newEntry(data:{
         DEX: 8
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body',
-        'horns'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body',
+        'base:horns'
     ],
     swarms : false,
     canBlock : true,
@@ -279,6 +287,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Sheep',
+    id : 'base:sheep',
     description: 'A common ungulate race.',
     rarity : 10,
     growth : StatSet.new(
@@ -292,14 +301,14 @@ Species.newEntry(data:{
         DEX: 4
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body',
-        'horns'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body',
+        'base:horns'
     ],
     swarms : false,
     canBlock : true,
@@ -310,6 +319,7 @@ Species.newEntry(data:{
 })
 Species.newEntry(data:{
     name : 'Gazelle',
+    id : 'base:gazelle',
     description: 'A tall ungulate race.',
     rarity : 40,
     growth : StatSet.new(
@@ -323,13 +333,13 @@ Species.newEntry(data:{
         DEX: 3
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -342,6 +352,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Kobold',
+    id : 'base:kobold',
     description: 'A common dragon-like race of small stature.',
     rarity : 30,
     growth : StatSet.new(
@@ -355,13 +366,13 @@ Species.newEntry(data:{
         DEX: 8
     ),
     qualities : [
-        'snout',
-        'scales',
-        'eyes',
-        'face',
-        'tail',
-        'horns',
-        'body'
+        'base:snout',
+        'base:scales',
+        'base:eyes',
+        'base:face',
+        'base:tail',
+        'base:horns',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -374,6 +385,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Drake-kin',
+    id : 'base:drake-kin',
     description: 'A common dragon-like race of medium stature with fur.',
     rarity : 30,
     growth : StatSet.new(
@@ -387,13 +399,13 @@ Species.newEntry(data:{
         DEX: 6
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'face',
-        'tail',
-        'horns',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:face',
+        'base:tail',
+        'base:horns',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -405,6 +417,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Serval',
+    id : 'base:serval',
     description: 'A felid race of medium stature.',
     rarity : 30,
     growth : StatSet.new(
@@ -418,13 +431,13 @@ Species.newEntry(data:{
         DEX: 7
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -437,6 +450,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Jackal',
+    id : 'base:jackal',
     rarity : 30,
     description: 'A slender canid race.',
     growth : StatSet.new(
@@ -450,13 +464,13 @@ Species.newEntry(data:{
         DEX: 6
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -468,6 +482,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Possum',
+    id : 'base:possum',
     rarity : 40,
     description: 'A marsupial race of medium stature.',
     growth : StatSet.new(
@@ -481,13 +496,13 @@ Species.newEntry(data:{
         DEX: 3
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -499,6 +514,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Bear',
+    id : 'base:bear',
     rarity : 100,
     description: 'A large mammal race.',
     growth : StatSet.new(
@@ -512,12 +528,12 @@ Species.newEntry(data:{
         DEX: 2
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -529,6 +545,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Kangaroo',
+    id : 'base:kangaroo',
     rarity : 100,
     description: 'A large mammal race.',
     growth : StatSet.new(
@@ -542,13 +559,13 @@ Species.newEntry(data:{
         DEX: 3
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -560,6 +577,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Raven',
+    id : 'base:raven',
     rarity : 100,
     description: 'A bird race of medium stature',
     growth : StatSet.new(
@@ -573,10 +591,10 @@ Species.newEntry(data:{
         DEX: 4
     ),
     qualities : [
-        'feathers',
-        'eyes',
-        'face',
-        'body'
+        'base:feathers',
+        'base:eyes',
+        'base:face',
+        'base:body'
     ],        
     swarms : false,
     canBlock : true,
@@ -588,6 +606,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Pigeon',
+    id : 'base:pigeon',
     rarity : 100,
     description: 'A bird race of medium stature',
     growth : StatSet.new(
@@ -601,10 +620,10 @@ Species.newEntry(data:{
         DEX: 1
     ),
     qualities : [
-        'feathers',
-        'eyes',
-        'face',
-        'body'
+        'base:feathers',
+        'base:eyes',
+        'base:face',
+        'base:body'
     ],        
     swarms : false,
     canBlock : true,
@@ -618,6 +637,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Rat',
+    id : 'base:rat',
     rarity : 100,
     description: 'A rodent race of medium stature',
     growth : StatSet.new(
@@ -631,13 +651,13 @@ Species.newEntry(data:{
         DEX: 5
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     // OKAY HEAR ME OUT... THIS COULD BE FUNNY....
     swarms : true,
@@ -650,6 +670,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Caracal',
+    id : 'base:caracal',
     rarity : 40,
     description: 'A felid race of medium stature',
     growth : StatSet.new(
@@ -663,13 +684,13 @@ Species.newEntry(data:{
         DEX: 3
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -681,6 +702,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Tanuki',
+    id : 'base:tanuki',
     rarity : 40,
     description: 'A canid race of medium stature',
     growth : StatSet.new(
@@ -694,13 +716,13 @@ Species.newEntry(data:{
         DEX: 6
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -713,6 +735,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Werewolf',
+    id : 'base:werewolf',
     rarity : 200,
     description: 'Canid race thought to be blessed by the moon.',
     growth : StatSet.new(
@@ -726,13 +749,13 @@ Species.newEntry(data:{
         DEX: 2
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -744,6 +767,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Hyena',
+    id : 'base:hyena',
     rarity: 100,
     description: 'A mammal race of medium stature.',
     growth : StatSet.new(
@@ -758,13 +782,13 @@ Species.newEntry(data:{
     ),
     special : false,
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -776,6 +800,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Gnoll',
+    id : 'base:gnoll',
     rarity : 200,
     description: 'A mammal race of medium stature.',
     growth : StatSet.new(
@@ -789,13 +814,13 @@ Species.newEntry(data:{
         DEX: 6
     ),
     qualities : [
-        'snout',
-        'fur',
-        'eyes',
-        'ears',
-        'face',
-        'tail',
-        'body'
+        'base:snout',
+        'base:fur',
+        'base:eyes',
+        'base:ears',
+        'base:face',
+        'base:tail',
+        'base:body'
     ],
     swarms : false,
     canBlock : true,
@@ -808,6 +833,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Creature',
+    id : 'base:creature',
     rarity : 200000000000,
     description: '',
     growth : StatSet.new(
@@ -834,6 +860,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Fire Sprite',
+    id : 'base:fire-sprite',
     rarity : 2000000000000,
     description: 'Hot n\' spicy!',
     growth : StatSet.new(
@@ -859,6 +886,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Ice Elemental',
+    id : 'base:ice-elemental',
     rarity : 2000000000000,
     description: 'Brrr that\'s cold!',
     growth : StatSet.new(
@@ -884,6 +912,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Thunder Spawn',
+    id : 'base:thunder-spawn',
     rarity : 2000000000000,
     description: 'Shocking!',
     growth : StatSet.new(
@@ -910,6 +939,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Guiding Light',
+    id : 'base:guiding-light',
     rarity : 2000000000000,
     description: 'Oh!',
     growth : StatSet.new(
@@ -937,6 +967,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Wyvern',
+    id : 'base:wyvern',
     rarity : 2000000000000,
     description: 'Keepers of the gates',
     growth : StatSet.new(
@@ -959,110 +990,11 @@ Species.newEntry(data:{
     ]
 })
 
-Species.newEntry(data:{
-    name : 'Wyvern of Fire',
-    rarity : 2000000000000,
-    description: 'Keepers of the gates',
-    growth : StatSet.new(
-        HP : 60,
-        AP : 10,
-        ATK: 10,
-        DEF: 10,
-        INT: 10,
-        LUK: 10,
-        SPD: 10,
-        DEX: 10
-    ),
-    qualities : [
-    ],
-    swarms : false,
-    canBlock : true,
-    
-    special : true,
-    passives : [
-    ]
-})
-
-Species.newEntry(data:{
-    name : 'Wyvern of Ice',
-    rarity : 2000000000000,
-    description: 'Keepers of the gates',
-    growth : StatSet.new(
-        HP : 60,
-        AP : 10,
-        ATK: 10,
-        DEF: 10,
-        INT: 10,
-        LUK: 10,
-        SPD: 10,
-        DEX: 10
-    ),
-    qualities : [
-    ],
-    swarms : false,
-    canBlock : true,
-    
-    special : true,
-    passives : [
-        'Icy'
-    ]
-})
-
-
-Species.newEntry(data:{
-    name : 'Wyvern of Thunder',
-    rarity : 2000000000000,
-    description: 'Keepers of the gates',
-    growth : StatSet.new(
-        HP : 60,
-        AP : 10,
-        ATK: 10,
-        DEF: 10,
-        INT: 10,
-        LUK: 10,
-        SPD: 10,
-        DEX: 10
-    ),
-    qualities : [
-    ],
-    swarms : false,
-    canBlock : true,
-    
-    special : true,
-    passives : [
-        'Shock'
-    ]
-})
-
-
-Species.newEntry(data:{
-    name : 'Wyvern of Light',
-    rarity : 2000000000000,
-    description: 'Keepers of the gates',
-    growth : StatSet.new(
-        HP : 60,
-        AP : 10,
-        ATK: 10,
-        DEF: 10,
-        INT: 10,
-        LUK: 10,
-        SPD: 10,
-        DEX: 10
-    ),
-    qualities : [
-    ],
-    swarms : false,
-    canBlock : true,
-    
-    special : true,
-    passives : [
-        'Shimmering'
-    ]
-})
 
 
 Species.newEntry(data:{
     name : 'Wyvern Specter',
+    id : 'base:wyvern-specter',
     rarity : 2000000000000,
     description: 'Ancient spirit',
     growth : StatSet.new(
@@ -1081,13 +1013,14 @@ Species.newEntry(data:{
     special : true,
     canBlock : false,
     passives : [
-        'Apparition'
+        'base:apparition'
     ]
 })
 
 
 Species.newEntry(data:{
     name : 'Beast',
+    id : 'base:beast',
     rarity : 2000000000000,
     description: 'Force of nature',
     growth : StatSet.new(
@@ -1107,13 +1040,14 @@ Species.newEntry(data:{
     
     special : true,
     passives : [
-        'The Beast'
+        'base:the-beast'
     ]
 })
 
 
 Species.newEntry(data:{
     name : 'Treasure Golem',
+    id : 'base:treasure-golem',
     rarity : 2000000000000,
     description: 'Looks like a chest! Not as friendly though.',
     growth : StatSet.new(
@@ -1139,6 +1073,7 @@ Species.newEntry(data:{
 
 Species.newEntry(data:{
     name : 'Cave Bat',
+    id : 'base:cave-bat',
     rarity : 2000000000000,
     description: 'Large, wild bat.',
     growth : StatSet.new(
@@ -1167,6 +1102,7 @@ Species.newEntry(data:{
     name : 'Wyvern.Species',
     attributes : {
         name : String,
+        id : String,
         rarity: Number,
         qualities : Object,
         description : String,

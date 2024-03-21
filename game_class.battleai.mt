@@ -44,7 +44,7 @@
                 @:defaultAttack = ::{
                     battle.entityCommitAction(action:BattleAction.new(
                         ability: 
-                            Ability.find(name:'Attack'),
+                            Ability.find(id:'Attack'),
 
                         targets: [
                             Random.pickArrayItem(list:enemies)
@@ -58,7 +58,7 @@
             
                 when(enemies->keycount == 0)
                     battle.entityCommitAction(action:BattleAction.new(
-                        ability: Ability.find(name:'Wait'),
+                        ability: Ability.find(id:'Wait'),
                         targets: [],
                         targetParts : [],
                         extraData: {}                        

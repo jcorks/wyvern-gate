@@ -24,6 +24,7 @@
 ApparelMaterial.newEntry(
     data : {
         name : 'Cloth',
+        id : 'base:cloth',
         description : 'The cloth used is generic and nondescript, but comfortable.',
         rarity : 3,
         tier : 0,
@@ -39,6 +40,7 @@ ApparelMaterial.newEntry(
 ApparelMaterial.newEntry(
     data : {
         name : 'Leather',
+        id : 'base:leather',
         description : 'The rough leather of the item makes it quite sturdy.',
         rarity : 3,
         tier : 0,
@@ -55,6 +57,7 @@ ApparelMaterial.newEntry(
 ApparelMaterial.newEntry(
     data : {
         name : 'Linen',
+        id : 'base:linen',
         description : 'The linen used offers durability mixed with comfort.',
         rarity : 3,
         tier : 0,
@@ -71,6 +74,7 @@ ApparelMaterial.newEntry(
 ApparelMaterial.newEntry(
     data : {
         name : 'Silk',
+        id : 'base:silk', 
         description : 'The silk material feels lavishly soft.',
         rarity : 3,
         tier : 1,
@@ -86,6 +90,7 @@ ApparelMaterial.newEntry(
 ApparelMaterial.newEntry(
     data : {
         name : 'Wool',
+        id : 'base:wool',
         description : 'The wool material feels warm and soft.',
         rarity : 3,
         tier : 1,
@@ -104,6 +109,7 @@ ApparelMaterial.newEntry(
 ApparelMaterial.newEntry(
     data : {
         name : 'Wool+',
+        id : 'base:wool-plus',
         description : 'The wool used is different somehow.',
         rarity : 3,
         tier : 100,
@@ -121,6 +127,7 @@ ApparelMaterial.newEntry(
 ApparelMaterial.newEntry(
     data : {
         name : 'Mythril',
+        id : 'base:mythril',
         description : 'The mythril used makes it radiantly green',
         rarity : 30,
         tier : 2,
@@ -137,8 +144,9 @@ ApparelMaterial.newEntry(
 ApparelMaterial.newEntry(
     data : {
         name : 'Eversilk',
+        id : 'base:eversilk',
         description : 'The wool used is different somehow.',
-        rarity : 20,
+        rarity : 40,
         tier : 2,
         statMod : StatSet.new(
             INT: 35,
@@ -156,8 +164,9 @@ ApparelMaterial.newEntry(
 ApparelMaterial.newEntry(
     data : {
         name : 'Soulstrand',
+        id : 'base:soulstrand',
         description : 'The soulstrand material softly glows.',
-        rarity : 30,
+        rarity : 50,
         tier : 3,
         statMod : StatSet.new(
             INT: 105,
@@ -176,6 +185,7 @@ ApparelMaterial.newEntry(
     name: 'Wyvern.ApparelMaterial',
     attributes : {
         name : String,
+        id : String,
         rarity : Number,
         tier : Number,
         description : String,

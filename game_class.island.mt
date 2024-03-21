@@ -289,54 +289,16 @@
             // guaranteed gate
             LargeMap.addLandmark(
                 map:state.map,
-                base:Landmark.database.find(name:'Wyvern Gate'),
+                base:Landmark.database.find(id:'base:wyvern-gate'),
                 island:this
             )
             
-
-
-            // guaranteed shrine
-            match(state.tier) {
-                (0):// nothign defeated
-                    LargeMap.addLandmark(
-                        map:state.map,
-                        base:Landmark.database.find(name:'Shrine of Fire'),
-                        island:this
-                    ),
-
-                (1):// fire defeated
-                    LargeMap.addLandmark(
-                        map:state.map,
-                        base:Landmark.database.find(name:'Shrine of Ice'),
-                        island:this
-                    ),
-
-                (2):// ice defeated
-                    LargeMap.addLandmark(
-                        map:state.map,
-                        base:Landmark.database.find(name:'Shrine of Thunder'),
-                        island:this
-                    ),
-                    
-                (3):// thunder defeated
-                    LargeMap.addLandmark(
-                        map:state.map,
-                        base:Landmark.database.find(name:'Shrine of Light'),
-                        island:this
-                    ),
-                    
-                (4):// default
-                    LargeMap.addLandmark(
-                        map:state.map,
-                        base:Landmark.database.find(name:'Lost Shrine'),
-                        island:this
-                    )
-            }                        
+                  
 
             
             LargeMap.addLandmark(
                 map:state.map,
-                base:Landmark.database.find(name:'Town'),
+                base:Landmark.database.find(id:'base:town'),
                 island:this
             )
 
@@ -347,7 +309,7 @@
 
             LargeMap.addLandmark(
                 map:state.map,
-                base:Landmark.database.find(name:'City'),
+                base:Landmark.database.find(id:'base:city'),
                 island:this
             )
 
@@ -382,7 +344,7 @@
 
             },
             
-            defaultLoad::(levelHint, nameHint, tierHint, landmarksHint, sizeWHint, sizeHHint, possibleEventsHint) {
+            defaultLoad::(levelHint, nameHint, tierHint, landmarksHint, sizeWHint, sizeHHint, possibleEventsHint, extraLandmarks) {
                 @:world = import(module:'game_singleton.world.mt');
 
                 @:oldIsland = world.island;
@@ -455,11 +417,23 @@
                     foreach(landmarksHint) ::(i, landmarkName) {
                         LargeMap.addLandmark(
                             map:state.map,
-                            base:Landmark.database.find(name:landmarkName),
+                            base:Landmark.database.find(id:landmarkName),
                             island:this
                         )                    
                     }
                 }
+
+                if (extraLandmarks != empty) ::<= {
+                    foreach(extraLandmarks) ::(i, landmarkName) {
+                        LargeMap.addLandmark(
+                            map:state.map,
+                            base:Landmark.database.find(id:landmarkName),
+                            island:this
+                        )                    
+                    }
+                
+                }
+
                 
                 world.island = oldIsland;
                 return this;
@@ -557,7 +531,7 @@
                     if (Number.random() > 13 - (state.stepsSinceLastEvent-5) / 5) ::<={
                         this.addEvent(
                             event:Event.new(
-                                base:Event.database.find(name:random.pickArrayItem(list:state.possibleEvents)),
+                                base:Event.database.find(id:random.pickArrayItem(list:state.possibleEvents)),
                                 parent:this
                             )
                         );                        

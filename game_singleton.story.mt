@@ -24,8 +24,7 @@
 
 @:ITEM_SOURCE = {
     
-    // Whether the initial box has been opened.
-    openedSentimentalBox : false,
+
     
     // whether the player has seen the wandering gamblist
     skieEncountered : false,
@@ -40,21 +39,7 @@
     // Number of discovered locations
     data_locationsDiscovered : 0,
     
-    data_locationsNeeded : 25,
-    
-    
-    
-    // Whether the wyvern of fire was defeated in combat
-    fireWyvernDefeated : false,
-
-    // Whether the wyvern of ice was defeated in combat
-    iceWyvernDefeated : false,
-
-    // Whether the wyvern of thunder was defeated in combat
-    thunderWyvernDefeated : false,
-
-    // Whether the wyvern of light was defeated in combat
-    lightWyvernDefeated : false,
+    data_locationsNeeded : 25
 }
 
 @:Story = LoadableClass.create(

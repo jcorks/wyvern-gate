@@ -214,7 +214,7 @@ instance.mainMenu(
 
         @:jsonTypes = {
             name : String,
-            displayName : String,
+            name : String,
             description : String,
             author : String,
             website : String,

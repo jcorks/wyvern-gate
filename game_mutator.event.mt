@@ -36,7 +36,7 @@
 
 Event.database.newEntry(
     data: {
-        name : 'Weather:1',
+        id : 'base:weather:1',
         rarity: 10,        
         onEventStart ::(event) {
             // only one weather event at a time.
@@ -89,7 +89,7 @@ Event.database.newEntry(
 
 Event.database.newEntry(
     data: {
-        name : 'BBQ',
+        id : 'base:bbq',
         rarity: 1, //5        
         onEventStart ::(event) {
             @:party = event.party;
@@ -169,7 +169,7 @@ Event.database.newEntry(
 
 Event.database.newEntry(
     data: {
-        name : 'Camp out',
+        id : 'base:camp-out',
         rarity: 1, //5        
         onEventStart ::(event) {
             @:party = event.party;
@@ -265,7 +265,7 @@ Event.database.newEntry(
 
 Event.database.newEntry(
     data: {
-        name : 'Encounter:Normal',
+        id : 'base:encounter:normal',
         rarity: 1000,        
         onEventStart ::(event) {
             @chance = Number.random(); 
@@ -383,7 +383,7 @@ Event.database.newEntry(
     database: Database.new(
         name : 'Wyvern.Event.Base',
         attributes : {
-            name : String,
+            id : String,
             rarity: Number,
             onEventStart : Function,
             onEventUpdate : Function,

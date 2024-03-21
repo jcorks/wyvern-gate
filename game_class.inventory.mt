@@ -42,7 +42,7 @@
             },
             
             add::(item) {
-                when (item.base.name == 'None') false; // never accept None as a real item
+                when (item.base.id == 'base:none') false; // never accept None as a real item
                 when (state.items->keycount == state.maxItems) false;
                 state.items->push(value:item);
                 item.container = this;
@@ -68,10 +68,10 @@
                 return item;
             },
             
-            removeByName::(name) {
+            removeByID::(id) {
                 {:::} {
                     foreach(state.items)::(i, item) {
-                        if (item.base.name == name) ::<= {
+                        if (item.base.id == id) ::<= {
                             state.items->remove(key:i);
                             send();
                         }

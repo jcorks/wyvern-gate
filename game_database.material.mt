@@ -28,6 +28,7 @@
 Material.newEntry(
     data : {
         name : 'Hardstone',
+        id : 'base:hardstone',
         description : 'The polished hardstone it\'s made of is dark and shiny.',
         rarity : 13,
         tier : 0,
@@ -43,6 +44,7 @@ Material.newEntry(
 Material.newEntry(
     data : {
         name : 'Copper',
+        id : 'base:copper',
         description : 'The copper material used gives off a radiant brown color.',
         rarity : 13,
         tier : 0,
@@ -57,6 +59,7 @@ Material.newEntry(
 Material.newEntry(
     data : {
         name : 'Steel',
+        id : 'base:steel',
         description : 'The steel used gives a persistent shine.',
         rarity : 15,
         tier : 1,
@@ -71,6 +74,7 @@ Material.newEntry(
 Material.newEntry(
     data : {
         name : 'Iron',
+        id : 'base:iron',
         description : 'The iron used gives it a solid grey color.',
         rarity : 13,
         tier : 0,
@@ -86,6 +90,7 @@ Material.newEntry(
 Material.newEntry(
     data : {
         name : 'Gold',
+        id : 'base:gold',
         description : 'The gold used gives a radiant glow.',
         rarity : 30,
         tier : 1,
@@ -103,6 +108,7 @@ Material.newEntry(
 Material.newEntry(
     data : {
         name : 'Crystal',
+        id : 'base:crystal',
         description : 'The crystal material grants a haunting translucency.',
         rarity : 60,
         tier : 1,
@@ -120,6 +126,7 @@ Material.newEntry(
 Material.newEntry(
     data : {
         name : 'Tungsten',
+        id : 'base:tungsten',
         description : 'The tungsten used gives it a whitish-grey color.',
         rarity : 15,
         tier : 1,
@@ -136,6 +143,7 @@ Material.newEntry(
 Material.newEntry(
     data : {
         name : 'Mythril',
+        id : 'base:mythril',
         description : 'The mythril used makes it radiantly green',
         rarity : 70,
         tier : 2,
@@ -151,6 +159,7 @@ Material.newEntry(
 Material.newEntry(
     data : {
         name : 'Adamantine',
+        id : 'base:adamantine',
         description : 'The adamantine used makes it earthly',
         rarity : 90,
         tier : 3,
@@ -165,6 +174,7 @@ Material.newEntry(
 Material.newEntry(
     data : {
         name : 'Quicksilver',
+        id : 'base:quicksilver',
         description : 'The quicksilver used makes it remarkably shiny.',
         rarity : 110,
         tier : 3,
@@ -181,6 +191,7 @@ Material.newEntry(
 Material.newEntry(
     data : {
         name : 'Dragonglass',
+        id : 'base:dragonglass',
         description : 'The dragonglass used gives it a deep black color.',
         rarity : 110,
         tier : 3,
@@ -197,6 +208,7 @@ Material.newEntry(
 Material.newEntry(
     data : {
         name : 'Composite',
+        id : 'base:composite',
         rarity : 20,
         description : 'The composite material used is sturdy.',
         tier : 1,
@@ -214,7 +226,8 @@ Material.newEntry(
 Material.newEntry(
     data : {
         name : 'Ray',
-        rarity : 150,
+        id : 'base:ray',
+        rarity : 260,
         description : 'Parts of this seem to be made of solid light.',
         tier : 5,
         statMod : StatSet.new(
@@ -230,6 +243,7 @@ Material.newEntry(
 Material.newEntry(
     data : {
         name : 'Sunstone',
+        id : 'base:sunstone',
         rarity : 50,
         description : 'The sunstone used gives it a warm touch.',
         tier : 1,
@@ -245,6 +259,7 @@ Material.newEntry(
 Material.newEntry(
     data : {
         name : 'Moonstone',
+        id : 'base:moonstone',
         rarity : 50,
         description : 'The moonstone used gives it a cold touch.',
         tier : 1,
@@ -262,6 +277,7 @@ Material.newEntry(
     name : 'Wyvern.Material',
     attributes : {
         name : String,
+        id : String,
         rarity : Number,
         tier : Number,
         description : String,

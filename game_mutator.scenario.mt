@@ -40,6 +40,7 @@
             name : 'Wyvern.Scenario.Base',
             attributes : {
                 name : String,
+                id : String,
                 // the function to start off the scenario
                 onBegin : Function,
                 // Function called when a new day starts.
@@ -105,7 +106,7 @@
             },
             
             load ::(serialized) {
-                @:base = Scenario.database.find(name:serialized.base.name);
+                @:base = Scenario.database.find(id:serialized.base.name);
                 base.databaseOverrides();
                 state.load(parent:this, serialized);
             },

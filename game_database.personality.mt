@@ -35,6 +35,7 @@
 
 Personality.newEntry(data: {
     name: 'Calm',
+    id : 'base:calm',
     growth : StatSet.new(
         HP : 0,
         AP : 1,
@@ -97,6 +98,7 @@ Personality.newEntry(data: {
 
 Personality.newEntry(data: {
     name: 'Friendly',
+    id : 'base:friendly',
     growth : StatSet.new(
         HP : 1,
         AP : 2,
@@ -160,6 +162,7 @@ Personality.newEntry(data: {
 
 Personality.newEntry(data:{
     name: 'Short-tempered',
+    id : 'base:short-tempered',
     growth : StatSet.new(
         HP : 2,
         AP : -2,
@@ -218,6 +221,7 @@ Personality.newEntry(data:{
 
 Personality.newEntry(data:{
     name: 'Quiet',
+    id : 'base:quiet',
     growth : StatSet.new(
         HP : 1,
         AP : 3,
@@ -270,6 +274,7 @@ Personality.newEntry(data:{
 
 Personality.newEntry(data:{
     name: 'Charismatic',
+    id : 'base:charismatic',
     growth : StatSet.new(
         HP : -2,
         AP : 2,
@@ -322,6 +327,7 @@ Personality.newEntry(data:{
 
 Personality.newEntry(data:{
     name: 'Caring',
+    id : 'base:caring',
     growth : StatSet.new(
         HP : 1,
         AP : 2,
@@ -370,6 +376,7 @@ Personality.newEntry(data:{
 
 Personality.newEntry(data:{
     name: 'Cold',
+    id : 'base:cold',
     growth : StatSet.new(
         HP : 0,
         AP : 4,
@@ -419,6 +426,7 @@ Personality.newEntry(data:{
 
 Personality.newEntry(data:{
     name: 'Disconnected',
+    id : 'base:disconnected',
     growth : StatSet.new(
         HP : -4,
         AP : 6,
@@ -514,6 +522,7 @@ Personality.newEntry(data:{
 
 Personality.newEntry(data:{
     name: 'Inquisitive',
+    id : 'base:inquisitive',
     growth : StatSet.new(
         HP : 2,
         AP : 3,
@@ -560,6 +569,7 @@ Personality.newEntry(data:{
 
 Personality.newEntry(data:{
     name: 'Curious',
+    id : 'base:curious',
     growth : StatSet.new(
         HP : 2,
         AP : 4,
@@ -613,6 +623,7 @@ Personality.newEntry(data:{
     name : 'Wyvern.Personality',
     attributes : {
         name : String,
+        id : String,
         growth : StatSet.type,
         phrases : Object            
     },

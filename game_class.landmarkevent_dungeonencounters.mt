@@ -68,7 +68,7 @@
                     @:itembase = Item.database.getRandomWeightedFiltered(
                         filter:::(value) <- value.isUnique == false && value.tier <= island_.tier                    
                     );
-                    if (itembase.name != 'None') ::<={
+                    if (itembase.id != 'base:none') ::<={
                         @:itemInstance = Item.new(base:itembase, rngEnchantHint:true);
                         ref.inventory.add(item:itemInstance);
                     }
@@ -82,9 +82,9 @@
                 entities : ents,
                 tag : 'dungeonencounter'
             );
-            ref.addUpkeepTask(name:'dungeonencounters-roam');
-            ref.addUpkeepTask(name:'aggressive');
-            ref.addUpkeepTask(name:'exit');
+            ref.addUpkeepTask(id:'base:dungeonencounters-roam');
+            ref.addUpkeepTask(id:'base:aggressive');
+            ref.addUpkeepTask(id:'base:exit');
 
             if (state.encountersOnFloor == 1) ::<= {
                 windowEvent.queueMessage(

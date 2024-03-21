@@ -53,6 +53,7 @@
 Ability.newEntry(
     data: {
         name: 'Attack',
+        id : 'base:attack',
         targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's ATK.",
         durationTurns: 0,
@@ -85,6 +86,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Headhunter',
+        id : 'base:headhunter',
         targetMode : TARGET_MODE.ONE,
         description: "Deals 1 HP. 5% chance to 1hit KO.",
         durationTurns: 0,
@@ -108,7 +110,7 @@ Ability.newEntry(
             ) == true)
                 if (random.try(percentSuccess:5)) ::<= {
                     windowEvent.queueMessage(
-                        text: user.name + ' does a connecting blow, finishing ' + targets[0].name +'!'
+                        text: user.name + ' does a connecting blow, finishing off ' + targets[0].name +'!'
                     );                            
                     targets[0].damage(from:user, damage:Damage.new(
                         amount:999999,
@@ -125,6 +127,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Wyvern Prayer',
+        id : 'base:wyvern-prayer',
         targetMode : TARGET_MODE.ALL,
         description: "Prays for a miracle. If successful, uses all remaining AP.",
         durationTurns: 0,
@@ -177,7 +180,7 @@ Ability.newEntry(
                 // hurt everyone
                 :: {
                     windowEvent.queueMessage(
-                        text: 'Beams of line shine from above!'
+                        text: 'Beams of light shine from above!'
                     );
                     
                     foreach(targets) ::(k, target) {
@@ -223,7 +226,7 @@ Ability.newEntry(
                     );
                     
                     foreach(targets) ::(k, target) {
-                        target.addEffect(from:user, name:'Greater Sol Attunement', durationTurns:9999);
+                        target.addEffect(from:user, id:'base:greater-sol-attunement', durationTurns:9999);
                     }
                 }
             ]))();
@@ -238,6 +241,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Precise Strike',
+        id : 'base:precise-strike',
         targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's ATK and DEX.",
         durationTurns: 0,
@@ -268,6 +272,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Tranquilizer',
+        id : 'base:tranquilizer',
         targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's DEX with a 45% chance to paralyze.",
         durationTurns: 0,
@@ -290,7 +295,7 @@ Ability.newEntry(
                 targetDefendPart:targetDefendParts[0]
             ) == true)                      
                 if (Number.random() < 0.45)
-                    targets[0].addEffect(from:user, name:'Paralyzed', durationTurns:2);
+                    targets[0].addEffect(from:user, id:'base:paralyzed', durationTurns:2);
 
 
         }
@@ -302,6 +307,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Coordination',
+        id : 'base:coordination',
         targetMode : TARGET_MODE.ALLALLY,
         description: "ATK,DEF,SPD +35% for each party member who is also the same profession.",
         durationTurns: 0,
@@ -321,7 +327,7 @@ Ability.newEntry(
                     // skip if already has Coordinated effect.
                     when(ent.effects->any(condition::(value) <- value.name == user.profession.name)) empty;
 
-                    targets[0].addEffect(from:user, name: 'Coordinated', durationTurns: 1000000);
+                    targets[0].addEffect(from:user, id: 'base:coordinated', durationTurns: 1000000);
                 }
             }
         }
@@ -331,6 +337,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Follow Up',
+        id : 'base:follow-up',
         targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's ATK, doing 150% more damage if the target was hit since their last turn.",
         durationTurns: 0,
@@ -371,6 +378,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Doublestrike',
+        id : 'base:doublestrike',
         targetMode : TARGET_MODE.ALLENEMY,
         description: "Damages a target based on the user's strength.",
         durationTurns: 0,
@@ -411,6 +419,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Triplestrike',
+        id : 'base:triplestrike',
         targetMode : TARGET_MODE.ALLENEMY,
         description: "Damages three targets based on the user's strength.",
         durationTurns: 0,
@@ -458,6 +467,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Focus Perception',
+        id : 'base:focus-perception',        
         targetMode : TARGET_MODE.NONE,
         description: "Causes the user to focus on their enemies, making attacks 25% more effective for 5 turns.",
         durationTurns: 0,
@@ -468,7 +478,7 @@ Ability.newEntry(
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' focuses their perception, increasing their ATK temporarily!');
-            user.addEffect(from:user, name: 'Focus Perception', durationTurns: 5);                        
+            user.addEffect(from:user, id: 'base:focus-perception', durationTurns: 5);                        
         }
     }
 )
@@ -476,6 +486,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Cheer',
+        id : 'base:cheer',
         targetMode : TARGET_MODE.ALLALLY,
         description: "Cheers, granting a 30% damage bonus to allies for 5 turns.",
         durationTurns: 0,
@@ -487,7 +498,7 @@ Ability.newEntry(
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' cheers for the party!');
             foreach(user.allies)::(index, ally) {
-                ally.addEffect(from:user, name: 'Cheered', durationTurns: 5);                        
+                ally.addEffect(from:user, id: 'base:cheered', durationTurns: 5);                        
             
             }
         }
@@ -498,6 +509,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Lunar Blessing',
+        id : 'base:lunar-blessing',
         targetMode : TARGET_MODE.NONE,
         description: "Puts all of the combatants into stasis until it is night time.",
         durationTurns: 0,
@@ -524,6 +536,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Solar Blessing',
+        id : 'base:solar-blessing',
         targetMode : TARGET_MODE.NONE,
         description: "Puts all of the combatants into stasis until it is morning.",
         durationTurns: 0,
@@ -551,6 +564,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Moonbeam',
+        id : 'base:moonbeam',
         targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target with Fire based on the user's INT. If night time, the damage is boosted.",
         durationTurns: 0,
@@ -589,6 +603,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Sunbeam',
+        id : 'base:sunbeam',
         targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target with Fire based on the user's INT. If day time, the damage is boosted.",
         durationTurns: 0,
@@ -627,6 +642,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Sunburst',
+        id : 'base:sunburst',
         targetMode : TARGET_MODE.ALLENEMY,
         description: "Damages all enemies with Fire based on the user's INT. If day time, the damage is boosted.",
         durationTurns: 0,
@@ -665,6 +681,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Night Veil',
+        id : 'base:night-veil',
         targetMode : TARGET_MODE.ONE,
         description: "Increases DEF of target for 5 turns. If casted during night time, it's much more powerful.",
         durationTurns: 0,
@@ -683,10 +700,10 @@ Ability.newEntry(
                 windowEvent.queueMessage(
                     text: targets[0].name + ' shimmers brightly!'
                 );                                  
-                targets[0].addEffect(from:user, name: 'Greater Night Veil', durationTurns: 5);
+                targets[0].addEffect(from:user, id: 'base:greater-night-veil', durationTurns: 5);
 
             } else 
-                targets[0].addEffect(from:user, name: 'Night Veil', durationTurns: 5);
+                targets[0].addEffect(from:user, id: 'base:night-veil', durationTurns: 5);
             ;
             
             
@@ -699,6 +716,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Dayshroud',
+        id : 'base:dayshroud',
         targetMode : TARGET_MODE.ONE,
         description: "Increases DEF of target for 5 turns. If casted during day time, it's much more powerful.",
         durationTurns: 0,
@@ -717,10 +735,10 @@ Ability.newEntry(
                 windowEvent.queueMessage(
                     text: targets[0].name + ' shines brightly!'
                 );                                  
-                targets[0].addEffect(from:user, name: 'Greater Dayshroud', durationTurns: 5);
+                targets[0].addEffect(from:user, id: 'base:greater-dayshroud', durationTurns: 5);
 
             } else 
-                targets[0].addEffect(from:user, name: 'Dayshroud', durationTurns: 5);
+                targets[0].addEffect(from:user, id: 'base:dayshroud', durationTurns: 5);
             ;
             
             
@@ -732,6 +750,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Call of the Night',
+        id : 'base:call-of-the-night',
         targetMode : TARGET_MODE.ONE,
         description: "Increases ATK of target for 5 turns. If casted during night time, it's much more powerful.",
         durationTurns: 0,
@@ -750,10 +769,10 @@ Ability.newEntry(
                 windowEvent.queueMessage(
                     text: targets[0].name + ' shimmers brightly!'
                 );                                  
-                targets[0].addEffect(from:user, name: 'Greater Call of the Night', durationTurns: 5);
+                targets[0].addEffect(from:user, id: 'base:greater-call-of-the-night', durationTurns: 5);
 
             } else 
-                targets[0].addEffect(from:user, name: 'Call of the Night', durationTurns: 5);
+                targets[0].addEffect(from:user, id: 'base:call-of-the-night', durationTurns: 5);
             ;
             
             
@@ -767,6 +786,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Lunacy',
+        id : 'base:lunacy',
         targetMode : TARGET_MODE.ONE,
         description: "Causes the target to go berserk and attack random enemies for their turns. DEF,ATK +70%. Only can be casted at night.",
         durationTurns: 0,
@@ -785,7 +805,7 @@ Ability.newEntry(
                 windowEvent.queueMessage(
                     text: targets[0].name + ' shimmers brightly!'
                 );                                  
-                targets[0].addEffect(from:user, name: 'Lunacy', durationTurns: 7);
+                targets[0].addEffect(from:user, id: 'base:lunacy', durationTurns: 7);
 
             } else 
                 windowEvent.queueMessage(text:'....But nothing happens!');
@@ -800,6 +820,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Moonsong',
+        id : 'base:moonsong',
         targetMode : TARGET_MODE.ONE,
         description: "Heals over time. If casted during night time, it's much more powerful.",
         durationTurns: 0,
@@ -818,10 +839,10 @@ Ability.newEntry(
                 windowEvent.queueMessage(
                     text: targets[0].name + ' shimmers brightly!'
                 );                                  
-                targets[0].addEffect(from:user, name: 'Greater Moonsong', durationTurns: 8);
+                targets[0].addEffect(from:user, id: 'base:greater-moonsong', durationTurns: 8);
 
             } else 
-                targets[0].addEffect(from:user, name: 'Moonsong', durationTurns: 3);
+                targets[0].addEffect(from:user, id: 'base:moonsong', durationTurns: 3);
             ;
             
             
@@ -833,6 +854,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Sol Attunement',
+        id : 'base:sol-attunement',
         targetMode : TARGET_MODE.ONE,
         description: "Heals over time. If casted during day time, it's much more powerful.",
         durationTurns: 0,
@@ -851,10 +873,10 @@ Ability.newEntry(
                 windowEvent.queueMessage(
                     text: targets[0].name + ' shines brightly!'
                 );                                  
-                targets[0].addEffect(from:user, name: 'Greater Sol Attunement', durationTurns: 3);
+                targets[0].addEffect(from:user, id: 'base:greater-sol-attunement', durationTurns: 3);
 
             } else 
-                targets[0].addEffect(from:user, name: 'Sol Attunement', durationTurns: 3);
+                targets[0].addEffect(from:user, id: 'base:sol-attunement', durationTurns: 3);
             ;
             
             
@@ -866,6 +888,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Ensnare',
+        id : 'base:ensnare',
         targetMode : TARGET_MODE.ONE,
         description: "Damages a target and immobilizes both the user and the target for 3 turns. 80% success rate.",
         durationTurns: 0,
@@ -889,8 +912,8 @@ Ability.newEntry(
                 targetDefendPart:targetDefendParts[0]
             ) == true)                        
                 if (random.try(percentSuccess:80)) ::<= {
-                    targets[0].addEffect(from:user, name: 'Ensnared', durationTurns: 3);                        
-                    user.addEffect(from:user, name: 'Ensnaring', durationTurns: 3);                        
+                    targets[0].addEffect(from:user, id: 'base:ensnared', durationTurns: 3);                        
+                    user.addEffect(from:user, id: 'base:ensnaring', durationTurns: 3);                        
                 }
                 
         }
@@ -901,6 +924,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Call',
+        id : 'base:call',
         targetMode : TARGET_MODE.NONE,
         description: "Calls a creature to come and join the fight.",
         durationTurns: 0,
@@ -940,6 +964,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Tame',
+        id : 'base:tame',
         targetMode : TARGET_MODE.ONE,
         description: "Attempts to tame a creature, making it a party member if successful.",
         durationTurns: 0,
@@ -986,6 +1011,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Leg Sweep',
+        id : 'base:leg-sweep',
         targetMode : TARGET_MODE.ALLENEMY,
         description: "Swings, aiming for all enemies legs in hopes of stunning them.",
         durationTurns: 0,
@@ -1008,7 +1034,7 @@ Ability.newEntry(
                     targetDefendPart:targetDefendParts[i]
                 ) == true)
                     if (Number.random() > 0.5)
-                        enemy.addEffect(from:user, name: 'Stunned', durationTurns: 1);    
+                        enemy.addEffect(from:user, id: 'base:stunned', durationTurns: 1);    
             }
         }
     }
@@ -1018,6 +1044,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Big Swing',
+        id : 'base:big-swing',
         targetMode : TARGET_MODE.ALLENEMY,
         description: "Damages targets based on the user's strength.",
         durationTurns: 0,
@@ -1049,6 +1076,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Tackle',
+        id : 'base:tackle',
         targetMode : TARGET_MODE.ONE,
         description: "Damages a target based on the user's strength.",
         durationTurns: 0,
@@ -1076,6 +1104,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Throw Item',
+        id : 'base:throw-item',
         targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target by throwing an item.",
         durationTurns: 0,
@@ -1112,6 +1141,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Stun',
+        id : 'base:stun',
         targetMode : TARGET_MODE.ONE,
         description: "Damages a target based on the user's strength with a chance to stun.",
         durationTurns: 0,
@@ -1133,7 +1163,7 @@ Ability.newEntry(
                 targetDefendPart:targetDefendParts[0]
             ) == true)                    
                 if (Number.random() > 0.5)
-                    targets[0].addEffect(from:user, name: 'Stunned', durationTurns: 1);                        
+                    targets[0].addEffect(from:user, id: 'base:stunned', durationTurns: 1);                        
                 
         }
     }
@@ -1142,6 +1172,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Sheer Cold',
+        id : 'base:sheer-cold',
         targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's strength with a chance to stun.",
         durationTurns: 0,
@@ -1163,7 +1194,7 @@ Ability.newEntry(
                 targetDefendPart:targetDefendParts[0]
             ) == true)                    
                 if (Number.random() < 0.9)
-                    targets[0].addEffect(from:user, name: 'Frozen', durationTurns: 1);                        
+                    targets[0].addEffect(from:user, id: 'base:frozen', durationTurns: 1);                        
                 
         }
     }
@@ -1173,6 +1204,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Mind Read',
+        id : 'base:mind-read',
         targetMode : TARGET_MODE.ONE,
         description: 'Uses a random offsensive ability of the target\'s',
         durationTurns: 0,
@@ -1211,6 +1243,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Flight',
+        id : 'base:flight',
         targetMode : TARGET_MODE.ONE,
         description: "Causes the target to fly, making all damage miss the target for 3 turns",
         durationTurns: 0,
@@ -1223,7 +1256,7 @@ Ability.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' casts Flight on ' + targets[0].name + '!'
             );
-            targets[0].addEffect(from:user, name: 'Flight', durationTurns: 3);
+            targets[0].addEffect(from:user, id: 'base:flight', durationTurns: 3);
                 
         }
     }
@@ -1231,6 +1264,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Grapple',
+        id : 'base:grapple',
         targetMode : TARGET_MODE.ONE,
         description: "Immobilizes both the user and the target for 3 turns. 70% success rate.",
         durationTurns: 0,
@@ -1245,8 +1279,8 @@ Ability.newEntry(
             );
             
             if (Number.random() > 0.3) ::<= {
-                targets[0].addEffect(from:user, name: 'Grappled', durationTurns: 3);                        
-                user.addEffect(from:user, name: 'Grappling', durationTurns: 3);                        
+                targets[0].addEffect(from:user, id: 'base:grappled', durationTurns: 3);                        
+                user.addEffect(from:user, id: 'base:grappling', durationTurns: 3);                        
             }
                 
         }
@@ -1257,6 +1291,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Combo Strike',
+        id : 'base:combo-strike',
         targetMode : TARGET_MODE.ONEPART,
         description: "Damages the same target twice at the same location.",
         durationTurns: 0,
@@ -1296,6 +1331,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Poison Rune',
+        id : 'base:poison-rune',
         targetMode : TARGET_MODE.ONE,
         description: "Places a poison rune on a target, which causes damage to the target each turn.",
         durationTurns: 0,
@@ -1308,13 +1344,14 @@ Ability.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' casts Poison Rune on ' + targets[0].name + '!'
             );
-            targets[0].addEffect(from:user, name: 'Poison Rune', durationTurns: 10);                        
+            targets[0].addEffect(from:user, id: 'base:poison-rune', durationTurns: 10);                        
         }
     }
 )            
 Ability.newEntry(
     data: {
         name: 'Rune Release',
+        id : 'base:rune-release',
         targetMode : TARGET_MODE.ONE,
         description: "Release all runes.",
         durationTurns: 0,
@@ -1329,13 +1366,13 @@ Ability.newEntry(
             );
             
             @:effects = [...targets[0].effects->filter(by:::(value) <- 
-                match(value.effect.name) {
+                match(value.effect.id) {
                   (
-                    'Poison Rune',
-                    'Destruction Rune',
-                    'Regeneration Rune',
-                    'Cure Rune',
-                    'Shield Rune'                             
+                    'base:poison-rune',
+                    'base:destruction-rune',
+                    'base:regeneration-rune',
+                    'base:cure-rune',
+                    'base:Shield Rune'                             
                   ): true,
                   default: false
                 }
@@ -1345,8 +1382,8 @@ Ability.newEntry(
             breakpoint();
             foreach(effects)::(i, effect) {
                 toRemove->push(value:effect);
-                match(effect.name) {                              
-                  ('Destruction Rune'): ::<= {
+                match(effect.id) {                              
+                  ('base:destruction-rune'): ::<= {
                     windowEvent.queueMessage(text:'The release of the Destruction Rune causes it to explode on ' + targets[0].name + '!');
                     targets[0].damage(from:user, damage:Damage.new(
                         amount:user.stats.INT * (1.2),
@@ -1355,7 +1392,7 @@ Ability.newEntry(
                     ),dodgeable: false);                
                   },
 
-                  ('Cure Rune'): ::<= {
+                  ('base:cure-rune'): ::<= {
                     windowEvent.queueMessage(text:'The release of the Cure Rune causes it to heal ' + targets[0].name + '!');
                     targets[0].heal(
                         amount: targets[0].stats.HP * 0.3
@@ -1371,6 +1408,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Destruction Rune',
+        id : 'base:destruction-rune',
         targetMode : TARGET_MODE.ONE,
         description: "Places a destruction rune on a target, which causes INT-based damaged upon release.",
         durationTurns: 0,
@@ -1383,7 +1421,7 @@ Ability.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' casts Destruction Rune on ' + targets[0].name + '!'
             );
-            targets[0].addEffect(from:user, name: 'Destruction Rune', durationTurns: 10);                        
+            targets[0].addEffect(from:user, id: 'base:destruction-rune', durationTurns: 10);                        
         }
     }
 )       
@@ -1392,6 +1430,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Regeneration Rune',
+        id : 'base:regeneration-rune',
         targetMode : TARGET_MODE.ONE,
         description: "Places a regeneration rune on a target, which slightly heals a target every turn.",
         durationTurns: 0,
@@ -1404,13 +1443,14 @@ Ability.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' casts Regeneration Rune on ' + targets[0].name + '!'
             );
-            targets[0].addEffect(from:user, name: 'Regeneration Rune', durationTurns: 10);                        
+            targets[0].addEffect(from:user, id: 'base:regeneration-rune', durationTurns: 10);                        
         }
     }
 )
 Ability.newEntry(
     data: {
         name: 'Shield Rune',
+        id : 'base:shield-rune',
         targetMode : TARGET_MODE.ONE,
         description: "Places a shield rune on a target, which gives +100% DEF while active.",
         durationTurns: 0,
@@ -1423,13 +1463,14 @@ Ability.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' casts Shield Rune on ' + targets[0].name + '!'
             );
-            targets[0].addEffect(from:user, name: 'Shield Rune', durationTurns: 10);                        
+            targets[0].addEffect(from:user, id: 'base:shield-rune', durationTurns: 10);                        
         }
     }
 )  
 Ability.newEntry(
     data: {
         name: 'Cure Rune',
+        id : 'base:cure-rune',
         targetMode : TARGET_MODE.ONE,
         description: "Places a cure rune on a target, which heals the target when the rune is released.",
         durationTurns: 0,
@@ -1442,7 +1483,7 @@ Ability.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' casts Cure Rune on ' + targets[0].name + '!'
             );
-            targets[0].addEffect(from:user, name: 'Cure Rune', durationTurns: 10);                        
+            targets[0].addEffect(from:user, id: 'base:cure-rune', durationTurns: 10);                        
         }
     }
 )             
@@ -1450,6 +1491,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Multiply Runes',
+        id : 'base:mutiply-runes',
         targetMode : TARGET_MODE.ONE,
         description: "Doubles all current runes on a target.",
         durationTurns: 0,
@@ -1466,18 +1508,18 @@ Ability.newEntry(
             @:effects = targets[0].effects->filter(by:::(value) <- 
                 match(value.effect.name) {
                   (
-                    'Poison Rune',
-                    'Destruction Rune',
-                    'Regeneration Rune',
-                    'Cure Rune',
-                    'Shield Rune'                             
+                    'base:poison-rune',
+                    'base:destruction-rune',
+                    'base:regeneration-rune',
+                    'base:cure-rune',
+                    'base:shield-rune'                             
                   ): true,
                   default: false
                 }
             );
             
             foreach(effects)::(i, effect) {
-                targets[0].addEffect(from:user, name:effect.effect.name, durationTurns:10);
+                targets[0].addEffect(from:user, id:effect.effect.id, durationTurns:10);
             }
         }
     }
@@ -1487,6 +1529,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Poison Attack',
+        id : 'base:poison-attack',
         targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's strength with a poisoned weapon.",
         durationTurns: 0,
@@ -1507,7 +1550,7 @@ Ability.newEntry(
                 targetPart: targetParts[0],
                 targetDefendPart:targetDefendParts[0]
             ))
-                targets[0].addEffect(from:user, name: 'Poisoned', durationTurns: 4);                        
+                targets[0].addEffect(from:user, id: 'base:poisoned', durationTurns: 4);                        
         }
     }
 )
@@ -1515,6 +1558,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Petrify',
+        id : 'base:petrify',
         targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's strength with a special petrification poison.",
         durationTurns: 0,
@@ -1535,13 +1579,14 @@ Ability.newEntry(
                 targetPart: targetParts[0],
                 targetDefendPart:targetDefendParts[0]
             ))
-                targets[0].addEffect(from:user, name: 'Petrified', durationTurns: 2);                        
+                targets[0].addEffect(from:user, id: 'base:petrified', durationTurns: 2);                        
         }
     }
 )            
 Ability.newEntry(
     data: {
         name: 'Tripwire',
+        id : 'base:tripwire',
         targetMode : TARGET_MODE.ONE,
         description: "Activates a tripwire set up prior to battle, causing the target to be stunned for 3 turns. Only works once per battle.",
         durationTurns: 0,
@@ -1554,7 +1599,7 @@ Ability.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' activates the tripwire right under ' + targets[0].name + '!'
             );
-            targets[0].addEffect(from:user, name: 'Stunned', durationTurns: 2);                        
+            targets[0].addEffect(from:user, id: 'base:stunned', durationTurns: 2);                        
         }
     }
 )
@@ -1563,6 +1608,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Trip Explosive',
+        id : 'base:trip-explosive',
         targetMode : TARGET_MODE.ONE,
         description: "Activates a tripwire-activated explosive set up prior to battle, causing the target to be damaged. Only works once per battle.",
         durationTurns: 0,
@@ -1593,6 +1639,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Spike Pit',
+        id : 'base:spike-pit',
         targetMode : TARGET_MODE.ALLENEMY,
         description: "Activates a floor trap leading to a spike pit. Only works once per battle.",
         durationTurns: 0,
@@ -1617,7 +1664,7 @@ Ability.newEntry(
                     damageType:Damage.TYPE.PHYS,
                     damageClass:Damage.CLASS.HP
                 ),dodgeable: false);   
-                target.addEffect(from:user, name: 'Stunned', durationTurns: 2);                        
+                target.addEffect(from:user, id: 'base:stunned', durationTurns: 2);                        
             }
         }
     }
@@ -1626,6 +1673,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Stab',
+        id : 'base:stab',
         targetMode : TARGET_MODE.ONEPART,
         description: "Damages a target based on the user's strength and causes bleeding.",
         durationTurns: 0,
@@ -1646,7 +1694,7 @@ Ability.newEntry(
                 targetPart: targetParts[0],
                 targetDefendPart:targetDefendParts[0]
             ) == true)
-                targets[0].addEffect(from:user, name: 'Bleeding', durationTurns: 4);                        
+                targets[0].addEffect(from:user, id: 'base:bleeding', durationTurns: 4);                        
         }
     }
 )
@@ -1654,6 +1702,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'First Aid',
+        id : 'base:first-aid',
         targetMode : TARGET_MODE.ONE,
         description: "Heals a target by a small amount.",
         durationTurns: 0,
@@ -1675,6 +1724,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Mend',
+        id : 'base:mend',
         targetMode : TARGET_MODE.ONE,
         description: "Heals a target by a small amount.",
         durationTurns: 0,
@@ -1695,6 +1745,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Give Snack',
+        id : 'base:give-snack',
         targetMode : TARGET_MODE.ONE,
         description: "Heals a target by a small amount.",
         durationTurns: 0,
@@ -1740,6 +1791,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Summon: Fire Sprite',
+        id : 'base:summon-fire-sprite',
         targetMode : TARGET_MODE.NONE,
         description: 'Summons a fire sprite to fight on your side.',
         durationTurns: 0,
@@ -1777,8 +1829,8 @@ Ability.newEntry(
             @:Species = import(module:'game_database.species.mt');
             @:sprite = Entity.new(
                 island : world.island,
-                speciesHint: 'Fire Sprite',
-                professionHint: 'Fire Sprite',
+                speciesHint: 'base:fire-sprite',
+                professionHint: 'base:fire-sprite',
                 levelHint:5
             );
             sprite.name = 'the Fire Sprite';
@@ -1800,6 +1852,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Summon: Ice Elemental',
+        id : 'base:summon-ice-elemental',
         targetMode : TARGET_MODE.NONE,
         description: 'Summons an ice elemental to fight on your side.',
         durationTurns: 0,
@@ -1835,8 +1888,8 @@ Ability.newEntry(
             @:world = import(module:'game_singleton.world.mt');
             @:sprite = Entity.new(
                 island: world.island,
-                speciesHint: 'Ice Elemental',
-                professionHint: 'Ice Elemental',
+                speciesHint: 'base:ice-elemental',
+                professionHint: 'base:ice-elemental',
                 levelHint:5
             );
             sprite.name = 'the Ice Elemental';
@@ -1857,6 +1910,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Summon: Thunder Spawn',
+        id : 'base:summon-thunder-spawn',
         targetMode : TARGET_MODE.NONE,
         description: 'Summons a thunder spawn to fight on your side.',
         durationTurns: 0,
@@ -1890,8 +1944,8 @@ Ability.newEntry(
             @:world = import(module:'game_singleton.world.mt');
             @:sprite = Entity.new(
                 island: world.island,
-                speciesHint: 'Thunder Spawn',
-                professionHint: 'Thunder Spawn',
+                speciesHint: 'base:thunder-spawn',
+                professionHint: 'base:thunder-spawn',
                 levelHint:5
             );
             sprite.name = 'the Thunder Spawn';
@@ -1913,6 +1967,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Summon: Guiding Light',
+        id : 'base:summon-guiding-light',
         targetMode : TARGET_MODE.NONE,
         description: 'Summons a guiding light to fight on your side.',
         durationTurns: 0,
@@ -1946,8 +2001,8 @@ Ability.newEntry(
             @:world = import(module:'game_singleton.world.mt');
             @:sprite = Entity.new(
                 island: world.island,
-                speciesHint: 'Guiding Light',
-                professionHint: 'Guiding Light',
+                speciesHint: 'base:guiding-light',
+                professionHint: 'base:guiding-light',
                 levelHint:5
             );
             sprite.name = 'the Guiding Light';
@@ -1969,6 +2024,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Unsummon',
+        id : 'base:unsummon',
         targetMode : TARGET_MODE.ONE,
         description: 'Magick that removes a summoned entity.',
         durationTurns: 0,
@@ -2008,6 +2064,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Fire',
+        id : 'base:fire',
         targetMode : TARGET_MODE.ONE,
         description: 'Magick that damages a target with fire.',
         durationTurns: 0,
@@ -2034,6 +2091,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Backdraft',
+        id : 'base:backdraft',
         targetMode : TARGET_MODE.ALLENEMY,
         description: 'Using great amount of heat, gives targets burns.',
         durationTurns: 0,
@@ -2054,7 +2112,7 @@ Ability.newEntry(
                     damageType : Damage.TYPE.FIRE,
                     damageClass: Damage.CLASS.HP
                 ))
-                    targets[0].addEffect(from:user, name:'Burned', durationTurns:5);
+                    targets[0].addEffect(from:user, id:'base:burned', durationTurns:5);
                                           
             }
         }
@@ -2067,6 +2125,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Flare',
+        id : 'base:flare',
         targetMode : TARGET_MODE.ONE,
         description: 'Magick that damages a target with fire.',
         durationTurns: 0,
@@ -2093,6 +2152,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Dematerialize',
+        id : 'base:dematerialize',
         targetMode : TARGET_MODE.ONE,
         description: 'Magick that unequips a target\'s equipment',
         durationTurns: 0,
@@ -2129,6 +2189,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Ice',
+        id : 'base:ice',
         targetMode : TARGET_MODE.ALLENEMY,
         description: 'Magick that damages all enemies with Ice.',
         durationTurns: 0,
@@ -2156,6 +2217,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Frozen Flame',
+        id : 'base:frozen-flame',
         targetMode : TARGET_MODE.ALLENEMY,
         description: 'Magick that causes enemies to spontaneously combust in a cold, blue flame. Might freeze the targets.',
         durationTurns: 0,
@@ -2186,6 +2248,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Telekinesis',
+        id : 'base:telekinesis',
         targetMode : TARGET_MODE.ONE,
         description: 'Magick that moves a target around, stunning them',
         durationTurns: 0,
@@ -2199,7 +2262,7 @@ Ability.newEntry(
                 text: user.name + ' casts Telekinesis!'
             );
             if (random.flipCoin())
-                targets[0].addEffect(from:user, name: 'Stunned', durationTurns: 1)                       
+                targets[0].addEffect(from:user, id: 'base:stunned', durationTurns: 1)                       
             else 
                 windowEvent.queueMessage(
                     text: '...but it missed!'
@@ -2213,6 +2276,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Explosion',
+        id : 'base:explosion',
         targetMode : TARGET_MODE.ALLENEMY,
         description: 'Magick that damages all enemies with Fire.',
         durationTurns: 0,
@@ -2240,6 +2304,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Flash',
+        id : 'base:flash',
         targetMode : TARGET_MODE.ALLENEMY,
         description: 'Magick that blinds all enemies with a bright light.',
         durationTurns: 0,
@@ -2255,7 +2320,7 @@ Ability.newEntry(
             foreach(user.enemies)::(index, enemy) {
                 when(enemy.isIncapacitated()) empty;
                 if (random.flipCoin())
-                    enemy.addEffect(from:user, name: 'Blind', durationTurns: 5)
+                    enemy.addEffect(from:user, id: 'base:blind', durationTurns: 5)
                 else 
                     windowEvent.queueMessage(
                         text: enemy.name + ' covered their eyes!'
@@ -2268,6 +2333,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Thunder',
+        id : 'base:thunder',
         targetMode : TARGET_MODE.ALLENEMY,
         description: 'Magick that deals 4 random strikes.',
         durationTurns: 0,
@@ -2297,6 +2363,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Wild Swing',
+        id : 'base:wild-swing',
         targetMode : TARGET_MODE.ALLENEMY,
         description: 'Attack that deals 4 random strikes.',
         durationTurns: 0,
@@ -2328,6 +2395,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Cure',
+        id : 'base:cure',
         targetMode : TARGET_MODE.ONE,
         description: "Heals a target by a small amount.",
         durationTurns: 0,
@@ -2350,6 +2418,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Cleanse',
+        id : 'base:cleanse',
         targetMode : TARGET_MODE.ONE,
         description: "Removes the status effects: Paralyzed, Poisoned, Petrified, Burned, Frozen, and Blind.",
         durationTurns: 0,
@@ -2365,12 +2434,12 @@ Ability.newEntry(
             @:Effect = import(module:'game_database.effect.mt');
             targets[0].removeEffects(
                 effectBases: [
-                    Effect.find(name:'Poisoned'),
-                    Effect.find(name:'Paralyzed'),
-                    Effect.find(name:'Petrified'),
-                    Effect.find(name:'Burned'),
-                    Effect.find(name:'Blind'),
-                    Effect.find(name:'Frozen')                                  
+                    Effect.find(id:'base:poisoned'),
+                    Effect.find(id:'base:paralyzed'),
+                    Effect.find(id:'base:petrified'),
+                    Effect.find(id:'base:burned'),
+                    Effect.find(id:'base:blind'),
+                    Effect.find(id:'base:frozen')                                  
                 ]
             );
 
@@ -2381,6 +2450,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Magic Mist',
+        id : 'base:magic-mist',
         targetMode : TARGET_MODE.ALLENEMY,
         description: "Removes ALL effects.",
         durationTurns: 0,
@@ -2404,6 +2474,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Antidote',
+        id : 'base:antidote',
         targetMode : TARGET_MODE.ONE,
         description: "Cures the poison status effect.",
         durationTurns: 0,
@@ -2419,7 +2490,7 @@ Ability.newEntry(
             );
             targets[0].removeEffects(
                 effectBases: [
-                    Effect.find(name:'Poisoned')                            
+                    Effect.find(id:'base:poisoned')                            
                 ]
             );
         }
@@ -2430,6 +2501,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Greater Cure',
+        id : 'base:greater-cure',
         targetMode : TARGET_MODE.ONE,
         description: "Heals a target by a moderate amount.",
         durationTurns: 0,
@@ -2451,6 +2523,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Protect',
+        id : 'base:protect',
         targetMode : TARGET_MODE.ONE,
         description: "Increases DEF of target for 10 turns.",
         durationTurns: 0,
@@ -2463,7 +2536,7 @@ Ability.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' casts Protect on ' + targets[0].name + '!'
             );
-            targets[0].addEffect(from:user, name: 'Protect', durationTurns: 10);
+            targets[0].addEffect(from:user, id: 'base:protect', durationTurns: 10);
 
         }
     }
@@ -2472,6 +2545,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Duel',
+        id : 'base:duel',
         targetMode : TARGET_MODE.ONE,
         description: "Chooses a target to have a duel, causing them to take bonus damage by the user.",
         durationTurns: 0,
@@ -2484,7 +2558,7 @@ Ability.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' challenges ' + targets[0].name + ' to a duel!'
             );
-            targets[0].addEffect(from:user, name: 'Dueled', durationTurns: 1000000);
+            targets[0].addEffect(from:user, id: 'base:dueled', durationTurns: 1000000);
 
         }
     }
@@ -2493,6 +2567,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Grace',
+        id : 'base:grace',
         targetMode : TARGET_MODE.ONE,
         description: "Grants the target the ability to avoid death once.",
         durationTurns: 0,
@@ -2505,7 +2580,7 @@ Ability.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' casts Grace on ' + targets[0].name + '!'
             );
-            targets[0].addEffect(from:user, name: 'Grace', durationTurns: 1000);
+            targets[0].addEffect(from:user, id: 'base:grace', durationTurns: 1000);
 
         }
     }
@@ -2514,6 +2589,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Phoenix Soul',
+        id : 'base:phoenix-soul',
         targetMode : TARGET_MODE.ONE,
         description: "Grants the target the ability to avoid death once if casted during daytime.",
         durationTurns: 0,
@@ -2530,7 +2606,7 @@ Ability.newEntry(
 
             
             if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING)
-                targets[0].addEffect(from:user, name: 'Grace', durationTurns: 1000)
+                targets[0].addEffect(from:user, id: 'base:grace', durationTurns: 1000)
             else 
                 windowEvent.queueMessage(text:'... but nothing happened!');
 
@@ -2541,6 +2617,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Protect All',
+        id : 'base:protect-all',
         targetMode : TARGET_MODE.ALLALLY,
         description: "Increases DEF of allies for 5 turns.",
         durationTurns: 0,
@@ -2554,7 +2631,7 @@ Ability.newEntry(
                 text: user.name + ' casts Protect All!'
             );
             foreach(user.allies)::(index, ally) {
-                ally.addEffect(from:user, name: 'Protect', durationTurns: 5);
+                ally.addEffect(from:user, id: 'base:protect', durationTurns: 5);
             }
         }
     }
@@ -2563,6 +2640,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Meditate',
+        id : 'base:meditate',
         targetMode : TARGET_MODE.NONE,
         description: "Recovers users AP by a small amount.",
         durationTurns: 0,
@@ -2584,6 +2662,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Soothe',
+        id : 'base:soothe',
         targetMode : TARGET_MODE.ONE,
         description: "Relaxes a target, healing AP by a small amount.",
         durationTurns: 0,
@@ -2606,6 +2685,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Steal',
+        id : 'base:steal',
         targetMode : TARGET_MODE.ONE,
         description: 'Steals an item from a target',
         durationTurns: 0,
@@ -2648,6 +2728,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Counter',
+        id : 'base:counter',
         targetMode : TARGET_MODE.NONE,
         description: 'If attacked, dodges and retaliates for 3 turns.',
         durationTurns: 0,
@@ -2657,7 +2738,7 @@ Ability.newEntry(
         oncePerBattle : false,
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-            user.addEffect(from:user, name: 'Counter', durationTurns: 3);
+            user.addEffect(from:user, id: 'base:counter', durationTurns: 3);
         }
     }
 )
@@ -2667,6 +2748,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Unarm',
+        id : 'base:unarm',
         targetMode : TARGET_MODE.ONE,
         description: 'Disarms a target',
         durationTurns: 0,
@@ -2711,6 +2793,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Mug',
+        id : 'base:mug',
         targetMode : TARGET_MODE.ONE,
         description: 'Damages an enemy and attempts to steal gold',
         durationTurns: 0,
@@ -2756,6 +2839,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Sneak',
+        id : 'base:sneak',
         targetMode : TARGET_MODE.ONE,
         description: 'Guarantees times 3 damage next time an offensive ability is used next turn',
         durationTurns: 0,
@@ -2765,7 +2849,7 @@ Ability.newEntry(
         oncePerBattle : false,
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-            targets[0].addEffect(from:user, name: 'Sneaked', durationTurns: 2);
+            targets[0].addEffect(from:user, id: 'base:sneaked', durationTurns: 2);
 
         }
     }
@@ -2774,6 +2858,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Mind Focus',
+        id : 'base:mind-focus',
         targetMode : TARGET_MODE.NONE,
         description: 'Increases user\'s INT by 100% for 5 turns.',
         durationTurns: 0,
@@ -2783,7 +2868,7 @@ Ability.newEntry(
         oncePerBattle : false,
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-            targets[0].addEffect(from:user, name: 'Mind Focused', durationTurns: 5);
+            targets[0].addEffect(from:user, id: 'base:mind-focused', durationTurns: 5);
         }
     }
 ) 
@@ -2794,6 +2879,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Defend',
+        id : 'base:defend',
         targetMode : TARGET_MODE.NONE,
         description: 'Reduced damage for one turn.',
         durationTurns: 0,
@@ -2803,7 +2889,7 @@ Ability.newEntry(
         oncePerBattle : false,
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-            user.addEffect(from:user, name: 'Defend', durationTurns:1);
+            user.addEffect(from:user, id: 'base:defend', durationTurns:1);
             user.flags.add(flag:StateFlags.DEFENDED);
         }
     }
@@ -2812,6 +2898,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Guard',
+        id : 'base:guard',
         targetMode : TARGET_MODE.NONE,
         description: 'Reduced damage for one turn.',
         durationTurns: 0,
@@ -2821,7 +2908,7 @@ Ability.newEntry(
         oncePerBattle : false,
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-            user.addEffect(from:user, name: 'Guard', durationTurns:1);
+            user.addEffect(from:user, id: 'base:guard', durationTurns:1);
         }
     }
 )
@@ -2830,6 +2917,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Proceed with Caution',
+        id : 'base:proceed-with-caution',
         targetMode : TARGET_MODE.ALLALLY,
         description: 'Defense is heightened for the team for 10 turns.',
         durationTurns: 0,
@@ -2839,7 +2927,7 @@ Ability.newEntry(
         oncePerBattle : false,
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-            user.addEffect(from:user, name: 'Proceed with Caution', durationTurns:10);
+            user.addEffect(from:user, id: 'base:proceed-with-caution', durationTurns:10);
         }
     }
 )
@@ -2847,6 +2935,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Retaliate',
+        id : 'base:retaliate',
         targetMode : TARGET_MODE.ALLALLY,
         description: 'The user retaliates to attacks.',
         durationTurns: 0,
@@ -2856,7 +2945,7 @@ Ability.newEntry(
         oncePerBattle : false,
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-            user.addEffect(from:user, name: 'Retaliate', durationTurns:10);
+            user.addEffect(from:user, id: 'base:retaliate', durationTurns:10);
         }
     }
 )
@@ -2864,6 +2953,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Defensive Stance',
+        id : 'base:defensive-stance',
         targetMode : TARGET_MODE.NONE,
         description: 'Stance that sacrifices offensive capabilities to boost defense.',
         durationTurns: 0,
@@ -2876,7 +2966,7 @@ Ability.newEntry(
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
-            user.addEffect(from:user, name: 'Defensive Stance', durationTurns:1000);
+            user.addEffect(from:user, id: 'base:defensive-stance', durationTurns:1000);
         }
     }
 )           
@@ -2884,6 +2974,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Offensive Stance',
+        id : 'base:offensive-stance',
         targetMode : TARGET_MODE.NONE,
         description: 'Stance that sacrifices defensive capabilities to boost offense.',
         durationTurns: 0,
@@ -2896,7 +2987,7 @@ Ability.newEntry(
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
-            user.addEffect(from:user, name: 'Offsensive Stance', durationTurns:1000);
+            user.addEffect(from:user, id: 'base:offsensive-stance', durationTurns:1000);
         }
     }
 )            
@@ -2904,6 +2995,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Light Stance',
+        id : 'base:light-stance',
         targetMode : TARGET_MODE.NONE,
         description: 'Stance that makes the user lighter on their feet at the cost of offense.',
         durationTurns: 0,
@@ -2916,7 +3008,7 @@ Ability.newEntry(
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
-            user.addEffect(from:user, name: 'Light Stance', durationTurns:1000);
+            user.addEffect(from:user, id: 'base:light-stance', durationTurns:1000);
         }
     }
 )            
@@ -2924,6 +3016,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Heavy Stance',
+        id : 'base:heavy-stance',
         targetMode : TARGET_MODE.NONE,
         description: 'Stance that makes the user sturdier at the cost of speed.',
         durationTurns: 0,
@@ -2936,7 +3029,7 @@ Ability.newEntry(
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
-            user.addEffect(from:user, name: 'Heavy Stance', durationTurns:1000);
+            user.addEffect(from:user, id: 'base:heavy-stance', durationTurns:1000);
         }
     }
 ) 
@@ -2944,6 +3037,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Meditative Stance',
+        id : 'base:meditative-stance',
         targetMode : TARGET_MODE.NONE,
         description: 'Stance that makes the user more mentally focused.',
         durationTurns: 0,
@@ -2956,7 +3050,7 @@ Ability.newEntry(
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
-            user.addEffect(from:user, name: 'Meditative Stance', durationTurns:1000);
+            user.addEffect(from:user, id: 'base:meditative-stance', durationTurns:1000);
         }
     }
 )                 
@@ -2964,6 +3058,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Striking Stance',
+        id : 'base:striking-stance',
         targetMode : TARGET_MODE.NONE,
         description: 'Stance that focuses offense above all.',
         durationTurns: 0,
@@ -2976,7 +3071,7 @@ Ability.newEntry(
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
-            user.addEffect(from:user, name: 'Striking Stance', durationTurns:1000);
+            user.addEffect(from:user, id: 'base:striking-stance', durationTurns:1000);
         }
     }
 )  
@@ -2985,6 +3080,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Reflective Stance',
+        id : 'base:reflective-stance',
         targetMode : TARGET_MODE.NONE,
         description: 'Stance that allows the user to reflect damage.',
         durationTurns: 0,
@@ -2997,7 +3093,7 @@ Ability.newEntry(
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
-            user.addEffect(from:user, name: 'Reflective Stance', durationTurns:1000);
+            user.addEffect(from:user, id: 'base:reflective-stance', durationTurns:1000);
         }
     }
 ) 
@@ -3005,6 +3101,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Evasive Stance',
+        id : 'base:evasive-stance',
         targetMode : TARGET_MODE.NONE,
         description: 'Stance that allows the user to dodge incoming attacks.',
         durationTurns: 0,
@@ -3017,7 +3114,7 @@ Ability.newEntry(
             @:Effect = import(module:'game_database.effect.mt');
             @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
             user.removeEffects(effectBases:stances);
-            user.addEffect(from:user, name: 'Evasive Stance', durationTurns:1000);
+            user.addEffect(from:user, id: 'base:evasive-stance', durationTurns:1000);
         }
     }
 )                            
@@ -3025,6 +3122,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Wait',
+        id : 'base:wait',
         targetMode : TARGET_MODE.NONE,
         description: 'Does nothing.',
         durationTurns: 0,
@@ -3043,6 +3141,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Plant Poisonroot',
+        id : 'base:plant-poisonroot',
         targetMode : TARGET_MODE.ONE,
         description: "Plants a poisonroot seed on the target. Grows in 4 turns and causes poison damage every turn when grown.",
         durationTurns: 0,
@@ -3053,7 +3152,7 @@ Ability.newEntry(
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:targets[0].name + ' was covered in poisonroot seeds!');
-            targets[0].addEffect(from:user, name:'Poisonroot Growing', durationTurns:2);                            
+            targets[0].addEffect(from:user, id:'base:poisonroot-growing', durationTurns:2);                            
         }
     }
 )
@@ -3061,6 +3160,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Plant Triproot',
+        id : 'base:plant-triproot',
         targetMode : TARGET_MODE.ONE,
         description: "Plants a triproot seed on the target. Grows in 4 turns and causes 40% chance to trip every turn when grown.",
         durationTurns: 0,
@@ -3071,7 +3171,7 @@ Ability.newEntry(
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:targets[0].name + ' was covered in triproot seeds!');
-            targets[0].addEffect(from:user, name:'Triproot Growing', durationTurns:2);                            
+            targets[0].addEffect(from:user, id:'base:triproot-growing', durationTurns:2);                            
         }
     }
 )
@@ -3079,6 +3179,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Plant Healroot',
+        id : 'base:plant-healroot',
         targetMode : TARGET_MODE.ONE,
         description: "Plants a healroot seed on the target. Grows in 4 turns and heals 5% HP turn.",
         durationTurns: 0,
@@ -3089,7 +3190,7 @@ Ability.newEntry(
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:targets[0].name + ' was covered in triproot seeds!');
-            targets[0].addEffect(from:user, name:'Healroot Growing', durationTurns:2);                            
+            targets[0].addEffect(from:user, id:'base:healroot-growing', durationTurns:2);                            
         }
     }
 )
@@ -3098,6 +3199,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Green Thumb',
+        id : 'base:green-thumb',
         targetMode : TARGET_MODE.ONE,
         description: "Any growing roots grow instantly on the target.",
         durationTurns: 0,
@@ -3110,9 +3212,9 @@ Ability.newEntry(
             @:effects = targets[0].effects;
             @:toRemove = [];
             foreach(effects)::(i, effect) {
-                if (effect.name == 'Healroot Growing' ||
-                    effect.name == 'Triproot Growing' ||
-                    effect.name == 'Poisonroot Growing')
+                if (effect.id == 'base:healroot-growing' ||
+                    effect.id == 'base:triproot-growing' ||
+                    effect.id == 'base:poisonroot-growing')
                     toRemove->push(value:effect.base);
             }
             
@@ -3128,6 +3230,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Fire Shift',
+        id : 'base:fire-shift',
         targetMode : TARGET_MODE.NONE,
         description: "Adds the Burning effect.",
         durationTurns: 0,
@@ -3138,7 +3241,7 @@ Ability.newEntry(
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' becomes shrouded in flame!');
-            user.addEffect(from:user, name:'Burning', durationTurns:20);                            
+            user.addEffect(from:user, id:'base:burning', durationTurns:20);                            
         }
     }
 )
@@ -3147,6 +3250,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Elemental Tag',
+        id : 'base:elemental-tag',
         targetMode : TARGET_MODE.ONE,
         description: "Adds weakness to elemental damage +100%.",
         durationTurns: 0,
@@ -3157,7 +3261,7 @@ Ability.newEntry(
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:targets[0].name + ' becomes weak to elemental damage!');
-            user.addEffect(from:user, name:'Elemental Tag', durationTurns:20);                            
+            user.addEffect(from:user, id:'base:elemental-tag', durationTurns:20);                            
         }
     }
 )
@@ -3166,6 +3270,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Elemental Shield',
+        id : 'base:elemental-shield',
         targetMode : TARGET_MODE.NONE,
         description: "Nullifies most Thunder, Fire, and Ice damage.",
         durationTurns: 0,
@@ -3176,7 +3281,7 @@ Ability.newEntry(
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' becomes shielded to elemental damage!');
-            user.addEffect(from:user, name:'Elemental Shield', durationTurns:20);                            
+            user.addEffect(from:user, id:'base:elemental-shield', durationTurns:20);                            
         }
     }
 )
@@ -3186,6 +3291,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Ice Shift',
+        id : 'base:ice-shift',
         targetMode : TARGET_MODE.NONE,
         description: "Adds the Icy effect.",
         durationTurns: 0,
@@ -3196,7 +3302,7 @@ Ability.newEntry(
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' becomes shrouded in an icy wind!');
-            user.addEffect(from:user, name:'Icy', durationTurns:20);                            
+            user.addEffect(from:user, id:'base:icy', durationTurns:20);                            
         }
     }
 )
@@ -3204,6 +3310,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Thunder Shift',
+        id : 'base:thunder-shift',
         targetMode : TARGET_MODE.NONE,
         description: "Adds the Shock effect.",
         durationTurns: 0,
@@ -3214,7 +3321,7 @@ Ability.newEntry(
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' becomes shrouded in electric arcs!');
-            user.addEffect(from:user, name:'Shock', durationTurns:20);                            
+            user.addEffect(from:user, id:'base:shock', durationTurns:20);                            
         }
     }
 )
@@ -3222,6 +3329,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Tri Shift',
+        id : 'base:tri-shift',
         targetMode : TARGET_MODE.NONE,
         description: "Adds the Shock, Burning, and Icy effects.",
         durationTurns: 0,
@@ -3232,9 +3340,9 @@ Ability.newEntry(
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(text:user.name + ' becomes shrouded in light');
-            user.addEffect(from:user, name:'Burning', durationTurns:20);                            
-            user.addEffect(from:user, name:'Icy',     durationTurns:20);                            
-            user.addEffect(from:user, name:'Shock',   durationTurns:20);                            
+            user.addEffect(from:user, id:'base:burning', durationTurns:20);                            
+            user.addEffect(from:user, id:'base:icy',     durationTurns:20);                            
+            user.addEffect(from:user, id:'base:shock',   durationTurns:20);                            
         }
     }
 )
@@ -3243,6 +3351,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Use Item',
+        id : 'base:use-item',
         targetMode : TARGET_MODE.ONE,
         description: "Uses an item from the user's inventory.",
         durationTurns: 0,
@@ -3255,14 +3364,14 @@ Ability.newEntry(
             @:item = extraData[0];
             when (targets->size == 0) ::<= {
                 foreach(item.base.useEffects)::(index, effect) {    
-                    user.addEffect(from:user, name:effect, item:item, durationTurns:0);                            
+                    user.addEffect(from:user, id:effect, item:item, durationTurns:0);                            
                 }
             }
 
             
             foreach(item.base.useEffects)::(index, effect) {    
                 foreach(targets)::(t, target) {
-                    target.addEffect(from:user, name:effect, item:item, durationTurns:0);                            
+                    target.addEffect(from:user, id:effect, item:item, durationTurns:0);                            
                 }
             }
         }
@@ -3272,6 +3381,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Quickhand Item',
+        id : 'base:quickhand-item',
         targetMode : TARGET_MODE.ONE,
         description: "Uses 2 items from the user's inventory.",
         durationTurns: 0,
@@ -3284,14 +3394,14 @@ Ability.newEntry(
             @item = extraData[0];
             foreach(item.base.useEffects)::(index, effect) {    
                 foreach(targets)::(t, target) {
-                    target.addEffect(from:user, name:effect, item:item, durationTurns:0);                            
+                    target.addEffect(from:user, id:effect, item:item, durationTurns:0);                            
                 }
             }
 
             item = extraData[1];
             foreach(item.base.useEffects)::(index, effect) {    
                 foreach(targets)::(t, target) {
-                    target.addEffect(from:user, name:effect, item:item, durationTurns:0);                            
+                    target.addEffect(from:user, id:effect, item:item, durationTurns:0);                            
                 }
             }
         }
@@ -3302,6 +3412,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Equip Item',
+        id : 'base:equip-item',
         targetMode : TARGET_MODE.ONE,
         description: "Equips an item from the user's inventory.",
         durationTurns: 0,
@@ -3324,6 +3435,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Defend Other',
+        id : 'base:defend-other',
         targetMode : TARGET_MODE.ONE,
         description: "Defends another from getting attacked",
         durationTurns: 0,
@@ -3334,7 +3446,7 @@ Ability.newEntry(
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             targets[0].addEffect(
-                from:user, name: 'Defend Other', durationTurns: 4 
+                from:user, id: 'base:defend-other', durationTurns: 4 
             );
         }
     }
@@ -3343,6 +3455,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Perfect Guard',
+        id : 'base:perfect-guard',
         targetMode : TARGET_MODE.ONE,
         description: "Nullifies damage for 3 turns",
         durationTurns: 0,
@@ -3353,7 +3466,7 @@ Ability.newEntry(
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             targets[0].addEffect(
-                from:user, name: 'Perfect Guard', durationTurns: 3 
+                from:user, id: 'base:perfect-guard', durationTurns: 3 
             );
         }
     }
@@ -3362,6 +3475,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Sharpen',
+        id : 'base:sharpen',
         targetMode : TARGET_MODE.ONE,
         description: "Sharpens a weapon, increasing its damage for the battle.",
         durationTurns: 0,
@@ -3379,7 +3493,7 @@ Ability.newEntry(
             windowEvent.queueMessage(text:user.name + ' sharpens ' + targets[0].name + '\'s weapon!');
 
             targets[0].addEffect(
-                from:user, name: 'Sharpen', durationTurns: 1000000 
+                from:user, id: 'base:sharpen', durationTurns: 1000000 
             );
             
         }
@@ -3389,6 +3503,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Weaken Armor',
+        id : 'base:weaken-armor',
         targetMode : TARGET_MODE.ONE,
         description: "Weakens armor, decreasing its effectiveness for the battle.",
         durationTurns: 0,
@@ -3406,7 +3521,7 @@ Ability.newEntry(
             windowEvent.queueMessage(text:user.name + ' weakens ' + targets[0].name + '\'s armor!');
 
             targets[0].addEffect(
-                from:user, name: 'Weaken Armor', durationTurns: 1000000 
+                from:user, id: 'base:weaken-armor', durationTurns: 1000000 
             );
             
         }
@@ -3416,6 +3531,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Dull Weapon',
+        id : 'base:dull-weapon',
         targetMode : TARGET_MODE.ONE,
         description: "Dull a weapon, decreasing its damage for next turn.",
         durationTurns: 0,
@@ -3433,7 +3549,7 @@ Ability.newEntry(
             windowEvent.queueMessage(text:user.name + ' dulls ' + targets[0].name + '\'s weapon!');
 
             targets[0].addEffect(
-                from:user, name: 'Dull Weapon', durationTurns: 1000000 
+                from:user, id: 'base:dull-weapon', durationTurns: 1000000 
             );
             
         }
@@ -3443,6 +3559,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Strengthen Armor',
+        id : 'base:strengthen-armor',
         targetMode : TARGET_MODE.ONE,
         description: "Strengthens armor, increasing its effectiveness for the battle",
         durationTurns: 0,
@@ -3460,7 +3577,7 @@ Ability.newEntry(
             windowEvent.queueMessage(text:user.name + ' strengthens ' + targets[0].name + '\'s armor!');
 
             targets[0].addEffect(
-                from:user, name: 'Strengthen Armor', durationTurns: 1000000 
+                from:user, id: 'base:strengthen-armor', durationTurns: 1000000 
             );
             
         }
@@ -3470,6 +3587,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Convince',
+        id : 'base:convince',
         targetMode : TARGET_MODE.ONE,
         description: "Prevents a combatant from acting for a few turns if successful.",
         durationTurns: 0,
@@ -3487,7 +3605,7 @@ Ability.newEntry(
 
             windowEvent.queueMessage(text:targets[0].name + ' listens intently!');
             targets[0].addEffect(
-                from:user, name: 'Convinced', durationTurns: 1+(Number.random()*3)->floor 
+                from:user, id: 'base:convinced', durationTurns: 1+(Number.random()*3)->floor 
             );
         }
     }
@@ -3496,6 +3614,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Pink Brew',
+        id : 'base:pink-brew',
         targetMode : TARGET_MODE.NONE,
         description: 'Uses 1 Ingredient to make a pink potion.',
         durationTurns: 0,
@@ -3515,7 +3634,7 @@ Ability.newEntry(
             
             @count = 0;
             foreach(inventory.items)::(i, item) {
-                if (item.name == 'Ingredient') ::<= {
+                if (item.base.id == 'base:ingredient') ::<= {
                     count += 1;
                 }
             }
@@ -3525,8 +3644,8 @@ Ability.newEntry(
                 windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
             windowEvent.queueMessage(text: '... and made a Pink Potion!');
-            inventory.removeByName(name:'Ingredient');
-            inventory.add(item:Item.new(base:Item.database.find(name:'Pink Potion')));                            
+            inventory.removeByID(id:'base:ingredient');
+            inventory.add(item:Item.new(base:Item.database.find(id:'base:pink-potion')));                            
         }
     }
 )
@@ -3534,6 +3653,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Cyan Brew',
+        id : 'base:cyan-brew',
         targetMode : TARGET_MODE.NONE,
         description: 'Uses 1 Ingredient to make a cyan potion.',
         durationTurns: 0,
@@ -3553,7 +3673,7 @@ Ability.newEntry(
             
             @count = 0;
             foreach(inventory.items)::(i, item) {
-                if (item.name == 'Ingredient') ::<= {
+                if (item.base.id == 'base:ingredient') ::<= {
                     count += 1;
                 }
             }
@@ -3563,10 +3683,10 @@ Ability.newEntry(
                 windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
             windowEvent.queueMessage(text: '... and made a Cyan Potion!');
-            inventory.removeByName(name:'Ingredient');
+            inventory.removeByID(id:'base:ingredient');
             inventory.add(item:
                 Item.new(
-                    base:Item.database.find(name:'Cyan Potion')
+                    base:Item.database.find(id:'base:cyan-potion')
                 )
             );                            
         }
@@ -3577,6 +3697,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Green Brew',
+        id : 'base:green-brew',
         targetMode : TARGET_MODE.NONE,
         description: 'Uses 1 Ingredient to make a cyan potion.',
         durationTurns: 0,
@@ -3596,7 +3717,7 @@ Ability.newEntry(
             
             @count = 0;
             foreach(inventory.items)::(i, item) {
-                if (item.name == 'Ingredient') ::<= {
+                if (item.base.id == 'base:ingredient') ::<= {
                     count += 1;
                 }
             }
@@ -3606,10 +3727,10 @@ Ability.newEntry(
                 windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
             windowEvent.queueMessage(text: '... and made a Green Potion!');
-            inventory.removeByName(name:'Ingredient');
+            inventory.removeByID(id:'base:ingredient');
             inventory.add(
                 item:Item.new(
-                    base:Item.database.find(name:'Green Potion')
+                    base:Item.database.find(id:'base:green-potion')
             ));                            
         }
     }
@@ -3620,6 +3741,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Orange Brew',
+        id : 'base:orange-brew',
         targetMode : TARGET_MODE.NONE,
         description: 'Uses 1 Ingredient to make an orange potion.',
         durationTurns: 0,
@@ -3639,7 +3761,7 @@ Ability.newEntry(
             
             @count = 0;
             foreach(inventory.items)::(i, item) {
-                if (item.name == 'Ingredient') ::<= {
+                if (item.base.id == 'base:ingredient') ::<= {
                     count += 1;
                 }
             }
@@ -3649,10 +3771,10 @@ Ability.newEntry(
                 windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
             windowEvent.queueMessage(text: '... and made a Orange Potion!');
-            inventory.removeByName(name:'Ingredient');
+            inventory.removeByID(id:'base:ingredient');
             inventory.add(item:
                 Item.new(
-                    base:Item.database.find(name:'Orange Potion')
+                    base:Item.database.find(id:'base:orange-potion')
                 )
             );                            
         }
@@ -3662,6 +3784,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Purple Brew',
+        id : 'base:purple-brew',
         targetMode : TARGET_MODE.NONE,
         description: 'Uses 1 Ingredient to make a purple potion.',
         durationTurns: 0,
@@ -3681,7 +3804,7 @@ Ability.newEntry(
             
             @count = 0;
             foreach(inventory.items)::(i, item) {
-                if (item.name == 'Ingredient') ::<= {
+                if (item.base.id == 'base:ingredient') ::<= {
                     count += 1;
                 }
             }
@@ -3691,10 +3814,10 @@ Ability.newEntry(
                 windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
             windowEvent.queueMessage(text: '... and made a Purple Potion!');
-            inventory.removeByName(name:'Ingredient');
+            inventory.removeByID(id:'base:ingredient');
             inventory.add(
                 item:Item.new(
-                    base:Item.database.find(name:'Purple Potion')
+                    base:Item.database.find(id:'base:purple-potion')
                 )
             );                            
         }
@@ -3705,6 +3828,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Black Brew',
+        id : 'base:black-brew',
         targetMode : TARGET_MODE.NONE,
         description: 'Uses 1 Ingredient to make a black potion.',
         durationTurns: 0,
@@ -3724,7 +3848,7 @@ Ability.newEntry(
             
             @count = 0;
             foreach(inventory.items)::(i, item) {
-                if (item.name == 'Ingredient') ::<= {
+                if (item.base.id == 'base:ingredient') ::<= {
                     count += 1;
                 }
             }
@@ -3734,10 +3858,10 @@ Ability.newEntry(
                 windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
             windowEvent.queueMessage(text: '... and made a Black Potion!');
-            inventory.removeByName(name:'Ingredient');
+            inventory.removeByID(id:'base:ingredient');
             inventory.add(
                 item:Item.new(
-                    base:Item.database.find(name:'Black Potion')
+                    base:Item.database.find(id:'base:black-potion')
                 )
             );                            
         }
@@ -3748,6 +3872,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Bribe',
+        id : 'base:bribe',
         targetMode : TARGET_MODE.ONE,
         description: "Pays a combatant to not fight any more.",
         durationTurns: 0,
@@ -3775,7 +3900,7 @@ Ability.newEntry(
 
                     world.party.inventory.subtractGold(amount:cost);
                     targets[0].addEffect(
-                        from:user, name: 'Bribed', durationTurns: -1
+                        from:user, id: 'base:bribed', durationTurns: -1
                     );             
                     windowEvent.queueMessage(text: user.name + ' bribes ' + targets[0].name + ' for ' + g(g:cost) + '!');
                 
@@ -3791,7 +3916,7 @@ Ability.newEntry(
 
                             windowEvent.queueMessage(text: user.name + ' bribes ' + targets[0].name + '!');
                             targets[0].addEffect(
-                                from:user, name: 'Bribed', durationTurns: -1
+                                from:user, id: 'base:bribed', durationTurns: -1
                             );    
             
                             world.party.inventory.addGold(amount:cost);
@@ -3802,7 +3927,7 @@ Ability.newEntry(
                 // NPC -> NPC
                 default: ::<={
                     targets[0].addEffect(
-                        from:user, name: 'Bribed', durationTurns: -1
+                        from:user, id: 'base:bribed', durationTurns: -1
                     );                                         
                 }
             }
@@ -3813,6 +3938,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Sweet Song',
+        id : 'base:sweet-song',
         targetMode : TARGET_MODE.ALLENEMY,
         description: 'Alluring song that captivates the listener',
         durationTurns: 0,
@@ -3828,7 +3954,7 @@ Ability.newEntry(
             foreach(user.enemies)::(index, enemy) {
                 when(enemy.isIncapacitated()) empty;
                 if (random.flipCoin())
-                    enemy.addEffect(from:user, name: 'Mesmerized', durationTurns: 3)
+                    enemy.addEffect(from:user, id: 'base:mesmerized', durationTurns: 3)
                 else 
                     windowEvent.queueMessage(
                         text: enemy.name + ' covered their ears!'
@@ -3842,6 +3968,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Wrap',
+        id : 'base:wrap',
         targetMode : TARGET_MODE.ONE,
         description: 'Wraps around one enemy, followed by a feast.',
         durationTurns: 2,
@@ -3864,12 +3991,12 @@ Ability.newEntry(
                 }
 
 
-                targets[0].addEffect(from:user, name: 'Wrapped', durationTurns: 4)
+                targets[0].addEffect(from:user, id: 'base:wrapped', durationTurns: 4)
             }
             
             when(turnIndex == 2) ::<= {
                 breakpoint();
-                when ([...targets[0].effects]->filter(by:::(value) <- value.effect.name == 'Wrapped')->size == 0) empty;
+                when ([...targets[0].effects]->filter(by:::(value) <- value.effect.id == 'base:wrapped')->size == 0) empty;
                 
                 windowEvent.queueMessage(
                     text: 'While wrapping ' + targets[0].name + ' in their coils, ' + user.name + ' tries to devour ' + targets[0].name + '!'
@@ -3887,7 +4014,7 @@ Ability.newEntry(
                 );                                
                 
                 targets[0].removeEffectInstance(
-                    instance: targets[0].effects->filter(by:::(value) <- value.from == user && value.effect.name == 'Wrapped')[0]
+                    instance: targets[0].effects->filter(by:::(value) <- value.from == user && value.effect.id == 'base:wrapped')[0]
                 );
                 
             }
@@ -3901,6 +4028,7 @@ Ability.newEntry(
     Ability.newEntry(
         data: {
             name: 'Swipe Kick',
+            id : 'base:swipe-kick',
             targetMode : TARGET_MODE.ONEPART,
             description: "Damages a target based on the user's ATK.",
             durationTurns: 0,
@@ -3943,6 +4071,7 @@ Ability.newEntry(
     name : 'Wyvern.Ability',
     attributes : {
         name : String,
+        id : String,
         description : String,
         targetMode : Number,
         usageHintAI : Number,

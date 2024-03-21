@@ -43,7 +43,7 @@ return ::(
     );
 
 
-    @:choices = [...options]->map(to:::(value) <- value.displayName);
+    @:choices = [...options]->map(to:::(value) <- value.name);
 
 
     windowEvent.queueChoiceColumns(

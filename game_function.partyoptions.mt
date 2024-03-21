@@ -185,14 +185,14 @@ return ::{
                                     if (i <= Entity.EQUIP_SLOTS.HAND_LR) ::<= {
                                         @:item = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
                                         if (i < Entity.EQUIP_SLOTS.HAND_LR) ::<= {     
-                                            str = str +  if (item.name == 'None') ('------') else item.name;
+                                            str = str +  if (item.base.id == 'base:none') ('------') else item.name;
                                         } else if (item.base.equipType == Item.TYPE.TWOHANDED) ::<= {
-                                            str = str +  if (item.name == 'None') ('') else item.name;                                                    
+                                            str = str +  if (item.base.id == 'base:none') ('') else item.name;                                                    
                                         }       
                                     
                                     } else ::<= {
                                         @:item = member.getEquipped(slot:i);
-                                        str = str +  if (item.name == 'None') '------' else item.name;
+                                        str = str +  if (item.base.id == 'base:none') '------' else item.name;
                                     }
                                     choices->push(value:str);
                                 }
@@ -213,7 +213,7 @@ return ::{
                                     @:itemNames = [...items]->map(to:::(value) <- value.name);
                                     itemNames->push(value:'[Nothing]');
                                     @hovered;
-                                    @:none = Item.new(base:Item.database.find(name:'None'));
+                                    @:none = Item.new(base:Item.database.find(id:'None'));
                                     windowEvent.queueChoices(
                                         leftWeight: 0.8,
                                         topWeight: 0.5,
@@ -327,7 +327,7 @@ return ::{
 
                                 // force equip when nothing equipped yet.
                                 // slightly less confusing
-                                when(member.getEquipped(slot).name == 'None')
+                                when(member.getEquipped(slot).base.id == 'base:none')
                                     equip();
 
                                 windowEvent.queueChoices(
@@ -335,7 +335,7 @@ return ::{
                                     topWeight: 1,
                                     onGetChoices:: {
                                         @choices = ['Equip'];
-                                        return if (member.getEquipped(slot).name != 'None') ::<= {
+                                        return if (member.getEquipped(slot).base.id != 'base:none') ::<= {
                                             choices->push(value:'Check');
                                             choices->push(value:'Improve');
                                             choices->push(value:'Rename');

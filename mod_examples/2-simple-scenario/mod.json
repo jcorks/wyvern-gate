@@ -1,6 +1,6 @@
 {
-    "name": "mod.example.rasa.simplescenario",
-    "displayName": "Example mod: Simple Scenario",
+    "id": "mod.example.rasa.simplescenario",
+    "name": "Example mod: Simple Scenario",
     "description": "Adds an empty scenario to the game.",
     "author": "Johnathan Corkery",
     "website": "https://github.com/jcorks/wyvern-gate",

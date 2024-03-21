@@ -92,16 +92,16 @@
                 item.databaseName = databaseNameGetter;
                 item->setIsInterface(enabled:true);
                 
-                items_[item.name] = item;
+                items_[item.id] = item;
             },
 
-            remove ::(name) {
-                items_->remove(key:name);
+            remove ::(id) {
+                items_->remove(key:id);
             },
         
-            find ::(name) {
-                @:item = items_[name];
-                when(item == empty) error(detail: 'Unknown database item ' + name);
+            find ::(id) {
+                @:item = items_[id];
+                when(item == empty) error(detail: 'Unknown database item ID ' + id);
                 return item;
             },
             

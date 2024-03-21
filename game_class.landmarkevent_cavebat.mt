@@ -42,11 +42,11 @@
 
             @:beast = island_.newInhabitant();
             beast.name = 'Cave Bat';
-            beast.species = Species.find(name:'Cave Bat');
-            beast.profession = Profession.new(base:Profession.database.find(name:'Cave Bat'));               
+            beast.species = Species.find(id:'base:cave-bat');
+            beast.profession = Profession.new(base:Profession.database.find(id:'base:cave-bat'));               
             beast.clearAbilities();
             foreach(beast.profession.gainSP(amount:10))::(i, ability) {
-                beast.learnAbility(name:ability);
+                beast.learnAbility(id:ability);
             }
 
             beast.stats.load(serialized:StatSet.new(
@@ -78,8 +78,8 @@
                 entities : ents,
                 tag : 'cavebat'
             );
-            ref.addUpkeepTask(name:'thebeast-roam');
-            ref.addUpkeepTask(name:'aggressive');
+            ref.addUpkeepTask(id:'base:thebeast-roam');
+            ref.addUpkeepTask(id:'base:aggressive');
             
         }
         

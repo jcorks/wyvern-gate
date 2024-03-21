@@ -25,7 +25,7 @@ return struct(
     
     items : {
         // The option's name to display in menus
-        displayName: String,
+        name: String,
         
         // The condition function that determines whether the 
         // option should be added to the menu.

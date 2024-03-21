@@ -38,7 +38,7 @@ return ::(this, party, location, onDone, overrideChat, skipIntro) {
     );
     
     @:interactionNames = [...interactions]->map(
-        to ::(value) <- value.displayName
+        to ::(value) <- value.name
     );
     
     
@@ -85,7 +85,7 @@ return ::(this, party, location, onDone, overrideChat, skipIntro) {
                 entity:this
             );
                 
-            if (this.onInteract) this.onInteract(interaction:interactions[choice-1].displayName);
+            if (this.onInteract) this.onInteract(interaction:interactions[choice-1].name);
 
             if (!interactions[choice-1].keepInteractionMenu && windowEvent.canJumpToTag(name:'InteractPerson')) 
                 windowEvent.jumpToTag(name:'InteractPerson', goBeforeTag:true, doResolveNext:true);

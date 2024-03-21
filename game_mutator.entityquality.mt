@@ -36,6 +36,7 @@
 EntityQuality.database.newEntry(
     data : {
         name : 'fur',
+        id : 'base:fur',
         appearanceChance : 1,
         plural : false,
         descriptions : [
@@ -113,6 +114,7 @@ EntityQuality.database.newEntry(
 EntityQuality.database.newEntry(
     data : {
         name : 'face',
+        id : 'base:face',
         appearanceChance : 0.3,
         plural : false,
         descriptions : [
@@ -163,6 +165,7 @@ EntityQuality.database.newEntry(
 EntityQuality.database.newEntry(
     data : {
         name : 'scales',
+        id : 'base:scales',
         appearanceChance : 1,
         plural : true,
         descriptions : [
@@ -243,6 +246,7 @@ EntityQuality.database.newEntry(
 EntityQuality.database.newEntry(
     data : {
         name : 'feathers',
+        id : 'base:feathers',
         appearanceChance : 1,
         plural : true,
         descriptions : [
@@ -288,6 +292,7 @@ EntityQuality.database.newEntry(
 EntityQuality.database.newEntry(
     data : {
         name : 'eyes',
+        id : 'base:eyes',
         appearanceChance : 1,
         plural : true,
         descriptions : [
@@ -354,6 +359,7 @@ EntityQuality.database.newEntry(
 EntityQuality.database.newEntry(
     data : {
         name : 'ears',
+        id : 'base:ears',
         plural : true,
         appearanceChance : 1,
         descriptions : [
@@ -384,6 +390,7 @@ EntityQuality.database.newEntry(
 EntityQuality.database.newEntry(
     data : {
         name : 'horns',
+        id : 'base:horns',
         plural : true,
         appearanceChance : 0.5,
         descriptions : [
@@ -433,6 +440,7 @@ EntityQuality.database.newEntry(
 EntityQuality.database.newEntry(
     data : {
         name : 'tail',
+        id : 'base:tail',
         plural : false,
         appearanceChance : 1,
         descriptions : [
@@ -477,6 +485,7 @@ EntityQuality.database.newEntry(
 EntityQuality.database.newEntry(
     data : {
         name : 'snout',
+        id : 'base:snout',
         appearanceChance : 1,
         plural : false,
         descriptions : [
@@ -509,6 +518,7 @@ EntityQuality.database.newEntry(
 EntityQuality.database.newEntry(
     data : {
         name : 'body',
+        id : 'base:body',
         appearanceChance : 1,
         plural : false,
         descriptions : [
@@ -568,6 +578,7 @@ EntityQuality.database.newEntry(
         name : 'Wyvern.EntityQuality.Base',     
         attributes : {
             name : String,
+            id : String,
             plural : Boolean,
             appearanceChance : Number,
             descriptions : Object,

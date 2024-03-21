@@ -51,7 +51,7 @@
             {
                 (TAG__IS_DATABASE) : true,
                 database : value.databaseName,
-                name : value.name
+                id : value.id
             };
 
         if (DEBUG_SERIALIZED != empty) ::<= {
@@ -126,7 +126,7 @@
         }
         when(value[TAG__IS_DATABASE] != empty) ::<= {
             @:database = Database.Lookup[value.database];
-            output[key] = database.find(name:value.name);
+            output[key] = database.find(id:value.id);
         }
         
         when(value[TAG__SPARSE_ARRAY] != empty) ::<= {

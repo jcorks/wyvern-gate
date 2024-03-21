@@ -25,6 +25,7 @@
 ItemColor.newEntry(
     data : {
         name : 'red',
+        id : 'base:red',
         equipMod : StatSet.new(
             DEF: 3,
             ATK: 3,
@@ -36,6 +37,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'blue',
+        id : 'base:blue',
         equipMod : StatSet.new(
             SPD: 3,
             DEX: 3,
@@ -48,6 +50,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'purple',
+        id : 'base:purple',
         equipMod : StatSet.new(
             SPD: 2,
             DEX: 2,
@@ -61,6 +64,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'pink',
+        id : 'base:pink',
         equipMod : StatSet.new(
             DEX: 3,
             INT: 5
@@ -71,6 +75,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'white',
+        id : 'base:white',
         equipMod : StatSet.new(
             DEF: 7
         ),
@@ -82,6 +87,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'green',
+        id : 'base:green',
         equipMod : StatSet.new(
             SPD: 3,
             DEX: 3,
@@ -93,6 +99,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'olive-green',
+        id : 'base:olive-green',
         equipMod : StatSet.new(
             SPD: 3,
             DEX: 4,
@@ -104,6 +111,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'yellow',
+        id : 'base:yellow',
         equipMod : StatSet.new(
             DEX: 5,
             ATK: 3
@@ -114,6 +122,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'orange',
+        id : 'base:orange',
         equipMod : StatSet.new(
             DEX: 3,
             ATK: 5
@@ -124,6 +133,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'grey',
+        id : 'base:grey',
         equipMod : StatSet.new(
             SPD: 5,
             DEX: 3
@@ -134,6 +144,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'brown',
+        id : 'base:brown',
         equipMod : StatSet.new(
             DEF: 5,
             DEX: 3
@@ -144,6 +155,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'black',
+        id : 'base:black',
         equipMod : StatSet.new(
             ATK: 7
         ),
@@ -153,6 +165,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'silver',
+        id : 'base:silver',
         equipMod : StatSet.new(
             ATK: 5,
             DEF: 5
@@ -163,6 +176,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'aquamarine',
+        id : 'base:aquamarine',
         equipMod : StatSet.new(
             INT: 5,
             DEF: 3
@@ -174,6 +188,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'teal',
+        id : 'base:teal',
         equipMod : StatSet.new(
             SPD: 5,
             INT: 3
@@ -185,6 +200,7 @@ ItemColor.newEntry(
 ItemColor.newEntry(
     data : {
         name : 'gold',
+        id : 'base:gold',
         equipMod : StatSet.new(
             ATK: 5,
             DEF: 5,
@@ -198,6 +214,7 @@ ItemColor.newEntry(
     name : 'Wyvern.ItemColor',
     attributes : {
         name : String,
+        id : String,
         equipMod : StatSet.type, // percentages
     },
     reset

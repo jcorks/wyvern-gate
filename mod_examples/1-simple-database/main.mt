@@ -32,6 +32,9 @@ return {
             // Base name of the item.
             name : "Frying Pan",
 
+            // A unique ID. Usually this is prefixed with the mod ID to guarantee uniqueness.            
+            id: 'mod.example.rasa.simplescenario:frying-pan',
+
             // Regular description of the item. Note the $color$ and $design$ tokens.
             description: 'A frying pan usually used for cooking. The handle has a $color$ trim with a $design$ design.',
 
@@ -102,14 +105,14 @@ return {
             
             // The effects that occur, in order, when used as an item.
             useEffects : [
-                'Fling',
+                'base:fling',
             ],
             
             // The abilities that are possible when making an item. Only one of them is 
             // chosen for an item instance.
             possibleAbilities : [
-                "Doublestrike",
-                "Stun"
+                "base:doublestrike",
+                "base:stun"
             ],
 
             // Additional effects, by name, that are passively active when equipping the item.

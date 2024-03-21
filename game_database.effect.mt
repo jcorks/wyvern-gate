@@ -34,48 +34,6 @@
 @:g = import(module:'game_function.g.mt');
 
 
-Effect.newEntry(
-    data : {
-        name : 'EVENTEFFECT::scene0_0_sylviaenter',
-        description: '',
-        battleOnly : true,
-        skipTurn : false,
-        stackable: false,
-        stats: StatSet.new(),
-        blockPoints : 0,
-        onAffliction ::(user, item, holder) {
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            Scene.start(name:'scene0_0_sylviaenter');
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
-        },
-    }
-)
-    
-    
     
     
     
@@ -86,6 +44,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Defend',
+        id: 'base:defend',
         description: 'Reduces damage by 40%',
         battleOnly : true,
         skipTurn : false,
@@ -136,6 +95,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Guard',
+        id : 'base:guard',
         description: 'Reduces damage by 90%',
         battleOnly : true,
         skipTurn : false,
@@ -182,6 +142,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Apparition',
+        id : 'base:apparition',
         description: 'Ghostly apparition makes it particularly hard to hit.',
         battleOnly : true,
         skipTurn : false,
@@ -229,6 +190,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'The Beast',
+        id : 'base:the-beast',
         description: 'The ferocity of this creature makes it particularly hard to hit.',
         battleOnly : true,
         skipTurn : false,
@@ -275,6 +237,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Seasoned Adventurer',
+        id : 'base:seasoned-adventurer',
         description: 'Is considerably harder to hit, as they are an experienced fighter.',
         battleOnly : true,
         skipTurn : false,
@@ -327,6 +290,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Defensive Stance',
+        id : 'base:defensive-stance',
         description: 'ATK -50%, DEF +200%, additional block point.',
         battleOnly : true,
         skipTurn : false,
@@ -371,6 +335,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Offsensive Stance',
+        id : 'base:offensive-stance',
         description: 'DEF -50%, ATK +200%',
         battleOnly : true,
         skipTurn : false,
@@ -414,6 +379,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Light Stance',
+        id : 'base:light-stance',        
         description: 'ATK -50%, SPD +100%, DEX +100%',
         battleOnly : true,
         skipTurn : false,
@@ -457,6 +423,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Heavy Stance',
+        id : 'base:heavy-stance',
         description: 'SPD -50%, DEF +200%, additional block point.',
         battleOnly : true,
         skipTurn : false,
@@ -501,6 +468,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Meditative Stance',
+        id : 'base:meditative-stance',
         description: 'SPD -50%, INT +200%',
         battleOnly : true,
         skipTurn : false,
@@ -545,6 +513,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Striking Stance',
+        id : 'base:striking-stance',
         description: 'SPD -30%, DEF -30%, ATK +200%, DEX +100%',
         battleOnly : true,
         skipTurn : false,
@@ -588,6 +557,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Reflective Stance',
+        id : 'base:reflective-stance',
         description: 'Attack retaliation',
         battleOnly : true,
         skipTurn : false,
@@ -646,6 +616,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Counter',
+        id : 'base:counter',
         description: 'Dodges attacks and retaliates.',
         battleOnly : true,
         skipTurn : true,
@@ -703,6 +674,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Evasive Stance',
+        id : 'base:evasive-stance',
         description: '%50 chance damage nullify when from others.',
         battleOnly : true,
         skipTurn : false,
@@ -754,6 +726,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Sneaked',
+        id : 'base:sneaked',
         description: 'Guarantees next damage from user is x3',
         battleOnly : true,
         skipTurn : false,
@@ -801,6 +774,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Mind Focused',
+        id : 'base:mind-focused',
         description: 'INT +100%',
         battleOnly : true,
         skipTurn : false,
@@ -844,6 +818,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Protect',
+        id : 'base:protect',
         description: 'DEF +100%',
         battleOnly : true,
         skipTurn : false,
@@ -886,6 +861,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Shield',
+        id : 'base:shield',
         description: 'DEF +10%, 30% chance to block',
         battleOnly : true,
         skipTurn : false,
@@ -932,6 +908,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Trigger Protect',
+        id : 'base:trigger-protect',
         description: 'Casts Protect',
         battleOnly : true,
         skipTurn : false,
@@ -943,7 +920,7 @@ Effect.newEntry(
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
             windowEvent.queueMessage(text:'It casts Protect on ' + holder.name + '!');
             holder.addEffect(
-                from:user, name: 'Protect', durationTurns: 3
+                from:user, id: 'base:protect', durationTurns: 3
             );                        
         },
         onPostAttackOther ::(user, item, holder, to) {
@@ -976,6 +953,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Trigger Evade',
+        id : 'base:trigger-evade',
         description: 'Allows the user to evade all attacks for the next turn.',
         battleOnly : true,
         skipTurn : false,
@@ -986,7 +964,7 @@ Effect.newEntry(
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
             holder.addEffect(
-                from:user, name: 'Evade', durationTurns: 1
+                from:user, id: 'base:evade', durationTurns: 1
             );                        
         },
         onPostAttackOther ::(user, item, holder, to) {
@@ -1019,6 +997,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Evade',
+        id : 'base:evade',
         description: 'Allows the user to evade all attacks.',
         battleOnly : true,
         skipTurn : false,
@@ -1061,6 +1040,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Trigger Regen',
+        id : 'base:trigger-regen',
         description: 'Slightly heals wounds.',
         battleOnly : true,
         skipTurn : false,
@@ -1105,6 +1085,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Trigger Hurt Chance',
+        id : 'base:trigger-hurt-chance',
         description: '10% chance to hurt for 1HP.',
         battleOnly : true,
         skipTurn : false,
@@ -1156,6 +1137,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Trigger Fatigue Chance',
+        id : 'base:trigger-fatigue-chance',
         description: '10% chance to hurt for 1AP.',
         battleOnly : true,
         skipTurn : false,
@@ -1207,6 +1189,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Trigger Break Chance',
+        id : 'base:trigger-break-chance',
         description: '5% chance to break item.',
         battleOnly : true,
         skipTurn : false,
@@ -1251,6 +1234,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Trigger Spikes',
+        id : 'base:trigger-spikes',
         description: 'Casts Spikes',
         battleOnly : true,
         skipTurn : false,
@@ -1262,7 +1246,7 @@ Effect.newEntry(
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
             windowEvent.queueMessage(text:'It covers ' + holder.name + ' in spikes of light!');
             holder.addEffect(
-                from:user, name: 'Spikes', durationTurns: 3
+                from:user, id: 'base:spikes', durationTurns: 3
             );                        
         },
         onPostAttackOther ::(user, item, holder, to) {
@@ -1295,6 +1279,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Spikes',
+        id : 'base:spikes',
         description: 'DEF +10%, light damage when attacked.',
         battleOnly : true,
         skipTurn : false,
@@ -1339,102 +1324,12 @@ Effect.newEntry(
     }
 ) 
 
-
-Effect.newEntry(
-    data : {
-        name : 'Trigger Spikes',
-        description: 'Casts Spikes',
-        battleOnly : true,
-        skipTurn : false,
-        stackable: false,
-        blockPoints : 0,
-        stats: StatSet.new(
-        ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-            windowEvent.queueMessage(text:'It covers ' + holder.name + ' in spikes of light!');
-            holder.addEffect(
-                from:user, name: 'Spikes', durationTurns: 3
-            );                        
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
-    }
-) 
-
-Effect.newEntry(
-    data : {
-        name : 'Spikes',
-        description: 'DEF +10%, light damage when attacked.',
-        battleOnly : true,
-        skipTurn : false,
-        stackable: false,
-        blockPoints : 0,
-        stats: StatSet.new(
-            DEF: 10
-        ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + ' is covered in spikes of light.');
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-            windowEvent.queueMessage(text:by.name + ' gets hurt by ' + holder.name + '\'s spikes of light!');
-            by.damage(from:holder, damage:Damage.new(
-                amount:random.integer(from:1, to:4),
-                damageType:Damage.TYPE.LIGHT,
-                damageClass:Damage.CLASS.HP
-            ),dodgeable: false);
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s spikes of light fade.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
-    }
-) 
 
 
 Effect.newEntry(
     data : {
         name : 'Trigger AP Regen',
+        id : 'base:trigger-ap-regen',
         description: 'Slightly recovers AP.',
         battleOnly : true,
         skipTurn : false,
@@ -1478,6 +1373,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Trigger Shield',
+        id : 'base:trigger-shield',
         description: 'Casts Shield',
         battleOnly : true,
         skipTurn : false,
@@ -1489,7 +1385,7 @@ Effect.newEntry(
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
             windowEvent.queueMessage(text:'It casts Shield on ' + holder.name + '!');
             holder.addEffect(
-                from:user, name: 'Shield', durationTurns: 3
+                from:user, id: 'base:shield', durationTurns: 3
             );                        
         },
         onPostAttackOther ::(user, item, holder, to) {
@@ -1523,6 +1419,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Trigger Strength Boost',
+        id : 'base:trigger-strength-boost',
         description: 'Triggers a boost in strength.',
         battleOnly : true,
         skipTurn : false,
@@ -1533,7 +1430,7 @@ Effect.newEntry(
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
             holder.addEffect(
-                from:user, name: 'Strength Boost', durationTurns: 3
+                from:user, id: 'base:strength-boost', durationTurns: 3
             );                        
         },
         onPostAttackOther ::(user, item, holder, to) {
@@ -1566,6 +1463,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Strength Boost',
+        id : 'base:strength-boost',
         description: 'ATK +70%',
         battleOnly : true,
         skipTurn : false,
@@ -1608,6 +1506,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Trigger Defense Boost',
+        id : 'base:trigger-defense-boost',
         description: 'Triggers a boost in defense.',
         battleOnly : true,
         skipTurn : false,
@@ -1618,7 +1517,7 @@ Effect.newEntry(
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
             holder.addEffect(
-                from:user, name: 'Defense Boost', durationTurns: 3
+                from:user, id: 'base:defense-boost', durationTurns: 3
             );                        
         },
         onPostAttackOther ::(user, item, holder, to) {
@@ -1651,6 +1550,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Defense Boost',
+        id : 'base:defense-boost',
         description: 'DEF +70%',
         battleOnly : true,
         skipTurn : false,
@@ -1693,6 +1593,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Trigger Mind Boost',
+        id : 'base:trigger-mind-boost',
         description: 'Triggers a boost in mental acuity.',
         battleOnly : true,
         skipTurn : false,
@@ -1703,7 +1604,7 @@ Effect.newEntry(
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
             holder.addEffect(
-                from:user, name: 'Mind Boost', durationTurns: 3
+                from:user, id: 'base:mind-boost', durationTurns: 3
             );                        
         },
         onPostAttackOther ::(user, item, holder, to) {
@@ -1736,6 +1637,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Mind Boost',
+        id : 'base:mind-boost',
         description: 'INT +70%',
         battleOnly : true,
         skipTurn : false,
@@ -1778,6 +1680,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Trigger Dex Boost',
+        id : 'base:trigger-dex-boost',
         description: 'Triggers a boost in dexterity.',
         battleOnly : true,
         skipTurn : false,
@@ -1788,7 +1691,7 @@ Effect.newEntry(
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
             holder.addEffect(
-                from:user, name: 'Dex Boost', durationTurns: 3
+                from:user, id: 'base:dex-boost', durationTurns: 3
             );                        
         },
         onPostAttackOther ::(user, item, holder, to) {
@@ -1821,6 +1724,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Dex Boost',
+        id : 'base:dex-boost',
         description: 'DEX +70%',
         battleOnly : true,
         skipTurn : false,
@@ -1863,6 +1767,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Trigger Speed Boost',
+        id : 'base:trigger-speed-boost',
         description: 'Triggers a boost in speed.',
         battleOnly : true,
         skipTurn : false,
@@ -1873,7 +1778,7 @@ Effect.newEntry(
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
             holder.addEffect(
-                from:user, name: 'Speed Boost', durationTurns: 3
+                from:user, id: 'base:speed-boost', durationTurns: 3
             );                        
         },
         onPostAttackOther ::(user, item, holder, to) {
@@ -1906,6 +1811,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Speed Boost',
+        id : 'base:speed-boost',
         description: 'SPD +70%',
         battleOnly : true,
         skipTurn : false,
@@ -1951,6 +1857,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Night Veil',
+        id : 'base:night-veil',
         description: 'DEF +40%',
         battleOnly : true,
         skipTurn : false,
@@ -1992,6 +1899,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Dayshroud',
+        id : 'base:dayshroud',
         description: 'DEF +40%',
         battleOnly : true,
         skipTurn : false,
@@ -2033,6 +1941,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Call of the Night',
+        id : 'base:call-of-the-night',
         description: 'ATK +40%',
         battleOnly : true,
         skipTurn : false,
@@ -2075,6 +1984,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Lunacy',
+        id : 'base:lunacy',
         description: 'Skips turn and, instead, attacks a random enemy. ATK,DEF +70%.',
         battleOnly : true,
         skipTurn : true,
@@ -2126,6 +2036,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Greater Call of the Night',
+        id : 'base:greater-call-of-the-night',
         description: 'ATK +100%',
         battleOnly : true,
         skipTurn : false,
@@ -2167,6 +2078,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Greater Night Veil',
+        id : 'base:greater-night-veil',
         description: 'DEF +100%',
         battleOnly : true,
         skipTurn : false,
@@ -2209,6 +2121,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Greater Dayshroud',
+        id : 'base:greater-dayshroud',
         description: 'DEF +100%',
         battleOnly : true,
         skipTurn : false,
@@ -2250,6 +2163,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Moonsong',
+        id : 'base:moonsong',
         description: 'Heals 5% HP every turn',
         battleOnly : true,
         skipTurn : false,
@@ -2291,6 +2205,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Sol Attunement',
+        id : 'base:sol-attunement',
         description: 'Heals 5% HP every turn',
         battleOnly : true,
         skipTurn : false,
@@ -2332,6 +2247,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Greater Moonsong',
+        id : 'base:greater-moonsong',
         description: 'Heals 15% HP every turn',
         battleOnly : true,
         skipTurn : false,
@@ -2373,6 +2289,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Greater Sol Attunement',
+        id : 'base:greater-sol-attunement',
         description: 'Heals 15% HP every turn',
         battleOnly : true,
         skipTurn : false,
@@ -2414,6 +2331,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Grace',
+        id : 'base:grace',
         description: 'If hurt while HP is 0, the damage is nullified and this effect disappears.',
         battleOnly : true,
         skipTurn : false,
@@ -2446,7 +2364,7 @@ Effect.newEntry(
                 windowEvent.queueMessage(text:holder.name + ' is protected from death!');
                 holder.removeEffects(
                     effectBases : [
-                        Effect.find(name:'Grace')
+                        Effect.find(id:'Grace')
                     ]
                 );
             }
@@ -2466,6 +2384,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Consume Item',
+        id : 'base:consume-item',
         description: 'The item is destroyed in the process of its effects',
         battleOnly : true,
         skipTurn : false,
@@ -2508,6 +2427,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Break Item',
+        id : 'base:break-item',
         description: 'The item is destroyed in the process of misuse or strain',
         battleOnly : true,
         skipTurn : false,
@@ -2552,6 +2472,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Fling',
+        id : 'base:fling',
         description: 'The item is violently lunged at a target, likely causing damage. The target may catch the item.',
         battleOnly : true,
         skipTurn : false,
@@ -2613,49 +2534,12 @@ Effect.newEntry(
     }
 )    
 
-Effect.newEntry(
-    data : {
-        name : 'Sentimental Box',
-        description: 'Opens the box.',
-        battleOnly : true,
-        skipTurn : false,
-        stackable: true,
-        blockPoints : 0,
-        stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            Scene.start(name:'scene_sentimentalbox', onDone::{});            
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
-    }
-)
   
 
 Effect.newEntry(
     data : {
         name : 'HP Recovery: All',
+        id : 'base:hp-recovery-all',
         description: 'Heals 100% of HP.',
         battleOnly : true,
         skipTurn : false,
@@ -2695,6 +2579,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'AP Recovery: All',
+        id : 'base:ap-recovery-all',
         description: 'Heals 100% of AP.',
         battleOnly : true,
         skipTurn : false,
@@ -2734,6 +2619,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Treasure I',
+        id : 'base:treasure-1',
         description: 'Opening gives a fair number of G.',
         battleOnly : true,
         skipTurn : false,
@@ -2776,6 +2662,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Field Cook',
+        id : 'base:field-cook',
         description: 'Chance to cook a meal after battle.',
         battleOnly : true,
         skipTurn : false,
@@ -2830,6 +2717,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Penny Picker',
+        id : 'base:penny-picker',
         description: 'Looks on the ground for G after battle.',
         battleOnly : true,
         skipTurn : false,
@@ -2883,6 +2771,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Alchemist\'s Scavenging',
+        id : 'base:alchemists-scavenging',
         description: 'Scavenges for alchemist ingredients.',
         battleOnly : true,
         skipTurn : false,
@@ -2910,7 +2799,7 @@ Effect.newEntry(
             );
 
             for(0, amt)::(i) {                    
-                world.party.inventory.add(item:Item.new(base:Item.database.find(name:'Ingredient')));
+                world.party.inventory.add(item:Item.new(base:Item.database.find(id:'Ingredient')));
             }
             
         },                
@@ -2942,6 +2831,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Trained Hand',
+        id : 'base:trained-hand',
         description: 'ATK +30%',
         battleOnly : true,
         skipTurn : false,
@@ -2982,6 +2872,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Focus Perception',
+        id : 'base:focus-perception',
         description: 'ATK +30%',
         battleOnly : true,
         skipTurn : false,
@@ -3020,6 +2911,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Cheered',
+        id : 'base:cheered',
         description: 'ATK +70%',
         battleOnly : true,
         skipTurn : false,
@@ -3058,6 +2950,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Poisonroot Growing',
+        id : 'base:poisonroot-growing',
         description: 'Vines grow on target. SPD -10%',
         battleOnly : true,
         skipTurn : false,
@@ -3068,7 +2961,7 @@ Effect.newEntry(
         },
         
         onRemoveEffect ::(user, item, holder) {                    
-            holder.addEffect(from:holder, name:'Poisonroot', durationTurns:30);                            
+            holder.addEffect(from:holder, id:'base:poisonroot', durationTurns:30);                            
         },                
         
         onSuccessfulBlock::(user, item, holder, from, damage) {
@@ -3098,6 +2991,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Poisonroot',
+        id : 'base:poisonroot',
         description: 'Every turn takes poison damage. SPD -10%',
         battleOnly : true,
         skipTurn : false,
@@ -3142,6 +3036,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Triproot Growing',
+        id : 'base:triproot-growing',
         description: 'Vines grow on target. SPD -10%',
         battleOnly : true,
         skipTurn : false,
@@ -3152,7 +3047,7 @@ Effect.newEntry(
         },
         
         onRemoveEffect ::(user, item, holder) {                    
-            holder.addEffect(from:holder, name:'Triproot', durationTurns:30);                            
+            holder.addEffect(from:holder, id:'base:triproot', durationTurns:30);                            
         },                
         
         onSuccessfulBlock::(user, item, holder, from, damage) {
@@ -3183,6 +3078,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Triproot',
+        id : 'base:triproot',
         description: 'Every turn 40% chance to trip. SPD -10%',
         battleOnly : true,
         skipTurn : false,
@@ -3213,7 +3109,7 @@ Effect.newEntry(
         onNextTurn ::(user, item, holder, turnIndex, turnCount) {
             if (Number.random() < 0.4) ::<= {
                 windowEvent.queueMessage(text:'The triproot trips ' + holder.name + '!');
-                holder.addEffect(from:holder, name:'Stunned', durationTurns:1);                                                
+                holder.addEffect(from:holder, id:'base:stunned', durationTurns:1);                                                
             }
         },
         onStatRecalculate ::(user, item, holder, stats) {
@@ -3226,6 +3122,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Healroot Growing',
+        id : 'base:healroot-growing',
         description: 'Vines grow on target. SPD -10%',
         battleOnly : true,
         skipTurn : false,
@@ -3236,7 +3133,7 @@ Effect.newEntry(
         },
         
         onRemoveEffect ::(user, item, holder) {                    
-            holder.addEffect(from:holder, name:'Healroot', durationTurns:30);                            
+            holder.addEffect(from:holder, id:'base:healroot', durationTurns:30);                            
         },                
         
         onSuccessfulBlock::(user, item, holder, from, damage) {
@@ -3267,6 +3164,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Healroot',
+        id : 'base:healroot',
         description: 'Every turn heal 5% HP. SPD -10%',
         battleOnly : true,
         skipTurn : false,
@@ -3310,6 +3208,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Defend Other',
+        id : 'base:defend-other',
         description: 'Takes hits for another.',
         battleOnly : true,
         skipTurn : false,
@@ -3363,6 +3262,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Perfect Guard',
+        id : 'base:perfect-guard',
         description: 'All damage is nullified.',
         battleOnly : true,
         skipTurn : false,
@@ -3406,6 +3306,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Convinced',
+        id : 'base:convinced',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
@@ -3447,6 +3348,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Grappled',
+        id : 'base:grappled',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
@@ -3488,6 +3390,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Ensnared',
+        id : 'base:ensnared',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
@@ -3529,6 +3432,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Grappling',
+        id : 'base:grappling',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
@@ -3567,6 +3471,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Ensnaring',
+        id : 'base:ensnaring',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
@@ -3607,6 +3512,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Bribed',
+        id : 'base:bribed',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
@@ -3645,6 +3551,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Stunned',
+        id : 'base:stunned',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
@@ -3684,6 +3591,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Sharpen',
+        id : 'base:sharpen',
         description: 'ATK +20%',
         battleOnly : true,
         skipTurn : false,
@@ -3723,6 +3631,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Weaken Armor',
+        id : 'base:weaken-armor',
         description: 'DEF -20%',
         battleOnly : true,
         skipTurn : false,
@@ -3762,6 +3671,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Dull Weapon',
+        id : 'base:dull-weapon',
         description: 'ATK -20%',
         battleOnly : true,
         skipTurn : false,
@@ -3801,6 +3711,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Strengthen Armor',
+        id : 'base:strengthen-armor',
         description: 'DEF +20%',
         battleOnly : true,
         skipTurn : false,
@@ -3841,6 +3752,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Lunar Affinity',
+        id : 'base:lunar-affinity',
         description: 'INT,DEF,ATK +40% if night time.',
         battleOnly : true,
         skipTurn : false,
@@ -3889,6 +3801,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Coordinated',
+        id : 'base:coordinated',
         description: 'SPD,DEF,ATK +35%',
         battleOnly : true,
         skipTurn : false,
@@ -3930,6 +3843,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Proceed with Caution',
+        id : 'base:proceed-with-caution',
         description: 'DEF + 50%',
         battleOnly : true,
         skipTurn : false,
@@ -3972,6 +3886,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Solar Affinity',
+        id : 'base:solar-affinity',
         description: 'INT,DEF,ATK +40% if day time.',
         battleOnly : true,
         skipTurn : false,
@@ -4021,6 +3936,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Non-combat Weapon',
+        id : 'base:non-combat-weapon',
         description: '20% chance to deflect attack then break weapon.',
         battleOnly : true,
         skipTurn : false,
@@ -4068,6 +3984,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Auto-Life',
+        id : 'base:auto-life',
         description: '50% chance to fully revive if damaged while at 0 HP. This breaks the item.',
         battleOnly : true,
         skipTurn : false,
@@ -4123,6 +4040,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Flight',
+        id : 'base:flight',
         description: 'Dodges attacks.',
         battleOnly : true,
         skipTurn : false,
@@ -4165,6 +4083,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Assassin\'s Pride',
+        id : 'base:assassins-pride',
         description: 'SPD, ATK +25% for each slain.',
         battleOnly : true,
         skipTurn : false,
@@ -4180,7 +4099,7 @@ Effect.newEntry(
         onPostAttackOther ::(user, item, holder, to) {
             if (to.isIncapacitated()) ::<= {
                 windowEvent.queueMessage(text:holder.name + "'s ending blow to " + to.name + " increases "+ holder.name + "'s abilities due to their Assassin's Pride.");                        
-                user.addEffect(from:holder, name: 'Pride', durationTurns: 10);                        
+                user.addEffect(from:holder, id: 'base:pride', durationTurns: 10);                        
             }
         },
 
@@ -4208,6 +4127,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Pride',
+        id : 'base:pride',
         description: 'SPD, ATK +25%',
         battleOnly : true,
         skipTurn : false,
@@ -4252,6 +4172,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Dueled',
+        id : 'base:dueled',
         description: 'If attacked by user, 1.5x damage.',
         battleOnly : true,
         skipTurn : false,
@@ -4292,6 +4213,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Consume Item Partially',
+        id : 'base:consume-item-partially',
         description: 'The item has a chance of being used up',
         battleOnly : true,
         skipTurn : false,
@@ -4340,6 +4262,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Bleeding',
+        id : 'base:bleeding',
         description: 'Damage every turn to holder. ATK,DEF,SPD -20%.',
         battleOnly : true,
         skipTurn : false,
@@ -4395,6 +4318,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Learn Skill',
+        id : 'base:learn-skill',
         description: 'Acquire a new skill',
         battleOnly : true,
         skipTurn : false,
@@ -4407,8 +4331,8 @@ Effect.newEntry(
 
             @:learned = holder.profession.gainSP(amount:1);
             foreach(learned)::(index, ability) {
-                holder.learnAbility(name:ability);
-                windowEvent.queueMessage(text: holder.name + ' learned the ability: ' + ability);                        
+                holder.learnAbility(id:ability);
+                windowEvent.queueMessage(text: holder.name + ' learned the ability: ' + Ability.database.find(id:ability).name;                        
             }
         
         },
@@ -4442,6 +4366,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Explode',
+        id : 'base:explode',
         description: 'Damage to holder.',
         battleOnly : true,
         skipTurn : false,
@@ -4490,6 +4415,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Poison Rune',
+        id : 'base:poison-rune',
         description: 'Damage every turn to holder.',
         battleOnly : true,
         skipTurn : false,
@@ -4541,6 +4467,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Destruction Rune',
+        id : 'base:destruction-rune',
         description: 'Causes INT-based damage when rune is released.',
         battleOnly : true,
         skipTurn : false,
@@ -4582,6 +4509,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Regeneration Rune',
+        id : 'base:regeneration-rune',
         description: 'Heals holder every turn.',
         battleOnly : true,
         skipTurn : false,
@@ -4625,6 +4553,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Shield Rune',
+        id : 'base:shield-rune',
         description: '+100% DEF while active.',
         battleOnly : true,
         skipTurn : false,
@@ -4670,6 +4599,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Cure Rune',
+        id : 'base:cure-rune',
         description: 'Cures the holder when the rune is released.',
         battleOnly : true,
         skipTurn : false,
@@ -4716,6 +4646,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Poisoned',
+        id : 'base:poisoned',
         description: 'Damage every turn to holder.',
         battleOnly : true,
         skipTurn : false,
@@ -4767,6 +4698,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Blind',
+        id : 'base:blind',
         description: '50% chance to miss attacks.',
         battleOnly : true,
         skipTurn : false,
@@ -4813,6 +4745,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Burned',
+        id : 'base:burned',
         description: '50% chance to get damage each turn.',
         battleOnly : true,
         skipTurn : false,
@@ -4863,6 +4796,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Frozen',
+        id : 'base:frozen',
         description: 'Unable to act.',
         battleOnly : true,
         skipTurn : true,
@@ -4904,6 +4838,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Paralyzed',
+        id : 'base:paralyzed',
         description: 'SPD,ATK -100%',
         battleOnly : true,
         skipTurn : true,
@@ -4949,6 +4884,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Mesmerized',
+        id : 'base:mesmerized',
         description: 'SPD,DEF -100%',
         battleOnly : true,
         skipTurn : true,
@@ -4994,6 +4930,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Wrapped',
+        id : 'base:wrapped',
         description: 'Can\'t move.',
         battleOnly : true,
         skipTurn : true,
@@ -5037,6 +4974,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Petrified',
+        id : 'base:petrified',
         description: 'Unable to act. DEF -50%',
         battleOnly : true,
         skipTurn : true,
@@ -5080,6 +5018,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Elemental Tag',
+        id : 'base:elemental-tag',
         description: 'Weakness to Fire, Ice, and Thunder damage by 100%',
         battleOnly : true,
         skipTurn : false,
@@ -5128,6 +5067,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Elemental Shield',
+        id : 'base:elemental-shield',
         description: 'Nullify ',
         battleOnly : true,
         skipTurn : false,
@@ -5182,6 +5122,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Burning',
+        id : 'base:burning',
         description: 'Gives fire damage and gives 50% ice resist',
         battleOnly : true,
         skipTurn : false,
@@ -5228,6 +5169,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Icy',
+        id : 'base:icy',
         description: 'Gives ice damage and gives 50% fire resist',
         battleOnly : true,
         skipTurn : false,
@@ -5274,6 +5216,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Shock',
+        id : 'base:shock',
         description: 'Gives thunder damage and gives 50% thunder resist',
         battleOnly : true,
         skipTurn : false,
@@ -5320,6 +5263,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Toxic',
+        id : 'base:toxic',
         description: 'Gives poison damage and gives 50% poison resist',
         battleOnly : true,
         skipTurn : false,
@@ -5368,6 +5312,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Shimmering',
+        id : 'base:shimmering',
         description: 'Gives light damage and gives 50% dark resist',
         battleOnly : true,
         skipTurn : false,
@@ -5413,6 +5358,7 @@ Effect.newEntry(
 Effect.newEntry(
     data : {
         name : 'Dark',
+        id : 'base:dark',
         description: 'Gives dark damage and gives 50% light resist',
         battleOnly : true,
         skipTurn : false,
@@ -5460,6 +5406,7 @@ Effect.newEntry(
     name: "Wyvern.Effect",
     attributes : {
         name : String,
+        id : String,
         description : String,
         battleOnly : Boolean,
         skipTurn : Boolean, // whether this effect makes the user not act for a turn

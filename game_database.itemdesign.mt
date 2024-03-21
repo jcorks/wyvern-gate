@@ -26,6 +26,7 @@
 ItemDesign.newEntry(
     data : {
         name : 'complicated',
+        id : 'base:complicated',
         equipMod : StatSet.new(
             INT: 4,
             SPD: 4
@@ -36,6 +37,7 @@ ItemDesign.newEntry(
 ItemDesign.newEntry(
     data : {
         name : 'humble',
+        id : 'base:humble',
         equipMod : StatSet.new(
             DEF: 4,
             INT: 4
@@ -46,6 +48,7 @@ ItemDesign.newEntry(
 ItemDesign.newEntry(
     data : {
         name : 'practical',
+        id : 'base:practical',
         equipMod : StatSet.new(
             DEF: 4,
             ATK: 4
@@ -56,6 +59,7 @@ ItemDesign.newEntry(
 ItemDesign.newEntry(
     data : {
         name : 'sharp',
+        id : 'base:sharp',
         equipMod : StatSet.new(
             SPD: 4,
             ATK: 4
@@ -66,6 +70,7 @@ ItemDesign.newEntry(
 ItemDesign.newEntry(
     data : {
         name : 'striking',
+        id : 'base:striking',
         equipMod : StatSet.new(
             DEX: 4,
             ATK: 4
@@ -76,6 +81,7 @@ ItemDesign.newEntry(
 ItemDesign.newEntry(
     data : {
         name : 'simple',
+        id : 'base:simple',
         equipMod : StatSet.new(
             DEX: 1,
             ATK: 1,
@@ -89,6 +95,7 @@ ItemDesign.newEntry(
 ItemDesign.newEntry(
     data : {
         name : 'ornate',
+        id : 'base:ornate',
         equipMod : StatSet.new(
             ATK: 4,
             INT: 4
@@ -100,6 +107,7 @@ ItemDesign.newEntry(
 ItemDesign.newEntry(
     data : {
         name : 'weighty',
+        id : 'base:weighty',
         equipMod : StatSet.new(
             DEF: 8,
             SPD: -2
@@ -110,6 +118,7 @@ ItemDesign.newEntry(
 ItemDesign.newEntry(
     data : {
         name : 'minimalist',
+        id : 'base:minimalist',
         equipMod : StatSet.new(
             SPD: 4,
             DEX: 4
@@ -122,6 +131,7 @@ ItemDesign.newEntry(
     name : 'Wyvern.ItemDesign',
     attributes : {
         name : String,
+        id : String,
         equipMod : StatSet.type, // percentages
     },
     reset

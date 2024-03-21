@@ -36,7 +36,7 @@
 // if within interest distance, stairs down locations will 
 MapEntity.Task.database.newEntry(
     data : {
-        name: 'dungeonencounters-roam',
+        id: 'base:dungeonencounters-roam',
         startup ::{
             
         },
@@ -60,7 +60,7 @@ MapEntity.Task.database.newEntry(
 
 MapEntity.Task.database.newEntry(
     data : {
-        name: 'thebeast-roam',
+        id: 'base:thebeast-roam',
         startup ::{
             
         },
@@ -87,7 +87,7 @@ MapEntity.Task.database.newEntry(
 MapEntity.Task.database.newEntry(
 
     data : {
-        name: 'exit',
+        id: 'base:exit',
         startup ::{},
         do ::(data, mapEntity) {
             @:Location = import(module:'game_mutator.location.mt');
@@ -150,7 +150,7 @@ MapEntity.Task.database.newEntry(
                     @:all = world.battle.getMembers();
                     {:::} {
                         foreach(all) ::(k, member) {
-                            if (member.species.name == mapEntity.entities[0].species.name) ::<= {
+                            if (member.species.id == mapEntity.entities[0].species.id) ::<= {
                                 world.battle.join(group: mapEntity.entities, sameGroupAs:member);                        
                                 send();
                             }
@@ -198,7 +198,7 @@ MapEntity.Task.database.newEntry(
             // swarming enemies dont attack each other
             when (itemOther.data != empty && // filter out pointer
                   mapEntity.entities[0].species.swarms && 
-                  mapEntity.entities[0].species.name == itemOther.data.entities[0].species.name)
+                  mapEntity.entities[0].species.id == itemOther.data.entities[0].species.id)
                 empty;
             
             @dist = distance(
@@ -238,7 +238,7 @@ MapEntity.Task.database.newEntry(
 
     MapEntity.Task.database.newEntry(
         data : {
-            name: 'aggressive',
+            id: 'base:aggressive',
             startup ::{
             },
             
@@ -250,7 +250,7 @@ MapEntity.Task.database.newEntry(
     
     MapEntity.Task.database.newEntry(
         data : {
-            name: 'aggressive-slow',
+            id: 'base:aggressive-slow',
             startup ::{
             },
             
@@ -273,7 +273,7 @@ MapEntity.Task.database.newEntry(
             foreach(Entity.EQUIP_SLOTS) ::(k, slot) {
                 @:item = member.getEquipped(slot);
                 when(item == empty) empty;
-                when(item.name == 'None') empty;
+                when(item.base.id == 'base:none') empty;
                 
                 items->push(value:item);
             }                
@@ -434,7 +434,7 @@ MapEntity.Task.database.newEntry(
 
     MapEntity.Task.database.newEntry(
         data : {
-            name: 'specter',
+            id: 'base:specter',
             startup ::{
             },
             
@@ -537,7 +537,7 @@ MapEntity.Task.database.newEntry(
 @:THESNAKESIREN_SONG_DISTANCE = 18;
 MapEntity.Task.database.newEntry(
     data : {
-        name: 'thesnakesiren-song',
+        id: 'base:thesnakesiren-song',
         startup ::{
             
         },
@@ -600,7 +600,7 @@ MapEntity.Task.database.newEntry(
 
 MapEntity.Task.database.newEntry(
     data : {
-        name: 'thesnakesiren-roam',
+        id: 'base:thesnakesiren-roam',
         startup ::{
             
         },
@@ -709,7 +709,7 @@ MapEntity.Task.database.newEntry(
                     state.onCancel = empty;
                     if (state.onArrive) ::<= {
                         @:task = MapEntity.Task.new(
-                            base:MapEntity.Task.database.find(name:state.onArrive)
+                            base:MapEntity.Task.database.find(id:state.onArrive)
                         );
                         task.do(mapEntity:this);
                         
@@ -739,16 +739,16 @@ MapEntity.Task.database.newEntry(
                 
             },
             
-            addUpkeepTask ::(name) {
+            addUpkeepTask ::(id) {
                 state.onStepSet->push(
                     value: MapEntity.Task.new(
-                        base:MapEntity.Task.database.find(name)
+                        base:MapEntity.Task.database.find(id)
                     )
                 );
             },
             
-            removeUpkeepTask ::(name) {
-                @:index = state.onStepSet->findIndex(query::(value) <- value.base.name == name);
+            removeUpkeepTask ::(id) {
+                @:index = state.onStepSet->findIndex(query::(value) <- value.base.id == id);
                 when(index == -1) empty;
                 state.onStepSet->remove(key:index);
             },
@@ -834,7 +834,7 @@ MapEntity.Task.database.newEntry(
                                 x:otherItem.x,
                                 y:otherItem.y,
                                 ownedByHint: entity,
-                                name: 'Body'
+                                id: 'base:body'
                             );
                         }
                     }
@@ -872,7 +872,7 @@ MapEntity.Task.database.newEntry(
                 when(isRemoved) empty;
                 if (state.onCancel != empty) ::<= {
                     @:task = MapEntity.Task.new(
-                        base:MapEntity.Task.database.find(name:state.onArrive)
+                        base:MapEntity.Task.database.find(id:state.onArrive)
                     );
                     task.do(mapEntity:this);
                 }
@@ -952,7 +952,7 @@ MapEntity.Task = databaseItemMutatorClass(
     database : Database.new(
         name : 'Wyvern.MapEntity.Task.Base',
         attributes : {
-            name : String,
+            id : String,
             startup : Function,
             do : Function
         },

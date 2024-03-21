@@ -31,7 +31,7 @@ return ::(canCancel => Boolean, onPick => Function, leftWeight, topWeight, promp
             when(slot == Entity.EQUIP_SLOTS.HAND_R) empty;
             @:item = member.getEquipped(slot);
             when(item == empty) empty;
-            when(item.name == 'None') empty;
+            when(item.base.id == 'base:none') empty;
             
             when(filter != empty && ! filter(item)) empty;
             listNames->push(value: prefix + item.name);

@@ -173,7 +173,7 @@
     
     
     define :::(this, state) {
-        if (none == empty) none = Item.new(base:Item.database.find(name:'None'));
+        if (none == empty) none = Item.new(base:Item.database.find(id:'None'));
         @battle_;
         @overrideInteract = empty;
         // requests removal from battle
@@ -211,7 +211,7 @@
                     this.addEffect(
                         from:this, 
                         item:equip,
-                        name:effect, 
+                        id:effect, 
                         durationTurns: -1
                     );
                 }
@@ -221,7 +221,7 @@
             foreach(this.profession.base.passives)::(index, passiveName) {
                 this.addEffect(
                     from:this, 
-                    name:passiveName, 
+                    id:passiveName, 
                     durationTurns: -1
                 );
             }
@@ -229,7 +229,7 @@
             foreach(this.species.passives)::(index, passiveName) {
                 this.addEffect(
                     from:this, 
-                    name:passiveName, 
+                    id:passiveName, 
                     durationTurns: -1
                 );
             }
@@ -283,8 +283,8 @@
                     empty
                 ];
                 state.abilitiesAvailable = [
-                    Ability.find(name:'Attack'),
-                    Ability.find(name:'Defend'),
+                    Ability.find(id:'Attack'),
+                    Ability.find(id:'Defend'),
 
                 ]; // active that can choose in combat
                 state.abilitiesLearned = []; // abilities that can choose outside battle.
@@ -302,7 +302,7 @@
                     state.adventurous = adventurousHint;
                 
                 if (personalityHint != empty)
-                    state.personality = Personality.find(name:personalityHint);
+                    state.personality = Personality.find(id:personalityHint);
 
                 state.qualitiesHint = qualities;
 
@@ -313,10 +313,10 @@
                         if (professionHint == empty) 
                             Profession.database.getRandom() 
                         else 
-                            Profession.database.find(name:professionHint)
+                            Profession.database.find(id:professionHint)
                 );
                 if (speciesHint != empty) ::<= {
-                    state.species = Species.find(name:speciesHint);
+                    state.species = Species.find(id:speciesHint);
                 }
                 state.professions = [profession]
                 state.profession = 0;
@@ -329,7 +329,7 @@
                 }
                 state.inventory = Inventory.new(size:10);
                 if (faveWeapon)
-                    state.faveWeapon = Item.database.find(name:faveWeapon);
+                    state.faveWeapon = Item.database.find(id:faveWeapon);
 
                 if (island != empty)  ::<= {
                     state.inventory.add(item:
@@ -834,7 +834,7 @@
                         if (isLimbHit) ::<= {
                             windowEvent.queueMessage(text: 'The hit caused direct damage to the limbs!');
                             if (!target.isIncapacitated())
-                                target.addEffect(from:this, name:'Stunned', durationTurns:1);                    
+                                target.addEffect(from:this, id:'Stunned', durationTurns:1);                    
                         }
 
                         if (isHitBody) ::<= {
@@ -1026,19 +1026,19 @@
                     state.flags.add(flag:StateFlags.HURT);
                     
                     if (damage.damageType == Damage.TYPE.FIRE && Number.random() > 0.98)
-                        this.addEffect(from, name:'Burned',durationTurns:5);
+                        this.addEffect(from, id:'base:burned',durationTurns:5);
                     if (damage.damageType == Damage.TYPE.ICE && Number.random() > 0.98)
-                        this.addEffect(from, name:'Frozen',durationTurns:2);
+                        this.addEffect(from, id:'base:frozen',durationTurns:2);
                     if (damage.damageType == Damage.TYPE.THUNDER && Number.random() > 0.98)
-                        this.addEffect(from, name:'Paralyzed',durationTurns:2);
+                        this.addEffect(from, id:'base:paralyzed',durationTurns:2);
                     if (damage.damageType == Damage.TYPE.PHYS && Number.random() > 0.99) 
-                        this.addEffect(from, name:'Bleeding',durationTurns:5);
+                        this.addEffect(from, id:'base:bleeding',durationTurns:5);
                     if (damage.damageType == Damage.TYPE.POISON && Number.random() > 0.98) 
-                        this.addEffect(from, name:'Poisoned',durationTurns:5);
+                        this.addEffect(from, id:'base:poisoned',durationTurns:5);
                     if (damage.damageType == Damage.TYPE.DARK && Number.random() > 0.98)
-                        this.addEffect(from, name:'Blind',durationTurns:2);
+                        this.addEffect(from, id:'base:blind',durationTurns:2);
                     if (damage.damageType == Damage.TYPE.LIGHT && Number.random() > 0.98)
-                        this.addEffect(from, name:'Petrified',durationTurns:2);
+                        this.addEffect(from, id:'base:petrified',durationTurns:2);
                     
                     
                     if (!alreadyKnockedOut && world.party.isMember(entity:this) && state.hp == 0 && Number.random() > 0.7 && world.party.members->size > 1) ::<= {
@@ -1286,7 +1286,7 @@
                 state.isDead = true;                
             },
             
-            addEffect::(from => Entity.type, name => String, durationTurns => Number, item) {
+            addEffect::(from => Entity.type, id => String, durationTurns => Number, item) {
                 // temporarily make effects active but remove them right after.
                 @inBattle = effects != empty;
                 if (!inBattle)
@@ -1295,8 +1295,8 @@
 
                 if (durationTurns == empty) durationTurns = -1;
                 
-                @:effect = Effect.find(name);
-                @:existingEffectIndex = effects->findIndex(query::(value) <- value.effect.name == name);               
+                @:effect = Effect.find(id);
+                @:existingEffectIndex = effects->findIndex(query::(value) <- value.effect.id == id);               
                 when (effect.stackable == false && existingEffectIndex != -1) ::<= {
                     // reset duration of effect and source.
                     @einst = effects[existingEffectIndex];
@@ -1367,7 +1367,7 @@
                     @out = [...state.abilitiesAvailable];
                     foreach(EQUIP_SLOTS)::(i, val) {
                         if (state.equips[val] != empty && state.equips[val].ability != empty) ::<= {
-                            @:ab = Ability.find(name:state.equips[val].ability);
+                            @:ab = Ability.find(id:state.equips[val].ability);
                             when(out->findIndex(value:ab) != -1) empty;
                             out->push(value:ab);
                         }
@@ -1376,10 +1376,9 @@
                 }
             },
             
-            learnAbility::(name => String) {
-                when (name == empty) empty;
+            learnAbility::(id => String) {
 
-                @:ability = Ability.find(name);
+                @:ability = Ability.find(id);
                 if (state.abilitiesAvailable->keycount < 7)
                     state.abilitiesAvailable->push(value:ability);
                     
@@ -1390,14 +1389,14 @@
                 @:skills = this.profession.gainSP(amount:1);
                 when(skills == empty) empty;
                 foreach(skills)::(i, skill) {
-                    this.learnAbility(name:skill);
+                    this.learnAbility(id:skill);
                 }
             },
             
             clearAbilities::{
                 state.abilitiesAvailable = [
-                    Ability.find(name:'Attack'),
-                    Ability.find(name:'Defend'),
+                    Ability.find(id:'Attack'),
+                    Ability.find(id:'Defend'),
                 ];
                 state.abilitiesLearned = [];
             },
@@ -1479,7 +1478,7 @@
                     foreach(item.equipEffects)::(index, effect) {
                         this.addEffect(
                             from:this, 
-                            name:effect, 
+                            id:effect, 
                             durationTurns: -1
                         );
                     }
@@ -1628,7 +1627,7 @@
                 if (qualities == empty) ::<= {
                     qualities = [];
                     foreach(state.species.qualities)::(i, qual) {
-                        @:q = EntityQuality.database.find(name:qual);
+                        @:q = EntityQuality.database.find(id:qual);
                         if (q.appearanceChance == 1 || Number.random() < q.appearanceChance)
                             qualities->push(value:EntityQuality.new(base:q));
                     }

@@ -62,7 +62,7 @@
             }  
             
             @:inv = Inventory.new();
-            inv.add(item:Item.new(base:Item.database.find(name:'Life Crystal'
+            inv.add(item:Item.new(base:Item.database.find(id:'base:life-crystal'
             )));                        
             partyCopy[0].forceDrop = inv;
 
@@ -77,8 +77,8 @@
                 entities : partyCopy,
                 tag : 'themirror'
             );
-            ref.addUpkeepTask(name:'thebeast-roam');
-            ref.addUpkeepTask(name:'aggressive');
+            ref.addUpkeepTask(id:'base:thebeast-roam');
+            ref.addUpkeepTask(id:'base:aggressive');
             
         }	
         

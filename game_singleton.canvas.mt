@@ -409,7 +409,6 @@ return class(
                         iter += 1;
                     }
                 }  
-                breakpoint();        
                 when(backgrounds->size == 0) empty;
                 foreach(backgrounds) ::(k, v) {
                     v();

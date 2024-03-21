@@ -18,7 +18,7 @@
 return {
     battle : {
         act : InteractionMenuEntry.new(
-            displayName : 'Act',
+            name : 'Act',
             filter::(user, battle) <- true,
             onSelect::(user, battle, commitAction) {
                 @:abilities = [];
@@ -221,7 +221,7 @@ return {
         ),
         
         check : InteractionMenuEntry.new(
-            displayName : 'Check',
+            name : 'Check',
             filter::(user, battle) <- true,
             onSelect::(user, battle, commitAction) {
 
@@ -292,12 +292,12 @@ return {
         ),
         
         wait : InteractionMenuEntry.new(
-            displayName : 'Wait',
+            name : 'Wait',
             filter::(user, battle) <- true,
             onSelect::(user, battle, commitAction) {
                 commitAction(action:
                     BattleAction.new(
-                        ability: Ability.find(name:'Wait'),
+                        ability: Ability.find(id:'Wait'),
                         targets: [],
                         extraData: {}
                     )                
@@ -307,7 +307,7 @@ return {
         
         
         item : InteractionMenuEntry.new(
-            displayName : 'Item',
+            name : 'Item',
             filter::(user, battle) <- true,
             onSelect::(user, battle, commitAction) {
                 @:world = import(module:'game_singleton.world.mt');
@@ -321,7 +321,7 @@ return {
         ),
         
         pray : InteractionMenuEntry.new(
-            displayName : 'Pray',
+            name : 'Pray',
             filter::(user, battle) <- true,
             onSelect::(user, battle, commitAction) {
 
@@ -330,7 +330,7 @@ return {
                 
                 commitAction(action:
                     BattleAction.new(
-                        ability: Ability.find(name:'Wyvern Prayer'),
+                        ability: Ability.find(id:'Wyvern Prayer'),
                         targets: [...enemies, ...allies],
                         extraData: {}
                     )                
@@ -341,7 +341,7 @@ return {
 
     options : {
         quit : InteractionMenuEntry.new(
-            displayName : 'Quit',
+            name : 'Quit',
             keepInteractionMenu : true,
             filter::(island, landmark) <- true,
             onSelect::(island, landmark) {
@@ -360,7 +360,7 @@ return {
         ),
         
         save : InteractionMenuEntry.new(
-            displayName : 'Save',
+            name : 'Save',
             filter ::(island, landmark) <- landmark == empty,
             keepInteractionMenu : true,
             onSelect::(island, landmark) {
@@ -378,7 +378,7 @@ return {
         ),
         
         system : InteractionMenuEntry.new(
-            displayName: 'System',
+            name: 'System',
             keepInteractionMenu : true,
             filter ::(island, landmark) <- true,
             onSelect::(island, landmark) {
@@ -388,7 +388,7 @@ return {
     },
     walk : {
         check : InteractionMenuEntry.new(
-            displayName : 'Check',
+            name : 'Check',
             keepInteractionMenu : true,
             filter::(island, landmark) <- landmark == empty,
             onSelect::(island, landmark) {
@@ -492,7 +492,7 @@ return {
         ),
         
         party : InteractionMenuEntry.new(
-            displayName : 'Party',
+            name : 'Party',
             keepInteractionMenu : true,
             filter::(island, landmark) <- true,
             onSelect::(island, landmark) {
@@ -501,7 +501,7 @@ return {
         ),
         
         inventory : InteractionMenuEntry.new(
-            displayName : 'Inventory',
+            name : 'Inventory',
             keepInteractionMenu : true,
             filter::(island, landmark) <- true,
             onSelect::(island, landmark) {
@@ -539,7 +539,7 @@ return {
         ),
         
         wait : InteractionMenuEntry.new(
-            displayName : 'Wait',
+            name : 'Wait',
             keepInteractionMenu : false,
             filter::(island, landmark) <- true,
             onSelect::(island, landmark) {
@@ -587,7 +587,7 @@ return {
     },
     person : {
         barter : InteractionMenuEntry.new(
-            displayName: 'Barter',
+            name: 'Barter',
             keepInteractionMenu : true,
             filter ::(entity)<- true, // everyone can barter,
             onSelect::(entity) {

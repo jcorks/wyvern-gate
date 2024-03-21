@@ -13,6 +13,8 @@
 return {
     name : 'Example Scenario',
     
+    id: 'mod.example.rasa.simplescenario:scenario',
+    
     // Called when first starting the scenario.
     onBegin ::(data) {
         windowEvent.queueMessage(

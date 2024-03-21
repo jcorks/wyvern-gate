@@ -27,6 +27,7 @@
 ItemQuality.newEntry(
     data : {
         name : 'Worn',
+        id : 'base:worn',
         description : 'The surface appears worn out; it might not be able to last much longer.',
         equipMod : StatSet.new(
             DEF: -20,
@@ -51,6 +52,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'Cheap',
+        id : 'base:cheap',
         description : 'It is of poor quality.',
         equipMod : StatSet.new(
             DEF: -10,
@@ -73,6 +75,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'Sturdy',
+        id : 'base:sturdy',
         description : 'It is unusually sturdy.',
         equipMod : StatSet.new(
             DEF: 20,
@@ -95,6 +98,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'Robust',
+        id : 'base:robust',
         description : 'It has been shown that this is resistant to even heavy use.',
         equipMod : StatSet.new(
             DEF: 10,
@@ -117,6 +121,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'Quality',
+        id : 'base:quality',
         description : 'The quality of this is remarkable.',
         equipMod : StatSet.new(
             DEF: 5,
@@ -137,6 +142,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'Light',
+        id : 'base:light',
         description : 'It appears to be lighter than expected.',
         equipMod : StatSet.new(
             SPD: 30,
@@ -157,6 +163,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'Decorative',
+        id : 'base:decorative',
         description : 'It appears a bit more ornate than the usual.',
         equipMod : StatSet.new(
             SPD: -5,
@@ -177,6 +184,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'Apprentice\'s',
+        id : 'base:apprentices',
         description : "This seems to be the work of a master's apprentice.",
         levelMinimum: 1,
         equipMod : StatSet.new(
@@ -197,6 +205,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'Reinforced',
+        id : 'base:reinforced',
         description : "Extra care has been taken to assure that this will last a long time.",
         levelMinimum: 1,
         equipMod : StatSet.new(
@@ -216,6 +225,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'Durable',
+        id : 'base:durable',
         description : "At the intersection of good quality materials and workmanship.",
         levelMinimum: 1,
         equipMod : StatSet.new(
@@ -236,6 +246,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'Standard',
+        id : 'base:standard',
         description : 'The quality of this seems to meet some sort of standard stock, perhaps of military grade.',
         equipMod : StatSet.new(
             SPD: 25,
@@ -256,6 +267,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'King\'s',
+        id : 'base:kings',
         description : "The quality of this is as if it were meant for a king.",
         levelMinimum: 1,
         equipMod : StatSet.new(
@@ -276,6 +288,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'Queen\'s',
+        id : 'base:queens',
         description : "The quality of this is as if it were meant for a queen.",
         levelMinimum: 1,
         equipMod : StatSet.new(
@@ -296,6 +309,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'Masterwork',
+        id : 'base:masterwork',
         description : "A crowning achievement by a craftsperson representing a life's work.",
         levelMinimum: 1,
         equipMod : StatSet.new(
@@ -320,6 +334,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'Legendary',
+        id : 'base:legendary',
         description : "It is said that this is part of some legend.",
         levelMinimum: 1,
         equipMod : StatSet.new(
@@ -341,6 +356,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'Divine',
+        id : 'base:divine',
         description : "It is said the origin of this is mythical.",
         levelMinimum: 1,
         equipMod : StatSet.new(
@@ -362,6 +378,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : 'God\'s',
+        id : 'base:gods',
         description : "It is said this was created by a deity.",
         levelMinimum: 1,
         equipMod : StatSet.new(
@@ -384,6 +401,7 @@ ItemQuality.newEntry(
 ItemQuality.newEntry(
     data : {
         name : '[  ]',
+        id : 'base:null',
         description : "It is said this shouldn\'t exist.",
         levelMinimum: 1,
         equipMod : StatSet.new(
@@ -407,6 +425,7 @@ ItemQuality.newEntry(
     name : 'Wyvern.ItemQuality',
     attributes : {
         name : String,
+        id : String,
         description : String,
         levelMinimum : Number,
         equipMod : StatSet.type, // percentages

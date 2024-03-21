@@ -138,8 +138,8 @@ return class(
             
         
             foreach(mods) ::(i, mod) {
-                depends[mod.name] = [...mod.loadFirst];
-                modsIndexed[mod.name] = mod;
+                depends[mod.id] = [...mod.loadFirst];
+                modsIndexed[mod.id] = mod;
             }
 
             
@@ -149,11 +149,11 @@ return class(
             
             // loads a single mod in order, detected circular dependencies.
             @:loadMod ::(mod) {
-                when(loaded[mod.name] == true) empty;
-                if (loading[mod.name] == true)
-                    error(detail: 'Circular dependency of mods detected! First circular dependency: ' + mod.name);
+                when(loaded[mod.id] == true) empty;
+                if (loading[mod.id] == true)
+                    error(detail: 'Circular dependency of mods detected! First circular dependency: ' + mod.id);
                     
-                loading[mod.name] = true;
+                loading[mod.id] = true;
                 
                 // load prereqs
                 foreach(mod.loadFirst) ::(i, first) {
@@ -163,16 +163,16 @@ return class(
                 
                 // get entry point.
                 @:result = {:::} {
-                    return import(module: mod.name + '/main.mt');
+                    return import(module: mod.id + '/main.mt');
                 } : {
                     onError::(message) {
-                        error(detail: 'An error occurred while loading the mod ' + mod.name + ':' + message.summary + '\n\n');
+                        error(detail: 'An error occurred while loading the mod ' + mod.id + ':' + message.summary + '\n\n');
                     }
                 }
 
                 modMainOrdered->push(value:result);
 
-                loaded[mod.name] = true;
+                loaded[mod.id] = true;
             }
             foreach(mods) ::(i, mod) {
                 loadMod(mod);
@@ -365,7 +365,7 @@ return empty;
                                 @choiceNames = [...choices]->map(to::(value) <- value.name);
                                 
                                 if (settings.unlockedScenarios == false || settings.unlockedScenarios == empty) ::<= {
-                                    choices = [Scenario.database.find(name:'The Chosen')];
+                                    choices = [Scenario.database.find(id:'rasa:the-chosen')];
                                     choiceNames = ['The Chosen'];
                                 }
                                 
@@ -448,7 +448,7 @@ return empty;
                         @:modList = [];
                         
                         foreach(mods) ::(k, mod) {
-                            modNames->push(value:mod.displayName);
+                            modNames->push(value:mod.name);
                             modList->push(value:mod);
                         }
 
@@ -463,8 +463,8 @@ return empty;
                                     windowEvent.queueMessage(
                                         speaker: 'Mod info...',
                                         text: 
-                                            'Name    : ' + mod.displayName + '\n'+
-                                            '         (' + mod.name + ')\n' +
+                                            'Name    : ' + mod.name + '\n'+
+                                            '         (' + mod.id + ')\n' +
                                             'Author  : ' + mod.author + '\n' +
                                             'Website : ' + mod.website + '\n\n' +
                                             mod.description + 
@@ -669,7 +669,7 @@ return empty;
                     }
                     breakpoint();
                     if (restorePos == empty && atGate != empty) ::<= {
-                        @gate = island.landmarks->filter(by:::(value) <- value.base.name == 'Wyvern Gate');
+                        @gate = island.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
                         when(gate->size == 0) empty;
                         
                         gate = gate[0];
@@ -679,7 +679,7 @@ return empty;
                         );               
                         
                         
-                        @gategate = gate.locations->filter(by:::(value) <- value.base.name == 'Gate');
+                        @gategate = gate.locations->filter(by:::(value) <- value.base.id == 'base:gate');
                         when(gategate->size == 0) empty;
                         
                         this.visitLandmark(
@@ -795,7 +795,7 @@ return empty;
                         onGetChoices ::{
                             islandOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island));
                             
-                            @:choices = [...islandOptions]->map(to::(value) <- value.displayName);
+                            @:choices = [...islandOptions]->map(to::(value) <- value.name);
                             @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
 
                             choices->push(value: 'Options');
@@ -818,7 +818,7 @@ return empty;
                                 }
                             } else if (choice-1 == islandOptions->size) ::<= {
                                 @:options = [...world.scenario.base.interactionsOptions]->filter(by::(value) <- value.filter(island));
-                                @:choices = [...options]->map(to::(value) <- value.displayName);
+                                @:choices = [...options]->map(to::(value) <- value.name);
 
                                 windowEvent.queueChoices(
                                     leftWeight: 1,
@@ -905,7 +905,7 @@ return empty;
                         onGetChoices ::{
                             landmarkOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island:island_, landmark));
                             
-                            @:choices = [...landmarkOptions]->map(to::(value) <- value.displayName);
+                            @:choices = [...landmarkOptions]->map(to::(value) <- value.name);
 
                             choices->push(value: 'Options');
                             
@@ -929,7 +929,7 @@ return empty;
                                 landmarkOptions[choice-1].onSelect(island:island_, landmark);
                             } else if (choice-1 == landmarkOptions->size) ::<= {
                                 @:options = [...world.scenario.base.interactionsOptions]->filter(by::(value) <- value.filter(island:island_, landmark));
-                                @:choices = [...options]->map(to::(value) <- value.displayName);
+                                @:choices = [...options]->map(to::(value) <- value.name);
 
                                 windowEvent.queueChoices(
                                     leftWeight: 1,

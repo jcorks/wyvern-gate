@@ -59,8 +59,8 @@
                 
             },
             
-            getItemAtAll ::(name) {
-                @key = this.inventory.items->filter(by:::(value) <- value.name == name);
+            getItemAtAll ::(id) {
+                @key = this.inventory.items->filter(by:::(value) <- value.base.id == id);
                 when (key->size != 0) key[0];
 
                 // could be equipped
@@ -68,7 +68,7 @@
                     foreach(this.members)::(i, member) {
                         foreach(Entity.EQUIP_SLOTS) ::(n, slot) {
                             @:wep = member.getEquipped(slot);
-                            if (wep.name == name) ::<= {
+                            if (wep.base.id == id) ::<= {
                                 send(message:wep);
                             }
                         }

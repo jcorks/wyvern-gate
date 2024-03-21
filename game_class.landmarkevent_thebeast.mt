@@ -20,8 +20,8 @@
             @world = import(module:'game_singleton.world.mt');
             @:beast = world.island.newInhabitant();
             beast.name = 'the Dungeon Beast';
-            beast.species = Species.find(name:'Beast');
-            beast.profession = Profession.new(base:Profession.database.find(name:'Beast'));               
+            beast.species = Species.find(id:'base:beast');
+            beast.profession = Profession.new(base:Profession.database.find(id:'base:beast'));               
             beast.clearAbilities();
             foreach(beast.profession.gainSP(amount:10))::(i, ability) {
                 beast.learnAbility(name:ability);
@@ -88,8 +88,8 @@
                 entities : ents,
                 tag : 'thebeast'
             );
-            ref.addUpkeepTask(name:'thebeast-roam');
-            ref.addUpkeepTask(name:'aggressive');
+            ref.addUpkeepTask(id:'base:thebeast-roam');
+            ref.addUpkeepTask(id:'base:aggressive');
 
             if (state.encountersOnFloor == 1)
                 windowEvent.queueMessage(

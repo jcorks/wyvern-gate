@@ -22,11 +22,11 @@
             @world = import(module:'game_singleton.world.mt');
             @:beast = world.island.newInhabitant();
             beast.name = 'the Snake Siren';
-            beast.species = Species.find(name:'Beast');
-            beast.profession = Profession.new(base:Profession.database.find(name:'Snake Siren'));               
+            beast.species = Species.find(id:'base:beast');
+            beast.profession = Profession.new(base:Profession.database.find(id:'base:snake-siren'));               
             beast.clearAbilities();
             foreach(beast.profession.gainSP(amount:10))::(i, ability) {
-                beast.learnAbility(name:ability);
+                beast.learnAbility(id:ability);
             }
 
             beast.stats.load(serialized:StatSet.new(
@@ -89,9 +89,9 @@
                 entities : ents,
                 tag : 'thesnakesiren'
             );
-            ref.addUpkeepTask(name:'thesnakesiren-roam');
-            ref.addUpkeepTask(name:'thesnakesiren-song');
-            ref.addUpkeepTask(name:'aggressive');
+            ref.addUpkeepTask(id:'base:thesnakesiren-roam');
+            ref.addUpkeepTask(id:'base:thesnakesiren-song');
+            ref.addUpkeepTask(id:'base:aggressive');
             
 
         }

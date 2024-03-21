@@ -97,6 +97,7 @@
 Item.database.newEntry(
     data : {
         name : 'None',
+        id : 'base:none',
         description : '',
         examine : '',
         equipType : TYPE.HAND,
@@ -125,51 +126,11 @@ Item.database.newEntry(
         possibleAbilities : [],
     }
 )
-Item.database.newEntry(data : {
-    name : "Cat of Bea",
-    description: 'A small, white figurine depicting a cat. It smells faintly of strawberry pastries.',
-    examine : 'It appears to be entirely white and oddly angular. The bottom side is engraved with the number \'IX\'.',
-    equipType: TYPE.TRINKET,
-    rarity : 30000,
-    basePrice : 30000,
-    keyItem : false,
-    weight : 0.1,
-    levelMinimum : 1,
-    tier: 0,
-    canHaveEnchants : false,
-    canHaveTriggerEnchants : false,
-    enchantLimit : 0,
-    hasQuality : false,
-    hasMaterial : false,
-    isApparel : false,
-    isUnique : true,
-    canBeColored : false,
-    useTargetHint : USE_TARGET_HINT.ONE,
-    hasSize : false,
-    onCreate ::(item, creationHint) {},
-    possibleAbilities : [],
-    blockPoints : 0,
-    
-    equipMod : StatSet.new(
-        DEF: 4,   // 
-        INT: 10,  // strawberries are magical probably
-        SPD: 8    // because zoomy
-    ),
-    useEffects : [
-        'Fling',
-        'Break Item'
-    ],
-    equipEffects : [
-        // Affects whole party:
-        // 99% chance -> strawberry shortcake smell (stat boost for turn)
-        // 1%  chance -> premonition / subliminal state (incapacitated for turn)
-        "Bea's Aura"     
-    ],
-    attributes : ATTRIBUTE.FRAGILE
-})
+
 
 Item.database.newEntry(data : {
     name : "Mei\'s Bow",
+    id: 'base:meis-bow',
     description: 'A neck accessory featuring an ornate bell and bow.',
     examine : '',
     equipType: TYPE.TRINKET,
@@ -198,8 +159,8 @@ Item.database.newEntry(data : {
         DEF: 50
     ),
     useEffects : [
-        'Fling',
-        'Break Item'
+        'base:fling',
+        'base:break-item'
     ],
     equipEffects : [
     ],
@@ -208,7 +169,8 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Life Crystal",
-    description: 'A shimmering amulet. The metal enclosure has a $color$ tint. If death befalls the holder, has a 50% chance to revive them and break.',
+    id : 'base:life-crystal',
+    description: 'A shimmering amulet. The metal enclosure has a $color$ tint. If death befalls the holder, has a 50% chance to revive them. It breaks in the process of revival.',
     examine : '',
     equipType: TYPE.AMULET,
     rarity : 30000,
@@ -236,102 +198,19 @@ Item.database.newEntry(data : {
         DEF: 10
     ),
     useEffects : [
-        'Fling',
-        'Break Item'
+        'base:fling',
+        'base:break-item'
     ],
     equipEffects : [
-        'Auto-Life',
+        'base:auto-life',
     ],
     attributes : ATTRIBUTE.FRAGILE    
 })
 
 
 Item.database.newEntry(data : {
-    name : "Bracelet of Luna",
-    description: 'A bracelet inset with an opal in the shape of a crescent moon.',
-    examine : "Once the greatest treasure in a dragons' hoard, it softly gleams in the moonlight with incredible power.",
-    equipType: TYPE.TRINKET,
-    rarity : 30000,
-    basePrice : 30000,
-    keyItem : false,
-    weight : 0.3,
-    hasSize : false,
-    tier: 0,
-    canHaveEnchants : false,
-    canHaveTriggerEnchants : false,
-    enchantLimit : 0,
-    hasQuality : false,
-    hasMaterial : false,
-    isApparel : false,
-    isUnique : true,
-    canBeColored : false,
-    levelMinimum : 1,
-    useTargetHint : USE_TARGET_HINT.ONE,
-    blockPoints : 0,
-    equipMod : StatSet.new(
-        DEF: 4, 
-        ATK: 10
-    ),
-    possibleAbilities : [],
-    useEffects : [
-        'Fling',
-    ],
-    equipEffects : [
-        // At night: attacks gain water affinity with increased strength
-        "Luna's Aura"     
-    ],
-    attributes : 
-        ATTRIBUTE.METAL
-    ,
-    onCreate ::(item, creationHint) {}
-})
-
-Item.database.newEntry(data : {
-    name : "Skie's Ring",
-    description: 'A simple ring said to have been worn by a great dragon.',
-    examine : 'Wearers appear to feel a bit tired from wearing it, but feel their potential profoundly grow.',
-    equipType: TYPE.RING,
-    rarity : 30000,
-    basePrice : 30000,
-    keyItem : false,
-    tier: 0,
-    hasMaterial : false,
-    isApparel : false,
-    canHaveEnchants : false,
-    canHaveTriggerEnchants : false,
-    enchantLimit : 0,
-    hasQuality : false,
-    canBeColored : false,
-    isUnique : true,
-    weight : 0.1,
-    hasSize : false,
-    levelMinimum : 1,
-    useTargetHint : USE_TARGET_HINT.ONE,
-
-    // fatigued
-    blockPoints : 0,
-    equipMod : StatSet.new(
-        AP: -20, // 
-        DEF: -20, // 
-        SPD: -20, // 
-        ATK: -40 // 
-    ),
-    useEffects : [
-        'Fling',
-    ],
-    possibleAbilities : [],
-    equipEffects : [
-        // Growth potential + 3 for all stats
-        "Skie's Aura"     
-    ],
-    attributes : 
-        ATTRIBUTE.METAL
-    ,
-    onCreate ::(item, creationHint) {}
-})
-
-Item.database.newEntry(data : {
     name : "Pink Potion",
+    id : 'base:pink-potion',
     description: 'Pink-colored potions are known to be for recovery of injuries',
     examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
     equipType: TYPE.HAND,
@@ -357,8 +236,8 @@ Item.database.newEntry(data : {
         DEX: -10   // its oddly shaped.
     ),
     useEffects : [
-        'HP Recovery: All',
-        'Consume Item'       
+        'base:hp-recovery-all',
+        'base:consume-item'       
     ],
     possibleAbilities : [],
     equipEffects : [
@@ -374,6 +253,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Purple Potion",
+    id : 'base:purple-potion',
     description: 'Purple-colored potions are known to combine the effects of pink and cyan potions',
     examine : 'These potions are handy, as the effects of ',
     equipType: TYPE.HAND,
@@ -400,9 +280,9 @@ Item.database.newEntry(data : {
         DEX: -10   // its oddly shaped.
     ),
     useEffects : [
-        'HP Recovery: All',
-        'AP Recovery: All',
-        'Consume Item'       
+        'base:hp-recovery-all',
+        'base:ap-recovery-all',
+        'base:consume-item'       
     ],
     equipEffects : [
     ],
@@ -416,6 +296,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Green Potion",
+    id : 'base:green-potion',
     description: 'Green-colored potions are known to be toxic.',
     examine : 'Often used offensively, these potions are known to be used as poison once used and doused on a target.',
     equipType: TYPE.HAND,
@@ -442,8 +323,8 @@ Item.database.newEntry(data : {
         DEX: -10   // its oddly shaped.
     ),
     useEffects : [
-        'Poisoned',
-        'Consume Item'       
+        'base:poisoned',
+        'base:consume-item'       
     ],
     equipEffects : [
     ],
@@ -457,6 +338,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Orange Potion",
+    id : 'base:orange-potion',
     description: 'Orange-colored potions are known to be volatile.',
     examine : 'Often used offensively, these potions are known to explode on contact.',
     equipType: TYPE.HAND,
@@ -483,8 +365,8 @@ Item.database.newEntry(data : {
         DEX: -10   // its oddly shaped.
     ),
     useEffects : [
-        'Explode',
-        'Consume Item'       
+        'base:explode',
+        'base:consume-item'       
     ],
     equipEffects : [
     ],
@@ -497,6 +379,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Black Potion",
+    id : 'base:black-potion',
     description: 'Black-colored potions are known to be toxic to all organic life.',
     examine : 'Often used offensively, these potions are known to cause instant petrification.',
     equipType: TYPE.HAND,
@@ -523,8 +406,8 @@ Item.database.newEntry(data : {
         DEX: -10   // its oddly shaped.
     ),
     useEffects : [
-        'Petrified',
-        'Consume Item'       
+        'base:petrified',
+        'base:consume-item'       
     ],
     equipEffects : [
     ],
@@ -566,7 +449,7 @@ Item.database.newEntry(data : {
     ),
     useEffects : [
         'HP Recovery: Iffy',
-        'Consume Item'       
+        'base:consume-item'       
     ],
     equipEffects : [
     ],
@@ -583,6 +466,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Cyan Potion",
+    id : 'base:cyan-potion',
     description: 'Cyan-colored potions are known to be for recovery of mental fatigue.',
     examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
     equipType: TYPE.HAND,
@@ -609,8 +493,8 @@ Item.database.newEntry(data : {
         DEX: -10   // its oddly shaped.
     ),
     useEffects : [
-        'AP Recovery: All',
-        'Consume Item'       
+        'base:ap-recovery-all',
+        'base:consume-item'       
     ],
     equipEffects : [
     ],
@@ -624,6 +508,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Pitchfork",
+    id : 'base:pitchfork',
     description: 'A common farming implement.',
     examine : 'Quite sturdy and pointy, some people use these as weapons.',
     equipType: TYPE.HAND,
@@ -643,7 +528,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     hasSize : true,
     possibleAbilities : [
-        "Stab"
+        'base:stab'
     ],
     useTargetHint : USE_TARGET_HINT.ONE,
 
@@ -654,11 +539,11 @@ Item.database.newEntry(data : {
         DEF: 20
     ),
     useEffects : [
-        'Fling',
-        'Break Item'
+        'base:fling',
+        'base:break-item'
     ],
     equipEffects : [
-        'Non-combat Weapon' // high chance to deflect, but when it deflects, the weapon breaks
+        'base:non-combat-weapon' // high chance to deflect, but when it deflects, the weapon breaks
         
     ],
     attributes : 
@@ -671,6 +556,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Shovel",
+    id : 'base:shovel',
     description: 'A common farming implement.',
     examine : 'Quite sturdy and pointy, some people use these as weapons.',
     equipType: TYPE.HAND,
@@ -700,15 +586,15 @@ Item.database.newEntry(data : {
         DEX: -10
     ),
     useEffects : [
-        'Fling',
-        'Break Item'
+        'base:fling',
+        'base:break-item'
     ],
     equipEffects : [
-        'Non-combat Weapon' // high chance to deflect, but when it deflects, the weapon breaks
+        'base:non-combat-weapon' // high chance to deflect, but when it deflects, the weapon breaks
         
     ],
     possibleAbilities : [
-        "Stun"
+        'base:stun'
     ],
     attributes : 
         ATTRIBUTE.SHARP |
@@ -720,6 +606,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Pickaxe",
+    id : 'base:pickaxe',
     description: 'A common mining implement.',
     examine : 'Quite sturdy and pointy, some people use these as weapons.',
     equipType: TYPE.TWOHANDED,
@@ -749,15 +636,15 @@ Item.database.newEntry(data : {
         DEX: -15
     ),
     useEffects : [
-        'Fling',
-        'Break Item'
+        'base:fling',
+        'base:break-item'
     ],
     equipEffects : [
-        'Non-combat Weapon' // high chance to deflect, but when it deflects, the weapon breaks
+        'base:non-combat-weapon' // high chance to deflect, but when it deflects, the weapon breaks
         
     ],
     possibleAbilities : [
-        "Stab"
+        'base:stab'
     ],
 
 
@@ -772,6 +659,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Butcher's Knife",
+    id : 'base:butchers-knife',
     description: 'Common knife meant for cleaving meat.',
     examine : 'Quite sharp.',
     equipType: TYPE.HAND,
@@ -799,15 +687,15 @@ Item.database.newEntry(data : {
         DEX: 5
     ),
     useEffects : [
-        'Fling',
-        'Break Item'
+        'base:fling',
+        'base:break-item'
     ],
     equipEffects : [
-        'Non-combat Weapon' // high chance to deflect, but when it deflects, the weapon breaks
+        'base:non-combat-weapon' // high chance to deflect, but when it deflects, the weapon breaks
         
     ],
     possibleAbilities : [
-        "Stab"
+        'base:stab'
     ],
 
     attributes : 
@@ -820,6 +708,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Bludgeon",
+    id : 'base:bludgeon',
     description: 'A basic blunt weapon. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Clubs and bludgeons seem primitive, but are quite effective.',
     equipType: TYPE.HAND,
@@ -848,12 +737,12 @@ Item.database.newEntry(data : {
         SPD: -10
     ),
     useEffects : [
-        'Fling',
+        'base:fling',
     ],
     possibleAbilities : [
-        "Doublestrike",
-        "Triplestrike",
-        "Stun"
+        'base:doublestrike',
+        'base:triplestrike',
+        'base:stun'
     ],
 
     equipEffects : [],
@@ -867,6 +756,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Shortsword",
+    id : 'base:shortsword',
     description: 'A basic sword. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
     equipType: TYPE.HAND,
@@ -895,13 +785,13 @@ Item.database.newEntry(data : {
         SPD: -5
     ),
     useEffects : [
-        'Fling',
+        'base:fling',
     ],
     possibleAbilities : [
-        "Stab",
-        "Doublestrike",
-        "Triplestrike",
-        "Stun"
+        'base:stab',
+        'base:doublestrike',
+        'base:triplestrike',
+        'base:stun'
     ],
 
     equipEffects : [],
@@ -917,6 +807,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Longsword",
+    id : 'base:longsword',
     description: 'A basic sword. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
     equipType: TYPE.TWOHANDED,
@@ -945,11 +836,11 @@ Item.database.newEntry(data : {
         SPD: -10
     ),
     useEffects : [
-        'Fling',
+        'base:fling',
     ],
     possibleAbilities : [
-        "Stab",
-        "Stun"
+        'base:stab',
+        'base:stun'
     ],
 
     equipEffects : [],
@@ -965,6 +856,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Blade & Shield",
+    id : 'base:blade-and-shield',
     description: 'A matching medium-length blade and shield. They feature a $color$, $design$ design.',
     examine : 'Weapons with shields seem to block more than they let on.',
     equipType: TYPE.TWOHANDED,
@@ -994,12 +886,12 @@ Item.database.newEntry(data : {
         DEX: 10
     ),
     useEffects : [
-        'Fling',
+        'base:fling',
     ],
     possibleAbilities : [
-        "Counter",
-        "Stun",
-        "Leg Sweep"
+        'base:counter',
+        'base:stun',
+        'base:leg-sweep'
     ],
 
     equipEffects : [],
@@ -1016,6 +908,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Wall Shield",
+    id : 'base:wall-shield',
     description: 'A large shield that can be used for defending.',
     examine : 'Weapons with shields seem to block more than they let on.',
     equipType: TYPE.TWOHANDED,
@@ -1045,12 +938,12 @@ Item.database.newEntry(data : {
         DEX: -10
     ),
     useEffects : [
-        'Fling',
+        'base:fling',
     ],
     possibleAbilities : [
-        "Counter",
-        "Stun",
-        "Leg Sweep"
+        'base:counter',
+        'base:stun',
+        'base:leg-sweep'
     ],
 
     equipEffects : [],
@@ -1066,6 +959,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Chakram",
+    id : 'base:chakram',
     description: 'A pair of round blades. The handles have a $color$ trim with a $design$ design.',
     examine : '.',
     equipType: TYPE.TWOHANDED,
@@ -1086,9 +980,9 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Stab",
-        "Stun",
-        "Combo Strike"
+        'base:stab',
+        'base:stun',
+        'base:combo-strike'
     ],
 
     // fatigued
@@ -1100,7 +994,7 @@ Item.database.newEntry(data : {
         DEX: 25
     ),
     useEffects : [
-        'Fling',
+        'base:fling',
     ],
     equipEffects : [],
     attributes : 
@@ -1114,6 +1008,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Dual Blades",
+    id : 'base:dual-blades',
     description: 'A pair of short blades. The hilts have a $color$ trim with a $design$ design.',
     examine : '.',
     equipType: TYPE.TWOHANDED,
@@ -1134,9 +1029,9 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Stab",
-        "Stun",
-        "Combo Strike"
+        'base:stab',
+        'base:stun',
+        'base:combo-strike'
     ],
 
     // fatigued
@@ -1148,7 +1043,7 @@ Item.database.newEntry(data : {
         DEX: 30
     ),
     useEffects : [
-        'Fling',
+        'base:fling',
     ],
     equipEffects : [],
     attributes : 
@@ -1162,6 +1057,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Falchion",
+    id : 'base:falchion',
     description: 'A basic sword with a large blade. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
     equipType: TYPE.HAND,
@@ -1182,11 +1078,11 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Stab",
-        "Doublestrike",
-        "Triplestrike",
-        "Stun",
-        "Counter"
+        'base:stab',
+        'base:doublestrike',
+        'base:triplestrike',
+        'base:stun',
+        'base:counter'
     ],
 
     // fatigued
@@ -1197,7 +1093,7 @@ Item.database.newEntry(data : {
         SPD: -10
     ),
     useEffects : [
-        'Fling',
+        'base:fling',
     ],
     equipEffects : [],
     attributes : 
@@ -1212,6 +1108,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Morning Star",
+    id : 'base:morning-star',
     description: 'A spiked weapon. The hilt has a $color$ trim with a $design$ design.',
     examine : '',
     equipType: TYPE.HAND,
@@ -1232,10 +1129,10 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Stab",
-        "Stun",
-        "Counter",
-        "Big Swing"
+        'base:stab',
+        'base:stun',
+        'base:counter',
+        'base:big-swing'
     ],
 
     // fatigued
@@ -1246,7 +1143,7 @@ Item.database.newEntry(data : {
         SPD: -10
     ),
     useEffects : [
-        'Fling',
+        'base:fling',
     ],
     equipEffects : [],
     attributes : 
@@ -1260,6 +1157,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Scimitar",
+    id : 'base:scimitar',
     description: 'A basic sword with a curved blade. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
     equipType: TYPE.HAND,
@@ -1280,10 +1178,10 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Stab",
-        "Doublestrike",
-        "Triplestrike",
-        "Stun",
+        'base:stab',
+        'base:doublestrike',
+        'base:triplestrike',
+        'base:stun',
     ],
 
     // fatigued
@@ -1295,7 +1193,7 @@ Item.database.newEntry(data : {
         DEX: 10
     ),
     useEffects : [
-        'Fling',
+        'base:fling',
     ],
     equipEffects : [],
     attributes : 
@@ -1310,6 +1208,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Rapier",
+    id : 'base:rapier',
     description: 'A slender sword excellent for thrusting. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Swords like these are quite common and are of adequate quality even if simple.',
     equipType: TYPE.HAND,
@@ -1330,10 +1229,10 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Stab",
-        "Doublestrike",
-        "Triplestrike",
-        "Counter"
+        'base:stab',
+        'base:doublestrike',
+        'base:triplestrike',
+        'base:counter'
     ],
 
     // fatigued
@@ -1345,7 +1244,7 @@ Item.database.newEntry(data : {
         DEX: 10
     ),
     useEffects : [
-        'Fling',
+        'base:fling',
     ],
     equipEffects : [],
     attributes : 
@@ -1360,6 +1259,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Bow & Quiver",
+    id : 'base:bow-and-quiver',
     description: 'A basic bow and quiver full of arrows. The bow features a $design$ design and has a streak of $color$ across it.',
     examine : '',
     equipType: TYPE.TWOHANDED,
@@ -1380,10 +1280,10 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Doublestrike",
-        "Triplestrike",
-        "Precise Strike",
-        "Tranquilizer"
+        'base:doublestrike',
+        'base:triplestrike',
+        'base:precise-strike',
+        'base:tranquilizer'
     ],
 
     // fatigued
@@ -1394,8 +1294,8 @@ Item.database.newEntry(data : {
         DEX: 95
     ),
     useEffects : [
-        'Fling',
-        'Break Item'
+        'base:fling',
+        'base:break-item'
     ],
     equipEffects : [],
     attributes : 
@@ -1409,6 +1309,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Crossbow",
+    id : 'base:crossbow',
     description: 'A mechanical device that launches bolts. It features a $color$, $design$ design design.',
     examine : '',
     equipType: TYPE.TWOHANDED,
@@ -1429,8 +1330,8 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Precise Strike",
-        "Tranquilizer"
+        'base:precise-strike',
+        'base:tranquilizer'
     ],
 
     // fatigued
@@ -1441,8 +1342,8 @@ Item.database.newEntry(data : {
         DEX: 45
     ),
     useEffects : [
-        'Fling',
-        'Break Item'
+        'base:fling',
+        'base:break-item'
     ],
     equipEffects : [],
     attributes : 
@@ -1455,6 +1356,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Greatsword",
+    id : 'base:greatsword',
     description: 'A basic, large sword. The hilt has a $color$ trim with a $design$ design.',
     examine : 'Not as common as shortswords, but rather easy to find. Favored by larger warriors.',
     equipType: TYPE.TWOHANDED,
@@ -1475,10 +1377,10 @@ Item.database.newEntry(data : {
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Stun",
-        "Stab",
-        "Big Swing",
-        "Leg Sweep"
+        'base:stun',
+        'base:stab',
+        'base:big-swing',
+        'base:leg-sweep'
     ],
 
     // fatigued
@@ -1489,7 +1391,7 @@ Item.database.newEntry(data : {
         SPD: -15
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -1503,6 +1405,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Dagger",
+    id : 'base:dagger',
     description: 'A basic knife. The handle has an $color$ trim with a $design$ design.',
     examine : 'Commonly favored by both swift warriors and common folk for their easy handling and easiness to produce.',
     equipType: TYPE.HAND,
@@ -1530,12 +1433,12 @@ Item.database.newEntry(data : {
         DEX: 20
     ),
     useEffects : [
-        'Fling',
+        'base:fling',
     ],
     possibleAbilities : [
-        "Stab",
-        "Doublestrike",
-        "Triplestrike"
+        'base:stab',
+        'base:doublestrike',
+        'base:triplestrike'
     ],
     equipEffects : [],
     attributes : 
@@ -1550,6 +1453,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Smithing Hammer",
+    id : 'base:smithing-hammer',
     description: 'A basic hammer meant for smithing.',
     examine : 'Easily available, this hammer is common as a general tool for metalworking.',
     equipType: TYPE.TWOHANDED,
@@ -1570,7 +1474,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Stun"
+        'base:stun'
     ],
 
     // fatigued
@@ -1581,7 +1485,7 @@ Item.database.newEntry(data : {
         DEX: -30
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -1596,6 +1500,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Halberd",
+    id : 'base:halberd',
     description: 'A weapon with long reach and deadly power. The handle has a $color$ trim with a $design$ design.',
     examine : '',
     equipType: TYPE.TWOHANDED,
@@ -1616,10 +1521,10 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Stun",
-        "Stab",
-        "Big Swing",
-        "Leg Sweep"
+        'base:stun',
+        'base:stab',
+        'base:big-swing',
+        'base:leg-sweep'
     ],
 
     // fatigued
@@ -1630,7 +1535,7 @@ Item.database.newEntry(data : {
         DEX:  20
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -1644,6 +1549,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Lance",
+    id : 'base:lance',
     description: 'A weapon with long reach and deadly power. The handle has a $color$ trim with a $design$ design.',
     examine : '',
     equipType: TYPE.TWOHANDED,
@@ -1664,10 +1570,10 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Stun",
-        "Stab",
-        "Big Swing",
-        "Leg Sweep"
+        'base:stun',
+        'base:stab',
+        'base:big-swing',
+        'base:leg-sweep'
     ],
 
     // fatigued
@@ -1678,7 +1584,7 @@ Item.database.newEntry(data : {
         DEX:  15
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -1692,6 +1598,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Glaive",
+    id : 'base:glaive',
     description: 'A weapon with long reach and deadly power. The handle has a $color$ trim with a $design$ design.',
     examine : '',
     equipType: TYPE.TWOHANDED,
@@ -1712,10 +1619,10 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Stun",
-        "Stab",
-        "Big Swing",
-        "Leg Sweep"
+        'base:stun',
+        'base:stab',
+        'base:big-swing',
+        'base:leg-sweep'
     ],
 
     // fatigued
@@ -1726,7 +1633,7 @@ Item.database.newEntry(data : {
         DEX:  25
     ),
     useEffects : [
-        'Fling',
+        'base:fling',
     ],
     equipEffects : [],
     attributes : 
@@ -1741,6 +1648,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Staff",
+    id :  'base:staff',
     description: 'A combat staff. Promotes fluid movement when used well. The ends are tied with a $color$ fabric, featuring a $design$ design.',
     examine : '',
     equipType: TYPE.TWOHANDED,
@@ -1761,9 +1669,9 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Stun",
-        "Big Swing",
-        "Leg Sweep"
+        'base:stun',
+        'base:big-swing',
+        'base:leg-sweep'
     ],
 
     // fatigued
@@ -1774,7 +1682,7 @@ Item.database.newEntry(data : {
         DEX:  30
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -1789,6 +1697,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Mage-Staff",
+    id : 'base:mage-staff',
     description: 'Similar to a wand, promotes mental acuity. The handle has a $color$ trim with a $design$ design.',
     examine : '',
     equipType: TYPE.TWOHANDED,
@@ -1809,18 +1718,18 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Fire",
-        "Ice",
-        "Thunder",
-        "Flare",
-        "Frozen Flame",
-        "Explosion",
-        "Flash",
-        "Cure",
-        "Greater Cure",
-        "Summon: Fire Sprite",
-        "Summon: Ice Elemental",
-        "Summon: Thunder Spawn"
+        'base:fire',
+        'base:ice',
+        'base:thunder',
+        'base:flare',
+        'base:frozen-flame',
+        'base:explosion',
+        'base:flash',
+        'base:cure',
+        'base:greater-cure',
+        'base:summon-fire-sprite',
+        'base:summon-ice-elemental',
+        'base:summon-thunder-spawn'
     ],
 
     // fatigued
@@ -1831,7 +1740,7 @@ Item.database.newEntry(data : {
         INT:  45
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -1845,6 +1754,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Wand",
+    id : 'base:wand',
     description: 'The handle has a $color$ trim with a $design$ design.',
     examine : '',
     equipType: TYPE.TWOHANDED,
@@ -1865,15 +1775,15 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleAbilities : [
-        "Fire",
-        "Ice",
-        "Thunder",
-        "Flare",
-        "Frozen Flame",
-        "Explosion",
-        "Flash",
-        "Cure",
-        "Greater Cure"
+        'base:fire',
+        'base:ice',
+        'base:thunder',
+        'base:flare',
+        'base:frozen-flame',
+        'base:explosion',
+        'base:flash',
+        'base:cure',
+        'base:greater-cure'
     ],
 
     // fatigued
@@ -1885,7 +1795,7 @@ Item.database.newEntry(data : {
         DEX:  20
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -1901,6 +1811,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Warhammer",
+    id : 'base:warhammer',
     description: 'A hammer meant for combat with a $design$ design. The end is tied with a $color$ fabric.',
     examine : 'A common choice for those who wish to cause harm and have the arm to back it up.',
     equipType: TYPE.TWOHANDED,
@@ -1921,9 +1832,9 @@ Item.database.newEntry(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
     tier: 2,
     possibleAbilities : [
-        "Stun",
-        "Big Swing",
-        "Leg Sweep"
+        'base:stun',
+        'base:big-swing',
+        'base:leg-sweep'
     ],
 
     // fatigued
@@ -1935,7 +1846,7 @@ Item.database.newEntry(data : {
         DEX: -25
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -1950,6 +1861,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Tome",
+    id : 'base:tome',
     description: 'A plated book for magick-users in the heat of battle. It is covered with a $color$ fabric featuring a $design$ design.',
     examine : 'A lightly enchanted book meant to both be used as reference on-the-fly and meant to increase the mental acquity of the holder.',
     equipType: TYPE.HAND,
@@ -1970,11 +1882,11 @@ Item.database.newEntry(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 220,
     possibleAbilities : [
-        "Fire",
-        "Ice",
-        "Thunder",
-        "Flash",
-        "Cure",
+        'base:fire',
+        'base:ice',
+        'base:thunder',
+        'base:flash',
+        'base:cure',
     ],
     // fatigued
     blockPoints : 1,
@@ -1984,7 +1896,7 @@ Item.database.newEntry(data : {
         SPD: -10
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -1998,6 +1910,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Tunic",
+    id : 'base:tunic',
     description: 'Simple cloth for the body with a $design$ design. It is predominantly $color$.',
     examine : 'Common type of light armor',
     equipType: TYPE.ARMOR,
@@ -2036,6 +1949,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Robe",
+    id : 'base:robe',
     description: 'Simple cloth favored by scholars. It features a $color$, $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.ARMOR,
@@ -2073,6 +1987,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Scarf",
+    id : 'base:scarf',
     description: 'Simple cloth accessory. It is $color$ with a $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.TRINKET,
@@ -2110,6 +2025,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Headband",
+    id : 'base:headband',
     description: 'Simple cloth accessory. It is $color$ with a $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.TRINKET,
@@ -2145,6 +2061,7 @@ Item.database.newEntry(data : {
 })        
 Item.database.newEntry(data : {
     name : "Ring",
+    id : 'base:ring',
     description: 'A metallic ring. The inset gem is $color$ and features a $design$ design.',
     examine : '',
     equipType: TYPE.RING,
@@ -2172,7 +2089,7 @@ Item.database.newEntry(data : {
         DEX: 20
     ),
     useEffects : [
-        'Fling',
+        'base:fling',
     ],
     possibleAbilities : [
     ],
@@ -2186,6 +2103,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Cape",
+    id : 'base:cape',
     description: 'Simple cloth accessory. It features a $color$-based design with a $design$ pattern.',
     examine : 'Common type of light armor',
     equipType: TYPE.TRINKET,
@@ -2223,6 +2141,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Cloak",
+    id : 'base:cloak',
     description: 'Simple cloth accessory that covers the entire body and includes a hood. It features a $color$-based design with a $design$ pattern.',
     examine : 'Stylish!',
     equipType: TYPE.TRINKET,
@@ -2260,6 +2179,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Hat",
+    id : 'base:hat',
     description: 'Simple cloth accessory. It is predominantly $color$ with a $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.TRINKET,
@@ -2296,6 +2216,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Fortified Cape",
+    id : 'base:fortified-cape',
     description: 'A cape fortified with metal. It is a bit heavy. It features a $color$ trim and a $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.TRINKET,
@@ -2336,6 +2257,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Light Robe",
+    id : 'base:light-robe',
     description: 'Enchanted light wear favored by mages. It features a $color$, $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.ARMOR,
@@ -2374,6 +2296,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Chainmail",
+    id : 'base:chainmail',
     description: 'Mail made of linked chains. It bears an emblem colored $color$ with a $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.ARMOR,
@@ -2414,6 +2337,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Filigree Armor",
+    id : 'base:filigree-armor',
     description: 'Hardened material with a fancy $color$ trim and a $design$ design.',
     examine : 'Common type of light armor',
     equipType: TYPE.ARMOR,
@@ -2455,6 +2379,7 @@ Item.database.newEntry(data : {
     
 Item.database.newEntry(data : {
     name : "Plate Armor",
+    id : 'base:plate-armor',
     description: 'Extremely protective armor of a high-grade. It has a $color$ trim with a $design$ design.',
     examine : 'Highly skilled craftspeople are required to make this work.',
     equipType: TYPE.ARMOR,
@@ -2493,9 +2418,10 @@ Item.database.newEntry(data : {
     onCreate ::(item, creationHint) {}
     
 })    
-
+/*
 Item.database.newEntry(data : {
     name : "Edrosae's Key",
+    id : 'base:
     description: 'The gateway to the domain of the Elders.',
     examine : '',
     equipType: TYPE.TWOHANDED,
@@ -2525,7 +2451,7 @@ Item.database.newEntry(data : {
         DEX: -5
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -2534,7 +2460,7 @@ Item.database.newEntry(data : {
     ,
     onCreate ::(item, creationHint) {}
     
-})
+})*/
 
 
 ////// RAW_METALS
@@ -2542,6 +2468,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Copper Ingot",
+    id : 'base:copper-ingot',
     description: 'Copper Ingot',
     examine : 'Pure copper ingot.',
     equipType: TYPE.TWOHANDED,
@@ -2570,7 +2497,7 @@ Item.database.newEntry(data : {
         DEX: -20
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -2585,6 +2512,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Iron Ingot",
+    id : 'base:iron-ingot',
     description: 'Iron Ingot',
     examine : 'Pure iron ingot',
     equipType: TYPE.TWOHANDED,
@@ -2613,7 +2541,7 @@ Item.database.newEntry(data : {
         DEX: -20
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -2626,6 +2554,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Steel Ingot",
+    id : 'base:steel-ingot',
     description: 'Steel Ingot',
     examine : 'Pure Steel ingot.',
     equipType: TYPE.TWOHANDED,
@@ -2654,7 +2583,7 @@ Item.database.newEntry(data : {
         DEX: -20
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -2669,6 +2598,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Mythril Ingot",
+    id : 'base:mythril-ingot',
     description: 'Mythril Ingot',
     examine : 'Pure iron ingot',
     equipType: TYPE.TWOHANDED,
@@ -2697,7 +2627,7 @@ Item.database.newEntry(data : {
         DEX: -20
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -2710,6 +2640,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Quicksilver Ingot",
+    id : 'base:quicksilver-ingot',
     description: 'Quicksilver Ingot',
     examine : 'Pure quicksilver alloy ingot',
     equipType: TYPE.TWOHANDED,
@@ -2738,7 +2669,7 @@ Item.database.newEntry(data : {
         DEX: -20
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -2751,6 +2682,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Adamantine Ingot",
+    id : 'base:adamantine-ingot',
     description: 'Adamantine Ingot',
     examine : 'Pure adamantine ingot',
     equipType: TYPE.TWOHANDED,
@@ -2779,7 +2711,7 @@ Item.database.newEntry(data : {
         DEX: -20
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -2793,6 +2725,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Sunstone Ingot",
+    id : 'base:substone-ingot',
     description: 'Sunstone alloy ingot',
     examine : 'An alloy with mostly sunstone, it dully shines with a soft yellow gleam',
     equipType: TYPE.TWOHANDED,
@@ -2821,7 +2754,7 @@ Item.database.newEntry(data : {
         DEX: -20
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -2834,6 +2767,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Moonstone Ingot",
+    id : 'base:moonstone-ingot',
     description: 'Sunstone alloy ingot',
     examine : 'An alloy with mostly moonstone, it dully shines with a soft teal',
     equipType: TYPE.TWOHANDED,
@@ -2862,7 +2796,7 @@ Item.database.newEntry(data : {
         DEX: -20
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -2875,6 +2809,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Dragonglass Ingot",
+    id : 'base:dragonglass-ingot',
     description: 'Dragonglass alloy ingot',
     examine : 'An alloy with mostly dragonglass, it sharply shines black.',
     equipType: TYPE.TWOHANDED,
@@ -2903,7 +2838,7 @@ Item.database.newEntry(data : {
         DEX: -20
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -2915,6 +2850,7 @@ Item.database.newEntry(data : {
 }) 
 Item.database.newEntry(data : {
     name : "Ore",
+    id : 'base:ore',
     description: "Raw ore. It's hard to tell exactly what kind of metal it is.",
     examine : 'Could be smelted into',
     equipType: TYPE.TWOHANDED,
@@ -2943,7 +2879,7 @@ Item.database.newEntry(data : {
         DEX: -20
     ),
     useEffects : [
-        'Fling'
+        'base:fling'
     ],
     equipEffects : [],
     attributes : 
@@ -2955,6 +2891,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Gold Pouch",
+    id : 'base:gold-pouch',
     description: "A pouch of coins.",
     examine : '',
     equipType: TYPE.HAND,
@@ -2983,8 +2920,8 @@ Item.database.newEntry(data : {
         DEX: -20
     ),
     useEffects : [
-        'Treasure I',
-        'Consume Item'       
+        'base:treasure-1',
+        'base:consume-item'       
     ],
     equipEffects : [],
     attributes : 
@@ -2996,6 +2933,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Skill Crystal",
+    id : 'base:skill-crystal',
     description: "Irridescent crystal that imparts knowledge when used.",
     examine : 'Quite sought after, highly skilled mages usually produce them for the public',
     equipType: TYPE.HAND,
@@ -3024,8 +2962,8 @@ Item.database.newEntry(data : {
         DEX: -20
     ),
     useEffects : [
-        'Learn Skill',
-        'Consume Item'       
+        'base:learn-skill',
+        'base:consume-item'       
     ],
     equipEffects : [],
     attributes : 
@@ -3081,6 +3019,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Tablet",
+    id : 'base:tablet',
     description: "A tablet with carved with runes in Draconic. Arcanists might find this valuable.",
     examine : 'Might have been used for some highly specialized purpose. These seem very rare.',
     equipType: TYPE.TWOHANDED,
@@ -3109,8 +3048,8 @@ Item.database.newEntry(data : {
         DEX: -20
     ),
     useEffects : [
-        'Fling',
-        'Break Item'
+        'base:fling',
+        'base:break-item'
     ],
     equipEffects : [],
     attributes : 
@@ -3123,6 +3062,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(data : {
     name : "Ingredient",
+    id : 'base:ingredient',
     description: "A pack of ingredients used for potions and brews.",
     examine : 'Common ingredients used by alchemists.',
     equipType: TYPE.TWOHANDED,
@@ -3151,8 +3091,8 @@ Item.database.newEntry(data : {
         DEX: -2
     ),
     useEffects : [
-        'Fling',
-        'Break Item'
+        'base:fling',
+        'base:break-item'
     ],
     equipEffects : [],
     attributes : 0,
@@ -3161,248 +3101,11 @@ Item.database.newEntry(data : {
 }) 
 
 
-Item.database.newEntry(data : {
-    name : "Wyvern Key of Fire",
-    description: 'A key to another island. Its quite big and warm to the touch.',
-    examine : '',
-    equipType: TYPE.TWOHANDED,
-    rarity : 100,
-    weight : 10,
-    hasSize : false,
-    canBeColored : false,
-    basePrice: 1,
-    tier: 0,
-    keyItem : false,
-    levelMinimum : 1000000000,
-    canHaveEnchants : false,
-    canHaveTriggerEnchants : false,
-    enchantLimit : 0,
-    hasQuality : false,
-    hasMaterial : false,
-    isApparel : false,    isUnique : true,
-    useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
-        "Fire" // for fun!
-    ],
-
-    // fatigued
-    blockPoints : 2,
-    equipMod : StatSet.new(
-        ATK: 25,
-        SPD: -5,
-        DEX: -5
-    ),
-    useEffects : [
-    ],
-    equipEffects : [
-        "Burning"
-    ],
-    attributes : 
-        ATTRIBUTE.SHARP |
-        ATTRIBUTE.METAL
-    ,
-    onCreate ::(item, user, creationHint) {     
-    
-        @:world = import(module:'game_singleton.world.mt');        
-        @:nameGen = import(module:'game_singleton.namegen.mt');
-        @:story = import(module:'game_singleton.story.mt');
-        @:island = {
-            island : empty
-        }
-        breakpoint();
-        item.setIslandGenAttributes(
-            levelHint:  story.levelHint,//user.level => Number,
-            nameHint:   nameGen.island(),
-            tierHint : 1
-        );
-        
-        item.price = 1;
-    }
-    
-})
-
-Item.database.newEntry(data : {
-    name : "Wyvern Key of Ice",
-    description: 'A key to another island. Its quite big and cold to the touch.',
-    examine : '',
-    equipType: TYPE.TWOHANDED,
-    rarity : 100,
-    hasSize : false,
-    weight : 10,
-    canBeColored : false,
-    basePrice: 1,
-    tier: 0,
-    keyItem : false,
-    levelMinimum : 1000000000,
-    canHaveEnchants : false,
-    canHaveTriggerEnchants : false,
-    enchantLimit : 0,
-    hasQuality : false,
-    hasMaterial : false,
-    isApparel : false,    isUnique : true,
-    useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
-        "Ice" // for fun!
-    ],
-
-    // fatigued
-    blockPoints : 2,
-    equipMod : StatSet.new(
-        ATK: 25,
-        SPD: -5,
-        DEX: -5
-    ),
-    useEffects : [
-    ],
-    equipEffects : [
-        "Icy"
-    ],
-    attributes : 
-        ATTRIBUTE.SHARP |
-        ATTRIBUTE.METAL
-    ,
-    onCreate ::(item, user, creationHint) {     
-    
-        @:world = import(module:'game_singleton.world.mt');        
-        @:nameGen = import(module:'game_singleton.namegen.mt');
-        @:story = import(module:'game_singleton.story.mt');
-        @:island = {
-            island : empty
-        }
-
-        item.setIslandGenAttributes(
-            levelHint:  story.levelHint+1,
-            nameHint:   nameGen.island(),
-            tierHint : 2
-        );
-        
-        item.price = 1;
-    }
-    
-})    
-
-Item.database.newEntry(data : {
-    name : "Wyvern Key of Thunder",
-    description: 'A key to another island. Its quite big and softly hums.',
-    examine : '',
-    equipType: TYPE.TWOHANDED,
-    rarity : 100,
-    weight : 10,
-    canBeColored : false,
-    hasSize : false,
-    basePrice: 1,
-    keyItem : false,
-    tier: 0,
-    levelMinimum : 1000000000,
-    canHaveEnchants : false,
-    canHaveTriggerEnchants : false,
-    enchantLimit : 0,
-    hasQuality : false,
-    hasMaterial : false,
-    isApparel : false,    isUnique : true,
-    useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
-        "Thunder" // for fun!
-    ],
-
-    // fatigued
-    blockPoints : 2,
-    equipMod : StatSet.new(
-        ATK: 25,
-        SPD: -5,
-        DEX: -5
-    ),
-    useEffects : [
-    ],
-    equipEffects : [
-        "Shock"
-    ],
-    attributes : 
-        ATTRIBUTE.SHARP |
-        ATTRIBUTE.METAL
-    ,
-    onCreate ::(item, user, creationHint) {     
-    
-        @:world = import(module:'game_singleton.world.mt');        
-        @:nameGen = import(module:'game_singleton.namegen.mt');
-        @:story = import(module:'game_singleton.story.mt');
-        @:island = {
-            island : empty
-        }
-
-        item.setIslandGenAttributes(
-            levelHint:  story.levelHint+2,
-            nameHint:   nameGen.island(),
-            tierHint : 3
-        );
-        
-        item.price = 1;
-    }
-    
-})    
-
-Item.database.newEntry(data : {
-    name : "Wyvern Key of Light",
-    description: 'A key to another island. Its quite big and faintly glows.',
-    examine : '',
-    equipType: TYPE.TWOHANDED,
-    rarity : 100,
-    weight : 10,
-    hasSize : false,
-    canBeColored : false,
-    basePrice: 1,
-    keyItem : false,
-    tier: 0,
-    levelMinimum : 1000000000,
-    canHaveEnchants : false,
-    canHaveTriggerEnchants : false,
-    enchantLimit : 0,
-    hasQuality : false,
-    hasMaterial : false,
-    isApparel : false,    isUnique : true,
-    useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
-        "Explosion" // for fun!
-    ],
-
-    // fatigued
-    blockPoints : 2,
-    equipMod : StatSet.new(
-        ATK: 25,
-        SPD: -5,
-        DEX: -5
-    ),
-    useEffects : [
-    ],
-    equipEffects : [
-        "Shimmering"
-    ],
-    attributes : 
-        ATTRIBUTE.SHARP |
-        ATTRIBUTE.METAL
-    ,
-    onCreate ::(item, user, creationHint) {     
-    
-        @:world = import(module:'game_singleton.world.mt');        
-        @:nameGen = import(module:'game_singleton.namegen.mt');
-        @:story = import(module:'game_singleton.story.mt');
-        @:island = {
-            island : empty
-        }
-
-        item.setIslandGenAttributes(
-            levelHint:  story.levelHint+3,
-            nameHint:   nameGen.island(),
-            tierHint : 4
-        );
-        
-        item.price = 1;
-    }
-    
-})       
+  
 
 Item.database.newEntry(data : {
     name : "Wyvern Key",
+    id : 'base:wyvern-key',
     description: 'A key to another island.',
     examine : '',
     equipType: TYPE.TWOHANDED,
@@ -3444,49 +3147,7 @@ Item.database.newEntry(data : {
 })    
 
 
-Item.database.newEntry(data : {
-    name : "Sentimental Box",
-    description: 'A box of sentimental value. You feel like you should open it right away.',
-    examine : '',
-    equipType: TYPE.TWOHANDED,
-    rarity : 100,
-    weight : 10,
-    canBeColored : false,
-    basePrice: 400,
-    keyItem : false,
-    hasSize : false,
-    tier: 0,
-    levelMinimum : 1000000000,
-    canHaveEnchants : false,
-    canHaveTriggerEnchants : false,
-    enchantLimit : 0,
-    hasQuality : false,
-    hasMaterial : false,
-    isApparel : false,    isUnique : true,
-    useTargetHint : USE_TARGET_HINT.NONE,
-    possibleAbilities : [
-    ],
 
-    // fatigued
-    blockPoints : 0,
-    equipMod : StatSet.new(
-        ATK: 5,
-        SPD: -5,
-        DEX: -5
-    ),
-    useEffects : [
-        'Sentimental Box',
-    ],
-    equipEffects : [],
-    attributes : 
-        ATTRIBUTE.SHARP  |
-        ATTRIBUTE.METAL
-    ,
-    onCreate ::(item, user, creationHint) {     
-
-    }
-    
-})    
 }
 
 
@@ -3530,6 +3191,7 @@ Item.database.newEntry(data : {
         name: 'Wyvern.Item.Base',
         attributes : {
             name : String,
+            id : String,
             description : String,
             examine : String,
             equipType : Number,
@@ -3763,7 +3425,7 @@ Item.database.newEntry(data : {
                                 knockout : if (world.island.tier > world.MAX_NORMAL_TIER) (world.island.tier  - world.MAX_NORMAL_TIER)*1.4                            
                             )
                         else 
-                            ItemQuality.find(name:qualityHint);
+                            ItemQuality.find(id:qualityHint);
                         state.stats.add(stats:state.quality.equipMod);
                         state.price += (state.price * (state.quality.pricePercentMod/100));                        
                     }
@@ -3777,7 +3439,7 @@ Item.database.newEntry(data : {
                             knockout : if (world.island.tier > world.MAX_NORMAL_TIER) (world.island.tier  - world.MAX_NORMAL_TIER)*1.4
                         );
                     } else ::<= {
-                        state.material = Material.find(name:materialHint);                
+                        state.material = Material.find(id:materialHint);                
                     }
                     state.stats.add(stats:state.material.statMod);
                 }
@@ -3789,7 +3451,7 @@ Item.database.newEntry(data : {
                             knockout : if (world.island.tier > world.MAX_NORMAL_TIER) (world.island.tier  - world.MAX_NORMAL_TIER)*1.4
                         );
                     } else ::<= {
-                        state.apparel = ApparelMaterial.find(name:apparelHint);                
+                        state.apparel = ApparelMaterial.find(id:apparelHint);                
                     }
                     state.stats.add(stats:state.apparel.statMod);
                 }                
@@ -3798,7 +3460,7 @@ Item.database.newEntry(data : {
                 if (base.canHaveEnchants) ::<= {
                     if (enchantHint != empty) ::<= {
                         this.addEnchant(mod:ItemEnchant.new(
-                            base:ItemEnchant.database.find(name:enchantHint)
+                            base:ItemEnchant.database.find(id:enchantHint)
                         ));
                     }
 
@@ -3827,9 +3489,9 @@ Item.database.newEntry(data : {
 
 
                 if (base.canBeColored) ::<= {
-                    state.color = if (colorHint) ItemColor.find(name:colorHint) else ItemColor.getRandom();
+                    state.color = if (colorHint) ItemColor.find(id:colorHint) else ItemColor.getRandom();
                     state.stats.add(stats:state.color.equipMod);
-                    state.design = if (designHint) ItemDesign.find(name:designHint) else ItemDesign.getRandom();
+                    state.design = if (designHint) ItemDesign.find(id:designHint) else ItemDesign.getRandom();
                     state.stats.add(stats:state.design.equipMod);
                 }
                             
@@ -3927,10 +3589,11 @@ Item.database.newEntry(data : {
                 get ::<- state.island
             },
             
-            setIslandGenAttributes ::(levelHint => Number, nameHint => String, tierHint => Number) {
+            setIslandGenAttributes ::(levelHint => Number, nameHint => String, tierHint => Number, extraLandmarks) {
                 state.islandLevelHint = levelHint;
                 state.islandNameHint = nameHint;
                 state.islandTierHint = tierHint;
+                state.islandExtraLandmarks = extraLandmarks;
             },
             
             modData : {
@@ -3944,7 +3607,8 @@ Item.database.newEntry(data : {
                     this.islandEntry = Island.new(
                         levelHint: (state.islandLevelHint)=>Number,
                         nameHint: (state.islandNameHint)=>String,
-                        tierHint: (state.islandTierHint)=>Number
+                        tierHint: (state.islandTierHint)=>Number,
+                        extraLandmarks: state.extraLandmarks
                     );                
                 } else 
                     this.islandEntry = island;
@@ -4060,7 +3724,7 @@ Item.database.newEntry(data : {
                             @out = '';
                             when (state.equipEffects->keycount == 0) 'None.';
                             foreach(state.equipEffects)::(i, effect) {
-                                out = out + '. ' + Effect.find(name:effect).description + '\n';
+                                out = out + '. ' + Effect.find(id:effect).description + '\n';
                             }
                             return out;
                         }
@@ -4076,7 +3740,7 @@ Item.database.newEntry(data : {
                         @out = '';
                         when (state.useEffects->keycount == 0) 'None.';
                         foreach(state.useEffects)::(i, effect) {
-                            out = out + '- ' + Effect.find(name:effect).description + '\n';
+                            out = out + '- ' + Effect.find(id:effect).description + '\n';
                         }
                         return out;
                     }
