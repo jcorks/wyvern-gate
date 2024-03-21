@@ -44,7 +44,7 @@
                 @:defaultAttack = ::{
                     battle.entityCommitAction(action:BattleAction.new(
                         ability: 
-                            Ability.find(id:'Attack'),
+                            Ability.find(id:'base:attack'),
 
                         targets: [
                             Random.pickArrayItem(list:enemies)
@@ -58,7 +58,7 @@
             
                 when(enemies->keycount == 0)
                     battle.entityCommitAction(action:BattleAction.new(
-                        ability: Ability.find(id:'Wait'),
+                        ability: Ability.find(id:'base:wait'),
                         targets: [],
                         targetParts : [],
                         extraData: {}                        
@@ -70,7 +70,7 @@
                     defaultAttack();          
 
                 // else pick a non-defend ability
-                @:list = user_.abilitiesAvailable->filter(by:::(value) <- value.name != 'Attack' && value.name != 'Defend' && value.usageHintAI != Ability.USAGE_HINT.DONTUSE);
+                @:list = user_.abilitiesAvailable->filter(by:::(value) <- value.id != 'base:attack' && value.id != 'base:defend' && value.usageHintAI != Ability.USAGE_HINT.DONTUSE);
 
                 // fallback if only ability known is "dont use"
                 when (list->keycount == 0)

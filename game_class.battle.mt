@@ -838,7 +838,6 @@
                     jumpTag: 'Battle',
                     onEnter :: {
                         backgroundID = canvas.addBackground(render::{
-                            breakpoint();
                             this.render();
                         });
                     },

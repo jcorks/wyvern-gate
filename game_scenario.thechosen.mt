@@ -265,7 +265,7 @@ return {
         @party = world.party;            
     
         @:keyhome = Item.new(
-            base: Item.database.find(id:'Wyvern Key')
+            base: Item.database.find(id:'base:wyvern-key')
         );
         keyhome.name = 'Wyvern Key: Home';
         
@@ -327,7 +327,7 @@ return {
         }
 
         party.inventory.add(item:Item.new(
-            base:Item.database.find(id:'Sentimental Box')
+            base:Item.database.find(id:'thechosen:sentimental-box')
         ));
 
 
@@ -445,8 +445,8 @@ return {
                     );               
                     instance.savestate();
                     @:Scene = import(module:'game_database.scene.mt');
-                    //Scene.start(name:'scene_intro', onDone::{                    
-                    Scene.start(id:'thechosen:scene_wyvernlight1_quest', onDone ::{
+                    Scene.start(id:'thechosen:scene_intro', onDone::{                    
+                    //Scene.start(id:'thechosen:scene_wyvernlight1_quest', onDone ::{
                         instance.visitIsland(key:keyhome);                        
                         windowEvent.queueMessage(
                             speaker: party.members[0].name,
@@ -885,7 +885,7 @@ return {
         
         
         @:Landmark = import(module:'game_mutator.landmark.mt');
-
+        @:DungeonMap = import(module:'game_singleton.dungeonmap.mt');
 
 
         Landmark.database.newEntry(
@@ -900,7 +900,7 @@ return {
                 maxLocations : 3,
                 peaceful: false,
                 guarded : false,
-                landmarkType : TYPE.DUNGEON,
+                landmarkType : Landmark.TYPE.DUNGEON,
                 canSave : false,
                 pointOfNoReturn : true,
                 ephemeral : true,
@@ -962,7 +962,7 @@ return {
                 maxLocations : 4,
                 peaceful: false,
                 guarded : false,
-                landmarkType : TYPE.DUNGEON,
+                landmarkType : Landmark.TYPE.DUNGEON,
                 canSave : false,
                 pointOfNoReturn : true,
                 ephemeral : true,
@@ -1017,7 +1017,7 @@ return {
                 maxLocations : 4,
                 peaceful: false,
                 guarded : false,
-                landmarkType : TYPE.DUNGEON,
+                landmarkType : Landmark.TYPE.DUNGEON,
                 canSave : false,
                 pointOfNoReturn : true,
                 ephemeral : true,
@@ -1075,7 +1075,7 @@ return {
                 maxLocations : 4,
                 peaceful: false,
                 guarded : false,
-                landmarkType : TYPE.DUNGEON,
+                landmarkType : Landmark.TYPE.DUNGEON,
                 canSave : false,
                 pointOfNoReturn : true,
                 ephemeral : true,
@@ -1134,7 +1134,7 @@ return {
                 maxLocations : 2,
                 guarded : false,
                 peaceful: true,
-                landmarkType : TYPE.DUNGEON,
+                landmarkType : Landmark.TYPE.DUNGEON,
                 canSave : true,
                 pointOfNoReturn : false,
                 ephemeral : false,
@@ -1175,7 +1175,7 @@ return {
                 maxLocations : 2,
                 guarded : false,
                 peaceful: true,
-                landmarkType : TYPE.DUNGEON,
+                landmarkType : Landmark.TYPE.DUNGEON,
                 canSave : true,
                 pointOfNoReturn : false,
                 ephemeral : false,
@@ -1216,7 +1216,7 @@ return {
                 peaceful: true,
                 
                 canSave : true,
-                landmarkType : TYPE.DUNGEON,
+                landmarkType : Landmark.TYPE.DUNGEON,
                 pointOfNoReturn : false,
                 ephemeral : false,
                 dungeonForceEntrance: false,
@@ -1257,7 +1257,7 @@ return {
                 peaceful: true,
                 
                 canSave : true,
-                landmarkType : TYPE.DUNGEON,
+                landmarkType : Landmark.TYPE.DUNGEON,
                 pointOfNoReturn : false,
                 ephemeral : false,
                 dungeonForceEntrance: false,
@@ -1509,6 +1509,7 @@ return {
 
                 
                 location.ownedBy.overrideInteract = ::(party, location, onDone) {
+                    @:world = import(module:'game_singleton.world.mt');                            
                     if (world.scenario.data.thunderWyvernDefeated == false) ::<= {
                         Scene.start(id:'thechosen:scene_wyvernthunder0', onDone::{}, location, landmark:location.landmark);
                     } else ::<= {
@@ -1729,6 +1730,7 @@ return {
         Landmark.database.newEntry(
             data: {
                 name : 'Dark Lair',
+                id : 'thechosen:dark-lair',
                 symbol : 'M',
                 legendName: 'Shrine',
                 rarity : 100000,      
@@ -1737,7 +1739,7 @@ return {
                 maxLocations : 4,
                 peaceful: false,
                 guarded : false,
-                landmarkType : TYPE.DUNGEON,
+                landmarkType : Landmark.TYPE.DUNGEON,
                 canSave : false,
                 pointOfNoReturn : true,
                 ephemeral : true,
@@ -2059,7 +2061,7 @@ return {
             id : 'thechosen:sentimental-box',
             description: 'A box of sentimental value. You feel like you should open it right away.',
             examine : '',
-            equipType: TYPE.TWOHANDED,
+            equipType: Item.TYPE.TWOHANDED,
             rarity : 100,
             weight : 10,
             canBeColored : false,
@@ -2074,7 +2076,7 @@ return {
             hasQuality : false,
             hasMaterial : false,
             isApparel : false,    isUnique : true,
-            useTargetHint : USE_TARGET_HINT.NONE,
+            useTargetHint : Item.USE_TARGET_HINT.NONE,
             possibleAbilities : [
             ],
 
@@ -2090,8 +2092,8 @@ return {
             ],
             equipEffects : [],
             attributes : 
-                ATTRIBUTE.SHARP  |
-                ATTRIBUTE.METAL
+                Item.ATTRIBUTE.SHARP  |
+                Item.ATTRIBUTE.METAL
             ,
             onCreate ::(item, user, creationHint) {     
 
@@ -2107,7 +2109,7 @@ return {
             id : 'thechosen:wyvern-key-of-fire',
             description: 'A key to another island. Its quite big and warm to the touch.',
             examine : '',
-            equipType: TYPE.TWOHANDED,
+            equipType: Item.TYPE.TWOHANDED,
             rarity : 100,
             weight : 10,
             hasSize : false,
@@ -2122,7 +2124,7 @@ return {
             hasQuality : false,
             hasMaterial : false,
             isApparel : false,    isUnique : true,
-            useTargetHint : USE_TARGET_HINT.ONE,
+            useTargetHint : Item.USE_TARGET_HINT.ONE,
             possibleAbilities : [
                 "base:fire" // for fun!
             ],
@@ -2140,8 +2142,8 @@ return {
                 "base:burning"
             ],
             attributes : 
-                ATTRIBUTE.SHARP |
-                ATTRIBUTE.METAL
+                Item.ATTRIBUTE.SHARP |
+                Item.ATTRIBUTE.METAL
             ,
             onCreate ::(item, user, creationHint) {     
             
@@ -2171,7 +2173,7 @@ return {
             id : 'thechosen:wyvern-key-of-ice',
             description: 'A key to another island. Its quite big and cold to the touch.',
             examine : '',
-            equipType: TYPE.TWOHANDED,
+            equipType: Item.TYPE.TWOHANDED,
             rarity : 100,
             hasSize : false,
             weight : 10,
@@ -2186,7 +2188,7 @@ return {
             hasQuality : false,
             hasMaterial : false,
             isApparel : false,    isUnique : true,
-            useTargetHint : USE_TARGET_HINT.ONE,
+            useTargetHint : Item.USE_TARGET_HINT.ONE,
             possibleAbilities : [
                 "base:ice" // for fun!
             ],
@@ -2204,8 +2206,8 @@ return {
                 "base:icy"
             ],
             attributes : 
-                ATTRIBUTE.SHARP |
-                ATTRIBUTE.METAL
+                Item.ATTRIBUTE.SHARP |
+                Item.ATTRIBUTE.METAL
             ,
             onCreate ::(item, user, creationHint) {     
             
@@ -2235,7 +2237,7 @@ return {
             id : 'thechosen:wyvern-key-of-thunder',
             description: 'A key to another island. Its quite big and softly hums.',
             examine : '',
-            equipType: TYPE.TWOHANDED,
+            equipType: Item.TYPE.TWOHANDED,
             rarity : 100,
             weight : 10,
             canBeColored : false,
@@ -2250,7 +2252,7 @@ return {
             hasQuality : false,
             hasMaterial : false,
             isApparel : false,    isUnique : true,
-            useTargetHint : USE_TARGET_HINT.ONE,
+            useTargetHint : Item.USE_TARGET_HINT.ONE,
             possibleAbilities : [
                 "base:thunder" // for fun!
             ],
@@ -2268,8 +2270,8 @@ return {
                 "base:shock"
             ],
             attributes : 
-                ATTRIBUTE.SHARP |
-                ATTRIBUTE.METAL
+                Item.ATTRIBUTE.SHARP |
+                Item.ATTRIBUTE.METAL
             ,
             onCreate ::(item, user, creationHint) {     
             
@@ -2299,7 +2301,7 @@ return {
             id : 'base:wyvern-key-of-light',
             description: 'A key to another island. Its quite big and faintly glows.',
             examine : '',
-            equipType: TYPE.TWOHANDED,
+            equipType: Item.TYPE.TWOHANDED,
             rarity : 100,
             weight : 10,
             hasSize : false,
@@ -2314,7 +2316,7 @@ return {
             hasQuality : false,
             hasMaterial : false,
             isApparel : false,    isUnique : true,
-            useTargetHint : USE_TARGET_HINT.ONE,
+            useTargetHint : Item.USE_TARGET_HINT.ONE,
             possibleAbilities : [
                 "base:explosion" // for fun!
             ],
@@ -2332,8 +2334,8 @@ return {
                 "base:shimmering"
             ],
             attributes : 
-                ATTRIBUTE.SHARP |
-                ATTRIBUTE.METAL
+                Item.ATTRIBUTE.SHARP |
+                Item.ATTRIBUTE.METAL
             ,
             onCreate ::(item, user, creationHint) {     
             
@@ -3636,6 +3638,7 @@ return {
                 id : 'thechosen:scene_sentimentalbox',
                 script: [
                     ::(location, landmark, doNext) {
+                        @:world = import(module:'game_singleton.world.mt');
                         when(world.scenario.data.openedSentimentalBox) 
                             windowEvent.queueMessage(text:
                                 "The box is empty."
@@ -3727,6 +3730,7 @@ return {
             }
         )
 
+        @:Species = import(module:'game_database.species.mt');
 
         Species.newEntry(data:{
             name : 'Wyvern of Fire',

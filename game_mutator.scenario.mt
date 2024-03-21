@@ -106,7 +106,7 @@
             },
             
             load ::(serialized) {
-                @:base = Scenario.database.find(id:serialized.base.name);
+                @:base = Scenario.database.find(id:serialized.base.id);
                 base.databaseOverrides();
                 state.load(parent:this, serialized);
             },

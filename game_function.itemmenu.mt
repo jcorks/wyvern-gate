@@ -74,7 +74,7 @@ return ::(
               onChoice ::(choice) {
                 when(choice == 0) empty;                      
                 commitAction(action:BattleAction.new(
-                        ability: Ability.find(id:'Use Item'),
+                        ability: Ability.find(id:'base:use-item'),
                         targets: [all[choice-1]],
                         extraData : [choiceItem]
                     ) 
@@ -103,7 +103,7 @@ return ::(
            
                 when(choice == 0) empty;                                                  
                 commitAction(action:BattleAction.new(
-                        ability: Ability.find(id:'Use Item'),
+                        ability: Ability.find(id:'base:use-item'),
                         targets: if (choice == 1) party.members else enemies,
                         extraData : [choiceItem]
                     ) 
@@ -117,7 +117,7 @@ return ::(
 
           (Item.USE_TARGET_HINT.ALL): ::<= {
             commitAction(action:BattleAction.new(
-                    ability: Ability.find(id:'Use Item'),
+                    ability: Ability.find(id:'base:use-item'),
                     targets: [...party.members, ...enemies],
                     extraData : [choiceItem]
                 ) 
@@ -129,7 +129,7 @@ return ::(
           
           (Item.USE_TARGET_HINT.NONE): ::<= {
             commitAction(action:BattleAction.new(
-                    ability: Ability.find(id:'Use Item'),
+                    ability: Ability.find(id:'base:use-item'),
                     targets: [],
                     extraData : [choiceItem]
                 ) 
@@ -158,7 +158,7 @@ return ::(
         choiceNames->push(value:'Equip');
         choices->push(value::{
             commitAction(action:BattleAction.new(
-                ability: Ability.find(id:'Equip Item'),
+                ability: Ability.find(id:'base:equip-item'),
                 targets: [user],
                 extraData : [choiceItem, party.inventory]
             ));           

@@ -4328,11 +4328,12 @@ Effect.newEntry(
             
         ),
         onAffliction ::(user, item, holder) {
-
+            @:Ability = import(module:'game_database.ability.mt');
+            
             @:learned = holder.profession.gainSP(amount:1);
             foreach(learned)::(index, ability) {
                 holder.learnAbility(id:ability);
-                windowEvent.queueMessage(text: holder.name + ' learned the ability: ' + Ability.database.find(id:ability).name;                        
+                windowEvent.queueMessage(text: holder.name + ' learned the ability: ' + Ability.find(id:ability).name);                        
             }
         
         },

@@ -3176,6 +3176,7 @@ Item.database.newEntry(data : {
         islandLevelHint : empty,
         islandNameHint : empty,
         islandTierHint : empty,
+        islandExtraLandmarks : empty,
         improvementsLeft : empty,
         improvementsStart : empty,
         equipEffects : empty,
@@ -3342,12 +3343,14 @@ Item.database.newEntry(data : {
             })()
         }
         
+        @:Ability = import(module:'game_database.ability.mt');
+        
         @:recalculateDescription ::{
             @:base = this.base;
             state.description = String.combine(strings:[
                 base.description,
                 ' ',
-                (if (state.ability == empty) '' else 'If equipped, grants the ability: "' + state.ability + '". '),
+                (if (state.ability == empty) '' else 'If equipped, grants the ability: "' + Ability.find(id:state.ability).name + '". '),
                 if (state.size == empty) '' else 'It is ' + sizeToString() + '. ',
                 if (state.hasEmblem) (
                     if (base.isApparel) 
@@ -3608,7 +3611,7 @@ Item.database.newEntry(data : {
                         levelHint: (state.islandLevelHint)=>Number,
                         nameHint: (state.islandNameHint)=>String,
                         tierHint: (state.islandTierHint)=>Number,
-                        extraLandmarks: state.extraLandmarks
+                        extraLandmarks: state.islandExtraLandmarks
                     );                
                 } else 
                     this.islandEntry = island;

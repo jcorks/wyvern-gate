@@ -47,7 +47,7 @@ Profession.database.newEntry(data:{
     name: 'Adventurer',
     id : 'base:adventurer',
     description : 'General, well-rounded profession. Learns abilities on-the-fly to stay alive.', 
-    weaponAffinity : 'Shortsword',
+    weaponAffinity : 'base:shortsword',
     growth: StatSet.new(
         HP:  4,
         AP:  4,
@@ -79,7 +79,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Martial Artist',
     id : 'base:martial-artist',
-    weaponAffinity: 'Staff',
+    weaponAffinity: 'base:staff',
     description : 'A fighter that uses various stances to bend to the flow of battle.', 
     growth: StatSet.new(
         HP:  6,
@@ -115,8 +115,8 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Field Mage',
     id : 'base:field-mage',
-    description : 'A this-taught mage. Knows a variety of magicks.', 
-    weaponAffinity: 'Wand',
+    description : 'A self-taught mage. Knows a variety of magicks.', 
+    weaponAffinity: 'base:wand',
     growth: StatSet.new(
         HP:  3,
         AP:  7,
@@ -150,8 +150,8 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Cleric',
     id : 'base:cleric',
-    description : 'A this-taught healing mage. Knows a variety of magicks.', 
-    weaponAffinity: 'Mage-rod',
+    description : 'A self-taught healing mage. Knows a variety of magicks.', 
+    weaponAffinity: 'base:mage-staff',
     growth: StatSet.new(
         HP:  5,
         AP:  6,
@@ -184,7 +184,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Divine Lunist',
     id : 'base:divine-lunist',
-    weaponAffinity: 'Tome',
+    weaponAffinity: 'base:tome',
     description : 'Blessed by the moon, their magicks are entwined with the night.', 
     growth: StatSet.new(
         HP:  3,
@@ -218,7 +218,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Divine Solist',
     id : 'base:divine-solist',
-    weaponAffinity: 'Tome',
+    weaponAffinity: 'base:tome',
     description : 'Blessed by the sun, their magicks are entwined with daylight.', 
     growth: StatSet.new(
         HP:  3,
@@ -253,7 +253,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Blacksmith',
     id : 'base:blacksmith',
-    weaponAffinity: 'Smithing Hammer',
+    weaponAffinity: 'base:smithing-hammer',
     description : 'Skilled with metalworking, their skills are revered.', 
     growth: StatSet.new(
         HP:  14,
@@ -283,7 +283,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Trader',
     id : 'base:trader',
-    weaponAffinity: 'Dagger',
+    weaponAffinity: 'base:dagger',
     description : 'A silver tongue and a quick hand make this profession both lauded and loathed.', 
     growth: StatSet.new(
         HP:  4,
@@ -313,7 +313,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Warrior',
     id : 'base:warrior',
-    weaponAffinity: 'Greatsword',
+    weaponAffinity: 'base:greatsword',
     description : "Excelling in raw strength and technique, users of this profession are fearsome.", 
     growth: StatSet.new(
         HP:  9,
@@ -346,7 +346,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Guard',
     id : 'base:guard',
-    weaponAffinity: 'Polearm',
+    weaponAffinity: 'base:polearm',
     description : "Standard profession excelling in defending others, for better or for worse.", 
     growth: StatSet.new(
         HP:  6,
@@ -380,7 +380,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Summoner',
     id : 'base:summoner',
-    weaponAffinity: 'Tome',
+    weaponAffinity: 'base:tome',
     description : "Amagick-user who is able to temporarily materialize allies.", 
     growth: StatSet.new(
         HP:  5,
@@ -415,7 +415,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Arcanist',
     id : 'base:arcanist',
-    weaponAffinity: 'Tome',
+    weaponAffinity: 'base:tome',
     description : "A scholar first, their large knowledge of the arcane yields interesting magicks for any situation.", 
     growth: StatSet.new(
         HP:  3,
@@ -448,7 +448,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Runologist',
     id : 'base:runologist',
-    weaponAffinity: 'Tome',                
+    weaponAffinity: 'base:tome',                
     description : "An arcanist scholar who focuses on runes.", 
     growth: StatSet.new(
         HP:  3,
@@ -484,7 +484,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Elementalist',
     id : 'base:elementalist',
-    weaponAffinity: 'Shortsword',                
+    weaponAffinity: 'base:shortsword',                
     description : "Capable of infusing magicks into normal objects for combat.", 
     growth: StatSet.new(
         HP:  5,
@@ -518,7 +518,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Farmer',
     id : 'base:farmer',
-    weaponAffinity: 'Shovel',
+    weaponAffinity: 'base:shovel',
     description : "Skilled individual who knows their way around the fields.", 
     growth: StatSet.new(
         HP:  12,
@@ -548,7 +548,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Alchemist',
     id : 'base:alchemist',
-    weaponAffinity: 'Dagger',
+    weaponAffinity: 'base:dagger',
     description : "Skilled at brewing potions for all sorts of purposes.", 
     growth: StatSet.new(
         HP:  3,
@@ -611,7 +611,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Ranger',
     id : 'base:ranger',
-    weaponAffinity: 'Bow & Quiver',
+    weaponAffinity: 'base:bow-and-quiver',
     description : "", 
     growth: StatSet.new(
         HP:  4,
@@ -719,7 +719,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Assassin',
     id : 'base:assassin',
-    weaponAffinity: 'Dagger',                
+    weaponAffinity: 'base:dagger',                
     description : "Unparalleled in their ability to take down a target, this profession is respected for its abilities.", 
     growth: StatSet.new(
         HP:  2,
@@ -893,7 +893,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Keeper',
     id : 'base:keeper',
-    weaponAffinity: 'Glaive',                
+    weaponAffinity: 'base:glaive',                
     description : "", 
     levelMinimum : 100,
 
@@ -921,7 +921,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Creature',
     id : 'base:creature',
-    weaponAffinity: 'Shortsword',
+    weaponAffinity: 'base:shortsword',
     description : "", 
     levelMinimum : 100,
 
@@ -949,7 +949,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Fire Sprite',
     id : 'base:fire-sprite',
-    weaponAffinity: 'Shortsword',
+    weaponAffinity: 'base:shortsword',
     description : "", 
     levelMinimum : 100,
 
@@ -978,7 +978,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Ice Elemental',
     id : 'base:ice-elemental',
-    weaponAffinity: 'Shortsword',
+    weaponAffinity: 'base:shortsword',
     description : "", 
     levelMinimum : 100,
 
@@ -1008,7 +1008,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Thunder Spawn',
     id : 'base:thunder-spawn',
-    weaponAffinity: 'Shortsword',
+    weaponAffinity: 'base:shortsword',
     description : "", 
     levelMinimum : 100,
 
@@ -1039,7 +1039,7 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Guiding Light',
     id : 'base:guiding-light',
-    weaponAffinity: 'Shortsword',
+    weaponAffinity: 'base:shortsword',
     description : "", 
     levelMinimum : 100,
 

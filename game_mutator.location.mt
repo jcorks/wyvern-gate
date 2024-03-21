@@ -115,7 +115,7 @@ Location.database.newEntry(data:{
     onFirstInteract ::(location){
         location.ownedBy = location.landmark.island.newInhabitant();
         @:Profession = import(module:'game_mutator.profession.mt');
-        location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'Farmer'));  
+        location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'base:farmer'));  
         location.ownedBy.normalizeStats();              
         @:story = import(module:'game_singleton.story.mt');
         
@@ -224,8 +224,8 @@ Location.database.newEntry(data:{
 })
 
 Location.database.newEntry(data:{
-    id: 'Ore vein',
-    name: 'base:ore-vein',
+    name: 'Ore vein',
+    id: 'base:ore-vein',
     rarity: 100,
     ownVerb: '???',
     category : Location.CATEGORY.UTILITY,
@@ -354,7 +354,7 @@ Location.database.newEntry(data:{
     onFirstInteract ::(location) {
         @:Profession = import(module:'game_mutator.profession.mt');
         location.ownedBy = location.landmark.island.newInhabitant();            
-        location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'Trader'));
+        location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'base:trader'));
         location.ownedBy.normalizeStats();              
         location.name = 'Shop';
         location.inventory.maxItems = 50;
@@ -508,7 +508,7 @@ Location.database.newEntry(data:{
     onFirstInteract ::(location) {
         @:Profession = import(module:'game_mutator.profession.mt');
         location.ownedBy = location.landmark.island.newInhabitant();            
-        location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'Blacksmith'));
+        location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'base:blacksmith'));
         location.name = 'Blacksmith';
         location.ownedBy.normalizeStats();
         @:story = import(module:'game_singleton.story.mt');

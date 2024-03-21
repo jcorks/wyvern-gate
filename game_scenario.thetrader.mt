@@ -3250,7 +3250,7 @@ return {
                 maxLocations : 2,
                 guarded : false,
                 peaceful: true,
-                landmarkType : TYPE.DUNGEON,
+                landmarkType : Item.TYPE.DUNGEON,
                 canSave : true,
                 pointOfNoReturn : false,
                 ephemeral : false,
@@ -3278,11 +3278,11 @@ return {
         )
         
         
-    
+        @:Location = import(module:'game_mutator.location.mt');
     
         Location.database.newEntry(data:{
             id: 'thetrader:fortune-throne',
-            name: 'Wyvern Throne of Fortune'
+            name: 'Wyvern Throne of Fortune',
             rarity: 1,
             ownVerb : 'owned',
             category : Location.CATEGORY.DUNGEON_SPECIAL,

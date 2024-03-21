@@ -1497,7 +1497,7 @@ Interaction.newEntry(
                         text:
                             'Profession: ' + location.ownedBy.profession.base.name + '\n\n' +
                             location.ownedBy.profession.base.description + '\n' +
-                            'Weapon affinity: ' + Item.find(id:location.ownedBy.profession.base.weaponAffinity).name
+                            'Weapon affinity: ' + Item.database.find(id:location.ownedBy.profession.base.weaponAffinity).name
                     );
 
 
@@ -1517,7 +1517,7 @@ Interaction.newEntry(
                         onChoice:::(which) {
                             when(which == false) empty;
                             party.addGoldAnimated(
-                                amount:cost,
+                                amount:-cost,
                                 onDone::{
                                     whom.profession = Profession.new(base:Profession.database.find(id: location.ownedBy.profession.base.id));
 

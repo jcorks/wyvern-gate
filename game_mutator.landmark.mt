@@ -808,9 +808,9 @@ Landmark.database.newEntry(
                 when(possibleLocations->keycount == 0) empty;
                 @:which = random.pickArrayItemWeighted(list:possibleLocations);
                 this.addLocation(
-                    id:which.name
+                    id:which.id
                 );
-                if (Location.database.find(id:which.name).onePerLandmark) ::<= {
+                if (Location.database.find(id:which.id).onePerLandmark) ::<= {
                     possibleLocations->remove(key:possibleLocations->findIndex(value:which));
                 }
                 mapIndex += 1;
@@ -1082,7 +1082,7 @@ Landmark.database.newEntry(
                 get :: {
                     @:locations = this.locations;
                     @:index = locations->findIndex(query::(value) {
-                        return value.base.name == 'base:entrance'
+                        return value.base.id == 'base:entrance'
                     });
                     when (index != -1)
                         locations[index];

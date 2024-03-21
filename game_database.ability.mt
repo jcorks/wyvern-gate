@@ -1491,7 +1491,7 @@ Ability.newEntry(
 Ability.newEntry(
     data: {
         name: 'Multiply Runes',
-        id : 'base:mutiply-runes',
+        id : 'base:multiply-runes',
         targetMode : TARGET_MODE.ONE,
         description: "Doubles all current runes on a target.",
         durationTurns: 0,

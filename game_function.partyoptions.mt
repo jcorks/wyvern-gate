@@ -213,7 +213,7 @@ return ::{
                                     @:itemNames = [...items]->map(to:::(value) <- value.name);
                                     itemNames->push(value:'[Nothing]');
                                     @hovered;
-                                    @:none = Item.new(base:Item.database.find(id:'None'));
+                                    @:none = Item.new(base:Item.database.find(id:'base:none'));
                                     windowEvent.queueChoices(
                                         leftWeight: 0.8,
                                         topWeight: 0.5,

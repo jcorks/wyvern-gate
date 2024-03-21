@@ -173,7 +173,7 @@
     
     
     define :::(this, state) {
-        if (none == empty) none = Item.new(base:Item.database.find(id:'None'));
+        if (none == empty) none = Item.new(base:Item.database.find(id:'base:none'));
         @battle_;
         @overrideInteract = empty;
         // requests removal from battle
@@ -283,8 +283,8 @@
                     empty
                 ];
                 state.abilitiesAvailable = [
-                    Ability.find(id:'Attack'),
-                    Ability.find(id:'Defend'),
+                    Ability.find(id:'base:attack'),
+                    Ability.find(id:'base:defend'),
 
                 ]; // active that can choose in combat
                 state.abilitiesLearned = []; // abilities that can choose outside battle.
@@ -834,7 +834,7 @@
                         if (isLimbHit) ::<= {
                             windowEvent.queueMessage(text: 'The hit caused direct damage to the limbs!');
                             if (!target.isIncapacitated())
-                                target.addEffect(from:this, id:'Stunned', durationTurns:1);                    
+                                target.addEffect(from:this, id:'base:stunned', durationTurns:1);                    
                         }
 
                         if (isHitBody) ::<= {
@@ -1323,7 +1323,22 @@
                     holder:this,
                     item
                 );
+                
+                @:oldStats = StatSet.new();
+                oldStates.load(serialized:this.stats.save());
                 this.recalculateStats();
+                
+                
+                
+                if (StatSet.isDifferent(stats:oldStats, other:this.stats)) {
+                    windowEvent.queueDisplay(
+                        prompt: this.name + ': stats changed!',
+                        StatSet.diffToLines(
+                            stats:oldStats,
+                            other:this.stats
+                        )
+                    );
+                }
                 if (!inBattle)
                     this.battleEnd();
 
@@ -1395,8 +1410,8 @@
             
             clearAbilities::{
                 state.abilitiesAvailable = [
-                    Ability.find(id:'Attack'),
-                    Ability.find(id:'Defend'),
+                    Ability.find(id:'base:attack'),
+                    Ability.find(id:'base:defend'),
                 ];
                 state.abilitiesLearned = [];
             },

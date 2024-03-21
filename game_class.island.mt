@@ -389,7 +389,7 @@
                                 )
                         ]->map(
                             to:::(value) <- {
-                                species: value.name, 
+                                species: value.id, 
                                 rarity: rarity *= 1.4
                             }
                         );
@@ -568,7 +568,7 @@
                     island: this,
                     speciesHint:    if (speciesHint == empty) random.pickArrayItemWeighted(list:state.species).species else speciesHint,
                     levelHint:      if (levelHint == empty) random.integer(from:state.levelMin, to:state.levelMax) else levelHint,
-                    professionHint: if (professionHint == empty) Profession.database.getRandomFiltered(filter::(value)<-value.learnable).name else professionHint
+                    professionHint: if (professionHint == empty) Profession.database.getRandomFiltered(filter::(value)<-value.learnable).id else professionHint
                 );
                 
                 augmentTiered(entity:out);
