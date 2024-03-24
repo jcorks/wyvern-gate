@@ -379,6 +379,7 @@ var onPageInput = function (event) {
 
       case 'z': 
       case 'Space': 
+      case ' ':
       case 'Enter': 
         postMessageWorker(4);
         break;

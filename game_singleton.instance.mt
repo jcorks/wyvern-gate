@@ -365,7 +365,7 @@ return empty;
                                 @choiceNames = [...choices]->map(to::(value) <- value.name);
                                 
                                 if (settings.unlockedScenarios == false || settings.unlockedScenarios == empty) ::<= {
-                                    choices = [Scenario.database.find(id:'rasa:the-chosen')];
+                                    choices = [Scenario.database.find(id:'rasa:thechosen')];
                                     choiceNames = ['The Chosen'];
                                 }
                                 
