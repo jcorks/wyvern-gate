@@ -48,7 +48,7 @@ return ::(
     choiceNames->push(value:'Use');
     choices->push(value::{
         match(choiceItem.base.useTargetHint) {
-          (Item.USE_TARGET_HINT.ONE): ::<={
+          (Item.database.statics.USE_TARGET_HINT.ONE): ::<={
             @:all = [];
             foreach(party.members)::(index, ally) {
                 all->push(value:ally);
@@ -88,7 +88,7 @@ return ::(
     
           },
           
-          (Item.USE_TARGET_HINT.GROUP): ::<={
+          (Item.database.statics.USE_TARGET_HINT.GROUP): ::<={
             @choice = windowEvent.queueChoices(
               leftWeight: if (leftWeight == empty) 1 else leftWeight,
               topWeight: if (topWeight == empty) 1 else topWeight,
@@ -115,7 +115,7 @@ return ::(
             );
           },
 
-          (Item.USE_TARGET_HINT.ALL): ::<= {
+          (Item.database.statics.USE_TARGET_HINT.ALL): ::<= {
             commitAction(action:BattleAction.new(
                     ability: Ability.find(id:'base:use-item'),
                     targets: [...party.members, ...enemies],
@@ -127,7 +127,7 @@ return ::(
           
           },
           
-          (Item.USE_TARGET_HINT.NONE): ::<= {
+          (Item.database.statics.USE_TARGET_HINT.NONE): ::<= {
             commitAction(action:BattleAction.new(
                     ability: Ability.find(id:'base:use-item'),
                     targets: [],

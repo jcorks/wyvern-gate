@@ -225,34 +225,34 @@ Landmark.database.newEntry(
         ephemeral : true,
         dungeonForceEntrance: false,
         startingEvents : [
-            'dungeon-encounters',
-            'item-specter',
-            'the-beast',
-            'the-mirror',
-            'treasure-golem',
-            'cave-bat'
+            'base:dungeon-encounters',
+            'base:item-specter',
+            'base:the-beast',
+            'base:the-mirror',
+            'base:treasure-golem',
+            'base:cave-bat'
         ],
         possibleLocations : [
 //                    {id: 'Stairs Down', rarity:1},
-            {id: 'Fountain', rarity:18},
-            {id: 'Potion Shop', rarity: 17},
-            {id: 'Wyvern Statue', rarity: 15},
-            {id: 'Small Chest', rarity: 16},
-            {id: 'Locked Chest', rarity: 11},
-            {id: 'Magic Chest', rarity: 15},
+            {id: 'base:fountain', rarity:18},
+            {id: 'base:potion-shop', rarity: 17},
+            {id: 'base:wyvern-statue', rarity: 15},
+            {id: 'base:small-chest', rarity: 16},
+            {id: 'base:locked-chest', rarity: 11},
+            {id: 'base:magic-chest', rarity: 15},
 
-            {id: 'Healing Circle', rarity:35},
+            {id: 'base:healing-circle', rarity:35},
 
-            {id: 'Clothing Shop', rarity: 100},
-            {id: 'Fancy Shop', rarity: 50}
+            {id: 'base:clothing-shop', rarity: 100},
+            {id: 'base:fancy-shop', rarity: 50}
 
         ],
         requiredLocations : [
-            'Enchantment Stand',
-            'Stairs Down',
-            'Stairs Down',
-            'Locked Chest',
-            'Small Chest'
+            'base:enchantment-stand',
+            'base:stairs-down',
+            'base:stairs-down',
+            'base:locked-chest',
+            'base:small-chest'
         ],
         mapHint:{
             layoutType: DungeonMap.LAYOUT_EPSILON
@@ -673,11 +673,6 @@ Landmark.database.newEntry(
 
 @:Landmark = databaseItemMutatorClass(  
     name : 'Wyvern.Landmark',
-    statics : {
-        TYPE : {
-            get ::<- TYPE
-        }
-    },
     items : {
         worldID : empty,
         name : empty,
@@ -696,6 +691,9 @@ Landmark.database.newEntry(
     
     database : Database.new(
         name : 'Wyvern.Landmark.Base',
+        statics : {
+            TYPE : TYPE
+        },
         attributes : {
             id : String,
             name: String,

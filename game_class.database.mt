@@ -43,17 +43,19 @@
         @name_;
         @attributes_;
         @reset_;
+        @statics_;
         @:databaseNameGetter = {
             get ::<- name_
         };
-        this.constructor = ::(attributes, name => String, reset => Function) {
+        this.constructor = ::(attributes, name => String, reset => Function, statics) {
             LOOKUP[name] = this;
             name_ = name;
             attributes_ = attributes;
             reset_ = reset;
+            statics_ = statics;
         };
 
-        this.interface = {
+        @:interface = {
             
             attributes : {
                 get::<- attributes_
@@ -159,10 +161,14 @@
             
             getAll :: {
                 return items_->values;
+            },
+            
+            statics : {
+                get ::<- statics_
             }
-            
-            
         }
+        
+        this.interface = interface;
     }
 );
 return Database;

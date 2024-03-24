@@ -1225,8 +1225,8 @@ ItemEnchant.database.newEntry(
         equipMod : StatSet.new(
             DEF: -70,
             ATK: -70,
-            INT: 100,
-            SPD: 20
+            INT: 150,
+            DEX: 80
         ),
         levelMinimum : 5,
         priceMod: 300,
@@ -1524,7 +1524,7 @@ ItemEnchant.database.newEntry(
                 
                     foreach(state.base.triggerConditionEffects)::(i, effectName) {
                         wielder.addEffect(
-                            from:wielder, name: effectName, durationTurns: 1, item
+                            from:wielder, id: effectName, durationTurns: 1, item
                         );                        
                     }
                 }

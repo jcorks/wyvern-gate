@@ -297,7 +297,7 @@ return {
             onSelect::(user, battle, commitAction) {
                 commitAction(action:
                     BattleAction.new(
-                        ability: Ability.find(id:'Wait'),
+                        ability: Ability.find(id:'base:wait'),
                         targets: [],
                         extraData: {}
                     )                
@@ -330,7 +330,7 @@ return {
                 
                 commitAction(action:
                     BattleAction.new(
-                        ability: Ability.find(id:'Wyvern Prayer'),
+                        ability: Ability.find(id:'base:wyvern-prayer'),
                         targets: [...enemies, ...allies],
                         extraData: {}
                     )                

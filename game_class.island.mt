@@ -184,7 +184,7 @@
                 @:wep = Item.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
-                        value.attributes & Item.ATTRIBUTE.WEAPON
+                        value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
                 );
                     
                 entity.equip(
@@ -212,7 +212,7 @@
                 @:wep = Item.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
-                        value.attributes & Item.ATTRIBUTE.WEAPON
+                        value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
                 );
                     
                 entity.equip(
@@ -238,7 +238,7 @@
                 @:wep = Item.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
-                        value.attributes & Item.ATTRIBUTE.WEAPON
+                        value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
                 );
                     
                 entity.equip(
@@ -255,7 +255,7 @@
                 @:wep = Item.database.getRandomFiltered(
                     filter:::(value) <-
                         value.isUnique == false &&
-                        value.equipType == Item.TYPE.ARMOR
+                        value.equipType == Item.database.statics.TYPE.ARMOR
                 );;
                     
                 entity.equip(
@@ -359,9 +359,9 @@
                     state.levelMin = 0;
                     state.levelMax = 0;
                     state.possibleEvents = if (possibleEventsHint) possibleEventsHint else [
-                        'BBQ',
-                        'Weather:1',
-                        'Camp out'
+                        'base:bbq',
+                        'base:weather:1',
+                        'base:camp-out'
                     ];
                     state.encounterRate = Number.random();
                     state.sizeW  = if (sizeWHint != empty) sizeWHint else sizeW;
@@ -587,7 +587,7 @@
                     island: this,
                     speciesHint: random.pickArrayItemWeighted(list:state.species).species,
                     levelHint,
-                    professionHint: Profession.database.getRandomFiltered(filter::(value)<-value.learnable).name
+                    professionHint: Profession.database.getRandomFiltered(filter::(value)<-value.learnable).id
                 );       
                 
                 augmentTiered(entity:angy);                       
@@ -598,9 +598,9 @@
                 @levelHint = random.integer(from:state.levelMin, to:if(levelMaxHint == empty) state.levelMax else levelMaxHint);
                 @:angy =  Entity.new(
                     island: this,
-                    speciesHint: 'Creature',
+                    speciesHint: 'base:creature',
                     levelHint,
-                    professionHint: 'Creature'
+                    professionHint: 'base:creature'
                 );       
                 
                 angy.nickname = random.pickArrayItem(list:state.nativeCreatures);

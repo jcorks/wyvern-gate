@@ -28,6 +28,8 @@
 @:g = import(module:'game_function.g.mt');
 @:Entity = import(module:'game_class.entity.mt');
 
+@:HP_KNOWN_LIMIT = 99;
+
 @:combatChooseDefend::(targetPart, attacker, defender, onDone) {
     when (defender.blockPoints == 0) onDone(which:0);
     @:Entity = import(module:'game_class.entity.mt');
@@ -158,7 +160,10 @@
         }
         if (inv.gold > 0) ::<= {
             windowEvent.queueMessage(text: 'The party acquired ' + g(g:inv.gold) + '.');
-            party.inventory.addGold(amount:inv.gold);
+            party.addGoldAnimated(
+                amount:inv.gold,
+                onDone::{}
+            );
         }
     }
 
@@ -179,7 +184,10 @@
                     windowEvent.queueMessage(text: 'Jackpot! They dropped some gold!');
                     @:amount = (200 + Number.random()*300)->floor;
                     windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
-                    party.inventory.addGold(amount);    
+                    party.addGoldAnimated(
+                        amount:amount,
+                        onDone::{}
+                    );
                 },
                 rarity: 100 / 40
             },
@@ -192,21 +200,21 @@
                         windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
                     }
                     @itemMaterials = [
-                        'Gold',
-                        'Crystal',
-                        'Mythril',
-                        'Quicksilver',
-                        'Dragonglass',
-                        'Sunstone',
-                        'Moonstone',
-                        'Adamantine'
+                        'base:gold',
+                        'base:crystal',
+                        'base:mythril',
+                        'base:quicksilver',
+                        'base:dragonglass',
+                        'base:sunstone',
+                        'base:moonstone',
+                        'base:adamantine'
                     ]
                     
                     @itemQualities = [
-                        'King\'s',
-                        'Queen\'s',
-                        'Masterwork',
-                        'Legendary'
+                        'base:kings',
+                        'base:queens',
+                        'base:masterwork',
+                        'base:legendary'
                     ]
                     
                     @item = Item.new(
@@ -522,7 +530,7 @@
         }
                 
         @:renderFrac::(value, outOf) {
-            when (outOf > 99 || value < 0) 
+            when (outOf > HP_KNOWN_LIMIT || value < 0) 
                 '?? / ??';
                 
             return 
@@ -693,7 +701,7 @@
                     
                     foreach(groups[1])::(index, enemy) {
                         windowEvent.queueMessage(
-                            text: enemy.name + '(' + enemy.stats.HP + ' HP) blocks your path!'
+                            text: enemy.name + ' blocks your path!'
                         );                    
                     }
                 }

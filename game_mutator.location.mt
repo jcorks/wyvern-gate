@@ -21,7 +21,14 @@
 @:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
 
 
-
+@:CATEGORY = {  
+    ENTRANCE : 0,
+    RESIDENTIAL : 1,
+    BUSINESS : 2,
+    UTILITY : 3,
+    EXIT : 4,
+    DUNGEON_SPECIAL : 5
+}  
 
 @:reset ::{
 
@@ -38,7 +45,7 @@ Location.database.newEntry(data:{
     name: 'Entrance',
     rarity: 100000000,
     ownVerb: '',
-    category : Location.CATEGORY.ENTRANCE,
+    category : CATEGORY.ENTRANCE,
     minStructureSize : 1,
     onePerLandmark : false,
     descriptions: [
@@ -89,7 +96,7 @@ Location.database.newEntry(data:{
     name: 'Farm',
     rarity: 100,
     ownVerb: 'owned',
-    category : Location.CATEGORY.RESIDENTIAL,
+    category : CATEGORY.RESIDENTIAL,
     symbol: 'F',
     minStructureSize : 2,
     onePerLandmark : false,
@@ -158,7 +165,7 @@ Location.database.newEntry(data:{
     name: 'Home',
     rarity: 100,
     ownVerb: 'owned',
-    category : Location.CATEGORY.RESIDENTIAL,
+    category : CATEGORY.RESIDENTIAL,
     symbol: '^',
     minStructureSize : 1,
     onePerLandmark : false,
@@ -228,7 +235,7 @@ Location.database.newEntry(data:{
     id: 'base:ore-vein',
     rarity: 100,
     ownVerb: '???',
-    category : Location.CATEGORY.UTILITY,
+    category : CATEGORY.UTILITY,
     symbol: '%',
     minStructureSize : 1,
 
@@ -272,7 +279,7 @@ Location.database.newEntry(data:{
     name: 'Smelter',
     rarity: 100,
     ownVerb: '???',
-    category : Location.CATEGORY.UTILITY,
+    category : CATEGORY.UTILITY,
     symbol: 'm',
     onePerLandmark : false,
     minStructureSize : 1,
@@ -282,7 +289,7 @@ Location.database.newEntry(data:{
     ],
     
     interactions : [
-        'base:smelt ore',
+        'base:smelt-ore',
         'base:examine'
     ],
     
@@ -325,7 +332,7 @@ Location.database.newEntry(data:{
     id: 'base:shop',
     rarity: 100,
     ownVerb : 'run',
-    category : Location.CATEGORY.BUSINESS,
+    category : CATEGORY.BUSINESS,
     symbol: '$',
     onePerLandmark : false,
     minStructureSize : 1,
@@ -411,7 +418,7 @@ Location.database.newEntry(data:{
     id: 'base:enchant-stand',
     rarity: 100,
     ownVerb : 'run',
-    category : Location.CATEGORY.BUSINESS,
+    category : CATEGORY.BUSINESS,
     symbol: '$',
     onePerLandmark : false,
     minStructureSize : 1,
@@ -480,7 +487,7 @@ Location.database.newEntry(data:{
     id: 'base:blacksmith',
     rarity: 100,
     ownVerb : 'run',
-    category : Location.CATEGORY.BUSINESS,
+    category : CATEGORY.BUSINESS,
     symbol: '/',
     minStructureSize : 1,
 
@@ -520,7 +527,7 @@ Location.database.newEntry(data:{
                         filter::(value) <- (
                             value.isUnique == false && 
                             location.ownedBy.level >= value.levelMinimum &&
-                            value.attributes & Item.ATTRIBUTE.METAL
+                            value.attributes & Item.database.statics.ATTRIBUTE.METAL
                         )
                     )
                 )
@@ -549,7 +556,7 @@ Location.database.newEntry(data:{
     id: 'base:tavern',
     rarity: 100,
     ownVerb : 'run',
-    category : Location.CATEGORY.UTILITY,
+    category : CATEGORY.UTILITY,
     symbol: '&',
     onePerLandmark : false,
     minStructureSize : 2,
@@ -593,7 +600,7 @@ Location.database.newEntry(data:{
     id: 'base:arena',
     rarity: 100,
     ownVerb : 'run',
-    category : Location.CATEGORY.UTILITY,
+    category : CATEGORY.UTILITY,
     symbol: '!',
     onePerLandmark : false,
     minStructureSize : 2,
@@ -638,7 +645,7 @@ Location.database.newEntry(data:{
     id: 'base:inn',
     rarity: 100,
     ownVerb : 'run',
-    category : Location.CATEGORY.UTILITY,
+    category : CATEGORY.UTILITY,
     symbol: '=',
     onePerLandmark : false,
     minStructureSize : 2,
@@ -683,7 +690,7 @@ Location.database.newEntry(data:{
     id: 'base:school',
     rarity: 100,
     ownVerb : 'run',
-    category : Location.CATEGORY.UTILITY,
+    category : CATEGORY.UTILITY,
     symbol: '+',
     onePerLandmark : false,
     minStructureSize : 2,
@@ -726,7 +733,7 @@ Location.database.newEntry(data:{
     id: 'base:library',
     rarity: 100,
     ownVerb : '',
-    category : Location.CATEGORY.UTILITY,
+    category : CATEGORY.UTILITY,
     symbol: '[]',
     onePerLandmark : true,
     minStructureSize : 2,
@@ -767,7 +774,7 @@ Location.database.newEntry(data:{
     id: 'base:gate',
     rarity: 100,
     ownVerb : '',
-    category : Location.CATEGORY.UTILITY,
+    category : CATEGORY.UTILITY,
     symbol: '@',
     onePerLandmark : true,
     minStructureSize : 1,
@@ -810,7 +817,7 @@ Location.database.newEntry(data:{
     rarity: 1000000000000,
     ownVerb : '',
     symbol: '\\',
-    category : Location.CATEGORY.EXIT,
+    category : CATEGORY.EXIT,
     onePerLandmark : false,
     minStructureSize : 1,
 
@@ -851,7 +858,55 @@ Location.database.newEntry(data:{
     }
 })
 
+Location.database.newEntry(data:{
+    name: 'Warp Point',
+    id: 'base:warp-point',
+    rarity: 1000000000000,
+    ownVerb : '',
+    symbol: 'w',
+    category : CATEGORY.DUNGEON_SPECIAL,
+    onePerLandmark : false,
+    minStructureSize : 1,
 
+    descriptions: [
+        "Strange stone column that allows travel between 2 points.",
+    ],
+    interactions : [
+        'base:warp-floor',
+    ],
+    
+    aggressiveInteractions : [
+    ],
+
+
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    
+    onFirstInteract ::(location) {
+        when(location.modData.warpPoint != empty) empty;
+        
+        @:possibilities = [...location.landmark.locations]->filter(by::(value) <-
+            value.base.id == 'base:warp-point' &&
+            value.modData.warpPoint == empty &&
+            value != location 
+        );
+        when(possibilities->size == 0) empty;
+        
+        @:other = possibilities[0];
+        other.modData.warpPoint = location.worldID;
+        location.modData.warpPoint = other.worldID;
+    },
+    onInteract ::(location) {
+    },
+    
+    onCreate ::(location) {
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+})
 
 
 Location.database.newEntry(data:{
@@ -861,7 +916,7 @@ Location.database.newEntry(data:{
     ownVerb : '',
     symbol: '=',
     onePerLandmark : false,
-    category : Location.CATEGORY.EXIT,
+    category : CATEGORY.EXIT,
     minStructureSize : 1,
 
     descriptions: [
@@ -897,7 +952,7 @@ Location.database.newEntry(data:{
     rarity: 1000000000000,
     ownVerb : '',
     symbol: '?',
-    category : Location.CATEGORY.EXIT,
+    category : CATEGORY.EXIT,
     onePerLandmark : false,
     minStructureSize : 1,
 
@@ -946,7 +1001,7 @@ Location.database.newEntry(data:{
     rarity: 1000000000000,
     ownVerb : '',
     symbol: '$',
-    category : Location.CATEGORY.UTILITY,
+    category : CATEGORY.UTILITY,
     onePerLandmark : false,
     minStructureSize : 1,
 
@@ -994,7 +1049,7 @@ Location.database.newEntry(data:{
     rarity: 1000000000000,
     ownVerb : '',
     symbol: '$',
-    category : Location.CATEGORY.UTILITY,
+    category : CATEGORY.UTILITY,
     onePerLandmark : true,
     minStructureSize : 1,
 
@@ -1031,7 +1086,7 @@ Location.database.newEntry(data:{
     rarity: 1000000000000,
     ownVerb : '',
     symbol: '$',
-    category : Location.CATEGORY.UTILITY,
+    category : CATEGORY.UTILITY,
     onePerLandmark : false,
     minStructureSize : 1,
 
@@ -1087,7 +1142,7 @@ Location.database.newEntry(data:{
     rarity: 1000000000000,
     ownVerb : '',
     symbol: '=',
-    category : Location.CATEGORY.UTILITY,
+    category : CATEGORY.UTILITY,
     onePerLandmark : false,
     minStructureSize : 1,
 
@@ -1129,7 +1184,7 @@ Location.database.newEntry(data:{
     rarity: 4,
     ownVerb : '',
     symbol: 'S',
-    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    category : CATEGORY.DUNGEON_SPECIAL,
     onePerLandmark : true,
     minStructureSize : 1,
 
@@ -1169,7 +1224,7 @@ Location.database.newEntry(data:{
     rarity: 4,
     ownVerb : '',
     symbol: 'O',
-    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    category : CATEGORY.DUNGEON_SPECIAL,
     onePerLandmark : true,
     minStructureSize : 1,
 
@@ -1209,7 +1264,7 @@ Location.database.newEntry(data:{
     rarity: 4,
     ownVerb : '',
     symbol: 'M',
-    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    category : CATEGORY.DUNGEON_SPECIAL,
     onePerLandmark : false,
     minStructureSize : 1,
 
@@ -1252,7 +1307,7 @@ Location.database.newEntry(data:{
     rarity: 4,
     ownVerb : '',
     symbol: '%',
-    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    category : CATEGORY.DUNGEON_SPECIAL,
     onePerLandmark : false,
     minStructureSize : 1,
 
@@ -1296,7 +1351,7 @@ Location.database.newEntry(data:{
     rarity: 4,
     ownVerb : 'run',
     symbol: '%',
-    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    category : CATEGORY.DUNGEON_SPECIAL,
     onePerLandmark : true,
     minStructureSize : 1,
 
@@ -1381,7 +1436,7 @@ Location.database.newEntry(data:{
     rarity: 4,
     ownVerb : 'run',
     symbol: 'P',
-    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    category : CATEGORY.DUNGEON_SPECIAL,
     onePerLandmark : true,
     minStructureSize : 1,
 
@@ -1466,7 +1521,7 @@ Location.database.newEntry(data:{
     rarity: 4,
     ownVerb : 'run',
     symbol: '$',
-    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    category : CATEGORY.DUNGEON_SPECIAL,
     onePerLandmark : true,
     minStructureSize : 1,
 
@@ -1562,7 +1617,7 @@ Location.database.newEntry(data:{
     rarity: 1000000000000,
     ownVerb : '',
     symbol: '$',
-    category : Location.CATEGORY.UTILITY,
+    category : CATEGORY.UTILITY,
     minStructureSize : 1,
     onePerLandmark : true,
 
@@ -1629,7 +1684,7 @@ Location.database.newEntry(data:{
     rarity: 1000000000000,
     ownVerb : 'owned',
     symbol: '-',
-    category : Location.CATEGORY.DUNGEON_SPECIAL,
+    category : CATEGORY.DUNGEON_SPECIAL,
     minStructureSize : 1,
     onePerLandmark : false,
 
@@ -1668,21 +1723,6 @@ Location.database.newEntry(data:{
 
 @:Location = databaseItemMutatorClass(
     name: 'Wyvern.Location',
-    statics : {
-        CATEGORY ::<= {  
-            @:ct = {
-                ENTRANCE : 0,
-                RESIDENTIAL : 1,
-                BUSINESS : 2,
-                UTILITY : 3,
-                EXIT : 4,
-                DUNGEON_SPECIAL : 5
-            }
-            return {
-                get ::<- ct
-            }
-        }
-    },
     items : {
         worldID : empty,
         targetLandmark : empty, // where this location could take the party. Could be a different island in theory
@@ -1703,6 +1743,9 @@ Location.database.newEntry(data:{
     
     database : Database.new(
         name: 'Wyvern.Location.Base',
+        statics : {
+            CATEGORY : CATEGORY      
+        },
         attributes : {
             id: String,
             name: String,

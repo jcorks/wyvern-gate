@@ -41,6 +41,19 @@
             get ::<- NAMES
         },
         
+        isDifferent::(stats, other) {
+            return 
+                stats.HP != other.HP ||
+                stats.AP != other.AP ||
+                stats.ATK != other.ATK ||
+                stats.DEF != other.DEF ||
+                stats.INT != other.INT ||
+                stats.SPD != other.SPD ||
+                stats.LUK != other.LUK ||
+                stats.DEX != other.DEX
+            ;
+        },
+        
         diffToLines ::(stats, other) {
             return canvas.columnsToLines(columns:[
                 [

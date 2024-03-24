@@ -194,6 +194,7 @@
         
 
         @:resetEffects :: {
+            breakpoint();
             effects = [];
             
             foreach(state.innateEffects) ::(k, name) {
@@ -343,10 +344,10 @@
                     );
 
                     if (state.faveWeapon == empty)
-                        state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0 && value.tier <= island.tier)
+                        state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.database.statics.ATTRIBUTE.WEAPON) != 0 && value.tier <= island.tier)
                 } else ::<= {
                     if (state.faveWeapon == empty)
-                        state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0)
+                        state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.database.statics.ATTRIBUTE.WEAPON) != 0)
                 }
                 state.inventory.addGold(amount:(Number.random() * 100)->ceil);
                 state.favoriteItem = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
@@ -429,7 +430,7 @@
                     when(this.isIncapacitated()) 0;
                     @:am = ::<= {
                         @wep = this.getEquipped(slot:EQUIP_SLOTS.HAND_LR);
-                        @amount = if (wep.base.name == 'None') 1 else wep.base.blockPoints;
+                        @amount = if (wep.base.id == 'base:none') 1 else wep.base.blockPoints;
                         
                         if (effects != empty) ::<= {
                             foreach(effects) ::(index, effect) {
@@ -460,6 +461,8 @@
                 enemies_ = empty;
                 abilitiesUsedBattle = empty;                
                 effects = empty;
+                
+                this.recalculateStats();                                
             },
 
             
@@ -485,8 +488,8 @@
                 @weaponAffinity = false;
                 if (hand != empty)
                     weaponAffinity = 
-                        (this.profession.base.weaponAffinity == hand.base.name) ||
-                        (state.faveWeapon.name == hand.base.name)
+                        (this.profession.base.weaponAffinity == hand.base.id) ||
+                        (state.faveWeapon.id == hand.base.id)
                     ;
                 
                 // flat bonus
@@ -528,12 +531,7 @@
                 @act = true;
                 foreach(effects)::(index, effect) {                        
                     if (effect.duration != -1 && effect.turnIndex >= effect.duration) ::<= {
-                        effect.effect.onRemoveEffect(
-                            user:effect.from, 
-                            holder:this,
-                            item:effect.item
-                        );
-                        effects->remove(key:index);
+                        this.removeEffectInstance(instance:effect);
                     } else ::<= {
                         if (effect.effect.skipTurn == true) ::<= {
                             if (this.isIncapacitated() == false)
@@ -605,7 +603,7 @@
                 set ::(value => Profession.type) {
                     state.profession = {:::}{
                         foreach(state.professions)::(index, prof) {
-                            if (value.base.name == prof.base.name) ::<= {
+                            if (value.base.id == prof.base.id) ::<= {
                                 send(message:index);
                             }
                         }
@@ -868,7 +866,7 @@
                     when(hpWas0 && target.hp == 0) ::<= {
                         this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
                         target.flags.add(flag:StateFlags.DIED);
-                        target.kill();                
+                        target.kill(from:this);                
                     }
 
                     return true;
@@ -888,6 +886,9 @@
             damage ::(from => Entity.type, damage => Damage.type, dodgeable => Boolean, critical, exact, dexPenalty) {
                 @:alreadyKnockedOut = this.hp == 0;
                 if (alreadyKnockedOut)
+                    dodgeable = false;
+                    
+                if (from == this)
                     dodgeable = false;
                     
                     
@@ -936,7 +937,7 @@
                     // pretty nifty!
                     /*
                     when (dodgeable && 
-                          (this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).base.attributes & Item.ATTRIBUTE.SHIELD) && 
+                          (this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).base.attributes & Item.database.statics.ATTRIBUTE.SHIELD) && 
                           random.try(percentSuccess:15)) ::<= {
                         windowEvent.queueMessage(text:random.pickArrayItem(list:[
                             this.name + ' defends against ' + from.name + '\'s attack with their shield!',                 
@@ -1098,10 +1099,10 @@
 
                 state.canMake = [];
                 foreach(Item.database.getRandomSet(
-                        count:if (this.profession.base.name == 'Blacksmith') 10 else 4,
+                        count:if (this.profession.base.id == 'base:blacksmith') 10 else 2,
                         filter::(value) <- value.hasMaterial == true
                 )) ::(k, val) {
-                    state.canMake->push(value:val.name);
+                    state.canMake->push(value:val.id);
                 }
 
                 return state.canMake;
@@ -1265,7 +1266,7 @@
                 get ::<- state.modData
             },
             
-            kill ::(silent) {
+            kill ::(silent, from) {
                 state.hp = 0;
                 if (silent == empty)
                     if (this.name->contains(key:'Wyvern'))
@@ -1278,8 +1279,10 @@
                 if (world.party.isMember(entity:this))
                     world.accoladeIncrement(name:'deadPartyMembers')
                 else ::<= {
-                    world.accoladeIncrement(name:'murders');                                        
-                    world.party.karma -= 1000;
+                    if (from != empty && world.party.isMember(entity:from)) ::<= {
+                        world.accoladeIncrement(name:'murders');                                        
+                        world.party.karma -= 1000;
+                    }
                 }
 
                 state.flags.add(flag:StateFlags.DIED);
@@ -1325,15 +1328,12 @@
                 );
                 
                 @:oldStats = StatSet.new();
-                oldStates.load(serialized:this.stats.save());
+                oldStats.load(serialized:this.stats.save());
                 this.recalculateStats();
-                
-                
-                
-                if (StatSet.isDifferent(stats:oldStats, other:this.stats)) {
+                if (StatSet.isDifferent(stats:oldStats, other:this.stats)) ::<= {
                     windowEvent.queueDisplay(
                         prompt: this.name + ': stats changed!',
-                        StatSet.diffToLines(
+                        lines: StatSet.diffToLines(
                             stats:oldStats,
                             other:this.stats
                         )
@@ -1360,6 +1360,21 @@
                             holder:this,
                             item:value.item
                         );
+
+                        @:oldStats = StatSet.new();
+                        oldStats.load(serialized:this.stats.save());
+                        this.recalculateStats();
+                        if (StatSet.isDifferent(stats:oldStats, other:this.stats)) ::<= {
+                            windowEvent.queueDisplay(
+                                prompt: this.name + ': stats changed!',
+                                lines: StatSet.diffToLines(
+                                    stats:oldStats,
+                                    other:this.stats
+                                )
+                            );
+                        }
+
+
                     }
                 });
             },
@@ -1375,6 +1390,19 @@
                     holder:this,
                     item:value.item
                 );
+
+                @:oldStats = StatSet.new();
+                oldStats.load(serialized:this.stats.save());
+                this.recalculateStats();
+                if (StatSet.isDifferent(stats:oldStats, other:this.stats)) ::<= {
+                    windowEvent.queueDisplay(
+                        prompt: this.name + ': stats changed!',
+                        lines: StatSet.diffToLines(
+                            stats:oldStats,
+                            other:this.stats
+                        )
+                    );
+                }
             },
             
             abilitiesAvailable : {
@@ -1449,7 +1477,7 @@
                 oldstats.add(stats: this.stats);
 
                 @olditem = state.equips[slot];
-                if (item.name == 'None')
+                if (item.base.id == 'base:none')
                     error(detail:'Can\'t equip the None item. Unequip instead.');
         
                 when (this.getSlotsForItem(item)->findIndex(value:slot) == -1) ::<= {
@@ -1463,21 +1491,21 @@
 
 
 
-                if (item.base.equipType == Item.TYPE.TWOHANDED) ::<={
+                if (item.base.equipType == Item.database.statics.TYPE.TWOHANDED) ::<={
                     state.equips[EQUIP_SLOTS.HAND_LR] = item;
                 } else ::<= {
                     state.equips[slot] = item;
                 }
                 
                 if (silent != true) ::<= {
-                    if ((slot == EQUIP_SLOTS.HAND_LR) && this.profession.base.weaponAffinity == state.equips[EQUIP_SLOTS.HAND_LR].base.name) ::<= {
+                    if ((slot == EQUIP_SLOTS.HAND_LR) && this.profession.base.weaponAffinity == state.equips[EQUIP_SLOTS.HAND_LR].base.id) ::<= {
                         if (silent != true) ::<= {
                             windowEvent.queueMessage(
                                 speaker: this.name,
                                 text: '"This ' + item.base.name + ' really works for me as ' + correctA(word:this.profession.base.name) + '"'
                             );
                         }
-                    } else if ((slot == EQUIP_SLOTS.HAND_LR) && state.faveWeapon.name == state.equips[EQUIP_SLOTS.HAND_LR].base.name) ::<= {
+                    } else if ((slot == EQUIP_SLOTS.HAND_LR) && state.faveWeapon.id == state.equips[EQUIP_SLOTS.HAND_LR].base.id) ::<= {
                         if (silent != true) ::<= {
                             windowEvent.queueMessage(
                                 speaker: this.name,
@@ -1512,7 +1540,7 @@
 
                 
                 if (silent != true) ::<={
-                    if (olditem == empty || olditem.name == 'None') ::<= {
+                    if (olditem == empty || olditem.base.id == 'base:none') ::<= {
                         windowEvent.queueMessage(text:this.name + ' has equipped the ' + item.name + '.');                    
                     } else ::<= {
                         windowEvent.queueMessage(text:this.name + ' unequipped the ' + olditem.name + ' and equipped the ' + item.name + '.');                    
@@ -1521,7 +1549,7 @@
                 }
             },
             anonymize :: {
-                this.nickname = 'the ' + this.species.name + (if(this.profession.base.name == 'None') '' else ' ' + this.profession.base.name);            
+                this.nickname = 'the ' + this.species.name + (if(this.profession.base.id == 'base:none') '' else ' ' + this.profession.base.name);            
             },
             
             getEquipped::(slot => Number) {
@@ -1539,12 +1567,12 @@
             // returns an array of equip slots that the item can fit in.
             getSlotsForItem ::(item => none->type) {
                 return match(item.base.equipType) {
-                    (Item.TYPE.HAND)     :  [EQUIP_SLOTS.HAND_LR],
-                    (Item.TYPE.ARMOR)    :  [EQUIP_SLOTS.ARMOR],
-                    (Item.TYPE.AMULET)   :  [EQUIP_SLOTS.AMULET],
-                    (Item.TYPE.RING)     :  [EQUIP_SLOTS.RING_L, EQUIP_SLOTS.RING_R],
-                    (Item.TYPE.TRINKET)  :  [EQUIP_SLOTS.TRINKET],
-                    (Item.TYPE.TWOHANDED):  [EQUIP_SLOTS.HAND_LR],
+                    (Item.database.statics.TYPE.HAND)     :  [EQUIP_SLOTS.HAND_LR],
+                    (Item.database.statics.TYPE.ARMOR)    :  [EQUIP_SLOTS.ARMOR],
+                    (Item.database.statics.TYPE.AMULET)   :  [EQUIP_SLOTS.AMULET],
+                    (Item.database.statics.TYPE.RING)     :  [EQUIP_SLOTS.RING_L, EQUIP_SLOTS.RING_R],
+                    (Item.database.statics.TYPE.TRINKET)  :  [EQUIP_SLOTS.TRINKET],
+                    (Item.database.statics.TYPE.TWOHANDED):  [EQUIP_SLOTS.HAND_LR],
                     default: error(detail:'Item has an invalid equiptype?')      
                 }
             },
@@ -1558,7 +1586,7 @@
 
                 if (effects != empty) ::<= {
                     foreach(current.equipEffects)::(i, effect) {
-                        @:effectObj = effects->filter(by:::(value) <- value.effect.name == effect)[0];
+                        @:effectObj = effects->filter(by:::(value) <- value.effect.id == effect)[0];
                         effectObj.effect.onRemoveEffect(
                             user:effectObj.from, 
                             holder:this,
@@ -1591,10 +1619,10 @@
                     text: this.name + " tried to use " + ability.name + ", but couldn't muster the strength!"
                 );
                 
-                when (abilitiesUsedBattle != empty && ability.oncePerBattle && abilitiesUsedBattle[ability.name] == true) windowEvent.queueMessage(
+                when (abilitiesUsedBattle != empty && ability.oncePerBattle && abilitiesUsedBattle[ability.id] == true) windowEvent.queueMessage(
                     text: this.name + " tried to use " + ability.name + ", but it worked the first time!"
                 );
-                if (abilitiesUsedBattle) abilitiesUsedBattle[ability.name] = true;
+                if (abilitiesUsedBattle) abilitiesUsedBattle[ability.id] = true;
                 
                 state.ap -= ability.apCost;
                 state.hp -= ability.hpCost;
@@ -1743,7 +1771,7 @@
                 @:getRightHandName ::{
                     @:hand = this.getEquipped(slot:EQUIP_SLOTS.HAND_LR);
                     return 
-                        if (hand.name == "None")
+                        if (hand.base.id == "base:none")
                             ""
                         else
                             hand.name 

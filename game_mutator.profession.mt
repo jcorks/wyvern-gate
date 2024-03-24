@@ -154,13 +154,13 @@ Profession.database.newEntry(data:{
     weaponAffinity: 'base:mage-staff',
     growth: StatSet.new(
         HP:  5,
-        AP:  6,
+        AP:  8,
         ATK: 4,
-        INT: 6,
+        INT: 8,
         DEF: 2,
         SPD: 4,
-        LUK: 3,
-        DEX: 2
+        LUK: 5,
+        DEX: 4
     ),
     minKarma : 100,
     maxKarma : 1000,
@@ -169,12 +169,11 @@ Profession.database.newEntry(data:{
     
     abilities : [
         'base:cure',         //X
-        'base:antidote',     //X specifically cures poison
+        'base:cleanse',      //X removal of standard status ailments
         'base:protect',      //X
         'base:greater-cure', //X
         'base:protect-all',  //X
         'base:soothe',       //X ap recovery, any
-        'base:cleanse',      //X removal of standard status ailments
         'base:grace',        //X save from death, once    
     ],
     
@@ -1059,7 +1058,7 @@ Profession.database.newEntry(data:{
     
     abilities : [
         'base:cure',
-        'base:greater Cure',
+        'base:greater-cure',
         'base:protect',
         'base:explosion'
     ],
@@ -1107,6 +1106,40 @@ Profession.database.newEntry(data:{
 Profession.database.newEntry(data:{
     name: 'Beast',
     id: 'base:beast',
+    weaponAffinity: 'base:none',
+    description : "", 
+    levelMinimum : 100,
+
+    growth: StatSet.new(
+        HP:  20,
+        AP:  20,
+        ATK: 20,
+        INT: 20,
+        DEF: 20,
+        SPD: 20,
+        LUK: 20,
+        DEX: 20
+    ),
+    minKarma : 0,
+    maxKarma : 50,
+    learnable : false,
+    
+    abilities : [
+        'base:headhunter',
+        //'Magic Mist', // remove all effects
+        'base:wild-swing',
+        'base:triplestrike',
+        'base:leg-sweep',
+        'base:unarm',
+        'base:doublestrike'
+    ],
+    passives : [
+    ]
+}) 
+
+Profession.database.newEntry(data:{
+    name: 'Wyvern',
+    id: 'base:wyvern',
     weaponAffinity: 'base:none',
     description : "", 
     levelMinimum : 100,

@@ -24,7 +24,7 @@
             beast.profession = Profession.new(base:Profession.database.find(id:'base:beast'));               
             beast.clearAbilities();
             foreach(beast.profession.gainSP(amount:10))::(i, ability) {
-                beast.learnAbility(name:ability);
+                beast.learnAbility(id:ability);
             }
 
             beast.stats.load(serialized:StatSet.new(

@@ -291,6 +291,9 @@ return {
         keyhome.setIslandGenAttributes(
             nameHint:namegen.island(), 
             levelHint:story.levelHint,
+            extraLandmarks : [
+                'thechosen:shrine-of-fire'
+            ],
             tierHint: 0    
         )
         keyhome.addIslandEntry(world);
@@ -865,7 +868,7 @@ return {
 
                             location.targetLandmark = 
                                 location.landmark.island.newLandmark(
-                                    base:Landmark.database.find(id:'Treasure Room')
+                                    base:Landmark.database.find(id:'base:treasure-room')
                                 )
                             ;
                             location.targetLandmark.loadContent();
@@ -900,7 +903,7 @@ return {
                 maxLocations : 3,
                 peaceful: false,
                 guarded : false,
-                landmarkType : Landmark.TYPE.DUNGEON,
+                landmarkType : Landmark.database.statics.TYPE.DUNGEON,
                 canSave : false,
                 pointOfNoReturn : true,
                 ephemeral : true,
@@ -913,21 +916,21 @@ return {
                     'base:cave-bat'
                 ],
                 possibleLocations : [
-        //                    {name: 'Stairs Down', rarity:1},
+        //                    {id: 'Stairs Down', rarity:1},
 
                     // the standard set
-                    {name: 'base:fountain', rarity:18},
-                    {name: 'base:potion-shop', rarity: 17},
-                    {name: 'base:wyvern-statue', rarity: 15},
-                    {name: 'base:small-chest', rarity: 16},
-                    {name: 'base:locked-chest', rarity: 11},
+                    {id: 'base:fountain', rarity:18},
+                    {id: 'base:potion-shop', rarity: 17},
+                    {id: 'base:wyvern-statue', rarity: 15},
+                    {id: 'base:small-chest', rarity: 16},
+                    {id: 'base:locked-chest', rarity: 11},
 
 
-                    {name: 'base:healing-circle', rarity:20},
+                    {id: 'base:healing-circle', rarity:20},
 
 
-                    {name: 'base:clothing-shop', rarity: 100},
-                    {name: 'base:fancy-shop', rarity: 500}
+                    {id: 'base:clothing-shop', rarity: 100},
+                    {id: 'base:fancy-shop', rarity: 500}
 
                 ],
                 requiredLocations : [
@@ -962,7 +965,7 @@ return {
                 maxLocations : 4,
                 peaceful: false,
                 guarded : false,
-                landmarkType : Landmark.TYPE.DUNGEON,
+                landmarkType : Landmark.database.statics.TYPE.DUNGEON,
                 canSave : false,
                 pointOfNoReturn : true,
                 ephemeral : true,
@@ -976,24 +979,25 @@ return {
                     'base:cave-bat'
                 ],
                 possibleLocations : [
-        //                    {name: 'Stairs Down', rarity:1},
-                    {name: 'base:fountain', rarity:18},
-                    {name: 'base:potion-shop', rarity: 17},
-                    {name: 'base:enchantment-stand', rarity: 11},
-                    {name: 'base:wyvern-statue', rarity: 15},
-                    {name: 'base:small-chest', rarity: 16},
-                    {name: 'base:locked-chest', rarity: 12},
-                    {name: 'base:magic-chest', rarity: 15},
+        //                    {id: 'Stairs Down', rarity:1},
+                    {id: 'base:fountain', rarity:18},
+                    {id: 'base:potion-shop', rarity: 17},
+                    {id: 'base:enchantment-stand', rarity: 11},
+                    {id: 'base:wyvern-statue', rarity: 15},
+                    {id: 'base:small-chest', rarity: 16},
+                    {id: 'base:locked-chest', rarity: 12},
+                    {id: 'base:magic-chest', rarity: 15},
 
 
-                    {name: 'base:healing-circle', rarity:20},
-                    {name: 'base:clothing-shop', rarity: 300},
-                    {name: 'base:fancy-shop', rarity: 500},
+                    {id: 'base:healing-circle', rarity:20},
+                    {id: 'base:clothing-shop', rarity: 300},
+                    {id: 'base:fancy-shop', rarity: 500},
                 ],
                 requiredLocations : [
                     'base:enchantment-stand',
                     'base:stairs-down',
-                    'base:locked-chest',
+                    'base:locked-chest'
+                    
                 ],
                 mapHint:{
                     layoutType: DungeonMap.LAYOUT_BETA
@@ -1017,7 +1021,7 @@ return {
                 maxLocations : 4,
                 peaceful: false,
                 guarded : false,
-                landmarkType : Landmark.TYPE.DUNGEON,
+                landmarkType : Landmark.database.statics.TYPE.DUNGEON,
                 canSave : false,
                 pointOfNoReturn : true,
                 ephemeral : true,
@@ -1031,26 +1035,31 @@ return {
                     'base:cave-bat'
                 ],
                 possibleLocations : [
-        //                    {name: 'Stairs Down', rarity:1},
-                    {name: 'base:fountain', rarity:18},
-                    {name: 'base:potion-shop', rarity: 17},
-                    {name: 'base:enchantment-stand', rarity: 11},
-                    {name: 'base:wyvern-statue', rarity: 15},
-                    {name: 'base:small-chest', rarity: 16},
-                    {name: 'base:locked-chest', rarity: 11},
-                    {name: 'base:magic-chest', rarity: 15},
+        //                    {id: 'Stairs Down', rarity:1},
+                    {id: 'base:fountain', rarity:18},
+                    {id: 'base:potion-shop', rarity: 17},
+                    {id: 'base:enchantment-stand', rarity: 11},
+                    {id: 'base:wyvern-statue', rarity: 15},
+                    {id: 'base:small-chest', rarity: 16},
+                    {id: 'base:locked-chest', rarity: 11},
+                    {id: 'base:magic-chest', rarity: 15},
 
-                    {name: 'base:healing-circle', rarity:25},
+                    {id: 'base:healing-circle', rarity:25},
 
-                    {name: 'base:clothing-shop', rarity: 80},
-                    {name: 'base:fancy-shop', rarity: 100}
+                    {id: 'base:clothing-shop', rarity: 80},
+                    {id: 'base:fancy-shop', rarity: 100}
 
                 ],
                 requiredLocations : [
                     'base:enchantment-stand',
                     'base:stairs-down',
                     'base:locked-chest',
-                    'base:small-chest'
+                    'base:small-chest',
+
+                    'base:warp-point',
+                    'base:warp-point',
+                    'base:warp-point',
+                    'base:warp-point'
                 ],
                 mapHint:{
                     layoutType: DungeonMap.LAYOUT_GAMMA
@@ -1075,7 +1084,7 @@ return {
                 maxLocations : 4,
                 peaceful: false,
                 guarded : false,
-                landmarkType : Landmark.TYPE.DUNGEON,
+                landmarkType : Landmark.database.statics.TYPE.DUNGEON,
                 canSave : false,
                 pointOfNoReturn : true,
                 ephemeral : true,
@@ -1089,26 +1098,31 @@ return {
                     'base:cave-bat'
                 ],
                 possibleLocations : [
-        //                    {name: 'Stairs Down', rarity:1},
-                    {name: 'base:fountain', rarity:18},
-                    {name: 'base:potion-shop', rarity: 17},
-                    {name: 'base:enchantment-stand', rarity: 11},
-                    {name: 'base:wyvern-statue', rarity: 15},
-                    {name: 'base:small-chest', rarity: 16},
-                    {name: 'base:locked-chest', rarity: 11},
-                    {name: 'base:magic-chest', rarity: 15},
+        //                    {id: 'Stairs Down', rarity:1},
+                    {id: 'base:fountain', rarity:18},
+                    {id: 'base:potion-shop', rarity: 17},
+                    {id: 'base:enchantment-stand', rarity: 11},
+                    {id: 'base:wyvern-statue', rarity: 15},
+                    {id: 'base:small-chest', rarity: 16},
+                    {id: 'base:locked-chest', rarity: 11},
+                    {id: 'base:magic-chest', rarity: 15},
 
-                    {name: 'base:healing-circle', rarity:35},
+                    {id: 'base:healing-circle', rarity:35},
 
-                    {name: 'base:clothing-shop', rarity: 100},
-                    {name: 'base:fancy-shop', rarity: 50}
+                    {id: 'base:clothing-shop', rarity: 100},
+                    {id: 'base:fancy-shop', rarity: 50}
 
                 ],
                 requiredLocations : [
                     'base:enchantment-stand',
                     'base:stairs-down',
                     'base:locked-chest',
-                    'base:small-chest'
+                    'base:small-chest',
+                    
+                    'base:warp-point',
+                    'base:warp-point',
+                    'base:warp-point',
+                    'base:warp-point'                    
                 ],
                 mapHint:{
                     layoutType: DungeonMap.LAYOUT_DELTA
@@ -1134,7 +1148,7 @@ return {
                 maxLocations : 2,
                 guarded : false,
                 peaceful: true,
-                landmarkType : Landmark.TYPE.DUNGEON,
+                landmarkType : Landmark.database.statics.TYPE.DUNGEON,
                 canSave : true,
                 pointOfNoReturn : false,
                 ephemeral : false,
@@ -1175,7 +1189,7 @@ return {
                 maxLocations : 2,
                 guarded : false,
                 peaceful: true,
-                landmarkType : Landmark.TYPE.DUNGEON,
+                landmarkType : Landmark.database.statics.TYPE.DUNGEON,
                 canSave : true,
                 pointOfNoReturn : false,
                 ephemeral : false,
@@ -1216,7 +1230,7 @@ return {
                 peaceful: true,
                 
                 canSave : true,
-                landmarkType : Landmark.TYPE.DUNGEON,
+                landmarkType : Landmark.database.statics.TYPE.DUNGEON,
                 pointOfNoReturn : false,
                 ephemeral : false,
                 dungeonForceEntrance: false,
@@ -1257,7 +1271,7 @@ return {
                 peaceful: true,
                 
                 canSave : true,
-                landmarkType : Landmark.TYPE.DUNGEON,
+                landmarkType : Landmark.database.statics.TYPE.DUNGEON,
                 pointOfNoReturn : false,
                 ephemeral : false,
                 dungeonForceEntrance: false,
@@ -1289,6 +1303,7 @@ return {
         
         
         @:Location = import(module:'game_mutator.location.mt');
+        @:world = import(module:'game_singleton.world.mt');
 
 
 
@@ -1297,7 +1312,7 @@ return {
             id: 'thechosen:throne-fire',
             rarity: 1,
             ownVerb : 'owned',
-            category : Location.CATEGORY.RESIDENTIAL,
+            category : Location.database.statics.CATEGORY.RESIDENTIAL,
             symbol: 'W',
             onePerLandmark : true,
             minStructureSize : 1,
@@ -1334,16 +1349,16 @@ return {
                 @:StatSet = import(module:'game_class.statset.mt');
                 location.ownedBy = location.landmark.island.newInhabitant();
                 location.ownedBy.name = 'Wyvern of Fire';
-                location.ownedBy.species = Species.find(id:'Wyvern of Fire');
-                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'Wyvern of Fire'));               
+                location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-fire');
+                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'thechosen:wyvern-of-fire'));               
                 location.ownedBy.clearAbilities();
                 foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
-                    location.ownedBy.learnAbility(name:ability);
+                    location.ownedBy.learnAbility(id:ability);
                 }
 
                 
                 location.ownedBy.overrideInteract = ::(party, location, onDone) {
-                    if (Story.fireWyvernDefeated == false) ::<= {
+                    if (world.scenario.data.fireWyvernDefeated == false) ::<= {
                         Scene.start(id:'thechosen:scene_wyvernfire0', onDone::{}, location, landmark:location.landmark);
                     } else ::<= {
                         // just visiting!
@@ -1380,7 +1395,7 @@ return {
             id: 'thechosen:throne-ice',
             rarity: 1,
             ownVerb : 'owned',
-            category : Location.CATEGORY.RESIDENTIAL,
+            category : Location.database.statics.CATEGORY.RESIDENTIAL,
             symbol: 'W',
             onePerLandmark : true,
             minStructureSize : 1,
@@ -1417,16 +1432,16 @@ return {
                 @:StatSet = import(module:'game_class.statset.mt');
                 location.ownedBy = location.landmark.island.newInhabitant();
                 location.ownedBy.name = 'Wyvern of Ice';
-                location.ownedBy.species = Species.find(id:'Wyvern of Ice');
-                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'Wyvern of Ice'));               
+                location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-ice');
+                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'thechosen:wyvern-of-ice'));               
                 location.ownedBy.clearAbilities();
                 foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
-                    location.ownedBy.learnAbility(name:ability);
+                    location.ownedBy.learnAbility(id:ability);
                 }
 
                 
                 location.ownedBy.overrideInteract = ::(party, location, onDone) {
-                    if (Story.iceWyvernDefeated == false) ::<= {
+                    if (world.scenario.data.iceWyvernDefeated == false) ::<= {
                         Scene.start(id:'thechosen:scene_wyvernice0', onDone::{}, location, landmark:location.landmark);
                     } else ::<= {
                         // just visiting!
@@ -1463,7 +1478,7 @@ return {
             id: 'thechosen:throne-thunder',
             rarity: 1,
             ownVerb : 'owned',
-            category : Location.CATEGORY.RESIDENTIAL,
+            category : Location.database.statics.CATEGORY.RESIDENTIAL,
             symbol: 'W',
             onePerLandmark : true,
             minStructureSize : 1,
@@ -1498,13 +1513,14 @@ return {
                 @:Story = import(module:'game_singleton.story.mt');
                 @:Scene = import(module:'game_database.scene.mt');
                 @:StatSet = import(module:'game_class.statset.mt');
+                @:Entity = import(module:'game_class.entity.mt');
                 location.ownedBy = location.landmark.island.newInhabitant();
                 location.ownedBy.name = 'Wyvern of Thunder';
-                location.ownedBy.species = Species.find(id:'Wyvern of Thunder');
-                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'Wyvern of Thunder'));               
+                location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-thunder');
+                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'thechosen:wyvern-of-thunder'));               
                 location.ownedBy.clearAbilities();
                 foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
-                    location.ownedBy.learnAbility(name:ability);
+                    location.ownedBy.learnAbility(id:ability);
                 }
 
                 
@@ -1527,6 +1543,7 @@ return {
                     SPD:  100,
                     DEX:  16
                 ).save());
+                location.ownedBy.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
                 location.ownedBy.heal(amount:9999, silent:true); 
                 location.ownedBy.healAP(amount:9999, silent:true); 
 
@@ -1547,7 +1564,7 @@ return {
             id: 'thechosen:throne-light',
             rarity: 1,
             ownVerb : 'owned',
-            category : Location.CATEGORY.RESIDENTIAL,
+            category : Location.database.statics.CATEGORY.RESIDENTIAL,
             symbol: 'W',
             onePerLandmark : true,
             minStructureSize : 1,
@@ -1585,20 +1602,20 @@ return {
                 @:StatSet = import(module:'game_class.statset.mt');
                 location.ownedBy = location.landmark.island.newInhabitant();
                 location.ownedBy.name = 'Wyvern of Light';
-                location.ownedBy.species = Species.find(id:'Wyvern of Light');
-                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'Wyvern of Light'));               
+                location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-light');
+                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'thechosen:wyvern-of-light'));               
                 location.ownedBy.clearAbilities();
                 foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
-                    location.ownedBy.learnAbility(name:ability);
+                    location.ownedBy.learnAbility(id:ability);
                 }
 
                 
                 location.ownedBy.overrideInteract = ::(party, location, onDone) {
-                    if (Story.lightWyvernDefeated == false) ::<= {
-                        Scene.start(id:'base:scene_wyvernlight0', onDone::{}, location, landmark:location.landmark);
+                    if (world.scenario.data.lightWyvernDefeated == false) ::<= {
+                        Scene.start(id:'thechosen:scene_wyvernlight0', onDone::{}, location, landmark:location.landmark);
                     } else ::<= {
                         // just visiting!
-                        Scene.start(id:'base:scene_wyvernlight1', onDone::{}, location, landmark:location.landmark);                        
+                        Scene.start(id:'thechosen:scene_wyvernlight1', onDone::{}, location, landmark:location.landmark);                        
                     }
                 }
                 location.ownedBy.stats.load(serialized:StatSet.new(
@@ -1636,7 +1653,7 @@ return {
             rarity: 1000000000000,
             ownVerb : '',
             symbol: '\\',
-            category : Location.CATEGORY.EXIT,
+            category : Location.database.statics.CATEGORY.EXIT,
             onePerLandmark : false,
             minStructureSize : 1,
 
@@ -1684,7 +1701,7 @@ return {
             rarity: 1000000000000,
             ownVerb : '',
             symbol: ' ',
-            category : Location.CATEGORY.ENTRANCE,
+            category : Location.database.statics.CATEGORY.ENTRANCE,
             onePerLandmark : false,
             minStructureSize : 1,
 
@@ -1739,7 +1756,7 @@ return {
                 maxLocations : 4,
                 peaceful: false,
                 guarded : false,
-                landmarkType : Landmark.TYPE.DUNGEON,
+                landmarkType : Landmark.database.statics.TYPE.DUNGEON,
                 canSave : false,
                 pointOfNoReturn : true,
                 ephemeral : true,
@@ -1748,15 +1765,15 @@ return {
                     'base:damned-souls',
                 ],
                 possibleLocations : [
-        //                    {name: 'Stairs Down', rarity:1},
-                    {name: 'base:fountain', rarity:18},
-                    {name: 'base:potion-shop', rarity: 17},
-                    {name: 'base:wyvern-statue', rarity: 15},
-                    {name: 'base:small-chest', rarity: 16},
-                    {name: 'base:locked-chest', rarity: 11},
-                    {name: 'base:magic-chest', rarity: 15},
+        //                    {id: 'Stairs Down', rarity:1},
+                    {id: 'base:fountain', rarity:18},
+                    {id: 'base:potion-shop', rarity: 17},
+                    {id: 'base:wyvern-statue', rarity: 15},
+                    {id: 'base:small-chest', rarity: 16},
+                    {id: 'base:locked-chest', rarity: 11},
+                    {id: 'base:magic-chest', rarity: 15},
 
-                    {name: 'base:Healing Circle', rarity:35}
+                    {id: 'base:Healing Circle', rarity:35}
 
                 ],
                 requiredLocations : [
@@ -1791,7 +1808,7 @@ return {
                 maxLocations : 0,
                 isUnique : true,
                 peaceful : true,
-                landmarkType : Landmark.TYPE.CUSTOM,
+                landmarkType : Landmark.database.statics.TYPE.CUSTOM,
                 dungeonForceEntrance: false,
                 guarded : false,
                 canSave : false,
@@ -2017,6 +2034,7 @@ return {
                 skipTurn : false,
                 stackable: true,
                 blockPoints : 0,
+                flags : 0,
                 stats: StatSet.new(),
                 onAffliction ::(user, item, holder) {
                     Scene.start(id:'thechosen:scene_sentimentalbox', onDone::{});            
@@ -2061,7 +2079,7 @@ return {
             id : 'thechosen:sentimental-box',
             description: 'A box of sentimental value. You feel like you should open it right away.',
             examine : '',
-            equipType: Item.TYPE.TWOHANDED,
+            equipType: Item.database.statics.TYPE.TWOHANDED,
             rarity : 100,
             weight : 10,
             canBeColored : false,
@@ -2076,7 +2094,7 @@ return {
             hasQuality : false,
             hasMaterial : false,
             isApparel : false,    isUnique : true,
-            useTargetHint : Item.USE_TARGET_HINT.NONE,
+            useTargetHint : Item.database.statics.USE_TARGET_HINT.NONE,
             possibleAbilities : [
             ],
 
@@ -2092,8 +2110,8 @@ return {
             ],
             equipEffects : [],
             attributes : 
-                Item.ATTRIBUTE.SHARP  |
-                Item.ATTRIBUTE.METAL
+                Item.database.statics.ATTRIBUTE.SHARP  |
+                Item.database.statics.ATTRIBUTE.METAL
             ,
             onCreate ::(item, user, creationHint) {     
 
@@ -2109,7 +2127,7 @@ return {
             id : 'thechosen:wyvern-key-of-fire',
             description: 'A key to another island. Its quite big and warm to the touch.',
             examine : '',
-            equipType: Item.TYPE.TWOHANDED,
+            equipType: Item.database.statics.TYPE.TWOHANDED,
             rarity : 100,
             weight : 10,
             hasSize : false,
@@ -2124,7 +2142,7 @@ return {
             hasQuality : false,
             hasMaterial : false,
             isApparel : false,    isUnique : true,
-            useTargetHint : Item.USE_TARGET_HINT.ONE,
+            useTargetHint : Item.database.statics.USE_TARGET_HINT.ONE,
             possibleAbilities : [
                 "base:fire" // for fun!
             ],
@@ -2142,8 +2160,8 @@ return {
                 "base:burning"
             ],
             attributes : 
-                Item.ATTRIBUTE.SHARP |
-                Item.ATTRIBUTE.METAL
+                Item.database.statics.ATTRIBUTE.SHARP |
+                Item.database.statics.ATTRIBUTE.METAL
             ,
             onCreate ::(item, user, creationHint) {     
             
@@ -2173,7 +2191,7 @@ return {
             id : 'thechosen:wyvern-key-of-ice',
             description: 'A key to another island. Its quite big and cold to the touch.',
             examine : '',
-            equipType: Item.TYPE.TWOHANDED,
+            equipType: Item.database.statics.TYPE.TWOHANDED,
             rarity : 100,
             hasSize : false,
             weight : 10,
@@ -2188,7 +2206,7 @@ return {
             hasQuality : false,
             hasMaterial : false,
             isApparel : false,    isUnique : true,
-            useTargetHint : Item.USE_TARGET_HINT.ONE,
+            useTargetHint : Item.database.statics.USE_TARGET_HINT.ONE,
             possibleAbilities : [
                 "base:ice" // for fun!
             ],
@@ -2206,8 +2224,8 @@ return {
                 "base:icy"
             ],
             attributes : 
-                Item.ATTRIBUTE.SHARP |
-                Item.ATTRIBUTE.METAL
+                Item.database.statics.ATTRIBUTE.SHARP |
+                Item.database.statics.ATTRIBUTE.METAL
             ,
             onCreate ::(item, user, creationHint) {     
             
@@ -2237,7 +2255,7 @@ return {
             id : 'thechosen:wyvern-key-of-thunder',
             description: 'A key to another island. Its quite big and softly hums.',
             examine : '',
-            equipType: Item.TYPE.TWOHANDED,
+            equipType: Item.database.statics.TYPE.TWOHANDED,
             rarity : 100,
             weight : 10,
             canBeColored : false,
@@ -2252,7 +2270,7 @@ return {
             hasQuality : false,
             hasMaterial : false,
             isApparel : false,    isUnique : true,
-            useTargetHint : Item.USE_TARGET_HINT.ONE,
+            useTargetHint : Item.database.statics.USE_TARGET_HINT.ONE,
             possibleAbilities : [
                 "base:thunder" // for fun!
             ],
@@ -2270,8 +2288,8 @@ return {
                 "base:shock"
             ],
             attributes : 
-                Item.ATTRIBUTE.SHARP |
-                Item.ATTRIBUTE.METAL
+                Item.database.statics.ATTRIBUTE.SHARP |
+                Item.database.statics.ATTRIBUTE.METAL
             ,
             onCreate ::(item, user, creationHint) {     
             
@@ -2298,10 +2316,10 @@ return {
 
         Item.database.newEntry(data : {
             name : "Wyvern Key of Light",
-            id : 'base:wyvern-key-of-light',
+            id : 'thechosen:wyvern-key-of-light',
             description: 'A key to another island. Its quite big and faintly glows.',
             examine : '',
-            equipType: Item.TYPE.TWOHANDED,
+            equipType: Item.database.statics.TYPE.TWOHANDED,
             rarity : 100,
             weight : 10,
             hasSize : false,
@@ -2316,7 +2334,7 @@ return {
             hasQuality : false,
             hasMaterial : false,
             isApparel : false,    isUnique : true,
-            useTargetHint : Item.USE_TARGET_HINT.ONE,
+            useTargetHint : Item.database.statics.USE_TARGET_HINT.ONE,
             possibleAbilities : [
                 "base:explosion" // for fun!
             ],
@@ -2334,8 +2352,8 @@ return {
                 "base:shimmering"
             ],
             attributes : 
-                Item.ATTRIBUTE.SHARP |
-                Item.ATTRIBUTE.METAL
+                Item.database.statics.ATTRIBUTE.SHARP |
+                Item.database.statics.ATTRIBUTE.METAL
             ,
             onCreate ::(item, user, creationHint) {     
             
@@ -2445,7 +2463,7 @@ return {
 
 
                                     
-                                windowEvent.queueMessage(text: 'The party obtained the ' + itemName + '!');                            
+                                windowEvent.queueMessage(text: 'The party obtained the ' + key.name + '!');                            
                             }
 
 
@@ -2922,7 +2940,7 @@ return {
                                                     
                                                     @:prize = Item.new(
                                                         base: Item.database.getRandomFiltered(
-                                                            filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial && value.attributes & Item.ATTRIBUTE.WEAPON
+                                                            filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial && value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
                                                         ),
                                                         rngEnchantHint:true, 
                                                         colorHint:'base:blue', 
@@ -2961,7 +2979,7 @@ return {
                     ['Ziikkaettaal', 'I\'ll take you back to your world.'],                     
                     ::(location, landmark, doNext) {
                         @:world = import(module:'game_singleton.world.mt');
-                        @key = world.party.getItemAtAll(name:'thechosen:wyvern-key-of-ice');
+                        @key = world.party.getItemAtAll(id:'thechosen:wyvern-key-of-ice');
 
                         @:canvas = import(module:'game_singleton.canvas.mt');
                         windowEvent.queueMessage(
@@ -3542,7 +3560,7 @@ return {
                     ::(location, landmark, doNext) {
                         location.ownedBy.name = 'Shaarraeziil';
                         @:world = import(module:'game_singleton.world.mt');
-                        @key = world.party.getItemAtAll(name:'thechosen:wyvern-key-of-light');
+                        @key = world.party.getItemAtAll(id:'thechosen:wyvern-key-of-light');
 
                         // you can technically throw it out or Literally Throw It.
                         when(key == empty) ::<= {
@@ -3900,7 +3918,7 @@ return {
                 'base:ice',
                 //'Magic Mist', // remove all effects
                 'base:wild-swing',
-                'bare:sheer-cold'
+                'base:sheer-cold'
             ],
             passives : [
             ]
@@ -3969,7 +3987,7 @@ return {
                 'base:flare',
                 'base:headhunter',
                 'base:sunburst',
-                'base:sol Attunement',
+                'base:sol-attunement',
                 'base:cure',
                 'base:summon-guiding-light',
                 //'Magic Mist', // remove all effects

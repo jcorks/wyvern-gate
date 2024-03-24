@@ -67,8 +67,8 @@
             });
             
             @:popularList = [...items]->map(to:::(value) {
-                when(popular->findIndex(value:value.base.name) != -1) 'High'
-                when(unpopular->findIndex(value:value.base.name) != -1) 'Low'
+                when(popular->findIndex(value:value.base.id) != -1) 'High'
+                when(unpopular->findIndex(value:value.base.id) != -1) 'Low'
                 return ' '
             })
             
@@ -414,7 +414,7 @@
                                 filter:::(value) <- value.isUnique == false
                                                     && value.hasQuality
                             ),
-                            qualityHint : 'Masterwork',
+                            qualityHint : 'base:masterwork',
                             rngEnchantHint:true
                         )
                     ); 
@@ -433,7 +433,7 @@
                     @:current = state.member.getEquipped(slot);
                     
                     // ignore equipping hand things that arent weapons.
-                    when(slot == Entity.EQUIP_SLOTS.HAND_LR && (item.base.attributes & Item.ATTRIBUTE.WEAPON == 0))
+                    when(slot == Entity.EQUIP_SLOTS.HAND_LR && (item.base.attributes & Item.database.statics.ATTRIBUTE.WEAPON == 0))
                         spoilsFiltered->push(value:item);
                     
                     // simply take
@@ -683,14 +683,14 @@
                             
                             @popnews = 'These items are now popular. People will pay high prices for them compared to normal.\n\n';
                             foreach(state.popular) ::(i, val) {
-                                popnews = popnews + ' - ' + val + '\n';
+                                popnews = popnews + ' - ' + Item.database.find(id:val).name + '\n';
                             }
                             
                             windowEvent.queueMessage(text:popnews, pageAfter:14);
 
                             @unpopnews = 'These items are now unpopular. People will avoid these or won\'t be willing to buy them for normal prices.\n\n';
                             foreach(state.unpopular) ::(i, val) {
-                                unpopnews = unpopnews + ' - ' + val + '\n';
+                                unpopnews = unpopnews + ' - ' + Item.database.find(id:val).name + '\n';
                             }
                             windowEvent.queueMessage(text:unpopnews, pageAfter:14);
                         }
@@ -1454,7 +1454,7 @@
                             foreach(state.ownedProperties) ::(i, id) {
                                 @:location = world.island.findLocation(id);
                                 
-                                if (location.base.category == Location.CATEGORY.RESIDENTIAL) ::<= {
+                                if (location.base.category == Location.database.statics.CATEGORY.RESIDENTIAL) ::<= {
                                     rent += (location.modData.trader.boughtPrice * 0.07)->ceil;
                                     @current = location.modData.trader.listPrice;
                                     current += (((Number.random() - 0.5) * 0.05) * location.modData.trader.boughtPrice)->floor;
@@ -1479,7 +1479,7 @@
                             rent = 0;
                             foreach(state.ownedProperties) ::(i, id) {
                                 @:location = world.island.findLocation(id);
-                                when (location.base.category == Location.CATEGORY.RESIDENTIAL) empty
+                                when (location.base.category == Location.database.statics.CATEGORY.RESIDENTIAL) empty
                                 
                                 @profit = location.modData.trader.listPrice * 0.15;
                                 profit = random.integer(from:(profit * 0.5)->floor, to:(profit * 1.5)->floor);
@@ -2893,7 +2893,7 @@ return {
         );
         party.inventory.add(item:
             Item.new(
-                base:Item.database.find(id:'Gold Pouch'),
+                base:Item.database.find(id:'base:gold-pouch'),
                 from:p0
             )
         );
@@ -2972,9 +2972,9 @@ return {
                     location.ownedBy != empty && 
                     trader.ownedProperties->findIndex(value:location.worldID) == -1 &&
                     (
-                        location.base.category == Location.CATEGORY.RESIDENTIAL ||
-                        location.base.category == Location.CATEGORY.UTILITY ||
-                        location.base.category == Location.CATEGORY.BUSINESS
+                        location.base.category == Location.database.statics.CATEGORY.RESIDENTIAL ||
+                        location.base.category == Location.database.statics.CATEGORY.UTILITY ||
+                        location.base.category == Location.database.statics.CATEGORY.BUSINESS
                     )
                 ;
             },
@@ -3003,9 +3003,9 @@ return {
                     @basePrice = match(location.base.category) {
                       // residential properties can be bought, and thee owners become 
                       // tennants
-                      (Location.CATEGORY.RESIDENTIAL): random.pickArrayItem(list:[9000, 12000, 8000, 14000, 5000]),
-                      (Location.CATEGORY.BUSINESS): random.pickArrayItem(list:[100000, 120000, 89000, 160000]),
-                      (Location.CATEGORY.UTILITY): random.pickArrayItem(list:[30000, 35000, 22000, 45000])
+                      (Location.database.statics.CATEGORY.RESIDENTIAL): random.pickArrayItem(list:[9000, 12000, 8000, 14000, 5000]),
+                      (Location.database.statics.CATEGORY.BUSINESS): random.pickArrayItem(list:[100000, 120000, 89000, 160000]),
+                      (Location.database.statics.CATEGORY.UTILITY): random.pickArrayItem(list:[30000, 35000, 22000, 45000])
                     }
                     
                     location.modData.trader.listPrice = random.integer(from:(basePrice * 0.8)->floor, to:(basePrice * 1.2)->floor);
@@ -3042,7 +3042,7 @@ return {
                                     text: 'Congratulations! You now own ' + location.ownedBy.name + '\'s ' + location.base.name + '.'
                                 );
                                 
-                                if (location.base.category == Location.CATEGORY.RESIDENTIAL)
+                                if (location.base.category == Location.database.statics.CATEGORY.RESIDENTIAL)
                                     windowEvent.queueMessage(
                                         text: 'This residence will pay you rent daily based on a percentage of the price you bought it at.'
                                     )
@@ -3250,7 +3250,7 @@ return {
                 maxLocations : 2,
                 guarded : false,
                 peaceful: true,
-                landmarkType : Item.TYPE.DUNGEON,
+                landmarkType : Landmark.database.statics.TYPE.DUNGEON,
                 canSave : true,
                 pointOfNoReturn : false,
                 ephemeral : false,
@@ -3285,7 +3285,7 @@ return {
             name: 'Wyvern Throne of Fortune',
             rarity: 1,
             ownVerb : 'owned',
-            category : Location.CATEGORY.DUNGEON_SPECIAL,
+            category : Location.database.statics.CATEGORY.DUNGEON_SPECIAL,
             symbol: 'W',
             onePerLandmark : true,
             minStructureSize : 1,
@@ -3322,8 +3322,8 @@ return {
                 @:StatSet = import(module:'game_class.statset.mt');
                 location.ownedBy = location.landmark.island.newInhabitant();
                 location.ownedBy.name = 'Wyvern of Fortune';
-                location.ownedBy.species = Species.find(id:'Wyvern of Fire');
-                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'Wyvern of Fire'));               
+                location.ownedBy.species = Species.find(id:'base:wyvern');
+                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'base:wyvern'));               
                 location.ownedBy.clearAbilities();
                 foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
                     location.ownedBy.learnAbility(id:ability);
@@ -3363,7 +3363,7 @@ return {
             id : 'thetrader:crate',
             description: 'A sizeable container full of raw material. Can be quite expensive.',
             examine : '',
-            equipType: Item.TYPE.HAND,
+            equipType: Item.database.statics.TYPE.HAND,
             rarity : 300,
             canBeColored : false,
             keyItem : false,
@@ -3380,7 +3380,7 @@ return {
             hasMaterial : true,
             isApparel : false,
             isUnique : false,
-            useTargetHint : Item.USE_TARGET_HINT.ONE,
+            useTargetHint : Item.database.statics.USE_TARGET_HINT.ONE,
 
             // fatigued
             equipMod : StatSet.new(
@@ -3394,8 +3394,8 @@ return {
 
             equipEffects : [],
             attributes : 
-                Item.ATTRIBUTE.SHARP |
-                Item.ATTRIBUTE.METAL
+                Item.database.statics.ATTRIBUTE.SHARP |
+                Item.database.statics.ATTRIBUTE.METAL
             ,
             onCreate ::(item, creationHint) {}
 
@@ -3407,7 +3407,7 @@ return {
             id : 'thetrader:shipment',
             description: 'A large container full of raw material. One person can barely lift it alone. Can be quite expensive.',
             examine : '',
-            equipType: Item.TYPE.HAND,
+            equipType: Item.database.statics.TYPE.HAND,
             rarity : 300,
             canBeColored : false,
             keyItem : false,
@@ -3424,7 +3424,7 @@ return {
             hasMaterial : true,
             isApparel : false,
             isUnique : false,
-            useTargetHint : Item.USE_TARGET_HINT.ONE,
+            useTargetHint : Item.database.statics.USE_TARGET_HINT.ONE,
 
             // fatigued
             equipMod : StatSet.new(
@@ -3438,8 +3438,8 @@ return {
 
             equipEffects : [],
             attributes : 
-                Item.ATTRIBUTE.SHARP |
-                Item.ATTRIBUTE.METAL
+                Item.database.statics.ATTRIBUTE.SHARP |
+                Item.database.statics.ATTRIBUTE.METAL
             ,
             onCreate ::(item, creationHint) {}
 
@@ -3491,7 +3491,7 @@ return {
                         @:Landmark = import(module:'game_mutator.landmark.mt');
 
                         @:d = world.island.newLandmark(
-                            base:Landmark.database.find(id:'Fortune Wyvern Dimension')
+                            base:Landmark.database.find(id:'thetrader:fortune-wyvern-dimension')
                         );
                         instance.visitLandmark(landmark:d);             
                         doNext();

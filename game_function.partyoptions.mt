@@ -186,7 +186,7 @@ return ::{
                                         @:item = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
                                         if (i < Entity.EQUIP_SLOTS.HAND_LR) ::<= {     
                                             str = str +  if (item.base.id == 'base:none') ('------') else item.name;
-                                        } else if (item.base.equipType == Item.TYPE.TWOHANDED) ::<= {
+                                        } else if (item.base.equipType == Item.database.statics.TYPE.TWOHANDED) ::<= {
                                             str = str +  if (item.base.id == 'base:none') ('') else item.name;                                                    
                                         }       
                                     

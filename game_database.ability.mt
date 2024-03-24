@@ -2420,10 +2420,10 @@ Ability.newEntry(
         name: 'Cleanse',
         id : 'base:cleanse',
         targetMode : TARGET_MODE.ONE,
-        description: "Removes the status effects: Paralyzed, Poisoned, Petrified, Burned, Frozen, and Blind.",
+        description: "Removes all status ailments and some negative effects.",
         durationTurns: 0,
         hpCost : 0,
-        apCost : 1,
+        apCost : 2,
         usageHintAI : USAGE_HINT.BUFF,
         oncePerBattle : false,
         canBlock : false,
@@ -2433,14 +2433,7 @@ Ability.newEntry(
             );
             @:Effect = import(module:'game_database.effect.mt');
             targets[0].removeEffects(
-                effectBases: [
-                    Effect.find(id:'base:poisoned'),
-                    Effect.find(id:'base:paralyzed'),
-                    Effect.find(id:'base:petrified'),
-                    Effect.find(id:'base:burned'),
-                    Effect.find(id:'base:blind'),
-                    Effect.find(id:'base:frozen')                                  
-                ]
+                effectBases: [...Effect.getAll()]->filter(by:::(value) <- value.flags & Effect.statics.FLAGS.AILMENT)
             );
 
         }

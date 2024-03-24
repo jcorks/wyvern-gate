@@ -21,7 +21,9 @@
 
 
 
-
+@:FLAGS = {
+    AILMENT : 1
+};
 
 
     ////////////////////// SPECIAL EFFECTS
@@ -50,6 +52,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 1,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(
@@ -101,6 +104,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 1,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(
@@ -148,6 +152,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -196,6 +201,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -243,6 +249,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -296,6 +303,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 1,
+        flags : 0,
         stats: StatSet.new(ATK:-50, DEF:200),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(
@@ -341,6 +349,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(DEF:-50, ATK:200),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(
@@ -385,6 +394,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(ATK:-50, SPD:100, DEX:100),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(
@@ -429,6 +439,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 1,
+        flags : 0,
         stats: StatSet.new(SPD:-50, DEF:200),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(
@@ -474,6 +485,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(SPD:-50, INT:200),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(
@@ -519,6 +531,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(SPD:-30, DEF:-30, ATK:200, DEX:100),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(
@@ -564,6 +577,7 @@ Effect.newEntry(
         stackable: false,
         stats: StatSet.new(),
         blockPoints : 0,
+        flags : 0,
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(
                 text: holder.name + ' changes their stance to reflect attacks!'
@@ -622,6 +636,7 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(
@@ -680,6 +695,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(
@@ -732,6 +748,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:user.name + " snuck behind " + holder.name + '!');
@@ -780,6 +797,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             INT: 100
         ),
@@ -824,6 +842,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             DEF: 100
         ),
@@ -867,6 +886,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             DEF: 10
         ),
@@ -914,6 +934,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -959,6 +980,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -1003,6 +1025,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -1046,6 +1069,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -1091,6 +1115,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -1143,6 +1168,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -1195,6 +1221,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -1240,6 +1267,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -1285,6 +1313,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             DEF: 10
         ),
@@ -1335,6 +1364,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -1379,6 +1409,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -1425,6 +1456,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -1469,6 +1501,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             ATK:70
         ),
@@ -1512,6 +1545,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -1556,6 +1590,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             DEF:70
         ),
@@ -1599,6 +1634,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -1643,6 +1679,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             INT:70
         ),
@@ -1686,6 +1723,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -1730,6 +1768,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             DEX:70
         ),
@@ -1773,6 +1812,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -1817,6 +1857,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             SPD:70
         ),
@@ -1863,6 +1904,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             DEF: 50
         ),
@@ -1905,6 +1947,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             DEF: 50
         ),
@@ -1947,6 +1990,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             ATK: 40
         ),
@@ -1990,6 +2034,7 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             DEF: 70,
             ATK: 70
@@ -2042,6 +2087,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             ATK: 100
         ),
@@ -2084,6 +2130,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             DEF: 100
         ),
@@ -2127,6 +2174,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             DEF: 100
         ),
@@ -2169,6 +2217,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -2211,6 +2260,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -2253,6 +2303,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -2295,6 +2346,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -2337,6 +2389,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -2390,6 +2443,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(
@@ -2433,6 +2487,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             if (Number.random() > 0.5) ::<= {
@@ -2478,6 +2533,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(
@@ -2545,6 +2601,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             holder.heal(amount:holder.stats.HP);
@@ -2585,6 +2642,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             holder.healAP(amount:holder.stats.AP);
@@ -2625,12 +2683,16 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             @:world = import(module:'game_singleton.world.mt');
             @:amount = (50 + Number.random()*400)->floor;                    
             windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
-            world.party.inventory.addGold(amount);                    
+            world.party.addGoldAnimated(
+                amount:amount,
+                onDone::{}
+            );
         },
         
         onRemoveEffect ::(user, item, holder) {
@@ -2668,6 +2730,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -2723,6 +2786,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -2777,6 +2841,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -2837,8 +2902,12 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(ATK:30),
         onAffliction ::(user, item, holder) {
+            windowEvent.queueMessage(
+                text: user.name + ' readies their trained hands!'
+            );
         },
         
         onRemoveEffect ::(user, item, holder) {                    
@@ -2878,6 +2947,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(ATK:30),
         onAffliction ::(user, item, holder) {
         },
@@ -2917,6 +2987,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(ATK:70),
         onAffliction ::(user, item, holder) {
         },
@@ -2957,6 +3028,7 @@ Effect.newEntry(
         stackable: true,                
         stats: StatSet.new(SPD:-10),
         blockPoints : 0,
+        flags : FLAGS.AILMENT,
         onAffliction ::(user, item, holder) {
         },
         
@@ -2998,6 +3070,7 @@ Effect.newEntry(
         stackable: true,
         stats: StatSet.new(SPD:-10),
         blockPoints : 0,
+        flags : FLAGS.AILMENT,
         onAffliction ::(user, item, holder) {
         },
         
@@ -3042,6 +3115,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : FLAGS.AILMENT,
         stats: StatSet.new(SPD:-10),
         onAffliction ::(user, item, holder) {
         },
@@ -3084,6 +3158,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : FLAGS.AILMENT,
         stats: StatSet.new(SPD:-10),
         onAffliction ::(user, item, holder) {
         },
@@ -3128,6 +3203,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(SPD:-10),
         onAffliction ::(user, item, holder) {
         },
@@ -3170,6 +3246,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(SPD:-10),
         onAffliction ::(user, item, holder) {
         },
@@ -3214,6 +3291,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -3268,6 +3346,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + ' is strongly guarding themself');
@@ -3313,6 +3392,7 @@ Effect.newEntry(
         stackable: false,
         stats: StatSet.new(),
         blockPoints : 0,
+        flags : 0,
         onAffliction ::(user, item, holder) {
         },
         
@@ -3355,6 +3435,7 @@ Effect.newEntry(
         stackable: false,
         blockPoints : -3,
         stats: StatSet.new(),
+        flags : 0,
         onAffliction ::(user, item, holder) {
         },
         
@@ -3396,6 +3477,7 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : -3,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -3438,6 +3520,7 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : -3,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -3477,6 +3560,7 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : -3,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -3518,6 +3602,7 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -3557,6 +3642,7 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : -3,
+        flags : FLAGS.AILMENT,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + ' was stunned!');
@@ -3597,6 +3683,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             ATK: 20
         ),
@@ -3637,6 +3724,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             DEF: -20
         ),
@@ -3677,6 +3765,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             ATK: -20
         ),
@@ -3717,6 +3806,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             DEF: 20
         ),
@@ -3758,6 +3848,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             
         ),
@@ -3807,6 +3898,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             ATK:35,
             DEF:35,
@@ -3849,6 +3941,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             
         ),
@@ -3892,6 +3985,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             
         ),
@@ -3942,6 +4036,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -3990,11 +4085,13 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
         
         onRemoveEffect ::(user, item, holder) {
+            breakpoint();
         },                
         onPostAttackOther ::(user, item, holder, to) {
         },
@@ -4011,6 +4108,10 @@ Effect.newEntry(
         onDamage ::(user, item, holder, from, damage) {
             if (holder.hp == 0) ::<= {
                 windowEvent.queueMessage(text:holder.name + " glows!");
+                holder.unequipItem(item, silent:true);
+                item.throwOut();                      
+
+
                 if (random.try(percentSuccess:50)) ::<= {
 
                     @:Entity = import(module:'game_class.entity.mt');
@@ -4018,9 +4119,7 @@ Effect.newEntry(
                     damage.amount = 0;
                     holder.heal(amount:holder.stats.HP);
 
-                    holder.unequipItem(item, silent:true);
                     windowEvent.queueMessage(text:'The ' + item.name + " shatters after reviving " + holder.name + "!");
-                    item.throwOut();                      
                 } else ::<= {
                     windowEvent.queueMessage(text:'The ' + item.name + " failed to revive " + holder.name + "!");
                     
@@ -4046,6 +4145,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -4089,6 +4189,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -4133,6 +4234,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             ATK:25,
             SPD:25
@@ -4178,6 +4280,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -4219,6 +4322,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             if (Number.random() > 0.7) ::<={
@@ -4268,6 +4372,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : FLAGS.AILMENT,
         stats: StatSet.new(
             ATK: -20,
             DEF: -20,
@@ -4324,6 +4429,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             
         ),
@@ -4373,6 +4479,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:"The " + item.name + " explodes on " + user.name + "!");
@@ -4422,6 +4529,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : FLAGS.AILMENT,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:'Glowing purple runes were imprinted on ' + holder.name + "!");
@@ -4474,6 +4582,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:'Glowing orange runes were imprinted on ' + holder.name + "!");
@@ -4516,6 +4625,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:'Glowing cyan runes were imprinted on ' + holder.name + "!");
@@ -4560,6 +4670,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
             DEF: 100
         ),
@@ -4606,6 +4717,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -4653,6 +4765,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : FLAGS.AILMENT,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + " was poisoned!");
@@ -4705,6 +4818,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : FLAGS.AILMENT,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + " was blinded!");
@@ -4752,6 +4866,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
+        flags : FLAGS.AILMENT,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + " was burned!");
@@ -4803,6 +4918,7 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : -3,
+        flags : FLAGS.AILMENT,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
             windowEvent.queueMessage(text:holder.name + " was frozen");
@@ -4845,6 +4961,7 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : -3,
+        flags : FLAGS.AILMENT,
         stats: StatSet.new(
             SPD: -100,
             ATK: -100
@@ -4891,6 +5008,7 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : -3,
+        flags : FLAGS.AILMENT,
         stats: StatSet.new(
             SPD: -100,
             DEF: -100
@@ -4937,6 +5055,7 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : -3,
+        flags : 0,
         stats: StatSet.new(
         ),
         onAffliction ::(user, item, holder) {
@@ -4981,6 +5100,7 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : -3,
+        flags : FLAGS.AILMENT,
         stats: StatSet.new(
             DEF: -50
         ),
@@ -5025,6 +5145,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : FLAGS.AILMENT,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -5075,6 +5196,7 @@ Effect.newEntry(
         stats: StatSet.new(),
         stackable: false,
         blockPoints : 0,
+        flags : 0,
         onAffliction ::(user, item, holder) {
         },
         
@@ -5129,6 +5251,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -5176,6 +5299,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -5223,6 +5347,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -5270,6 +5395,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -5319,6 +5445,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -5365,6 +5492,7 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
+        flags : 0,
         stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
@@ -5405,6 +5533,9 @@ Effect.newEntry(
 
 @:Effect = Database.new(
     name: "Wyvern.Effect",
+    statics : {
+        FLAGS : FLAGS
+    },
     attributes : {
         name : String,
         id : String,
@@ -5412,6 +5543,7 @@ Effect.newEntry(
         battleOnly : Boolean,
         skipTurn : Boolean, // whether this effect makes the user not act for a turn
         stats : StatSet.type,
+        flags : Number,
         blockPoints : Number,
         onAffliction : Function, //Called once when first activated
         onPostAttackOther : Function, // Called AFTER the user has explicitly damaged a target

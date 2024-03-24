@@ -683,25 +683,13 @@
             @:tryMap = [
                 [0, 0],
                 [-1, -1],
-                [1, -1],
-                [-1, 0],
-                [0, -1],
-                [1, 0],
                 [1, 1],
-                [0, 1],
                 [-1, 1],
-                [-2, 1],
+                [1, -1],
                 [-2, 0],
-                [-2, -1],
-                [-2, -2],
-                [-1, -2],
-                [0, -2],
-                [1, -2],
-                [2, -2],
-                [2, -1],
-                [2, 0],
-                [2, 1],
-                [2, 2]
+                [ 2, 0],
+                [ 0, 2],
+                [ 0, -2],
             ];
             return ::(area, item, symbol, name) {
                 area.occupy()
@@ -710,9 +698,12 @@
                     forever ::{
                         @:offset = tryMap[iter];
                         iter += 1;
+                        if (iter >= tryMap->size)
+                            iter = 0;
+                            
                         @location = {
-                            x: (area.x + area.width/2 + offset[0]*2)->floor,
-                            y: (area.y + area.height/2 + offset[1]*2)->floor
+                            x: (area.x + area.width/2 + offset[0])->floor,
+                            y: (area.y + area.height/2 + offset[1])->floor
                         }                
 
                         @:already = this.itemsAt(x:location.x, y:location.y);

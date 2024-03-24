@@ -438,7 +438,7 @@
             blockSceneryIndex = map.addScenerySymbol(character:'▓');
 
             // if category is Entrance, the area is 2x2 
-            if (category == Location.CATEGORY.ENTRANCE) ::<= {
+            if (category == Location.database.statics.CATEGORY.ENTRANCE) ::<= {
                 unitsWide = 1;
                 unitsHigh = 1;
             }
@@ -515,7 +515,7 @@
             // returns false if cant fit the location
             addLocation::(location) {
                 // entrances take up 2 slots.
-                when(location.base.category == Location.CATEGORY.ENTRANCE) ::<= {                    
+                when(location.base.category == Location.database.statics.CATEGORY.ENTRANCE) ::<= {                    
                     {:::} {
                         for(0, 20)::(i) {
                             @x0;
@@ -584,7 +584,7 @@
                     freeSpaces->remove(key:freeSpaces->findIndex(value:space));
                     addMinimalBuilding(
                         location,
-                        symbol:if (location.base.category == Location.CATEGORY.RESIDENTIAL) empty else location.base.symbol,
+                        symbol:if (location.base.category == Location.database.statics.CATEGORY.RESIDENTIAL) empty else location.base.symbol,
                         left:space.x * ZONE_BUILDING_MINIMUM_WIDTH + _x+ZONE_CONTENT_PADDING,
                         top:space.y * ZONE_BUILDING_MINIMUM_HEIGHT + _y+ZONE_CONTENT_PADDING
                     );
@@ -623,7 +623,7 @@
                                 @:left = if (space0.x < space1.x) space0.x else space1.x;
                                 addWideBuilding(
                                     location,
-                                    symbol:if (location.base.category == Location.CATEGORY.RESIDENTIAL) empty else location.base.symbol,
+                                    symbol:if (location.base.category == Location.database.statics.CATEGORY.RESIDENTIAL) empty else location.base.symbol,
                                     left:_x + left * ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING,
                                     top: _y + space0.y * ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING
                                 );
@@ -631,7 +631,7 @@
                                 @:top = if (space0.y < space1.y) space0.y else space1.y;
                                 addTallBuilding(
                                     location,
-                                    symbol:if (location.base.category == Location.CATEGORY.RESIDENTIAL) empty else location.base.symbol,
+                                    symbol:if (location.base.category == Location.database.statics.CATEGORY.RESIDENTIAL) empty else location.base.symbol,
                                     left:_x + space0.x * ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING,
                                     top: _y + top * ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING
                                 );                            

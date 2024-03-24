@@ -739,7 +739,7 @@ Interaction.newEntry(
             party.inventory.remove(item:ores[0]);
             party.inventory.remove(item:ores[1]);
             
-            @:metal = Item.new(base:Item.database.getRandomWeightedFiltered(filter:::(value) <- value.attributes & Item.ATTRIBUTE.RAW_METAL));                        
+            @:metal = Item.new(base:Item.database.getRandomWeightedFiltered(filter:::(value) <- value.attributes & Item.database.statics.ATTRIBUTE.RAW_METAL));                        
             windowEvent.queueMessage(text: 'Smelted 2 ore chunks into ' + correctA(word:metal.name) + '!');
             party.inventory.add(item:metal);                    
                 
@@ -1032,13 +1032,69 @@ Interaction.newEntry(
         
             @:Entity = import(module:'game_class.entity.mt');
 
-            @:items = party.inventory.items->filter(by:::(value) <- value.base.attributes & Item.ATTRIBUTE.RAW_METAL);
+            @:items = party.inventory.items->filter(by:::(value) <- value.base.attributes & Item.database.statics.ATTRIBUTE.RAW_METAL);
             when(items->keycount == 0)
                 windowEvent.queueMessage(text:'No suitable ingots or materials were found in the party inventory.');
 
 
             @charge = false;
             @smith = empty;
+
+            @:smithingDo ::(item, ingot) {
+                @:material = ingot.modData.RAW_MATERIAL;
+
+                @:output = Item.new(
+                    base:Item.database.find(id:item),
+                    materialHint: material
+                );
+                
+                windowEvent.queueMessage(
+                    speaker: smith.name,
+                    text: 
+                        if (smith.profession.base.id == 'base:blacksmith')
+                            '"No problem!"'
+                        else 
+                            '"I\'m no blacksmith, but I\'ll try my best!"'
+                );
+
+                @success = if (smith.profession.base.id == 'base:blacksmith') true else random.flipCoin();                                         
+                
+
+                windowEvent.queueMessage(
+                    text:'*clank clank*'
+                );
+
+
+                if (success) ::<= {
+                    party.inventory.remove(item:ingot);
+                    windowEvent.queueMessage(
+                        text:smith.name + ' forged a ' + output.name
+                    );
+                    
+                    windowEvent.queueCustom(
+                        onEnter ::{
+                            party.inventory.add(item:output);                                                                                                        
+                        }
+                    );                 
+                } else ::<= {
+                    windowEvent.queueMessage(
+                        text: 'Due to their inexperience, ' + smith.name + ' burned their hand while mishandling the forge tools and was unable to produce anything.'
+                    );
+
+                    @:Damage = import(module:'game_class.damage.mt');
+                    smith.damage(
+                        from: smith,
+                        damage: Damage.new(
+                            amount: 1,
+                            damageType: Damage.TYPE.FIRE,
+                            damageClass: Damage.CLASS.HP
+                        ),
+                        dodgeable : false,
+                        critical : false
+                    );
+                }             
+            }
+
 
             @:smithingInAction = :: {
                
@@ -1051,47 +1107,30 @@ Interaction.newEntry(
                     onChoice::(choice) {
                         @:ore = items[choice-1];
 
-                        when(windowEvent.queueAskBoolean(
+                        windowEvent.queueAskBoolean(
                             prompt:'Smith with ' + ore.base.name + '?',
                             onChoice::(which) {
-                            
-                            }
-                        )) empty;
-                        
-                        
-                        @:canMake = smith.getCanMake();
-                        windowEvent.queueChoices(
-                            prompt:smith.name + ' - "Here\'s what I can make:"',
-                            choices: canMake,
-                            canCancel: true,
-                            onChoice::(choice) {
-                                when(choice == 0) empty;
+                                when(which == false) empty;
 
-                                party.addGoldAnimated(
-                                    amount:-300,
-                                    onDone ::{
-                                        @:output = Item.new(
-                                            base:Item.database.find(id:canMake[choice-1]),
-                                            materialHint: ore.base.name->split(token:' ')[0]
-                                        );
-                                        
-                                        windowEvent.queueMessage(
-                                            speaker: smith.name,
-                                            text: 'No problem!'
-                                        );
-                                        
-                                        windowEvent.queueMessage(
-                                            text:smith.name + ' forged a ' + output.name
-                                        );
-                                        
-                                        windowEvent.queueCustom(
-                                            onEnter ::{
-                                                party.inventory.remove(item:ore);
-                                                party.inventory.add(item:output);                                                                                                        
-                                            }
-                                        );                                     
-                                    }                                    
-                                );                            
+                                @:canMake = smith.getCanMake();
+                                @:canMakeNames = [...canMake]->map(to:::(value) <- Item.database.find(id:value).name);
+                                windowEvent.queueChoices(
+                                    prompt:smith.name + ' - "Here\'s what I can make:"',
+                                    choices: canMakeNames,
+                                    canCancel: true,
+                                    onChoice::(choice) {
+                                        when(choice == 0) empty;
+
+                                        when (party.isMember(entity:smith)) 
+                                            smithingDo(ingot:ore, item:canMake[choice-1]);
+                                        party.addGoldAnimated(
+                                            amount:-300,
+                                            onDone ::{
+                                                smithingDo(ingot:ore, item:canMake[choice-1]);                   
+                                            }                                    
+                                        );                            
+                                    }
+                                )
                             }
                         )
                     }
@@ -1100,49 +1139,70 @@ Interaction.newEntry(
 
         
             @:smiths = party.members->filter(by:::(value) <- value.profession.base.id == 'base:blacksmith');
-            if (smiths->keycount == 0) ::<= {
-                windowEvent.queueMessage(text:'No one in your party can work the forge (no one is a Blacksmith)');
 
-                @:world = import(module:'game_singleton.world.mt');
-                when (world.time < world.TIME.MORNING || world.time > world.TIME.EVENING)                            
-                    windowEvent.queueMessage(text:'The blacksmith here would normally be able to forge for you, but the blacksmith is gone for the night.');
-
-                windowEvent.queueMessage(text:'The blacksmith offers to work the forge for you.');
-
-
+            @:choosePartySmith ::{
+                @hasHammer = [...party.members]->filter(
+                    by:::(value) <- value.getEquipped(
+                        slot:Entity.EQUIP_SLOTS.HAND_LR
+                    ).base.id == 'base:smithing-hammer'
+                );
+                
                 windowEvent.queueAskBoolean(
-                    prompt: 'Hire to forge for 300G?',
+                    prompt: 'Have a party member work the forge?',
                     onChoice::(which) {
+                        breakpoint();
                         when(which == false) empty;
-                        when(party.inventory.gold < 300)
-                            windowEvent.queueMessage(text:'The party cannot afford to pay the blacksmith.');
-                        
-                        smith = location.ownedBy;
-                        charge = true;
-                        smithingInAction();
+
+                        when(hasHammer->size == 0)
+                            windowEvent.queueMessage(
+                                text: 'No one in the party has a Smithing Hammer equipped. Working the forge requies a Smithing Hammer in hand.'
+                            );
+
+                        @:hammerNames = [...hasHammer]->map(to:::(value) <- value.name);
+                        windowEvent.queueChoices(
+                            prompt: 'Who should work the forge?',
+                            choices: hammerNames,
+                            canCancel: true,
+                            onChoice::(choice) {
+                                when(choice == 0) empty;
+
+                                smith = hasHammer[choice-1];
+                                smithingInAction();
+                            
+                            }
+                        );                          
                     }
                 );
-            } else ::<= {                            
-                @:names = [...smiths]->map(to:::(value) <- value.name);
-                
-                windowEvent.queueChoices(
-                    prompt: 'Who should work the forge?',
-                    choices: names,
-                    canCancel: true,
-                    onChoice::(choice) {
-                        when(choice == 0) empty;
-                        @:hammer = smiths[choice-1].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
-                        when (hammer == empty || hammer.base.id != 'base:smithing-hammer')
-                            windowEvent.queueMessage(text:'Smithing requires a Smithing Hammer to be equipped.');
+            };
+
+            if (smiths->keycount == 0) ::<= {
+                windowEvent.queueMessage(text:'No one in your party can professionally work the forge (no one is a Blacksmith)');
+
+                @:world = import(module:'game_singleton.world.mt');
+                if (world.time < world.TIME.MORNING || world.time > world.TIME.EVENING) ::<= {
+                    windowEvent.queueMessage(text:'The Blacksmith here would normally be able to forge for you, but the blacksmith is gone for the night.');
+                    choosePartySmith();
+                } else ::<= {
+                    windowEvent.queueMessage(text:'The Blacksmith offers to work the forge for you.');
+                    windowEvent.queueMessage(text:'While you don\'t have a Blacksmith, it is common for most folk to be able to use a forge for some items. Typically, Blacksmiths are preferred because of their larger amount of expertise and knowledge working the forge.');
 
 
-                        smith = smiths[choice-1];
-                        smithingInAction();
-                    
-                    }
-                );         
+                    windowEvent.queueAskBoolean(
+                        prompt: 'Hire Blacksmith to forge for 300G?',
+                        onChoice::(which) {
+                            when(which == false) choosePartySmith();
+                            when(party.inventory.gold < 300)
+                                windowEvent.queueMessage(text:'The party cannot afford to pay the Blacksmith.');
+                            
+                            smith = location.ownedBy;
+                            charge = true;
+                            smithingInAction();
+                        }
+                    );
+                }
+            } else ::<= {
+                choosePartySmith();            
             }
-
             
         },
         
@@ -1203,6 +1263,42 @@ Interaction.newEntry(
         },
     }
 )
+
+Interaction.newEntry(
+    data : {
+        name : 'Warp to ???',
+        id :  'base:warp-floor',
+        keepInteractionMenu : false,
+        onInteract ::(location, party) {
+            when(location.modData.warpPoint == empty)
+                windowEvent.queueMessage(
+                    text: 'The warp column doesn\'t seem active.'
+                );
+            
+            windowEvent.queueMessage(
+                renderable : {
+                    render :: {
+                        canvas.blackout();
+                    }
+                },
+                text: 'The party was teleported elsewhere on the floor.'
+            );
+            
+            @:warp = [...location.landmark.locations]->filter(by::(value) <- value.worldID == location.modData.warpPoint)[0]
+            
+            when(warp == empty)
+                windowEvent.queueMessage(
+                    text: 'The warp column doesn\'t seem active.'
+                );
+            
+            location.landmark.map.setPointer(
+                x:warp.x,
+                y:warp.y
+            );
+        },
+    }
+)      
+    
     
 // specifically for exploring different areas of dungeons.
 Interaction.newEntry(
@@ -1546,7 +1642,7 @@ Interaction.newEntry(
                     base:Item.database.getRandomFiltered(
                         filter:::(value) <- (
                             value.isUnique == false &&
-                            value.attributes & Item.ATTRIBUTE.WEAPON
+                            value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
                         )
                     )
                 )                    
@@ -2328,7 +2424,7 @@ Interaction.newEntry(
                 
                 windowEvent.queueMessage(speaker: 'Sylvia', text: '"Here! Thanks again."');
                 item = Item.database.getRandomFiltered(filter:::(value) <- 
-                    value.attributes & Item.ATTRIBUTE.WEAPON &&
+                    value.attributes & Item.database.statics.ATTRIBUTE.WEAPON &&
                     !value.isUnique
                 );
               },
@@ -2343,9 +2439,9 @@ Interaction.newEntry(
                 
                 windowEvent.queueMessage(speaker: 'Sylvia', text: '"Here! Thanks again."');
                 item = Item.database.getRandomFiltered(filter:::(value) <- 
-                    (value.attributes & Item.ATTRIBUTE.WEAPON ||
-                     value.equipType == Item.TYPE.RING ||
-                     value.equipType == Item.TYPE.TRINKET) &&
+                    (value.attributes & Item.database.statics.ATTRIBUTE.WEAPON ||
+                     value.equipType == Item.database.statics.TYPE.RING ||
+                     value.equipType == Item.database.statics.TYPE.TRINKET) &&
                     value.isUnique
                 );
               }                        

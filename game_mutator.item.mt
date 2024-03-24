@@ -52,14 +52,14 @@
 }
     
 @:ATTRIBUTE = {
-    BLUNT     : 0x1,
-    SHARP     : 0x10,
-    FLAT      : 0x100,
-    SHIELD    : 0x1000,
-    METAL     : 0x10000,
-    FRAGILE   : 0x100000,
-    WEAPON    : 0x1000000,
-    RAW_METAL : 0x10000000
+    BLUNT     : 1,
+    SHARP     : 2,
+    FLAT      : 4,
+    SHIELD    : 8,
+    METAL     : 16,
+    FRAGILE   : 32,
+    WEAPON    : 64,
+    RAW_METAL : 128
 }
 
 @:USE_TARGET_HINT = {
@@ -1007,7 +1007,7 @@ Item.database.newEntry(data : {
 })    
 
 Item.database.newEntry(data : {
-    name : "Dual Blades",
+    name : "Blade Pair",
     id : 'base:dual-blades',
     description: 'A pair of short blades. The hilts have a $color$ trim with a $design$ design.',
     examine : '.',
@@ -2504,7 +2504,9 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, creationHint) {}
+    onCreate ::(item, creationHint) {
+        item.modData.RAW_MATERIAL = 'base:copper';
+    }
 
 })      
 
@@ -2548,7 +2550,9 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, creationHint) {}
+    onCreate ::(item, creationHint) {
+        item.modData.RAW_MATERIAL = 'base:iron';
+    }
 
 })   
 
@@ -2590,7 +2594,9 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, creationHint) {}
+    onCreate ::(item, creationHint) {
+        item.modData.RAW_MATERIAL = 'base:steel';
+    }
 
 })      
 
@@ -2634,7 +2640,9 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, creationHint) {}
+    onCreate ::(item, creationHint) {
+        item.modData.RAW_MATERIAL = 'base:mythril';
+    }
 
 })   
 
@@ -2676,7 +2684,9 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, creationHint) {}
+    onCreate ::(item, creationHint) {
+        item.modData.RAW_MATERIAL = 'base:quicksilver';
+    }
 
 })   
 
@@ -2718,7 +2728,9 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, creationHint) {}
+    onCreate ::(item, creationHint) {
+        item.modData.RAW_MATERIAL = 'base:adamantine';
+    }
 
 }) 
 
@@ -2761,7 +2773,9 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, creationHint) {}
+    onCreate ::(item, creationHint) {
+        item.modData.RAW_MATERIAL = 'base:sunstone';
+    }
 
 }) 
 
@@ -2803,7 +2817,9 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, creationHint) {}
+    onCreate ::(item, creationHint) {
+        item.modData.RAW_MATERIAL = 'base:moonstone';
+    }
 
 }) 
 
@@ -2845,14 +2861,16 @@ Item.database.newEntry(data : {
         ATTRIBUTE.SHARP |
         ATTRIBUTE.RAW_METAL
     ,
-    onCreate ::(item, creationHint) {}
+    onCreate ::(item, creationHint) {
+        item.modData.RAW_MATERIAL = 'base:dragonglass';
+    }
 
 }) 
 Item.database.newEntry(data : {
     name : "Ore",
     id : 'base:ore',
     description: "Raw ore. It's hard to tell exactly what kind of metal it is.",
-    examine : 'Could be smelted into',
+    examine : 'Could be smelted into...',
     equipType: TYPE.TWOHANDED,
     hasSize : false,
     rarity : 100,
@@ -3152,13 +3170,7 @@ Item.database.newEntry(data : {
 
 
 @:Item = databaseItemMutatorClass(
-    name : 'Wyvern.Item',
-    statics : {
-        TYPE :{get::<- TYPE},
-        ATTRIBUTE : {get::<-ATTRIBUTE},
-        USE_TARGET_HINT : {get::<-USE_TARGET_HINT}
-    },
-    
+    name : 'Wyvern.Item',    
     items : {
         base : empty,
         enchants : empty, // ItemMod
@@ -3190,6 +3202,12 @@ Item.database.newEntry(data : {
     
     database : Database.new(
         name: 'Wyvern.Item.Base',
+        statics : {
+            TYPE : TYPE,
+            ATTRIBUTE : ATTRIBUTE,
+            USE_TARGET_HINT : USE_TARGET_HINT
+        },
+        
         attributes : {
             name : String,
             id : String,
