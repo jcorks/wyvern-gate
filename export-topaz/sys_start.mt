@@ -160,7 +160,7 @@ return ::(terminal, arg, onDone) {
                     Topaz.Resources.removeAsset(asset);
                     when (data == '') empty;
                 });
-                return data;
+                return if (data == empty || data == '') empty else data;
             },
             onSaveSettings ::(data) {
                 enterLocation(location:SAVEPATH, action::{                
