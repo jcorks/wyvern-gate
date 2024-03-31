@@ -59,25 +59,29 @@ return ::(
         get ::<- database
     };
     items.base = empty;
+
+    
+    @:defaultLoad = interface.defaultLoad;
+    interface.defaultLoad = ::(*args) {
+        @:$ = args.$;
+        $.state.base = args.base;
+        if (defaultLoad != empty) ::<= {
+            $.defaultLoad = defaultLoad;
+            $.defaultLoad(*args)
+        }
+    }
+
+    interface.base = {
+        get ::($) <- $.state.base
+    }   
+
     
     @:c = LoadableClass.create(
         name,
         items,
         statics:staticsOut,
-        define ::(this, state) {
-            define(this, state);
-
-            @:defaultLoad = this.interface.defaultLoad;
-            this.interface.defaultLoad = ::(*args) {
-                state.base = args.base;
-                if (defaultLoad != empty)
-                    defaultLoad(*args)
-            }
-
-            this.interface.base = {
-                get ::<- state.base
-            }                
-        }
+        constructor,
+        interface: interface
     )
     return c;
 }
