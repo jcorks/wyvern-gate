@@ -12,6 +12,70 @@
 @:AGGRESSIVE_DISTANCE = 5;
 
 
+
+@:addEntity ::(map, landmark, island, state) {
+    @:Entity = import(module:'game_class.entity.mt');
+    @:windowEvent = import(module:'game_singleton.windowevent.mt');
+
+    @ar = map.getRandomArea();;
+    @:tileX = ar.x + (ar.width /2)->floor;
+    @:tileY = ar.y + (ar.height/2)->floor;
+    
+    // only add an entity when not visible. Makes it 
+    // feel more alive and unknown
+    when (map.isLocationVisible(x:tileX, y:tileY)) empty;
+    
+    state.hasBeast = false;
+
+
+    @:beast = island.newInhabitant();
+    beast.name = 'the Treasure Golem';
+    beast.species = Species.find(id:'base:treasure-golem');
+    beast.profession = Profession.new(base:Profession.database.find(id:'base:treasure-golem'));               
+    @:inv = Inventory.new();
+    inv.addGold(amount:900 + (Number.random()*200)->floor);
+    beast.forceDrop = inv;
+    beast.clearAbilities();
+    foreach(beast.profession.gainSP(amount:10))::(i, ability) {
+        beast.learnAbility(id:ability);
+    }
+
+    beast.stats.load(serialized:StatSet.new(
+        HP:   60,
+        AP:   20,
+        ATK:  24,
+        INT:  5,
+        DEF:  20,
+        LUK:  6,
+        SPD:  1,
+        DEX:  1
+    ).save());
+    
+    beast.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+    beast.heal(amount:9999, silent:true); 
+    beast.healAP(amount:9999, silent:true);     
+
+    
+    // who knows whos down here. Can be anything and anyone, regardless of 
+    // the inhabitants of the island.
+    @ents = [beast]
+
+    state.encountersOnFloor += 1;
+
+    @:ref = landmark.mapEntityController.add(
+        x:tileX, 
+        y:tileY, 
+        symbol:'$',
+        entities : ents,
+        tag : 'treasuregolem'
+    );
+    ref.addUpkeepTask(id:'base:aggressive-slow');
+    
+}
+
+
+
+
 @:TheBeast = LoadableClass.create(
     name: 'Wyvern.LandmarkEvent.TreasureGolem',
     items : {
@@ -19,101 +83,35 @@
         hasBeast : false
     },
     
-    define:::(this, state) {
-        @map_;
-        @island_;
-        @landmark_;
-
-        @:Entity = import(module:'game_class.entity.mt');
-        @:Location = import(module:'game_mutator.location.mt');
-
-    
-    
-        @:addEntity ::{
-            @:windowEvent = import(module:'game_singleton.windowevent.mt');
-
-            @ar = map_.getRandomArea();;
-            @:tileX = ar.x + (ar.width /2)->floor;
-            @:tileY = ar.y + (ar.height/2)->floor;
-            
-            // only add an entity when not visible. Makes it 
-            // feel more alive and unknown
-            when (map_.isLocationVisible(x:tileX, y:tileY)) empty;
-            
-            state.hasBeast = false;
-
-
-            @:beast = island_.newInhabitant();
-            beast.name = 'the Treasure Golem';
-            beast.species = Species.find(id:'base:treasure-golem');
-            beast.profession = Profession.new(base:Profession.database.find(id:'base:treasure-golem'));               
-            @:inv = Inventory.new();
-            inv.addGold(amount:900 + (Number.random()*200)->floor);
-            beast.forceDrop = inv;
-            beast.clearAbilities();
-            foreach(beast.profession.gainSP(amount:10))::(i, ability) {
-                beast.learnAbility(id:ability);
-            }
-
-            beast.stats.load(serialized:StatSet.new(
-                HP:   60,
-                AP:   20,
-                ATK:  24,
-                INT:  5,
-                DEF:  20,
-                LUK:  6,
-                SPD:  1,
-                DEX:  1
-            ).save());
-            
-            beast.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
-            beast.heal(amount:9999, silent:true); 
-            beast.healAP(amount:9999, silent:true);     
-
-            
-            // who knows whos down here. Can be anything and anyone, regardless of 
-            // the inhabitants of the island.
-            @ents = [beast]
-   
-            state.encountersOnFloor += 1;
-
-            @:ref = landmark_.mapEntityController.add(
-                x:tileX, 
-                y:tileY, 
-                symbol:'$',
-                entities : ents,
-                tag : 'treasuregolem'
-            );
-            ref.addUpkeepTask(id:'base:aggressive-slow');
-            
-        }
+    interface : {
+        initialize::(parent) {
+            @landmark = parent.landmark;
+            _.map = landmark.map;
+            _.island = landmark.island;
+            _.landmark = landmark;
+        },
         
-
-    
-        this.interface = {
-            initialize::(parent) {
-                @landmark = parent.landmark;
-                map_ = landmark.map;
-                island_ = landmark.island;
-                landmark_ = landmark;
-            },
-            
-            defaultLoad::{
-                state.hasBeast = if (landmark_.floor > 1 && random.try(percentSuccess:15))
-                    true
-                else 
-                    false
-                ;
-            },
-            
-            step::{
-                @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'treasuregolem');
-            
-                // add additional entities out of spawn points (stairs)
-                //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && Number.random() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
-                if (entities->keycount < 1 && state.hasBeast) ::<= {
-                    addEntity();
-                }
+        defaultLoad::{
+            state.hasBeast = if (_.landmark.floor > 1 && random.try(percentSuccess:15))
+                true
+            else 
+                false
+            ;
+        },
+        
+        step::{
+            @:state = _.state;
+            @:entities = _.landmark.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'treasuregolem');
+        
+            // add additional entities out of spawn points (stairs)
+            //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && Number.random() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
+            if (entities->keycount < 1 && state.hasBeast) ::<= {
+                addEntity(
+                    map: _.map,
+                    landmark: _.landmark,
+                    island: _.island,
+                    state
+                );
             }
         }
     }

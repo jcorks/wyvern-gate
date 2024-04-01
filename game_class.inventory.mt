@@ -31,8 +31,8 @@
         initialize ::{
         },
         
-        defaultLoad::($, size) {
-            @:state = $.state;
+        defaultLoad::(size) {
+            @:state = _.state;
             state.maxItems = 10;
             if (size != empty)
                 this.maxItems = size;                        
@@ -40,8 +40,8 @@
             state.gold = 0;
         },
         
-        add::($, item) {
-            @:state = $.state;
+        add::(item) {
+            @:state = _.state;
             when (item.base.id == 'base:none') false; // never accept None as a real item
             when (state.items->keycount == state.maxItems) false;
             state.items->push(value:item);
@@ -49,8 +49,8 @@
             return true;
         },
         
-        clone::($) {
-            @:state = $.state;
+        clone:: {
+            @:state = _.state;
             @:out = Inventory.new();
             out.maxItems = state.maxItems;
             foreach(state.items) ::(k, item) {
@@ -60,8 +60,8 @@
             return out;
         },
         
-        remove::($, item) {
-            @:state = $.state;
+        remove::(item) {
+            @:state = _.state;
             @:index = state.items->findIndex(value:item);
             when(index == -1) empty;
             
@@ -70,8 +70,8 @@
             return item;
         },
         
-        removeByID::($, id) {
-            @:state = $.state;
+        removeByID::(id) {
+            @:state = _.state;
             {:::} {
                 foreach(state.items)::(i, item) {
                     if (item.base.id == id) ::<= {
@@ -83,52 +83,52 @@
         },
         
         maxItems : {
-            set ::($, value) {
-                @:state = $.state;
+            set ::(value) {
+                @:state = _.state;
                 state.maxItems = value;
             },
             
-            get ::($)<- $.state.maxItems
+            get ::<- _.state.maxItems
         },
         
         gold : {
-            get ::($)<- $.state.gold,
+            get ::<- _.state.gold,
         },
         
-        addGold::($, amount) {
-            $.state.gold += amount;
+        addGold::(amount) {
+            _.state.gold += amount;
         },
         
-        subtractGold::($, amount) {
-            @:state = $.state;
+        subtractGold::(amount) {
+            @:state = _.state;
             when(state.gold < amount) false;
             state.gold -= amount;
             return true;
         },
-        clear ::($) {
-            $.state.items = [];
+        clear :: {
+            _.state.items = [];
         },
         
         items : {
-            get ::($) {
-                return $.state.items;
+            get :: {
+                return _.state.items;
             }
         },
         
         isEmpty : {
-            get ::($)<- $.state.items->keycount == 0
+            get ::<- _.state.items->keycount == 0
         },
         
         isFull : {
-            get ::($) <- $.state.items->keycount >= $.state.maxItems
+            get :: <- _.state.items->keycount >= $.state.maxItems
         },
         
         slotsLeft : {
-            get ::($)<- $.state.maxItems - $.state.items->keycount
+            get ::<- _.state.maxItems - _.state.items->keycount
         },
         
-        afterLoad ::($){
-            @:state = $.state;             
+        afterLoad ::{
+            @:state = _.state;             
             foreach(state.items) ::(k, item) {
                 item.container = this;                
             }

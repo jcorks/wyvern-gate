@@ -17,7 +17,7 @@
 */
 
 
-// A ligher implementation of classes that 
+// A lighter implementation of classes that 
 // uses dynamic binding to reduce copies of objects.
 
 @:lclass = ::<= {
@@ -52,7 +52,7 @@
     
 
 
-    return ::(name => String, statics, inherits, constructor, interface) {
+    return ::(name => String, statics, inherits, constructor, interface => Object) {
 
         @:type = if (inherits == empty)
             Object.newType(name)

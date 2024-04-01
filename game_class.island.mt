@@ -15,7 +15,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-@:class = import(module:'Matte.Core.Class');
 @:random = import(module:'game_singleton.random.mt');
 @:NameGen = import(module:'game_singleton.namegen.mt');
 @:Species = import(module:'game_database.species.mt');
@@ -62,9 +61,7 @@
 
 
 // augments an entity based on the current tier
-@:augmentTiered = ::($, entity) {
-    @:state = $.state;
-    @:this = $.this;
+@:augmentTiered = ::(this, state, entity) {
     match(state.tier) {
       (0):::<= {
         entity.capHP(max:11);
@@ -231,7 +228,7 @@
 @:Island = LoadableClass.create(
     name: 'Wyvern.Island',
     statics : {
-        CLIMATE : {get::<-CLIMATE},
+        CLIMATE : CLIMATE,
         
         climateToString::(climate) {
             return match(climate) {
@@ -311,11 +308,11 @@
     
     
     interface : 
-        initialize::($) { 
+        initialize:: { 
         },
 
-        wait::($, until) {       
-            @:this = $.this;
+        wait::(until) {       
+            @:this = _.this;
             @:world = import(module:'game_singleton.world.mt');
             {:::} {
                 forever ::{
@@ -332,9 +329,9 @@
 
         },
             
-        defaultLoad::($, levelHint, nameHint, tierHint, landmarksHint, sizeWHint, sizeHHint, possibleEventsHint, extraLandmarks) {
-            @:state = $.state;
-            @:this = $.this;
+        defaultLoad::(levelHint, nameHint, tierHint, landmarksHint, sizeWHint, sizeHHint, possibleEventsHint, extraLandmarks) {
+            @:state = _.state;
+            @:this  = _.this;
             
             @:world = import(module:'game_singleton.world.mt');
 
@@ -430,26 +427,26 @@
             return this;
         },
 
-        save ::($){
+        save ::{
             @:world = import(module:'game_singleton.world.mt');
-            world.addLoadableIsland(island:$.this);
-            return $.state.save();
+            world.addLoadableIsland(island:_.this);
+            return _.state.save();
         },
-        load ::($, serialized) {
+        load ::(serialized) {
             @:world = import(module:'game_singleton.world.mt');
-            $.state.load(parent:this, serialized);
-            world.addLoadableIsland(island:$.this);
+            _.state.load(parent:this, serialized);
+            world.addLoadableIsland(island:_.this);
         },
             
         name : {
             get :: {
-                return $.state.name;
+                return _.state.name;
             }
         }, 
             
         description : {
-            get ::($) {
-                @:state = $.state;
+            get :: {
+                @:state = _.state;
                 @out = 'A ' + Island.climateToString(climate:state.climate) + ' island, ' + state.name + ' is mostly populated by people of ' + state.species[0].species + ' and ' + state.species[1].species + ' descent. ';//The island is known for its ' + professions[0].profession.name + 's and ' + professions[1].profession.name + 's.\n';
                 //out = out + this.class.describeEncounterRate(rate:encounterRate) + '\n';
                 //out = out + '(Level range: ' + levelMin + ' - ' + levelMax + ')' + '\n\n';
@@ -468,27 +465,27 @@
         },
             
         worldID : {
-            get ::($)<- $.state.worldID
+            get ::<- _.state.worldID
         },
             
         sizeW : {
-            get ::($)<- $.state.sizeW
+            get ::<- _.state.sizeW
         },
         sizeH : {
-            get ::($)<- $.state.sizeH
+            get ::<- _.state.sizeH
         },
             
         tier : {
-            set ::($, value) <- $.state.tier = value,
-            get ::($) <- $.state.tier
+            set ::(value) <- _.state.tier = value,
+            get :: <- _.state.tier
         },
             
         map : {
-            get::($) <- $.state.map
+            get:: <- _.state.map
         },
             
-        incrementTime::($) {
-            @:state = $.state;
+        incrementTime:: {
+            @:state = _.state;
         
             @:world = import(module:'game_singleton.world.mt');
             world.stepTime(); 
@@ -503,9 +500,9 @@
             }
         },
             
-        findLocation ::($, id) {
+        findLocation ::(id) {
             return {:::} {
-                foreach($.state.map.getAllItemData())::(i, landmark) {
+                foreach(_.state.map.getAllItemData())::(i, landmark) {
                     foreach(landmark.locations)::(n, location) {
                         when(location.worldID == id)
                             send(message:location);
@@ -514,8 +511,8 @@
             }
         },
             
-        takeStep ::($) {
-            @:state = $.state;            
+        takeStep :: {
+            @:state = _.state;            
             state.stepsSinceLastEvent += 1;        
             
             when(state.possibleEvents->size == 0) empty;
@@ -535,8 +532,8 @@
             }    
         },
             
-        newLandmark ::($, base, x, y, floorHint) {
-            @:state = $.state;
+        newLandmark ::(base, x, y, floorHint) {
+            @:state = _.state;
             @landmark = Landmark.new(
                 base:base,
                 parent:state.map,
@@ -551,16 +548,16 @@
             return landmark;
         },
             
-        addEvent::($, event) {
-            $.state.events->push(value:event);
+        addEvent::(event) {
+            _.state.events->push(value:event);
         },
             
         events : {
-            get ::($) <- $.state.events
+            get ::<- _.state.events
         },
                                     
-        newInhabitant ::($, professionHint, levelHint, speciesHint) {
-            @:state = $.state;
+        newInhabitant ::(professionHint, levelHint, speciesHint) {
+            @:state = _.state;
             @:out = Entity.new(
                 island: this,
                 speciesHint:    if (speciesHint == empty) random.pickArrayItemWeighted(list:state.species).species else speciesHint,
@@ -568,18 +565,18 @@
                 professionHint: if (professionHint == empty) Profession.database.getRandomFiltered(filter::(value)<-value.learnable).id else professionHint
             );
             
-            augmentTiered(entity:out);
+            augmentTiered(this:_.this, state, entity:out);
             
             return out;
         },
             
             
         species : {
-            get ::($) <- [...$.state.species]->map(to:::(value) <- value.species)
+            get :: <- [..._.state.species]->map(to:::(value) <- value.species)
         },
             
-        newAggressor ::($, levelMaxHint) {            
-            @:state = $.state;
+        newAggressor ::(levelMaxHint) {            
+            @:state = _.state;
             @levelHint = random.integer(from:state.levelMin, to:if(levelMaxHint == empty) state.levelMax else levelMaxHint);
             @:angy =  Entity.new(
                 island: this,
@@ -588,12 +585,12 @@
                 professionHint: Profession.database.getRandomFiltered(filter::(value)<-value.learnable).id
             );       
             
-            augmentTiered(entity:angy);                       
+            augmentTiered(this:_.this, state, entity:angy);                       
             return angy;  
         },
 
-        newHostileCreature ::($, levelMaxHint) {
-            @:state = $.state;
+        newHostileCreature ::(levelMaxHint) {
+            @:state = _.state;
             @levelHint = random.integer(from:state.levelMin, to:if(levelMaxHint == empty) state.levelMax else levelMaxHint);
             @:angy =  Entity.new(
                 island: this,
@@ -608,19 +605,19 @@
         },
 
             
-        getLandmarkIndex ::($, landmark => Landmark.type) {
-            return $.state.map.getAllItemData()->findIndex(value:landmark);
+        getLandmarkIndex ::(landmark => Landmark.type) {
+            return _.state.map.getAllItemData()->findIndex(value:landmark);
         },
             
         landmarks : {
-            get ::($)<- $.state.map.getAllItemData()
+            get ::<- _.state.map.getAllItemData()
         },
             
         levelMin : {
-            get ::($)<- $.state.levelMin
+            get ::<- _.state.levelMin
         },
         levelMax : {
-            get ::($)<- $.state.levelMax
+            get ::<- _.state.levelMax
         },
         
         world : {

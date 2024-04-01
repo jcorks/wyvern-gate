@@ -8,6 +8,43 @@
 
 
 
+    
+    
+@:addEntity ::(landmark, island, map, state) {
+    @:windowEvent = import(module:'game_singleton.windowevent.mt');
+
+    @ar = map.getRandomArea();;
+    @:tileX = ar.x + (ar.width /2)->floor;
+    @:tileY = ar.y + (ar.height/2)->floor;
+    
+    // only add an entity when not visible. Makes it 
+    // feel more alive and unknown
+    when (map.isLocationVisible(x:tileX, y:tileY)) empty;
+    
+
+    @beast = TheSnakeSiren.createEntity();
+    state.hasBeast = false;
+
+    
+    // who knows whos down here. Can be anything and anyone, regardless of 
+    // the inhabitants of the island.
+    @ents = [beast]
+
+    encountersOnFloor += 1;
+
+    @:ref = landmark.mapEntityController.add(
+        x:tileX, 
+        y:tileY, 
+        symbol:'S',
+        entities : ents,
+        tag : 'thesnakesiren'
+    );
+    ref.addUpkeepTask(id:'base:thesnakesiren-roam');
+    ref.addUpkeepTask(id:'base:thesnakesiren-song');
+    ref.addUpkeepTask(id:'base:aggressive');
+    
+
+}
 
 
 @:TheSnakeSiren = LoadableClass.create(
@@ -48,73 +85,33 @@
         }
     },
 
-    define:::(this, state) {
-        @map_;
-        @island_;
-        @landmark_;
-        @encountersOnFloor = 0;
-        @hasBeast = false;
+    constructor ::{
+        _.encountersOnFloor = 0;
+        _.hasBeast = false;
+    },
 
-        @:Entity = import(module:'game_class.entity.mt');
-        @:Location = import(module:'game_mutator.location.mt');
-
-    
-    
-        @:addEntity ::{
-            @:windowEvent = import(module:'game_singleton.windowevent.mt');
-
-            @ar = map_.getRandomArea();;
-            @:tileX = ar.x + (ar.width /2)->floor;
-            @:tileY = ar.y + (ar.height/2)->floor;
-            
-            // only add an entity when not visible. Makes it 
-            // feel more alive and unknown
-            when (map_.isLocationVisible(x:tileX, y:tileY)) empty;
-            
-
-            @beast = TheSnakeSiren.createEntity();
-            state.hasBeast = false;
-
-            
-            // who knows whos down here. Can be anything and anyone, regardless of 
-            // the inhabitants of the island.
-            @ents = [beast]
-   
-            encountersOnFloor += 1;
-
-            @:ref = landmark_.mapEntityController.add(
-                x:tileX, 
-                y:tileY, 
-                symbol:'S',
-                entities : ents,
-                tag : 'thesnakesiren'
-            );
-            ref.addUpkeepTask(id:'base:thesnakesiren-roam');
-            ref.addUpkeepTask(id:'base:thesnakesiren-song');
-            ref.addUpkeepTask(id:'base:aggressive');
-            
-
-        }
+    interface : {
+        initialize::(parent) {
+            @landmark = parent.landmark;
+            _.map = landmark.map;
+            _.island = landmark.island;
+            _.landmark = landmark;
+        },
         
-
-    
-        this.interface = {
-            initialize::(parent) {
-                @landmark = parent.landmark;
-                map_ = landmark.map;
-                island_ = landmark.island;
-                landmark_ = landmark;
-            },
-            
-            defaultLoad ::{
-                state.hasBeast = true;            
-            },
-            
-            step::{
-                @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'thesnakesiren');
-                if (random.try(percentSuccess:30) == true && state.hasBeast) ::<= {
-                    addEntity();
-                }
+        defaultLoad ::{
+            _.state.hasBeast = true;            
+        },
+        
+        step::{
+            @:state = _.state;
+            @:entities = _.landmark.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'thesnakesiren');
+            if (random.try(percentSuccess:30) == true && state.hasBeast) ::<= {
+                addEntity(
+                    map: _.map,
+                    landmark: _.landmark,
+                    island: _.island,
+                    state
+                );
             }
         }
     }

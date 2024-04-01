@@ -15,160 +15,150 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-@:class = import(module:'Matte.Core.Class');
+@:lclass = import(module:'Matte.Core.Class');
 @:Random = import(module:'game_singleton.random.mt');
 
 @:Item2Database = {};
 @:LOOKUP = {};
 @:ItemType = Object.newType(name:'Wyvern.Database.Item');
 
-@:Database = class(
+@:databaseNameGetter = {
+    get ::<- name_
+};
+
+
+@:Database = lclass(
     name : 'Wyvern.Database',
     statics : {
-        Lookup : {
-            get::<-LOOKUP
-        },
-        ItemType : {
-            get ::<- ItemType
-        },
-        
+        Lookup : LOOKUP
+        ItemType : ItemType        
         reset :: {
             foreach(LOOKUP) ::(name, database) {
                 database.reset();
             }
         }
     },
-    define:::(this) {
-        @items_ = {}
-        @name_;
-        @attributes_;
-        @reset_;
-        @statics_;
-        @:databaseNameGetter = {
-            get ::<- name_
-        };
-        this.constructor = ::(attributes, name => String, reset => Function, statics) {
-            LOOKUP[name] = this;
-            name_ = name;
-            attributes_ = attributes;
-            reset_ = reset;
-            statics_ = statics;
-        };
 
-        @:interface = {
-            
-            attributes : {
-                get::<- attributes_
-            },
-            name : {
-                get ::<- name_
-            },
-            reset :: {
-                items_ = {};
-                reset_();
-            },            
-            newEntry ::(data) {
-                // preflight                            
-                @:item = Object.instantiate(type:ItemType);
+    constructor::(attributes, name => String, reset => Function, statics) {
+        LOOKUP[name] = this;
+        _.name = name;
+        _.attributes = attributes;
+        _.reset = reset;
+        _.statics = statics;
+        _.items = {};
+    };
 
-                foreach(attributes_) ::(key, typ) {
-                    @val = data[key];
-                    when(val == empty)
-                        error(detail:'Internal error: database item is missing property ' + key);
+    interface = {
 
-                    when(key->type != String)
-                        error(detail:'Internal error: database attribute property key isnt a string!');
-                        
-                    when(typ->type != Type)
-                        error(detail:'Internal error: database attribute property isnt a type!');
+        attributes : {
+            get::<- _.attributes
+        },
+        name : {
+            get ::<- _.name
+        },
+        reset :: {
+            _.items = {};
+            _.reset();
+        },            
+        newEntry ::(data) {
+            // preflight                            
+            @:item = Object.instantiate(type:ItemType);
 
-                    when(typ != val->type)
-                        error(detail:'Internal error: database item property should be of type ' + attributes_[key] + ', but received item of type ' + val->type);
+            foreach(_.attributes) ::(key, typ) {
+                @val = data[key];
+                when(val == empty)
+                    error(detail:'Internal error: database item is missing property ' + key);
 
+                when(key->type != String)
+                    error(detail:'Internal error: database attribute property key isnt a string!');
                     
-                    if (typ == Function)
-                        item[key] = val
-                    else 
-                        item[key] = {get::<-val}
-                }                         
-                item.databaseName = databaseNameGetter;
-                item->setIsInterface(enabled:true);
-                
-                items_[item.id] = item;
-            },
+                when(typ->type != Type)
+                    error(detail:'Internal error: database attribute property isnt a type!');
 
-            remove ::(id) {
-                items_->remove(key:id);
-            },
+                when(typ != val->type)
+                    error(detail:'Internal error: database item property should be of type ' + attributes_[key] + ', but received item of type ' + val->type);
+
+                
+                if (typ == Function)
+                    item[key] = val
+                else 
+                    item[key] = {get::<-val}
+            }                         
+            item.databaseName = databaseNameGetter;
+            item->setIsInterface(enabled:true);
+            
+            items_[item.id] = item;
+        },
+
+        remove ::(id) {
+            _.items->remove(key:id);
+        },
+    
+        find ::(id) {
+            @:item = _.items[id];
+            when(item == empty) error(detail: 'Unknown database item ID ' + id);
+            return item;
+        },
         
-            find ::(id) {
-                @:item = items_[id];
-                when(item == empty) error(detail: 'Unknown database item ID ' + id);
-                return item;
-            },
-            
-            getRandom :: {
-                return Random.pickTableItem(table:items_);
-            },
+        getRandom :: {
+            return Random.pickTableItem(table:_.items);
+        },
 
-            getRandomWeighted ::(knockout)  {
-                // knockout removes the weighted property and randomly returns something
-                when (knockout != empty && Random.try(percentSuccess:knockout))
-                    Random.pickArrayItem(list:items_->values);
-                    
-                return Random.pickArrayItemWeighted(list:items_->values);
-            },
-
-            getRandomFiltered ::(filter => Function) {
-                return Random.pickArrayItem(
-                    list: (
-                        items_->values->filter(by:filter)                   
-                    )
-                );
-            },
-            
-            getRandomSet ::(count, filter => Function) {
-                @:l = [];
-                for(0, count)::(i) {
-                    l->push(value:{:::} {
-                        forever ::{
-                            @:choice = this.getRandomFiltered(filter);
-                            if (l->all(condition:::(value) <- value != choice))                            
-                                send(message:choice);
-                        }
-                    });
-                }
-                return l;            
-            },
-
-            getRandomWeightedFiltered ::(filter => Function, knockout) {
-                // knockout removes the weighted property and randomly returns something
-                when (knockout != empty && Random.try(percentSuccess:knockout))
-                    Random.pickArrayItem(
-                        list: (
-                            items_->values->filter(by:filter)                   
-                        )                    
-                    )
-                ; 
+        getRandomWeighted ::(knockout)  {
+            // knockout removes the weighted property and randomly returns something
+            when (knockout != empty && Random.try(percentSuccess:knockout))
+                Random.pickArrayItem(list:_.items->values);
                 
-                return Random.pickArrayItemWeighted(
-                    list: (
-                        items_->values->filter(by:filter)                   
-                    )
-                );
-            },
+            return Random.pickArrayItemWeighted(list:_.items->values);
+        },
 
-            
-            getAll :: {
-                return items_->values;
-            },
-            
-            statics : {
-                get ::<- statics_
+        getRandomFiltered ::(filter => Function) {
+            return Random.pickArrayItem(
+                list: (
+                    _.items->values->filter(by:filter)                   
+                )
+            );
+        },
+        
+        getRandomSet ::(count, filter => Function) {
+            @:l = [];
+            for(0, count)::(i) {
+                l->push(value:{:::} {
+                    forever ::{
+                        @:choice = _.this.getRandomFiltered(filter);
+                        if (l->all(condition:::(value) <- value != choice))                            
+                            send(message:choice);
+                    }
+                });
             }
-        }
+            return l;            
+        },
+
+        getRandomWeightedFiltered ::(filter => Function, knockout) {
+            // knockout removes the weighted property and randomly returns something
+            when (knockout != empty && Random.try(percentSuccess:knockout))
+                Random.pickArrayItem(
+                    list: (
+                        _.items->values->filter(by:filter)                   
+                    )                    
+                )
+            ; 
+            
+            return Random.pickArrayItemWeighted(
+                list: (
+                    _.items->values->filter(by:filter)                   
+                )
+            );
+        },
+
         
-        this.interface = interface;
+        getAll :: {
+            return _.items->values;
+        },
+        
+        statics : {
+            get ::<- _.statics
+        }
     }
 );
 return Database;
