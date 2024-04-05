@@ -252,9 +252,7 @@ Landmark.database.newEntry(
             'base:stairs-down',
             'base:stairs-down',
             'base:locked-chest',
-            'base:small-chest',
-            'base:warp-point',
-            'base:warp-point'
+            'base:small-chest'
         ],
         mapHint:{
             layoutType: DungeonMap.LAYOUT_EPSILON
@@ -323,9 +321,7 @@ Landmark.database.newEntry(
             'base:enchantment-stand',
             'base:stairs-down',
             'base:locked-chest',
-            'base:small-chest',
-            'base:warp-point',
-            'base:warp-point'
+            'base:small-chest'
         ],
         mapHint:{
             layoutType: DungeonMap.LAYOUT_DELTA
@@ -1033,7 +1029,7 @@ Landmark.database.newEntry(
                     if (this.peaceful == false) ::<= {
                         if (state.stepsSinceLast >= 14 && Number.random() > 0.7) ::<= {
                             @:Scene = import(module:'game_database.scene.mt');                        
-                            Scene.start(id:'base:scene_guards0', onDone::{}, location:empty, landmark:this);
+                            Scene.start(id:'scene_guards0', onDone::{}, location:empty, landmark:this);
                             state.stepsSinceLast = 0;
                         }
                     }

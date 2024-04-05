@@ -24,111 +24,114 @@
 @:BattleAI = LoadableClass.create(
     name: 'Wyvern.BattleAI',
     items : [],
-    constructor::($) {},
-    interface : {
-        initialize::($, user) {
-            $.user = user;
-        },
-            
-        defaultLoad ::{},
-
-        setUser ::(user) {
-            $.user = user;
-        },
-            
-        takeTurn ::($, battle, enemies, allies){
-            @:user_ = $.user;
-            @:Entity = import(module:'game_class.entity.mt');
-            @:defaultAttack = ::{
-                battle.entityCommitAction(action:BattleAction.new(
-                    ability: 
-                        Ability.find(id:'base:attack'),
-
-                    targets: [
-                        Random.pickArrayItem(list:enemies)
-                    ],
-                    targetParts : [
-                        Entity.normalizedDamageTarget()
-                    ],
-                    extraData: {}                        
-                ));                  
-            }
+    define:::(this, state) {
+        @user_;
         
-            when(enemies->keycount == 0)
+            
+        this.interface = {
+            initialize::(user) {
+                this.setUser(user);
+            },
+            
+            defaultLoad ::{},
+
+            setUser ::(user) {
+                user_ = user;
+            },
+            
+            takeTurn ::(battle, enemies, allies){
+                @:Entity = import(module:'game_class.entity.mt');
+                @:defaultAttack = ::{
+                    battle.entityCommitAction(action:BattleAction.new(
+                        ability: 
+                            Ability.find(id:'base:attack'),
+
+                        targets: [
+                            Random.pickArrayItem(list:enemies)
+                        ],
+                        targetParts : [
+                            Entity.normalizedDamageTarget()
+                        ],
+                        extraData: {}                        
+                    ));                  
+                }
+            
+                when(enemies->keycount == 0)
+                    battle.entityCommitAction(action:BattleAction.new(
+                        ability: Ability.find(id:'base:wait'),
+                        targets: [],
+                        targetParts : [],
+                        extraData: {}                        
+                    ));
+            
+            
+                // default: just attack if all you have is defend and attack
+                when(user_.abilitiesAvailable->keycount <= 2 || random.try(percentSuccess:if(user_.aiAbilityChance == empty) 60 else 100 - user_.aiAbilityChance))
+                    defaultAttack();          
+
+                // else pick a non-defend ability
+                @:list = user_.abilitiesAvailable->filter(by:::(value) <- value.id != 'base:attack' && value.id != 'base:defend' && value.usageHintAI != Ability.USAGE_HINT.DONTUSE);
+
+                // fallback if only ability known is "dont use"
+                when (list->keycount == 0)
+                    defaultAttack();
+                    
+                @:ability = Random.pickArrayItem(list);
+
+
+
+                when (ability.usageHintAI == Ability.USAGE_HINT.HEAL &&                
+                    user_.hp == user_.stats.HP)
+                    defaultAttack();
+                
+                @atEnemy = (ability.usageHintAI == Ability.USAGE_HINT.OFFENSIVE) ||
+                           (ability.usageHintAI == Ability.USAGE_HINT.DEBUFF);
+                
+                @targets = [];
+                @targetParts = [];
+                match(ability.targetMode) {
+                  (Ability.TARGET_MODE.ONE,
+                   Ability.TARGET_MODE.ONEPART) :::<= {
+                    if (atEnemy) 
+                        targets->push(value:Random.pickArrayItem(list:enemies))
+                    else 
+                        targets->push(value:Random.pickArrayItem(list:allies))
+                    ;
+                  },
+                  
+                  (Ability.TARGET_MODE.ALLALLY) :::<= {
+                    targets = [...allies];
+                  },                  
+
+                  (Ability.TARGET_MODE.ALLENEMY) :::<= {
+                    targets = [...enemies];
+                  },                  
+
+                  (Ability.TARGET_MODE.NONE) :::<= {
+                  },
+
+
+                  (Ability.TARGET_MODE.RANDOM) :::<= {
+                    if (Number.random() < 0.5) 
+                        targets->push(value:Random.pickArrayItem(list:enemies))
+                    else 
+                        targets->push(value:Random.pickArrayItem(list:allies))
+                    ;                    
+                  }
+
+                }
+                foreach(targets) ::(index, t) {
+                    targetParts[index] = Entity.normalizedDamageTarget();
+                }
+                
                 battle.entityCommitAction(action:BattleAction.new(
-                    ability: Ability.find(id:'base:wait'),
-                    targets: [],
-                    targetParts : [],
+                    ability: ability,
+                    targets: targets,
+                    targetParts : targetParts,
                     extraData: {}                        
                 ));
-        
-        
-            // default: just attack if all you have is defend and attack
-            when(user_.abilitiesAvailable->keycount <= 2 || random.try(percentSuccess:if(user_.aiAbilityChance == empty) 60 else 100 - user_.aiAbilityChance))
-                defaultAttack();          
-
-            // else pick a non-defend ability
-            @:list = user_.abilitiesAvailable->filter(by:::(value) <- value.id != 'base:attack' && value.id != 'base:defend' && value.usageHintAI != Ability.USAGE_HINT.DONTUSE);
-
-            // fallback if only ability known is "dont use"
-            when (list->keycount == 0)
-                defaultAttack();
-                
-            @:ability = Random.pickArrayItem(list);
-
-
-
-            when (ability.usageHintAI == Ability.USAGE_HINT.HEAL &&                
-                user_.hp == user_.stats.HP)
-                defaultAttack();
-            
-            @atEnemy = (ability.usageHintAI == Ability.USAGE_HINT.OFFENSIVE) ||
-                       (ability.usageHintAI == Ability.USAGE_HINT.DEBUFF);
-            
-            @targets = [];
-            @targetParts = [];
-            match(ability.targetMode) {
-              (Ability.TARGET_MODE.ONE,
-               Ability.TARGET_MODE.ONEPART) :::<= {
-                if (atEnemy) 
-                    targets->push(value:Random.pickArrayItem(list:enemies))
-                else 
-                    targets->push(value:Random.pickArrayItem(list:allies))
-                ;
-              },
-              
-              (Ability.TARGET_MODE.ALLALLY) :::<= {
-                targets = [...allies];
-              },                  
-
-              (Ability.TARGET_MODE.ALLENEMY) :::<= {
-                targets = [...enemies];
-              },                  
-
-              (Ability.TARGET_MODE.NONE) :::<= {
-              },
-
-
-              (Ability.TARGET_MODE.RANDOM) :::<= {
-                if (Number.random() < 0.5) 
-                    targets->push(value:Random.pickArrayItem(list:enemies))
-                else 
-                    targets->push(value:Random.pickArrayItem(list:allies))
-                ;                    
-              }
-
             }
-            foreach(targets) ::(index, t) {
-                targetParts[index] = Entity.normalizedDamageTarget();
-            }
-            
-            battle.entityCommitAction(action:BattleAction.new(
-                ability: ability,
-                targets: targets,
-                targetParts : targetParts,
-                extraData: {}                        
-            ));
-        }
+        }   
     }  
 
 );

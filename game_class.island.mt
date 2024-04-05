@@ -60,172 +60,7 @@
 ];
 
 
-
-// augments an entity based on the current tier
-@:augmentTiered = ::($, entity) {
-    @:state = $.state;
-    @:this = $.this;
-    match(state.tier) {
-      (0):::<= {
-        entity.capHP(max:11);
-      }, // tier zero has no mods 
-
-      // tier 1: learn 1 to 2 skills
-      (1):::<= {
-        entity.capHP(max:14);
-        entity.learnNextAbility();
-        if (Number.random() > 0.5)
-            entity.learnNextAbility();
-                  
-      },
-      
-
-      // tier 2: learn 1 to 2 skills and get equips
-      (2):::<= {
-        entity.capHP(max:16);
-        entity.learnNextAbility();
-        if (Number.random() > 0.5)
-            entity.learnNextAbility();
-      
-        @:Item = import(module:'game_mutator.item.mt');
-        // add a weapon
-        @:wep = Item.database.getRandomFiltered(
-            filter:::(value) <-
-                value.isUnique == false &&
-                value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
-        );
-            
-        entity.equip(
-            slot:Entity.EQUIP_SLOTS.HAND_LR, 
-            item:Item.new(
-                base:wep
-            ), 
-            inventory:entity.inventory, 
-            silent:true
-        );
-      },
-      
-
-
-      // tier 3: learn 1 to 2 skills and get equips
-      (3):::<= {
-        entity.capHP(max:20);
-        for(0, 10)::(i) {
-            entity.learnNextAbility();                
-        }
-
-      
-        @:Item = import(module:'game_mutator.item.mt');
-        // add a weapon
-        @:wep = Item.database.getRandomFiltered(
-            filter:::(value) <-
-                value.isUnique == false &&
-                value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
-        );
-            
-        entity.equip(
-            slot:Entity.EQUIP_SLOTS.HAND_LR, 
-            item:Item.new(
-                base: wep
-            ), 
-            inventory:entity.inventory, 
-            silent:true
-        );
-      },
-      
-      
-      // tier 2: learn 1 to 2 skills and get equips
-      default: ::<= {
-        for(0, 10)::(i) {
-            entity.learnNextAbility();                
-        }
-
-      
-        @:Item = import(module:'game_mutator.item.mt');
-        // add a weapon
-        @:wep = Item.database.getRandomFiltered(
-            filter:::(value) <-
-                value.isUnique == false &&
-                value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
-        );
-            
-        entity.equip(
-            slot:Entity.EQUIP_SLOTS.HAND_LR, 
-            item:Item.new(
-                base:wep
-            ), 
-            inventory:entity.inventory, 
-            silent:true
-        );
-
-
-        // add some armor!
-        @:wep = Item.database.getRandomFiltered(
-            filter:::(value) <-
-                value.isUnique == false &&
-                value.equipType == Item.database.statics.TYPE.ARMOR
-        );;
-            
-        entity.equip(
-            slot:Entity.EQUIP_SLOTS.ARMOR, 
-            item:Item.new(
-                base: wep
-            ), 
-            inventory:entity.inventory, 
-            silent:true
-        );
-
-      }             
-      
-      
-    }        
-}
-
-@:addDefaultLandmarks::{
-    @locationCount = (1 + (Number.random()*2)->floor); 
-    if (locationCount < 1) locationCount = 1;
-    for(0, locationCount)::(i) {
-        LargeMap.addLandmark(
-            map:state.map,
-            base:Landmark.database.getRandomWeightedFiltered(
-                filter:::(value) <- value.isUnique == false
-            ),
-            island:this
-        )
-    }
-    
-    // guaranteed gate
-    LargeMap.addLandmark(
-        map:state.map,
-        base:Landmark.database.find(id:'base:wyvern-gate'),
-        island:this
-    )
-    
-          
-
-    
-    LargeMap.addLandmark(
-        map:state.map,
-        base:Landmark.database.find(id:'base:town'),
-        island:this
-    )
-
-
-
-
-
-
-    LargeMap.addLandmark(
-        map:state.map,
-        base:Landmark.database.find(id:'base:city'),
-        island:this
-    )
-
-
-}
-
-
-
+// todo: database.
 
 
 @:Island = LoadableClass.create(
@@ -310,324 +145,494 @@
     },
     
     
-    interface : 
-        initialize::($) { 
-        },
+    define:::(this, state) {
+   
+        // the world
+        @world_;
 
-        wait::($, until) {       
-            @:this = $.this;
-            @:world = import(module:'game_singleton.world.mt');
-            {:::} {
-                forever ::{
-                    when(world.time != until) send()
-                    this.incrementTime();
-                }
-            }
-            {:::} {
-                forever ::{
-                    when(world.time == until) send()
-                    this.incrementTime();
-                }
-            }
+        // current party
+        @party_;
 
-        },
-            
-        defaultLoad::($, levelHint, nameHint, tierHint, landmarksHint, sizeWHint, sizeHHint, possibleEventsHint, extraLandmarks) {
-            @:state = $.state;
-            @:this = $.this;
-            
-            @:world = import(module:'game_singleton.world.mt');
+        
 
-            @:oldIsland = world.island;
-            world.island = this;
+        // augments an entity based on the current tier
+        @augmentTiered = ::(entity) {
+            match(state.tier) {
+              (0):::<= {
+                entity.capHP(max:11);
+              }, // tier zero has no mods 
 
-            ::<= {
-                @factor = Number.random()*50 + 80;
-                @sizeW  = (factor)->floor;
-                @sizeH  = (factor*0.5)->floor;
-                
-                state.name = NameGen.island();
-                state.levelMin = 0;
-                state.levelMax = 0;
-                state.possibleEvents = if (possibleEventsHint) possibleEventsHint else [
-                    'base:bbq',
-                    'base:weather:1',
-                    'base:camp-out'
-                ];
-                state.encounterRate = Number.random();
-                state.sizeW  = if (sizeWHint != empty) sizeWHint else sizeW;
-                state.sizeH  = if (sizeHHint != empty) sizeHHint else sizeH;
-                state.stepsSinceLastEvent = 0;
-                state.map = LargeMap.create(parent:this, sizeW, sizeH);
-                state.worldID = world.getNextID();
-                state.climate = random.integer(
-                    from:Island.CLIMATE.WARM, 
-                    to  :Island.CLIMATE.COLD
+              // tier 1: learn 1 to 2 skills
+              (1):::<= {
+                entity.capHP(max:14);
+                entity.learnNextAbility();
+                if (Number.random() > 0.5)
+                    entity.learnNextAbility();
+                          
+              },
+              
+
+              // tier 2: learn 1 to 2 skills and get equips
+              (2):::<= {
+                entity.capHP(max:16);
+                entity.learnNextAbility();
+                if (Number.random() > 0.5)
+                    entity.learnNextAbility();
+              
+                @:Item = import(module:'game_mutator.item.mt');
+                // add a weapon
+                @:wep = Item.database.getRandomFiltered(
+                    filter:::(value) <-
+                        value.isUnique == false &&
+                        value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
                 );
-                state.events = []; //array of Events
-                state.tier = 0;
-                state.nativeCreatures = [
-                    NameGen.creature(),
-                    NameGen.creature(),
-                    NameGen.creature()
-                ];
-                state.species = ::<={
-                    @rarity = 1;
-                    return [
-                        ... Species.getRandomSet(
-                                count : (5+Number.random()*5)->ceil,
-                                filter:::(value) <- value.special == false
-                            )
-                    ]->map(
-                        to:::(value) <- {
-                            species: value.id, 
-                            rarity: rarity *= 1.4
-                        }
-                    );
-                };
-            };
+                    
+                entity.equip(
+                    slot:Entity.EQUIP_SLOTS.HAND_LR, 
+                    item:Item.new(
+                        base:wep
+                    ), 
+                    inventory:entity.inventory, 
+                    silent:true
+                );
+              },
+              
+
+
+              // tier 3: learn 1 to 2 skills and get equips
+              (3):::<= {
+                entity.capHP(max:20);
+                for(0, 10)::(i) {
+                    entity.learnNextAbility();                
+                }
+
+              
+                @:Item = import(module:'game_mutator.item.mt');
+                // add a weapon
+                @:wep = Item.database.getRandomFiltered(
+                    filter:::(value) <-
+                        value.isUnique == false &&
+                        value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
+                );
+                    
+                entity.equip(
+                    slot:Entity.EQUIP_SLOTS.HAND_LR, 
+                    item:Item.new(
+                        base: wep
+                    ), 
+                    inventory:entity.inventory, 
+                    silent:true
+                );
+              },
+              
+              
+              // tier 2: learn 1 to 2 skills and get equips
+              default: ::<= {
+                for(0, 10)::(i) {
+                    entity.learnNextAbility();                
+                }
+
+              
+                @:Item = import(module:'game_mutator.item.mt');
+                // add a weapon
+                @:wep = Item.database.getRandomFiltered(
+                    filter:::(value) <-
+                        value.isUnique == false &&
+                        value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
+                );
+                    
+                entity.equip(
+                    slot:Entity.EQUIP_SLOTS.HAND_LR, 
+                    item:Item.new(
+                        base:wep
+                    ), 
+                    inventory:entity.inventory, 
+                    silent:true
+                );
+
+
+                // add some armor!
+                @:wep = Item.database.getRandomFiltered(
+                    filter:::(value) <-
+                        value.isUnique == false &&
+                        value.equipType == Item.database.statics.TYPE.ARMOR
+                );;
+                    
+                entity.equip(
+                    slot:Entity.EQUIP_SLOTS.ARMOR, 
+                    item:Item.new(
+                        base: wep
+                    ), 
+                    inventory:entity.inventory, 
+                    silent:true
+                );
+
+              }             
+              
+              
+            }        
+        }
+
+        @:addDefaultLandmarks::{
+            @locationCount = (1 + (Number.random()*2)->floor); 
+            if (locationCount < 1) locationCount = 1;
+            for(0, locationCount)::(i) {
+                LargeMap.addLandmark(
+                    map:state.map,
+                    base:Landmark.database.getRandomWeightedFiltered(
+                        filter:::(value) <- value.isUnique == false
+                    ),
+                    island:this
+                )
+            }
             
+            // guaranteed gate
+            LargeMap.addLandmark(
+                map:state.map,
+                base:Landmark.database.find(id:'base:wyvern-gate'),
+                island:this
+            )
+            
+                  
+
+            
+            LargeMap.addLandmark(
+                map:state.map,
+                base:Landmark.database.find(id:'base:town'),
+                island:this
+            )
+
+
+
+
+
+
+            LargeMap.addLandmark(
+                map:state.map,
+                base:Landmark.database.find(id:'base:city'),
+                island:this
+            )
+
         
+        }
+
         
-            state.tier = tierHint;
+        this.interface = {
+            initialize:: { 
+                @:world = import(module:'game_singleton.world.mt');
+                @:party = world.party;
 
-            state.levelMin = (levelHint - Number.random() * (levelHint * 0.4))->ceil;
-            state.levelMax = (levelHint + Number.random() * (levelHint * 0.4))->floor;
-            if (state.levelMin < 1) state.levelMin = 1;
-            if (nameHint != empty)
-                state.name = (nameHint) => String;
+                world_ = world;            
+                party_ = party;
+            
+            },
 
-            @rarity = 1;
-
-            
-  
-
-            if (landmarksHint == empty)
-                addDefaultLandmarks()
-            else ::<= {
-                foreach(landmarksHint) ::(i, landmarkName) {
-                    LargeMap.addLandmark(
-                        map:state.map,
-                        base:Landmark.database.find(id:landmarkName),
-                        island:this
-                    )                    
-                }
-            }
-
-            if (extraLandmarks != empty) ::<= {
-                foreach(extraLandmarks) ::(i, landmarkName) {
-                    LargeMap.addLandmark(
-                        map:state.map,
-                        base:Landmark.database.find(id:landmarkName),
-                        island:this
-                    )                    
-                }
-            
-            }
-
-            
-            world.island = oldIsland;
-            return this;
-        },
-
-        save ::($){
-            @:world = import(module:'game_singleton.world.mt');
-            world.addLoadableIsland(island:$.this);
-            return $.state.save();
-        },
-        load ::($, serialized) {
-            @:world = import(module:'game_singleton.world.mt');
-            $.state.load(parent:this, serialized);
-            world.addLoadableIsland(island:$.this);
-        },
-            
-        name : {
-            get :: {
-                return $.state.name;
-            }
-        }, 
-            
-        description : {
-            get ::($) {
-                @:state = $.state;
-                @out = 'A ' + Island.climateToString(climate:state.climate) + ' island, ' + state.name + ' is mostly populated by people of ' + state.species[0].species + ' and ' + state.species[1].species + ' descent. ';//The island is known for its ' + professions[0].profession.name + 's and ' + professions[1].profession.name + 's.\n';
-                //out = out + this.class.describeEncounterRate(rate:encounterRate) + '\n';
-                //out = out + '(Level range: ' + levelMin + ' - ' + levelMax + ')' + '\n\n';
-                /*
-                out = out + 'It has ' + significantLandmarks->keycount + ' landmark(s): \n';
-
-                foreach(significantLandmarks)::(index, landmark) {
-                    if (landmark.discovered)
-                        out = out + landmark.description + '\n'
-                    else
-                        out = out + 'An undiscovered ' + landmark.base.name + '\n';
-                }
-                */
-                return out;
-            }
-        },
-            
-        worldID : {
-            get ::($)<- $.state.worldID
-        },
-            
-        sizeW : {
-            get ::($)<- $.state.sizeW
-        },
-        sizeH : {
-            get ::($)<- $.state.sizeH
-        },
-            
-        tier : {
-            set ::($, value) <- $.state.tier = value,
-            get ::($) <- $.state.tier
-        },
-            
-        map : {
-            get::($) <- $.state.map
-        },
-            
-        incrementTime::($) {
-            @:state = $.state;
-        
-            @:world = import(module:'game_singleton.world.mt');
-            world.stepTime(); 
-            foreach(state.events)::(index, event) {
-                event.stepTime();
-            }
-            foreach(state.events)::(index, event) {
-                if (event.expired) ::<= {
-                    event.base.onEventEnd(event);                    
-                    state.events->remove(key:state.events->findIndex(value:event));
-                }
-            }
-        },
-            
-        findLocation ::($, id) {
-            return {:::} {
-                foreach($.state.map.getAllItemData())::(i, landmark) {
-                    foreach(landmark.locations)::(n, location) {
-                        when(location.worldID == id)
-                            send(message:location);
+            wait::(until) {       
+                @:world = import(module:'game_singleton.world.mt');
+                {:::} {
+                    forever ::{
+                        when(world.time != until) send()
+                        this.incrementTime();
                     }
                 }
-            }
-        },
-            
-        takeStep ::($) {
-            @:state = $.state;            
-            state.stepsSinceLastEvent += 1;        
-            
-            when(state.possibleEvents->size == 0) empty;
-        
-            // every step, an event can occur.
-            //if (stepsSinceLastEvent > 200000) ::<= {
-            if (state.stepsSinceLastEvent > 13) ::<= {
-                if (Number.random() > 13 - (state.stepsSinceLastEvent-5) / 5) ::<={
-                    this.addEvent(
-                        event:Event.new(
-                            base:Event.database.find(id:random.pickArrayItem(list:state.possibleEvents)),
-                            parent:this
-                        )
-                    );                        
-                    state.stepsSinceLastEvent = 0;
+                {:::} {
+                    forever ::{
+                        when(world.time == until) send()
+                        this.incrementTime();
+                    }
                 }
-            }    
-        },
+
+            },
             
-        newLandmark ::($, base, x, y, floorHint) {
-            @:state = $.state;
-            @landmark = Landmark.new(
-                base:base,
-                parent:state.map,
-                x: x,
-                y: y,
-                floorHint:floorHint
-            );            
+            defaultLoad::(levelHint, nameHint, tierHint, landmarksHint, sizeWHint, sizeHHint, possibleEventsHint, extraLandmarks) {
+                @:world = import(module:'game_singleton.world.mt');
+
+                @:oldIsland = world.island;
+                world.island = this;
+ 
+                ::<= {
+                    @factor = Number.random()*50 + 80;
+                    @sizeW  = (factor)->floor;
+                    @sizeH  = (factor*0.5)->floor;
+                    
+                    state.name = NameGen.island();
+                    state.levelMin = 0;
+                    state.levelMax = 0;
+                    state.possibleEvents = if (possibleEventsHint) possibleEventsHint else [
+                        'base:bbq',
+                        'base:weather:1',
+                        'base:camp-out'
+                    ];
+                    state.encounterRate = Number.random();
+                    state.sizeW  = if (sizeWHint != empty) sizeWHint else sizeW;
+                    state.sizeH  = if (sizeHHint != empty) sizeHHint else sizeH;
+                    state.stepsSinceLastEvent = 0;
+                    state.map = LargeMap.create(parent:this, sizeW, sizeH);
+                    state.worldID = world.getNextID();
+                    state.climate = random.integer(
+                        from:Island.CLIMATE.WARM, 
+                        to  :Island.CLIMATE.COLD
+                    );
+                    state.events = []; //array of Events
+                    state.tier = 0;
+                    state.nativeCreatures = [
+                        NameGen.creature(),
+                        NameGen.creature(),
+                        NameGen.creature()
+                    ];
+                    state.species = ::<={
+                        @rarity = 1;
+                        return [
+                            ... Species.getRandomSet(
+                                    count : (5+Number.random()*5)->ceil,
+                                    filter:::(value) <- value.special == false
+                                )
+                        ]->map(
+                            to:::(value) <- {
+                                species: value.id, 
+                                rarity: rarity *= 1.4
+                            }
+                        );
+                    };
+                };
+                
             
-            if (x != empty && y != empty) ::<= {
-                state.map.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.legendName);
-            }
-            return landmark;
-        },
             
-        addEvent::($, event) {
-            $.state.events->push(value:event);
-        },
+                state.tier = tierHint;
+
+                state.levelMin = (levelHint - Number.random() * (levelHint * 0.4))->ceil;
+                state.levelMax = (levelHint + Number.random() * (levelHint * 0.4))->floor;
+                if (state.levelMin < 1) state.levelMin = 1;
+                if (nameHint != empty)
+                    state.name = (nameHint) => String;
+
+                @rarity = 1;
+
+                
+      
+
+                if (landmarksHint == empty)
+                    addDefaultLandmarks()
+                else ::<= {
+                    foreach(landmarksHint) ::(i, landmarkName) {
+                        LargeMap.addLandmark(
+                            map:state.map,
+                            base:Landmark.database.find(id:landmarkName),
+                            island:this
+                        )                    
+                    }
+                }
+
+                if (extraLandmarks != empty) ::<= {
+                    foreach(extraLandmarks) ::(i, landmarkName) {
+                        LargeMap.addLandmark(
+                            map:state.map,
+                            base:Landmark.database.find(id:landmarkName),
+                            island:this
+                        )                    
+                    }
+                
+                }
+
+                
+                world.island = oldIsland;
+                return this;
+            },
+
+            save ::{
+                @:world = import(module:'game_singleton.world.mt');
+                world.addLoadableIsland(island:this);
+                return state.save();
+            },
+            load ::(serialized) {
+                @:world = import(module:'game_singleton.world.mt');
+                state.load(parent:this, serialized);
+                world.addLoadableIsland(island:this);
+            },
             
-        events : {
-            get ::($) <- $.state.events
-        },
+            name : {
+                get :: {
+                    return state.name;
+                }
+            }, 
+            
+            description : {
+                get :: {
+                    @out = 'A ' + Island.climateToString(climate:state.climate) + ' island, ' + state.name + ' is mostly populated by people of ' + state.species[0].species + ' and ' + state.species[1].species + ' descent. ';//The island is known for its ' + professions[0].profession.name + 's and ' + professions[1].profession.name + 's.\n';
+                    //out = out + this.class.describeEncounterRate(rate:encounterRate) + '\n';
+                    //out = out + '(Level range: ' + levelMin + ' - ' + levelMax + ')' + '\n\n';
+                    /*
+                    out = out + 'It has ' + significantLandmarks->keycount + ' landmark(s): \n';
+
+                    foreach(significantLandmarks)::(index, landmark) {
+                        if (landmark.discovered)
+                            out = out + landmark.description + '\n'
+                        else
+                            out = out + 'An undiscovered ' + landmark.base.name + '\n';
+                    }
+                    */
+                    return out;
+                }
+            },
+            
+            worldID : {
+                get ::<- state.worldID
+            },
+            
+            sizeW : {
+                get ::<- state.sizeW
+            },
+            sizeH : {
+                get ::<- state.sizeH
+            },
+            
+            tier : {
+                set ::(value) <- state.tier = value,
+                get ::<- state.tier
+            },
+            
+            map : {
+                get:: <- state.map
+            },
+            
+            incrementTime:: {
+                @:world = import(module:'game_singleton.world.mt');
+                world.stepTime(); 
+                foreach(state.events)::(index, event) {
+                    event.stepTime();
+                }
+                foreach(state.events)::(index, event) {
+                    if (event.expired) ::<= {
+                        event.base.onEventEnd(event);                    
+                        state.events->remove(key:state.events->findIndex(value:event));
+                    }
+                }
+            },
+            
+            findLocation ::(id) {
+                return {:::} {
+                    foreach(state.map.getAllItemData())::(i, landmark) {
+                        foreach(landmark.locations)::(n, location) {
+                            when(location.worldID == id)
+                                send(message:location);
+                        }
+                    }
+                }
+            },
+            
+            takeStep :: {            
+                state.stepsSinceLastEvent += 1;        
+                
+                when(state.possibleEvents->size == 0) empty;
+            
+                // every step, an event can occur.
+                //if (stepsSinceLastEvent > 200000) ::<= {
+                if (state.stepsSinceLastEvent > 13) ::<= {
+                    if (Number.random() > 13 - (state.stepsSinceLastEvent-5) / 5) ::<={
+                        this.addEvent(
+                            event:Event.new(
+                                base:Event.database.find(id:random.pickArrayItem(list:state.possibleEvents)),
+                                parent:this
+                            )
+                        );                        
+                        state.stepsSinceLastEvent = 0;
+                    }
+                }    
+            },
+            
+            newLandmark ::(base, x, y, floorHint) {
+                @landmark = Landmark.new(
+                    base:base,
+                    parent:state.map,
+                    x: x,
+                    y: y,
+                    floorHint:floorHint
+                );            
+                
+                if (x != empty && y != empty) ::<= {
+                    state.map.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.legendName);
+                }
+                return landmark;
+            },
+            
+            addEvent::(event) {
+                state.events->push(value:event);
+            },
+            
+            events : {
+                get :: <- state.events
+            },
                                     
-        newInhabitant ::($, professionHint, levelHint, speciesHint) {
-            @:state = $.state;
-            @:out = Entity.new(
-                island: this,
-                speciesHint:    if (speciesHint == empty) random.pickArrayItemWeighted(list:state.species).species else speciesHint,
-                levelHint:      if (levelHint == empty) random.integer(from:state.levelMin, to:state.levelMax) else levelHint,
-                professionHint: if (professionHint == empty) Profession.database.getRandomFiltered(filter::(value)<-value.learnable).id else professionHint
-            );
+            newInhabitant ::(professionHint, levelHint, speciesHint) {
+                @:out = Entity.new(
+                    island: this,
+                    speciesHint:    if (speciesHint == empty) random.pickArrayItemWeighted(list:state.species).species else speciesHint,
+                    levelHint:      if (levelHint == empty) random.integer(from:state.levelMin, to:state.levelMax) else levelHint,
+                    professionHint: if (professionHint == empty) Profession.database.getRandomFiltered(filter::(value)<-value.learnable).id else professionHint
+                );
+                
+                augmentTiered(entity:out);
+                
+                return out;
+            },
             
-            augmentTiered(entity:out);
             
-            return out;
-        },
+            species : {
+                get :: <- [...state.species]->map(to:::(value) <- value.species)
+            },
             
-            
-        species : {
-            get ::($) <- [...$.state.species]->map(to:::(value) <- value.species)
-        },
-            
-        newAggressor ::($, levelMaxHint) {            
-            @:state = $.state;
-            @levelHint = random.integer(from:state.levelMin, to:if(levelMaxHint == empty) state.levelMax else levelMaxHint);
-            @:angy =  Entity.new(
-                island: this,
-                speciesHint: random.pickArrayItemWeighted(list:state.species).species,
-                levelHint,
-                professionHint: Profession.database.getRandomFiltered(filter::(value)<-value.learnable).id
-            );       
-            
-            augmentTiered(entity:angy);                       
-            return angy;  
-        },
+            newAggressor ::(levelMaxHint) {            
+                @levelHint = random.integer(from:state.levelMin, to:if(levelMaxHint == empty) state.levelMax else levelMaxHint);
+                @:angy =  Entity.new(
+                    island: this,
+                    speciesHint: random.pickArrayItemWeighted(list:state.species).species,
+                    levelHint,
+                    professionHint: Profession.database.getRandomFiltered(filter::(value)<-value.learnable).id
+                );       
+                
+                augmentTiered(entity:angy);                       
+                return angy;  
+            },
 
-        newHostileCreature ::($, levelMaxHint) {
-            @:state = $.state;
-            @levelHint = random.integer(from:state.levelMin, to:if(levelMaxHint == empty) state.levelMax else levelMaxHint);
-            @:angy =  Entity.new(
-                island: this,
-                speciesHint: 'base:creature',
-                levelHint,
-                professionHint: 'base:creature'
-            );       
-            
-            angy.nickname = random.pickArrayItem(list:state.nativeCreatures);
-                   
-            return angy;  
-        },
+            newHostileCreature ::(levelMaxHint) {
+                @levelHint = random.integer(from:state.levelMin, to:if(levelMaxHint == empty) state.levelMax else levelMaxHint);
+                @:angy =  Entity.new(
+                    island: this,
+                    speciesHint: 'base:creature',
+                    levelHint,
+                    professionHint: 'base:creature'
+                );       
+                
+                angy.nickname = random.pickArrayItem(list:state.nativeCreatures);
+                       
+                return angy;  
+            },
 
             
-        getLandmarkIndex ::($, landmark => Landmark.type) {
-            return $.state.map.getAllItemData()->findIndex(value:landmark);
-        },
+            getLandmarkIndex ::(landmark => Landmark.type) {
+                return state.map.getAllItemData()->findIndex(value:landmark);
+            },
             
-        landmarks : {
-            get ::($)<- $.state.map.getAllItemData()
-        },
+            landmarks : {
+                get ::<- state.map.getAllItemData()
+            },
             
-        levelMin : {
-            get ::($)<- $.state.levelMin
-        },
-        levelMax : {
-            get ::($)<- $.state.levelMax
-        },
-        
-        world : {
-            get :: {
-                return import(module:'game_singleton.world.mt');
+            levelMin : {
+                get ::<- state.levelMin
+            },
+            levelMax : {
+                get ::<- state.levelMax
+            },
+            
+            world : {
+                get :: {
+                    return world_;
+                }
             }
+
         }
+        
+
     }
 );
 

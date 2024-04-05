@@ -31,8 +31,8 @@
 
 */
 
-@:lclass = import(module:'game_function.lclass.mt');
-@:State  = import(module:'game_class.state.mt');
+@:class = import(module:'Matte.Core.Class');
+@:State = import(module:'game_class.state.mt');
 
 
 
@@ -43,55 +43,51 @@
 
 return {
     create ::(
-        interface => Object,
-        constructor => Function,
+        define,
         items => Object,
         name => String,
         inherits,
         statics
     ) {
-
-        if (interface == empty)
-            interface = {};
-        
-        
-        @:afterLoad = interface.afterLoad;
-        @:overrideSave = interface.save;
-        @:overrideLoad = interface.load;
-        @:initialize = interface.initialize;
-
-
-                
-
-        //interface.afterLoad = empty;
-
-        interface.load = if (overrideLoad) overrideLoad else ::($, serialized) {
-            $.state.load(parent:this, serialized);
-            if ($.this.afterLoad != empty)
-                $.this.afterLoad();
-        }
-
-        interface.save = if (overrideSave) overrideSave else ::($, serialized) {
-            return $.state.save();
-        }
-
-
-
-        @:output = lclass(
-            constructor::(*args) {
+        @:output = class(
+            define ::(this) {
                 @:state = State.new(items);
-                args.$.state = state;
-                @:this = args.$.this;
-
-                if (initialize != empty)
-                    this.initialize(*args);
                 
-                if (args.state != empty) 
-                    this.load(serialized:args.state)
-                else 
-                    this.defaultLoad(*args);
+                define(this, state);
+                if (this.interface == empty)
+                    this.interface = {};
+                @:interface = this.interface;
+                
+                
+                @:afterLoad = interface.afterLoad;
+                @:overrideSave = interface.save;
+                @:overrideLoad = interface.load;
+                @:initialize = interface.initialize;
+                
+                this.constructor = ::(*args) {
+                        
+                    if (initialize != empty)
+                        initialize(*args);
+                    
+                    if (args.state != empty) 
+                        this.load(serialized:args.state)
+                    else 
+                        this.defaultLoad(*args);
+                }
+
+                interface.afterLoad = empty;
+
+                interface.load = if (overrideLoad) overrideLoad else ::(serialized) {
+                    state.load(parent:this, serialized);
+                    if (afterLoad != empty)
+                        afterLoad();
+                }
+
+                interface.save = if (overrideSave) overrideSave else ::(serialized) {
+                    return state.save();
+                }
+
             },
-            interface,
             name,
             inherits,
             statics

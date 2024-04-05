@@ -3292,9 +3292,7 @@ Effect.newEntry(
         stackable: false,
         blockPoints : 0,
         flags : 0,
-        stats: StatSet.new(
-            DEF : 100
-        ),
+        stats: StatSet.new(),
         onAffliction ::(user, item, holder) {
         },
         
@@ -3315,11 +3313,6 @@ Effect.newEntry(
         },
         onDamage ::(user, item, holder, from, damage) {
             @:amount = damage.amount;
-
-            when(user == holder) ::<= {
-                windowEvent.queueMessage(text:user.name + ' braces for damage!');            
-            }
-
             damage.amount = 0;
             windowEvent.queueMessage(text:user.name + ' leaps in front of ' + holder.name + ', taking damage in their stead!');
 

@@ -16,7 +16,6 @@
 @:g = import(module:'game_function.g.mt');
 @:Accolade = import(module:'game_struct.accolade.mt');
 @:loading = import(module:'game_function.loading.mt');
-@:romanNum = import(module:'game_function.romannumerals.mt');
 
 
 @:interactionsPerson = [
@@ -854,7 +853,7 @@ return {
                     @:world = import(module:'game_singleton.world.mt');
                     @:Event = import(module:'game_mutator.event.mt');
                     @:Scene = import(module:'game_database.scene.mt');                        
-                    if (location.contested == true) ::<= {
+                    if (location.contested == true && world.island.tier <= 3) ::<= {
                         Scene.start(
                             id: 'thechosen:scene_keybattle0',
                             onDone::{},
@@ -1060,7 +1059,7 @@ return {
                     'base:warp-point',
                     'base:warp-point',
                     'base:warp-point',
-                    'base:warp-point'                    
+                    'base:warp-point'
                 ],
                 mapHint:{
                     layoutType: DungeonMap.LAYOUT_GAMMA
@@ -1121,7 +1120,9 @@ return {
                     'base:small-chest',
                     
                     'base:warp-point',
-                    'base:warp-point'
+                    'base:warp-point',
+                    'base:warp-point',
+                    'base:warp-point'                    
                 ],
                 mapHint:{
                     layoutType: DungeonMap.LAYOUT_DELTA
@@ -2433,6 +2434,7 @@ return {
                             ])
                         );
                         
+                        
                         @:getKey ::{
                             @:Story = import(module:'game_singleton.story.mt');
                             
@@ -2450,14 +2452,11 @@ return {
                                     @:namegen = import(module:'game_singleton.namegen.mt');
                                     @:name = namegen.island();
                                     key.setIslandGenAttributes(
-                                        levelHint: world.island.levelMax + 1 + (world.island.levelMax * 1.2)->ceil,
+                                        levelHint: world.island.levelMax + 1 + (world.island.levelMax * 1.2)->floor,
                                         nameHint: name,
-                                        tierHint: world.island.tier + 1,
-                                        extraLandmarks : [
-                                            'base:lost-shrine'
-                                        ]
+                                        tierHint: world.island.tier + 1
                                     ); 
-                                    key.name = 'Key to ' + name + '('+romanNum(value:world.island.tier + 1)+')';
+                                    key.name = 'Key to ' + name;
                                     itemName = key.name;
                                 } 
                                 party.inventory.add(item:key);                                       
@@ -2481,7 +2480,7 @@ return {
                                 (3):::<= {
                                     foundMessage(itemName:'thechosen:wyvern-key-of-light');
                                 },
-                                default: ::<={
+                                default: ::{
                                     foundMessage();
                                 }
                             }   
@@ -3542,7 +3541,7 @@ return {
                     ::(location, landmark, doNext) {
                         @:item = Item.new(
                             base: Item.database.find(id:'base:greatsword'),
-                            qualityHint: 'base:divine',
+                            qualityHint: 'base:bivine',
                             materialHint: 'base:dragonglass',
                             colorHint: 'base:gold',
                             designHint: 'base:striking',
@@ -3557,8 +3556,6 @@ return {
                     ['Shaarraeziil', 'I forged this in hopes that our Chosen would be able to wield it.'],
                     ['Shaarraeziil', 'Perhaps you don\'t need it, but it is for you regardless. Do with it as you like.'],
 
-                    ['Shaarraeziil', 'The islands of the sky are aplenty... There is one that the light key points to. I will take you there.'],
-                    ['Shaarraeziil', 'Come to the gate and use the key of light to see me again when you\'re ready for the journey ahead.'],
                     
                     ::(location, landmark, doNext) {
                         location.ownedBy.name = 'Shaarraeziil';
@@ -3587,29 +3584,16 @@ return {
                         
                         
                         @:instance = import(module:'game_singleton.instance.mt');
-
-                        @:canvas = import(module:'game_singleton.canvas.mt');
-                        windowEvent.queueMessage(
-                            renderable:{render::{canvas.blackout();}},
-                            text: 'You are whisked away to another island...'
-                        );
-
-                        windowEvent.queueCustom(
-                            onEnter :: {
-                                @:instance = import(module:'game_singleton.instance.mt');
-                                instance.visitIsland(key, atGate:true);
-                                doNext();       
-                            }
-                        ); 
-
-
                         // cancel and flush current VisitIsland session
                         if (key.islandEntry == empty)
                             key.addIslandEntry(world);
 
 
-                        instance.visitIsland(key, atGate:true, onReady:doNext);    
-                    }
+                        instance.visitIsland(key, atGate:true, onReady:doNext);
+                    }, 
+                    
+                    
+
                 ]
             }
         )
@@ -3617,7 +3601,7 @@ return {
 
         Scene.newEntry(
             data : {
-                id : 'thechosen:scene_wyvernlight1',
+                id : 'thechosen:scene_wyvernlight1_quest',
                 script: [
                     ['Shaarraeziil', '...'],
                     ['Shaarraeziil', 'Chosen, are you ready?'],
@@ -3626,50 +3610,15 @@ return {
                         windowEvent.queueAskBoolean(
                             prompt: 'Venture forth?',
                             onChoice::(which) {
-                                when(which == false) ::<= {
-                                    doNext();    
-                                }
-
                                 @:instance = import(module:'game_singleton.instance.mt');
                                 @:world = import(module:'game_singleton.world.mt');
                                 instance.visitLandmark(
                                     landmark: world.island.newLandmark(
-                                        base : Landmark.database.find(id:'thechosen:dark-lair-entrance')
+                                        base : Landmark.database.find(id:'thechosen_DarkLairEntrance')
                                     )
                                 );
                             }
                         );
-                    },
-                    
-                    ['Shaarraeziil', 'I understand. Come back when you are ready.'],
-                    ['Shaarraeziil', 'For now, I will take you back.'],
-                    ::(location, landmark, doNext){
-                        @:world = import(module:'game_singleton.world.mt');
-                        @key = world.party.getItemAtAll(id:'thechosen:wyvern-key-of-light');
-
-                        
-                        
-                        @:instance = import(module:'game_singleton.instance.mt');
-
-                        @:canvas = import(module:'game_singleton.canvas.mt');
-                        windowEvent.queueMessage(
-                            renderable:{render::{canvas.blackout();}},
-                            text: 'You are whisked away to another island...'
-                        );
-
-                        windowEvent.queueCustom(
-                            onEnter :: {
-                                @:instance = import(module:'game_singleton.instance.mt');
-                                instance.visitIsland(key, atGate:true);
-                                doNext();       
-                            }
-                        ); 
-
-                        // cancel and flush current VisitIsland session
-                        if (key.islandEntry == empty)
-                            key.addIslandEntry(world);
-
-                        instance.visitIsland(key, atGate:true, onReady:doNext);                    
                     }
                 ]
             }
@@ -4093,13 +4042,12 @@ return {
                                 @:world = import(module:'game_singleton.world.mt');
                                 @:instance = import(module:'game_singleton.instance.mt');
 
-                                @:which = match(keys[choice-1].name) {
+                                @base = Landmark.database.find(id:match(keys[choice-1].name) {
                                     ('Wyvern Key of Fire'):    'thechosen:fire-wyvern-dimension',
                                     ('Wyvern Key of Ice'):     'thechosen:ice-wyvern-dimension',
                                     ('Wyvern Key of Thunder'): 'thechosen:thunder-wyvern-dimension',
                                     ('Wyvern Key of Light'):   'thechosen:light-wyvern-dimension'
-                                };
-                                @base = if (which != empty) Landmark.database.find(id:which)
+                                })
                                 if (base) ::<= {
                                     @:d = location.landmark.island.newLandmark(
                                         base

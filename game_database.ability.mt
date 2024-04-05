@@ -2861,7 +2861,7 @@ Ability.newEntry(
         oncePerBattle : false,
         canBlock : false,
         onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-            user.addEffect(from:user, id: 'base:mind-focused', durationTurns: 5);
+            targets[0].addEffect(from:user, id: 'base:mind-focused', durationTurns: 5);
         }
     }
 ) 

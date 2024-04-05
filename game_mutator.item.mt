@@ -25,7 +25,6 @@
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:correctA = import(module:'game_function.correcta.mt');
-@:romanNum = import(module:'game_function.romannumerals.mt');
 
 /*
     Items. 
@@ -3493,7 +3492,7 @@ Item.database.newEntry(data : {
                             (3,4,5):    4,
                             (1, 2):    2,
                             (0): 1,
-                            default: ((world.island.tier**0.5) * 3.3)->floor
+                            default: 12
                         });
                         
                         
@@ -3719,10 +3718,13 @@ Item.database.newEntry(data : {
                         speaker:this.name + ' - Enchantments',
                         pageAfter:canvas.height-4,
                         text:::<={
-                            when (state.enchants->keycount == 0) 'None.';
+                            @:list = [
+                                'I', 'II', 'III', 'IV', 'V', 'VI', "VII", 'VIII', 'IX', 'X', 'XI'
+                            ]
                             @out = '';
+                            when (state.enchants->keycount == 0) 'None.';
                             foreach(state.enchants)::(i, mod) {
-                                out = out + romanNum(value:i) + ' - ' + mod.description + '\n';
+                                out = out + list[i] + ' - ' + mod.description + '\n';
                             }
                             return out;
                         }
