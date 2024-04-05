@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-@:lclass = import(module:'game_function.lclass.mt');
+@:class = import(module:'Matte.Core.Class');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:Species = import(module:'game_database.species.mt');
@@ -105,7 +105,7 @@
 
 
 
-@:resetEffects :: {
+@:resetEffects ::($) {
     effects = [];
     
     foreach(state.innateEffects) ::(k, name) {
@@ -221,21 +221,22 @@
         modData : empty
     },
     
-    constructor :: {
+    constructor::($){
         if (none == empty) none = Item.new(base:Item.database.find(id:'base:none'));
-        _.requestsRemove = false;
-        _.resetEffects = resetEffects;
+        $.requestsRemove = false;
+        $.resetEffects = resetEffects;
     },
 
     interface : {
-        initialize ::{
-            _.state.battleAI = BattleAI.new(user:this);                
+        initialize ::($){
+            $.state.battleAI = BattleAI.new(user:this);                
         },
         
+            
         
-        defaultLoad::(island, speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities, innateEffects, faveWeapon) {
-            @:state = _.state;
-            @:this = _.this;
+        defaultLoad::($, island, speciesHint, professionHint, personalityHint, levelHint, adventurousHint, qualities, innateEffects, faveWeapon) {
+            @:state = $.state;
+            @:this = $.this;
             @:world = import(module:'game_singleton.world.mt');
             state.worldID = world.getNextID();
             state.stats = StatSet.new(
@@ -366,9 +367,9 @@
         },     
         
 
-        afterLoad :: {
-            @:state = _.state;
-            @:this = _.this;
+        afterLoad ::($) {
+            @:state = $.state;
+            @:this = $.this;
             foreach(state.equips) ::(k, equip) {
                 when(equip == empty) empty;
                 equip.equippedBy = this;
@@ -377,46 +378,46 @@
         },
 
         worldID : {
-            get ::<- _.state.worldID
+            get ::($)<- $.state.worldID
         },
     
         // Called to indicate to the entity the 
         // start of a new turn in general.
         // This does things like reset stats according to 
         // effects and such.
-        startTurn ::(allies, enemies) {
-            _.allies = allies;
-            _.enemies = enemies;
-            _.this.recalculateStats();             
-            _.this.flags.reset();
+        startTurn ::($, allies, enemies) {
+            $.allies_ = allies;
+            $.enemies_ = enemies;
+            $.this.recalculateStats();             
+            $.this.flags.reset();
         },
             
         // called to signal that a battle has started involving this entity
-        battleStart ::(battle) {
-            _.battle = battle;
-            _.requestsRemove = false;
-            _.abilitiesUsedBattle = {}
-            _.resetEffects();              
+        battleStart ::($, battle) {
+            $.battle_ = battle;
+            $.requestsRemove = false;
+            $.abilitiesUsedBattle = {}
+            $.resetEffects();              
         },
         
         battle : {
-            get ::<- _.battle
+            get ::($)<- $.battle_
         },
             
         owns : {
-            get ::<- _.owns,
-            set ::(value) <- _.owns = value
+            get ::($)<- $.owns,
+            set ::($, value) <- $.owns = value
         },
             
         aiAbilityChance : {
-            set ::value) <- _.state.aiAbilityChance = value,
-            get ::<- _.state.aiAbilityChance
+            set ::($, value) <- $.state.aiAbilityChance = value,
+            get ::($, <- $.state.aiAbilityChance
         },
             
         blockPoints : {
-            get :: {
-                @:this = _.this;
-                @:state = _.state;
+            get ::($) {
+                @:this = $.this;
+                @:state = $.state;
                 when(this.isIncapacitated()) 0;
                 @:am = ::<= {
                     @wep = this.getEquipped(slot:EQUIP_SLOTS.HAND_LR);
@@ -437,28 +438,28 @@
             
 
         // called to signal that a battle has started involving this entity
-        battleEnd :: {
-            _.battle = empty;
-            foreach(_.effects)::(index, effect) {
+        battleEnd ::($) {
+            $.battle_ = empty;
+            foreach($.effects)::(index, effect) {
 
                 effect.effect.onRemoveEffect(
                     user:effect.from, 
-                    holder:_.this,
+                    holder:$.this,
                     item:effect.item
                 );
             }
-            _.allies = empty;
-            _.enemies = empty;
-            _.abilitiesUsedBattle = empty;                
-            _.effects = empty;
+            $.allies_ = empty;
+            $.enemies_ = empty;
+            $.abilitiesUsedBattle = empty;                
+            $.effects = empty;
             
-            _.this.recalculateStats();                                
+            $.this.recalculateStats();                                
         },
 
             
-        recalculateStats :: {
-            @:this = _.this;    
-            @:state = _.state;
+        recalculateStats ::($) {
+            @:this = $.this;    
+            @:state = $.state;
                         
             @oldHP = this.hp;
             @:oldHPmax = this.stats.HP;
@@ -507,25 +508,25 @@
         },
             
         personality : {
-            get ::<- _.state.personality
+            get ::($)<- $.state.personality
         },
         
-        endTurn ::(battle) {
-            @:state = _.state;
-            @:this = _.this;
+        endTurn ::($, battle) {
+            @:state = $.state;
+            @:this = $.this;
             @:equips = state.equips;
             foreach(EQUIP_SLOTS)::(str, i) {
                 when(i == 0 && equips[0] == equips[1]) empty;
                 when(equips[i] == empty) empty;
-                equips[i].onTurnEnd(wielder:this, _.battle);
+                equips[i].onTurnEnd(wielder:this, $.battle);
             }
         },
 
         // lets the entity know that their turn has come.            
-        actTurn :: => Boolean {
+        actTurn ::($) => Boolean {
             @act = true;
-            @:this = _.this;
-            foreach(_.effects)::(index, effect) {                        
+            @:this = $.this;
+            foreach($.effects)::(index, effect) {                        
                 if (effect.duration != -1 && effect.turnIndex >= effect.duration) ::<= {
                     this.removeEffectInstance(instance:effect);
                 } else ::<= {
@@ -556,48 +557,48 @@
 
             
         flags : {
-            get :: {
-                return _.state.flags;
+            get ::($) {
+                return $.state.flags;
             }
         },
             
         name : {
-            get :: {
-                when (_.state.nickname != empty) _.state.nickname;
-                return _.state.name;
+            get ::($) {
+                when ($.state.nickname != empty) $.state.nickname;
+                return $.state.name;
             },
             
-            set ::(value => String) {
-                _.state.name = value;
+            set ::($, value => String) {
+                $.state.name = value;
             }
         },
             
         species : {
-            get :: {
-                return _.state.species;
+            get ::($) {
+                return $.state.species;
             }, 
             
-            set ::(value) {
-                _.state.species = value;
+            set ::($, value) {
+                $.state.species = value;
             }
         },
 
         requestsRemove : {
-            get ::<- _.requestsRemove,
-            set ::(value) <- _.requestsRemove = value
+            get ::($)<- $.requestsRemove,
+            set ::($, value) <- $.requestsRemove = value
         },
 
         favoriteItem : {
-            get ::<- _.state.favoriteItem
+            get ::($)<- $.state.favoriteItem
         },
 
         profession : {
-            get :: {
-                return _.state.professions[_.state.profession];
+            get ::($) {
+                return $.state.professions[$.state.profession];
             },
             
-            set ::(value => Profession.type) {
-                @:state = _.state;
+            set ::($, value => Profession.type) {
+                @:state = $.state;
                 state.profession = {:::}{
                     foreach(state.professions)::(index, prof) {
                         if (value.base.id == prof.base.id) ::<= {
@@ -619,13 +620,13 @@
         },
             
         nickname : {
-            set ::(value) {
-                _.state.nickname = value;
+            set ::($, value) {
+                $.state.nickname = value;
             }
         },
             
         renderHP ::(length, x) {
-            @:state = _.state;
+            @:state = $.state;
             if (length == empty) length = 12;
             
             @ratio = state.hp / state.stats.HP;
@@ -646,23 +647,24 @@
         },
             
         level : {
-            get :: {
-                return _.state.level;
+            get ::($) {
+                return $.state.level;
             }
         },
             
         effects : {
-            get :: <- [..._.effects]
+            get ::($) <- [...$.effects]
         },
             
         overrideInteract : {
-            set ::(value) {
-                _.overrideInteract = value;
+            set ::($, value) {
+                $.overrideInteract = value;
             }
         },
             
             
         attack::(
+            $,
             amount => Number,
             damageType => Number,
             damageClass => Number,
@@ -670,8 +672,8 @@
             targetPart,
             targetDefendPart
         ){
-            @:this = _.this;
-            @:state = _.state;
+            @:this = $.this;
+            @:state = $.state;
             displayedHurt[target] = true;
             if (targetPart == empty) targetPart = Entity.normalizedDamageTarget();
             if (targetDefendPart == empty) targetPart = Entity.normalizedDamageTarget();
@@ -883,9 +885,9 @@
             return retval;
         },
             
-        damage ::(from => Entity.type, damage => Damage.type, dodgeable => Boolean, critical, exact, dexPenalty) {
-            @:this = _.this;
-            @:state = _.state;
+        damage ::($, from => Entity.type, damage => Damage.type, dodgeable => Boolean, critical, exact, dexPenalty) {
+            @:this = $.this;
+            @:state = $.state;
             @:alreadyKnockedOut = this.hp == 0;
             if (alreadyKnockedOut)
                 dodgeable = false;
@@ -1074,16 +1076,16 @@
             
         // where they roam to in their freetime. if places doesnt have one they stay home
         favoritePlace : {
-            get ::<- _.state.favoritePlace
+            get ::($)<- $.state.favoritePlace
         },
             
         forceDrop : {
-            get ::<- _.state.forceDrop,
-            set ::(value) <- _.state.forceDrop = value
+            get ::($)<- $.state.forceDrop,
+            set ::($, value) <- $.state.forceDrop = value
         },
             
-        heal ::(amount => Number, silent) {
-            @:state = _.state;
+        heal ::($, amount => Number, silent) {
+            @:state = $.state;
             if (state.hp > state.stats.HP) state.hp = state.stats.HP;
             when(state.hp >= state.stats.HP) empty;
             amount = amount->ceil;
@@ -1094,9 +1096,9 @@
                 windowEvent.queueMessage(text: '' + this.name + ' heals ' + amount + ' HP (HP:' + this.renderHP() + ')');
         },
         
-        getCanMake :: {
-            @:state = _.state;
-            @:this = _.this;
+        getCanMake ::($) {
+            @:state = $.state;
+            @:this = $.this;
             when(state.canMake) state.canMake;
 
             // was thinking about making this specific to blacksmiths, but 
@@ -1113,9 +1115,9 @@
             return state.canMake;
         },
         
-        healAP ::(amount => Number, silent) {
-            @:state = _.state;
-            @:this = _.this;
+        healAP ::($, amount => Number, silent) {
+            @:state = $.state;
+            @:this = $.this;
             amount = amount->ceil;
             state.ap += amount;
             if (state.ap > state.stats.AP) state.ap = state.stats.AP;
@@ -1126,19 +1128,19 @@
         },
         
         
-        isIncapacitated :: {
-            return _.state.hp <= 0;
+        isIncapacitated ::($) {
+            return $.state.hp <= 0;
         },
         
         isDead : {
-            get :: {
-                return _.state.isDead;
+            get ::($) {
+                return $.state.isDead;
             }   
         },
             
-        gainExp ::(amount => Number, chooseStat, afterLevel) {
-            @:this = _.this;
-            @:state = _.state;
+        gainExp ::($, amount => Number, chooseStat, afterLevel) {
+            @:this = $.this;
+            @:state = $.state;
             {:::} {
                 forever ::{
                     when(amount <= 0) send();
@@ -1205,21 +1207,21 @@
         },
     
         stats : {
-            get :: {
-                return _.state.stats;
+            get ::($) {
+                return $.state.stats;
             }
         },
 
-        capHP ::(max) {
-            @:state = _.state;
+        capHP ::($, max) {
+            @:state = $.state;
             @stats = state.stats.save();
             if (stats.HP > max) stats.HP = max;
             state.stats.load(serialized:stats);   
             if (state.hp > stats.HP) state.hp = stats.HP;             
         },
 
-        normalizeStats ::(min, max, maxHP) {
-            @:state = _.state;
+        normalizeStats ::($, min, max, maxHP) {
+            @:state = $.state;
             if (min == empty) min = 3;
             if (max == empty) max = 10;
             if (maxHP == empty) maxHP = 12;
@@ -1248,12 +1250,12 @@
                 state.hp = maxHP;
         },
             
-        autoLevel :: {
-            _.this.gainExp(amount:state.expNext);  
+        autoLevel ::($) {
+            $.this.gainExp(amount:state.expNext);  
         },
             
-        dropExp :: {
-            @:state = _.state;
+        dropExp ::($) {
+            @:state = $.state;
             return 
                 ((state.stats.HP +
                 state.stats.AP +
@@ -1268,19 +1270,19 @@
             
         // whether they would be okay with being hired for the team.
         adventurous : {
-            get :: {
-                return _.state.adventurous;
+            get ::($) {
+                return $.state.adventurous;
             }
         },
             
         // per-entity data for mods
         modData : {
-            get ::<- _.state.modData
+            get ::($)<- $.state.modData
         },
             
-        kill ::(silent, from) {
-            @:state = _.state;
-            @:this = _.this;
+        kill ::($, silent, from) {
+            @:state = $.state;
+            @:this = $.this;
             state.hp = 0;
             if (silent == empty)
                 if (this.name->contains(key:'Wyvern'))
@@ -1303,9 +1305,9 @@
             state.isDead = true;                
         },
             
-        addEffect::(from => Entity.type, id => String, durationTurns => Number, item) {
-            @:this = _.this;
-            @:state = _.state;
+        addEffect::($, from => Entity.type, id => String, durationTurns => Number, item) {
+            @:this = $.this;
+            @:state = $.state;
         
             // temporarily make effects active but remove them right after.
             @inBattle = effects != empty;
@@ -1362,11 +1364,11 @@
         },
             
         
-        removeEffects::(effectBases => Object) {
-            @:state = _.state;
-            @:this = _.this;
-            when(_.effects == empty) empty;
-            _.effects = _.effects->filter(by:::(value) {
+        removeEffects::($, effectBases => Object) {
+            @:state = $.state;
+            @:this = $.this;
+            when($.effects == empty) empty;
+            $.effects = $.effects->filter(by:::(value) {
                 @:current = value.effect;
                 @:keep = effectBases->all(condition:::(value) <-
                     value != current
@@ -1398,12 +1400,12 @@
             });
         },
             
-        removeEffectInstance::(instance) {
-            when(_.effects == empty) empty;
-            @index = _.effects->findIndex(value:instance);
+        removeEffectInstance::($, instance) {
+            when($.effects == empty) empty;
+            @index = $.effects->findIndex(value:instance);
             when(index == -1) empty;
-            @:this = _.this;
-            @:state = _.state;
+            @:this = $.this;
+            @:state = $.state;
 
             @value = effects[index];
             effects->remove(key:index);
@@ -1428,9 +1430,9 @@
         },
             
         abilitiesAvailable : {
-            get :: {
-                @:state = _.state;
-                @:this = _.this;
+            get ::($) {
+                @:state = $.state;
+                @:this = $.this;
                 @out = [...state.abilitiesAvailable];
                 foreach(EQUIP_SLOTS)::(i, val) {
                     if (state.equips[val] != empty && state.equips[val].ability != empty) ::<= {
@@ -1443,8 +1445,8 @@
             }
         },
             
-        learnAbility::(id => String) {
-            @:state = _.state;
+        learnAbility::($, id => String) {
+            @:state = $.state;
             @:ability = Ability.find(id);
             if (state.abilitiesAvailable->keycount < 7)
                 state.abilitiesAvailable->push(value:ability);
@@ -1452,8 +1454,8 @@
             state.abilitiesLearned->push(value:ability);
         },
             
-        learnNextAbility:: {
-            @:this = _.this;
+        learnNextAbility::($) {
+            @:this = $.this;
             @:skills = this.profession.gainSP(amount:1);
             when(skills == empty) empty;
             foreach(skills)::(i, skill) {
@@ -1461,45 +1463,45 @@
             }
         },
             
-        clearAbilities::{
-            _.state.abilitiesAvailable = [
+        clearAbilities::($){
+            $.state.abilitiesAvailable = [
                 Ability.find(id:'base:attack'),
                 Ability.find(id:'base:defend'),
             ];
-            _.state.abilitiesLearned = [];
+            $.state.abilitiesLearned = [];
         },
         
         hp : {
-            get :: {
-                return _.state.hp;
+            get ::($) {
+                return $.state.hp;
             }
         },
             
         ap : {
-            get :: {
-                return _.state.ap;
+            get ::($) {
+                return $.state.ap;
             }
         },
             
-        rest :: {
-            @:state = _.state;
+        rest ::($) {
+            @:state = $.state;
             state.hp = state.stats.HP;
             state.ap = state.stats.AP;
         },
             
         inventory : {
-            get :: {
-                return _.state.inventory;
+            get ::($) {
+                return $.state.inventory;
             }
         },
             
         battleAI : {
-            get ::<- _.state.battleAI
+            get ::($)<- $.state.battleAI
         },
             
-        equip ::(item => none->type, slot, silent, inventory) {
-            @:this = _.this;
-            @:state = _.state;
+        equip ::($, item => none->type, slot, silent, inventory) {
+            @:this = $.this;
+            @:state = $.state;
             
             this.recalculateStats();
             @:oldstats = StatSet.new();
@@ -1577,27 +1579,27 @@
                 oldstats.printDiff(prompt: '(Equipped: ' + item.name + ')', other:this.stats);
             }
         },
-        anonymize :: {
-            @:this = _.this;
+        anonymize ::($) {
+            @:this = $.this;
             this.nickname = 'the ' + this.species.name + (if(this.profession.base.id == 'base:none') '' else ' ' + this.profession.base.name);            
         },
             
-        getEquipped::(slot => Number) {
-            @:eq = _.state.equips[slot];
+        getEquipped::($, slot => Number) {
+            @:eq = $.state.equips[slot];
             when(eq == empty) none;
             return eq;
         },
 
-        isEquipped::(item) {
-            return _.state.equips->any(func::(value) <- value == item);
+        isEquipped::($, item) {
+            return $.state.equips->any(func::(value) <- value == item);
         },
             
         resetEffects::{
-            _.resetEffects();
+            $.resetEffects();
         },
             
         // returns an array of equip slots that the item can fit in.
-        getSlotsForItem ::(item => none->type) {
+        getSlotsForItem ::($, item => none->type) {
             return match(item.base.equipType) {
                 (Item.database.statics.TYPE.HAND)     :  [EQUIP_SLOTS.HAND_LR],
                 (Item.database.statics.TYPE.ARMOR)    :  [EQUIP_SLOTS.ARMOR],
@@ -1609,9 +1611,9 @@
             }
         },
             
-        unequip ::(slot => Number, silent) {
-            @:state = _.state;
-            @:this = _.this;
+        unequip ::($, slot => Number, silent) {
+            @:state = $.state;
+            @:this = $.this;
             @:current = state.equips[slot];
             when (current == empty) empty;
             state.equips[slot] = empty;                
@@ -1634,9 +1636,9 @@
             this.recalculateStats();
             return current;
         },
-        unequipItem ::(item => none->type, silent) {
-            @:this  = _.this;
-            @:state = _.state;
+        unequipItem ::($, item => none->type, silent) {
+            @:this = $.this;
+            @:state = $.state;
             @slotOut;
             foreach(state.equips)::(slot, equip) {
                 if (equip == item) ::<= {
@@ -1647,9 +1649,9 @@
             return slotOut;
         },
             
-        useAbility::(ability, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-            @:state = _.state;
-            @:this  = _.this;
+        useAbility::($, ability, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+            @:state = $.state;
+            @:this = $.this;
             
             when(state.ap < ability.apCost) windowEvent.queueMessage(
                 text: this.name + " tried to use " + ability.name + ", but couldn\'t muster the mental strength!"
@@ -1672,11 +1674,11 @@
         },
             
         // interacts with this entity
-        interactPerson ::(party, location, onDone, overrideChat, skipIntro) {
-            when(_.overrideInteract) _.overrideInteract(party, location, onDone);
+        interactPerson ::($, party, location, onDone, overrideChat, skipIntro) {
+            when($.overrideInteract) $.overrideInteract(party, location, onDone);
             
             (import(module:'game_function.interactperson.mt'))(
-                this:_.this, party, location, onDone, overrideChat, skipIntro
+                this:$.this, party, location, onDone, overrideChat, skipIntro
             );
         },
     
@@ -1686,24 +1688,24 @@
         },
         
         allies : {
-            get ::<- _.allies
+            get ::($)<- $.allies_
         },
 
         enemies : {
-            get ::<- _.enemies
+            get ::($)<- $.enemies_
         },
             
         // when set, this overrides the default interaction menu
         onInteract : {
-            set ::(value) {
-                _.onInteract = value;
+            set ::($, value) {
+                $.onInteract = value;
             },
-            get :: <- _.onInteract
+            get ::($) <- $.onInteract
         },
             
-        describeQualities :: {
-            @:state = _.state;
-            @:this = _.this;
+        describeQualities ::($){
+            @:state = $.state;
+            @:this = $.this;
             when (state.qualityDescription) state.qualityDescription;
             
             @qualities = state.qualitiesHint;
@@ -1797,9 +1799,9 @@
             return out;
         },
             
-        describe::(excludeStats)  {
-            @:this  = _.this;
-            @:state = _.state;
+        describe::($, excludeStats)  {
+            @:this = $.this;
+            @:state = $.state;
             
             @:plainStatsState = this.stats.save();
             @:plainStats = StatSet.new();

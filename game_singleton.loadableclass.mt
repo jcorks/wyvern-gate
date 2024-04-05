@@ -44,7 +44,7 @@
 return {
     create ::(
         interface => Object,
-        constructor,
+        constructor => Function,
         items => Object,
         name => String,
         inherits,
@@ -65,14 +65,14 @@ return {
 
         //interface.afterLoad = empty;
 
-        interface.load = if (overrideLoad) overrideLoad else ::(serialized) {
-            _.state.load(parent:this, serialized);
-            if (_.this.afterLoad != empty)
-                _.this.afterLoad();
+        interface.load = if (overrideLoad) overrideLoad else ::($, serialized) {
+            $.state.load(parent:this, serialized);
+            if ($.this.afterLoad != empty)
+                $.this.afterLoad();
         }
 
-        interface.save = if (overrideSave) overrideSave else ::(serialized) {
-            return _.state.save();
+        interface.save = if (overrideSave) overrideSave else ::($, serialized) {
+            return $.state.save();
         }
 
 
@@ -80,8 +80,8 @@ return {
         @:output = lclass(
             constructor::(*args) {
                 @:state = State.new(items);
-                _.state = state;
-                @:this = _.this;
+                args.$.state = state;
+                @:this = args.$.this;
 
                 if (initialize != empty)
                     this.initialize(*args);

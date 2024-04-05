@@ -11,57 +11,6 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 @:ROOM_SPECTER_COUNT = 3;
-
-
-@:addSpecter ::(map, landmark, island, state) {
-    @:Entity = import(module:'game_class.entity.mt');
-    @:Location = import(module:'game_mutator.location.mt');
-
-
-    @:windowEvent = import(module:'game_singleton.windowevent.mt');
-    @ar = map.getRandomArea();;
-    @:tileX = ar.x + (ar.width /2)->floor;
-    @:tileY = ar.y + (ar.height/2)->floor;
-    
-    // only add an entity when not visible. Makes it 
-    // feel more alive and unknown
-    when (map.isLocationVisible(x:tileX, y:tileY)) empty;
-    
-
-
-
-    @:specter = ItemSpecter.createEntity();
-
-
-
-    @ent = landmark.mapEntityController.add(
-        x:tileX,
-        y:tileY,
-        symbol: 'x',
-        entities : [specter],
-        tag : 'specter'
-    );
-    ent.addUpkeepTask(id:'base:specter');
-    
-    @ent = {
-        targetX:tileX, 
-        targetY:tileY
-    }
-    if (state.addedSpecters == false)
-        windowEvent.queueMessage(
-            text:random.pickArrayItem(list:[
-                'Something\'s off... It\'s not safe here.',
-                'Do you feel that? Something... different... is here.',
-            ])
-        );
-    state.addedSpecters = true;
-        
-}        
-
-
-
-
-
 @:ItemSpecter = LoadableClass.create(
     name : 'Wyvern.LandmarkEvent.ItemSpecter',
     items : {
@@ -106,39 +55,82 @@
             return specter;
         }
     },
-        
+    define::(this, state) {
+        @:Entity = import(module:'game_class.entity.mt');
+        @:Location = import(module:'game_mutator.location.mt');
 
-
-    interface : {
-        initialize::(parent) {
-            @landmark = parent.landmark;
-            _.map = landmark.map;
-            _.island = landmark.island;
-            _.landmark = landmark;
-        },
+        @map_;
+        @island_;
+        @landmark_;
         
-        defaultLoad ::{
-            _.state.addedSpecters = false;
-        },
         
-        step::{ 
-            @:state = _.state;
-            @:specters = _.landmark.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'specter');
+        @:addSpecter ::{
+            @:windowEvent = import(module:'game_singleton.windowevent.mt');
+            @ar = map_.getRandomArea();;
+            @:tileX = ar.x + (ar.width /2)->floor;
+            @:tileY = ar.y + (ar.height/2)->floor;
             
-            // the specters have been appeased. They leave now
-            when(state.addedSpecters == true && specters->size == 0) empty;
-            when(_landmark.floor < 1 || (_landmark.floor%3 != 0)) empty;
+            // only add an entity when not visible. Makes it 
+            // feel more alive and unknown
+            when (map_.isLocationVisible(x:tileX, y:tileY)) empty;
+            
 
-        
-            if (specters->size < ROOM_SPECTER_COUNT)
-                addSpecter(
-                    map: _.map,
-                    island: _.island,
-                    landmark: _.landmark,
-                    state
+
+
+            @:specter = ItemSpecter.createEntity();
+
+
+
+            @ent = landmark_.mapEntityController.add(
+                x:tileX,
+                y:tileY,
+                symbol: 'x',
+                entities : [specter],
+                tag : 'specter'
+            );
+            ent.addUpkeepTask(id:'base:specter');
+            
+            @ent = {
+                targetX:tileX, 
+                targetY:tileY
+            }
+            if (state.addedSpecters == false)
+                windowEvent.queueMessage(
+                    text:random.pickArrayItem(list:[
+                        'Something\'s off... It\'s not safe here.',
+                        'Do you feel that? Something... different... is here.',
+                    ])
                 );
-        
-        }
+            state.addedSpecters = true;
+                
+        }        
+
+
+        this.interface = {
+            initialize::(parent) {
+                @landmark = parent.landmark;
+                map_ = landmark.map;
+                island_ = landmark.island;
+                landmark_ = landmark;
+            },
+            
+            defaultLoad ::{
+                state.addedSpecters = false;
+            },
+            
+            step::{ 
+                @:specters = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'specter');
+                
+                // the specters have been appeased. They leave now
+                when(state.addedSpecters == true && specters->size == 0) empty;
+                when(landmark_.floor < 1 || (landmark_.floor%3 != 0)) empty;
+
+            
+                if (specters->size < ROOM_SPECTER_COUNT)
+                    addSpecter();
+            
+            }
+        }        
     }   
 );
 

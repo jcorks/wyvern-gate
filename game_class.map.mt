@@ -22,334 +22,13 @@
 @:State = import(module:'game_class.state.mt');
 
 
-
-
-@:aStarPath = ::<= {
-    @scenery_;
-    @aStarPQCompareTable;
-    @:isWalled ::(x, y) {
-        @:id = x + y*width;
-        return (scenery_[id] & IS_WALLED_MASK) != 0;
-    }
-    
-    @:isWalledID ::(id) {
-        return (scenery_[id] & IS_WALLED_MASK) != 0;
-    }
-
-    @:aStarHeuristicH::(from, to) {
-        @fromX = from%width;
-        @fromY = (from/width)->floor
-        
-        @toX = to%width;
-        @toY = (to/width)->floor
-        return distance(x0:fromX, y0:fromY, x1:toX, y1:toY)
-    }
-
-    @:aStarMapEmplace::(map, key, value) {
-        map.index[key] = value;
-    }
-    @:aStarMapFind::(map, key) {
-        return map.index[key];
-    }
-    @:aStarMapRemove::(map, key) {
-        map.index[key] = empty;
-    }
-    @:aStarMapNew :: {
-        @:presized = [];
-        presized[width*height] = 1;
-        return {
-            //list: [],
-            index: presized
-        }
-    }
-    
-    @:aStarPQNew :: {
-        return [];
-    }
-
-
-    @:aStarReconstructPath::(cameFrom, current, start) {
-        @:path = [];
-        return {:::} {
-            forever ::{
-                path->push(value:{
-                    x: current%width,
-                    y:(current/width)->floor
-                });
-                @:contains = aStarMapFind(map:cameFrom, key:current);
-                when(contains == start) send(message:path);
-                current = contains;
-            }
-        }
-    }
-
-
-    @:aStarFindLowestFscore::(fScore, openSet) {
-        return aStarPQGetFirst(pq:openSet);
-    }
-
-    @:aStarNewNode::(x, y) {
-        @id = x + y*width;
-        when (!isWalledID(id) && x >= 0 && y >= 0 && x < width && y < height)
-            id;
-    }
-
-    @:aStarGetNeighbors::(neighbors, current) {
-        neighbors->setSize(size:0);
-        @:x = current%width;
-        @:y = (current/width)->floor
-        
-        @i;
-        i = aStarNewNode(x:x+1, y:y+1); if (i != empty) neighbors->push(value:i);
-        i = aStarNewNode(x:x+1, y:y-1); if (i != empty) neighbors->push(value:i);
-        i = aStarNewNode(x:x-1, y:y+1); if (i != empty) neighbors->push(value:i);
-        i = aStarNewNode(x:x-1, y:y-1); if (i != empty) neighbors->push(value:i);
-
-        i = aStarNewNode(x:x-1, y:y  ); if (i != empty) neighbors->push(value:i);
-        i = aStarNewNode(x:x+1, y:y  ); if (i != empty) neighbors->push(value:i);
-        i = aStarNewNode(x:x  , y:y+1); if (i != empty) neighbors->push(value:i);
-        i = aStarNewNode(x:x  , y:y-1); if (i != empty) neighbors->push(value:i);
-        return neighbors;
-    }
-    
-    @:aStarGetScore::(value) <- if (value == empty) THE_BIG_ONE else value;
-    
-
-
-
-    @:aStarPQCompare::(a, b) {
-        @:as = aStarMapFind(map:aStarPQCompareTable, key:a);
-        @:bs = aStarMapFind(map:aStarPQCompareTable, key:b);
-        when(as < bs) -1;
-        when(as > bs)  1;
-        return 0;
-    }
-    
-    // returns the placement of the value within the 
-    // priority queue. The  
-    @:aStarPQBinarySearch::(pq, value, fScore) {
-        aStarPQCompareTable = fScore;
-        @m = 0;
-        @n = pq->keycount - 1;
-        return {:::} {
-            forever ::{
-                when(m > n) send(message:pq->keycount+m);
-                @k = ((n + m) / 2)->floor;
-                @cmp = aStarPQCompare(a:value, b:pq[k]);
-                when(cmp > 0) m = k + 1;
-                when(cmp < 0) n = k - 1;
-                send(message:k);
-            }
-        }
-    }
-    
-    @:aStarPQGetFirst::(pq) <- pq[0];
-    
-    @:aStarPQAdd::(pq, value, fScore) {
-        @:in = aStarPQBinarySearch(pq, value, fScore);
-        if (in < pq->keycount) empty; // already in 
-        pq->insert(at:in-pq->keycount, value);
-    }
-
-    @:aStarPQRemove::(pq, value, fScore) {
-        @:in = aStarPQBinarySearch(pq, value, fScore);
-        if (in >= pq->keycount) empty; // not in 
-        pq->remove(key:in);            
-    }
-
-    
-    
-    // A* finds a path from start to goal.
-    // h is the heuristic function. h(n) estimates the cost to reach goal from node n.
-    return ::(scenery, start, goal) {
-        scenery_ = scenr;
-        start = aStarNewNode(x:start.x, y:start.y);
-        goal = aStarNewNode(x:goal.x, y:goal.y);
-        
-        when(start == goal) empty;
-        // The set of discovered nodes that may need to be (re-)expanded.
-        // Initially, only the start node is known.
-        // This is usually implemented as a min-heap or priority queue rather than a hash-set.
-        @openSet = aStarPQNew();
-        aStarPQAdd(pq:openSet, value:start);
-
-        // For node n, cameFrom[n] is the node immediately preceding it on the cheapest path from the start
-        // to n currently known.
-        @cameFrom = aStarMapNew();
-
-        // For node n, gScore[n] is the cost of the cheapest path from start to n currently known.
-        @gScore = aStarMapNew();
-        aStarMapEmplace(map:gScore, key:start, value:0);
-
-        // For node n, fScore[n] := gScore[n] + h(n). fScore[n] represents our current best guess as to
-        // how cheap a path could be from start to finish if it goes through n.
-        @fScore = aStarMapNew();
-        aStarMapEmplace(map:fScore, key:start, value:aStarHeuristicH(from:start, to:goal));
-
-        @path;
-        @iter = 0;
-        
-        return {:::} {
-            forever ::{
-                // return empty: open set is empty but goal was never reached
-                when(openSet->keycount == 0) send();
-            
-                // This operation can occur in O(Log(N)) time if openSet is a min-heap or a priority queue
-                @current = openSet[0];
-                //@current = aStarFindLowestFscore(fScore, openSet);
-                if (current == goal) ::<= {
-                    @out = aStarReconstructPath(cameFrom, current, start);
-                    send(message:out);
-                    
-                }
-                openSet->remove(key:0);
-                foreach(aStarGetNeighbors(neighbors, current))::(i, neighbor) {
-                    // d(current,neighbor) is the weight of the edge from current to neighbor
-                    // tentative_gScore is the distance from start to the neighbor through current
-                    @:tentative_gScore = aStarMapFind(map:gScore, key:current) + 1;//d(current, neighbor)
-                    if (tentative_gScore < aStarGetScore(value:aStarMapFind(map:gScore, key:neighbor))) ::<= {
-                        // This path to neighbor is better than any previous one. Record it!
-                        aStarMapEmplace(map:cameFrom, key:neighbor, value:current);
-                        aStarMapEmplace(map:gScore, key:neighbor, value:tentative_gScore);
-                        aStarMapEmplace(map:fScore, key:neighbor, value:tentative_gScore + aStarHeuristicH(from:neighbor, to:goal));
-                        aStarPQAdd(pq:openSet, value:neighbor, fScore);
-                    }
-                }
-            }
-        }
-    }
+@BFS_NATIVE;
+{:::} { 
+    BFS_NATIVE = getExternalFunction(name:"wyvern_gate__native__bfs");
+} : {
+    onError::(message) {}
 }
-
-
-@:bfsPath = ::<= {
-
-    @BFS_NATIVE;
-    {:::} { 
-        BFS_NATIVE = getExternalFunction(name:"wyvern_gate__native__bfs");
-    } : {
-        onError::(message) {}
-    }
-
-
-    @scenery_;
-
-    @:isWalled ::(x, y) {
-        @:id = x + y*width;
-        return (scenery_[id] & IS_WALLED_MASK) != 0;
-    }
-    
-    @:isWalledID ::(id) {
-        return (scenery_[id] & IS_WALLED_MASK) != 0;
-    }
-
-    @:bfsNewNode::(x, y) {
-        @id = x + y*width;
-        when (!isWalledID(id) && x >= 0 && y >= 0 && x < width && y < height)
-            id;
-    }
-
-    @:bfsGetNeighbors::(neighbors, current) {
-        neighbors->setSize(size:0);
-        @:x = current%width;
-        @:y = (current/width)->floor
-        
-        @i;
-        i = bfsNewNode(x:x+1, y:y+1); if (i != empty) neighbors->push(value:i);
-        i = bfsNewNode(x:x+1, y:y-1); if (i != empty) neighbors->push(value:i);
-        i = bfsNewNode(x:x-1, y:y+1); if (i != empty) neighbors->push(value:i);
-        i = bfsNewNode(x:x-1, y:y-1); if (i != empty) neighbors->push(value:i);
-
-        i = bfsNewNode(x:x-1, y:y  ); if (i != empty) neighbors->push(value:i);
-        i = bfsNewNode(x:x+1, y:y  ); if (i != empty) neighbors->push(value:i);
-        i = bfsNewNode(x:x  , y:y+1); if (i != empty) neighbors->push(value:i);
-        i = bfsNewNode(x:x  , y:y-1); if (i != empty) neighbors->push(value:i);
-        return neighbors;
-    }
-
-    return::(scenery, start, goal, width, height) {
-        scenery_ = scenery;
-        @:bfsQ = [];
-        start = bfsNewNode(x:start.x, y:start.y);
-        goal = bfsNewNode(x:goal.x, y:goal.y);        
-    
-        when (BFS_NATIVE!=empty) ::<= {
-            @:result = BFS_NATIVE(
-                width,
-                height,
-                scenery,
-                start,
-                goal
-            );
-            when(result == empty) empty;
-            @:out = [];
-            for(0, result->size) ::(i) {
-                @:a = result[i];
-                out->push(value:{
-                    x: a%width,
-                    y: (a/width)->floor
-                });
-            }
-            return out;
-        }
-        
-        
-        // fallback on slow version
-
-        
-        when(start == goal) empty;
-        @:q = bfsQ;
-        @qIter = 0;
-        @:visited = {}
-        @:neighbors = [];
-        visited[start] = start;
-        q->push(value:start);
-        
-        return {:::} {
-            forever ::{
-                when(qIter >= q->size) send();
-                
-                @v = q[qIter];
-                qIter +=1;
-
-
-                when(v == goal) ::<= {
-                    // build path
-                    send(message: ::<={
-                        @:path = [];
-                        {:::} {
-                            @a = v;
-                            @last;
-                            forever ::{
-                                @:next = {
-                                    x: a%width,
-                                    y: (a/width)->floor
-                                };
-                                path->push(value:next);            
-                                when(visited[a] == start) ::<= {
-                                    send();                
-                                }    
-
-                                a = visited[a]; 
-                            }
-                        }
-                        q->setSize(size:0);
-                        return path;
-                    })
-                }
-
-                foreach(bfsGetNeighbors(neighbors, current:v))::(i, w) {
-                    when(visited[w] != empty) empty;
-                    
-                    visited[w] = v; // parent
-                    q->push(value:w);
-                }
-            }
-        }
-    }
-}
-
-
-
+//@:MemoryBuffer = import(module:'Matte.Core.MemoryBuffer');
 
 
 
@@ -384,385 +63,80 @@
 @Area = LoadableClass.create(
     name: 'Wyvern.Map.Area',
     items : {},
-
-    constructor ::{
-        _.x = 0;
-        _.y = 0;
-        _.w = 0;
-        _.h = 0;
-        _.isOccupied = false;
-
-
-        // TODO: WHY IS THIS HERE??? PLEASE EDIT...
+    define::(this, state) {
+        @_x = 0;
+        @_y = 0;
+        @_w = 0;
+        @_h = 0;
+        @isOccupied = false;
+        
         mapSizeH = canvas.height - 6;
         mapSizeW = canvas.width - 26;
-    },
 
-    interface : {
-        defaultLoad::(x, y, width, height) {
-            _.x = x => Number;
-            _.y = y => Number;
-            _.w = width => Number;
-            _.h = height => Number;
-            _.isOccupied = false;
-        },
+        this.interface = {
+            defaultLoad::(x, y, width, height) {
+                _x = x => Number;
+                _y = y => Number;
+                _w = width => Number;
+                _h = height => Number;
+                isOccupied = false;
+            },
 
-        x : {get::<-_.x},        
-        y : {get::<-_.y},        
-        width : {get::<-_.w},        
-        height : {get::<-_.h},
-        occupy ::{
-            _.isOccupied = true
-        },
-        
-        isOccupied : {
-            get ::<- _.isOccupied
-        },
-        
-        save ::{
-            return {
-                x: _.x,
-                y: _.y,
-                w: _.w,
-                h: _.h,
-                isOccupied: _.isOccupied
+            x : {get::<-_x},        
+            y : {get::<-_y},        
+            width : {get::<-_w},        
+            height : {get::<-_h},
+            occupy ::{
+                isOccupied = true
+            },
+            
+            isOccupied : {
+                get ::<- isOccupied
+            },
+            
+            save ::{
+                return {
+                    x: _x,
+                    y: _y,
+                    w: _w,
+                    h: _h,
+                    isOccupied: isOccupied
+                }
+            },
+            
+            
+            load ::(serialized) {
+                _x = serialized.x;
+                _y = serialized.y;
+                _w = serialized.w;
+                _h = serialized.h;
+                isOccupied = isOccupied;
             }
-        },
-        
-        
-        load ::(serialized) {
-            _.x = serialized.x;
-            _.y = serialized.y;
-            _.w = serialized.w;
-            _.h = serialized.h;
-            _.isOccupied = serialized.isOccupied;
         }
     }
 );
-
-
-
-
-
-        
-        
-
-        
-
-@:renderPaged ::(this) {
-    
-    
-    @:left = canvas.width/2 - mapSizeW/2;
-    @:top = canvas.height/2 - mapSizeH/2;
-    canvas.renderFrame(
-        left:left-1,
-        top:top-1,
-        width: mapSizeW+3,
-        height: mapSizeH+3                   
-    
-    );
-    
-
-
-    @:regionX = ((pointer.x + mapSizeW*0.5) / mapSizeW)->floor;
-    @:regionY = ((pointer.y + mapSizeH*0.5) / mapSizeH)->floor;
-
-
-    @:centerX = (mapSizeW / 2)->floor;
-    @:centerY = (mapSizeH / 2)->floor;
-    
-    //@:map = [...scenery, ...items->values];
-    /*
-    scenery->foreach(do:::(item, data) {
-        @itemX = ((data.x - regionX) * mapSizeW)->floor;
-        @itemY = ((data.y - regionY) * mapSizeH)->floor;
-    
-        when(itemX < 1 || itemY < 1 || itemX >= mapSizeW || itemY >= mapSizeH) empty;
-        canvas.movePen(x:left-1 + itemX, y:top-1 + itemY);  
-        canvas.drawText(text:data.symbol);
-    });
-    map->foreach(do:::(item, data) {
-        @itemX = ((x+data.x - regionX) * mapSizeW)->floor;
-        @itemY = ((y+data.y - regionY) * mapSizeH)->floor;
-    
-        when(itemX < 1 || itemY < 1 || itemX >= mapSizeW || itemY >= mapSizeH) empty;
-        canvas.movePen(x:left-1 + itemX, y:top + itemY);  
-        canvas.drawText(text:data.symbol);
-
-        canvas.movePen(x:left-1 + itemX+1, y:top + itemY+1);  
-        canvas.drawText(text:data.symbol);
-
-        canvas.movePen(x:left-1 + itemX, y:top + itemY+1);  
-        canvas.drawText(text:data.symbol);
-
-        canvas.movePen(x:left-1 + itemX+1, y:top + itemY);  
-        canvas.drawText(text:data.symbol);
-    });
-    */
-    
-    
-    for(0, mapSizeH+1)::(y) {
-        for(0, mapSizeW+1)::(x) {
-            @itemX = (x) + regionX*mapSizeW - mapSizeW*0.5;
-            @itemY = (y) + regionY*mapSizeH - mapSizeH*0.5;
-            
-            when(itemX < 0 || itemY < 0 || itemX >= width || itemY >= height) empty;
-            
-            @symbol = this.sceneryAt(x:itemX, y:itemY);
-
-            canvas.movePen(x:left + x, y:top + y);  
-
-            when(symbol == 1) ::<= {
-                canvas.drawChar(text:wallCharacter);
-            }
-            
-
-            when(itemX < 0 || itemY < 0 || itemX >= width+0 || itemY >= height+0) ::<= {
-                when (symbol != empty)
-                    canvas.drawChar(text:symbol);
-
-                when(!renderOutOfBounds) empty;
-                canvas.drawChar(text:outOfBoundsCharacter);
-            }
-
-
-            @:items = this.itemsAt(x:itemX, y:itemY);
-            when(items != empty) ::<= {
-                canvas.drawChar(text:if (items[items->keycount-1].discovered) items[items->keycount-1].symbol else '?');
-            }
-
-            when (symbol != empty) ::<= {
-                canvas.drawChar(text:symbol);
-            }
-
-
-            canvas.drawChar(text:' ');
-        }                
-    }              
-                    
-
-    
-
-    canvas.movePen(
-        x:left + ((pointer.x - regionX*mapSizeW  + mapSizeW*0.5))->floor,
-        y:top  + ((pointer.y - regionY*mapSizeH  + mapSizeH*0.5))->floor         
-    );
-    
-    canvas.drawText(text:'Ø');
-            
-}
-
-@:renderUnpaged ::(
-    this, 
-    pointer, 
-    width, 
-    height, 
-    scenery,
-    offsetX,
-    offsetY,
-    outOfBoundsCharacter
-){
-    //@:Time = import(module:'Matte.System.Time');
-    //@:ticks = Time.getTicks();
-    @:left = canvas.width/2 - mapSizeW/2;
-    @:top = canvas.height/2 - mapSizeH/2;
-    canvas.renderFrame(
-        left:left-1,
-        top:top-1,
-        width: mapSizeW+3,
-        height: mapSizeH+3
-    );
-
-    @:centerX = (mapSizeW / 2)->floor;
-    @:centerY = (mapSizeH / 2)->floor;
-    
-    
-    
-    
-    @:sightRay ::(degrees) {
-        @x = pointer.x + 0.5;
-        @y = pointer.y + 0.5;
-        @:rads = (Number.PI() / 180)*degrees;
-        {:::} {
-            forever ::{
-                x += rads->cos * SIGHT_RAY_EPSILON;
-                y += rads->sin * SIGHT_RAY_EPSILON;
-                
-
-                when((x < offsetX || y < offsetY || x >= width+offsetX || y >= height+offsetY)) send();
-
-                when(distance(x0:pointer.x, y0:pointer.y, x1:x, y1:y) > SIGHT_RAY_LIMIT) send();
-                scenery[x->floor+y->floor*width] &= ~IS_OBSCURED_MASK;                        
-                if (isWalled(x:x->floor, y:y->floor))
-                    send();
-            }
-        }
-    }
-    
-
-    {:::} {
-        @i = 0;
-        forever ::{
-            when (i >= 360) send();
-            sightRay(degrees:i);
-            i += 10;                    
-        }
-    }            
-    
-    /*
-    [0, mapSizeH+1]->for(do:::(y) {
-        [0, mapSizeW+1]->for(do:::(x) {
-            @itemX = ((x + pointer.x - mapSizeW/2))->floor;
-            @itemY = ((y + pointer.y - mapSizeH/2))->floor;
-
-            when((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY)) empty;
-            
-            
-            if (obscured[itemX][itemY])
-                if (distance(x0:pointer.x, y0:pointer.y, x1:itemX, y1:itemY) < 5)
-                    obscured[itemX][itemY] = false;
-        });
-    }); 
-    */           
-    for(0, mapSizeH+1)::(y) {
-        for(0, mapSizeW+1)::(x) {
-            @itemX = ((x + pointer.x - mapSizeW/2))->floor;
-            @itemY = ((y + pointer.y - mapSizeH/2))->floor;
-
-            @symbol = this.sceneryAt(x:itemX, y:itemY);
-
-            @:items = this.itemsAt(x:itemX, y:itemY);
-            canvas.movePen(x:left + x, y:top + y);  
-
-
-
-            when((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY)) ::<= {
-                when (symbol != empty) ::<= {
-                    canvas.drawChar(text:symbol);
-                }
-
-                when(renderOutOfBounds) ::<= {
-                    canvas.drawChar(text:outOfBoundsCharacter);
-                }
-            }
-
-            
-            
-            //if (obscured[itemX][itemY])
-            //    if (distance(x0:pointer.x, y0:pointer.y, x1:itemX, y1:itemY) < 5)
-            //        obscured[itemX][itemY] = false;
-            
-            when(scenery[itemX+itemY*width] & IS_OBSCURED_MASK) ::<= {
-                canvas.drawChar(text:outOfBoundsCharacter);                        
-            }
-
-
-            when(symbol == empty && isWalled(x:itemX, y:itemY)) ::<= {
-                canvas.drawChar(text:wallCharacter);
-            }
-
-            when(items != empty && items->keycount > 0) ::<= {
-                canvas.drawChar(text:if (items[0].discovered) items[0].symbol else '?');
-            }                    
-
-
-            when (symbol != empty) ::<= {
-                canvas.drawChar(text:symbol);
-            }
-        }             
-    }             
-    
-    
-    // TODO: walls
-    
-    /*
-    entities->foreach(do:::(i, ent) {
-        @itemX = ((ent.x - pointer.x + mapSizeW/2))->floor;
-        @itemY = ((ent.y - pointer.y + mapSizeH/2))->floor;
-    
-        when(itemX < 1 || itemY < 1 || itemX >= mapSizeW || itemY > mapSizeH) empty;
-        canvas.movePen(x:left-1 + itemX, y:top + itemY);  
-        canvas.drawText(text:'*');                
-    });
-    */
-    
-
-    canvas.movePen(
-        x:left + (mapSizeW/2)->floor,
-        y:top  + (mapSizeH/2)->floor         
-    );
-    
-    canvas.drawText(text:'Ø');
-    //canvas.debugLine = 'Frame took ' + (Time.getTicks() - ticks) + 'ms';
-            
-}
-
-@:retrieveItem = ::(data, items) {
-    return items->filter(by:::(value) <- value.data == data)[0];
-}
-
-@:putArea = ::<= {
-    @:tryMap = [
-        [0, 0],
-        [-1, -1],
-        [1, 1],
-        [-1, 1],
-        [1, -1],
-        [-2, 0],
-        [ 2, 0],
-        [ 0, 2],
-        [ 0, -2],
-    ];
-    return ::(this, area, item, symbol, name) {
-        area.occupy()
-        {:::} {                
-            @iter = 0;
-            forever ::{
-                @:offset = tryMap[iter];
-                iter += 1;
-                if (iter >= tryMap->size)
-                    iter = 0;
-                    
-                @location = {
-                    x: (area.x + area.width/2 + offset[0])->floor,
-                    y: (area.y + area.height/2 + offset[1])->floor
-                }                
-
-                @:already = this.itemsAt(x:location.x, y:location.y);
-                when(already != empty && already->keycount) empty;
-                item.x = location.x;
-                item.y = location.y;
-
-                this.setItem(data:item, x:location.x, y:location.y, symbol, discovered:true, name);
-
-
-
-                send();
-            }      
-        }          
-    }
-}      
-
-
-
 
 
 @:Map =  LoadableClass.create(
     name: 'Wyvern.Map',
 
     statics : {
-        Area : Area
+        Area : {
+            get::<-Area
+        } 
     },
     items : {},
+  
+    define:::(this, state) {
     
-    constructor ::{
-        _.itemIndex = [];
-        _.entities = [];
-        _.items = [];
-        _.legendEntries = [];
-        _.title;
+    
+        @itemIndex = [];
+        @entities = [];
+        @items = [];
+        @legendEntries = [];
+        @title;
 
-        _.pointer = {
+        @pointer = {
             x: 0,
             y: 0,
             discovered : true,
@@ -770,98 +144,655 @@
             name: "(Party)"
         }
 
-        _.width = 1;
-        _.height = 1;
-        _.offsetX = 0;
-        _.offsetY = 0;
-        _.drawLegend = false;
-        _.paged = true;
-        _.outOfBoundsCharacter = '▓';
-        _.wallCharacter = '▓';
+        @width = 1;
+        @height = 1;
+        @offsetX = 0;
+        @offsetY = 0;
+        @drawLegend = false;
+        @paged = true;
+        @outOfBoundsCharacter = '▓';
+        @wallCharacter = '▓';
         //@scenery = MemoryBuffer.new();
-        _.scenery = [];
-        _.sceneryValues = [];
-        _.stepAction = [];
-        _.areas = empty;;
-        _.renderOutOfBounds = true;
-        _.isDark = false;
-        _.parent = empty;
-        _.neighbors = [];    
-    },
-  
-    interface : {
-        initialize ::(parent) {
-            _.parent = parent;
-        },
-        defaultLoad ::{},
-        width : {
-            get ::<- _.width,
-            set ::(value) {
-                _.width = value;
-                @:size = (_.width*_.height);
-                for(0, size)::(i) {
-                    _.scenery[i] = 0;
+        @scenery = [];
+        @sceneryValues = [];
+        @stepAction = [];
+        @areas;
+        @renderOutOfBounds = true;
+        @isDark = false;
+        @parent_;
+        @neighbors = [];
+        @aStarPQCompareTable;
+
+        
+        @:isWalled ::(x, y) {
+            @:id = x + y*width;
+            return (scenery[id] & IS_WALLED_MASK) != 0;
+        }
+        
+        @:isWalledID ::(id) {
+            return (scenery[id] & IS_WALLED_MASK) != 0;
+        }
+
+        @:aStarHeuristicH::(from, to) {
+            @fromX = from%width;
+            @fromY = (from/width)->floor
+            
+            @toX = to%width;
+            @toY = (to/width)->floor
+            return distance(x0:fromX, y0:fromY, x1:toX, y1:toY)
+        }
+
+        @:aStarMapEmplace::(map, key, value) {
+            map.index[key] = value;
+        }
+        @:aStarMapFind::(map, key) {
+            return map.index[key];
+        }
+        @:aStarMapRemove::(map, key) {
+            map.index[key] = empty;
+        }
+        @:aStarMapNew :: {
+            @:presized = [];
+            presized[width*height] = 1;
+            return {
+                //list: [],
+                index: presized
+            }
+        }
+        
+        @:aStarPQNew :: {
+            return [];
+        }
+
+
+        @:aStarReconstructPath::(cameFrom, current, start) {
+            @:path = [];
+            return {:::} {
+                forever ::{
+                    path->push(value:{
+                        x: current%width,
+                        y:(current/width)->floor
+                    });
+                    @:contains = aStarMapFind(map:cameFrom, key:current);
+                    when(contains == start) send(message:path);
+                    current = contains;
                 }
             }
-        },
+        }
 
-        height : {
-            get ::<- _.height,
-            set ::(value) {
-                _.height = value;
-                @:size = (_.width*_.height);
-                for(0, size)::(i) {
-                    _.scenery[i] = 0;
-                }      
+
+        @:aStarFindLowestFscore::(fScore, openSet) {
+            return aStarPQGetFirst(pq:openSet);
+        }
+
+        @:aStarNewNode::(x, y) {
+            @id = x + y*width;
+            when (!isWalledID(id) && x >= 0 && y >= 0 && x < width && y < height)
+                id;
+        }
+
+        @:aStarGetNeighbors::(neighbors, current) {
+            neighbors->setSize(size:0);
+            @:x = current%width;
+            @:y = (current/width)->floor
+            
+            @i;
+            i = aStarNewNode(x:x+1, y:y+1); if (i != empty) neighbors->push(value:i);
+            i = aStarNewNode(x:x+1, y:y-1); if (i != empty) neighbors->push(value:i);
+            i = aStarNewNode(x:x-1, y:y+1); if (i != empty) neighbors->push(value:i);
+            i = aStarNewNode(x:x-1, y:y-1); if (i != empty) neighbors->push(value:i);
+
+            i = aStarNewNode(x:x-1, y:y  ); if (i != empty) neighbors->push(value:i);
+            i = aStarNewNode(x:x+1, y:y  ); if (i != empty) neighbors->push(value:i);
+            i = aStarNewNode(x:x  , y:y+1); if (i != empty) neighbors->push(value:i);
+            i = aStarNewNode(x:x  , y:y-1); if (i != empty) neighbors->push(value:i);
+            return neighbors;
+        }
+        
+        @:aStarGetScore::(value) <- if (value == empty) THE_BIG_ONE else value;
+        
+
+
+
+        @:aStarPQCompare::(a, b) {
+            @:as = aStarMapFind(map:aStarPQCompareTable, key:a);
+            @:bs = aStarMapFind(map:aStarPQCompareTable, key:b);
+            when(as < bs) -1;
+            when(as > bs)  1;
+            return 0;
+        }
+        
+        // returns the placement of the value within the 
+        // priority queue. The  
+        @:aStarPQBinarySearch::(pq, value, fScore) {
+            aStarPQCompareTable = fScore;
+            @m = 0;
+            @n = pq->keycount - 1;
+            return {:::} {
+                forever ::{
+                    when(m > n) send(message:pq->keycount+m);
+                    @k = ((n + m) / 2)->floor;
+                    @cmp = aStarPQCompare(a:value, b:pq[k]);
+                    when(cmp > 0) m = k + 1;
+                    when(cmp < 0) n = k - 1;
+                    send(message:k);
+                }
             }
-        },
-            
-        drawLegend : {
-            get ::<- _.drawLegend,
-            set ::(value) <- _.drawLegend = value
-        },
-            
-        enableWall ::(x, y) {
-            _.scenery[x + y*(width)] |= IS_WALLED_MASK;                
-        },
-            
-        disableWall ::(x, y) {        
-            _.scenery[x + y*(width)] &= (~IS_WALLED_MASK);
-        },
+        }
         
-        addScenerySymbol ::(character) {
-            @:preIndex = _.sceneryValues->findIndex(value:character);
-            when(preIndex != -1) preIndex;
-            
-            @:index = _.sceneryValues->keycount;
-            _.sceneryValues->push(value:character);
-            return index;
-        },
-            
-        setSceneryIndex ::(
-            x =>Number,
-            y =>Number,
-            symbol => Number
-        ) {
-            @index = x + y*(width);
-            
-            _.scenery[index] = (_.scenery[index] & SETTINGS_MASK) | (1+symbol);
-        },
+        @:aStarPQGetFirst::(pq) <- pq[0];
         
+        @:aStarPQAdd::(pq, value, fScore) {
+            @:in = aStarPQBinarySearch(pq, value, fScore);
+            if (in < pq->keycount) empty; // already in 
+            pq->insert(at:in-pq->keycount, value);
+        }
+
+        @:aStarPQRemove::(pq, value, fScore) {
+            @:in = aStarPQBinarySearch(pq, value, fScore);
+            if (in >= pq->keycount) empty; // not in 
+            pq->remove(key:in);            
+        }
+
+        
+        
+        // A* finds a path from start to goal.
+        // h is the heuristic function. h(n) estimates the cost to reach goal from node n.
+        @:aStarPath::(start, goal) {        
+            start = aStarNewNode(x:start.x, y:start.y);
+            goal = aStarNewNode(x:goal.x, y:goal.y);
             
-        fillSceneryIndex ::(
-            symbol => Number
-        ) {
-            @:width = _.width;
-            @:scenery = _.scenery;
-            for(0, height)::(y) {
-                for(0, width)::(x) {
-                    @index = x + y*(width);
+            when(start == goal) empty;
+            // The set of discovered nodes that may need to be (re-)expanded.
+            // Initially, only the start node is known.
+            // This is usually implemented as a min-heap or priority queue rather than a hash-set.
+            @openSet = aStarPQNew();
+            aStarPQAdd(pq:openSet, value:start);
+
+            // For node n, cameFrom[n] is the node immediately preceding it on the cheapest path from the start
+            // to n currently known.
+            @cameFrom = aStarMapNew();
+
+            // For node n, gScore[n] is the cost of the cheapest path from start to n currently known.
+            @gScore = aStarMapNew();
+            aStarMapEmplace(map:gScore, key:start, value:0);
+
+            // For node n, fScore[n] := gScore[n] + h(n). fScore[n] represents our current best guess as to
+            // how cheap a path could be from start to finish if it goes through n.
+            @fScore = aStarMapNew();
+            aStarMapEmplace(map:fScore, key:start, value:aStarHeuristicH(from:start, to:goal));
+
+            @path;
+            @iter = 0;
+            
+            return {:::} {
+                forever ::{
+                    // return empty: open set is empty but goal was never reached
+                    when(openSet->keycount == 0) send();
                 
-                    _.scenery[index] = (_.scenery[index] & SETTINGS_MASK) | (1+symbol);
-                }      
+                    // This operation can occur in O(Log(N)) time if openSet is a min-heap or a priority queue
+                    @current = openSet[0];
+                    //@current = aStarFindLowestFscore(fScore, openSet);
+                    if (current == goal) ::<= {
+                        @out = aStarReconstructPath(cameFrom, current, start);
+                        send(message:out);
+                        
+                    }
+                    openSet->remove(key:0);
+                    foreach(aStarGetNeighbors(neighbors, current))::(i, neighbor) {
+                        // d(current,neighbor) is the weight of the edge from current to neighbor
+                        // tentative_gScore is the distance from start to the neighbor through current
+                        @:tentative_gScore = aStarMapFind(map:gScore, key:current) + 1;//d(current, neighbor)
+                        if (tentative_gScore < aStarGetScore(value:aStarMapFind(map:gScore, key:neighbor))) ::<= {
+                            // This path to neighbor is better than any previous one. Record it!
+                            aStarMapEmplace(map:cameFrom, key:neighbor, value:current);
+                            aStarMapEmplace(map:gScore, key:neighbor, value:tentative_gScore);
+                            aStarMapEmplace(map:fScore, key:neighbor, value:tentative_gScore + aStarHeuristicH(from:neighbor, to:goal));
+                            aStarPQAdd(pq:openSet, value:neighbor, fScore);
+                        }
+                    }
+                }
             }
-        },            
+        }
+        
+        @:bfsQ = [];
+        @:bfsPath::(start, goal) {
+            start = aStarNewNode(x:start.x, y:start.y);
+            goal = aStarNewNode(x:goal.x, y:goal.y);        
+        
+            when (BFS_NATIVE!=empty) ::<= {
+                @:result = BFS_NATIVE(
+                    width,
+                    height,
+                    scenery,
+                    start,
+                    goal
+                );
+                when(result == empty) empty;
+                @:out = [];
+                for(0, result->size) ::(i) {
+                    @:a = result[i];
+                    out->push(value:{
+                        x: a%width,
+                        y: (a/width)->floor
+                    });
+                }
+                return out;
+            }
+            
+            
+            // fallback on slow version
+
+            
+            when(start == goal) empty;
+            @:q = bfsQ;
+            @qIter = 0;
+            @:visited = {}
+            @:neighbors = [];
+            visited[start] = start;
+            q->push(value:start);
+            
+            return {:::} {
+                forever ::{
+                    when(qIter >= q->size) send();
+                    
+                    @v = q[qIter];
+                    qIter +=1;
+
+
+                    when(v == goal) ::<= {
+                        // build path
+                        send(message: ::<={
+                            @:path = [];
+                            {:::} {
+                                @a = v;
+                                @last;
+                                forever ::{
+                                    @:next = {
+                                        x: a%width,
+                                        y: (a/width)->floor
+                                    };
+                                    path->push(value:next);            
+                                    when(visited[a] == start) ::<= {
+                                        send();                
+                                    }    
+
+                                    a = visited[a]; 
+                                }
+                            }
+                            q->setSize(size:0);
+                            return path;
+                        })
+                    }
+
+                    foreach(aStarGetNeighbors(neighbors, current:v))::(i, w) {
+                        when(visited[w] != empty) empty;
+                        
+                        visited[w] = v; // parent
+                        q->push(value:w);
+                    }
+                }
+            }
+        }
+        
+        
+        @:renderPaged ::{
+            
+            
+            @:left = canvas.width/2 - mapSizeW/2;
+            @:top = canvas.height/2 - mapSizeH/2;
+            canvas.renderFrame(
+                left:left-1,
+                top:top-1,
+                width: mapSizeW+3,
+                height: mapSizeH+3                   
+            
+            );
+            
+
+
+            @:regionX = ((pointer.x + mapSizeW*0.5) / mapSizeW)->floor;
+            @:regionY = ((pointer.y + mapSizeH*0.5) / mapSizeH)->floor;
+
+
+            @:centerX = (mapSizeW / 2)->floor;
+            @:centerY = (mapSizeH / 2)->floor;
+            
+            //@:map = [...scenery, ...items->values];
+            /*
+            scenery->foreach(do:::(item, data) {
+                @itemX = ((data.x - regionX) * mapSizeW)->floor;
+                @itemY = ((data.y - regionY) * mapSizeH)->floor;
+            
+                when(itemX < 1 || itemY < 1 || itemX >= mapSizeW || itemY >= mapSizeH) empty;
+                canvas.movePen(x:left-1 + itemX, y:top-1 + itemY);  
+                canvas.drawText(text:data.symbol);
+            });
+            map->foreach(do:::(item, data) {
+                @itemX = ((x+data.x - regionX) * mapSizeW)->floor;
+                @itemY = ((y+data.y - regionY) * mapSizeH)->floor;
+            
+                when(itemX < 1 || itemY < 1 || itemX >= mapSizeW || itemY >= mapSizeH) empty;
+                canvas.movePen(x:left-1 + itemX, y:top + itemY);  
+                canvas.drawText(text:data.symbol);
+
+                canvas.movePen(x:left-1 + itemX+1, y:top + itemY+1);  
+                canvas.drawText(text:data.symbol);
+
+                canvas.movePen(x:left-1 + itemX, y:top + itemY+1);  
+                canvas.drawText(text:data.symbol);
+
+                canvas.movePen(x:left-1 + itemX+1, y:top + itemY);  
+                canvas.drawText(text:data.symbol);
+            });
+            */
+            
+            
+            for(0, mapSizeH+1)::(y) {
+                for(0, mapSizeW+1)::(x) {
+                    @itemX = (x) + regionX*mapSizeW - mapSizeW*0.5;
+                    @itemY = (y) + regionY*mapSizeH - mapSizeH*0.5;
+                    
+                    when(itemX < 0 || itemY < 0 || itemX >= width || itemY >= height) empty;
+                    
+                    @symbol = this.sceneryAt(x:itemX, y:itemY);
+
+                    canvas.movePen(x:left + x, y:top + y);  
+
+                    when(symbol == 1) ::<= {
+                        canvas.drawChar(text:wallCharacter);
+                    }
+                    
+
+                    when(itemX < 0 || itemY < 0 || itemX >= width+0 || itemY >= height+0) ::<= {
+                        when (symbol != empty)
+                            canvas.drawChar(text:symbol);
+
+                        when(!renderOutOfBounds) empty;
+                        canvas.drawChar(text:outOfBoundsCharacter);
+                    }
+
+
+                    @:items = this.itemsAt(x:itemX, y:itemY);
+                    when(items != empty) ::<= {
+                        canvas.drawChar(text:if (items[items->keycount-1].discovered) items[items->keycount-1].symbol else '?');
+                    }
+
+                    when (symbol != empty) ::<= {
+                        canvas.drawChar(text:symbol);
+                    }
+
+
+                    canvas.drawChar(text:' ');
+                }                
+            }              
+                            
+
+            
+  
+            canvas.movePen(
+                x:left + ((pointer.x - regionX*mapSizeW  + mapSizeW*0.5))->floor,
+                y:top  + ((pointer.y - regionY*mapSizeH  + mapSizeH*0.5))->floor         
+            );
+            
+            canvas.drawText(text:'Ø');
+                    
+        }
+        
+        @:renderUnpaged ::{
+            //@:Time = import(module:'Matte.System.Time');
+            //@:ticks = Time.getTicks();
+            @:left = canvas.width/2 - mapSizeW/2;
+            @:top = canvas.height/2 - mapSizeH/2;
+            canvas.renderFrame(
+                left:left-1,
+                top:top-1,
+                width: mapSizeW+3,
+                height: mapSizeH+3
+            );
+
+            @:centerX = (mapSizeW / 2)->floor;
+            @:centerY = (mapSizeH / 2)->floor;
+            
+            
+            
+            
+            @:sightRay ::(degrees) {
+                @x = pointer.x + 0.5;
+                @y = pointer.y + 0.5;
+                @:rads = (Number.PI() / 180)*degrees;
+                {:::} {
+                    forever ::{
+                        x += rads->cos * SIGHT_RAY_EPSILON;
+                        y += rads->sin * SIGHT_RAY_EPSILON;
+                        
+
+                        when((x < offsetX || y < offsetY || x >= width+offsetX || y >= height+offsetY)) send();
+
+                        when(distance(x0:pointer.x, y0:pointer.y, x1:x, y1:y) > SIGHT_RAY_LIMIT) send();
+                        scenery[x->floor+y->floor*width] &= ~IS_OBSCURED_MASK;                        
+                        if (isWalled(x:x->floor, y:y->floor))
+                            send();
+                    }
+                }
+            }
+            
+
+            {:::} {
+                @i = 0;
+                forever ::{
+                    when (i >= 360) send();
+                    sightRay(degrees:i);
+                    i += 10;                    
+                }
+            }            
+            
+            /*
+            [0, mapSizeH+1]->for(do:::(y) {
+                [0, mapSizeW+1]->for(do:::(x) {
+                    @itemX = ((x + pointer.x - mapSizeW/2))->floor;
+                    @itemY = ((y + pointer.y - mapSizeH/2))->floor;
+
+                    when((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY)) empty;
+                    
+                    
+                    if (obscured[itemX][itemY])
+                        if (distance(x0:pointer.x, y0:pointer.y, x1:itemX, y1:itemY) < 5)
+                            obscured[itemX][itemY] = false;
+                });
+            }); 
+            */           
+            for(0, mapSizeH+1)::(y) {
+                for(0, mapSizeW+1)::(x) {
+                    @itemX = ((x + pointer.x - mapSizeW/2))->floor;
+                    @itemY = ((y + pointer.y - mapSizeH/2))->floor;
+
+                    @symbol = this.sceneryAt(x:itemX, y:itemY);
+
+                    @:items = this.itemsAt(x:itemX, y:itemY);
+                    canvas.movePen(x:left + x, y:top + y);  
+
+
+
+                    when((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY)) ::<= {
+                        when (symbol != empty) ::<= {
+                            canvas.drawChar(text:symbol);
+                        }
+
+                        when(renderOutOfBounds) ::<= {
+                            canvas.drawChar(text:outOfBoundsCharacter);
+                        }
+                    }
+
+                    
+                    
+                    //if (obscured[itemX][itemY])
+                    //    if (distance(x0:pointer.x, y0:pointer.y, x1:itemX, y1:itemY) < 5)
+                    //        obscured[itemX][itemY] = false;
+                    
+                    when(scenery[itemX+itemY*width] & IS_OBSCURED_MASK) ::<= {
+                        canvas.drawChar(text:outOfBoundsCharacter);                        
+                    }
+
+
+                    when(symbol == empty && isWalled(x:itemX, y:itemY)) ::<= {
+                        canvas.drawChar(text:wallCharacter);
+                    }
+
+                    when(items != empty && items->keycount > 0) ::<= {
+                        canvas.drawChar(text:if (items[0].discovered) items[0].symbol else '?');
+                    }                    
+
+
+                    when (symbol != empty) ::<= {
+                        canvas.drawChar(text:symbol);
+                    }
+                }             
+            }             
+            
+            
+            // TODO: walls
+            
+            /*
+            entities->foreach(do:::(i, ent) {
+                @itemX = ((ent.x - pointer.x + mapSizeW/2))->floor;
+                @itemY = ((ent.y - pointer.y + mapSizeH/2))->floor;
+            
+                when(itemX < 1 || itemY < 1 || itemX >= mapSizeW || itemY > mapSizeH) empty;
+                canvas.movePen(x:left-1 + itemX, y:top + itemY);  
+                canvas.drawText(text:'*');                
+            });
+            */
+            
+  
+            canvas.movePen(
+                x:left + (mapSizeW/2)->floor,
+                y:top  + (mapSizeH/2)->floor         
+            );
+            
+            canvas.drawText(text:'Ø');
+            //canvas.debugLine = 'Frame took ' + (Time.getTicks() - ticks) + 'ms';
+                    
+        }
+
+        @:retrieveItem = ::(data) {
+            return items->filter(by:::(value) <- value.data == data)[0];
+        }
+        
+        @:putArea = ::<= {
+            @:tryMap = [
+                [0, 0],
+                [-1, -1],
+                [1, 1],
+                [-1, 1],
+                [1, -1],
+                [-2, 0],
+                [ 2, 0],
+                [ 0, 2],
+                [ 0, -2],
+            ];
+            return ::(area, item, symbol, name) {
+                area.occupy()
+                {:::} {                
+                    @iter = 0;
+                    forever ::{
+                        @:offset = tryMap[iter];
+                        iter += 1;
+                        if (iter >= tryMap->size)
+                            iter = 0;
+                            
+                        @location = {
+                            x: (area.x + area.width/2 + offset[0])->floor,
+                            y: (area.y + area.height/2 + offset[1])->floor
+                        }                
+
+                        @:already = this.itemsAt(x:location.x, y:location.y);
+                        when(already != empty && already->keycount) empty;
+                        item.x = location.x;
+                        item.y = location.y;
+
+                        this.setItem(data:item, x:location.x, y:location.y, symbol, discovered:true, name);
+
+
+
+                        send();
+                    }      
+                }          
+            }
+        }        
+
+
+        this.interface = {
+            initialize ::(parent) {
+                parent_ = parent;
+            },
+            defaultLoad ::{},
+            width : {
+                get ::<- width,
+                set ::(value) {
+                    width = value;
+                    @:size = (width*height);
+                    for(0, size)::(i) {
+                        scenery[i] = 0;
+                    }
+                }
+            },
+
+            height : {
+                get ::<- height,
+                set ::(value) {
+                    height = value;
+                    @:size = (width*height);
+                    for(0, size)::(i) {
+                        scenery[i] = 0;
+                    }      
+                }
+            },
+            
+            drawLegend : {
+                get ::<- drawLegend,
+                set ::(value) <- drawLegend = value
+            },
+            
+            enableWall ::(x, y) {
+                scenery[x + y*(width)] |= IS_WALLED_MASK;                
+            },
+            
+            disableWall ::(x, y) {        
+                scenery[x + y*(width)] &= (~IS_WALLED_MASK);
+            },
+            
+            addScenerySymbol ::(character) {
+                @:preIndex = sceneryValues->findIndex(value:character);
+                when(preIndex != -1) preIndex;
+                
+                @:index = sceneryValues->keycount;
+                sceneryValues->push(value:character);
+                return index;
+            },
+            
+            setSceneryIndex ::(
+                x =>Number,
+                y =>Number,
+                symbol => Number
+            ) {
+                @index = x + y*(width);
+                
+                scenery[index] = (scenery[index] & SETTINGS_MASK) | (1+symbol);
+            },
+            
+            
+            fillSceneryIndex ::(
+                symbol => Number
+            ) {
+                for(0, height)::(y) {
+                    for(0, width)::(x) {
+                        @index = x + y*(width);
+                    
+                        scenery[index] = (scenery[index] & SETTINGS_MASK) | (1+symbol);
+                    }      
+                }
+            },            
             setStepAction ::(
                 x => Number,
                 y => Number,
@@ -880,8 +811,6 @@
             },
             
             sceneryAt::(x, y) {
-                @:width = _.width;
-                @:height = _.height;
                 @at = x+(y*width);
                 when(x < 0 || y < 0)
                     outOfBoundsCharacter;
@@ -889,9 +818,9 @@
                 when(x >= width || y >= height)
                     outOfBoundsCharacter;
                     
-                @:index = _.scenery[at] & (~SETTINGS_MASK);
+                @:index = scenery[at] & (~SETTINGS_MASK);
                 when(index == 0) empty;
-                return _.sceneryValues[index-1];
+                return sceneryValues[index-1];
             },
 
             // loads a whole block of graphical scenery 
@@ -1093,7 +1022,7 @@
             },
             
             movePointerToward::(x, y) {
-                @:path = aStarPath(scenery:scenery, start:pointer, goal:{x:x, y:y});                
+                @:path = aStarPath(start:pointer, goal:{x:x, y:y});                
                 when(path == empty || path->keycount == 0) empty;
                 
                 this.setPointer(
@@ -1117,8 +1046,8 @@
                 @:ent = retrieveItem(data);            
 
                 when(useBFS != empty)
-                    bfsPath(width, height, start:ent, goal:{x:x, y:y});
-                @:path = aStarPath(scenery:scenery, start:ent, goal:{x:x, y:y});
+                    bfsPath(start:ent, goal:{x:x, y:y});
+                @:path = aStarPath(start:ent, goal:{x:x, y:y});
                 when(path == empty || path->keycount == 0) empty;
                 return path;
             },

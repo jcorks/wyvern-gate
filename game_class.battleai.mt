@@ -24,20 +24,20 @@
 @:BattleAI = LoadableClass.create(
     name: 'Wyvern.BattleAI',
     items : [],
-    constructor:: {},
+    constructor::($) {},
     interface : {
-        initialize::(user) {
-            _.user = user;
+        initialize::($, user) {
+            $.user = user;
         },
             
         defaultLoad ::{},
 
         setUser ::(user) {
-            _.user = user;
+            $.user = user;
         },
             
-        takeTurn ::(battle, enemies, allies){
-            @:user_ = _.user;
+        takeTurn ::($, battle, enemies, allies){
+            @:user_ = $.user;
             @:Entity = import(module:'game_class.entity.mt');
             @:defaultAttack = ::{
                 battle.entityCommitAction(action:BattleAction.new(

@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-@:lclass = import(module:'game_function.lclass.mt');
+@:class = import(module:'Matte.Core.Class');
 
 @:TYPE = {
     NEUTRAL    : 0,
@@ -34,59 +34,63 @@
     AP : 1
 }
 
-@:Damage = lclass(
+@:Damage = class(
     name: 'Wyvern.Damage',
     statics : {
-        TYPE : TYPE,
-        CLASS : CLASS
+        TYPE : {get::<-TYPE},
+        CLASS : {get::<-CLASS}
     },
-    
-    constructor = ::(amount => Number, damageType => Number, damageClass => Number) {
-        amount = (amount)->ceil;
-        if (amount <= 0) amount = 1;// minimum of 1 damage
-        _.amount = amount;
-        _.type = damageType;
-        _.dclass = damageClass;
-    };    
-    
-    
-    interface : {
-    
-        reduce ::(byRatio) {
-            _.amount *= byRatio;
-        },
+    define:::(this) {
+        @type_;
+        @amount_;
+        @dclass;
         
-        amount : {
-            get :: {
-                return _.amount;
+        this.constructor = ::(amount => Number, damageType => Number, damageClass => Number) {
+            amount_ = (amount)->ceil;
+            if (amount_ <= 0) amount_ = 1;// minimum of 1 damage
+            type_ = damageType;
+            dclass = damageClass;
+        };
+        
+        this.interface = {
+        
+            reduce ::(byRatio) {
+                amount_ *= byRatio;
             },
             
-            set ::(value => Number) {
-                _.amount_= value->ceil;
-                if (_.amount <= 0) _.amount = 0;
-            }
-        },
-        
-        damageType : {
-            get :: {
-                return _.type;
+            amount : {
+                get :: {
+                    return amount_;
+                },
+                
+                set ::(value => Number) {
+                    amount_ = value->ceil;
+                    if (amount_ <= 0) amount_ = 0;
+                }
             },
             
-            set ::(value => Number) {
-                _.type = value;
-            }
-        },
-        
-        damageClass : {
-            get :: {
-                return _.dclass;
+            damageType : {
+                get :: {
+                    return type_;
+                },
+                
+                set ::(value => Number) {
+                    type_ = value;
+                }
             },
             
-            set ::(value => Number) {
-                _.dclass = value;
+            damageClass : {
+                get :: {
+                    return dclass;
+                },
+                
+                set ::(value => Number) {
+                    dclass = value;
+                }
+            
             }
-        }
-    
-    }    
+        
+        }    
+    }
 );
 return Damage;

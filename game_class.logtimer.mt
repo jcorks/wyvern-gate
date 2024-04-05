@@ -1,34 +1,37 @@
-@:lclass = import(module:'game_function.lclass.mt');
+@:class = import(module:'Matte.Core.Class');
 @:time = import(module:'Matte.System.Time');
 
-return lclass(
-    constructor ::{
-        _.trials = [];
-    },
-    interface : {
-        start:: {
-            _.currentTrial = {delta : time.getTicks()}
-        },
-        
-        end::(note => String) {
-            _.currentTrial.note  = note;
-            _.currentTrial.delta = time.getTicks() - _.currentTrial.delta;
-            _.trials->push(value:_.currentTrial);
-            _.currentTrial = empty;
-        },
-                    
-        clearTrials ::{
-            _.trials = [];
-        },
+return class(
+    define:::(this) {
+        @currentTrial;
+        @trials = [];
+    
+        this.interface = {
+            start:: {
+                currentTrial = {delta : time.getTicks()}
+            },
+            
+            end::(note => String) {
+                currentTrial.note  = note;
+                currentTrial.delta = time.getTicks() - currentTrial.delta;
+                trials->push(value:currentTrial);
+                currentTrial = empty;
+            },
+                        
+            clearTrials ::{
+                trials = [];
+            },
 
-        trials : {
-            get :: {
-                @out = [];
-                foreach(_.trials)::(i, trial) {
-                    out->push(value:'{['+trial.note+'] -> ' + trial.delta + '}');
+            trials : {
+                get :: {
+                    @out = [];
+                    foreach(trials)::(i, trial) {
+                        out->push(value:'{['+trial.note+'] -> ' + trial.delta + '}');
+                    }
+                    return out;
                 }
-                return out;
             }
-        }
-    }    
+
+        }    
+    }
 );
