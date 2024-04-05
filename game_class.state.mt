@@ -30,6 +30,10 @@
 @:TAG__LOADABLE_CLASS = '$c';
 @:TAG__SPARSE_ARRAY = '$sa';
 
+@:isTag = {};
+isTag[TAG__IS_DATABASE] = true;
+isTag[TAG__LOADABLE_CLASS] = true;
+isTag[TAG__SPARSE_ARRAY] = true;
 
 @DEBUG_SERIALIZED = empty;
 @DEBUG_SERIALIZED_REV = empty;
@@ -114,8 +118,10 @@
     @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
     match(value->type) {
       (Number, String, Boolean, Empty):::<= {
+        when(isTag[key]) empty;
         output[key] = value
       },
+
       
       default: ::<= {
         when(value[TAG__LOADABLE_CLASS] != empty) ::<= {
@@ -180,27 +186,21 @@ return {
         DEBUG_SERIALIZED = empty;
         DEBUG_SERIALIZED_REV = empty;    
     },
-    new ::(items)  {
-        items = {...items};
-        @:keys = {'save':true, 'load':true};
-        foreach(items) ::(k => String, value) {
-            keys[k] = true;
-        }
-        
-        @:output = {};
-        items.save = :: {
-        
+    
+    create ::(items) {
+
+        items.save = ::($) {
             @:serialized = {};
-            foreach(items) ::(key, value) {
+            foreach($) ::(key, value) {
                 when(key == 'save' || key == 'load') empty; // skip
                 serialized[key] = serialize(value);
             }
             return serialized;
         };
             
-        items.load = ::(parent, loadFirst, serialized) {
+        items.load = ::($, parent, loadFirst, serialized) {
 
-
+            @:output = $;// free clone
             if (parent == empty)
                 error(detail:'state loading parent MUST be present. (parent parameter must be set to something)');
 
@@ -208,7 +208,7 @@ return {
                 foreach(serialized) ::(key, value) {
                     deserialize(
                         parent, 
-                        output:items,
+                        output,
                         key,
                         value
                     );
@@ -219,7 +219,7 @@ return {
             foreach(loadFirst) ::(i, key) {
                 deserialize(
                     parent, 
-                    output:items,
+                    output,
                     key,
                     value:serialized[key]
                 );
@@ -229,33 +229,33 @@ return {
                 when(loaded[key] != empty) empty;
                 deserialize(
                     parent, 
-                    output:items,
+                    output,
                     key,
                     value
                 );
             }
+        }        
+        @:types = {};
+        
+        
+        foreach(items) ::(k, v) {
+            types[k] = if (v == empty) Nullable else v->type;
         }
-        @:reactor = {
-            set ::(key, value) {
-                if (keys[key] == empty)
-                    error(detail:'State has no member named ' + key);
-                items[key] = value;
-            },
-            
-            get ::(key) {
-                if (keys[key] == empty)
-                    error(detail:'State has no member named ' + key);
-                return items[key];                    
+        @:type = Object.newType(
+            layout : types,
+            name : 'State'
+        );
+                
+        
+        return {
+            type : type,
+            new ::{
+                @:obj = Object.instantiate(type);
+                foreach(items) ::(k, v){
+                    obj[k] = v;
+                }
+                return obj;
             }
         }
-        
-        output->setAttributes(
-            attributes : {
-                '.' : reactor,
-                '[]' : reactor
-            }
-        )
-        
-        return output;
     }
 }

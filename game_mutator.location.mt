@@ -1724,18 +1724,18 @@ Location.database.newEntry(data:{
 @:Location = databaseItemMutatorClass(
     name: 'Wyvern.Location',
     items : {
-        worldID : empty,
+        worldID : 0,
         targetLandmark : empty, // where this location could take the party. Could be a different island in theory
         targetLandmarkEntry : empty, // where in the landmark to take to. Should be an X-Y if populated, else its the locations responsibility to populate as needed.
         base : empty,
         occupants : empty, // entities. non-owners can shift
         ownedBy : empty,// entity
-        description : empty,
+        description : '',
         inventory : empty,
         x : 0,
         y : 0,
         contested : false,
-        name : empty,
+        name : '',
         data : empty, // simple table
         visited : false,
         modData : empty

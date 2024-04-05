@@ -3178,24 +3178,24 @@ Item.database.newEntry(data : {
         quality : empty,
         material : empty,
         apparel : empty,
-        customPrefix : empty,
-        customName : empty,
-        description : empty,
-        hasEmblem : empty,
-        size : empty,
-        price : empty,
+        customPrefix : '',
+        customName : '',
+        description : '',
+        hasEmblem : false,
+        size : 0,
+        price : 0,
         color : empty,
         island : empty,
-        islandLevelHint : empty,
-        islandNameHint : empty,
-        islandTierHint : empty,
+        islandLevelHint : 0,
+        islandNameHint : '',
+        islandTierHint : 0,
         islandExtraLandmarks : empty,
-        improvementsLeft : empty,
-        improvementsStart : empty,
+        improvementsLeft : 0,
+        improvementsStart : 0,
         equipEffects : empty,
         useEffects : empty,
         intuition : 0,
-        ability : empty,
+        ability : '',
         stats : empty,
         design : empty,
         modData : empty
@@ -3275,7 +3275,7 @@ Item.database.newEntry(data : {
         
         
         @:recalculateName = ::{
-            when (state.customPrefix)
+            when (state.customPrefix != '')
                 state.customName = state.customPrefix + getEnchantTag();
 
 
@@ -3369,7 +3369,7 @@ Item.database.newEntry(data : {
             state.description = String.combine(strings:[
                 base.description,
                 ' ',
-                (if (state.ability == empty) '' else 'If equipped, grants the ability: "' + Ability.find(id:state.ability).name + '". '),
+                (if (state.ability == '') '' else 'If equipped, grants the ability: "' + Ability.find(id:state.ability).name + '". '),
                 if (state.size == empty) '' else 'It is ' + sizeToString() + '. ',
                 if (state.hasEmblem) (
                     if (base.isApparel) 
@@ -3403,7 +3403,12 @@ Item.database.newEntry(data : {
                 state.equipEffects = [];
                 state.useEffects = [];
                 state.stats = StatSet.new();
-                state.ability = if (abilityHint) abilityHint else random.pickArrayItem(list:base.possibleAbilities);
+                state.ability = ::<= {
+                    when (abilityHint) abilityHint;
+                    @:out = random.pickArrayItem(list:base.possibleAbilities);
+                    when(out == empty) '';
+                    return out;
+                }
                 state.base = base;
                 state.stats.add(stats:base.equipMod);
                 state.price = base.basePrice;
@@ -3542,7 +3547,7 @@ Item.database.newEntry(data : {
             
             name : {
                 get :: {
-                    when (state.customName != empty) state.customName;
+                    when (state.customName != '') state.customName;
                     return state.base.name;
                 },
                 
@@ -3594,7 +3599,7 @@ Item.database.newEntry(data : {
             },
 
             ability : {
-                get ::<- state.ability
+                get ::<- if (state.ability == '') empty else state.ability
             },
             
             equipEffects : {

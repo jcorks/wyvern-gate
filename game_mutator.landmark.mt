@@ -18,6 +18,18 @@
 @:class = import(module:'Matte.Core.Class');
 @:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
 @:Database = import(module:'game_class.database.mt');
+@:State = import(module:'game_class.state.mt');
+
+
+@:StateType = State.create(
+    items : {
+        x : 0,
+        y : 0,
+        floorHint : 0,
+        base : empty,
+        isSparse : true    
+    }
+);
 
 
 @:TYPE = {
@@ -680,8 +692,8 @@ Landmark.database.newEntry(
 @:Landmark = databaseItemMutatorClass(  
     name : 'Wyvern.Landmark',
     items : {
-        worldID : empty,
-        name : empty,
+        worldID : 0,
+        name : '',
         x : 0,
         y : 0,
         discovered : false,
@@ -692,7 +704,7 @@ Landmark.database.newEntry(
         modData : empty,
         events : empty,
         mapEntityController : empty,
-        overrideTitle : empty
+        overrideTitle : ''
     },
     
     database : Database.new(
@@ -734,7 +746,6 @@ Landmark.database.newEntry(
         @:DungeonMap = import(module:'game_singleton.dungeonmap.mt');
         @:StructureMap = import(module:'game_class.structuremap.mt');
         @:distance = import(module:'game_function.distance.mt');
-        @:State = import(module:'game_class.state.mt');
         @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
         @:Map = import(module:'game_class.map.mt');
         @:windowEvent = import(module:'game_singleton.windowevent.mt');
@@ -908,28 +919,22 @@ Landmark.database.newEntry(
                 when (state.base.canSave)
                     state.save();
                 
-                return State.new(
-                    items: {
-                        x : state.x,
-                        y : state.y,
-                        floorHint : state.floor,
-                        base : state.base,
-                        isSparse : true
-                    }
-                ).save()
+                
+                @:st = StateType.new();
+                st. = {
+                    x : state.x,
+                    y : state.y,
+                    floorHint : state.floor,
+                    base : state.base,
+                    isSparse : true
+                }
+                return st.save()
+                
             },
             load ::(serialized) { 
                 
                 if (serialized.isSparse) ::<= {
-                    @:sparse = State.new(
-                        items: {
-                            x : state.x,
-                            y : state.y,
-                            floorHint : state.floor,
-                            base : state.base,
-                            isSparse : true
-                        }
-                    );
+                    @:sparse = StateType.new();
                     sparse.load(parent:this, serialized);
                     this.defaultLoad(
                         base: sparse.base,

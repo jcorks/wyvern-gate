@@ -137,37 +137,37 @@
         },
     },
     items : {
-        worldID : empty,
+        worldID : 0,
         stats  : empty,
-        hp  : empty,
-        ap  : empty,
+        hp  : 0,
+        ap  : 0,
         flags  : empty,
-        isDead  : empty,
-        name  : empty,
-        nickname  : empty,
+        isDead  : false,
+        name  : '',
+        nickname  : '',
         species   : empty,
-        profession  : empty,
+        profession  : 0,
         personality   : empty,
         emotionalState  : empty,
         favoritePlace  : empty,
         favoriteItem : empty,
         growth : empty,
-        qualityDescription : empty,
+        qualityDescription : '',
         qualitiesHint : empty,
         faveWeapon : empty,
-        adventurous : empty,
+        adventurous : false,
         battleAI : empty,
-        aiAbilityChance : empty,
+        aiAbilityChance : 0,
         professions : empty,
         canMake : empty,
         innateEffects : empty,
-        forceDrop : empty,
+        forceDrop : false,
         equips : empty,
         abilitiesAvailable : empty,
         abilitiesLearned : empty,
         inventory : empty,
-        expNext : empty,
-        level : empty,
+        expNext : 1,
+        level : 0,
         modData : empty
     },
     
@@ -567,7 +567,7 @@
             
             name : {
                 get :: {
-                    when (state.nickname != empty) state.nickname;
+                    when (state.nickname != '') state.nickname;
                     return state.name;
                 },
                 
@@ -1663,7 +1663,7 @@
             },
             
             describeQualities ::{
-                when (state.qualityDescription) state.qualityDescription;
+                when (state.qualityDescription != '') state.qualityDescription;
                 
                 @qualities = state.qualitiesHint;
                 

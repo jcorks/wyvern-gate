@@ -1458,8 +1458,8 @@ ItemEnchant.database.newEntry(
     name : 'Wyvern.ItemEnchant',
     items : {
         condition : empty,
-        conditionChance : empty,
-        conditionChanceName  : empty   
+        conditionChance : 0,
+        conditionChanceName  : ''
     },
 
     database: Database.new(

@@ -569,10 +569,10 @@ EntityQuality.database.newEntry(
 @:EntityQuality = databaseItemMutatorClass(
     name : 'Wyvern.EntityQuality',
     items : {
-        trait0 : empty,
-        trait1 : empty,
-        trait2 : empty,
-        descIndex : empty
+        trait0 : 0,
+        trait1 : 0,
+        trait2 : 0,
+        descIndex : 0
     },
     database : Database.new(
         name : 'Wyvern.EntityQuality.Base',     

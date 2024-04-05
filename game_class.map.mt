@@ -22,6 +22,36 @@
 @:State = import(module:'game_class.state.mt');
 
 
+
+@:StateType = State.create(
+    items : {
+        itemIndexCompressed : empty,
+        entities : empty,
+        compressedItems : empty,
+        dataList : empty,
+        legendEntriesCompressed : empty,
+        title : '',
+
+        pointer : empty,
+        width : 0,
+        height : 0,
+        offsetX : 0,
+        offsetY : 0,
+        drawLegend : false,
+        paged : false,
+        outOfBoundsCharacter : '',
+        wallCharacter : '',
+        //@scenery = MemoryBuffer.new();
+        sceneryCompressed : empty,
+        sceneryValues : empty,
+        stepAction : empty,
+        areas : empty,
+        renderOutOfBounds : false,
+        isDark : false
+    }
+)
+
+
 @BFS_NATIVE;
 {:::} { 
     BFS_NATIVE = getExternalFunction(name:"wyvern_gate__native__bfs");
@@ -1440,65 +1470,38 @@
                 }
                 
             
-                @:state = State.new(
-                    items : {
-                        itemIndexCompressed : itemIndexCompressed,
-                        entities : entities,
-                        compressedItems : compressedItems,
-                        dataList : dataList,
-                        legendEntriesCompressed : legendEntriesCompressed,
-                        title : title,
+                @:state = StateType.new();
+                
+                state. = {
+                    itemIndexCompressed : itemIndexCompressed,
+                    entities : entities,
+                    compressedItems : compressedItems,
+                    dataList : dataList,
+                    legendEntriesCompressed : legendEntriesCompressed,
+                    title : title,
 
-                        pointer : pointer,
-                        width : width,
-                        height : height,
-                        offsetX : offsetX,
-                        offsetY : offsetY,
-                        drawLegend : drawLegend,
-                        paged : paged,
-                        outOfBoundsCharacter : outOfBoundsCharacter,
-                        wallCharacter : wallCharacter,
-                        //@scenery = MemoryBuffer.new();
-                        sceneryCompressed : sceneryCompressed,
-                        sceneryValues : sceneryValues,
-                        stepAction : stepAction,
-                        areas : areas,
-                        renderOutOfBounds : renderOutOfBounds,
-                        isDark : isDark,
-                    }
-                );    
+                    pointer : pointer,
+                    width : width,
+                    height : height,
+                    offsetX : offsetX,
+                    offsetY : offsetY,
+                    drawLegend : drawLegend,
+                    paged : paged,
+                    outOfBoundsCharacter : outOfBoundsCharacter,
+                    wallCharacter : wallCharacter,
+                    //@scenery = MemoryBuffer.new();
+                    sceneryCompressed : sceneryCompressed,
+                    sceneryValues : sceneryValues,
+                    stepAction : stepAction,
+                    areas : areas,
+                    renderOutOfBounds : renderOutOfBounds,
+                    isDark : isDark,
+                }
                 return state.save();        
             },
             
             load ::(serialized) {
-                @:v = State.new(
-                    items : {
-                        itemIndexCompressed : [],
-                        entities : entities,
-                        compressedItems : [],
-                        dataList : [],
-                        legendEntriesCompressed : [],
-                        sceneryCompressed : [],
-                        title : title,
-
-                        pointer : pointer,
-                        width : width,
-                        height : height,
-                        offsetX : offsetX,
-                        offsetY : offsetY,
-                        drawLegend : drawLegend,
-                        paged : paged,
-                        outOfBoundsCharacter : outOfBoundsCharacter,
-                        wallCharacter : wallCharacter,
-                        //@scenery = MemoryBuffer.new();
-                        scenery : scenery,
-                        sceneryValues : sceneryValues,
-                        stepAction : stepAction,
-                        areas : areas,
-                        renderOutOfBounds : renderOutOfBounds,
-                        isDark : isDark,
-                    }
-                );    
+                @:v = StateType.new();
                 v.load(parent:this, serialized);
 
                 entities = v.entities;

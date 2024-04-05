@@ -138,7 +138,7 @@
 @:World = LoadableClass.create(
     name: 'Wyvern.World',
     items : {
-        saveName : empty,
+        saveName : '',
         // 10 steps per turn
         // 10 turns per "time"
         // 14 times per "day"
@@ -146,10 +146,10 @@
         step : 0,
         turn : 0,
         time : TIME.LATE_MORNING,
-        day : empty,
+        day : 0,
         year : 1033,
         party : empty,
-        islandID : empty,
+        islandID : 0,
         orphanedIsland : empty, // IN THE CASE that a user has tossed or otherwise 
                                 // lost the key to the island they are residing in 
                                 // the island becomes orphaned. The world becomes 

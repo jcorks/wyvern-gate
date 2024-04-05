@@ -56,6 +56,8 @@
                 set ::(value) <- state[item] = value
             }
         }
+        interface.save = empty;
+        interface.load = empty;
 
         this.interface = interface;
     }

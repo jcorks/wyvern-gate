@@ -24,8 +24,8 @@
     name: 'Wyvern.Inventory',
     items : {
         items : empty,
-        gold : empty,
-        maxItems : empty
+        gold : 0,
+        maxItems : 0
     },
     define:::(this, state) {
    

@@ -93,31 +93,31 @@
     },
     
     items : {
-        name : empty,
+        name : '',
 
         // minimum level of encountered individuals
-        levelMin : empty,
+        levelMin : 0,
 
         // maximum level of encountered individuals
-        levelMax : empty,
+        levelMax : 0,
 
         // how often encounters happen between turns.
-        encounterRate: empty,        
+        encounterRate: 0,        
 
         // Size of the island... Islands are always square-ish
-        sizeW : empty,
-        sizeH : empty,
+        sizeW : 0,
+        sizeH : 0,
 
         // steps since the last event
-        stepsSinceLastEvent : empty,
+        stepsSinceLastEvent : 0,
 
         // map of the region
         map : empty,
 
-        worldID : empty,
+        worldID : -1,
 
 
-        climate : empty,
+        climate : 0,
 
         events : empty,
 
@@ -128,7 +128,7 @@
         // tier 2-> enemies have 1 to 2 skills and have weapons. Large chests drop Thunder keys 
         // tier 3-> enemies have all skills and have equips. Large chests drop Light keys
         // tier 4-> enemies have a random set of all skills and have full equip sets.
-        tier : empty,
+        tier : 0,
 
 
         // every island has hostile creatures.

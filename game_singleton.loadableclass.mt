@@ -49,9 +49,10 @@ return {
         inherits,
         statics
     ) {
+        @:StateType = State.create(items);
         @:output = class(
             define ::(this) {
-                @:state = State.new(items);
+                @:state = StateType.new();
                 
                 define(this, state);
                 if (this.interface == empty)
