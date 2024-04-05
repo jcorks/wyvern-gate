@@ -177,7 +177,7 @@
     items : {},
     define:::(this, state) {
         @HP_  = 0;
-        @MP_  = 0;
+        @AP_  = 0;
         @ATK_ = 0;
         @INT_ = 0;
         @DEF_ = 0;
@@ -186,7 +186,7 @@
         @DEX_ = 0;
         
         @HPmod  = 0;
-        @MPmod  = 0;
+        @APmod  = 0;
         @ATKmod = 0;
         @INTmod = 0;
         @DEFmod = 0;
@@ -199,7 +199,7 @@
         this.interface = {
             defaultLoad::(HP, AP, ATK, INT, DEF, LUK, SPD, DEX) {
                 if (HP != empty) HP_  = HP;
-                if (AP != empty) MP_  = AP;
+                if (AP != empty) AP_  = AP;
                 if (ATK != empty)ATK_ = ATK;
                 if (INT != empty) INT_ = INT;
                 if (DEF != empty) DEF_ = DEF;
@@ -212,7 +212,7 @@
             isEmpty : {
                 get ::<- 
                     HP_ ==0 &&
-                    MP_ ==0 &&
+                    AP_ ==0 &&
                     ATK_ ==0 &&
                     INT_ ==0 &&
                     DEF_ ==0 &&
@@ -225,7 +225,7 @@
             load::(serialized) {
                 @:value = serialized;
                 HP_ = value.HP;
-                MP_ = value.AP;
+                AP_ = value.AP;
                 ATK_ = value.ATK;
                 INT_ = value.INT;
                 DEF_ = value.DEF;
@@ -234,7 +234,7 @@
                 DEX_ = value.DEX;
 
                 HPmod = value.HPmod;
-                MPmod = value.MPmod;
+                APmod = value.APmod;
                 ATKmod = value.ATKmod;
                 INTmod = value.INTmod;
                 DEFmod = value.DEFmod;
@@ -246,7 +246,7 @@
             save ::{
                 return {
                     HP: HP_,
-                    AP: MP_,
+                    AP: AP_,
                     ATK: ATK_,
                     INT: INT_,
                     DEF: DEF_,
@@ -255,7 +255,7 @@
                     DEX: DEX_,
                     
                     HPmod : HPmod,
-                    MPmod : MPmod,
+                    APmod : APmod,
                     ATKmod : ATKmod,
                     INTmod : INTmod,
                     DEFmod : DEFmod,
@@ -268,7 +268,7 @@
         
             mod ::(stats) {
                 HPmod  += stats.HP;
-                MPmod  += stats.AP;
+                APmod  += stats.AP;
                 ATKmod += stats.ATK;
                 INTmod += stats.INT;
                 DEFmod += stats.DEF;
@@ -279,7 +279,7 @@
             
             modRate ::(stats) {
                 HPmod  += (HP_*(stats.HP/100))->ceil;
-                MPmod  += (MP_*(stats.AP/100))->ceil;
+                APmod  += (AP_*(stats.AP/100))->ceil;
                 ATKmod += (ATK_*(stats.ATK/100))->ceil;
                 INTmod += (INT_*(stats.INT/100))->ceil;
                 DEFmod += (DEF_*(stats.DEF/100))->ceil;
@@ -293,7 +293,7 @@
             
             resetMod :: {
                 HPmod  = 0;
-                MPmod  = 0;
+                APmod  = 0;
                 ATKmod = 0;
                 INTmod = 0;
                 DEFmod = 0;
@@ -304,7 +304,7 @@
             
             add ::(stats) {
                 HP_  += stats.HP;
-                MP_  += stats.AP;
+                AP_  += stats.AP;
                 ATK_ += stats.ATK;
                 INT_ += stats.INT;
                 DEF_ += stats.DEF;
@@ -315,7 +315,7 @@
             
             subtract ::(stats) {
                 HP_  -= stats.HP;
-                MP_  -= stats.AP;
+                AP_  -= stats.AP;
                 ATK_ -= stats.ATK;
                 INT_ -= stats.INT;
                 DEF_ -= stats.DEF;
@@ -331,7 +331,7 @@
             },
             AP : {
                 get ::{
-                    return (MP_ + MPmod)->floor;
+                    return (AP_ + APmod)->floor;
                 }
             },        
             ATK : {
@@ -366,7 +366,7 @@
             },
             
             sum : {
-                get ::<- (HP_ + MP_ + ATK_ + INT_ + DEF_ + LUK_ + SPD_ + DEX_)
+                get ::<- (HP_ + AP_ + ATK_ + INT_ + DEF_ + LUK_ + SPD_ + DEX_)
             },
             
             printDiff ::(other, prompt, renderable) {
@@ -390,7 +390,7 @@
                 get :: {
                     return 
                         'HP:  ' + HP_ + '\n' +
-                        'AP:  ' + MP_ + '\n' +
+                        'AP:  ' + AP_ + '\n' +
                         'ATK: ' + ATK_ + '\n' +
                         'DEF: ' + DEF_ + '\n' +
                         'INT: ' + INT_ + '\n' +
@@ -405,7 +405,7 @@
                 get :: {
                     return 
                         'HP:  ' + (if(HP_ > 0) '+' + HP_ + '%\n' else if (HP_ == 0) '--\n' else ''+HP_+ '%\n') +
-                        'AP:  ' + (if(MP_ > 0) '+' + MP_ + '%\n' else if (MP_ == 0) '--\n' else ''+MP_+ '%\n') +
+                        'AP:  ' + (if(AP_ > 0) '+' + AP_ + '%\n' else if (AP_ == 0) '--\n' else ''+AP_+ '%\n') +
                         'ATK: ' + (if(ATK_ > 0) '+' + ATK_ + '%\n' else if (ATK_ == 0) '--\n' else ''+ATK_+ '%\n') +
                         'DEF: ' + (if(DEF_ > 0) '+' + DEF_ + '%\n' else if (DEF_ == 0) '--\n' else ''+DEF_+ '%\n') +
                         'INT: ' + (if(INT_ > 0) '+' + INT_ + '%\n' else if (INT_ == 0) '--\n' else ''+INT_+ '%\n') +

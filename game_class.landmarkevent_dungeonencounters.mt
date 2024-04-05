@@ -16,7 +16,8 @@
     name: 'Wyvern.LandmarkEvent.DungeonEncounters',
     items : {
         encountersOnFloor : 0,
-        isBusy : false
+        isBusy : false,
+        maxEncounters : 0
     },
 
     define:::(this, state) {
@@ -119,6 +120,15 @@
 
             defaultLoad ::{
                 state.isBusy = if (landmark_.floor == 0) false else random.try(percentSuccess:10);
+                state.maxEncounters = if (state.isBusy) 
+                    5
+                else 
+                    (if (landmark_.floor == 0) 
+                        0 
+                    else 
+                        (2+(landmark_.floor/3)->round)
+                    )
+                ;
             },
             
             step::{
@@ -129,17 +139,14 @@
                 @recCount = if (state.isBusy) 
                     5
                 else 
-                    (if (landmark_.floor == 0) 
-                        0 
-                    else 
-                        (2+(landmark_.floor/4)->ceil)
-                    )
+                    (1+(landmark_.floor/4)->round)
                 ;                                    
 
                 @:world = import(module:'game_singleton.world.mt');
     
                 if (!world.battle.isActive &&
                     entities->keycount < recCount && 
+                    state.encountersOnFloor < state.maxEncounters && 
                     landmark_.base.peaceful == false && 
                         (   
                             state.isBusy 
