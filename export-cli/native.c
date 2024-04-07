@@ -13,7 +13,7 @@
 
 
 
-#define CHECK_ARG(__V__, __T__) if((__V__).binID != __T__) assert(!"Incorrect parameter value.");
+#define CHECK_ARG(__V__, __T__) if(matte_value_type(__V__) != __T__) assert(!"Incorrect parameter value.");
 
 
 
