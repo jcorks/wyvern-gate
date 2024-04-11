@@ -19,7 +19,7 @@
 @:Database = import(module:'game_class.database.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 
 
@@ -1271,7 +1271,7 @@ Profession.database.newEntry(data:{
 }
 
 
-@:Profession = databaseItemMutatorClass(
+@:Profession = databaseItemMutatorClass.create(
     name : 'Wyvern.Profession.Instance',
 
     items : {

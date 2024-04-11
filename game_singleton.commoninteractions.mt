@@ -10,7 +10,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:namegen = import(module:'game_singleton.namegen.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 @:BattleAction = import(module:'game_struct.battleaction.mt');
 @:Ability = import(module:'game_database.ability.mt');
 

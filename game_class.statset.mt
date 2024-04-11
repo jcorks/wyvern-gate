@@ -33,7 +33,7 @@
 ]
 
 
-@:StatSet = LoadableClass.create(
+@:StatSet = LoadableClass.createLight(
     name : 'Wyvern.Entity.StatSet',
     statics: {
 
@@ -174,246 +174,208 @@
             ]);      
         }
     },
-    items : {},
-    define:::(this, state) {
-        @HP_  = 0;
-        @AP_  = 0;
-        @ATK_ = 0;
-        @INT_ = 0;
-        @DEF_ = 0;
-        @LUK_ = 0;
-        @SPD_ = 0;
-        @DEX_ = 0;
+    items : {
+        HP : 0,
+        AP : 0,
+        ATK : 0,
+        INT : 0,
+        DEF : 0,
+        LUK : 0,
+        SPD : 0,
+        DEX : 0,
         
-        @HPmod  = 0;
-        @APmod  = 0;
-        @ATKmod = 0;
-        @INTmod = 0;
-        @DEFmod = 0;
-        @SPDmod = 0;
-        @LUKmod = 0;
-        @DEXmod = 0;
-        ;
-        
-        
-        this.interface = {
-            defaultLoad::(HP, AP, ATK, INT, DEF, LUK, SPD, DEX) {
-                if (HP != empty) HP_  = HP;
-                if (AP != empty) AP_  = AP;
-                if (ATK != empty)ATK_ = ATK;
-                if (INT != empty) INT_ = INT;
-                if (DEF != empty) DEF_ = DEF;
-                if (LUK != empty) LUK_ = LUK;
-                if (SPD != empty) SPD_ = SPD;
-                if (DEX != empty) DEX_ = DEX;   
-                return this;
-            },
+        HPmod : 0,
+        APmod : 0,
+        ATKmod : 0,
+        INTmod : 0,
+        DEFmod : 0,
+        SPDmod : 0,
+        LUKmod : 0,
+        DEXmod : 0
+    },
+    
+    private : {},
+
+    interface : {
+        defaultLoad::(HP, AP, ATK, INT, DEF, LUK, SPD, DEX) {
+            @:state = _.state;
+            if (HP != empty) state.HP  = HP;
+            if (AP != empty) state.AP  = AP;
+            if (ATK != empty) state.ATK = ATK;
+            if (INT != empty) state.INT = INT;
+            if (DEF != empty) state.DEF = DEF;
+            if (LUK != empty) state.LUK = LUK;
+            if (SPD != empty) state.SPD = SPD;
+            if (DEX != empty) state.DEX = DEX;   
+        },
             
-            isEmpty : {
-                get ::<- 
-                    HP_ ==0 &&
-                    AP_ ==0 &&
-                    ATK_ ==0 &&
-                    INT_ ==0 &&
-                    DEF_ ==0 &&
-                    LUK_ ==0 &&
-                    SPD_ ==0 &&
-                    DEX_ ==0                    
-            },
+        isEmpty : {
+            get :: {
+                @:state = _.state;
+                return
+                state.HP_ ==0 &&
+                state.AP_ ==0 &&
+                state.ATK_ ==0 &&
+                state.INT_ ==0 &&
+                state.DEF_ ==0 &&
+                state.LUK_ ==0 &&
+                state.SPD_ ==0 &&
+                state.DEX_ ==0                    
+            }
+        },
 
 
-            load::(serialized) {
-                @:value = serialized;
-                HP_ = value.HP;
-                AP_ = value.AP;
-                ATK_ = value.ATK;
-                INT_ = value.INT;
-                DEF_ = value.DEF;
-                LUK_ = value.LUK;
-                SPD_ = value.SPD;
-                DEX_ = value.DEX;
-
-                HPmod = value.HPmod;
-                APmod = value.APmod;
-                ATKmod = value.ATKmod;
-                INTmod = value.INTmod;
-                DEFmod = value.DEFmod;
-                LUKmod = value.LUKmod;
-                SPDmod = value.SPDmod;
-                DEXmod = value.DEXmod;
-            },
+    
+        mod ::(stats) {
+            @:state = _.state;
+            state.HPmod  += stats.HP;
+            state.APmod  += stats.AP;
+            state.ATKmod += stats.ATK;
+            state.INTmod += stats.INT;
+            state.DEFmod += stats.DEF;
+            state.LUKmod += stats.LUK;
+            state.SPDmod += stats.SPD;
+            state.DEXmod += stats.DEX;            
+        },
             
-            save ::{
-                return {
-                    HP: HP_,
-                    AP: AP_,
-                    ATK: ATK_,
-                    INT: INT_,
-                    DEF: DEF_,
-                    LUK: LUK_,
-                    SPD: SPD_,
-                    DEX: DEX_,
+        modRate ::(stats) {
+            @:state = _.state;
+            state.HPmod  += (state.HP*(stats.HP/100))->ceil;
+            state.APmod  += (state.AP*(stats.AP/100))->ceil;
+            state.ATKmod += (state.ATK*(stats.ATK/100))->ceil;
+            state.INTmod += (state.INT*(stats.INT/100))->ceil;
+            state.DEFmod += (state.DEF*(stats.DEF/100))->ceil;
+            state.LUKmod += (state.LUK*(stats.LUK/100))->ceil;
+            state.SPDmod += (state.SPD*(stats.SPD/100))->ceil;
+            state.DEXmod += (state.DEX*(stats.DEX/100))->ceil;    
+            
                     
-                    HPmod : HPmod,
-                    APmod : APmod,
-                    ATKmod : ATKmod,
-                    INTmod : INTmod,
-                    DEFmod : DEFmod,
-                    SPDmod : SPDmod,
-                    LUKmod : LUKmod,
-                    DEXmod : DEXmod
-                }                
-                
-            },
         
-            mod ::(stats) {
-                HPmod  += stats.HP;
-                APmod  += stats.AP;
-                ATKmod += stats.ATK;
-                INTmod += stats.INT;
-                DEFmod += stats.DEF;
-                LUKmod += stats.LUK;
-                SPDmod += stats.SPD;
-                DEXmod += stats.DEX;            
-            },
+        },
             
-            modRate ::(stats) {
-                HPmod  += (HP_*(stats.HP/100))->ceil;
-                APmod  += (AP_*(stats.AP/100))->ceil;
-                ATKmod += (ATK_*(stats.ATK/100))->ceil;
-                INTmod += (INT_*(stats.INT/100))->ceil;
-                DEFmod += (DEF_*(stats.DEF/100))->ceil;
-                LUKmod += (LUK_*(stats.LUK/100))->ceil;
-                SPDmod += (SPD_*(stats.SPD/100))->ceil;
-                DEXmod += (DEX_*(stats.DEX/100))->ceil;    
-                
-                        
+        resetMod :: {
+            @:state = _.state;
+            state.HPmod  = 0;
+            state.APmod  = 0;
+            state.ATKmod = 0;
+            state.INTmod = 0;
+            state.DEFmod = 0;
+            state.SPDmod = 0;
+            state.LUKmod = 0;
+            state.DEXmod = 0;
+        },
             
-            },
+        add ::(stats) {
+            @:state = _.state;
+            state.HP  += stats.HP;
+            state.AP  += stats.AP;
+            state.ATK += stats.ATK;
+            state.INT += stats.INT;
+            state.DEF += stats.DEF;
+            state.LUK += stats.LUK;
+            state.SPD += stats.SPD;
+            state.DEX += stats.DEX;   
+        },
             
-            resetMod :: {
-                HPmod  = 0;
-                APmod  = 0;
-                ATKmod = 0;
-                INTmod = 0;
-                DEFmod = 0;
-                SPDmod = 0;
-                LUKmod = 0;
-                DEXmod = 0;
-            },
+        subtract ::(stats) {
+            @:state = _.state;
+            state.HP  -= stats.HP;
+            state.AP  -= stats.AP;
+            state.ATK -= stats.ATK;
+            state.INT -= stats.INT;
+            state.DEF -= stats.DEF;
+            state.LUK -= stats.LUK;
+            state.SPD -= stats.SPD;
+            state.DEX -= stats.DEX;               
+        },
             
-            add ::(stats) {
-                HP_  += stats.HP;
-                AP_  += stats.AP;
-                ATK_ += stats.ATK;
-                INT_ += stats.INT;
-                DEF_ += stats.DEF;
-                LUK_ += stats.LUK;
-                SPD_ += stats.SPD;
-                DEX_ += stats.DEX;   
-            },
+        HP : {
+            get ::{
+                return (_.state.HP + _.state.HPmod)->floor;
+            }
+        },
+        AP : {
+            get ::{
+                return (_.state.AP + _.state.APmod)->floor;
+            }
+        },        
+        ATK : {
+            get ::{
+                return (_.state.ATK + _.state.ATKmod)->floor;
+            }
+        },
+        INT : {
+            get ::{
+                return (_.state.INT + _.state.INTmod)->floor;
+            }
+        },
+        DEF : {
+            get ::{
+                return (_.state.DEF + _.state.DEFmod)->floor;
+            }
+        },
+        LUK : {
+            get ::{
+                return (_.state.LUK + _.state.LUKmod)->floor;
+            }
+        },
+        SPD : {
+            get ::{
+                return (_.state.SPD + _.state.SPDmod)->floor;
+            }
+        },
+        DEX : {
+            get ::{
+                return (_.state.DEX + _.state.DEXmod)->floor;
+            }
+        },
+        
+        printDiff ::(other, prompt, renderable) {
+            windowEvent.queueDisplay(
+                prompt,
+                pageAfter: 10,
+                renderable,
+                lines : StatSet.diffToLines(stats:_.this, other)            
+            );
+        },
             
-            subtract ::(stats) {
-                HP_  -= stats.HP;
-                AP_  -= stats.AP;
-                ATK_ -= stats.ATK;
-                INT_ -= stats.INT;
-                DEF_ -= stats.DEF;
-                LUK_ -= stats.LUK;
-                SPD_ -= stats.SPD;
-                DEX_ -= stats.DEX;               
-            },
+        printDiffRate ::(other, prompt) {
+            windowEvent.queueDisplay(
+                prompt,
+                pageAfter: 10,
+                lines: StatSet.diffRateToLines(stats:_.this, other)
+            );
+        },
             
-            HP : {
-                get ::{
-                    return (HP_ + HPmod)->floor;
-                }
-            },
-            AP : {
-                get ::{
-                    return (AP_ + APmod)->floor;
-                }
-            },        
-            ATK : {
-                get ::{
-                    return (ATK_ + ATKmod)->floor;
-                }
-            },
-            INT : {
-                get ::{
-                    return (INT_ + INTmod)->floor;
-                }
-            },
-            DEF : {
-                get ::{
-                    return (DEF_ + DEFmod)->floor;
-                }
-            },
-            LUK : {
-                get ::{
-                    return (LUK_ + LUKmod)->floor;
-                }
-            },
-            SPD : {
-                get ::{
-                    return (SPD_ + SPDmod)->floor;
-                }
-            },
-            DEX : {
-                get ::{
-                    return (DEX_ + DEXmod)->floor;
-                }
-            },
-            
-            sum : {
-                get ::<- (HP_ + AP_ + ATK_ + INT_ + DEF_ + LUK_ + SPD_ + DEX_)
-            },
-            
-            printDiff ::(other, prompt, renderable) {
-                windowEvent.queueDisplay(
-                    prompt,
-                    pageAfter: 10,
-                    renderable,
-                    lines : StatSet.diffToLines(stats:this, other)            
-                );
-            },
-            
-            printDiffRate ::(other, prompt) {
-                windowEvent.queueDisplay(
-                    prompt,
-                    pageAfter: 10,
-                    lines: StatSet.diffRateToLines(stats:this, other)
-                );
-            },
-            
-            description : {
-                get :: {
-                    return 
-                        'HP:  ' + HP_ + '\n' +
-                        'AP:  ' + AP_ + '\n' +
-                        'ATK: ' + ATK_ + '\n' +
-                        'DEF: ' + DEF_ + '\n' +
-                        'INT: ' + INT_ + '\n' +
-                        'SPD: ' + SPD_ + '\n' +
-                        'LUK: ' + LUK_ + '\n' +
-                        'DEX: ' + DEX_ + '\n'
-                    ;
-                }
-            },
+        description : {
+            get :: {
+                @:state = _.state;
+                return 
+                    'HP:  ' + state.HP + '\n' +
+                    'AP:  ' + state.AP + '\n' +
+                    'ATK: ' + state.ATK + '\n' +
+                    'DEF: ' + state.DEF + '\n' +
+                    'INT: ' + state.INT + '\n' +
+                    'SPD: ' + state.SPD + '\n' +
+                    'LUK: ' + state.LUK + '\n' +
+                    'DEX: ' + state.DEX + '\n'
+                ;
+            }
+        },
 
-            descriptionRate : {
-                get :: {
-                    return 
-                        'HP:  ' + (if(HP_ > 0) '+' + HP_ + '%\n' else if (HP_ == 0) '--\n' else ''+HP_+ '%\n') +
-                        'AP:  ' + (if(AP_ > 0) '+' + AP_ + '%\n' else if (AP_ == 0) '--\n' else ''+AP_+ '%\n') +
-                        'ATK: ' + (if(ATK_ > 0) '+' + ATK_ + '%\n' else if (ATK_ == 0) '--\n' else ''+ATK_+ '%\n') +
-                        'DEF: ' + (if(DEF_ > 0) '+' + DEF_ + '%\n' else if (DEF_ == 0) '--\n' else ''+DEF_+ '%\n') +
-                        'INT: ' + (if(INT_ > 0) '+' + INT_ + '%\n' else if (INT_ == 0) '--\n' else ''+INT_+ '%\n') +
-                        'SPD: ' + (if(SPD_ > 0) '+' + SPD_ + '%\n' else if (SPD_ == 0) '--\n' else ''+SPD_+ '%\n') +
-                        'LUK: ' + (if(LUK_ > 0) '+' + LUK_ + '%\n' else if (LUK_ == 0) '--\n' else ''+LUK_+ '%\n') +
-                        'DEX: ' + (if(DEX_ > 0) '+' + DEX_ + '%\n' else if (DEX_ == 0) '--\n' else ''+DEX_+ '%\n')
-                    ;
-                }
+        descriptionRate : {
+            get :: {
+                @:state = _.state;
+                return 
+                    'HP:  ' + (if(state.HP > 0) '+' + state.HP + '%\n' else if (state.HP == 0) '--\n' else ''+state.HP+ '%\n') +
+                    'AP:  ' + (if(state.AP > 0) '+' + state.AP + '%\n' else if (state.AP == 0) '--\n' else ''+state.AP+ '%\n') +
+                    'ATK: ' + (if(state.ATK > 0) '+' + state.ATK + '%\n' else if (state.ATK == 0) '--\n' else ''+state.ATK+ '%\n') +
+                    'DEF: ' + (if(state.DEF > 0) '+' + state.DEF + '%\n' else if (state.DEF == 0) '--\n' else ''+state.DEF+ '%\n') +
+                    'INT: ' + (if(state.INT > 0) '+' + state.INT + '%\n' else if (state.INT == 0) '--\n' else ''+state.INT+ '%\n') +
+                    'SPD: ' + (if(state.SPD > 0) '+' + state.SPD + '%\n' else if (state.SPD == 0) '--\n' else ''+state.SPD+ '%\n') +
+                    'LUK: ' + (if(state.LUK > 0) '+' + state.LUK + '%\n' else if (state.LUK == 0) '--\n' else ''+state.LUK+ '%\n') +
+                    'DEX: ' + (if(state.DEX > 0) '+' + state.DEX + '%\n' else if (state.DEX == 0) '--\n' else ''+state.DEX+ '%\n')
+                ;
             }
         }
     }

@@ -2,7 +2,7 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:State = import(module:'game_class.state.mt');
 @:class = import(module:'Matte.Core.Class');
-@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 
 
 
@@ -160,7 +160,7 @@ LandmarkEvent.database.newEntry(
 
 // essentially an opaque wrapper for custom per-step 
 // controllers of landmarks.
-@:LandmarkEvent = databaseItemMutatorClass(
+@:LandmarkEvent = databaseItemMutatorClass.create(
     name : 'Wyvern.LandmarkEvent',
     items : {
         data : empty // maintained    

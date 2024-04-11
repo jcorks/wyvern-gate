@@ -18,7 +18,7 @@
 @:Database = import(module:'game_class.database.mt');
 @:class = import(module:'Matte.Core.Class');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 
 
 @:CATEGORY = {  
@@ -1721,7 +1721,7 @@ Location.database.newEntry(data:{
 }
 
 
-@:Location = databaseItemMutatorClass(
+@:Location = databaseItemMutatorClass.create(
     name: 'Wyvern.Location',
     items : {
         worldID : 0,

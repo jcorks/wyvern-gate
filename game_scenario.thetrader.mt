@@ -9,7 +9,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:namegen = import(module:'game_singleton.namegen.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 @:commonInteractions = import(module:'game_singleton.commoninteractions.mt');
 @:InteractionMenuEntry = import(module:'game_struct.interactionmenuentry.mt');
 @:Personality = import(module:'game_database.personality.mt');

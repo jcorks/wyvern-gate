@@ -17,7 +17,7 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
-@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:random = import(module:'game_singleton.random.mt');
 
@@ -1454,7 +1454,7 @@ ItemEnchant.database.newEntry(
 }
 
 
-@:ItemEnchant = databaseItemMutatorClass(
+@:ItemEnchant = databaseItemMutatorClass.create(
     name : 'Wyvern.ItemEnchant',
     items : {
         condition : empty,

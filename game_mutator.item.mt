@@ -18,7 +18,7 @@
 @:class = import(module:'Matte.Core.Class');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 @:Database = import(module:'game_class.database.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:random = import(module:'game_singleton.random.mt');
@@ -3169,8 +3169,161 @@ Item.database.newEntry(data : {
 
 }
 
+/*
+@:Inventory = import(module:'game_class.inventory.mt');
+@:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
+@:ItemQuality = import(module:'game_database.itemquality.mt');
+@:ItemColor = import(module:'game_database.itemcolor.mt');
+@:ItemDesign = import(module:'game_database.itemdesign.mt');
+@:Material = import(module:'game_database.material.mt');
+@:ApparelMaterial = import(module:'game_database.apparelmaterial.mt');
+@:Ability = import(module:'game_database.ability.mt');
+@:Island = import(module:'game_class.island.mt');
+@:world = import(module:'game_singleton.world.mt');
+*/
 
-@:Item = databaseItemMutatorClass(
+
+
+
+
+@:getEnchantTag ::(state) <- match(state.enchants->keycount) {
+  (0) :'',
+  (1) :' (I)',
+  (2) :' (II)',
+  (3) :' (III)',
+  (4) :' (IV)',
+  (5) :' (V)',
+  (6) :' (VI)',
+  (7) :' (VII)',
+  (8) :' (VIII)',
+  (9) :' (IX)',
+  (10) :' (X)',
+  default: ' (*)'         
+};
+
+
+@:recalculateName = ::(state) {
+    when (state.customPrefix != '')
+        state.customName = state.customPrefix + getEnchantTag(state);
+
+
+    @baseName =
+    if (state.base.isApparel && state.apparel)
+        state.apparel.name + ' ' + state.base.name
+    else if (state.base.hasMaterial && state.material != empty)
+        state.material.name + ' ' + state.base.name
+    else 
+        state.base.name
+    ;
+    
+    state.customName = baseName;
+    
+        
+    @enchantName = getEnchantTag(state);
+    
+    state.customName = if (state.base.hasQuality && state.quality != empty)
+        state.quality.name + ' ' + baseName + enchantName 
+    else
+        baseName + enchantName;
+
+    if (state.improvementsLeft != state.improvementsStart) ::<= {
+        state.customName = state.customName +  '+'+(state.improvementsStart - state.improvementsLeft);
+    }
+
+
+}
+
+@:sizeToString ::(state) <- match(state.size) {
+  (SIZE.SMALL)   : 'smaller than expected',
+  (SIZE.TINY)    : 'quite small',
+  (SIZE.AVERAGE) : 'normally sized',
+  (SIZE.LARGE)   : 'larger than expected',
+  (SIZE.BIG)     : 'quite large' 
+}
+
+@:assignSize = ::(state){
+    state.size = random.integer(from:0, to:4);
+    
+    (match(state.size) {
+        (SIZE.SMALL): ::{
+            state.stats.add(stats:StatSet.new(
+                ATK:-10,
+                DEF:-10,
+                SPD:10,
+                DEX:10                    
+            ));
+            state.price *= 0.85;                    
+        },
+
+        (SIZE.TINY): ::{
+            state.stats.add(stats:StatSet.new(
+                ATK:-20,
+                DEF:-20,
+                SPD:20,
+                DEX:20                    
+            ));
+            state.price *= 0.75;                    
+        },
+
+        (SIZE.AVERAGE):::{
+        },
+
+        (SIZE.LARGE): ::{
+            state.stats.add(stats:StatSet.new(
+                ATK:10,
+                DEF:10,
+                SPD:-10,
+                DEX:-10                    
+            ));
+            state.price *= 1.15;                    
+        },
+
+        (SIZE.BIG): ::{
+            state.stats.add(stats:StatSet.new(
+                ATK:20,
+                DEF:20,
+                SPD:-20,
+                DEX:-20                    
+            ));
+            state.price *= 1.25;                    
+        }
+    })()
+}
+
+
+@:recalculateDescription ::(this, state){
+    @:Ability = import(module:'game_database.ability.mt');
+    @:base = this.base;
+    state.description = String.combine(strings:[
+        base.description,
+        ' ',
+        (if (state.ability == '') '' else 'If equipped, grants the ability: "' + Ability.find(id:state.ability).name + '". '),
+        if (state.size == empty) '' else 'It is ' + sizeToString(state) + '. ',
+        if (state.hasEmblem) (
+            if (base.isApparel) 
+                'The maker\'s emblem is sewn on it. '
+            else
+                'The maker\'s emblem is engraved on it. '
+        ) else 
+            '',
+        if (base.hasQuality && state.quality != empty) state.quality.description + ' ' else '',
+        if (base.hasMaterial) state.material.description + ' ' else '',
+        if (base.isApparel) state.apparel.description + ' ' else '',
+        if (base.blockPoints == 1) 'This equipment helps block an additional part of the body while equipped in combat.' else '',
+        if (base.blockPoints > 1) 'This equipment helps block multiple additional parts of the body while equipped in combat.' else '',
+    ]);
+    if (base.canBeColored) ::<= {
+        state.description = state.description->replace(key:'$color$', with:state.color.name);
+        state.description = state.description->replace(key:'$design$', with:state.design.name);
+    }
+}
+
+
+
+
+
+
+@:Item = databaseItemMutatorClass.createLight(
     name : 'Wyvern.Item',    
     items : {
         base : empty,
@@ -3243,560 +3396,434 @@ Item.database.newEntry(data : {
         reset       
     ),
     
-    define:::(this, state) {
-        @:Inventory = import(module:'game_class.inventory.mt');
-        @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
-        @:ItemQuality = import(module:'game_database.itemquality.mt');
-        @:ItemColor = import(module:'game_database.itemcolor.mt');
-        @:ItemDesign = import(module:'game_database.itemdesign.mt');
-        @:Material = import(module:'game_database.material.mt');
-        @:ApparelMaterial = import(module:'game_database.apparelmaterial.mt');
+    private : {
+        container : Nullable,
+        equippedBy : Nullable
+    },
     
+    interface : {
+        defaultLoad::(base, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, abilityHint, forceEnchant) {
+            @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
+            @:ItemQuality = import(module:'game_database.itemquality.mt');
+            @:ItemColor = import(module:'game_database.itemcolor.mt');
+            @:ItemDesign = import(module:'game_database.itemdesign.mt');
+            @:Material = import(module:'game_database.material.mt');
+            @:ApparelMaterial = import(module:'game_database.apparelmaterial.mt');
+            @:this = _.this;
+            @:state = _.state;
+            @:world = import(module:'game_singleton.world.mt');
 
-        @container = empty;
-        @equippedBy = empty;
-    
-
-        
-        @:getEnchantTag ::<- match(state.enchants->keycount) {
-          (0) :'',
-          (1) :' (I)',
-          (2) :' (II)',
-          (3) :' (III)',
-          (4) :' (IV)',
-          (5) :' (V)',
-          (6) :' (VI)',
-          (7) :' (VII)',
-          (8) :' (VIII)',
-          (9) :' (IX)',
-          (10) :' (X)',
-          default: ' (*)'         
-        };
-        
-        
-        @:recalculateName = ::{
-            when (state.customPrefix != '')
-                state.customName = state.customPrefix + getEnchantTag();
-
-
-            @baseName =
-            if (state.base.isApparel && state.apparel)
-                state.apparel.name + ' ' + state.base.name
-            else if (state.base.hasMaterial && state.material != empty)
-                state.material.name + ' ' + state.base.name
-            else 
-                state.base.name
-            ;
+            state.enchants = []; // ItemMod
+            state.equipEffects = [];
+            state.useEffects = [];
+            state.stats = StatSet.new();
+            state.ability = ::<= {
+                when (abilityHint) abilityHint;
+                @:out = random.pickArrayItem(list:base.possibleAbilities);
+                when(out == empty) '';
+                return out;
+            }
+            state.base = base;
+            state.stats.add(stats:base.equipMod);
+            state.price = base.basePrice;
+            state.price *= 1.05 * state.base.weight;
+            state.improvementsLeft = random.integer(from:10, to:25);
+            state.improvementsStart = state.improvementsLeft;
+            state.modData = {};
             
-            state.customName = baseName;
-            
-                
-            @enchantName = getEnchantTag();
-            
-            state.customName = if (state.base.hasQuality && state.quality != empty)
-                state.quality.name + ' ' + baseName + enchantName 
-            else
-                baseName + enchantName;
-
-            if (state.improvementsLeft != state.improvementsStart) ::<= {
-                state.customName = state.customName +  '+'+(state.improvementsStart - state.improvementsLeft);
+            if (base.hasSize)   
+                assignSize(*_);
+            foreach(base.equipEffects)::(i, effect) {
+                state.equipEffects->push(value:effect);
             }
 
-
-        }
-        
-        @:sizeToString ::<- match(state.size) {
-          (SIZE.SMALL)   : 'smaller than expected',
-          (SIZE.TINY)    : 'quite small',
-          (SIZE.AVERAGE) : 'normally sized',
-          (SIZE.LARGE)   : 'larger than expected',
-          (SIZE.BIG)     : 'quite large' 
-        }
-        
-        @:assignSize = ::{
-            state.size = random.integer(from:0, to:4);
+            foreach(base.useEffects)::(i, effect) {
+                state.useEffects->push(value:effect);
+            }
             
-            (match(state.size) {
-                (SIZE.SMALL): ::{
-                    state.stats.add(stats:StatSet.new(
-                        ATK:-10,
-                        DEF:-10,
-                        SPD:10,
-                        DEX:10                    
-                    ));
-                    state.price *= 0.85;                    
-                },
-
-                (SIZE.TINY): ::{
-                    state.stats.add(stats:StatSet.new(
-                        ATK:-20,
-                        DEF:-20,
-                        SPD:20,
-                        DEX:20                    
-                    ));
-                    state.price *= 0.75;                    
-                },
-
-                (SIZE.AVERAGE):::{
-                },
-
-                (SIZE.LARGE): ::{
+            
+            
+            if (base.hasQuality) ::<= {
+                // random chance to have a maker's emblem on it, indicating 
+                // made with love and care
+                if (random.try(percentSuccess:15)) ::<= {
+                    state.hasEmblem = true;
                     state.stats.add(stats:StatSet.new(
                         ATK:10,
                         DEF:10,
-                        SPD:-10,
-                        DEX:-10                    
+                        SPD:10,
+                        INT:10,
+                        DEX:10                    
                     ));
-                    state.price *= 1.15;                    
-                },
-
-                (SIZE.BIG): ::{
-                    state.stats.add(stats:StatSet.new(
-                        ATK:20,
-                        DEF:20,
-                        SPD:-20,
-                        DEX:-20                    
-                    ));
-                    state.price *= 1.25;                    
-                }
-            })()
-        }
-        
-        @:Ability = import(module:'game_database.ability.mt');
-        
-        @:recalculateDescription ::{
-            @:base = this.base;
-            state.description = String.combine(strings:[
-                base.description,
-                ' ',
-                (if (state.ability == '') '' else 'If equipped, grants the ability: "' + Ability.find(id:state.ability).name + '". '),
-                if (state.size == empty) '' else 'It is ' + sizeToString() + '. ',
-                if (state.hasEmblem) (
-                    if (base.isApparel) 
-                        'The maker\'s emblem is sewn on it. '
-                    else
-                        'The maker\'s emblem is engraved on it. '
-                ) else 
-                    '',
-                if (base.hasQuality && state.quality != empty) state.quality.description + ' ' else '',
-                if (base.hasMaterial) state.material.description + ' ' else '',
-                if (base.isApparel) state.apparel.description + ' ' else '',
-                if (base.blockPoints == 1) 'This equipment helps block an additional part of the body while equipped in combat.' else '',
-                if (base.blockPoints > 1) 'This equipment helps block multiple additional parts of the body while equipped in combat.' else '',
-            ]);
-            if (base.canBeColored) ::<= {
-                state.description = state.description->replace(key:'$color$', with:state.color.name);
-                state.description = state.description->replace(key:'$design$', with:state.design.name);
-            }
-        }
-        
-        @:Island = import(module:'game_class.island.mt');
-        @:world = import(module:'game_singleton.world.mt');
-        
-        
-        this.interface = {
-            initialize ::{},
-            defaultLoad::(base, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, abilityHint, forceEnchant) {
-                @:world = import(module:'game_singleton.world.mt');
-
-                state.enchants = []; // ItemMod
-                state.equipEffects = [];
-                state.useEffects = [];
-                state.stats = StatSet.new();
-                state.ability = ::<= {
-                    when (abilityHint) abilityHint;
-                    @:out = random.pickArrayItem(list:base.possibleAbilities);
-                    when(out == empty) '';
-                    return out;
-                }
-                state.base = base;
-                state.stats.add(stats:base.equipMod);
-                state.price = base.basePrice;
-                state.price *= 1.05 * state.base.weight;
-                state.improvementsLeft = random.integer(from:10, to:25);
-                state.improvementsStart = state.improvementsLeft;
-                state.modData = {};
-                
-                if (base.hasSize)   
-                    assignSize();
-                foreach(base.equipEffects)::(i, effect) {
-                    state.equipEffects->push(value:effect);
-                }
-
-                foreach(base.useEffects)::(i, effect) {
-                    state.useEffects->push(value:effect);
-                }
-                
-                
-                
-                if (base.hasQuality) ::<= {
-                    // random chance to have a maker's emblem on it, indicating 
-                    // made with love and care
-                    if (random.try(percentSuccess:15)) ::<= {
-                        state.hasEmblem = true;
-                        state.stats.add(stats:StatSet.new(
-                            ATK:10,
-                            DEF:10,
-                            SPD:10,
-                            INT:10,
-                            DEX:10                    
-                        ));
-                        state.price *= 1.05;
-                    } else 
-                        state.hasEmblem = false;
-                    
-                    
-                    if (random.try(percentSuccess:30) || (qualityHint != empty)) ::<= {
-                        state.quality = if (qualityHint == empty)
-                            ItemQuality.getRandomWeighted(
-                                knockout : if (world.island.tier > world.MAX_NORMAL_TIER) (world.island.tier  - world.MAX_NORMAL_TIER)*1.4                            
-                            )
-                        else 
-                            ItemQuality.find(id:qualityHint);
-                        state.stats.add(stats:state.quality.equipMod);
-                        state.price += (state.price * (state.quality.pricePercentMod/100));                        
-                    }
-                }
-                
-
-                if (base.hasMaterial) ::<= {
-                    if (materialHint == empty) ::<= {
-                        state.material = Material.getRandomWeightedFiltered(
-                            filter::(value) <- value.tier <= world.island.tier,
-                            knockout : if (world.island.tier > world.MAX_NORMAL_TIER) (world.island.tier  - world.MAX_NORMAL_TIER)*1.4
-                        );
-                    } else ::<= {
-                        state.material = Material.find(id:materialHint);                
-                    }
-                    state.stats.add(stats:state.material.statMod);
-                }
-
-                if (base.isApparel) ::<= {
-                    if (apparelHint == empty) ::<= {
-                        state.apparel = ApparelMaterial.getRandomWeightedFiltered(
-                            filter::(value) <- value.tier <= world.island.tier,
-                            knockout : if (world.island.tier > world.MAX_NORMAL_TIER) (world.island.tier  - world.MAX_NORMAL_TIER)*1.4
-                        );
-                    } else ::<= {
-                        state.apparel = ApparelMaterial.find(id:apparelHint);                
-                    }
-                    state.stats.add(stats:state.apparel.statMod);
-                }                
-
-                
-                if (base.canHaveEnchants) ::<= {
-                    if (enchantHint != empty) ::<= {
-                        this.addEnchant(mod:ItemEnchant.new(
-                            base:ItemEnchant.database.find(id:enchantHint)
-                        ));
-                    }
-
-                    
-                    if (rngEnchantHint != empty && (random.try(percentSuccess:60) || forceEnchant)) ::<= {
-                        @enchantCount = random.integer(from:1, to:match(world.island.tier) {
-                            (6, 7, 8, 9, 10):    8,
-                            (3,4,5):    4,
-                            (1, 2):    2,
-                            (0): 1,
-                            default: ((world.island.tier**0.5) * 3.3)->floor
-                        });
-                        
-                        
-                        
-                        for(0, enchantCount)::(i) {
-                            @mod = ItemEnchant.new(
-                                base:ItemEnchant.database.getRandomFiltered(
-                                    filter::(value) <- value.tier <= world.island.tier && (if (base.canHaveTriggerEnchants == false) value.triggerConditionEffects->keycount == 0 else true)
-                                )
-                            )
-                            this.addEnchant(mod);
-                        }
-                    }
-                }
-
-
-                if (base.canBeColored) ::<= {
-                    state.color = if (colorHint) ItemColor.find(id:colorHint) else ItemColor.getRandom();
-                    state.stats.add(stats:state.color.equipMod);
-                    state.design = if (designHint) ItemDesign.find(id:designHint) else ItemDesign.getRandom();
-                    state.stats.add(stats:state.design.equipMod);
-                }
-                            
-                
-                
-
-                if (state.material != empty) 
-                    state.price += state.price * (state.material.pricePercentMod / 100);
-                    
-                state.price = (state.price)->ceil;
-                
-                base.onCreate(item:this, creationHint);
-                recalculateDescription();
-                recalculateName();
-                
-                return this;
-                
-            },
-
-            base : {
-                get :: {
-                    return state.base;
-                }
-            },
-            
-            
-            name : {
-                get :: {
-                    when (state.customName != '') state.customName;
-                    return state.base.name;
-                },
-                
-                set ::(value => String)  {
-                    state.customPrefix = value;
-                    recalculateName();
-                }
-            },
-            
-            quality : {
-                get ::<- state.quality,
-                set ::(value) {
-                    if (state.quality != empty) ::<= {
-                        state.stats.subtract(stats:state.quality.equipMod);
-                        state.price -= (state.price * (state.quality.pricePercentMod/100));
-                    }
-                    state.quality = value;
-                    state.stats.add(stats:state.quality.equipMod);
-                    state.price += (state.price * (state.quality.pricePercentMod/100));
-
-                    recalculateName();
-                }
-            },
-            
-            enchantsCount : {
-                get ::<- state.enchants->keycount
-            },
-            
-            equipMod : {
-                get ::<- state.stats
-            },
-            
-            container : {
-                get :: {
-                    return container;
-                },
-                
-                set ::(value => Inventory.type) {
-                    container = value;
-                }
-            },
-            
-            equippedBy : {
-                set ::(value) {
-                    equippedBy = value;
-                },
-                
-                get ::<- equippedBy
-            },
-
-            ability : {
-                get ::<- if (state.ability == '') empty else state.ability
-            },
-            
-            equipEffects : {
-                get ::<- state.equipEffects
-            },
-            
-            islandEntry : {
-                set ::(value) {
-                    state.island = value;
-                    state.price *= 1 + ((state.island.levelMin) / (5 + 5*Number.random()));
-                    state.price = state.price->ceil;
-                
-                },
-                get ::<- state.island
-            },
-            
-            setIslandGenAttributes ::(levelHint => Number, nameHint => String, tierHint => Number, extraLandmarks) {
-                state.islandLevelHint = levelHint;
-                state.islandNameHint = nameHint;
-                state.islandTierHint = tierHint;
-                state.islandExtraLandmarks = extraLandmarks;
-            },
-            
-            modData : {
-                get ::<- state.modData
-            },
-            
-            addIslandEntry ::(world, island) {
-                when (state.island != empty) empty;
-
-                if (island == empty) ::<= {
-                    this.islandEntry = Island.new(
-                        levelHint: (state.islandLevelHint)=>Number,
-                        nameHint: (state.islandNameHint)=>String,
-                        tierHint: (state.islandTierHint)=>Number,
-                        extraLandmarks: state.islandExtraLandmarks
-                    );                
+                    state.price *= 1.05;
                 } else 
-                    this.islandEntry = island;
+                    state.hasEmblem = false;
+                
+                
+                if (random.try(percentSuccess:30) || (qualityHint != empty)) ::<= {
+                    state.quality = if (qualityHint == empty)
+                        ItemQuality.getRandomWeighted(
+                            knockout : if (world.island.tier > world.MAX_NORMAL_TIER) (world.island.tier  - world.MAX_NORMAL_TIER)*1.4                            
+                        )
+                    else 
+                        ItemQuality.find(id:qualityHint);
+                    state.stats.add(stats:state.quality.equipMod);
+                    state.price += (state.price * (state.quality.pricePercentMod/100));                        
+                }
+            }
+            
 
+            if (base.hasMaterial) ::<= {
+                if (materialHint == empty) ::<= {
+                    state.material = Material.getRandomWeightedFiltered(
+                        filter::(value) <- value.tier <= world.island.tier,
+                        knockout : if (world.island.tier > world.MAX_NORMAL_TIER) (world.island.tier  - world.MAX_NORMAL_TIER)*1.4
+                    );
+                } else ::<= {
+                    state.material = Material.find(id:materialHint);                
+                }
+                state.stats.add(stats:state.material.statMod);
+            }
+
+            if (base.isApparel) ::<= {
+                if (apparelHint == empty) ::<= {
+                    state.apparel = ApparelMaterial.getRandomWeightedFiltered(
+                        filter::(value) <- value.tier <= world.island.tier,
+                        knockout : if (world.island.tier > world.MAX_NORMAL_TIER) (world.island.tier  - world.MAX_NORMAL_TIER)*1.4
+                    );
+                } else ::<= {
+                    state.apparel = ApparelMaterial.find(id:apparelHint);                
+                }
+                state.stats.add(stats:state.apparel.statMod);
+            }                
+
+            
+            if (base.canHaveEnchants) ::<= {
+                if (enchantHint != empty) ::<= {
+                    this.addEnchant(mod:ItemEnchant.new(
+                        base:ItemEnchant.database.find(id:enchantHint)
+                    ));
+                }
 
                 
-                                
-                
-                /*
-                @:levelToStratum = ::(level) {
-                    return match((level / 5)->floor) {
-                      (0): 'IV',
-                      (1): 'III',
-                      (2): 'II',
-                      (3): 'I',
-                      default: 'Unknown'
+                if (rngEnchantHint != empty && (random.try(percentSuccess:60) || forceEnchant)) ::<= {
+                    @enchantCount = random.integer(from:1, to:match(world.island.tier) {
+                        (6, 7, 8, 9, 10):    8,
+                        (3,4,5):    4,
+                        (1, 2):    2,
+                        (0): 1,
+                        default: ((world.island.tier**0.5) * 3.3)->floor
+                    });
+                    
+                    
+                    
+                    for(0, enchantCount)::(i) {
+                        @mod = ItemEnchant.new(
+                            base:ItemEnchant.database.getRandomFiltered(
+                                filter::(value) <- value.tier <= world.island.tier && (if (base.canHaveTriggerEnchants == false) value.triggerConditionEffects->keycount == 0 else true)
+                            )
+                        )
+                        this.addEnchant(mod);
                     }
                 }
-                state.customName = 'Key to ' + state.island.name + ' - Stratum ' + levelToStratum(level:state.island.levelMin);
-                */
-            },
-            
-            resetContainer :: {
-                container = empty;
-            },
+            }
+
+
+            if (base.canBeColored) ::<= {
+                state.color = if (colorHint) ItemColor.find(id:colorHint) else ItemColor.getRandom();
+                state.stats.add(stats:state.color.equipMod);
+                state.design = if (designHint) ItemDesign.find(id:designHint) else ItemDesign.getRandom();
+                state.stats.add(stats:state.design.equipMod);
+            }
                         
-            throwOut :: {
-                when(container == empty) empty;
-                container.remove(item:this);
+            
+            
+
+            if (state.material != empty) 
+                state.price += state.price * (state.material.pricePercentMod / 100);
+                
+            state.price = (state.price)->ceil;
+            
+            base.onCreate(item:this, creationHint);
+            recalculateDescription(*_);
+            recalculateName(*_);
+            
+            return this;
+            
+        },
+
+        base : {
+            get :: {
+                return _.state.base;
+            }
+        },
+        
+            
+        name : {
+            get :: {
+                when (_.state.customName != '') _.state.customName;
+                return _.state.base.name;
             },
             
-            
-            price : {
-                get ::<-state.price,
-                set ::(value) <- state.price = value
-            },
-            
-            material : {
-                get ::<- state.material
-            },
-            
-            addEnchant::(mod) {
-                when (state.enchants->keycount >= state.base.enchantLimit) empty;
-                state.enchants->push(value:mod);
-                foreach(mod.base.equipEffects)::(i, effect) {
-                    state.equipEffects->push(value:effect);
+            set ::(value => String)  {
+                _.state.customPrefix = value;
+                recalculateName(*_);
+            }
+        },
+        
+        quality : {
+            get ::<- _.state.quality,
+            set ::(value) {
+                @:state = _.state;
+                if (state.quality != empty) ::<= {
+                    state.stats.subtract(stats:state.quality.equipMod);
+                    state.price -= (state.price * (state.quality.pricePercentMod/100));
                 }
-                state.stats.add(stats:mod.base.equipMod);
-                //if (description->contains(key:mod.description) == false)
-                //    description = description + mod.description + ' ';
-                recalculateName();
-                state.price += mod.base.priceMod;
+                state.quality = value;
+                state.stats.add(stats:state.quality.equipMod);
+                state.price += (state.price * (state.quality.pricePercentMod/100));
+
+                recalculateName(*_);
+            }
+        },
+            
+        enchantsCount : {
+            get ::<- _.state.enchants->keycount
+        },
+            
+        equipMod : {
+            get ::<- _.state.stats
+        },
+        
+        container : {
+            get :: {
+                return _.container;
+            },
+            
+            set ::(value) {
+                @:Inventory = import(module:'game_class.inventory.mt');
+                _.container = value => Inventory.type;
+            }
+        },
+            
+        equippedBy : {
+            set ::(value) {
+                _.equippedBy = value;
+            },
+            
+            get ::<- _.equippedBy
+        },
+
+        ability : {
+            get ::<- if (_.state.ability == '') empty else _.state.ability
+        },
+            
+        equipEffects : {
+            get ::<- _.state.equipEffects
+        },
+            
+        islandEntry : {
+            set ::(value) {
+                @:state = _.state;
+                state.island = value;
+                state.price *= 1 + ((state.island.levelMin) / (5 + 5*Number.random()));
                 state.price = state.price->ceil;
-            },
             
-            description : {
-                get :: {
-                    return state.description + '\nEquip effects: \n' + state.stats.descriptionRate;
-                }
             },
+            get ::<- _.state.island
+        },
             
-            onTurnEnd ::(wielder, battle){
-                foreach(state.enchants)::(i, enchant) {
-                    enchant.onTurnCheck(wielder, item:this, battle);
-                }
-            },
+        setIslandGenAttributes ::(levelHint => Number, nameHint => String, tierHint => Number, extraLandmarks) {
+            @:state = _.state;
+            state.islandLevelHint = levelHint;
+            state.islandNameHint = nameHint;
+            state.islandTierHint = tierHint;
+            state.islandExtraLandmarks = extraLandmarks;
+        },
             
-            improvementsLeft : {
-                get::<- state.improvementsLeft,
-                set::(value) {
-                    state.improvementsLeft = value;
-                    recalculateName();
-                }
-            },
+        modData : {
+            get ::<- _.state.modData
+        },
             
-            describe ::(by) {
-                @:Effect = import(module:'game_database.effect.mt');
-                windowEvent.queueMessage(
-                    speaker:this.name,
-                    text:state.description,
-                    pageAfter:canvas.height-4
-                );
-                
-                if (state.enchants->keycount != 0) ::<= {
-                    windowEvent.queueMessage(
-                        speaker:this.name + ' - Enchantments',
-                        pageAfter:canvas.height-4,
-                        text:::<={
-                            @out = '';
-                            when (state.enchants->keycount == 0) 'None.';
-                            foreach(state.enchants)::(i, mod) {
-                                out = out + romanNum(value:i) + ' - ' + mod.description + '\n';
-                            }
-                            return out;
-                        }
-                    );                
-                }                
-                
-                windowEvent.queueMessage(
-                    speaker:this.name + ' - Equip Stats',
-                    text:state.stats.descriptionRate,
-                    pageAfter:canvas.height-4
-                );
+        addIslandEntry ::(world, island) {
+            @:state = _.state;
+            when (state.island != empty) empty;
 
-                if (state.equipEffects->keycount != 0) ::<= {
-                    windowEvent.queueMessage(
-                        speaker:this.name + ' - Equip Effects',
-                        pageAfter:canvas.height-4,
-                        text:::<={
-                            @out = '';
-                            when (state.equipEffects->keycount == 0) 'None.';
-                            foreach(state.equipEffects)::(i, effect) {
-                                out = out + '. ' + Effect.find(id:effect).description + '\n';
-                            }
-                            return out;
-                        }
-                    );
-                }
-                
+            @:Island = import(module:'game_class.island.mt');
 
-                                
+
+            if (island == empty) ::<= {
+                _.this.islandEntry = Island.new(
+                    levelHint: (state.islandLevelHint)=>Number,
+                    nameHint: (state.islandNameHint)=>String,
+                    tierHint: (state.islandTierHint)=>Number,
+                    extraLandmarks: state.islandExtraLandmarks
+                );                
+            } else 
+                _.this.islandEntry = island;
+
+
+            
+                            
+            
+            /*
+            @:levelToStratum = ::(level) {
+                return match((level / 5)->floor) {
+                  (0): 'IV',
+                  (1): 'III',
+                  (2): 'II',
+                  (3): 'I',
+                  default: 'Unknown'
+                }
+            }
+            state.customName = 'Key to ' + state.island.name + ' - Stratum ' + levelToStratum(level:state.island.levelMin);
+            */
+        },
+            
+        resetContainer :: {
+            _.container = empty;
+        },
+                        
+        throwOut :: {
+            when(_.container == empty) empty;
+            _.container.remove(item:_.this);
+        },
+            
+            
+        price : {
+            get ::<-_.state.price,
+            set ::(value) <- _.state.price = value
+        },
+            
+        material : {
+            get ::<- _.state.material
+        },
+            
+        addEnchant::(mod) {
+            @:state = _.state;
+            when (state.enchants->keycount >= state.base.enchantLimit) empty;
+            state.enchants->push(value:mod);
+            foreach(mod.base.equipEffects)::(i, effect) {
+                state.equipEffects->push(value:effect);
+            }
+            state.stats.add(stats:mod.base.equipMod);
+            //if (description->contains(key:mod.description) == false)
+            //    description = description + mod.description + ' ';
+            recalculateName(*_);
+            state.price += mod.base.priceMod;
+            state.price = state.price->ceil;
+        },
+            
+        description : {
+            get :: {
+                @:state = _.state;
+                return state.description + '\nEquip effects: \n' + state.stats.descriptionRate;
+            }
+        },
+            
+        onTurnEnd ::(wielder, battle){
+            @:state = _.state;
+            @:this = _.this;
+            foreach(state.enchants)::(i, enchant) {
+                enchant.onTurnCheck(wielder, item:this, battle);
+            }
+        },
+        
+        improvementsLeft : {
+            get::<- _.state.improvementsLeft,
+            set::(value) {
+                _.state.improvementsLeft = value;
+                recalculateName(*_);
+            }
+        },
+            
+        describe ::(by) {
+            @:state = _.state;
+            @:this = _.this;
+            @:Effect = import(module:'game_database.effect.mt');
+            windowEvent.queueMessage(
+                speaker:this.name,
+                text:state.description,
+                pageAfter:canvas.height-4
+            );
+            
+            if (state.enchants->keycount != 0) ::<= {
                 windowEvent.queueMessage(
-                    speaker:this.name + ' - Use Effects',
+                    speaker:this.name + ' - Enchantments',
                     pageAfter:canvas.height-4,
                     text:::<={
                         @out = '';
-                        when (state.useEffects->keycount == 0) 'None.';
-                        foreach(state.useEffects)::(i, effect) {
-                            out = out + '- ' + Effect.find(id:effect).description + '\n';
+                        when (state.enchants->keycount == 0) 'None.';
+                        foreach(state.enchants)::(i, mod) {
+                            out = out + romanNum(value:i) + ' - ' + mod.description + '\n';
                         }
                         return out;
                     }
-                );  
-
-
-                if (by != empty) ::<= {
-                    when(by.profession.base.weaponAffinity != state.base.name) empty;
-                    windowEvent.queueMessage(
-                        speaker:by.name,
-                        pageAfter:canvas.height-4,
-                        text:'Oh! This weapon type really works for me as ' + correctA(word:by.profession.base.name) + '.'
-                    );  
-                }
-            },
+                );                
+            }                
             
-            stats : {
-                get ::<- state.stats
-            },
-            
-            addIntuition :: {
-                state.intuition += 1;
-            },
+            windowEvent.queueMessage(
+                speaker:this.name + ' - Equip Stats',
+                text:state.stats.descriptionRate,
+                pageAfter:canvas.height-4
+            );
 
-            canGainIntuition ::(silent) {
-                return state.intuition < 20;
-            },
-            
-            maxOut ::{
-                state.intuition = 20;
-                state.improvementsLeft = 0;
+            if (state.equipEffects->keycount != 0) ::<= {
+                windowEvent.queueMessage(
+                    speaker:this.name + ' - Equip Effects',
+                    pageAfter:canvas.height-4,
+                    text:::<={
+                        @out = '';
+                        when (state.equipEffects->keycount == 0) 'None.';
+                        foreach(state.equipEffects)::(i, effect) {
+                            out = out + '. ' + Effect.find(id:effect).description + '\n';
+                        }
+                        return out;
+                    }
+                );
             }
+            
+
+                            
+            windowEvent.queueMessage(
+                speaker:_.this.name + ' - Use Effects',
+                pageAfter:canvas.height-4,
+                text:::<={
+                    @out = '';
+                    when (state.useEffects->keycount == 0) 'None.';
+                    foreach(state.useEffects)::(i, effect) {
+                        out = out + '- ' + Effect.find(id:effect).description + '\n';
+                    }
+                    return out;
+                }
+            );  
+
+
+            if (by != empty) ::<= {
+                when(by.profession.base.weaponAffinity != state.base.name) empty;
+                windowEvent.queueMessage(
+                    speaker:by.name,
+                    pageAfter:canvas.height-4,
+                    text:'Oh! This weapon type really works for me as ' + correctA(word:by.profession.base.name) + '.'
+                );  
+            }
+        },
+        
+        stats : {
+            get ::<- _.state.stats
+        },
+        
+        addIntuition :: {
+            _.state.intuition += 1;
+        },
+
+        canGainIntuition ::(silent) {
+            return _.state.intuition < 20;
+        },
+            
+        maxOut ::{
+            _.state.intuition = 20;
+            _.state.improvementsLeft = 0;
         }
     }
 );

@@ -18,7 +18,7 @@
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 
 
 @:reset ::{
@@ -30,7 +30,7 @@
 
 
 
-@:Scenario = databaseItemMutatorClass(
+@:Scenario = databaseItemMutatorClass.create(
     name: 'Wyvern.Scenario',
     items : {
         data : empty

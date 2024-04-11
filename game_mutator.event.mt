@@ -17,7 +17,7 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
-@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 
 
 
@@ -373,7 +373,7 @@ Event.database.newEntry(
 
 
 
-@:Event = databaseItemMutatorClass(
+@:Event = databaseItemMutatorClass.create(
     name: 'Wyvern.Event',
     items : {
         timeLeft : empty,

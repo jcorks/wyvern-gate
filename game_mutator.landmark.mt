@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:class = import(module:'Matte.Core.Class');
-@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 @:Database = import(module:'game_class.database.mt');
 @:State = import(module:'game_class.state.mt');
 
@@ -689,7 +689,7 @@ Landmark.database.newEntry(
 */
 }
 
-@:Landmark = databaseItemMutatorClass(  
+@:Landmark = databaseItemMutatorClass.create(  
     name : 'Wyvern.Landmark',
     items : {
         worldID : 0,

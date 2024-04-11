@@ -39,9 +39,85 @@
 
 @:TYPE_TO_CLASS = {};
 @:NAME_TO_CLASS = {};
-
+@:status = {};
 
 return {
+    status : status,
+    createLight ::(
+        name => String,
+        items => Object,
+        private => Object,
+        interface,
+        statics
+    ) {
+        status[name] = 0;
+        @:StateType = State.create(items);
+        @:type = Object.newType(name:name);
+        @:output = {};
+        foreach(statics) ::(k, v) {
+            output[k] = v;
+        }
+
+        private.state = Object;
+        private.this = Object;
+        @:PrivateType = Object.newType(
+            name : name + '.private',
+            layout: private
+        );
+        
+
+        if (interface.load == empty)
+            interface.load = ::(serialized) {
+                _.state.load(parent:_.this, serialized);
+                if (interface.afterLoad != empty)
+                    _.this.afterLoad();
+            }
+        
+        if (interface.save == empty)
+            interface.save = ::(serialized) {
+                return _.state.save();
+            }
+
+        output.type = {
+            get ::<- type
+        }
+
+
+        
+        
+        output.new = ::(*args) {
+            status[name] += 1;
+            @:priv = Object.instantiate(type:PrivateType);
+            @:out = Object.instantiate(type:type);
+            out .= interface;
+            
+            priv.this = out;
+            priv.state = StateType.new();
+            
+            out->setIsInterface(
+                enabled: true,
+                private : priv
+            );
+            
+            if (interface.initialize != empty)
+                out.initialize(*args);
+            
+            if (args.state != empty)
+                out.load(serialized:args.state)
+            else 
+                out.defaultLoad(*args);
+            
+            return out;
+        }
+        output->setIsInterface(
+            enabled:true
+        );
+
+        
+        NAME_TO_CLASS[name] = output;
+        return output;
+    },
+
     create ::(
         define,
         items => Object,
@@ -49,9 +125,12 @@ return {
         inherits,
         statics
     ) {
+        status[name] = 0;
         @:StateType = State.create(items);
         @:output = class(
             define ::(this) {
+                status[name] += 1;
+            
                 @:state = StateType.new();
                 
                 define(this, state);

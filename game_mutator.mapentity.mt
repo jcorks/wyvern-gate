@@ -4,7 +4,7 @@
 @:class = import(module:'Matte.Core.Class');
 @:distance = import(module:'game_function.distance.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
-@:databaseItemMutatorClass = import(module:'game_function.databaseitemmutatorclass.mt');
+@:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:Map = import(module:'game_class.map.mt');
 /*
@@ -944,7 +944,7 @@ MapEntity.Controller = LoadableClass.create(
     }
 );
 
-MapEntity.Task = databaseItemMutatorClass(
+MapEntity.Task = databaseItemMutatorClass.create(
     name : "Wyvern.MapEntity.Task",
     items : {
         data : empty
