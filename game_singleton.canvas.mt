@@ -191,6 +191,25 @@ return class(
                 set ::(value) <- debugLines[0] = value => String,
                 get ::<- debugLines[0]
             },
+            
+            renderBarAsString ::(width, fillFraction) {
+                if (width == empty) width = 12;
+                
+                @ratio = fillFraction;;
+                if (ratio > 1) ratio = 1;
+                if (ratio < 0) ratio = 0;
+                @numFilled = ((width - 2) * (ratio))->floor;
+                if (fillFraction > 0 && numFilled < 1) numFilled = 1;
+                
+                @out = ' ';
+                for(0, numFilled)::(i) {
+                    out = out+'▓';
+                }
+                for(0, width - numFilled - 2)::(i) {
+                    out = out+'▁';
+                }
+                return out + ' ';            
+            },
 
             renderFrame ::(top, left, width, height) {
 

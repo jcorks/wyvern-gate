@@ -484,9 +484,9 @@
                         @line = '[';
                         for(0, 50) ::(i) {
                             if ((cursorPos * 50)->floor == i)
-                                line = line + 'I'
+                                line = line + '|'
                             else
-                                line = line + '-'
+                                line = line + ' '
                             ;
                         }
                         line = line + ']'

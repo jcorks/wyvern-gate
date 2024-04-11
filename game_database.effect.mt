@@ -2802,7 +2802,7 @@ Effect.newEntry(
 
             @:amt = (Number.random() * 20)->ceil;
             windowEvent.queueMessage(
-                text: '' + holder.name + ' happened to notice ' + g(g:amt) + ' dropped on the ground.'
+                text: '' + holder.name + ' happened to notice an additional  ' + g(g:amt) + ' dropped on the ground.'
             );
             world.party.inventory.addGold(amount:amt);
             

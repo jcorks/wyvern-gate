@@ -21,7 +21,10 @@
 @:WORK_ORDER__SPACE = 1;
 @:WORK_ORDER__FRONT = 2;
 
-
+@:LEVEL_UPGRADE_SHOP0   = 2;
+@:LEVEL_HIRE_EMPLOYEES  = 4;
+@:LEVEL_UPGRADE_SHOP1   = 6;
+@:LEVEL_BUY_PROPERTY    = 8;
 
 
 @:hireeContractWorth::(entity)<- 5+((entity.stats.sum/8 + entity.level)*2.5)->ceil;
@@ -485,13 +488,13 @@
         modData : empty,
         
         // world ID for the city where the shop resides 
-        cityID : empty,
+        cityID : -1,
         
         // inventory of the shop.
         shopInventory : empty,
         
         // world ID for the shop that is owned by the player.
-        shopID : empty,
+        shopID : -1,
         
         // Current popular items (base names)
         popular : empty,
@@ -506,10 +509,19 @@
         propertiesForSale : empty,
         
         // Whether a work order was put in for upgrading the shop.
-        workOrder : empty,
+        workOrder : 0,
         
         // The times the gold goal has been met
         goldTier : 0,
+        
+        // How much EXP gained from sales for this level
+        sellingEXP : 0,
+        
+        // Selling EXP to next 
+        sellingEXPtoNext : 600,
+        
+        // How many levels gained from sales.
+        sellingLevel : 1,
         
         // history of transactions
         ledger : empty,
@@ -533,6 +545,8 @@
         //////////////
         ////////////// accolade data 
         //////////////
+
+        accolade_srank : false,
 
         // whether the player experienced a recession
         accolade_experiencedRecession: false,
@@ -635,7 +649,7 @@
 
                         @hasNews = false;
                         
-                        if (state.workOrder != empty) ::<= {
+                        if (state.workOrder != 0) ::<= {
                             hasNews = true;
                             windowEvent.queueMessage(
                                 speaker: 'Courier',
@@ -647,7 +661,7 @@
                             else
                                 state.additionalStorefrontCount += 1;
 
-                            state.workOrder = empty;
+                            state.workOrder = 0;
                         }
                         
 
@@ -864,40 +878,75 @@
                     );
                 }
 
+                @:choiceNames = ['View ledger'];
+                @:choices = [finances_ledger];
+                
+                if (state.sellingLevel >= LEVEL_HIRE_EMPLOYEES) ::<= {
+                    choiceNames->push(value:'Hiree report');
+                    choices->push(value:finances_employee);
+                } else ::<= {
+                    choiceNames->push(value:'????');
+                    choices->push(value: ::{
+                        windowEvent.queueMessage(
+                            text: 'This option isn\'t available yet. You feel that you need to gain more experience as a salesperson before this is relevant.'
+                        );
+                    });                
+                }
+                
                 
                 windowEvent.queueChoices(
                     prompt: 'Finances...',
-                    choices: [
-                        'View ledger',
-                        'Hiree report'
-                    ],
+                    choices: choiceNames,
                     keep:true,
                     canCancel: true,
                     onChoice::(choice) {
-                        match(choice-1) {
-                          (0): finances_ledger(),
-                          (1): finances_employee()
-                        }
+                        choices[choice-1]();
                     }
                 );
             },
             
             
             manage ::{
+                @:choiceNames = [];
+                @:choices = [];
+                
+                if (state.sellingLevel >= LEVEL_HIRE_EMPLOYEES) ::<= {
+                    choiceNames->push(value: 'Hirees');
+                    choices->push(value: this.manageHirees);
+                } else ::<= {
+                    choices->push(value: ::{
+                        windowEvent.queueMessage(
+                            text: 'This option isn\'t available yet. You feel that you need to gain more experience as a salesperson before this is relevant.'
+                        );
+                    });                
+                    choiceNames->push(value: '????');
+                }
+
+                if (state.sellingLevel >= LEVEL_BUY_PROPERTY) ::<= {
+                    choiceNames->push(value: 'Properties');
+                    choices->push(value: this.manageProperties);
+                } else ::<= {
+                    choices->push(value: ::{
+                        windowEvent.queueMessage(
+                            text: 'This option isn\'t available yet. You feel that you need to gain more experience as a salesperson before this is relevant.'
+                        );
+                    });                
+                    choiceNames->push(value: '????');
+                }
+                
+                choiceNames->push(value:'Finances');
+                choices->push(value:this.finances);
+                
+                
+
+
+
                 windowEvent.queueChoices(
                     prompt : 'Manage...',
-                    choices : [
-                        'Hirees',
-                        'Properties',
-                        'Finances'
-                    ],
+                    choices : choiceNames,
                     
                     onChoice::(choice) {
-                        match(choice) {
-                          (1): this.manageHirees(),
-                          (2): this.manageProperties(),
-                          (3): this.finances()                        
-                        }
+                        choices[choice-1]();
                     },
                     keep:true,
                     canCancel:true
@@ -932,7 +981,7 @@
                 
                 @:doStart :: {
                     windowEvent.queueChoices(
-                        prompt:'Today I will...',
+                        prompt:'Today I will:',
                         choices : [
                             'Open shop...',
                             'Explore...',
@@ -975,6 +1024,153 @@
                     doStart();
             },
             
+            animateGainExp ::(accuracy, onDone, price) {
+                @exp = 
+                    if (price >= 10)
+                        (30 * (accuracy * (1+accuracy)**3.5))->ceil
+                    else 
+                        120
+
+                @:rating = ::<= {
+                    when(price < 10)
+                        '-- (sale too cheap for rating)'
+                    when (accuracy >= 0.99 && price > 30) ::<= {
+                        state.accolade_srank = true;
+                        exp *= 2;
+                        return 'S (Perfect!)';
+                    }
+                    when (accuracy >= 0.98 && price > 30) 'A+ (Amazing!)';
+                    when (accuracy >= 0.93) 'A (Great sale!)';
+                    when (accuracy >= 0.90) 'A- (Pretty great!)';
+                    when (accuracy >= 0.87) 'B+ (Good work!)';
+                    when (accuracy >= 0.83) 'B (Good!)';
+                    when (accuracy >= 0.80) 'B- (Alright.)';
+                    when (accuracy >= 0.77) 'C+ (Could be better.)';
+                    when (accuracy >= 0.73) 'C (In the right direction.)';
+                    when (accuracy >= 0.70) 'C- (Could have sold higher.)';
+
+                    exp += 300;
+                    return 'Generous! You really were nice and gave a big discount.';
+                };
+
+
+                @remainingForLevel = state.sellingEXPtoNext - state.sellingEXP;
+                windowEvent.queueDisplay(
+                    lines : [
+                        'Sale rating: ' + rating,
+                        '',
+                        'Selling level: ' + state.sellingLevel,
+                        canvas.renderBarAsString(width:40, fillFraction: state.sellingEXP / state.sellingEXPtoNext),
+                        'Exp to next level: ' + remainingForLevel,
+                        '                  +' + exp
+                    ]
+                )
+                
+                
+                @:level = ::{
+                    windowEvent.queueCustom(
+                        onEnter ::{},
+                        isAnimation: true,
+                        /*onInput ::(input) {
+                            match(input) {
+                              (windowEvent.CURSOR_ACTIONS.CONFIRM,
+                               windowEvent.CURSOR_ACTIONS.CANCEL):
+                                exp = 0
+                            }
+                        },*/
+                        animationFrame ::{
+                            @remainingForLevel = state.sellingEXPtoNext - state.sellingEXP;
+                            canvas.renderTextFrameGeneral(
+                                leftWeight: 0.5,
+                                topWeight : 0.5,
+                                lines : [
+                                    'Sale rating: ' + rating,
+                                    '',
+                                    'Selling level: ' + state.sellingLevel,
+                                    canvas.renderBarAsString(width:40, fillFraction: state.sellingEXP / state.sellingEXPtoNext),
+                                    'Exp to next level: ' + remainingForLevel,
+                                    if (exp >= 0)
+                                    '                  +' + exp
+                                    else
+                                    '                   ' + exp
+                                ]
+                            );
+                            
+
+                            
+                            @newExp = if (exp < 0) (exp * 0.9)->ceil else (exp*0.9)->floor;
+                            @add = exp - newExp;
+                            
+                            state.sellingEXP += add;
+                            exp = newExp;
+                            
+                            when (state.sellingEXP >= state.sellingEXPtoNext) ::<= {
+                                state.sellingLevel += 1;
+                                state.sellingEXP = state.sellingEXP - state.sellingEXPtoNext;
+                                state.sellingEXPtoNext = (state.sellingEXPtoNext ** 1.03)->floor;
+
+                                windowEvent.queueDisplay(
+                                    lines : [
+                                        'Level up!',
+                                        'Selling level: ' + state.sellingLevel,
+                                        'People will now be willing to pay more for your items being sold.'
+                                    ]
+                                );
+
+                                if (state.sellingLevel == LEVEL_UPGRADE_SHOP0) 
+                                    windowEvent.queueMessage(
+                                        text: 'You are now high enough level to expand your shop, allowing you to spend G to hold more items in your shop\'s stock. Tomorrow, check the "Upgrade shop" in the Shop options at the start of the day.\n\nNext unlock at level ' + LEVEL_HIRE_EMPLOYEES + ' : Hiring employees.'
+                                    );
+
+                                if (state.sellingLevel == LEVEL_HIRE_EMPLOYEES) 
+                                    windowEvent.queueMessage(
+                                        text: 'You are now high enough level to hire employees. Employees can be hired to explore dungeons for you, join your party, and more.\n\nNext unlock at level ' + LEVEL_UPGRADE_SHOP1 + ': Additional store fronts.'
+                                    );
+                                
+                                if (state.sellingLevel == LEVEL_UPGRADE_SHOP1) 
+                                    windowEvent.queueMessage(
+                                        text: 'You are now high enough level to add additional storefronts, allowing you to upgrade your shop to have your employees sell you items on your behalf. Tomorrow, check the "Upgrade shop" in the Shop options at the start of the day.\n\nNext unlock at level ' + LEVEL_BUY_PROPERTY + ' : Buying/selling property.'
+                                    );
+
+                                if (state.sellingLevel == LEVEL_BUY_PROPERTY) 
+                                    windowEvent.queueMessage(
+                                        text: 'You are now high enough level to buy and sell property. Properties are any homes and businesses in towns and cities.'
+                                    );
+
+
+
+                                level();
+                                return canvas.ANIMATION_FINISHED;
+                            }
+
+                            when(exp->abs <= 0) ::<= {
+                                windowEvent.queueDisplay(
+                                    lines : [
+                                        'Sale rating: ' + rating,
+                                        '',
+                                        'Selling level: ' + state.sellingLevel,
+                                        canvas.renderBarAsString(width:40, fillFraction: state.sellingEXP / state.sellingEXPtoNext),
+                                        'Exp to next level: ' + remainingForLevel,
+                                        ''
+                                    ],
+                                    skipAnimation: true
+                                )
+                                
+                                windowEvent.queueCustom(
+                                    onEnter :: {
+                                        onDone();
+                                    }
+                                );
+                                return canvas.ANIMATION_FINISHED
+                            }
+                        }
+                    );
+                }
+                level();
+                
+
+            },            
+            
             attemptSellProperty::(id, onDone) {
                 @world = import(module:'game_singleton.world.mt');
                 @location = world.island.findLocation(id);
@@ -995,7 +1191,7 @@
                     id:name,
                     standardPrice: location.modData.trader.listPrice,
                     shopper: buyer,
-                    onDone ::(bought, price) {
+                    onDone ::(bought, price, accuracy) {
                         when(!bought) windowEvent.queueMessage(
                             text: 'They left without buying ' + name + '...'
                         );
@@ -1012,10 +1208,17 @@
                             onDone ::{
                                 if (price > location.modData.trader.boughtPrice)
                                     state.accolade_soldAPropertyProfit = true;
-                                onDone();                            
+
+                                this.animateGainExp(
+                                    price:price,
+                                    accuracy,
+                                    onDone ::{
+                                        onDone();                            
+                                    }
+                                );
                             }
                         );
-
+                        
                     }
                 );
                 
@@ -2108,7 +2311,11 @@
                                       (1): ::<= {
                                         when (state.shopInventory.isFull) ::<= {
                                             windowEvent.queueMessage(
-                                                text: 'The shop stock is full. The shop can be upgraded to hold more items.'
+                                                text: 
+                                                if (state.sellingLevel >= LEVEL_UPGRADE_SHOP0)
+                                                    'The shop stock is full. The shop can be upgraded to hold more items.'
+                                                else 
+                                                    'The shop stock is full.'
                                             ); 
                                         }
 
@@ -2180,28 +2387,10 @@
                         if (base < 0) base = 0;
                         if (base > 1) base = 1;
                         base = 1 - base;
-                        base += 0.2*(Number.random() -.5); // still can vary a bit
-                        
-                        base *= 0.3; // personality only place a slight role
-                        base += 0.05; // people are generally reasonable
-                        @amount = (base + 1) * standardPrice + 1;
-                        
-                        // cheapskates or splurgers
-                        if (random.try(percentSuccess:33)) 
-                            if (random.flipCoin())
-                                amount *= 0.7
-                            else
-                                amount *= 1.3
-                        ;
-                        
-                        
-                        // not for free!
-                        if (amount < 1) amount = 1;
-                        amount = amount->ceil;    
-                        return amount;                
+                        return base;           
                     }
                     
-                    @:base = match(shopper.personality.name) {
+                    @base = match(shopper.personality.name) {
                       ('Friendly'):       (standardPrice * 1.56)->floor,
                       ('Short-tempered'): (standardPrice * 1.13)->floor,
                       ('Quiet'):          (standardPrice * 1.28)->floor,
@@ -2214,15 +2403,29 @@
                       ('Calm'):           (standardPrice * 1.3)->floor,
                       default: defaultCalculation()
                     }
+                    base *= 1+0.2*(Number.random() -.5); // still can vary a bit                    
+                    base *= 1.05; // people are generally reasonable
+                    
+                    // cheapskates or splurgers
+                    if (random.try(percentSuccess:15)) 
+                        if (random.flipCoin())
+                            base *= 0.9
+                        else
+                            base *= 1.1
+                    ;
+                    
+                    base = base + ((state.sellingLevel-1)*0.05 * base)->ceil;
 
                     when(isPopular)   base * 2;
                     when(isUnpopular) (base * 0.5)->floor;
+                    
+                    if (base < 1) base = 1;
                     return base;
                 }
                 
                 @:offerFromFraction::(fraction) {
                     @:min = standardPrice * 0;
-                    @:max = standardPrice * 2;
+                    @:max = standardPrice * 2 + (standardPrice * (state.sellingLevel-1) * 0.05)->ceil;
                     
                     return (fraction * (max - min) + min)->ceil;
                 }
@@ -2254,7 +2457,7 @@
                             }
                         },
                         prompt: 'Offer for how much?',
-                        increments: 40,
+                        increments: 60,
                         defaultValue : lastOffer,
                         topWeight: 0.6,
                         
@@ -2293,7 +2496,7 @@
                                             ]
                                         )
                                     );
-                                    onDone(bought:false, price:offer);
+                                    onDone(bought:false, price:offer, accuracy:0);
                                     state.accolade_failedToHaggle = true;
                                 } else ::<= {
                                     windowEvent.queueMessage(
@@ -2325,7 +2528,7 @@
                                     state.accolade_soldAWorthlessItem = true;
 
                                 state.totalEarnedSales += offer;
-                                onDone(bought:true, price:offer);
+                                onDone(bought:true, price:offer, accuracy: (shopperWillingToPay - (offer - shopperWillingToPay)->abs) / shopperWillingToPay);
                             }
                         }
                     );
@@ -2487,7 +2690,7 @@
                                 displayName:item.name,
                                 id : item.base.id,
                                 standardPrice: (item.price / 10)->ceil,
-                                onDone::(bought, price) {
+                                onDone::(bought, price, accuracy) {
                                     if (bought) ::<= {
                                         windowEvent.queueMessage(
                                             text: shopper.name + ' bought the ' + item.name + ' for ' + g(g:price) + '.'
@@ -2499,9 +2702,18 @@
                                         world.party.addGoldAnimated(
                                             amount:price,
                                             onDone :: {
-                                                nextShopper();
+                                                this.animateGainExp(
+                                                    price,
+                                                    accuracy,
+                                                    onDone ::{
+                                                        nextShopper();                                                    
+                                                    }
+                                                );
                                             }
-                                        )                                        
+                                        )    
+                                        
+                                        
+                                                                            
                                     } else ::<= {
                                         windowEvent.queueMessage(
                                             text: shopper.name + ' left without buying anything.'
@@ -2537,7 +2749,7 @@
                 @:upgradeShop_space = ::{
                     @:current = state.shopInventory.maxItems;
                     
-                    when (state.workOrder != empty)
+                    when (state.workOrder != 0)
                         windowEvent.queueMessage(
                             text: 'A work order for upgrading has already been placed.'
                         );
@@ -2598,7 +2810,7 @@
                 
                 
                 @:upgradeShop_fronts = ::{
-                    when (state.workOrder != empty)
+                    when (state.workOrder != 0)
                         windowEvent.queueMessage(
                             text: 'A work order for upgrading has already been placed.'
                         );
@@ -2649,19 +2861,23 @@
                     );
                 }
                 
+                @:choiceNames = ['Stock size'];
+                @:choices = [
+                    upgradeShop_space
+                ]
+                
+                if (state.sellingLevel >= LEVEL_UPGRADE_SHOP1) ::<= {
+                    choiceNames->push(value:'Add store front');
+                    choices->push(value:upgradeShop_fronts);
+                }
+                    
                 
                 windowEvent.queueChoices(
                     prompt: 'Upgrades...',
-                    choices : [
-                        'Stock size',
-                        'Additional store fronts'
-                    ],
+                    choices : choiceNames,
                     canCancel: true,                    
                     onChoice::(choice) {
-                        match(choice) {
-                          (1): upgradeShop_space(),
-                          (2): upgradeShop_fronts()
-                        }
+                        choices[choice-1]();
                     }
                 );
                 
@@ -2672,24 +2888,47 @@
             },
             
             openShop :: {
+            
+                @:choiceNames = [];
+                @:choices = [];
+                
+                choiceNames->push(value:'Manage...');
+                choices->push(value:this.manage);
+                
+                choiceNames->push(value:'Stock shop');
+                choices->push(value: this.stockShop);
+                
+                if (state.sellingLevel >= LEVEL_UPGRADE_SHOP0) ::<= {
+                    choiceNames->push(value: 'Upgrade shop');
+                    choices->push(value: this.upgradeShop);
+                } else ::<= {
+                    choiceNames->push(value: '????');
+                    choices->push(
+                        value:::{
+                            windowEvent.queueMessage(
+                                text: 'This option isn\'t available yet. You feel that you need to gain more experience as a salesperson before this is relevant.'
+                            ); 
+                        }                   
+                    )
+                }
+                
+                choiceNames->push(value:'Start the day!');
+                choices->push(value: ::{
+                    this.preflightCheckStart(onDone::{this.startShopDay();}, isShopkeeping:true)                
+                });
+
+                
+
+
+            
                 windowEvent.queueChoices(
                     prompt: 'Shop options:',
-                    choices : [
-                        'Manage...',
-                        'Stock shop', // inv to shop 
-                        'Upgrade shop', // stock, starts at 15 
-                        'Start the day!'
-                    ],
+                    choices : choiceNames,
                     keep:true,
                     canCancel: true,
                     onChoice::(choice) {
                         when(choice == 0) empty;
-                        match(choice) {
-                          (1): this.manage(),
-                          (2): this.stockShop(),
-                          (3): this.upgradeShop(),
-                          (4): this.preflightCheckStart(onDone::{this.startShopDay();}, isShopkeeping:true)
-                        }
+                        choices[choice-1]();
                     }
                 );
             }                      
@@ -2965,9 +3204,11 @@ return {
             name : 'Buy property',
             keepInteractionMenu: true,
             filter ::(location) {
+                @:trader = world.scenario.data.trader;            
+                when(trader.state.sellingLevel < LEVEL_BUY_PROPERTY) false;
+            
                 @world = import(module:'game_singleton.world.mt');
                 @:Location = import(module:'game_mutator.location.mt');
-                @:trader = world.scenario.data.trader;
                 return 
                     location.ownedBy != empty && 
                     trader.ownedProperties->findIndex(value:location.worldID) == -1 &&
@@ -3143,6 +3384,11 @@ return {
 
 
 
+        Accolade.new(
+            message: "Sly salesperson.",
+            info : 'Got an S rank sale.',
+            condition::(world)<- world.scenario.data.trader.state.accolade_srank     
+        ),
 
         Accolade.new(
             message: 'Business is not-so-booming anymore, is it?',

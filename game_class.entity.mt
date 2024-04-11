@@ -450,11 +450,12 @@
         // called to signal that a battle has started involving this entity
         battleEnd :: {
             _.battle = empty;
+            @:this = _.this;
             foreach(_.effects)::(index, effect) {
 
                 effect.effect.onRemoveEffect(
                     user:effect.from, 
-                    holder:_.this,
+                    holder:this,
                     item:effect.item
                 );
             }
@@ -637,24 +638,7 @@
         },
             
         renderHP ::(length, x) {
-            @:state = _.state;
-            if (length == empty) length = 12;
-            
-            @ratio = state.hp / state.stats.HP;
-            if (ratio > 1) ratio = 1;
-            if (ratio < 0) ratio = 0;
-            @numFilled = ((length - 2) * (ratio))->floor;
-            if (state.hp > 0 && numFilled < 1) numFilled = 1;
-            
-            @out = ' ';
-            for(0, numFilled)::(i) {
-                out = out+'▓';
-            }
-            for(0, length - numFilled - 2)::(i) {
-                out = out+'▁';
-            }
-            return out + ' ';
-            
+            return canvas.renderBarAsString(width:length, fillFraction:_.state.hp / _.state.stats.HP);
         },
             
         level : {
@@ -1330,6 +1314,7 @@
             @inBattle = effects != empty;
             if (!inBattle)
                 this.battleStart();
+            @:effects = _.effects;
 
 
             if (durationTurns == empty) durationTurns = -1;

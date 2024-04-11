@@ -213,14 +213,14 @@
             get :: {
                 @:state = _.state;
                 return
-                state.HP_ ==0 &&
-                state.AP_ ==0 &&
-                state.ATK_ ==0 &&
-                state.INT_ ==0 &&
-                state.DEF_ ==0 &&
-                state.LUK_ ==0 &&
-                state.SPD_ ==0 &&
-                state.DEX_ ==0                    
+                state.HP ==0 &&
+                state.AP ==0 &&
+                state.ATK ==0 &&
+                state.INT ==0 &&
+                state.DEF ==0 &&
+                state.LUK ==0 &&
+                state.SPD ==0 &&
+                state.DEX ==0                    
             }
         },
 
@@ -287,6 +287,18 @@
             state.LUK -= stats.LUK;
             state.SPD -= stats.SPD;
             state.DEX -= stats.DEX;               
+        },
+        
+        sum : {
+            get ::<-
+                _.state.HP +
+                _.state.AP +
+                _.state.ATK +
+                _.state.INT + 
+                _.state.DEF + 
+                _.state.LUK + 
+                _.state.SPD +
+                _.state.DEX
         },
             
         HP : {

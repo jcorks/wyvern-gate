@@ -894,8 +894,8 @@ Landmark.database.newEntry(
                 state.events = [];
 
                 state.base = base;
-                state.x = x;
-                state.y = y;
+                state.x = if (x != empty) x;
+                state.y = if (y != empty) y;
                 state.peaceful = base.peaceful;
 
                 if (floorHint != empty) ::<= {

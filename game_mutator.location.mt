@@ -1825,7 +1825,8 @@ Location.database.newEntry(data:{
                 if (ownedByHint != empty)
                     this.ownedBy = ownedByHint;
                        
-                state.description = random.pickArrayItem(list:base.descriptions);            
+                @:desc = random.pickArrayItem(list:base.descriptions);
+                state.description = if (desc != empty) desc else "";
                 base.onCreate(location:this);
                 return this;
             },
@@ -1891,7 +1892,7 @@ Location.database.newEntry(data:{
             },
             
             name : {
-                get::<- if (state.name == empty) (if (state.ownedBy == empty) state.base.name else (state.ownedBy.name + "'s " + state.base.name)) else state.name,
+                get::<- if (state.name == "") (if (state.ownedBy == empty) state.base.name else (state.ownedBy.name + "'s " + state.base.name)) else state.name,
                 set::(value) <- state.name = value
             },
             occupants : {
