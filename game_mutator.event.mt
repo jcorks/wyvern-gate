@@ -376,8 +376,8 @@ Event.database.newEntry(
 @:Event = databaseItemMutatorClass.create(
     name: 'Wyvern.Event',
     items : {
-        timeLeft : empty,
-        duration : empty,
+        timeLeft : 0,
+        duration : 0,
         startAt : empty   
     },
     database: Database.new(
@@ -426,8 +426,7 @@ Event.database.newEntry(
                 state.base = base; 
                 state.startAt = currentTime;
                 state.duration = base.onEventStart(event:this);
-                if (state.duration == empty)    
-                    state.duration = 0;
+                state.duration = 0;
                 state.timeLeft = state.duration;
                 return this;
             },

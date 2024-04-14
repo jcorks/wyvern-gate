@@ -109,7 +109,7 @@
     foreach(state.innateEffects) ::(k, name) {
         this.addEffect(
             from:this, 
-            name, 
+            id:name, 
             durationTurns: -1
         );                
     }
@@ -210,7 +210,7 @@
         professions : empty,
         canMake : empty,
         innateEffects : empty,
-        forceDrop : false,
+        forceDrop : empty,
         equips : empty,
         abilitiesAvailable : empty,
         abilitiesLearned : empty,
@@ -266,7 +266,6 @@
             state.flags = StateFlags.new();
             state.isDead = false;
             state.name = NameGen.person();
-            state.species = Species.getRandom();
             state.personality = Personality.getRandom();
             state.favoritePlace = Location.database.getRandom();
             state.growth = StatSet.new();
@@ -315,7 +314,9 @@
             );
             if (speciesHint != empty) ::<= {
                 state.species = Species.find(id:speciesHint);
-            }
+            } else 
+                error(detail: 'No species was specified when creating this entity. Please specify a species id!!!');
+
             state.professions = [profession]
             state.profession = 0;
             
@@ -676,7 +677,7 @@
             @:inBattle = _.effects != empty;
             if (!inBattle)
                 this.battleStart(); // dummy battle for effect shells.
-                
+            @:effects = _.effects;
             @:retval = ::<= {
                 @:dmg = Damage.new(
                     amount,
@@ -687,7 +688,7 @@
                 @:damaged = [];
                 // TODO: add weapon affinities if phys and equip weapon
                 // phys is always assumed to be with equipped weapon
-                foreach(_.effects)::(index, effect) {
+                foreach(effects)::(index, effect) {
                     when (dmg.amount <= 0) empty;
                     effect.effect.onPreAttackOther(user:effect.from, item:effect.item, holder:this, to:target, damage:dmg);
                 }
@@ -856,7 +857,7 @@
 
 
                 
-                foreach(_.effects)::(index, effect) {
+                foreach(effects)::(index, effect) {
                     effect.effect.onPostAttackOther(user:effect.from, item:effect.item, holder:this, to:target);
                 }
 
@@ -895,6 +896,8 @@
             @:inBattle = _.effects != empty;
             if (!inBattle)
                 this.battleStart(); // dummy battle for effect shells.
+
+            @:effects = _.effects;
 
 
             @:hitrate::(this, attacker) {
@@ -977,7 +980,7 @@
                 if (damage.amount <= 0) damage.amount = 1;
 
 
-                foreach(_.effects)::(index, effect) {
+                foreach(effects)::(index, effect) {
                     if (damage.amount > 0 || exact != empty)
                         effect.effect.onDamage(user:effect.from, item:effect.item, holder:this, from, damage);
                 }

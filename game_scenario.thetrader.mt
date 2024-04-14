@@ -16,15 +16,22 @@
 @:g = import(module:'game_function.g.mt');
 @:Scene = import(module:'game_database.scene.mt');
 @:Accolade = import(module:'game_struct.accolade.mt');
+@:romanNum = import(module:'game_function.romannumerals.mt');
 
 
 @:WORK_ORDER__SPACE = 1;
 @:WORK_ORDER__FRONT = 2;
 
-@:LEVEL_UPGRADE_SHOP0   = 2;
-@:LEVEL_HIRE_EMPLOYEES  = 4;
-@:LEVEL_UPGRADE_SHOP1   = 6;
-@:LEVEL_BUY_PROPERTY    = 8;
+@:LEVEL_HIRE_EMPLOYEES  = 3;
+@:LEVEL_UPGRADE_SHOP0   = 5;
+@:LEVEL_UPGRADE_SHOP1   = 7;
+@:LEVEL_BUY_PROPERTY    = 10;
+
+// Other shopkeeps have a standard reduction 
+// of 10 for their sales.
+//
+// Ours is higher because we are new
+@:STANDARD_REDUCTION_PRICE = 14;
 
 
 @:hireeContractWorth::(entity)<- 5+((entity.stats.sum/8 + entity.level)*2.5)->ceil;
@@ -144,7 +151,7 @@
         mood : MOODS.OK,
         
         // The last thing that attacked this hiree while exploring
-        lastAttackedBy : empty,
+        lastAttackedBy : '',
         
         // number of days employed.
         daysEmployed : 0,
@@ -348,7 +355,7 @@
                                             other.anonymize();
                                         } else if (Number.random() > 0.02) ::<= {
                                             other = instance.island.newHostileCreature()
-                                            other.nickname = 'a ' + other.name;
+                                            other.nickname = correctA(word:other.name);
                                             breakpoint();
                                         } else ::<= {
                                             @:TheBeast = import(module:'game_class.landmarkevent_thebeast.mt');
@@ -518,7 +525,7 @@
         sellingEXP : 0,
         
         // Selling EXP to next 
-        sellingEXPtoNext : 600,
+        sellingEXPtoNext : 700,
         
         // How many levels gained from sales.
         sellingLevel : 1,
@@ -540,6 +547,9 @@
         
         // Total earned from purely shopkeeping / selling property
         totalEarnedSales : 0,
+        
+        // You are truly a monster.
+        defeatedWyvern : false,
         
         
         //////////////
@@ -965,7 +975,7 @@
                     250000
                 ];
                   
-                when (party.inventory.gold > tiers[state.goldTier]) ::<= {
+                when (state.defeatedWyvern != true && party.inventory.gold > tiers[state.goldTier]) ::<= {
                     Scene.start(id:'thetrader:scene_gold0', onDone ::{
                     });
                 }
@@ -1029,7 +1039,7 @@
                     if (price >= 10)
                         (30 * (accuracy * (1+accuracy)**3.5))->ceil
                     else 
-                        120
+                        150
 
                 @:rating = ::<= {
                     when(price < 10)
@@ -1050,7 +1060,7 @@
                     when (accuracy >= 0.70) 'C- (Could have sold higher.)';
 
                     exp += 300;
-                    return 'Generous! You really were nice and gave a big discount.';
+                    return 'Generous! You were really nice and gave a big discount.';
                 };
 
 
@@ -1107,7 +1117,7 @@
                             when (state.sellingEXP >= state.sellingEXPtoNext) ::<= {
                                 state.sellingLevel += 1;
                                 state.sellingEXP = state.sellingEXP - state.sellingEXPtoNext;
-                                state.sellingEXPtoNext = (state.sellingEXPtoNext ** 1.03)->floor;
+                                state.sellingEXPtoNext = 100 + (state.sellingEXPtoNext ** 1.010)->floor;
 
                                 windowEvent.queueDisplay(
                                     lines : [
@@ -1117,19 +1127,21 @@
                                     ]
                                 );
 
-                                if (state.sellingLevel == LEVEL_UPGRADE_SHOP0) 
-                                    windowEvent.queueMessage(
-                                        text: 'You are now high enough level to expand your shop, allowing you to spend G to hold more items in your shop\'s stock. Tomorrow, check the "Upgrade shop" in the Shop options at the start of the day.\n\nNext unlock at level ' + LEVEL_HIRE_EMPLOYEES + ' : Hiring employees.'
-                                    );
+
 
                                 if (state.sellingLevel == LEVEL_HIRE_EMPLOYEES) 
                                     windowEvent.queueMessage(
-                                        text: 'You are now high enough level to hire employees. Employees can be hired to explore dungeons for you, join your party, and more.\n\nNext unlock at level ' + LEVEL_UPGRADE_SHOP1 + ': Additional store fronts.'
+                                        text: 'You are now high enough level to hire employees. Employees can be hired to explore dungeons for you, join your party, and more.\n\nNext unlock at level ' + LEVEL_UPGRADE_SHOP0 + ': Shop upgrades: stock size.'
+                                    );
+
+                                if (state.sellingLevel == LEVEL_UPGRADE_SHOP0) 
+                                    windowEvent.queueMessage(
+                                        text: 'You are now high enough level to expand your shop, allowing you to spend G to hold more items in your shop\'s stock. Tomorrow, check the "Upgrade shop" in the Shop options at the start of the day.\n\nNext unlock at level ' + LEVEL_UPGRADE_SHOP1 + ' : Shop upgrades: additional store fronts.'
                                     );
                                 
                                 if (state.sellingLevel == LEVEL_UPGRADE_SHOP1) 
                                     windowEvent.queueMessage(
-                                        text: 'You are now high enough level to add additional storefronts, allowing you to upgrade your shop to have your employees sell you items on your behalf. Tomorrow, check the "Upgrade shop" in the Shop options at the start of the day.\n\nNext unlock at level ' + LEVEL_BUY_PROPERTY + ' : Buying/selling property.'
+                                        text: 'You are now high enough level to add additional store fronts, allowing you to upgrade your shop to have your employees sell you items on your behalf. Tomorrow, check the "Upgrade shop" in the Shop options at the start of the day.\n\nNext unlock at level ' + LEVEL_BUY_PROPERTY + ' : Buying/selling property.'
                                     );
 
                                 if (state.sellingLevel == LEVEL_BUY_PROPERTY) 
@@ -1240,9 +1252,7 @@
                     when(wantsRaise->size == 0) onDone();
                     
                     @:hiree = wantsRaise->pop;
-                    @:raiseAmount = (hiree.contractRate * 0.6)->floor;
-                    when(raiseAmount == 0)
-                        nextRaise();
+                    @:raiseAmount = 1+(hiree.contractRate * 0.6)->floor;
 
 
 
@@ -1384,11 +1394,11 @@
 
                             @price = 
                                 if (isPopular) 
-                                    ((sold.price / 10)->floor)*2
+                                    ((sold.price / STANDARD_REDUCTION_PRICE)->floor)*2 // uses standard reduction
                                 else if (isUnpopular)
-                                    ((sold.price / 20)->floor)
+                                    ((sold.price / (STANDARD_REDUCTION_PRICE*2))->floor)
                                 else 
-                                    (sold.price / 10)->floor
+                                    (sold.price / STANDARD_REDUCTION_PRICE)->floor
                                     
                             match(shopkeeper.mood) {
                               (0, 1): ::<= {
@@ -1423,7 +1433,7 @@
                             gained += price;
                           
                             
-                            @:markup = (((price - (sold.price / 10)) / (sold.price / 10)) * 100)->floor;
+                            @:markup = (((price - (sold.price / STANDARD_REDUCTION_PRICE)) / (sold.price / STANDARD_REDUCTION_PRICE)) * 100)->floor;
                             itemsSold->push(value:sold.name);
                             itemsPrice->push(value:g(g:price));
                             itemsMarkup->push(value:if (markup == 0) '--' else (if (markup < 0)''+markup else '+'+markup)+'%');
@@ -1512,7 +1522,7 @@
                                     foreach(spoils) ::(i, item) {
                                         if (!world.party.inventory.isFull) ::<= {
                                             itemsFound = itemsFound + "- " + item.name + '\n'
-                                            hiree.earned += (item.price / 10)->floor;
+                                            hiree.earned += (item.price / STANDARD_REDUCTION_PRICE)->floor;
                                             world.party.inventory.add(item);
                                         }
                                     }
@@ -1878,14 +1888,14 @@
 
             
             addHiree ::(entity, rate) {
-                state.hirees->push(value:
-                    TraderState_Hiree.new(
-                        member:entity,
-                        rate
-                    )
-                );
+                @:n = TraderState_Hiree.new(
+                    member:entity,
+                    rate
+                )
+                state.hirees->push(value:n);
                 if (state.hirees->size >= 5)
                     state.accolade_5simultaneousHiree = true;
+                return n;
             },
             
             changeRole::(hiree) {
@@ -2136,6 +2146,31 @@
             
             preflightCheckStart::(onDone, isShopkeeping) {
                 @world = import(module:'game_singleton.world.mt');
+
+                @preflightCheckStart_hireeInPartyWhenShopKeeping :: {
+                    when(isShopkeeping != true) nextChain();
+                    @hasWaitingHiree = false;
+                    foreach(state.hirees) ::(k, hiree) {
+                        if (hiree.role == ROLES.IN_PARTY) ::<= {
+                            hasWaitingHiree = true;
+                        }
+                    }
+                    
+                    when(hasWaitingHiree == false) nextChain();                   
+                    
+                    windowEvent.queueMessage(
+                        text: 'You have one or more employees that are in your party, but you\'re not exploring today.'
+                    );
+                    
+                    windowEvent.queueAskBoolean(
+                        prompt: 'Start day with unassigned hiree tasks?',
+                        onChoice::(which) {
+                            when(which == false) empty;
+                            nextChain();
+                        }
+                    );
+                }
+
                 @preflightCheckStart_hireeswaiting :: {
                     @hasWaitingHiree = false;
                     foreach(state.hirees) ::(k, hiree) {
@@ -2144,7 +2179,7 @@
                         }
                     }
                     
-                    when(hasWaitingHiree == false) nextChain();
+                    when(hasWaitingHiree == false) nextChain();                   
                     
                     windowEvent.queueMessage(
                         text: 'You have one or more employees that dont have a task.'
@@ -2180,6 +2215,7 @@
 
                 @:chain = [
                     preflightCheckStart_hireeswaiting,
+                    preflightCheckStart_hireeInPartyWhenShopKeeping,
                     preflightCheckStart_shopkeepingwithnostock
                 ]
                 
@@ -2244,7 +2280,7 @@
                         traderState : state,
                         inventory: state.shopInventory,
                         canCancel: true,
-                        goldMultiplier: 0.1, // standard rate
+                        goldMultiplier: 1 / STANDARD_REDUCTION_PRICE, // standard rate
                         topWeight: 0.5,
                         leftWeight: 0.5,
                         onPick ::(item) {
@@ -2284,7 +2320,11 @@
                 @:ownInventory ::{
                     when(world.party.inventory.items->size == 0)
                         windowEvent.queueMessage(
-                            text: 'You have no items to stock the shop with. Perhaps you should hire someone to look for items. Otherwise, you must explore on your own to find things to sell.'
+                            text: 
+                                if (state.sellingLevel >= LEVEL_HIRE_EMPLOYEES)
+                                    'You have no items to stock the shop with. Perhaps you should hire someone to look for items. Otherwise, you must explore on your own to find things to sell.'
+                                else
+                                    'You have no items to stock the shop with. For now, you must explore on your own to find things to sell.'
                         );
                     
                     pickItemStock(
@@ -2292,7 +2332,7 @@
                         traderState : state,
                         inventory: world.party.inventory,
                         canCancel: true,
-                        goldMultiplier: 0.1,
+                        goldMultiplier: 1 / STANDARD_REDUCTION_PRICE,
                         topWeight: 0.5,
                         leftWeight: 0.5,
                         onPick ::(item) {
@@ -2414,7 +2454,7 @@
                             base *= 1.1
                     ;
                     
-                    base = base + ((state.sellingLevel-1)*0.05 * base)->ceil;
+                    base = base + ((state.sellingLevel-1)*0.03 * standardPrice)->ceil;
 
                     when(isPopular)   base * 2;
                     when(isUnpopular) (base * 0.5)->floor;
@@ -2437,7 +2477,7 @@
                                 canvas.renderTextFrameGeneral(
                                     lines: [
                                         shopper.name + ' wants to buy: ',
-                                        displayName + ' (worth standardly: ' + (if(worthless) 'WORTHLESS' else g(g:standardPrice)) + ')',
+                                        displayName + ' (worth: ' + (if(worthless) 'WORTHLESS' else g(g:standardPrice)) + ')',
                                         if (isPopular) 'NOTE: this item is currently in demand.' else if (isUnpopular) 'NOTE: this item is currently experiencing a price-drop.' else '',
                                         'Their personality seems to be: ' + shopper.personality.name
                                     ],
@@ -2528,7 +2568,10 @@
                                     state.accolade_soldAWorthlessItem = true;
 
                                 state.totalEarnedSales += offer;
-                                onDone(bought:true, price:offer, accuracy: (shopperWillingToPay - (offer - shopperWillingToPay)->abs) / shopperWillingToPay);
+                                @accuracy = (shopperWillingToPay - (offer - shopperWillingToPay)->abs) / shopperWillingToPay;
+                                if (fraction == 1)
+                                    accuracy = 0.95; // default accuracy if you maxed out the slider
+                                onDone(bought:true, price:offer, accuracy);
                             }
                         }
                     );
@@ -2689,7 +2732,7 @@
                                 shopper,
                                 displayName:item.name,
                                 id : item.base.id,
-                                standardPrice: (item.price / 10)->ceil,
+                                standardPrice: (item.price / STANDARD_REDUCTION_PRICE)->ceil,
                                 onDone::(bought, price, accuracy) {
                                     if (bought) ::<= {
                                         windowEvent.queueMessage(
@@ -3005,14 +3048,29 @@
                 onChoice::(which) {
                     when(which == false) empty;
 
-                    trader.addHiree(
+                    @:hiree = trader.addHiree(
                         entity:this,
                         rate: cost
                     );
+                    if (world.party.members->size == 3)
+                        windowEvent.queueMessage(
+                            text: this.name + ' was hired! They\'ll start working for you tomorrow. Be sure to assign them a task.'
+                        )
+                    else ::<= {
+                        windowEvent.queueMessage(
+                            text: this.name + ' was hired! You have the option to add them to your party now if you wish. Otherwise, you can assign them a task tomorrow.'
+                        );
                         
-                    windowEvent.queueMessage(
-                        text: this.name + ' was hired! They\'ll start working for you tomorrow. Be sure to assign them a task.'
-                    );     
+                        windowEvent.queueAskBoolean(
+                            prompt: 'Add to party now?',
+                            onChoice::(which) {
+                                when(which == false) empty;
+                                hiree.addToParty();  
+                            }
+                        );                        
+                        
+                    
+                    }     
 
                     world.accoladeIncrement(name:'recruitedCount');                                        
                     // the location is the one that has ownership over this...
@@ -3204,10 +3262,10 @@ return {
             name : 'Buy property',
             keepInteractionMenu: true,
             filter ::(location) {
+                @world = import(module:'game_singleton.world.mt');
                 @:trader = world.scenario.data.trader;            
                 when(trader.state.sellingLevel < LEVEL_BUY_PROPERTY) false;
             
-                @world = import(module:'game_singleton.world.mt');
                 @:Location = import(module:'game_mutator.location.mt');
                 return 
                     location.ownedBy != empty && 
@@ -3336,7 +3394,11 @@ return {
         InteractionMenuEntry.new(
             name: 'Finish Day',
             keepInteractionMenu: true,
-            filter::(island, landmark) <- landmark == empty || landmark.base.pointOfNoReturn == false,
+            filter::(island, landmark) <- 
+                if (landmark != empty && landmark.base.id == 'thetrader:fortune-wyvern-dimension')
+                    false
+                else
+                    landmark == empty || landmark.base.pointOfNoReturn == false,
             onSelect::(island, landmark) {
                 windowEvent.queueAskBoolean(
                     prompt: 'Wait until next day to open shop / explore?',
@@ -3479,6 +3541,151 @@ return {
     },
     
     databaseOverrides ::{
+        @:Interaction = import(module:'game_database.interaction.mt');
+    
+        // Overridden
+        Interaction.newEntry(
+            data : {
+                name : 'Explore Pit',
+                id :  'base:explore-pit',
+                keepInteractionMenu : false,
+                onInteract ::(location, party) {
+                    @:world = import(module:'game_singleton.world.mt');
+                    @:Event = import(module:'game_mutator.event.mt');
+
+                    if (location.targetLandmark == empty) ::<={
+                        @:Landmark = import(module:'game_mutator.landmark.mt');
+                        
+
+                        location.targetLandmark = 
+                            location.landmark.island.newLandmark(
+                                base:Landmark.database.find(id:'base:treasure-room')
+                            )
+                        ;
+                        location.targetLandmark.loadContent();
+                        location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
+                    }
+                    @:instance = import(module:'game_singleton.instance.mt');
+                    
+                    
+                    @:trader = world.scenario.data.trader;                    
+                    if (trader.state.defeatedWyvern) ::<= {
+                        @:key = Item.new(base:Item.database.find(id:'base:wyvern-key'));
+                        @:namegen = import(module:'game_singleton.namegen.mt');
+                        @:name = namegen.island();
+                        key.setIslandGenAttributes(
+                            levelHint: world.island.levelMax + 1 + (world.island.levelMax * 1.2)->ceil,
+                            nameHint: name,
+                            tierHint: world.island.tier + 1,
+                            extraLandmarks : [
+                                'base:lost-shrine',
+                            ]
+                        ); 
+                        key.name = 'Key to ' + name  + ' '+romanNum(value:world.island.tier + 1);
+                        party.inventory.add(item:key);                                       
+                        windowEvent.queueMessage(text: 'Oh? It looks like there\'s something near the entrance...');                            
+                        windowEvent.queueMessage(text: 'The party obtained the ' + key.name + '!');
+                    }                    
+                    
+                    
+
+                    instance.visitLandmark(landmark:location.targetLandmark, where::(landmark)<-location.targetLandmarkEntry);
+                    canvas.clear();
+                }
+            }
+        )      
+    
+    
+        Interaction.newEntry(
+            data : {
+                name : 'Steal',
+                id :  'thetrader:steal_wyvern',
+                keepInteractionMenu : false,
+                onInteract ::(location, party) {
+                    @:Entity = import(module:'game_class.entity.mt');
+                
+                    // the steal attempt happens first before items 
+                    //
+                    when (location.inventory.items->keycount == 0) ::<= {
+                        windowEvent.queueMessage(text: "There was nothing to steal.");                            
+                    }
+                    
+                    @:item = random.pickArrayItem(list:location.inventory.items);
+                    windowEvent.queueMessage(text:'Stole ' + item.name);
+
+                    when(party.inventory.isFull) ::<= {
+                        windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
+                    }
+
+                    @:world = import(module:'game_singleton.world.mt')
+
+                    if (location.ownedBy != empty && !location.ownedBy.isIncapacitated()) ::<= {
+                        when (random.try(percentSuccess:10)) ::<= {
+                            windowEvent.queueMessage(
+                                text: "The stealing goes unnoticed."
+                            );                
+                        }
+                        
+                        
+                        
+                        windowEvent.queueMessage(
+                            speaker: location.ownedBy.name,
+                            text: "What..??? You dare to steal from me???"
+                        );
+                        windowEvent.queueMessage(
+                            speaker: location.ownedBy.name,
+                            text: "That will be your last stealing on this plane, mortal!"
+                        );
+
+                        @:fireSprite ::{
+                            @:Entity = import(module:'game_class.entity.mt');
+                            @:sprite = Entity.new(
+                                island: location.landmark.island,
+                                speciesHint: 'base:fire-sprite',
+                                professionHint: 'base:fire-sprite',
+                                levelHint:5
+                            );
+                            sprite.name = 'the Fire Sprite';
+                            
+                            for(0, 10)::(i) {
+                                sprite.learnNextAbility();
+                            }          
+                            return sprite;      
+                        };
+                        @:e = [
+                            fireSprite(),
+                            location.ownedBy,
+                            fireSprite()  
+                        ];
+                        
+                        
+
+
+                        @:world = import(module:'game_singleton.world.mt');
+                        world.battle.start(
+                            party,                            
+                            allies: party.members,
+                            enemies: e,
+                            landmark: {},
+                            onEnd::(result) {
+                                @:instance = import(module:'game_singleton.instance.mt');
+                                if (!world.battle.partyWon()) 
+                                    instance.gameOver(reason:'The party was wiped out.');
+                                
+                                Scene.start(id:'thetrader:scene_defeatwyvern', onDone::{}, location, landmark:if (location) location.landmark else empty);
+                            }
+                        );
+                    }
+                    
+
+
+
+                    location.inventory.remove(item);
+                    party.inventory.add(item);                    
+                },
+            }
+        )    
+    
     
     
         @:Landmark = import(module:'game_mutator.landmark.mt');
@@ -3541,10 +3748,11 @@ return {
             ],
             interactions : [
                 'base:talk',
-                'base:examine'
+                'base:examine',
             ],
             
             aggressiveInteractions : [
+                'thetrader:steal_wyvern'
             ],
 
 
@@ -3566,6 +3774,25 @@ return {
                 @:Story = import(module:'game_singleton.story.mt');
                 @:Scene = import(module:'game_database.scene.mt');
                 @:StatSet = import(module:'game_class.statset.mt');
+
+                @:world = import(module:'game_singleton.world.mt');               
+                @:key = Item.new(base:Item.database.find(id:'base:wyvern-key'));
+                @:namegen = import(module:'game_singleton.namegen.mt');
+                @:name = namegen.island();
+                key.setIslandGenAttributes(
+                    levelHint: world.island.levelMax + 1 + (world.island.levelMax * 1.2)->ceil,
+                    nameHint: name,
+                    tierHint: world.island.tier + 1,
+                    extraLandmarks : [
+                        'base:lost-shrine',
+                    ]
+                ); 
+                key.name = 'Key to ' + name  + ' '+romanNum(value:world.island.tier + 1);
+
+                location.inventory.add(
+                    item:key
+                );
+                
                 location.ownedBy = location.landmark.island.newInhabitant();
                 location.ownedBy.name = 'Wyvern of Fortune';
                 location.ownedBy.species = Species.find(id:'base:wyvern');
@@ -3584,9 +3811,9 @@ return {
                     trader.goldTier += 1;
                 }
                 location.ownedBy.stats.load(serialized:StatSet.new(
-                    HP:   150,
+                    HP:   400,
                     AP:   999,
-                    ATK:  12,
+                    ATK:  15,
                     INT:  5,
                     DEF:  11,
                     LUK:  8,
@@ -3831,7 +4058,32 @@ return {
             }
         )
     
-    
+        Scene.newEntry(
+            data : {
+                id : 'thetrader:scene_defeatwyvern',
+                script: [
+                    ['Shiikaakael, Wyvern of Fortune', 'Augh..!!'],
+                    ['Shiikaakael, Wyvern of Fortune', 'I... what ... why are you so strong...? What ARE you??'],
+                    ['Shiikaakael, Wyvern of Fortune', 'Something is.. very wrong here.. I\'ve made a mistake...'],
+                    ['Shiikaakael, Wyvern of Fortune', 'Mortal... you... I want nothing further to do with you.!'],
+                    ['Shiikaakael, Wyvern of Fortune', 'Get away from me...!'],
+                    ['', 'In a violent flash of light, the Wyvern\'s magic lifts you off your feet and transports you home...'],
+                    ::(location, landmark, doNext) {
+                        @:world = import(module:'game_singleton.world.mt');
+                        @:instance = import(module:'game_singleton.instance.mt');
+
+
+                        instance.visitIsland(atGate:true);                
+                        @:world = import(module:'game_singleton.world.mt');
+                        @:party = world.party;
+                        @:trader = world.scenario.data.trader;
+
+                        trader.state.defeatedWyvern = true;
+                        
+                    }
+                ]
+            }
+        )        
     
     },
     onSaveLoad ::(data) {

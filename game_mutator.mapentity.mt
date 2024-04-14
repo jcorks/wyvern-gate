@@ -638,10 +638,10 @@ MapEntity.Task.database.newEntry(
         }        
     },
     items : {
-        tag : empty,
+        tag : '',
         entities : empty,
-        targetX : empty,
-        targetY : empty,
+        targetX : -1,
+        targetY : -1,
         path : empty,
         onArrive : empty, // MapEntity.Task to do when arriving 
         onCancel : empty, // MapEntity.Task to do when cancelling.

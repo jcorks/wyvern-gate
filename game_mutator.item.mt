@@ -3551,6 +3551,7 @@ Item.database.newEntry(data : {
             return this;
             
         },
+       
 
         base : {
             get :: {
@@ -3647,20 +3648,21 @@ Item.database.newEntry(data : {
             
         addIslandEntry ::(world, island) {
             @:state = _.state;
+            @:this = _.this;
             when (state.island != empty) empty;
 
             @:Island = import(module:'game_class.island.mt');
 
 
             if (island == empty) ::<= {
-                _.this.islandEntry = Island.new(
+                this.islandEntry = Island.new(
                     levelHint: (state.islandLevelHint)=>Number,
                     nameHint: (state.islandNameHint)=>String,
                     tierHint: (state.islandTierHint)=>Number,
                     extraLandmarks: state.islandExtraLandmarks
                 );                
             } else 
-                _.this.islandEntry = island;
+                this.islandEntry = island;
 
 
             
@@ -3755,7 +3757,7 @@ Item.database.newEntry(data : {
                         @out = '';
                         when (state.enchants->keycount == 0) 'None.';
                         foreach(state.enchants)::(i, mod) {
-                            out = out + romanNum(value:i) + ' - ' + mod.description + '\n';
+                            out = out + romanNum(value:i+1) + ' - ' + mod.description + '\n';
                         }
                         return out;
                     }

@@ -6,6 +6,8 @@ Known bugs / concerns:
   is too long.
 - Some abilities are not properly implemented currently.
 - On Windows in topaz, sometimes the settings arent read to unlock scenarios.
+- In the trader scenario, having a day end in a dungeon will cause the game to save. 
+  reloading the save will reset the day and take you out of the dungeon.
 
 Coming changes:
           

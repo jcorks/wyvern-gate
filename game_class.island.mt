@@ -344,7 +344,7 @@
 
             },
             
-            defaultLoad::(levelHint, nameHint, tierHint, landmarksHint, sizeWHint, sizeHHint, possibleEventsHint, extraLandmarks) {
+            defaultLoad::(levelHint, nameHint, tierHint, landmarksHint, sizeWHint, sizeHHint, possibleEventsHint, extraLandmarks, hasSpeciesBias) {
                 @:world = import(module:'game_singleton.world.mt');
 
                 @:oldIsland = world.island;
@@ -384,13 +384,13 @@
                         @rarity = 1;
                         return [
                             ... Species.getRandomSet(
-                                    count : (5+Number.random()*5)->ceil,
+                                    count : 2,
                                     filter:::(value) <- value.special == false
                                 )
                         ]->map(
-                            to:::(value) <- {
-                                species: value.id, 
-                                rarity: rarity *= 1.4
+                            to :::(value) <- {
+                                species: value.id,
+                                rarity : rarity *= 1.4
                             }
                         );
                     };
@@ -564,9 +564,19 @@
             },
                                     
             newInhabitant ::(professionHint, levelHint, speciesHint) {
+                @species = 
+                    if (random.try(percentSuccess:30))
+                        random.pickArrayItemWeighted(list:state.species).species
+                    else
+                        Species.getRandomFiltered(
+                            filter:::(value) <- value.special == false
+                        ).id
+                ;
+                    
+                        
                 @:out = Entity.new(
                     island: this,
-                    speciesHint:    if (speciesHint == empty) random.pickArrayItemWeighted(list:state.species).species else speciesHint,
+                    speciesHint:    if (speciesHint == empty) species else speciesHint,
                     levelHint:      if (levelHint == empty) random.integer(from:state.levelMin, to:state.levelMax) else levelHint,
                     professionHint: if (professionHint == empty) Profession.database.getRandomFiltered(filter::(value)<-value.learnable).id else professionHint
                 );

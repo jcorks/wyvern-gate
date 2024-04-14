@@ -59,6 +59,8 @@
         @_h;
         @_map;
         @_category;
+        @_topDeco;
+        @_bottomDeco;
         @unitsWide;
         @unitsHigh;
         @gateSide = random.integer(from:NORTH, to:SOUTH);
@@ -71,6 +73,15 @@
             _map.enableWall(x, y);
             _map.setSceneryIndex(x, y, symbol:blockSceneryIndex);
         }
+        @:addBuildingBlockTop::(x, y) {
+            _map.enableWall(x, y);
+            _map.setSceneryIndex(x, y, symbol:_topDeco);
+        }
+        @:addBuildingBlockBottom::(x, y) {
+            _map.enableWall(x, y);
+            _map.setSceneryIndex(x, y, symbol:_bottomDeco);
+        }
+
         
         
         @locations = [];  
@@ -82,15 +93,14 @@
         // adds a minimally-sized building
         @:addMinimalBuilding ::(left, top, symbol, location) {
             /*   
+                |  |
                 xxxx
                 x$$x
                 x  x
             
             */
-            addBuildingBlock(x:left + 1, y: top + 1);
-            addBuildingBlock(x:left + 2, y: top + 1);
-            addBuildingBlock(x:left + 3, y: top + 1);
-            addBuildingBlock(x:left + 4, y: top + 1);
+            addBuildingBlockTop(x:left + 1, y: top + 1);
+            addBuildingBlockTop(x:left + 4, y: top + 1);
 
             addBuildingBlock(x:left + 1, y: top + 2);
             addBuildingBlock(x:left + 2, y: top + 2);
@@ -98,19 +108,25 @@
             addBuildingBlock(x:left + 4, y: top + 2);
 
             addBuildingBlock(x:left + 1, y: top + 3);
+            addBuildingBlock(x:left + 2, y: top + 3);
+            addBuildingBlock(x:left + 3, y: top + 3);
             addBuildingBlock(x:left + 4, y: top + 3);
+
+
+            addBuildingBlockBottom(x:left + 1, y: top + 4);
+            addBuildingBlockBottom(x:left + 4, y: top + 4);
 
             if (symbol != empty) ::<= {
                 @:index = _map.addScenerySymbol(character:symbol);
-                _map.setSceneryIndex(x:left + 2, y: top + 2, symbol:index);
-                _map.setSceneryIndex(x:left + 3, y: top + 2, symbol:index);
+                _map.setSceneryIndex(x:left + 2, y: top + 3, symbol:index);
+                _map.setSceneryIndex(x:left + 3, y: top + 3, symbol:index);
             }
             
             
             
             
-            _map.setItem(data:location, x:left + 2, y: top + 3, symbol: ' ', discovered:true, name:location.name);
-            _map.setItem(data:location, x:left + 3, y: top + 3, symbol: ' ', discovered:true, name:location.name);
+            _map.setItem(data:location, x:left + 2, y: top + 4, symbol: ' ', discovered:true, name:location.name);
+            _map.setItem(data:location, x:left + 3, y: top + 4, symbol: ' ', discovered:true, name:location.name);
                 
 
         }  
@@ -121,6 +137,7 @@
         @:addDecoration ::(left, top, symbol, location) {
             random.pickArrayItem(list:[
                     /*   
+                        x  x
                         xxxx
                         xxxx
                         xxxx
@@ -129,10 +146,8 @@
 
 
                 ::{
-                    addBuildingBlock(x:left + 1, y: top + 1);
-                    addBuildingBlock(x:left + 2, y: top + 1);
-                    addBuildingBlock(x:left + 3, y: top + 1);
-                    addBuildingBlock(x:left + 4, y: top + 1);
+                    addBuildingBlockTop(x:left + 1, y: top + 1);
+                    addBuildingBlockTop(x:left + 4, y: top + 1);
 
                     addBuildingBlock(x:left + 1, y: top + 2);
                     addBuildingBlock(x:left + 2, y: top + 2);
@@ -140,9 +155,14 @@
                     addBuildingBlock(x:left + 4, y: top + 2);
 
                     addBuildingBlock(x:left + 1, y: top + 3);
-                    addBuildingBlock(x:left + 4, y: top + 3);
                     addBuildingBlock(x:left + 2, y: top + 3);
                     addBuildingBlock(x:left + 3, y: top + 3);
+                    addBuildingBlock(x:left + 4, y: top + 3);
+
+                    addBuildingBlockBottom(x:left + 1, y: top + 4);
+                    addBuildingBlock(x:left + 4, y: top + 4);
+                    addBuildingBlock(x:left + 2, y: top + 4);
+                    addBuildingBlockBottom(x:left + 3, y: top + 4);
                 },
                 
                 
@@ -324,6 +344,7 @@
         // adds a minimally-sized wide building
         @:addWideBuilding ::(left, top, symbol, location) {
             /*
+                x        x
                 xxxxxxxxxx
                 xxxxxxx$$x
                 x  xxxxxxx
@@ -331,6 +352,7 @@
             */
 
             /*
+                i        i
                 xxxxxxxxxx
                 x$$xxxxxxx
                 xxxxxxx  x
@@ -339,44 +361,46 @@
 
 
 
-            for(0, 3)::(y) {
-                for(0, 10)::(x) {
+            addBuildingBlockTop(x:left + 1,  y:top+1)
+            addBuildingBlockTop(x:left + 10, y:top+1)
+            for(1, 4)::(y) {
+                for(0, 10)::(x) {   
                     addBuildingBlock(x:left+x + 1, y:top+y+1);
                 }
             }
 
 
             if (random.flipCoin() == true) ::<= {
-                _map.disableWall(x:left + 2, y: top + 3);
-                _map.disableWall(x:left + 3, y: top + 3);
-                _map.clearScenery(x:left + 2, y: top + 3);
-                _map.clearScenery(x:left + 3, y: top + 3);
+                _map.disableWall(x:left + 2, y: top + 4);
+                _map.disableWall(x:left + 3, y: top + 4);
+                _map.clearScenery(x:left + 2, y: top + 4);
+                _map.clearScenery(x:left + 3, y: top + 4);
 
-                _map.setItem(data:location, x:left + 2, y: top + 3, symbol: ' ', discovered:true, name:location.name);
-                _map.setItem(data:location, x:left + 3, y: top + 3, symbol: ' ', discovered:true, name:location.name);
+                _map.setItem(data:location, x:left + 2, y: top + 4, symbol: ' ', discovered:true, name:location.name);
+                _map.setItem(data:location, x:left + 3, y: top + 4, symbol: ' ', discovered:true, name:location.name);
                 
 
                 if (symbol != empty) ::<= {
                     @:index = _map.addScenerySymbol(character:symbol);
-                    _map.setSceneryIndex(x:left + 8, y: top + 2, symbol:index);
-                    _map.setSceneryIndex(x:left + 9, y: top + 2, symbol:index);
+                    _map.setSceneryIndex(x:left + 8, y: top + 3, symbol:index);
+                    _map.setSceneryIndex(x:left + 9, y: top + 3, symbol:index);
                 }
 
 
             } else ::<= {            
-                _map.disableWall(x:left + 8, y: top + 3);
-                _map.disableWall(x:left + 9, y: top + 3);
-                _map.clearScenery(x:left + 8, y: top + 3);
-                _map.clearScenery(x:left + 9, y: top + 3);
+                _map.disableWall(x:left + 8, y: top + 4);
+                _map.disableWall(x:left + 9, y: top + 4);
+                _map.clearScenery(x:left + 8, y: top + 4);
+                _map.clearScenery(x:left + 9, y: top + 4);
                 
-                _map.setItem(data:location, x:left + 8, y: top + 3, symbol: ' ', discovered:true, name:location.name);
-                _map.setItem(data:location, x:left + 9, y: top + 3, symbol: ' ', discovered:true, name:location.name);
+                _map.setItem(data:location, x:left + 8, y: top + 4, symbol: ' ', discovered:true, name:location.name);
+                _map.setItem(data:location, x:left + 9, y: top + 4, symbol: ' ', discovered:true, name:location.name);
                 
 
                 if (symbol != empty) ::<= {
                     @:index = _map.addScenerySymbol(character:symbol);
-                    _map.setSceneryIndex(x:left + 2, y: top + 2, symbol:index);
-                    _map.setSceneryIndex(x:left + 3, y: top + 2, symbol:index);
+                    _map.setSceneryIndex(x:left + 2, y: top + 3, symbol:index);
+                    _map.setSceneryIndex(x:left + 3, y: top + 3, symbol:index);
                 }
 
             }
@@ -388,7 +412,7 @@
         // adds a minimally-sized wide building
         @:addTallBuilding ::(left, top, symbol, location) {
             /*
-                xxxx
+                ||||
                 xxxx
                 xxxx
                 xxxx
@@ -397,7 +421,10 @@
                 x  x
             
             */
-            for(0, 7)::(y) {
+            addBuildingBlockTop(x:left+  1, y:top+2)
+            addBuildingBlockTop(x:left+  4, y:top+2)
+
+            for(2, 7)::(y) {
                 for(0, 4)::(x) {
                     addBuildingBlock(x:left+x + 1, y:top+y+1);
                 }
@@ -427,9 +454,12 @@
 
         @:Location = import(module:'game_mutator.location.mt');
 
-        this.constructor = ::(map, category => Number) {
+        this.constructor = ::(map, category => Number, topDeco => String, bottomDeco => String) {
+            _topDeco = map.addScenerySymbol(character:topDeco);
+            _bottomDeco = map.addScenerySymbol(character:bottomDeco);
             unitsWide = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
             unitsHigh = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
+            
 
             if (unitsWide > ZONE_MAXIMUM_SPAN ||
                 unitsHigh > ZONE_MAXIMUM_SPAN)
@@ -663,6 +693,22 @@
         @hasFillerBuildings = true;
         @zones = [];
         @paired = [];
+        @topDeco = random.pickArrayItem(
+            list : [
+                ',',
+                '|',
+                '.',
+                '-',
+                '_',
+                '=',
+                '~'
+            ]
+        );
+        @bottomDeco = random.pickArrayItem(
+            list : [
+                '▓'
+            ]
+        );
         
         @isPaired = ::(i, n) {
             @temp;
@@ -748,7 +794,7 @@
         // out in the open. Else, it must be touching an existing zone 
         // on its side
         @:addZone ::(category) {
-            @zone = Zone.new(map:map, category);
+            @zone = Zone.new(map:map, category, topDeco, bottomDeco);
             @top;
             @left;
             @alongIcoord;

@@ -6,7 +6,7 @@
 @:StatSet = import(module:'game_class.statset.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
-@:ROOM_MAX_ENTITY = 6;
+@:ROOM_MAX_ENTITY = 12;
 @:REACHED_DISTANCE = 1.5;
 @:AGGRESSIVE_DISTANCE = 5;
 
@@ -107,7 +107,7 @@
             
                 // add additional entities out of spawn points (stairs)
                 //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && Number.random() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
-                if (state.hasBeast && entities->keycount < 5 && state.encountersOnFloor < 20) ::<= {
+                if (state.hasBeast && entities->keycount < 3 && state.encountersOnFloor < ROOM_MAX_ENTITY) ::<= {
                     addEntity();
                 }
             }

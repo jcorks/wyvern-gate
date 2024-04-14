@@ -1004,7 +1004,13 @@ return {
                 },
                 onCreate ::(landmark, island){
                 },
-                onVisit ::(landmark, island) {}
+                onVisit ::(landmark, island) {
+                    if (landmark.floor == 0)
+                        windowEvent.queueMessage(
+                            text:"This place seems to shift before you..."
+                        );
+                
+                }
                 
             }
         )
@@ -1066,7 +1072,13 @@ return {
                 },
                 onCreate ::(landmark, island){
                 },
-                onVisit ::(landmark, island) {}
+                onVisit ::(landmark, island) {
+                    if (landmark.floor == 0)
+                        windowEvent.queueMessage(
+                            text:"This place seems to shift before you..."
+                        );
+                
+                }
                 
             }
         )
@@ -1129,7 +1141,13 @@ return {
                 },
                 onCreate ::(landmark, island){
                 },
-                onVisit ::(landmark, island) {}
+                onVisit ::(landmark, island) {
+                    if (landmark.floor == 0)
+                        windowEvent.queueMessage(
+                            text:"This place seems to shift before you..."
+                        );
+                
+                }
                 
             }
         )
@@ -3727,8 +3745,10 @@ return {
                     ['', 'The party also receives an equippable Tome.'],
                     ['', 'There\'s also a note here...'],
                     ::(location, landmark, doNext) {
+                        @:world = import(module:'game_singleton.world.mt');
                         @:Entity = import(module:'game_class.entity.mt');
-                        @:someone = Entity.new(levelHint:5);
+                        @:someone = world.island.newInhabitant();
+                        @:someoneElse = world.island.newInhabitant(levelHint:10);
                         windowEvent.queueMessage(text:
                             (random.pickArrayItem(
                                 list : [
@@ -3737,12 +3757,11 @@ return {
                                     '"You know, you\'re a real pain. All of a sudden you want to go on a big adventure, huh? Whatever. Just take this stuff. Put it to good use and stay alive. You might find it hard to believe, but I\'ll miss you. Do good out there."',
                                     '"There comes a time when someone has to take action and do something big. I saw it in your eyes the moment you told me. I could tell it was hard for you, too. Just know that you have my blessing. Let the items in this box be proof of that. I\'m proud of you. Stay alive out there."',
                                     '"So, it\'s finally time. We always knew you were an adventurer at heart. We prepared for the day you would finally go out into the world on your own. It might be tough, but we truly think you can overcome anything. Hopefully you\'ll find these useful on your journey. Be strong."',
-                                    '"Ever since '+(Entity.new(levelHint:10).name)+' left, you\'ve never been the same. Always looking out there thinking of a way to find them. I think that this "Chosen" thing is just another excuse to go out and look, but I can\'t blame you. I miss them too. Either way, stay safe and come back in one piece. Hopefully these will come in handy."' 
+                                    '"Ever since '+someoneElse.name+' left, you\'ve never been the same. Always looking out there thinking of a way to find them. I think that this "Chosen" thing is just another excuse to go out and look, but I can\'t blame you. I miss them too. Either way, stay safe and come back in one piece. Hopefully these will come in handy."' 
                                 ]
                             )) + '\n\n - ' + someone.name
                         );
 
-                        @:world = import(module:'game_singleton.world.mt');
                         world.party.inventory.addGold(amount:125);
 
                         world.party.inventory.add(item:Item.new(base:Item.database.find(id:'base:life-crystal'

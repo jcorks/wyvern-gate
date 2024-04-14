@@ -602,7 +602,11 @@ Landmark.database.newEntry(
             outOfBoundsCharacter: '~'
         },
         onCreate ::(landmark, island){},
-        onVisit ::(landmark, island) {}
+        onVisit ::(landmark, island) {
+            windowEvent.queueMessage(
+                text:"This place seems to shift before you..."
+            );        
+        }
         
     }
 )
@@ -894,8 +898,8 @@ Landmark.database.newEntry(
                 state.events = [];
 
                 state.base = base;
-                state.x = if (x != empty) x;
-                state.y = if (y != empty) y;
+                state.x = if (x != empty) x else 0;
+                state.y = if (y != empty) y else 0;
                 state.peaceful = base.peaceful;
 
                 if (floorHint != empty) ::<= {
@@ -1022,7 +1026,7 @@ Landmark.database.newEntry(
                 if (override) 
                     state.overrideTitle = override;
                     
-                when (state.overrideTitle)
+                when (state.overrideTitle != '')
                     this.map.title = state.overrideTitle;
                 
                 this.map.title = this.name + 
