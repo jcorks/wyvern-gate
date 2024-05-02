@@ -19,7 +19,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:Random = import(module:'game_singleton.random.mt');
 @:BattleAction = import(module:'game_struct.battleaction.mt');
-@:Ability = import(module:'game_database.ability.mt');
+@:Arts = import(module:'game_database.arts.mt');
 @:itemmenu = import(module:'game_function.itemmenu.mt');
 
 
@@ -33,9 +33,17 @@ return ::(
 ) {
     @:world = import(module:'game_singleton.world.mt');
 
+
     @:commitAction ::(action => BattleAction->type) {
-        battle.entityCommitAction(action:action);    
-        windowEvent.jumpToTag(name:'BattleMenu', goBeforeTag:true, doResolveNext:true);
+        if (Arts.find(id:action.card.id).kind == Arts.KIND.ABILITY) ::<= {
+            battle.entityCommitAction(action:action);    
+            windowEvent.jumpToTag(name:'BattleMenu', goBeforeTag:true)
+        } else ::<= {
+            battle.entityCommitAction(action:action);    
+            breakpoint();
+            windowEvent.jumpToTag(name:'BattleMenu', doResolveNext:true);               
+        }
+
     }
 
     @:options = [...world.scenario.base.interactionsBattle]->filter(
@@ -45,19 +53,22 @@ return ::(
 
     @:choices = [...options]->map(to:::(value) <- value.name);
 
-
-    windowEvent.queueChoiceColumns(
-        leftWeight: 1,
-        topWeight: 1,
-        choices : choices,
-        jumpTag: 'BattleMenu',
-        keep: true,
-        itemsPerColumn: 3,
-        prompt: 'What will ' + user.name + ' do?',
-        canCancel: false,
-        onChoice::(choice) {
-            when(choice == 0) empty;
-            options[choice-1].onSelect(user, battle, commitAction);        
+    windowEvent.onResolveAll(
+        onDone:: {
+            windowEvent.queueChoiceColumns(
+                leftWeight: 1,
+                topWeight: 1,
+                choices : choices,
+                jumpTag: 'BattleMenu',
+                keep: true,
+                itemsPerColumn: 3,
+                prompt: 'What will ' + user.name + ' do?',
+                canCancel: false,
+                onChoice::(choice) {
+                    when(choice == 0) empty;
+                    options[choice-1].onSelect(user, battle, commitAction);        
+                }
+            );    
         }
-    );    
+    );
 }

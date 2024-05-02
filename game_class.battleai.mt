@@ -18,9 +18,11 @@
 @:Random = import(module:'game_singleton.random.mt');
 @:BattleAction = import(module:'game_struct.battleaction.mt');
 @:class  = import(module:'Matte.Core.Class');
-@:Ability = import(module:'game_database.ability.mt');
+@:Arts = import(module:'game_database.arts.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:ArtsDeck = import(module:'game_class.artsdeck.mt');
+@:windowEvent = import(:'game_singleton.windowevent.mt');
 @:BattleAI = LoadableClass.create(
     name: 'Wyvern.BattleAI',
     items : [],
@@ -41,95 +43,120 @@
             
             takeTurn ::(battle, enemies, allies){
                 @:Entity = import(module:'game_class.entity.mt');
-                @:defaultAttack = ::{
-                    battle.entityCommitAction(action:BattleAction.new(
-                        ability: 
-                            Ability.find(id:'base:attack'),
+                
+                
+                @:commitTargettedAction::(card) {
+                    @:art = Arts.find(id:card.id);
+                    @atEnemy = (art.usageHintAI == Arts.USAGE_HINT.OFFENSIVE) ||
+                               (art.usageHintAI == Arts.USAGE_HINT.DEBUFF);
+                    
+                    @targets = [];
+                    @targetParts = [];
+                    match(art.targetMode) {
+                      (Arts.TARGET_MODE.ONE,
+                       Arts.TARGET_MODE.ONEPART) :::<= {
+                        if (atEnemy) 
+                            targets->push(value:Random.pickArrayItem(list:enemies))
+                        else 
+                            targets->push(value:Random.pickArrayItem(list:allies))
+                        ;
+                      },
+                      
+                      (Arts.TARGET_MODE.ALLALLY) :::<= {
+                        targets = [...allies];
+                      },                  
 
-                        targets: [
-                            Random.pickArrayItem(list:enemies)
-                        ],
-                        targetParts : [
-                            Entity.normalizedDamageTarget()
-                        ],
-                        extraData: {}                        
-                    ));                  
+                      (Arts.TARGET_MODE.ALLENEMY) :::<= {
+                        targets = [...enemies];
+                      },                  
+
+                      (Arts.TARGET_MODE.NONE) :::<= {
+                      },
+
+
+                      (Arts.TARGET_MODE.RANDOM) :::<= {
+                        if (Number.random() < 0.5) 
+                            targets->push(value:Random.pickArrayItem(list:enemies))
+                        else 
+                            targets->push(value:Random.pickArrayItem(list:allies))
+                        ;                    
+                      }
+
+                    }
+                    foreach(targets) ::(index, t) {
+                        targetParts[index] = Entity.normalizedDamageTarget();
+                    }
+                    windowEvent.onResolveAll(
+                        onDone:: {
+                            battle.entityCommitAction(action:BattleAction.new(
+                                card,
+                                targets: targets,
+                                targetParts : targetParts,
+                                extraData: {}                        
+                            ));   
+                        }
+                    );          
+                }
+                
+                @:defaultAttack = ::{
+                    user_.deck.discardFromHand(card:random.pickArrayItem(list:user_.deck.hand));
+
+                    windowEvent.onResolveAll(
+                        onDone:: {
+
+                            battle.entityCommitAction(action:BattleAction.new(
+                                card: ArtsDeck.synthesizeHandCard(id:'base:attack'),
+
+                                targets: [
+                                    Random.pickArrayItem(list:enemies)
+                                ],
+                                targetParts : [
+                                    Entity.normalizedDamageTarget()
+                                ],
+                                extraData: {}                        
+                            ));             
+                        }
+                    );
                 }
             
                 when(enemies->keycount == 0)
                     battle.entityCommitAction(action:BattleAction.new(
-                        ability: Ability.find(id:'base:wait'),
+                        card: ArtsDeck.synthesizeHandCard(id:'base:wait'),
                         targets: [],
                         targetParts : [],
                         extraData: {}                        
                     ));
             
-            
-                // default: just attack if all you have is defend and attack
-                when(user_.abilitiesAvailable->keycount <= 2 || random.try(percentSuccess:if(user_.aiAbilityChance == empty) 60 else 100 - user_.aiAbilityChance))
-                    defaultAttack();          
+                
+                
+                @:hand = user_.deck.hand->filter(by::(value) <- Arts.find(id:value.id).usageHintAI != Arts.USAGE_HINT.DONTUSE);
+                
+                foreach(hand) ::(k, v) {
+                    @art = Arts.find(id:v.id);
+                    if (art.kind == Arts.KIND.EFFECT && random.flipCoin()) ::<= {
+                        commitTargettedAction(
+                            card:v
+                        );
+                        hand->remove(key:hand->findIndex(value:v));
+                    }
+                }                
 
-                // else pick a non-defend ability
-                @:list = user_.abilitiesAvailable->filter(by:::(value) <- value.id != 'base:attack' && value.id != 'base:defend' && value.usageHintAI != Ability.USAGE_HINT.DONTUSE);
 
-                // fallback if only ability known is "dont use"
-                when (list->keycount == 0)
+                when(hand->keycount == 0)
                     defaultAttack();
+            
                     
-                @:ability = Random.pickArrayItem(list);
+                @card = Random.pickArrayItem(list:hand->filter(by::(value) <- Arts.find(id:value.id).kind == Arts.KIND.ABILITY));
+                when (card == empty)
+                    defaultAttack();
 
+                @:ability = Arts.find(id:card.id);
 
-
-                when (ability.usageHintAI == Ability.USAGE_HINT.HEAL &&                
+                when (ability.usageHintAI == Arts.USAGE_HINT.HEAL &&                
                     user_.hp == user_.stats.HP)
                     defaultAttack();
                 
-                @atEnemy = (ability.usageHintAI == Ability.USAGE_HINT.OFFENSIVE) ||
-                           (ability.usageHintAI == Ability.USAGE_HINT.DEBUFF);
-                
-                @targets = [];
-                @targetParts = [];
-                match(ability.targetMode) {
-                  (Ability.TARGET_MODE.ONE,
-                   Ability.TARGET_MODE.ONEPART) :::<= {
-                    if (atEnemy) 
-                        targets->push(value:Random.pickArrayItem(list:enemies))
-                    else 
-                        targets->push(value:Random.pickArrayItem(list:allies))
-                    ;
-                  },
-                  
-                  (Ability.TARGET_MODE.ALLALLY) :::<= {
-                    targets = [...allies];
-                  },                  
-
-                  (Ability.TARGET_MODE.ALLENEMY) :::<= {
-                    targets = [...enemies];
-                  },                  
-
-                  (Ability.TARGET_MODE.NONE) :::<= {
-                  },
-
-
-                  (Ability.TARGET_MODE.RANDOM) :::<= {
-                    if (Number.random() < 0.5) 
-                        targets->push(value:Random.pickArrayItem(list:enemies))
-                    else 
-                        targets->push(value:Random.pickArrayItem(list:allies))
-                    ;                    
-                  }
-
-                }
-                foreach(targets) ::(index, t) {
-                    targetParts[index] = Entity.normalizedDamageTarget();
-                }
-                
-                battle.entityCommitAction(action:BattleAction.new(
-                    ability: ability,
-                    targets: targets,
-                    targetParts : targetParts,
-                    extraData: {}                        
-                ));
+                commitTargettedAction(card:card);
             }
         }   
     }  

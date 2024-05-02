@@ -1094,7 +1094,7 @@ Landmark.database.newEntry(
             gate : {
                 get :: {
                     @:locations = this.locations;
-                    @:index = locations->findIndex(query::(value) {
+                    @:index = locations->findIndexCondition(::(value) {
                         return value.base.id == 'base:entrance'
                     });
                     when (index != -1)

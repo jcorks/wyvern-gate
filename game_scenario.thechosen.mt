@@ -434,7 +434,7 @@ return {
 
         
         @:extendedName::(entity) {
-            return 'the ' + entity.species.name + ' ' + entity.profession.base.name
+            return 'the ' + entity.species.name + ' ' + entity.profession.name
         }
         
         @:finish ::{
@@ -629,6 +629,38 @@ return {
     onResume ::(data) {
         @:instance = import(module:'game_singleton.instance.mt');
         instance.islandTravel();           
+        
+        
+        /////
+        /*
+        @:world = import(module:'game_singleton.world.mt');
+        @:enemies = [
+            world.island.newInhabitant(),
+            world.island.newInhabitant()        
+        ];
+        
+        foreach(enemies) ::(k, v) {
+            v.anonymize();
+        }
+        world.battle.start(
+            party: world.party,
+
+            allies: world.party.members,
+            enemies,
+            landmark: {},
+            onStart :: {
+            },
+            onEnd ::(result) {
+                when(world.battle.partyWon()) ::<= { 
+                };
+                  
+                @:instance = import(module:'game_singleton.instance.mt');
+                instance.gameOver(reason:'The party was wiped out.');
+            }
+        );
+        */
+        /////
+        
     },
     
     onDeath ::(data, entity) {
@@ -646,11 +678,11 @@ return {
         commonInteractions.walk.wait
     ],
     interactionsBattle : [
-        commonInteractions.battle.act,
+        commonInteractions.battle.attack,
+        commonInteractions.battle.arts,
         commonInteractions.battle.check,
         commonInteractions.battle.item,
-        commonInteractions.battle.wait,
-        commonInteractions.battle.pray
+        commonInteractions.battle.wait
     ],
     interactionsOptions : [
         commonInteractions.options.save,
@@ -1360,7 +1392,7 @@ return {
             
             onCreate ::(location) {
                 location.name = 'Wyvern Throne';
-                @:Profession = import(module:'game_mutator.profession.mt');
+                @:Profession = import(module:'game_database.profession.mt');
                 @:Species = import(module:'game_database.species.mt');
                 @:Story = import(module:'game_singleton.story.mt');
                 @:Scene = import(module:'game_database.scene.mt');
@@ -1368,7 +1400,7 @@ return {
                 location.ownedBy = location.landmark.island.newInhabitant();
                 location.ownedBy.name = 'Wyvern of Fire';
                 location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-fire');
-                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'thechosen:wyvern-of-fire'));               
+                location.ownedBy.profession = Profession.new(base:Profession.find(id:'thechosen:wyvern-of-fire'));               
                 location.ownedBy.clearAbilities();
                 foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
                     location.ownedBy.learnAbility(id:ability);
@@ -1443,7 +1475,7 @@ return {
             
             onCreate ::(location) {
                 location.name = 'Wyvern Throne';
-                @:Profession = import(module:'game_mutator.profession.mt');
+                @:Profession = import(module:'game_database.profession.mt');
                 @:Species = import(module:'game_database.species.mt');
                 @:Story = import(module:'game_singleton.story.mt');
                 @:Scene = import(module:'game_database.scene.mt');
@@ -1451,7 +1483,7 @@ return {
                 location.ownedBy = location.landmark.island.newInhabitant();
                 location.ownedBy.name = 'Wyvern of Ice';
                 location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-ice');
-                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'thechosen:wyvern-of-ice'));               
+                location.ownedBy.profession = Profession.new(base:Profession.find(id:'thechosen:wyvern-of-ice'));               
                 location.ownedBy.clearAbilities();
                 foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
                     location.ownedBy.learnAbility(id:ability);
@@ -1526,7 +1558,7 @@ return {
             
             onCreate ::(location) {
                 location.name = 'Wyvern Throne';
-                @:Profession = import(module:'game_mutator.profession.mt');
+                @:Profession = import(module:'game_database.profession.mt');
                 @:Species = import(module:'game_database.species.mt');
                 @:Story = import(module:'game_singleton.story.mt');
                 @:Scene = import(module:'game_database.scene.mt');
@@ -1535,7 +1567,7 @@ return {
                 location.ownedBy = location.landmark.island.newInhabitant();
                 location.ownedBy.name = 'Wyvern of Thunder';
                 location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-thunder');
-                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'thechosen:wyvern-of-thunder'));               
+                location.ownedBy.profession = Profession.new(base:Profession.find(id:'thechosen:wyvern-of-thunder'));               
                 location.ownedBy.clearAbilities();
                 foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
                     location.ownedBy.learnAbility(id:ability);
@@ -1612,7 +1644,7 @@ return {
             
             onCreate ::(location) {
                 location.name = 'Wyvern Throne';
-                @:Profession = import(module:'game_mutator.profession.mt');
+                @:Profession = import(module:'game_database.profession.mt');
                 @:Entity = import(module:'game_class.entity.mt');
                 @:Species = import(module:'game_database.species.mt');
                 @:Story = import(module:'game_singleton.story.mt');
@@ -1621,7 +1653,7 @@ return {
                 location.ownedBy = location.landmark.island.newInhabitant();
                 location.ownedBy.name = 'Wyvern of Light';
                 location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-light');
-                location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'thechosen:wyvern-of-light'));               
+                location.ownedBy.profession = Profession.new(base:Profession.find(id:'thechosen:wyvern-of-light'));               
                 location.ownedBy.clearAbilities();
                 foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
                     location.ownedBy.learnAbility(id:ability);
@@ -2113,7 +2145,7 @@ return {
             hasMaterial : false,
             isApparel : false,    isUnique : true,
             useTargetHint : Item.database.statics.USE_TARGET_HINT.NONE,
-            possibleAbilities : [
+            possibleArts : [
             ],
 
             // fatigued
@@ -2161,7 +2193,7 @@ return {
             hasMaterial : false,
             isApparel : false,    isUnique : true,
             useTargetHint : Item.database.statics.USE_TARGET_HINT.ONE,
-            possibleAbilities : [
+            possibleArts : [
                 "base:fire" // for fun!
             ],
 
@@ -2225,7 +2257,7 @@ return {
             hasMaterial : false,
             isApparel : false,    isUnique : true,
             useTargetHint : Item.database.statics.USE_TARGET_HINT.ONE,
-            possibleAbilities : [
+            possibleArts : [
                 "base:ice" // for fun!
             ],
 
@@ -2289,7 +2321,7 @@ return {
             hasMaterial : false,
             isApparel : false,    isUnique : true,
             useTargetHint : Item.database.statics.USE_TARGET_HINT.ONE,
-            possibleAbilities : [
+            possibleArts : [
                 "base:thunder" // for fun!
             ],
 
@@ -2353,7 +2385,7 @@ return {
             hasMaterial : false,
             isApparel : false,    isUnique : true,
             useTargetHint : Item.database.statics.USE_TARGET_HINT.ONE,
-            possibleAbilities : [
+            possibleArts : [
                 "base:explosion" // for fun!
             ],
 
@@ -3929,9 +3961,9 @@ return {
             ]
         })
 
-        @:Profession = import(module:'game_mutator.profession.mt');
+        @:Profession = import(module:'game_database.profession.mt');
 
-        Profession.database.newEntry(data:{
+        Profession.newEntry(data:{
             name: 'Wyvern of Fire',
             id:'thechosen:wyvern-of-fire',
             weaponAffinity: 'base:none',
@@ -3952,7 +3984,7 @@ return {
             maxKarma : 50,
             learnable : false,
             
-            abilities : [
+            arts : [
                 'base:triplestrike',
                 'base:backdraft',
                 'base:big-swing',
@@ -3965,7 +3997,7 @@ return {
             ]
         })
 
-        Profession.database.newEntry(data:{
+        Profession.newEntry(data:{
             name: 'Wyvern of Ice',
             id : 'thechosen:wyvern-of-ice',
             weaponAffinity: 'base:none',
@@ -3986,7 +4018,7 @@ return {
             maxKarma : 50,
             learnable : false,
             
-            abilities : [
+            arts : [
                 'base:frozen-flame',
                 'base:summon-ice-elemental',
                 'base:ice',
@@ -3999,7 +4031,7 @@ return {
         })            
 
 
-        Profession.database.newEntry(data:{
+        Profession.newEntry(data:{
             name: 'Wyvern of Thunder',
             id : 'thechosen:wyvern-of-thunder',
             weaponAffinity: 'base:none',
@@ -4020,7 +4052,7 @@ return {
             maxKarma : 50,
             learnable : false,
             
-            abilities : [
+            arts : [
                 'base:thunder',
                 'base:summon-thunder-spawn',
                 //'Magic Mist', // remove all effects
@@ -4035,7 +4067,7 @@ return {
             ]
         })       
 
-        Profession.database.newEntry(data:{
+        Profession.newEntry(data:{
             name: 'Wyvern of Light',
             id : 'thechosen:wyvern-of-light',
             weaponAffinity: 'base:none',
@@ -4056,7 +4088,7 @@ return {
             maxKarma : 50,
             learnable : false,
             
-            abilities : [
+            arts : [
                 'base:explosion',
                 'base:flare',
                 'base:headhunter',

@@ -124,9 +124,12 @@
         @onInput;
         @isCursor = true;
         @choiceStack = [];
-        @nextResolve = [];
+        @resolveQueueCurrent = [];
+        @resolveQueues = {};
         @requestAutoSkip = false;
         @autoSkipIndex = empty;
+        @onResolvedAll = [];
+        @defaultQueue = resolveQueueCurrent;
 
     
         @:choiceStackPush::(value) {
@@ -195,12 +198,12 @@
                 }
             }
             if (dontResolveNext == empty && ((level == empty) || (level < KEEP_STACK_INPUT_SAFETY_LIMIT))) ::<= {
-                resolveNext();
-                this.commitInput(level);        
+                resolveNext(level);
             }
         }
         
         @:commitInput ::(input, level) {
+        
             @continue; 
             @val;
             if (choiceStack->keycount > 0) ::<= {
@@ -225,8 +228,10 @@
                 
                 // event callbacks mightve bonked out 
                 // this current val. Double check 
-                if (choiceStack->findIndex(value:val) == -1)
+                if (choiceStack->findIndex(value:val) == -1) ::<= {
                     continue = false;
+                    resolveNext(noCommit:true);
+                }
             }
             // true means done
             if (continue == true || choiceStack->keycount == 0) ::<= {
@@ -238,15 +243,21 @@
         // resolves the next action 
         // this is normally done for you, but
         // when jumping, sometimes it is required.
-        @:resolveNext::{
-            if (nextResolve->keycount) ::<= {
-                @:cbs = nextResolve[0];
-                nextResolve->remove(key:0);
+        @:resolveNext::(noCommit, level) {
+            if (resolveQueueCurrent->keycount) ::<= {
+                @:cbs = resolveQueueCurrent[0];
+                resolveQueueCurrent->remove(key:0);
                 foreach(cbs)::(i, cb) <- cb();
             } else ::<= {
-                if (choiceStack->size == 0)
-                    error(detail:'The windowEvent queue and menu stack are empty. There should always be an active menu or a queued menu request!');
+                if (onResolvedAll->size > 0) ::<= {
+                    @:p = onResolvedAll[0];
+                    onResolvedAll->remove(:0);
+                    p();
+                    resolveNext();
+                }
             }
+            if (noCommit == empty)
+                commitInput(level);
         }
 
 
@@ -397,6 +408,7 @@
                 renderThis(
                     data,
                     thisRender::{
+                        when(data.hideWindow) empty;
                         if (data.renderedAlready == empty) ::<= {
                             renderText(
                                 lines: choicesModified,
@@ -560,6 +572,7 @@
             when(choice == CURSOR_ACTIONS.CANCEL ||
                  choice == CURSOR_ACTIONS.CONFIRM) ::<= {
                 onMenu();
+                
                 resolveNext();
                 return false;
             }           
@@ -901,6 +914,11 @@
             SLIDER : 7
         }
         
+        @:getResolveQueue::(queueID) {
+            when(queueID == empty) defaultQueue;
+            return resolveQueues[queueID];
+        }
+        
         
         this.interface = {
             commitInput : commitInput,
@@ -911,10 +929,11 @@
             
             // Similar to message, but accepts a set of 
             // messages to display
-            queueMessageSet::(speaker, set => Object, leftWeight, topWeight, pageAfter, onLeave) {
+            queueMessageSet::(queueID, speaker, set => Object, leftWeight, topWeight, pageAfter, onLeave) {
                 foreach(set)::(i, text) {
                     when(text == '' || text == empty) empty;
                     this.queueMessage(
+                        queueID,
                         speaker,
                         text,
                         leftWeight,
@@ -931,49 +950,21 @@
             //
             // The function returns when the message is displayed in full
             // to the user.
-            queueMessage::(speaker, text, leftWeight, topWeight, pageAfter, renderable, onLeave) {
+            queueMessage::(queueID, speaker, text, leftWeight, topWeight, pageAfter, renderable, onLeave) {
                 if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
                 // first: split the text.
                 //text = text->replace(keys:['\r'], with: '');
                 //text = text->replace(keys:['\t'], with: ' ');
                 //text = text->replace(keys:['\n'], with: '\n');
                 //@:words = text->split(token:' ');
-
-                @:lines = [];
-                @line = '';
-
-                for(0, text->length)::(i) {
-                    @:word = text->charAt(index:i); 
-                    when(word == '\n') ::<= {
-                        lines->push(value:line);
-                        line = '';                    
-                    }
-                    line = line + word;
-                    if (line->length >= canvas.width-4) ::<= {
-                        @nextLine = '';
-                        {:::} {
-                            forever ::{
-                                @ch = line->charAt(index:line->length-1);
-                                when(line->length < canvas.width-4 && ch == ' ') send();
-
-                                nextLine = ch + nextLine;
-                                line = line->substr(from:0, to:line->length-2);
-                                                          
-
-                            }
-                        }                                                
-                        lines->push(value:line);
-                        line = nextLine;
-                    }
-                }
-                lines->push(value:line);
                 
 
-                this.queueDisplay(
+                return this.queueDisplay(
+                    queueID,
                     leftWeight, topWeight,
                     prompt:speaker,
                     renderable,
-                    lines,
+                    lines : canvas.refitLines(:[text]),
                     pageAfter,
                     onLeave
                 );              
@@ -984,13 +975,13 @@
             // If it doesnt fit, display will try and make it scrollable.
             //
             // lines should be an array of strings.
-            queueDisplay::(prompt, lines, pageAfter, leftWeight, topWeight, renderable, onLeave, skipAnimation) {
+            queueDisplay::(queueID, prompt, lines, pageAfter, leftWeight, topWeight, renderable, onLeave, skipAnimation) {
                 when(requestAutoSkip) ::<= {
                     if (onLeave) onLeave();
                 }
 
                 @:queuePage ::(iter, width, more){
-                    nextResolve->push(value:[::{
+                    getResolveQueue(queueID)->push(value:[::{
                         @:limit = min(a:iter+pageAfter, b:lines->keycount)-1;
                         @:linesOut = lines->subset(
                             from:iter, 
@@ -1042,18 +1033,19 @@
                         
                     }
                 }
+                return resolveQueueCurrent->size-1;
             },
             
             // An empty action. Can be used to make custom inputs.
             // If consistency is required, keep can be true and use forceExit() 
             // when done with the widget.
-            queueCustom::(renderable, keep, onEnter, onUpdate, onInput, jumpTag, onLeave, isAnimation, animationFrame) {
+            queueCustom::(queueID, renderable, keep, onEnter, onUpdate, onInput, jumpTag, onLeave, isAnimation, animationFrame) {
                 when(requestAutoSkip) ::<= {
                     if (onEnter) onEnter();
                     if (onLeave) onLeave();
                 }
 
-                nextResolve->push(value:[::{
+                getResolveQueue(queueID)->push(value:[::{
                     choiceStackPush(value:{
                         mode: CHOICE_MODE.CUSTOM,
                         keep: keep,
@@ -1067,6 +1059,7 @@
                         onInput : onInput
                     });
                 }]);                
+                return resolveQueueCurrent->size-1;
             },
             
             
@@ -1079,9 +1072,8 @@
             // Like all UI choices, the weight can be chosen.
             // Prompt will be displayed, like speaker in the message callback
             //
-            queueChoices::(choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetChoices, onGetPrompt, jumpTag, onLeave, header, onGetHeader, onCancel, pageAfter) {
-
-                nextResolve->push(value:[::{
+            queueChoices::(queueID, choices, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetChoices, onGetPrompt, jumpTag, onLeave, header, onGetHeader, onCancel, pageAfter, hideWindow) {
+                getResolveQueue(:queueID)->push(value:[::{
                     choiceStackPush(value:{
                         onCancel : onCancel,
                         mode: CHOICE_MODE.CURSOR,
@@ -1092,6 +1084,7 @@
                         topWeight: topWeight,
                         canCancel: canCancel,
                         defaultChoice: defaultChoice,
+                        hideWindow : hideWindow,
                         onChoice: onChoice,
                         onHover: onHover,
                         onLeave : onLeave,
@@ -1104,12 +1097,15 @@
                         onGetHeader : onGetHeader
                     });
                 }]);
+                return resolveQueueCurrent->size-1;
             },
             
             
-            queueSlider::(defaultValue => Number, increments => Number, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetPrompt, jumpTag, onLeave, onCancel) {
+            
+            
+            queueSlider::(queueID, defaultValue => Number, increments => Number, prompt, leftWeight, topWeight, canCancel, defaultChoice, onChoice => Function, onHover, renderable, keep, onGetPrompt, jumpTag, onLeave, onCancel) {
 
-                nextResolve->push(value:[::{
+                getResolveQueue(:queueID)->push(value:[::{
                     choiceStackPush(value:{
                         onCancel: onCancel,
                         mode: CHOICE_MODE.SLIDER,
@@ -1128,6 +1124,7 @@
                         jumpTag : jumpTag
                     });
                 }]);
+                return resolveQueueCurrent->size-1;
             },            
 
             canJumpToTag::(name => String) {
@@ -1171,21 +1168,13 @@
                 canvas.commit();                
                 choiceStack[choiceStack->keycount-1].rendered = empty;
                 if (clearResolve) ::<= {
-                    nextResolve = [];
+                    resolveQueueCurrent = [];
                 }
-
-
-                if (doResolveNext) ::<={
-                    resolveNext();
-                }
-                
-                    
-                this.commitInput();
             },
        
             
-            queueChoiceColumns::(choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function, keep, renderable, jumpTag, onLeave, onCancel) {
-                nextResolve->push(value:[::{
+            queueChoiceColumns::(queueID, choices, prompt, itemsPerColumn, leftWeight, topWeight, canCancel, onChoice => Function, keep, renderable, jumpTag, onLeave, onCancel) {
+                getResolveQueue(:queueID)->push(value:[::{
                     choiceStackPush(value:{
                         onCancel: onCancel,
                         mode:if (isCursor) CHOICE_MODE.COLUMN_CURSOR else CHOICE_MODE.COLUMN_NUMBER,
@@ -1202,9 +1191,10 @@
                         renderable:renderable,
                     });
                 }]);
+                return resolveQueueCurrent->size-1;
             },            
-            queueCursorMove ::(prompt, leftWeight, topWeight, onMove, onMenu => Function, renderable, onLeave, jumpTag, canCancel) {
-                nextResolve->push(value:[::{
+            queueCursorMove ::(queueID, prompt, leftWeight, topWeight, onMove, onMenu => Function, renderable, onLeave, jumpTag, canCancel, trap) {
+                getResolveQueue(:queueID)->push(value:[::{
                     choiceStackPush(value:{
                         canCancel: canCancel,
                         mode: CHOICE_MODE.CURSOR_MOVE,
@@ -1215,23 +1205,52 @@
                         onLeave:onLeave,
                         renderable:renderable,
                         jumpTag: jumpTag,
+                        trap : trap,
                         onMenu : onMenu
                     });
                     canvas.clear();
                 }]);
+                return resolveQueueCurrent->size-1;
             },  
+            
+            // Adds a resolve queue.
+            // when queueing window events, you may optionally 
+            // pass a "queueID" pointing to a resolve queue 
+            addResolveQueue:: {
+                @:id = {}; // its unique!
+                @:out = [];
+                resolveQueues[id] = out;
+                return id;
+            },
+            
+            // Deletes a resolve queue.
+            // All queued resolves are lost, so i wouldnt do this 
+            // unless youre sure you dont want the queued items here!
+            removeResolveQueue::(id){
+                if (resolveQueues[id] == resolveQueueCurrent)
+                    resolveQueueCurrent = defaultQueue;
+                resolveQueues->remove(:id);
+            },
+            
+            
+            // Sets the current resolve queue.
+            // If id is NULL, the default queue becomes active.
+            setActiveResolveQueue::(id) {
+                if (id == empty)
+                    resolveQueueCurrent = defaultQueue
+                else    
+                    resolveQueueCurrent = resolveQueues[id]
+                ;
+            },
+            
             
             // Pushes through all queued actions to the top 
             // of the window stack in order. This is normally not needed, but 
             // may be needed in particular contexts and effects.
-            resolveAllQueued :: {
-                {:::} {
-                    forever ::{
-                        when(nextResolve->keycount == 0) send();
-                        resolveNext();
-                    }
-                }
-                commitInput();
+            onResolveAll ::(onDone, doResolveNext) {
+                onResolvedAll->push(:onDone);
+                if (doResolveNext)
+                    resolveNext();                
             },
               
             // request to not render or wait for nodisplay and display 
@@ -1253,7 +1272,7 @@
 
             // ask yes or no immediately.
             queueAskBoolean::(prompt, leftWeight, topWeight, onChoice => Function, renderable, onLeave) {
-                this.queueChoices(prompt, choices:['Yes', 'No'], canCancel:false, onLeave:onLeave, topWeight, leftWeight,
+                return this.queueChoices(prompt, choices:['Yes', 'No'], canCancel:false, onLeave:onLeave, topWeight, leftWeight,
                     onChoice::(choice){
                         onChoice(which: choice == 1);
                     },
@@ -1263,7 +1282,7 @@
             
             // returns any resolvable items are left queued.
             hasAnyQueued:: {
-                return nextResolve->size != 0;
+                return resolveQueueCurrent->size != 0;
             }
         }    
     }

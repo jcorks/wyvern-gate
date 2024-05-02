@@ -38,7 +38,7 @@ return ::(
                 when (initialized[name] == empty)
                     error(detail:'"' + name + '" is not a member of the structure ' + String(from:type));
 
-                when (itemTypes[name] != value->type)
+                when (!value->isa(type:itemTypes[name]))
                     error(
                         detail:'"' + name + '" should be of type ' 
                         + String(from:itemTypes[name]) +  

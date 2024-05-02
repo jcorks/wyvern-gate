@@ -20,7 +20,7 @@
 
 
 
-import(module:'game_database.ability.mt');
+import(module:'game_database.arts.mt');
 import(module:'game_database.apparelmaterial.mt');
 import(module:'game_database.effect.mt');
 import(module:'game_database.interaction.mt');
@@ -41,9 +41,10 @@ import(module:'game_mutator.landmark.mt');
 import(module:'game_mutator.landmarkevent.mt');
 import(module:'game_mutator.location.mt');
 import(module:'game_mutator.mapentity.mt');
-import(module:'game_mutator.profession.mt');
+import(module:'game_database.profession.mt');
 import(module:'game_mutator.scenario.mt');
 import(module:'game_function.trap.mt');
+import(module:'game_singleton.commoninteractions.mt');
 
 @:Database = import(module:'game_class.database.mt');
 
@@ -106,7 +107,6 @@ import(module:'game_function.newrecord.mt');
         renderable : {
             render :: {
                 canvas.blackout();
-                breakpoint();
             }
         },
         onEnter : do
@@ -668,7 +668,7 @@ return empty;
                         hasVisitIsland = true;
                     }
                     breakpoint();
-                    if (restorePos == empty && atGate != empty) ::<= {
+                    when (restorePos == empty && atGate != empty) ::<= {
                         @gate = island.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
                         when(gate->size == 0) empty;
                         
@@ -687,7 +687,10 @@ return empty;
                             where: ::(landmark)<- gategate[0]
                         );                
                         if (hasVisitIsland)
-                            windowEvent.resolveAllQueued();
+                            windowEvent.resolveAllQueued(:onReady)
+                        else
+                            if (onReady)
+                                onReady();
                     }
                     if (onReady)
                         onReady();

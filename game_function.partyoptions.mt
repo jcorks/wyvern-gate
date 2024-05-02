@@ -55,7 +55,7 @@ return ::{
                     
                 
                 canvas.movePen(x: x+3, y: top + 2);
-                canvas.drawText(text: member.name + ' - (' + member.species.name + ' ' + member.profession.base.name + ')');
+                canvas.drawText(text: member.name + ' - (' + member.species.name + ' ' + member.profession.name + ')');
                 canvas.movePen(x: x+3, y: top + 3);
                 canvas.drawText(text: member.renderHP() + 'HP: ' + member.hp + ' / ' + member.stats.HP + '    AP: ' + member.ap + ' / ' + member.stats.AP + '\n');
                 canvas.movePen(x: x+3, y: top + 4);

@@ -466,12 +466,6 @@
                             silent: true
                         );
 
-                        @:learned = ent.profession.gainSP(amount:20);
-                        foreach(learned)::(index, ability) {
-                            ent.learnAbility(id:ability);
-                        }                                                
-
-
 
                         ent.name = 'Faus';                    
                         return ent;
@@ -495,11 +489,6 @@
                                 EntityQuality.new(base: EntityQuality.database.find(id: 'base:horns'), descriptionHint: 6, trait0Hint:2, trait1Hint:1)
                             ]                            
                         );
-
-                        @:learned = ent.profession.gainSP(amount:20);
-                        foreach(learned)::(index, ability) {
-                            ent.learnAbility(id:ability);
-                        }                                                
 
 
                         @:sylvWeapon = Item.new(
@@ -601,11 +590,6 @@
                             silent: true
                         );
 
-                        @:learned = ent.profession.gainSP(amount:20);
-                        foreach(learned)::(index, ability) {
-                            ent.learnAbility(id:ability);
-                        }                                                
-
                         ent.name = 'Mei';
                         return ent;
                     },
@@ -658,10 +642,6 @@
                         ent.equip(item:skieCloak,  slot:Entity.EQUIP_SLOTS.TRINKET, silent:true);
 
                         
-                        @:learned = ent.profession.gainSP(amount:20);
-                        foreach(learned)::(index, ability) {
-                            ent.learnAbility(id:ability);
-                        }                                                
                         ent.name = 'Skie';
                         return ent;                    
                     }

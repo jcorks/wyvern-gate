@@ -24,7 +24,7 @@
 @:Party = import(module:'game_class.party.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:StateFlags = import(module:'game_class.stateflags.mt');
-@:Ability = import(module:'game_database.ability.mt');
+@:Arts = import(module:'game_database.arts.mt');
 @:g = import(module:'game_function.g.mt');
 @:Entity = import(module:'game_class.entity.mt');
 
@@ -81,7 +81,7 @@
         
         
         canvas.renderTextFrameGeneral(
-            lines,
+            lines:canvas.refitLines(:lines),
             topWeight: 0,
             leftWeight: 0.5
         );
@@ -407,63 +407,79 @@
                     }                    
                 }       
             }
+            breakpoint();
+            windowEvent.queueCustom(
+                onEnter ::{
+                    windowEvent.jumpToTag(
+                        name:'Battle'
+                    )
+                }
+            );
         }
         
         @:nextTurn ::{
             when (turnPoppable->keycount == 0) empty;
-            @:ent = turnPoppable[0];
-            turnPoppable->remove(key:0);
-            entityTurn = ent;
-            
-            // act turn can signal to not act
-            when(!ent.actTurn()) ::<={
-                endTurn();
-            }
+            windowEvent.onResolveAll(
+              onDone:: {
+              
+                @:ent = turnPoppable[0];
+                turnPoppable->remove(key:0);
+                entityTurn = ent;
 
-
-            // may have died this turn.
-            when (ent.isIncapacitated()) ::<={
-                endTurn();
-            }
-            
-            // multi turn actions
-            if (actions[ent]) ::<= {
-                @:action = actions[ent];
-                action.turnIndex += 1;
-                
-                
-                @:ret = ent.useAbility(
-                    ability:action.ability,
-                    targets:action.targets,
-                    targetParts:action.targetParts,
-                    targetDefendParts: [],
-                    turnIndex : action.turnIndex,
-                    extraData : action.extraData
+                windowEvent.queueMessage(
+                    text: 'It is now ' + ent.name + '\'s turn.'
                 );
-                ent.flags.add(flag:StateFlags.WENT);
 
                 
-                if (action.turnIndex >= action.ability.durationTurns || ret == Ability.CANCEL_MULTITURN) ::<= {
-                    actions[ent] = empty;
+                // act turn can signal to not act
+                when(!ent.actTurn()) ::<={
+                    endTurn();
                 }
-                endTurn();
-            } else ::<= {
 
 
-                // normal turn: request action from the act function
-                // given by the caller
-                @:act = if (group2party[ent2group[ent]]) onAllyTurn_ else onEnemyTurn_;
-                act(
-                    battle:this,
-                    user:ent,
-                    landmark:landmark_,
-                    allies:getAllies(ent),
-                    enemies:getEnemies(ent)
-                );
-                if (onAct_) onAct_();
+                // may have died this turn.
+                when (ent.isIncapacitated()) ::<={
+                    endTurn();
+                }
                 
-            }
+                // multi turn actions
+                if (actions[ent]) ::<= {
+                    @:action = actions[ent];
+                    action.turnIndex += 1;
+                    
+                    
+                    @:ret = ent.useArt(
+                        art:action.art,
+                        targets:action.targets,
+                        targetParts:action.targetParts,
+                        targetDefendParts: [],
+                        turnIndex : action.turnIndex,
+                        extraData : action.extraData
+                    );
+                    ent.flags.add(flag:StateFlags.WENT);
 
+                    
+                    if (action.turnIndex >= action.art.durationTurns || ret == Arts.CANCEL_MULTITURN) ::<= {
+                        actions[ent] = empty;
+                    }
+                    endTurn();
+                } else ::<= {
+
+
+                    // normal turn: request action from the act function
+                    // given by the caller
+                    @:act = if (group2party[ent2group[ent]]) onAllyTurn_ else onEnemyTurn_;
+                    act(
+                        battle:this,
+                        user:ent,
+                        landmark:landmark_,
+                        allies:getAllies(ent),
+                        enemies:getEnemies(ent)
+                    );
+                    if (onAct_) onAct_();
+                    
+                }                
+            });
         }
         
         @:initTurn ::{
@@ -956,57 +972,69 @@
                 }
                 
                 @pendingChoices = [];
-                if (action.ability.canBlock && action.targets->size > 0) ::<= {
+                @:art = Arts.find(id:action.card.id);
+                if (art.canBlock && action.targets->size > 0) ::<= {
                     pendingChoices = [...action.targets]->filter(by::(value) <- world.party.isMember(entity:value));
                 }
             
             
-                @:commit = ::{
-                    action.turnIndex = 0;
-                    @:ret = entityTurn.useAbility(
-                        ability:action.ability,
-                        targets:action.targets,
-                        targetParts:action.targetParts,
-                        targetDefendParts: targetDefendParts,
-                        turnIndex : action.turnIndex,
-                        extraData : action.extraData
-                    );
-                    entityTurn.flags.add(flag:StateFlags.WENT);
-                    if (action.ability.name != 'Attack' &&
-                        action.ability.name != 'Defend' &&
-                        action.ability.name != 'Use Item')
-                        entityTurn.flags.add(flag:StateFlags.ABILITY);
-
-                    if (action.ability.durationTurns > 0 && ret != Ability.CANCEL_MULTITURN) ::<= {
-                        actions[entityTurn] = action;
-                    }  
-            
+                action.turnIndex = 0;
+                entityTurn.deck.discardFromHand(card:action.card);
+                windowEvent.onResolveAll(
+                    onDone :: {
+                        entityTurn.deck.revealArt(
+                            handCard:action.card,
+                            prompt: entityTurn.name + ' uses the Art: ' + art.name + '!'
+                        );
+                        @:doNext = :: {
+                            when(pendingChoices->size == 0) onDone();
+                            @:next = pendingChoices->pop;
+                            when(random.try(percentSuccess:35)) ::<= { // todo: luck delta affecting chance
+                                targetDefendParts[action.targets->findIndex(value:next)] = 0;
+                                doNext();
+                            }
+                            combatChooseDefend(
+                                targetPart: action.targetParts[action.targets->findIndex(value:next)],
+                                attacker:entityTurn,
+                                defender:next,
+                                onDone ::(which) {
+                                    @:index = action.targets->findIndex(value:next);
+                                    targetDefendParts[index] = which;
+                                    doNext();
+                                }
+                            );
+                        }
+                        @:onDone::{
+                            @:ret = entityTurn.useArt(
+                                art:Arts.find(id:action.card.id),
+                                level: action.card.level,
+                                targets:action.targets,
+                                targetParts:action.targetParts,
+                                targetDefendParts: targetDefendParts,
+                                turnIndex : action.turnIndex,
+                                extraData : action.extraData
+                            );
                     
-                    windowEvent.queueCustom(
-                        onEnter ::{
-                            endTurn();
-                        }
-                    );
-                }                    
-                @:doNext = ::{
-                    when(pendingChoices->size == 0) commit();
-                    @:next = pendingChoices->pop;
-                    when(random.try(percentSuccess:35)) ::<= {
-                        targetDefendParts[action.targets->findIndex(value:next)] = 0;
-                        doNext();
+                            if (art.kind == Arts.KIND.ABILITY) ::<= {
+                                entityTurn.flags.add(flag:StateFlags.WENT);
+                                if (art.name != 'Wait' &&
+                                    art.name != 'Use Item')
+                                    entityTurn.flags.add(flag:StateFlags.ABILITY);
+
+                                if (art.durationTurns > 0 && ret != Arts.CANCEL_MULTITURN) ::<= {
+                                    actions[entityTurn] = action;
+                                }  
+
+                                windowEvent.queueCustom(
+                                    onEnter ::{
+                                        endTurn();
+                                    }
+                                );
+                            }                            
+                        };   
+                        doNext();                         
                     }
-                    combatChooseDefend(
-                        targetPart: action.targetParts[action.targets->findIndex(value:next)],
-                        attacker:entityTurn,
-                        defender:next,
-                        onDone ::(which) {
-                            @:index = action.targets->findIndex(value:next);
-                            targetDefendParts[index] = which;
-                            doNext();
-                        }
-                    );
-                }
-                doNext();
+                );
                 
             },
             

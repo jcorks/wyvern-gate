@@ -95,6 +95,130 @@ Effect.newEntry(
     }
 )
 
+
+Effect.newEntry(
+    data : {
+        name : 'Brace',
+        id: 'base:brace',
+        description: 'Increased defense and grants an additional block point.',
+        battleOnly : true,
+        skipTurn : false,
+        stackable: false,
+        blockPoints : 1,
+        flags : 0,
+        stats: StatSet.new(
+            DEF: 50
+        ),
+        onAffliction ::(user, item, holder) {
+            windowEvent.queueMessage(
+                text: holder.name + ' braces for damage!'
+            );
+        },
+
+        onRemoveEffect ::(user, item, holder) {
+        },                
+        onPostAttackOther ::(user, item, holder, to) {
+        },
+
+        onPreAttackOther ::(user, item, holder, to, damage) {
+        },
+
+        onAttacked ::(user, item, holder, by, damage) {
+        
+        },
+
+        onSuccessfulBlock::(user, item, holder, from, damage) {
+        
+        },
+        onDamage ::(user, item, holder, from, damage) {
+
+        },
+        
+        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
+        
+        },
+        onStatRecalculate ::(user, item, holder, stats) {
+            
+        }
+    }
+)
+
+
+Effect.newEntry(
+    data : {
+        name : 'Agile',
+        id: 'base:agile',
+        description: 'The holder may now dodge attacks. If the holder has more DEX than the attacker, the chance of dodging increases if the holder\'s DEX is greater than the attacker\'s.',
+        battleOnly : true,
+        skipTurn : false,
+        stackable: false,
+        blockPoints : 1,
+        flags : 0,
+        stats: StatSet.new(
+            DEX: 20
+        ),
+        onAffliction ::(user, item, holder) {
+            windowEvent.queueMessage(
+                text: holder.name + ' is now able to dodge attacks!'
+            );
+        },
+
+        onRemoveEffect ::(user, item, holder) {
+        },                
+        onPostAttackOther ::(user, item, holder, to) {
+        },
+
+        onPreAttackOther ::(user, item, holder, to, damage) {
+
+        },
+
+        onAttacked ::(user, item, holder, by, damage) {
+            @:StateFlags = import(module:'game_class.stateflags.mt');
+            @whiff = false;
+            @:hitrate::(this, attacker) {
+                //if (dexPenalty != empty)
+                //    attacker *= dexPenalty;
+                    
+                when (attacker <= 1) 0.45;
+                @:diff = attacker/this; 
+                when(diff > 1) 1.0; 
+                return 1 - 0.45 * ((1-diff)**0.9);
+            }
+            if (Number.random() > hitrate(
+                this:     holder.stats.DEX,
+                attacker: by.stats.DEX
+            ))
+                whiff = true;
+            
+            
+            when(whiff) ::<= {
+                windowEvent.queueMessage(text:random.pickArrayItem(list:[
+                    holder.name + ' lithely dodges ' + by.name + '\'s attack!',                 
+                    holder.name + ' narrowly dodges ' + by.name + '\'s attack!',                 
+                    holder.name + ' dances around ' + by.name + '\'s attack!',                 
+                    by.name + '\'s attack completely misses ' + holder.name + '!'
+                ]));
+                holder.flags.add(flag:StateFlags.DODGED_ATTACK);
+                damage.amount = 0;
+            }        
+        },
+
+        onSuccessfulBlock::(user, item, holder, from, damage) {
+        
+        },
+        onDamage ::(user, item, holder, from, damage) {
+
+        },
+        
+        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
+        
+        },
+        onStatRecalculate ::(user, item, holder, stats) {
+            
+        }
+    }
+)
+
 Effect.newEntry(
     data : {
         name : 'Guard',
@@ -840,7 +964,7 @@ Effect.newEntry(
         description: 'DEF +100%',
         battleOnly : true,
         skipTurn : false,
-        stackable: false,
+        stackable: true,
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(
@@ -4427,56 +4551,6 @@ Effect.newEntry(
     }
 )     
 
-Effect.newEntry(
-    data : {
-        name : 'Learn Skill',
-        id : 'base:learn-skill',
-        description: 'Acquire a new skill',
-        battleOnly : true,
-        skipTurn : false,
-        stackable: true,
-        blockPoints : 0,
-        flags : 0,
-        stats: StatSet.new(
-            
-        ),
-        onAffliction ::(user, item, holder) {
-            @:Ability = import(module:'game_database.ability.mt');
-            
-            @:learned = holder.profession.gainSP(amount:1);
-            foreach(learned)::(index, ability) {
-                holder.learnAbility(id:ability);
-                windowEvent.queueMessage(text: holder.name + ' learned the ability: ' + Ability.find(id:ability).name);                        
-            }
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
-    }
-) 
 Effect.newEntry(
     data : {
         name : 'Explode',

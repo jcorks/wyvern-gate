@@ -23,12 +23,6 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@: nextSPLevel ::(spLevel) {
-    return 1;
-    //return (((spLevel+1)*0.75 * 10) + (spLevel+1) * 5)->ceil;
-}
-
-
 
 
 /*
@@ -43,7 +37,7 @@
 
 */
 @:reset ::{
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Adventurer',
     id : 'base:adventurer',
     description : 'General, well-rounded profession. Learns abilities on-the-fly to stay alive.', 
@@ -62,7 +56,7 @@ Profession.database.newEntry(data:{
     maxKarma : 1000,
     levelMinimum : 1,
     learnable : true,
-    abilities : [
+    arts : [
         'base:first-aid',        //X
         'base:combo-strike',       //X
         'base:doublestrike',     //X2 hits RNG targets, 80% of attack
@@ -76,7 +70,7 @@ Profession.database.newEntry(data:{
     passives : []
 })
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Martial Artist',
     id : 'base:martial-artist',
     weaponAffinity: 'base:staff',
@@ -95,7 +89,7 @@ Profession.database.newEntry(data:{
     maxKarma : 1000,
     levelMinimum : 1,
     learnable : true,
-    abilities : [
+    arts : [
         // only one stance at a time
         'base:defensive-stance',  //X +%75 Def -50% Atk
         'base:offensive-stance',  //X +%75 Atk -50% Def
@@ -112,7 +106,7 @@ Profession.database.newEntry(data:{
 
 })
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Field Mage',
     id : 'base:field-mage',
     description : 'A self-taught mage. Knows a variety of magicks.', 
@@ -132,7 +126,7 @@ Profession.database.newEntry(data:{
     learnable : true,
     levelMinimum : 1,
     
-    abilities : [
+    arts : [
         'base:fire',     //X
         'base:ice',      //X all enemies
         'base:meditate', //X AP recover, this
@@ -147,7 +141,7 @@ Profession.database.newEntry(data:{
 })
 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Cleric',
     id : 'base:cleric',
     description : 'A self-taught healing mage. Knows a variety of magicks.', 
@@ -167,11 +161,11 @@ Profession.database.newEntry(data:{
     learnable : true,
     levelMinimum : 1,
     
-    abilities : [
+    arts : [
         'base:cure',         //X
         'base:cleanse',      //X removal of standard status ailments
         'base:protect',      //X
-        'base:greater-cure', //X
+        'base:cure-all', //X
         'base:protect-all',  //X
         'base:soothe',       //X ap recovery, any
         'base:grace',        //X save from death, once    
@@ -180,7 +174,7 @@ Profession.database.newEntry(data:{
     passives : []
 })
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Divine Lunist',
     id : 'base:divine-lunist',
     weaponAffinity: 'base:tome',
@@ -201,7 +195,7 @@ Profession.database.newEntry(data:{
     learnable : true,
     levelMinimum : 1,
     
-    abilities : [
+    arts : [
         'base:lunar-blessing',   //X make it night time
         'base:moonbeam',         //X attack enhanced by night time
         'base:night-veil',       //X +100% Def if in night time
@@ -214,7 +208,7 @@ Profession.database.newEntry(data:{
     ]
 })
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Divine Solist',
     id : 'base:divine-solist',
     weaponAffinity: 'base:tome',
@@ -235,7 +229,7 @@ Profession.database.newEntry(data:{
     learnable : true,
     levelMinimum : 1,
     
-    abilities : [
+    arts : [
         'base:solar-blessing', //X make it day time
         'base:sunbeam',        //X attack enhanced by day 
         'base:dayshroud',      //X +100% Def if in day time     
@@ -249,7 +243,7 @@ Profession.database.newEntry(data:{
 })
 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Blacksmith',
     id : 'base:blacksmith',
     weaponAffinity: 'base:smithing-hammer',
@@ -269,7 +263,7 @@ Profession.database.newEntry(data:{
     learnable : true,
     levelMinimum : 1,
     
-    abilities : [
+    arts : [
         'base:sharpen',          //X
         'base:weaken-armor',     //X
         'base:strengthen-armor', //X
@@ -279,7 +273,7 @@ Profession.database.newEntry(data:{
     ]
 })
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Trader',
     id : 'base:trader',
     weaponAffinity: 'base:dagger',
@@ -299,17 +293,17 @@ Profession.database.newEntry(data:{
     learnable : true,
     levelMinimum : 1,
 
-    abilities : [
+    arts : [
         'base:convince',     //X convinces target to not do anything for 1 to 3 turns 
         'base:bribe',        //X pay to leave battle
-        'base:quickhand-item',//X do 2 item actions, same target
+        //'base:quickhand-item',//X do 2 item actions, same target
     ],
     passives : [
         'base:penny-picker'  //X after battle may notice dropped G
     ]
 })
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Warrior',
     id : 'base:warrior',
     weaponAffinity: 'base:greatsword',
@@ -329,7 +323,7 @@ Profession.database.newEntry(data:{
     learnable : true,
     levelMinimum : 1,
     
-    abilities : [
+    arts : [
         'base:tackle',           //X Damage, better than attack
         'base:stun',             //X Normal attack with 50% chance to stun
         'base:big-swing',        //X damage all enemies
@@ -342,7 +336,7 @@ Profession.database.newEntry(data:{
     ]
 }) 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Guard',
     id : 'base:guard',
     weaponAffinity: 'base:polearm',
@@ -362,7 +356,7 @@ Profession.database.newEntry(data:{
     learnable : true,
     levelMinimum : 1,
 
-    abilities : [
+    arts : [
         'base:guard',                //X defend 2.0
         'base:proceed-with-caution', //X defense buff for team (10 turns)
         'base:mend',                 //X heal other, no AP cost!!!! but weak
@@ -376,7 +370,7 @@ Profession.database.newEntry(data:{
     ]
 }) 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Summoner',
     id : 'base:summoner',
     weaponAffinity: 'base:tome',
@@ -397,7 +391,7 @@ Profession.database.newEntry(data:{
     maxKarma : 1000,
     learnable : true,
     
-    abilities : [
+    arts : [
         'base:summon-fire-sprite',    //X
         'base:summon-ice-elemental',  //X
         'base:unsummon',               //X removes equip
@@ -411,7 +405,7 @@ Profession.database.newEntry(data:{
 
 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Arcanist',
     id : 'base:arcanist',
     weaponAffinity: 'base:tome',
@@ -432,11 +426,11 @@ Profession.database.newEntry(data:{
     maxKarma : 1000,
     learnable : true,
     
-    abilities : [
+    arts : [
         'base:telekinesis',   //X stun for a turn
         'base:frozen-flame',  //X damage all, chance for freeze
         'base:dematerialize', //X removes equip
-        'base:mind-read',     //X use random ability of target
+        //'base:mind-read',     //X use random ability of target
         'base:flight',        //X make target fly
         
     ],
@@ -444,7 +438,7 @@ Profession.database.newEntry(data:{
     ]
 }) 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Runologist',
     id : 'base:runologist',
     weaponAffinity: 'base:tome',                
@@ -466,7 +460,7 @@ Profession.database.newEntry(data:{
     learnable : true,
     
     // runes fade after 10 turns
-    abilities : [
+    arts : [
         'base:poison-rune',       // X weak DoT until released
         'base:rune-release',      // X releases all runes on target
         'base:destruction-rune',  // X damage when released.
@@ -480,7 +474,7 @@ Profession.database.newEntry(data:{
 }) 
 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Elementalist',
     id : 'base:elementalist',
     weaponAffinity: 'base:shortsword',                
@@ -501,7 +495,7 @@ Profession.database.newEntry(data:{
     maxKarma : 1000,
     learnable : true,
     
-    abilities : [
+    arts : [
         'base:fire-shift',       //X adds fire aspect
         'base:elemental-tag',    //X Take +100% damage from elemental damage type
         'base:ice-shift',        //X adds ice aspect
@@ -514,7 +508,7 @@ Profession.database.newEntry(data:{
 })
 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Farmer',
     id : 'base:farmer',
     weaponAffinity: 'base:shovel',
@@ -534,7 +528,7 @@ Profession.database.newEntry(data:{
     maxKarma : 1000,
     levelMinimum : 1,
 
-    abilities : [
+    arts : [
         'base:plant-poisonroot', //X grows at targets feet quickly. after 4 turns, continuous poison damage every turn
         'base:plant-triproot',   //X grows at targets feet quickly. after 4 turns, 50% chance trip every turn
         'base:plant-healroot',   //X grows at targets feet quickly. after 4 turns, 5% heal per turn
@@ -544,7 +538,7 @@ Profession.database.newEntry(data:{
     ]
 })
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Alchemist',
     id : 'base:alchemist',
     weaponAffinity: 'base:dagger',
@@ -564,7 +558,7 @@ Profession.database.newEntry(data:{
     maxKarma : 1000,
     levelMinimum : 1,
 
-    abilities : [
+    arts : [
         'base:pink-brew',     //X -3 ingredient pack, +1 pink potion 
         'base:cyan-brew',     //X -3 ingredient pack, +1 cyan ption 
         'base:green-brew',    //X etc (poison)
@@ -577,7 +571,7 @@ Profession.database.newEntry(data:{
     ]
 })
 /*
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Cook',
     weaponAffinity: 'Butcher\'s Knife',
     description : "Skilled individual who can cook a mean meal.", 
@@ -596,7 +590,7 @@ Profession.database.newEntry(data:{
     learnable : true,
     levelMinimum : 1,
 
-    abilities : [
+    arts : [
         'Give Snack',  // X
         //'Rotten Food', // minor damage, poison chance 75%
         //'Flambe',      // fire damage, all enemies weak damage
@@ -607,7 +601,7 @@ Profession.database.newEntry(data:{
 })
 */
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Ranger',
     id : 'base:ranger',
     weaponAffinity: 'base:bow-and-quiver',
@@ -627,7 +621,7 @@ Profession.database.newEntry(data:{
     learnable : true,
     levelMinimum : 1,
 
-    abilities : [
+    arts : [
         
         'base:precise-strike',// X dex-based attack 
         'base:tranquilizer',  // X Paralysis + DEX attack,
@@ -641,7 +635,7 @@ Profession.database.newEntry(data:{
 })
 
 /*
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Blood Mage',
     weaponAffinity: 'Tome',
     description : "", 
@@ -661,7 +655,7 @@ Profession.database.newEntry(data:{
     minKarma : 0,
     maxKarma : 50,
     
-    abilities : [
+    arts : [
         
         'Curse',       // - 50% HP, -ATK 100% -DEF 50% one enemy 10 turns
         'Blood Rite',  // - 50% HP, HoT (+10% each turn)
@@ -678,7 +672,7 @@ Profession.database.newEntry(data:{
 */
 
 /*
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Thief',
     weaponAffinity: 'Dagger',
     description : "Efficient, silent movements are this profession's assets.", 
@@ -697,7 +691,7 @@ Profession.database.newEntry(data:{
     levelMinimum : 1,
     learnable : true,
 
-    abilities : [
+    arts : [
         
         'Steal',       // steal 
         'Lightfooted', // +50% speed for 5 turns  
@@ -715,7 +709,7 @@ Profession.database.newEntry(data:{
 
 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Assassin',
     id : 'base:assassin',
     weaponAffinity: 'base:dagger',                
@@ -736,7 +730,7 @@ Profession.database.newEntry(data:{
     minKarma : 0,
     maxKarma : 50,
     
-    abilities : [
+    arts : [
         'base:poison-attack',  //X atk + poison
         'base:tripwire',       //X ONCE PER BATTLE: attack that pushes ppl into a tripwire you set up before battle (cant act for a turn)
         'base:trip-explosive', //X ONCE PER BATTLE: attach that push ppl into a trip explosive u set up before battle (enemy party damage)
@@ -752,7 +746,7 @@ Profession.database.newEntry(data:{
 
 
 /*
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Mercenary',
     weaponAffinity: 'Shortsword',                
     description : "", 
@@ -772,14 +766,14 @@ Profession.database.newEntry(data:{
     minKarma : 0,
     maxKarma : 50,
     
-    abilities : [
+    arts : [
     ],
     passives : [
     ]
 }) 
 */
 /*
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Bounty Hunter',
     weaponAffinity: 'Shortsword',
     description : "", 
@@ -799,14 +793,14 @@ Profession.database.newEntry(data:{
     minKarma : 0,
     maxKarma : 50,
     
-    abilities : [
+    arts : [
     ],
     passives : [
     ]
 }) 
 */
 /*
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Necromancer',
     weaponAffinity: 'Mage-rod',                
     description : "", 
@@ -826,7 +820,7 @@ Profession.database.newEntry(data:{
     minKarma : 0,
     maxKarma : 50,
     
-    abilities : [
+    arts : [
     ],
     passives : [
     ]
@@ -834,7 +828,7 @@ Profession.database.newEntry(data:{
 */
 
 /*
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Pyromancer',
     weaponAffinity: 'Shortsword',                
     description : "", 
@@ -854,14 +848,14 @@ Profession.database.newEntry(data:{
     maxKarma : 50,
     learnable : true,
     
-    abilities : [
+    arts : [
     ],
     passives : [
     ]
 })  
 */          
 /*
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Witch',
     weaponAffinity: 'Tome',                
     description : "", 
@@ -881,7 +875,7 @@ Profession.database.newEntry(data:{
     minKarma : 0,
     maxKarma : 50,
     
-    abilities : [
+    arts : [
     ],
     passives : [
     ]
@@ -889,7 +883,7 @@ Profession.database.newEntry(data:{
 */
 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Keeper',
     id : 'base:keeper',
     weaponAffinity: 'base:glaive',                
@@ -910,14 +904,14 @@ Profession.database.newEntry(data:{
     maxKarma : 50,
     learnable : false,
     
-    abilities : [
+    arts : [
     ],
     passives : [
     ]
 })
 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Creature',
     id : 'base:creature',
     weaponAffinity: 'base:shortsword',
@@ -938,14 +932,14 @@ Profession.database.newEntry(data:{
     maxKarma : 50,
     learnable : false,
     
-    abilities : [
+    arts : [
         'base:call',   // calls for backup, DQ style
     ],
     passives : [
     ]
 })
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Fire Sprite',
     id : 'base:fire-sprite',
     weaponAffinity: 'base:shortsword',
@@ -966,7 +960,7 @@ Profession.database.newEntry(data:{
     maxKarma : 50,
     learnable : false,
     
-    abilities : [
+    arts : [
         'base:fire',   // calls for backup, DQ style
     ],
     passives : [
@@ -974,7 +968,7 @@ Profession.database.newEntry(data:{
     ]
 })
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Ice Elemental',
     id : 'base:ice-elemental',
     weaponAffinity: 'base:shortsword',
@@ -995,7 +989,7 @@ Profession.database.newEntry(data:{
     maxKarma : 50,
     learnable : false,
     
-    abilities : [
+    arts : [
         'base:ice',   // calls for backup, DQ style
         'base:frozen-flame'
     ],
@@ -1004,7 +998,7 @@ Profession.database.newEntry(data:{
     ]
 })            
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Thunder Spawn',
     id : 'base:thunder-spawn',
     weaponAffinity: 'base:shortsword',
@@ -1025,7 +1019,7 @@ Profession.database.newEntry(data:{
     maxKarma : 50,
     learnable : false,
     
-    abilities : [
+    arts : [
         'base:thunder',
         'base:triplestrike',
         'base:ensnare'
@@ -1035,7 +1029,7 @@ Profession.database.newEntry(data:{
     ]
 })
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Guiding Light',
     id : 'base:guiding-light',
     weaponAffinity: 'base:shortsword',
@@ -1056,9 +1050,9 @@ Profession.database.newEntry(data:{
     maxKarma : 50,
     learnable : false,
     
-    abilities : [
+    arts : [
         'base:cure',
-        'base:greater-cure',
+        'base:cure-all',
         'base:protect',
         'base:explosion'
     ],
@@ -1069,7 +1063,7 @@ Profession.database.newEntry(data:{
 
 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Wyvern Specter',
     id : 'base:wyvern-specter',
     weaponAffinity: 'base:none',
@@ -1090,7 +1084,7 @@ Profession.database.newEntry(data:{
     maxKarma : 50,
     learnable : false,
     
-    abilities : [
+    arts : [
         'base:headhunter',
         'base:cure',
         //'Magic Mist', // remove all effects
@@ -1103,7 +1097,7 @@ Profession.database.newEntry(data:{
     ]
 }) 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Beast',
     id: 'base:beast',
     weaponAffinity: 'base:none',
@@ -1124,7 +1118,7 @@ Profession.database.newEntry(data:{
     maxKarma : 50,
     learnable : false,
     
-    abilities : [
+    arts : [
         'base:headhunter',
         //'Magic Mist', // remove all effects
         'base:wild-swing',
@@ -1137,7 +1131,7 @@ Profession.database.newEntry(data:{
     ]
 }) 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Wyvern',
     id: 'base:wyvern',
     weaponAffinity: 'base:none',
@@ -1158,7 +1152,7 @@ Profession.database.newEntry(data:{
     maxKarma : 50,
     learnable : false,
     
-    abilities : [
+    arts : [
         'base:headhunter',
         //'Magic Mist', // remove all effects
         'base:wild-swing',
@@ -1171,7 +1165,7 @@ Profession.database.newEntry(data:{
     ]
 }) 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Snake Siren',
     id : 'base:snake-siren',
     weaponAffinity: 'base:none',
@@ -1192,7 +1186,7 @@ Profession.database.newEntry(data:{
     maxKarma : 50,
     learnable : false,
     
-    abilities : [
+    arts : [
         'base:sweet-song',
         'base:poison-attack',
         'base:petrify',
@@ -1203,7 +1197,7 @@ Profession.database.newEntry(data:{
 }) 
 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Treasure Golem',
     id : 'base:treasure-golem',
     weaponAffinity: 'base:none',
@@ -1224,7 +1218,7 @@ Profession.database.newEntry(data:{
     maxKarma : 50,
     learnable : false,
     
-    abilities : [
+    arts : [
         'base:headhunter',
         //'Magic Mist', // remove all effects
         'base:wild-swing',
@@ -1236,7 +1230,7 @@ Profession.database.newEntry(data:{
 }) 
 
 
-Profession.database.newEntry(data:{
+Profession.newEntry(data:{
     name: 'Cave Bat',
     id : 'base:cave-bat',
     weaponAffinity: 'base:none',
@@ -1257,7 +1251,7 @@ Profession.database.newEntry(data:{
     maxKarma : 50,
     learnable : false,
     
-    abilities : [
+    arts : [
         'base:headhunter',
         //'Magic Mist', // remove all effects
         'base:triplestrike',
@@ -1270,77 +1264,22 @@ Profession.database.newEntry(data:{
 }) 
 }
 
-
-@:Profession = databaseItemMutatorClass.create(
-    name : 'Wyvern.Profession.Instance',
-
-    items : {
-        base : empty,
-        sp : 0,
-        spNext : 1,
-        spLevel : 0
+@:Profession = Database.new(
+    name : 'Wyvern.Profession.Base',   
+    attributes : {
+        name : String,
+        id : String,
+        description : String,
+        growth : StatSet.type,
+        minKarma : Number,
+        maxKarma : Number,
+        arts : Object,
+        levelMinimum : Number,
+        passives : Object,
+        learnable : Boolean,
+        weaponAffinity : String
     },
-    
-    database : Database.new(
-        name : 'Wyvern.Profession.Base',   
-        attributes : {
-            name : String,
-            id : String,
-            description : String,
-            growth : StatSet.type,
-            minKarma : Number,
-            maxKarma : Number,
-            abilities : Object,
-            levelMinimum : Number,
-            passives : Object,
-            learnable : Boolean,
-            weaponAffinity : String
-        },
-        reset           
-    ),
-
-    define :::(this, state) {
-        
-
-        this.interface = {
-            initialize ::{},
-            defaultLoad ::(base) {
-                state.base = base;
-                return this;
-            },
-
-            base : {
-                get ::{
-                    return state.base;
-                }
-            },
-            
-            sp : {
-                get :: {
-                    return state.sp;
-                }
-            },
-            
-            // returns any learned abilities();
-            gainSP ::(amount) {
-                state.spNext -= amount;
-                @learned = [];
-                {:::} {
-                    forever ::{
-                        when(state.spNext > 0) send();
-                        @:next = state.base.abilities[state.spLevel];
-
-                        state.spNext += nextSPLevel(spLevel: state.spLevel);
-                        state.spLevel+=1;
-                        when(next == empty) empty; 
-                        learned->push(value:next);
-                    
-                    }
-                }
-                return learned;
-            }
-        }
-    }
+    reset           
 );
 
 

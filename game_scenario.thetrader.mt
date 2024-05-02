@@ -2475,12 +2475,12 @@
                         renderable : {
                             render ::{
                                 canvas.renderTextFrameGeneral(
-                                    lines: [
+                                    lines: canvas.refitLines(:[
                                         shopper.name + ' wants to buy: ',
                                         displayName + ' (worth: ' + (if(worthless) 'WORTHLESS' else g(g:standardPrice)) + ')',
                                         if (isPopular) 'NOTE: this item is currently in demand.' else if (isUnpopular) 'NOTE: this item is currently experiencing a price-drop.' else '',
                                         'Their personality seems to be: ' + shopper.personality.name
-                                    ],
+                                    ]),
                                     topWeight: 0,
                                     leftWeight: 0.5
                                 );
@@ -3769,7 +3769,7 @@ return {
             
             onCreate ::(location) {
                 location.name = 'Wyvern Throne';
-                @:Profession = import(module:'game_mutator.profession.mt');
+                @:Profession = import(module:'game_database.profession.mt');
                 @:Species = import(module:'game_database.species.mt');
                 @:Story = import(module:'game_singleton.story.mt');
                 @:Scene = import(module:'game_database.scene.mt');

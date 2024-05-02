@@ -20,11 +20,11 @@
 @:StatSet = import(module:'game_class.statset.mt');
 @:Species = import(module:'game_database.species.mt');
 @:Personality = import(module:'game_database.personality.mt');
-@:Profession = import(module:'game_mutator.profession.mt');
+@:Profession = import(module:'game_database.profession.mt');
 @:NameGen = import(module:'game_singleton.namegen.mt');
 @:Item = import(module:'game_mutator.item.mt');
 @:Damage = import(module:'game_class.damage.mt');
-@:Ability = import(module:'game_database.ability.mt');
+@:Arts = import(module:'game_database.arts.mt');
 @:Effect = import(module:'game_database.effect.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
 @:BattleAI = import(module:'game_class.battleai.mt');
@@ -35,7 +35,7 @@
 @:correctA = import(module:'game_function.correcta.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-
+@:ArtsDeck = import(module:'game_class.artsdeck.mt');
 
 
 // returns EXP recommended for next level
@@ -83,6 +83,44 @@
     return temp->keys;
 }
 
+@:assembleDeck ::(state) {
+    @:deck = ArtsDeck.new();
+    
+    
+    // add standard 
+    deck.addArt(id:'base:pebble');
+    deck.addArt(id:'base:defend');
+    deck.addArt(id:'base:retaliate');
+    deck.addArt(id:'base:wyvern-prayer');
+    
+    
+    // for now: meta standard
+    deck.addArt(id:'base:diversify');
+    deck.addArt(id:'base:mind-games');
+    deck.addArt(id:'base:crossed-wires');
+    deck.addArt(id:'base:recycle');
+    deck.addArt(id:'base:reevaluate');
+    deck.addArt(id:'base:brace');
+    deck.addArt(id:'base:agility');
+    deck.addArt(id:'base:foresight');
+    
+    
+    // profession boosts
+    foreach(state.profession.arts) ::(k, v) {
+        deck.addArt(id:v);
+    }
+    
+    // add weapon
+    @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
+    if (hand != empty) ::<= {
+        deck.addArt(id:hand.art);
+    }    
+    
+    deck.shuffle();
+    
+    return deck;
+}
+
 
 @:EQUIP_SLOTS = {
     HAND_LR : 0,
@@ -103,7 +141,6 @@
 @displayedHurt = {};
 
 @:resetEffects ::(priv, this, state) {
-    breakpoint();
     priv.effects = [];
     
     foreach(state.innateEffects) ::(k, name) {
@@ -128,7 +165,7 @@
     }
     
     
-    foreach(this.profession.base.passives)::(index, passiveName) {
+    foreach(this.profession.passives)::(index, passiveName) {
         this.addEffect(
             from:this, 
             id:passiveName, 
@@ -207,17 +244,17 @@
         adventurous : false,
         battleAI : empty,
         aiAbilityChance : 0,
-        professions : empty,
+        profession : empty,
         canMake : empty,
         innateEffects : empty,
         forceDrop : empty,
         equips : empty,
-        abilitiesAvailable : empty,
         abilitiesLearned : empty,
         inventory : empty,
         expNext : 1,
         level : 0,
-        modData : empty
+        modData : empty,
+        deck : empty,
     },
     
     private : {
@@ -279,11 +316,6 @@
                 empty, // ringr
                 empty
             ];
-            state.abilitiesAvailable = [
-                Ability.find(id:'base:attack'),
-                Ability.find(id:'base:defend'),
-
-            ]; // active that can choose in combat
             state.abilitiesLearned = []; // abilities that can choose outside battle.
             
             state.expNext = 10;
@@ -305,24 +337,22 @@
 
 
             
-            @:profession = Profession.new(
-                base:
-                    if (professionHint == empty) 
-                        Profession.database.getRandom() 
-                    else 
-                        Profession.database.find(id:professionHint)
-            );
+            state.profession = if (professionHint == empty) 
+                    Profession.getRandomFiltered(filter::(value) <- value.learnable) 
+                else 
+                    Profession.find(id:professionHint)
+
+
+
             if (speciesHint != empty) ::<= {
                 state.species = Species.find(id:speciesHint);
             } else 
                 error(detail: 'No species was specified when creating this entity. Please specify a species id!!!');
 
-            state.professions = [profession]
-            state.profession = 0;
             
             state.growth.mod(stats:state.species.growth);
             state.growth.mod(stats:state.personality.growth);
-            state.growth.mod(stats:state.professions[state.profession].base.growth);
+            state.growth.mod(stats:state.profession.growth);
             for(0, levelHint)::(i) {
                 this.autoLevel();                
             }
@@ -401,6 +431,10 @@
             _.enemies = enemies;
             _.this.recalculateStats();             
             _.this.flags.reset();
+            @:state = _.state;
+            if (state.deck == empty) ::<= {
+                state.deck = assembleDeck(state);
+            }
         },
         
         // called to signal that a battle has started involving this entity
@@ -424,6 +458,10 @@
             set ::(value) <- _.state.aiAbilityChance = value,
             get ::<- _.state.aiAbilityChance
         },
+        
+        deck : {
+            get ::<- _.state.deck
+        },
             
         blockPoints : {
             get :: {
@@ -432,7 +470,7 @@
                 when(this.isIncapacitated()) 0;
                 @:am = ::<= {
                     @wep = this.getEquipped(slot:EQUIP_SLOTS.HAND_LR);
-                    @amount = if (wep.base.id == 'base:none') 1 else wep.base.blockPoints;
+                    @amount = if (wep.base.id == 'base:none') 0 else wep.base.blockPoints;
                     
                     if (effects != empty) ::<= {
                         foreach(effects) ::(index, effect) {
@@ -465,6 +503,8 @@
             _.abilitiesUsedBattle = empty;                
             _.effects = empty;
             
+            _.state.deck = empty;
+            
             _.this.recalculateStats();                                
         },
 
@@ -494,7 +534,7 @@
             @weaponAffinity = false;
             if (hand != empty)
                 weaponAffinity = 
-                    (this.profession.base.weaponAffinity == hand.base.id) ||
+                    (this.profession.weaponAffinity == hand.base.id) ||
                     (state.faveWeapon.id == hand.base.id)
                 ;
             
@@ -538,6 +578,8 @@
         actTurn ::() => Boolean {
             @:state = _.state;
             @:this = _.this;
+            
+            state.deck.redraw();
             @act = true;
             foreach(_.effects)::(index, effect) {                        
                 if (effect.duration != -1 && effect.turnIndex >= effect.duration) ::<= {
@@ -607,26 +649,18 @@
 
         profession : {
             get :: {
-                return _.state.professions[_.state.profession];
+                return _.state.profession;
             },
             
-            set ::(value => Profession.type) {
+            set ::(value) {
                 @:state = _.state;
-                state.profession = {:::}{
-                    foreach(state.professions)::(index, prof) {
-                        if (value.base.id == prof.base.id) ::<= {
-                            send(message:index);
-                        }
-                    }
-                    state.professions->push(value);
-                    return state.professions->size-1;
-                }            
+                state.profession = value;
                 
                                     
                 state.growth.resetMod();
                 state.growth.mod(stats:state.species.growth);
                 state.growth.mod(stats:state.personality.growth);
-                state.growth.mod(stats:state.professions[state.profession].base.growth);
+                state.growth.mod(stats:state.profession.growth);
             
             
             }
@@ -720,7 +754,6 @@
 
 
                 @backupStats;
-                @dexPenalty;
                 @:which = match(targetPart) {
                   (Entity.DAMAGE_TARGET.HEAD): 'head',
                   (Entity.DAMAGE_TARGET.BODY): 'body',
@@ -770,8 +803,7 @@
                         backupStats = this.stats.save();
                         match(true) {
                           ((targetPart & DAMAGE_TARGET.HEAD) != 0):::<= {
-                            dexPenalty = 0.3;
-                            if (random.try(percentSuccess:35)) ::<= {
+                            if (random.try(percentSuccess:15)) ::<= {
                                 if (random.try(percentSuccess:90)) ::<= {
                                     isCrit = true;
                                     dmg.amount += this.stats.DEX * 1.5;
@@ -780,7 +812,7 @@
                                 isHitHead = true;
                             } else ::<= {
                                 missHead = true;
-                                dmg.amount *= 0.4;
+                                dmg.amount *= 0.1;
                             }
                           },
 
@@ -790,12 +822,11 @@
                           },
 
                           ((targetPart & DAMAGE_TARGET.LIMBS) != 0):::<= {
-                            dexPenalty = 0.7;
-                            if (random.try(percentSuccess:50)) ::<= {
+                            if (random.try(percentSuccess:45)) ::<= {
                                 isLimbHit = true;
                             } else ::<= {
                                 missLimb = true;
-                                dmg.amount *= 0.4;
+                                dmg.amount *= 0.1;
                             }
                           }
 
@@ -807,7 +838,7 @@
 
 
                 @:hpWas0 = if (target.hp == 0) true else false;
-                @:result = target.damage(from:this, damage:dmg, dodgeable:true, critical:isCrit, dexPenalty);
+                @:result = target.damage(from:this, damage:dmg, dodgeable:true, critical:isCrit);
                 
                 if (backupStats != empty)
                     this.stats.load(serialized:backupStats);
@@ -881,7 +912,7 @@
             return retval;
         },
             
-        damage ::(from => Object, damage => Damage.type, dodgeable => Boolean, critical, exact, dexPenalty) {
+        damage ::(from => Object, damage => Damage.type, dodgeable => Boolean, critical, exact) {
             @:this = _.this;
             @:state = _.state;
             
@@ -900,41 +931,14 @@
             @:effects = _.effects;
 
 
-            @:hitrate::(this, attacker) {
-                if (dexPenalty != empty)
-                    attacker *= dexPenalty;
-                    
-                when (attacker <= 1) 0.45;
-                @:diff = attacker/this; 
-                when(diff > 1) 1.0; 
-                return 1 - 0.45 * ((1-diff)**0.9);
-            }
+
 
                 
             @:retval = ::<= {
 
                 when(state.isDead) false;
                 @originalAmount = damage.amount;
-                @whiff = false;
-                if (dodgeable) ::<= {
-                    if (Number.random() > hitrate(
-                        this:     this.stats.DEX,
-                        attacker: from.stats.DEX
-                    ))
-                        whiff = true;
-                }
-                
-                
-                when(whiff) ::<= {
-                    windowEvent.queueMessage(text:random.pickArrayItem(list:[
-                        this.name + ' lithely dodges ' + from.name + '\'s attack!',                 
-                        this.name + ' narrowly dodges ' + from.name + '\'s attack!',                 
-                        this.name + ' dances around ' + from.name + '\'s attack!',                 
-                        from.name + '\'s attack completely misses ' + this.name + '!'
-                    ]));
-                    this.flags.add(flag:StateFlags.DODGED_ATTACK);
-                    return false;
-                }
+
 
                 // flat 15% chance to avoid damage with a shield 
                 // pretty nifty!
@@ -1107,7 +1111,7 @@
 
             state.canMake = [];
             foreach(Item.database.getRandomSet(
-                    count:if (this.profession.base.id == 'base:blacksmith') 10 else 2,
+                    count:if (this.profession.id == 'base:blacksmith') 10 else 2,
                     filter::(value) <- value.hasMaterial == true
             )) ::(k, val) {
                 state.canMake->push(value:val.id);
@@ -1323,7 +1327,7 @@
             if (durationTurns == empty) durationTurns = -1;
             
             @:effect = Effect.find(id);
-            @:existingEffectIndex = effects->findIndex(query::(value) <- value.effect.id == id);               
+            @:existingEffectIndex = effects->findIndexCondition(::(value) <- value.effect.id == id);               
             when (effect.stackable == false && existingEffectIndex != -1) ::<= {
                 // reset duration of effect and source.
                 @einst = effects[existingEffectIndex];
@@ -1433,49 +1437,7 @@
                 );
             }
         },
-        
-        abilitiesAvailable : {
-            get :: {
-                @:state = _.state;
-                @out = [...state.abilitiesAvailable];
-                foreach(EQUIP_SLOTS)::(i, val) {
-                    if (state.equips[val] != empty && state.equips[val].ability != empty) ::<= {
-                        @:ab = Ability.find(id:state.equips[val].ability);
-                        when(out->findIndex(value:ab) != -1) empty;
-                        out->push(value:ab);
-                    }
-                }
-                return out;
-            }
-        },
-            
-        learnAbility::(id => String) {
-            @:state = _.state;
 
-            @:ability = Ability.find(id);
-            if (state.abilitiesAvailable->keycount < 7)
-                state.abilitiesAvailable->push(value:ability);
-                
-            state.abilitiesLearned->push(value:ability);
-        },
-            
-        learnNextAbility::{
-            @:this = _.this;
-            @:skills = this.profession.gainSP(amount:1);
-            when(skills == empty) empty;
-            foreach(skills)::(i, skill) {
-                this.learnAbility(id:skill);
-            }
-        },
-            
-        clearAbilities::{
-            @:state = _.state;
-            state.abilitiesAvailable = [
-                Ability.find(id:'base:attack'),
-                Ability.find(id:'base:defend'),
-            ];
-            state.abilitiesLearned = [];
-        },
         
         hp : {
             get :: {
@@ -1534,11 +1496,11 @@
             }
             
             if (silent != true) ::<= {
-                if ((slot == EQUIP_SLOTS.HAND_LR) && this.profession.base.weaponAffinity == state.equips[EQUIP_SLOTS.HAND_LR].base.id) ::<= {
+                if ((slot == EQUIP_SLOTS.HAND_LR) && this.profession.weaponAffinity == state.equips[EQUIP_SLOTS.HAND_LR].base.id) ::<= {
                     if (silent != true) ::<= {
                         windowEvent.queueMessage(
                             speaker: this.name,
-                            text: '"This ' + item.base.name + ' really works for me as ' + correctA(word:this.profession.base.name) + '"'
+                            text: '"This ' + item.base.name + ' really works for me as ' + correctA(word:this.profession.name) + '"'
                         );
                     }
                 } else if ((slot == EQUIP_SLOTS.HAND_LR) && state.faveWeapon.id == state.equips[EQUIP_SLOTS.HAND_LR].base.id) ::<= {
@@ -1586,7 +1548,7 @@
         },
         anonymize :: {
             @:this = _.this;
-            this.nickname = 'the ' + this.species.name + (if(this.profession.base.id == 'base:none') '' else ' ' + this.profession.base.name);            
+            this.nickname = 'the ' + this.species.name + (if(this.profession.id == 'base:none') '' else ' ' + this.profession.name);            
         },
             
         getEquipped::(slot => Number) {
@@ -1659,28 +1621,54 @@
             return slotOut;
         },
             
-        useAbility::(ability, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+        useArt::(art, level, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:state = _.state;
             @:this = _.this;
             @:abilitiesUsedBattle = _.abilitiesUsedBattle;
-            when(state.ap < ability.apCost) windowEvent.queueMessage(
-                text: this.name + " tried to use " + ability.name + ", but couldn\'t muster the mental strength!"
-            );
-            when(state.hp < ability.hpCost) windowEvent.queueMessage(
-                text: this.name + " tried to use " + ability.name + ", but couldn't muster the strength!"
-            );
             
-            when (abilitiesUsedBattle != empty && ability.oncePerBattle && abilitiesUsedBattle[ability.id] == true) windowEvent.queueMessage(
-                text: this.name + " tried to use " + ability.name + ", but it worked the first time!"
+            when (abilitiesUsedBattle != empty && art.oncePerBattle && abilitiesUsedBattle[art.id] == true) windowEvent.queueMessage(
+                text: this.name + " tried to use " + art.name + ", but it worked the first time!"
             );
-            if (abilitiesUsedBattle) abilitiesUsedBattle[ability.id] = true;
+            if (abilitiesUsedBattle) abilitiesUsedBattle[art.id] = true;
             
-            state.ap -= ability.apCost;
-            state.hp -= ability.hpCost;
-            return ability.onAction(
+            return art.onAction(
                 user:this,
+                level,
                 targets, turnIndex, targetDefendParts, targetParts, extraData          
             );            
+        },
+
+        discardArt:: {
+            if (_.state.deck == empty)
+                error(detail: 'Can\'t discard when not in battle.');
+                
+            @:this = _.this;
+            @:deck = _.state.deck;
+            @:world = import(module:'game_singleton.world.mt');
+            if (world.party.isMember(entity:_.this))
+                deck.discardPlayer()
+            else ::<= {
+                windowEvent.queueMessage(
+                    text: this.name + ' discards an Art.'
+                );
+                deck.discardRandom()                
+            }
+        },
+        
+        drawArt ::(count) {
+            if (_.state.deck == empty)
+                error(detail: 'Can\'t draw when not in battle.');
+                
+            @:this = _.this;
+            @:deck = _.state.deck;
+            @:world = import(module:'game_singleton.world.mt');
+            windowEvent.queueMessage(
+                text: this.name + ' draws ' + (if (count == empty) 'an Art card.' else ''+count+' Art cards.')
+            );
+            for(0, if (count == empty) 1 else count) ::(i) {
+                deck.draw()                
+            }
+        
         },
             
         // interacts with this entity
@@ -1842,7 +1830,7 @@
                       '         HP: ' + this.hp + ' / ' + this.stats.HP + '\n' + 
                       '         AP: ' + this.ap + ' / ' + this.stats.AP + '\n\n' + 
                       '    species: ' + state.species.name + '\n' +
-                      ' profession: ' + this.profession.base.name + '\n' +
+                      ' profession: ' + this.profession.name + '\n' +
                       ' fave. wep.: ' + state.faveWeapon.name + '\n' +
                       'personality: ' + state.personality.name + '\n\n'
                      ,

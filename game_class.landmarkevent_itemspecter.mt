@@ -3,7 +3,7 @@
 @:distance = import(module:'game_function.distance.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Species = import(module:'game_database.species.mt');
-@:Profession = import(module:'game_mutator.profession.mt');
+@:Profession = import(module:'game_database.profession.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:Battle = import(module:'game_class.battle.mt');
 @:Inventory = import(module:'game_class.inventory.mt');

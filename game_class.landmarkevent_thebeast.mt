@@ -2,7 +2,7 @@
 @:random = import(module:'game_singleton.random.mt');
 @:distance = import(module:'game_function.distance.mt');
 @:Species = import(module:'game_database.species.mt');
-@:Profession = import(module:'game_mutator.profession.mt');
+@:Profession = import(module:'game_database.profession.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 

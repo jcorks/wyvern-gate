@@ -25,7 +25,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:LargeMap = import(module:'game_singleton.largemap.mt');
 @:Party = import(module:'game_class.party.mt');
-@:Profession = import(module:'game_mutator.profession.mt');
+@:Profession = import(module:'game_database.profession.mt');
 @:Event = import(module:'game_mutator.event.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
@@ -578,7 +578,7 @@
                     island: this,
                     speciesHint:    if (speciesHint == empty) species else speciesHint,
                     levelHint:      if (levelHint == empty) random.integer(from:state.levelMin, to:state.levelMax) else levelHint,
-                    professionHint: if (professionHint == empty) Profession.database.getRandomFiltered(filter::(value)<-value.learnable).id else professionHint
+                    professionHint: if (professionHint == empty) Profession.getRandomFiltered(filter::(value)<-value.learnable).id else professionHint
                 );
                 
                 augmentTiered(entity:out);
@@ -597,7 +597,7 @@
                     island: this,
                     speciesHint: random.pickArrayItemWeighted(list:state.species).species,
                     levelHint,
-                    professionHint: Profession.database.getRandomFiltered(filter::(value)<-value.learnable).id
+                    professionHint: Profession.getRandomFiltered(filter::(value)<-value.learnable).id
                 );       
                 
                 augmentTiered(entity:angy);                       

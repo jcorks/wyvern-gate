@@ -87,7 +87,7 @@
         @locations = [];  
         
         @:getSpaceBySlot::(x, y) {
-            return freeSpaces[freeSpaces->findIndex(query::(value) <- value.x == x && value.y == y)];
+            return freeSpaces[freeSpaces->findIndexCondition(::(value) <- value.x == x && value.y == y)];
         }   
         
         // adds a minimally-sized building
@@ -526,7 +526,7 @@
                         
                             
                         slots[x][y] = true;
-                        freeSpaces->remove(key:freeSpaces->findIndex(query:::(value) <- value.x == x && value.y == y));
+                        freeSpaces->remove(key:freeSpaces->findIndexCondition(::(value) <- value.x == x && value.y == y));
                         addDecoration(
                             left:x * ZONE_BUILDING_MINIMUM_WIDTH + _x+ZONE_CONTENT_PADDING,
                             top:y * ZONE_BUILDING_MINIMUM_HEIGHT + _y+ZONE_CONTENT_PADDING

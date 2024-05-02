@@ -121,8 +121,8 @@ Location.database.newEntry(data:{
     maxOccupants : 0,
     onFirstInteract ::(location){
         location.ownedBy = location.landmark.island.newInhabitant();
-        @:Profession = import(module:'game_mutator.profession.mt');
-        location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'base:farmer'));  
+        @:Profession = import(module:'game_database.profession.mt');
+        location.ownedBy.profession = Profession.database.find(id:'base:farmer');  
         location.ownedBy.normalizeStats();              
         @:story = import(module:'game_singleton.story.mt');
         
@@ -359,9 +359,9 @@ Location.database.newEntry(data:{
     minOccupants : 0,
     maxOccupants : 0,
     onFirstInteract ::(location) {
-        @:Profession = import(module:'game_mutator.profession.mt');
+        @:Profession = import(module:'game_database.profession.mt');
         location.ownedBy = location.landmark.island.newInhabitant();            
-        location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'base:trader'));
+        location.ownedBy.profession = Profession.find(id:'base:trader');
         location.ownedBy.normalizeStats();              
         location.name = 'Shop';
         location.inventory.maxItems = 50;
@@ -513,9 +513,9 @@ Location.database.newEntry(data:{
     minOccupants : 0,
     maxOccupants : 0,
     onFirstInteract ::(location) {
-        @:Profession = import(module:'game_mutator.profession.mt');
+        @:Profession = import(module:'game_database.profession.mt');
         location.ownedBy = location.landmark.island.newInhabitant();            
-        location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'base:blacksmith'));
+        location.ownedBy.profession = Profession.find(id:'base:blacksmith');
         location.name = 'Blacksmith';
         location.ownedBy.normalizeStats();
         @:story = import(module:'game_singleton.story.mt');
@@ -719,7 +719,7 @@ Location.database.newEntry(data:{
     },            
     onCreate ::(location) {
         location.ownedBy = location.landmark.island.newInhabitant();
-        location.name = location.ownedBy.profession.base.name + ' school';
+        location.name = location.ownedBy.profession.name + ' school';
         location.ownedBy.normalizeStats();              
     },
     
@@ -1375,7 +1375,7 @@ Location.database.newEntry(data:{
     minOccupants : 0,
     maxOccupants : 0,
     onFirstInteract ::(location) {
-        @:Profession = import(module:'game_mutator.profession.mt');
+        @:Profession = import(module:'game_database.profession.mt');
         @:Entity = import(module:'game_class.entity.mt');
         @:EntityQuality = import(module:'game_mutator.entityquality.mt');
         @:world = import(module:'game_singleton.world.mt');                
@@ -1460,7 +1460,7 @@ Location.database.newEntry(data:{
     minOccupants : 0,
     maxOccupants : 0,
     onFirstInteract ::(location) {
-        @:Profession = import(module:'game_mutator.profession.mt');
+        @:Profession = import(module:'game_database.profession.mt');
         @:Entity = import(module:'game_class.entity.mt');
         @:EntityQuality = import(module:'game_mutator.entityquality.mt');
         @:story = import(module:'game_singleton.story.mt');
@@ -1545,7 +1545,7 @@ Location.database.newEntry(data:{
     minOccupants : 0,
     maxOccupants : 0,
     onFirstInteract ::(location) {
-        @:Profession = import(module:'game_mutator.profession.mt');
+        @:Profession = import(module:'game_database.profession.mt');
         @:Entity = import(module:'game_class.entity.mt');
         @:EntityQuality = import(module:'game_mutator.entityquality.mt');
         @:world = import(module:'game_singleton.world.mt');                
@@ -1948,7 +1948,7 @@ Location.database.newEntry(data:{
                 
                 @locations = landmark_.locations;
                 
-                return locations[locations->findIndex(query::(value) <- 
+                return locations[locations->findIndexCondition(::(value) <- 
                     value.base.id == 'base:pressure-plate' &&
                     value.worldID == state.data.plateID
                 )].data.pressed;

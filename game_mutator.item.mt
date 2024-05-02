@@ -124,7 +124,7 @@ Item.database.newEntry(
         hasSize : false,
         blockPoints : 0,
         onCreate ::(item, creationHint) {},
-        possibleAbilities : [],
+        possibleArts : [],
     }
 )
 
@@ -153,7 +153,7 @@ Item.database.newEntry(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
     hasSize : false,
     onCreate ::(item, creationHint) {},
-    possibleAbilities : [],
+    possibleArts : [],
     
     equipMod : StatSet.new(
         HP: 30,
@@ -191,7 +191,7 @@ Item.database.newEntry(data : {
     useTargetHint : USE_TARGET_HINT.ONE,
     hasSize : false,
     onCreate ::(item, creationHint) {},
-    possibleAbilities : [],
+    possibleArts : [],
     
     blockPoints : 0,
     equipMod : StatSet.new(
@@ -240,7 +240,7 @@ Item.database.newEntry(data : {
         'base:hp-recovery-all',
         'base:consume-item'       
     ],
-    possibleAbilities : [],
+    possibleArts : [],
     equipEffects : [
     ],
     attributes : 
@@ -273,7 +273,7 @@ Item.database.newEntry(data : {
     hasMaterial : false,
     isApparel : false,
     isUnique : false,        
-    possibleAbilities : [],
+    possibleArts : [],
     useTargetHint : USE_TARGET_HINT.ONE,
     blockPoints : 0,
     equipMod : StatSet.new(
@@ -316,7 +316,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,        
     hasSize : false,
-    possibleAbilities : [],
+    possibleArts : [],
     useTargetHint : USE_TARGET_HINT.ONE,
     blockPoints : 0,
     equipMod : StatSet.new(
@@ -359,7 +359,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,        
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [],
+    possibleArts : [],
     blockPoints : 0,
     equipMod : StatSet.new(
         SPD: -2, // itll slow you down
@@ -399,7 +399,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     hasSize : false,
     isUnique : false,        
-    possibleAbilities : [],
+    possibleArts : [],
     useTargetHint : USE_TARGET_HINT.ONE,
     blockPoints : 0,
     equipMod : StatSet.new(
@@ -442,7 +442,7 @@ Item.database.newEntry(data : {
     canHaveTriggerEnchants : false,
     enchantLimit : 0,
     hasQuality : false,
-    possibleAbilities : [],
+    possibleArts : [],
     useTargetHint : USE_TARGET_HINT.ONE,
     equipMod : StatSet.new(
         SPD: -2, // itll slow you down
@@ -486,7 +486,7 @@ Item.database.newEntry(data : {
     canHaveTriggerEnchants : false,
     enchantLimit : 0,
     hasQuality : false,
-    possibleAbilities : [],
+    possibleArts : [],
     useTargetHint : USE_TARGET_HINT.ONE,
     blockPoints : 0,
     equipMod : StatSet.new(
@@ -528,7 +528,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     hasSize : true,
-    possibleAbilities : [
+    possibleArts : [
         'base:stab'
     ],
     useTargetHint : USE_TARGET_HINT.ONE,
@@ -594,7 +594,7 @@ Item.database.newEntry(data : {
         'base:non-combat-weapon' // high chance to deflect, but when it deflects, the weapon breaks
         
     ],
-    possibleAbilities : [
+    possibleArts : [
         'base:stun'
     ],
     attributes : 
@@ -644,7 +644,7 @@ Item.database.newEntry(data : {
         'base:non-combat-weapon' // high chance to deflect, but when it deflects, the weapon breaks
         
     ],
-    possibleAbilities : [
+    possibleArts : [
         'base:stab'
     ],
 
@@ -695,7 +695,7 @@ Item.database.newEntry(data : {
         'base:non-combat-weapon' // high chance to deflect, but when it deflects, the weapon breaks
         
     ],
-    possibleAbilities : [
+    possibleArts : [
         'base:stab'
     ],
 
@@ -740,7 +740,7 @@ Item.database.newEntry(data : {
     useEffects : [
         'base:fling',
     ],
-    possibleAbilities : [
+    possibleArts : [
         'base:doublestrike',
         'base:triplestrike',
         'base:stun'
@@ -788,7 +788,7 @@ Item.database.newEntry(data : {
     useEffects : [
         'base:fling',
     ],
-    possibleAbilities : [
+    possibleArts : [
         'base:stab',
         'base:doublestrike',
         'base:triplestrike',
@@ -839,7 +839,7 @@ Item.database.newEntry(data : {
     useEffects : [
         'base:fling',
     ],
-    possibleAbilities : [
+    possibleArts : [
         'base:stab',
         'base:stun'
     ],
@@ -889,7 +889,7 @@ Item.database.newEntry(data : {
     useEffects : [
         'base:fling',
     ],
-    possibleAbilities : [
+    possibleArts : [
         'base:counter',
         'base:stun',
         'base:leg-sweep'
@@ -941,7 +941,7 @@ Item.database.newEntry(data : {
     useEffects : [
         'base:fling',
     ],
-    possibleAbilities : [
+    possibleArts : [
         'base:counter',
         'base:stun',
         'base:leg-sweep'
@@ -980,7 +980,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:stab',
         'base:stun',
         'base:combo-strike'
@@ -1029,7 +1029,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:stab',
         'base:stun',
         'base:combo-strike'
@@ -1078,7 +1078,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:stab',
         'base:doublestrike',
         'base:triplestrike',
@@ -1129,7 +1129,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:stab',
         'base:stun',
         'base:counter',
@@ -1178,7 +1178,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:stab',
         'base:doublestrike',
         'base:triplestrike',
@@ -1229,7 +1229,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:stab',
         'base:doublestrike',
         'base:triplestrike',
@@ -1280,7 +1280,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:doublestrike',
         'base:triplestrike',
         'base:precise-strike',
@@ -1330,7 +1330,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:precise-strike',
         'base:tranquilizer'
     ],
@@ -1377,7 +1377,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:stun',
         'base:stab',
         'base:big-swing',
@@ -1436,7 +1436,7 @@ Item.database.newEntry(data : {
     useEffects : [
         'base:fling',
     ],
-    possibleAbilities : [
+    possibleArts : [
         'base:stab',
         'base:doublestrike',
         'base:triplestrike'
@@ -1474,7 +1474,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:stun'
     ],
 
@@ -1521,7 +1521,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:stun',
         'base:stab',
         'base:big-swing',
@@ -1570,7 +1570,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:stun',
         'base:stab',
         'base:big-swing',
@@ -1619,7 +1619,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:stun',
         'base:stab',
         'base:big-swing',
@@ -1669,7 +1669,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:stun',
         'base:big-swing',
         'base:leg-sweep'
@@ -1718,7 +1718,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:fire',
         'base:ice',
         'base:thunder',
@@ -1775,7 +1775,7 @@ Item.database.newEntry(data : {
     isApparel : false,
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
         'base:fire',
         'base:ice',
         'base:thunder',
@@ -1832,7 +1832,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     tier: 2,
-    possibleAbilities : [
+    possibleArts : [
         'base:stun',
         'base:big-swing',
         'base:leg-sweep'
@@ -1882,7 +1882,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 220,
-    possibleAbilities : [
+    possibleArts : [
         'base:fire',
         'base:ice',
         'base:thunder',
@@ -1931,7 +1931,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 100,
-    possibleAbilities : [],
+    possibleArts : [],
 
     // fatigued
     blockPoints : 0,
@@ -1970,7 +1970,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 100,
-    possibleAbilities : [],
+    possibleArts : [],
 
     // fatigued
     blockPoints : 0,
@@ -2008,7 +2008,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 40,
-    possibleAbilities : [],
+    possibleArts : [],
 
     // fatigued
     blockPoints : 0,
@@ -2046,7 +2046,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 40,
-    possibleAbilities : [],
+    possibleArts : [],
 
     // fatigued
     blockPoints : 0,
@@ -2092,7 +2092,7 @@ Item.database.newEntry(data : {
     useEffects : [
         'base:fling',
     ],
-    possibleAbilities : [
+    possibleArts : [
     ],
     equipEffects : [],
     attributes : 
@@ -2124,7 +2124,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 105,
-    possibleAbilities : [],
+    possibleArts : [],
 
     // fatigued
     blockPoints : 0,
@@ -2162,7 +2162,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 55,
-    possibleAbilities : [],
+    possibleArts : [],
 
     // fatigued
     blockPoints : 0,
@@ -2200,7 +2200,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 10,
-    possibleAbilities : [],
+    possibleArts : [],
 
     // fatigued
     blockPoints : 0,
@@ -2237,7 +2237,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 200,
-    possibleAbilities : [],
+    possibleArts : [],
 
     // fatigued
     blockPoints : 0,
@@ -2278,7 +2278,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 350,
-    possibleAbilities : [],
+    possibleArts : [],
 
     // fatigued
     blockPoints : 0,
@@ -2317,7 +2317,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 200,
-    possibleAbilities : [],
+    possibleArts : [],
 
     // fatigued
     blockPoints : 0,
@@ -2358,7 +2358,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 350,
-    possibleAbilities : [],
+    possibleArts : [],
 
     // fatigued
     blockPoints : 0,
@@ -2400,7 +2400,7 @@ Item.database.newEntry(data : {
     isUnique : false,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 400,
-    possibleAbilities : [],
+    possibleArts : [],
 
     // fatigued
     blockPoints : 0,
@@ -2441,7 +2441,7 @@ Item.database.newEntry(data : {
     hasMaterial : false,
     isApparel : false,
     isUnique : true,
-    possibleAbilities : [],
+    possibleArts : [],
     useTargetHint : USE_TARGET_HINT.ONE,
 
     // fatigued
@@ -2488,7 +2488,7 @@ Item.database.newEntry(data : {
     isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [],
+    possibleArts : [],
 
     blockPoints : 1,
     equipMod : StatSet.new(
@@ -2534,7 +2534,7 @@ Item.database.newEntry(data : {
     isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [],
+    possibleArts : [],
     blockPoints : 1,
 
     equipMod : StatSet.new(
@@ -2578,7 +2578,7 @@ Item.database.newEntry(data : {
     isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [],
+    possibleArts : [],
     blockPoints : 1,
 
     equipMod : StatSet.new(
@@ -2624,7 +2624,7 @@ Item.database.newEntry(data : {
     isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [],
+    possibleArts : [],
 
     blockPoints : 1,
     equipMod : StatSet.new(
@@ -2668,7 +2668,7 @@ Item.database.newEntry(data : {
     isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [],
+    possibleArts : [],
 
     blockPoints : 1,
     equipMod : StatSet.new(
@@ -2712,7 +2712,7 @@ Item.database.newEntry(data : {
     isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [],
+    possibleArts : [],
 
     blockPoints : 1,
     equipMod : StatSet.new(
@@ -2757,7 +2757,7 @@ Item.database.newEntry(data : {
     isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [],
+    possibleArts : [],
 
     blockPoints : 1,
     equipMod : StatSet.new(
@@ -2801,7 +2801,7 @@ Item.database.newEntry(data : {
     isApparel : false,    isUnique : false,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [],
+    possibleArts : [],
 
     blockPoints : 1,
     equipMod : StatSet.new(
@@ -2845,7 +2845,7 @@ Item.database.newEntry(data : {
     tier: 2,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [],
+    possibleArts : [],
 
     blockPoints : 1,
     equipMod : StatSet.new(
@@ -2888,7 +2888,7 @@ Item.database.newEntry(data : {
     levelMinimum : 100000,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 5,
-    possibleAbilities : [],
+    possibleArts : [],
 
     blockPoints : 1,
     equipMod : StatSet.new(
@@ -2929,7 +2929,7 @@ Item.database.newEntry(data : {
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 1000,
-    possibleAbilities : [],
+    possibleArts : [],
     blockPoints : 0,
 
     equipMod : StatSet.new(
@@ -2971,7 +2971,7 @@ Item.database.newEntry(data : {
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 600,
-    possibleAbilities : [],
+    possibleArts : [],
 
     blockPoints : 1,
     equipMod : StatSet.new(
@@ -3016,7 +3016,7 @@ Item.database.newEntry(data : {
     levelMinimum : 1000000,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 0,
-    possibleAbilities : [],
+    possibleArts : [],
 
     equipMod : StatSet.new(
         ATK: 2, // well. its hard!
@@ -3057,7 +3057,7 @@ Item.database.newEntry(data : {
     levelMinimum : 10000000,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 175,
-    possibleAbilities : [],
+    possibleArts : [],
 
     blockPoints : 1,
     equipMod : StatSet.new(
@@ -3100,7 +3100,7 @@ Item.database.newEntry(data : {
     levelMinimum : 10000000,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 5,
-    possibleAbilities : [],
+    possibleArts : [],
 
     blockPoints : 0,
     equipMod : StatSet.new(
@@ -3143,7 +3143,7 @@ Item.database.newEntry(data : {
     hasMaterial : false,
     isApparel : false,    isUnique : true,
     useTargetHint : USE_TARGET_HINT.ONE,
-    possibleAbilities : [
+    possibleArts : [
     ],
 
     // fatigued
@@ -3177,7 +3177,7 @@ Item.database.newEntry(data : {
 @:ItemDesign = import(module:'game_database.itemdesign.mt');
 @:Material = import(module:'game_database.material.mt');
 @:ApparelMaterial = import(module:'game_database.apparelmaterial.mt');
-@:Ability = import(module:'game_database.ability.mt');
+@:Arts = import(module:'game_database.arts.mt');
 @:Island = import(module:'game_class.island.mt');
 @:world = import(module:'game_singleton.world.mt');
 */
@@ -3292,12 +3292,12 @@ Item.database.newEntry(data : {
 
 
 @:recalculateDescription ::(this, state){
-    @:Ability = import(module:'game_database.ability.mt');
+    @:Arts = import(module:'game_database.arts.mt');
     @:base = this.base;
     state.description = String.combine(strings:[
         base.description,
         ' ',
-        (if (state.ability == '') '' else 'If equipped, grants the ability: "' + Ability.find(id:state.ability).name + '". '),
+        (if (state.art == '') '' else 'If equipped, grants the art: "' + Arts.find(id:state.art).name + '". '),
         if (state.size == empty) '' else 'It is ' + sizeToString(state) + '. ',
         if (state.hasEmblem) (
             if (base.isApparel) 
@@ -3348,7 +3348,7 @@ Item.database.newEntry(data : {
         equipEffects : empty,
         useEffects : empty,
         intuition : 0,
-        ability : '',
+        art : '',
         stats : empty,
         design : empty,
         modData : empty
@@ -3390,7 +3390,7 @@ Item.database.newEntry(data : {
             hasSize : Boolean,
             tier : Number,
             blockPoints : Number,
-            possibleAbilities : Object
+            possibleArts : Object
         
         },
         reset       
@@ -3402,7 +3402,7 @@ Item.database.newEntry(data : {
     },
     
     interface : {
-        defaultLoad::(base, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, abilityHint, forceEnchant) {
+        defaultLoad::(base, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, artsHint, forceEnchant) {
             @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
             @:ItemQuality = import(module:'game_database.itemquality.mt');
             @:ItemColor = import(module:'game_database.itemcolor.mt');
@@ -3417,9 +3417,9 @@ Item.database.newEntry(data : {
             state.equipEffects = [];
             state.useEffects = [];
             state.stats = StatSet.new();
-            state.ability = ::<= {
-                when (abilityHint) abilityHint;
-                @:out = random.pickArrayItem(list:base.possibleAbilities);
+            state.art = ::<= {
+                when (artsHint) artsHint;
+                @:out = random.pickArrayItem(list:base.possibleArts);
                 when(out == empty) '';
                 return out;
             }
@@ -3615,8 +3615,8 @@ Item.database.newEntry(data : {
             get ::<- _.equippedBy
         },
 
-        ability : {
-            get ::<- if (_.state.ability == '') empty else _.state.ability
+        art : {
+            get ::<- if (_.state.art == '') empty else _.state.art
         },
             
         equipEffects : {
@@ -3802,11 +3802,11 @@ Item.database.newEntry(data : {
 
 
             if (by != empty) ::<= {
-                when(by.profession.base.weaponAffinity != state.base.name) empty;
+                when(by.profession.weaponAffinity != state.base.name) empty;
                 windowEvent.queueMessage(
                     speaker:by.name,
                     pageAfter:canvas.height-4,
-                    text:'Oh! This weapon type really works for me as ' + correctA(word:by.profession.base.name) + '.'
+                    text:'Oh! This weapon type really works for me as ' + correctA(word:by.profession.name) + '.'
                 );  
             }
         },

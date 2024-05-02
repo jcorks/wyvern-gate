@@ -28,7 +28,7 @@
 @:Battle = import(module:'game_class.battle.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:Material = import(module:'game_database.material.mt');
-@:Profession = import(module:'game_mutator.profession.mt');
+@:Profession = import(module:'game_database.profession.mt');
 @:Item = import(module:'game_mutator.item.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:g = import(module:'game_function.g.mt');
@@ -1434,8 +1434,8 @@ Interaction.newEntry(
 
 
                 @:e = [
-                    location.landmark.island.newInhabitant(professionHint:'Guard'),
-                    location.landmark.island.newInhabitant(professionHint:'Guard')                        
+                    location.landmark.island.newInhabitant(professionHint:'base:guard'),
+                    location.landmark.island.newInhabitant(professionHint:'base:guard')                        
                 ];
                 
                 foreach(e)::(index, guard) {

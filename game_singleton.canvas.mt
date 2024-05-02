@@ -263,6 +263,54 @@ return class(
 
             },  
             
+            // Takes an array of strings and returns a new array of strings 
+            // that will fit once displayed. the standard is CANVAS_WIDTH - 4 
+            // to leave room for the window frame if any.
+            refitLines::(input => Object) {
+                @:lines = [];
+                foreach(input) ::(k, v) {
+                    lines->push(:v);
+                    if (k != input->size-1)
+                        lines->push(:'\n');
+                }
+                @:MAX_WIDTH = CANVAS_WIDTH - 4;
+                
+                @:text = String.combine(:lines);
+                lines->setSize(:0);
+                
+                @chars = [];
+
+                for(0, text->length)::(i) {
+                    @:word = text->charAt(:i); 
+                    when(word == '\n') ::<= {
+                        lines->push(:String.combine(:chars));
+                        chars->setSize(:0);                    
+                    }
+                    chars->push(:word);
+                    if (chars->size >= MAX_WIDTH) ::<= {
+                        @nextLine = [];
+                        {:::} {
+                            forever ::{
+                                @ch = chars[chars->size-1];
+                                when(chars->size < MAX_WIDTH && ch == ' ') send();
+
+                                nextLine->insert(at:0, value:ch);
+                                chars = chars->subset(from:0, to:chars->size-2);
+                                                          
+
+                            }
+                        }                                                
+                        lines->push(:String.combine(:chars));
+                        chars->setSize(:0);
+                        chars = nextLine;
+                    }
+                }            
+                lines->push(:String.combine(:chars));
+                chars->setSize(:0);
+                return lines;
+            },
+            
+            
             renderTextFrameGeneral::(
                 lines,
                 title,
@@ -272,11 +320,13 @@ return class(
             ) {
                 if (leftWeight == empty) leftWeight = 0.5;
                 if (topWeight  == empty) topWeight  = 0.5;
-
-                @width = if (title == empty) 0 else title->length;
-                foreach(lines)::(index, line) {
-                    if (line->length > width) width = line->length;
+                
+                @width = if (title!=empty) title->length else 0;
+                foreach(lines) ::(k, v) {
+                    if (v->length > width)
+                        width = v->length;
                 }
+            
                 
                 @left   = (this.width - (width+4))*leftWeight;
                 width   = width + 4;
@@ -309,13 +359,12 @@ return class(
             
             addBackground::(render) {
                 @:key = {};
-                backgrounds[key] = render;
-                breakpoint();
+                backgrounds->push(:{key:key, render:render});
                 return key;
             },
             
             removeBackground::(id) {
-                backgrounds->remove(key:id);
+                backgrounds->remove(:backgrounds->findIndexCondition(::(value) <- value.key == id));
             },
             
             pushState ::{
@@ -347,6 +396,7 @@ return class(
             states : {
                 get ::<- [...savestates]
             },
+
             
             removeState ::(id) {
                 @w = savestates->filter(by::(value) <- value.id == id);
@@ -413,7 +463,7 @@ return class(
                     @prevCanvas = savestates[savestates->keycount-1].text;
                     canvas = [...prevCanvas];
                     foreach(backgrounds) ::(k, v) {
-                        v();
+                        v.render();
                     }
                 }
                 this.blackout();
@@ -430,7 +480,7 @@ return class(
                 }  
                 when(backgrounds->size == 0) empty;
                 foreach(backgrounds) ::(k, v) {
-                    v();
+                    v.render();
                 }
 
             },
