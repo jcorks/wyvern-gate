@@ -312,6 +312,16 @@
             }   
             return out;
         }
+        
+        @:getAll::{
+            @:out = {};
+            foreach(groups) ::(k, v) {
+                foreach(v) ::(k, m) {
+                    out->push(:m);
+                }
+            }
+            return out;
+        }
 
         // defeated enemies were removed from their active groups
         //
@@ -964,6 +974,11 @@
             },
             
             entityCommitAction::(action) {
+                // failsafe. not normally needed.
+                when (entityTurn.isIncapacitated())
+                    endTurn();
+                    
+                    
                 @:Entity = import(module:'game_class.entity.mt');
                 @:world = import(module:'game_singleton.world.mt');
                 @:targetDefendParts = [];
@@ -977,6 +992,131 @@
                     pendingChoices = [...action.targets]->filter(by::(value) <- world.party.isMember(entity:value));
                 }
             
+                @:finish ::(useArtReturn) {
+                    if (art.kind == Arts.KIND.ABILITY) ::<= {
+                        entityTurn.flags.add(flag:StateFlags.WENT);
+                        if (art.name != 'Wait' &&
+                            art.name != 'Use Item')
+                            entityTurn.flags.add(flag:StateFlags.ABILITY);
+
+                        if (art.durationTurns > 0 && useArtReturn != Arts.CANCEL_MULTITURN) ::<= {
+                            actions[entityTurn] = action;
+                        }  
+
+                        windowEvent.queueCustom(
+                            onEnter ::{
+                                endTurn();
+                            }
+                        );
+                    }                
+                }
+            
+                
+                @:doAction ::{
+                    @:ret = entityTurn.useArt(
+                        art:Arts.find(id:action.card.id),
+                        level: action.card.level,
+                        targets:action.targets,
+                        targetParts:action.targetParts,
+                        targetDefendParts: targetDefendParts,
+                        turnIndex : action.turnIndex,
+                        extraData : action.extraData
+                    );
+            
+                    finish(:ret);                   
+                }
+            
+                // react andy time
+                @checkReactions ::(onPass, onReject) {
+                    @toReact = getAll()->filter(::(value) <- value.deck.containsReaction());
+                    toReact->sort(:::(a, b) <- a.stats.SPD > b.stats.SPD);
+                    when(toReact->size == 0)
+                        onPass();
+
+                    @:tryNext:: {
+                        when(toReact->size == 0)
+                            onPass();
+                            
+                        @reactor = toReact->pop;
+                        when(reactor == entityTurn)
+                            tryNext();
+
+                        reactor.react(
+                          source: entityTurn,
+                          onReact::(card) {
+                            when(card == empty)
+                                tryNext();
+                                
+                                
+                            reactor.deck.discardFromHand(:card);
+                            @art = Arts.find(:card.id);
+                            
+                            
+                            windowEvent.queueMessage(
+                                text: reactor.name + ' reacts with the Art ' + art.name + '!'
+                            );
+                            
+                            @cancel = art.onAction(
+                                level: 1,
+                                user: reactor,
+                                targets : [entityTurn],
+                                targetDefendParts: [0],
+                                targetParts : [Entity.normalizedDamageTarget()],
+                                turnIndex: 0
+                            );
+                            
+                            when(reactor.isIncapacitated())
+                                windowEvent.queueCustom(
+                                    onEnter ::{
+                                        endTurn();
+                                    }
+                                );
+
+                            
+                            when(cancel) ::<= {
+                                windowEvent.queueMessage(text: reactor.name + '\'s ' + art.name + ' cancelled ' + entityTurn.name + '\'s Art!');
+                                windowEvent.queueCustom(
+                                    onEnter :: {
+                                        onReject();
+                                    }
+                                )
+                            }
+                                
+                            windowEvent.queueCustom(
+                                onEnter :: {
+                                    tryNext();                                
+                                }
+                            );
+                            
+                        })
+                    }
+                    
+                    tryNext();
+                
+                }
+            
+                @:chooseDefend ::(onDone) {
+                    @:doNext = :: {
+                        when(pendingChoices->size == 0) onDone();
+                        @:next = pendingChoices->pop;
+                        when(random.try(percentSuccess:35)) ::<= { // todo: luck delta affecting chance
+                            targetDefendParts[action.targets->findIndex(value:next)] = 0;
+                            doNext();
+                        }
+                        combatChooseDefend(
+                            targetPart: action.targetParts[action.targets->findIndex(value:next)],
+                            attacker:entityTurn,
+                            defender:next,
+                            onDone ::(which) {
+                                @:index = action.targets->findIndex(value:next);
+                                targetDefendParts[index] = which;
+                                doNext();
+                            }
+                        );
+                    }
+                    doNext();                  
+                }
+            
             
                 action.turnIndex = 0;
                 entityTurn.deck.discardFromHand(card:action.card);
@@ -986,59 +1126,21 @@
                             handCard:action.card,
                             prompt: entityTurn.name + ' uses the Art: ' + art.name + '!'
                         );
-                        @:doNext = :: {
-                            when(pendingChoices->size == 0) onDone();
-                            @:next = pendingChoices->pop;
-                            when(random.try(percentSuccess:35)) ::<= { // todo: luck delta affecting chance
-                                targetDefendParts[action.targets->findIndex(value:next)] = 0;
-                                doNext();
+                        
+                        // react here
+                        checkReactions(
+                            onPass::{
+                                chooseDefend(::{
+                                    doAction();
+                                });
+                            },
+                            onReject::{
+                                finish();                              
                             }
-                            combatChooseDefend(
-                                targetPart: action.targetParts[action.targets->findIndex(value:next)],
-                                attacker:entityTurn,
-                                defender:next,
-                                onDone ::(which) {
-                                    @:index = action.targets->findIndex(value:next);
-                                    targetDefendParts[index] = which;
-                                    doNext();
-                                }
-                            );
-                        }
-                        @:onDone::{
-                            @:ret = entityTurn.useArt(
-                                art:Arts.find(id:action.card.id),
-                                level: action.card.level,
-                                targets:action.targets,
-                                targetParts:action.targetParts,
-                                targetDefendParts: targetDefendParts,
-                                turnIndex : action.turnIndex,
-                                extraData : action.extraData
-                            );
-                    
-                            if (art.kind == Arts.KIND.ABILITY) ::<= {
-                                entityTurn.flags.add(flag:StateFlags.WENT);
-                                if (art.name != 'Wait' &&
-                                    art.name != 'Use Item')
-                                    entityTurn.flags.add(flag:StateFlags.ABILITY);
-
-                                if (art.durationTurns > 0 && ret != Arts.CANCEL_MULTITURN) ::<= {
-                                    actions[entityTurn] = action;
-                                }  
-
-                                windowEvent.queueCustom(
-                                    onEnter ::{
-                                        endTurn();
-                                    }
-                                );
-                            }                            
-                        };   
-                        doNext();                         
+                        );
                     }
                 );
-                
             },
-            
-
         }
     }
 );

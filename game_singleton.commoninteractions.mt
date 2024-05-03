@@ -17,7 +17,7 @@
 
 
 
-@:playerUseAbility = ::(commitAction, allies, enemies, card) {
+@:playerUseAbility = ::(commitAction, onCancel, allies, enemies, card) {
     
     @:art = Arts.find(id:card.id);
     @:level = card.level;
@@ -96,6 +96,7 @@
           prompt: 'Against whom?',
           choices: allNames,
           canCancel: true,
+          onCancel,
           keep: true,
           onChoice::(choice) {
             when(choice == 0) empty;
@@ -213,9 +214,14 @@ return {
             onSelect::(user, battle, commitAction) {
                 
                 user.deck.chooseArtPlayer(
+                    canCancel: true,
+                    act: 'Use',
                     onChoice::(card, backout) {
                         playerUseAbility(
                             card,
+                            onCancel ::{
+                                backout();
+                            },
                             allies : battle.getAllies(entity:user),
                             enemies : battle.getEnemies(entity:user),
                             commitAction::(action){
@@ -244,7 +250,7 @@ return {
                   canCancel: true,
                   choices : [
                     'Allies',
-                    'Enemies'
+                    'Discarded Arts'
                   ],
                   onChoice::(choice) {
                     when(choice == 0) empty;
@@ -266,6 +272,13 @@ return {
                                 @:ally = allies[choice-1];
                                 ally.describe();                            
                             }
+                        );
+                      },
+                      
+                      
+                      (1): ::<= {
+                        user.deck.chooseDiscard(
+                            canCancel: true
                         );
                       }
                     

@@ -103,6 +103,7 @@
     deck.addArt(id:'base:brace');
     deck.addArt(id:'base:agility');
     deck.addArt(id:'base:foresight');
+    deck.addArt(id:'base:cancel');
     
     
     // profession boosts
@@ -117,6 +118,7 @@
     }    
     
     deck.shuffle();
+    deck.redraw();
     
     return deck;
 }
@@ -1652,6 +1654,47 @@
                     text: this.name + ' discards an Art.'
                 );
                 deck.discardRandom()                
+            }
+        },
+        
+        react::(source, onReact) {
+            if (_.state.deck == empty)
+                error(detail: 'Can\'t react when not in battle.');
+            @:priv = _;
+            @:this = _.this;
+            @:state = _.state;
+            @:deck = state.deck;
+            @:world = import(module:'game_singleton.world.mt');
+
+            if (world.party.isMember(entity:this)) ::<= {
+                windowEvent.queueMessage(
+                    text: '' + this.name + ' is able to react to this Art. You can either choose a Reaction Art or cancel to pass.'
+                );
+                deck.chooseArtPlayer(
+                    act: 'React',
+                    canCancel: true,
+                    filter::(value) <- Arts.find(:value.id).kind == Arts.KIND.REACTION,
+                    onChoice::(
+                        card,
+                        backout
+                    ) {
+                        onReact(:card)
+                        backout();
+                    },
+                    
+                    onCancel ::{
+                        onReact();
+                    }
+                )
+            } else ::<= {
+                @card = state.battleAI.chooseReaction(
+                    source,
+                    battle:priv.battle,
+                    allies:priv.allies,
+                    enemies: priv.enemies
+                );
+                
+                onReact(:card);
             }
         },
         

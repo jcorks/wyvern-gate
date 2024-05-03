@@ -41,6 +41,30 @@
                 user_ = user;
             },
             
+            chooseReaction::(source, battle, enemies, allies) {
+
+                @hand = user_.deck.hand->filter(
+                    ::(value) <- Arts.find(id:value.id).usageHintAI != Arts.USAGE_HINT.DONTUSE &&
+                                 Arts.find(id:value.id).kind == Arts.KIND.REACTION
+                );
+                
+                when(hand->size == 0) empty;
+                when (random.try(percentSuccess:40)) empty;
+                
+                @:sourceIsEnemy = enemies->findIndex(:source) != -1;
+                hand = random.scrambled(:hand);
+
+                when(sourceIsEnemy) hand[0];
+                
+                return {:::} {
+                    foreach(hand) ::(k, v) {
+                        @art = Arts.find(id:v.id);
+                        if (art.usageHintAI != Arts.USAGE_HINT.DEBUFF)
+                            send(:v);
+                    } 
+                }
+            },
+            
             takeTurn ::(battle, enemies, allies){
                 @:Entity = import(module:'game_class.entity.mt');
                 

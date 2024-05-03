@@ -3403,35 +3403,7 @@ Arts.newEntry(
     }
 )
 
-Arts.newEntry(
-    data: {
-        name: 'Retaliate',
-        id : 'base:retaliate',
-        targetMode : TARGET_MODE.ALLALLY,
-        description: 'The user retaliates to an ability, damaging the enemy based on ATK.',
-        durationTurns: 0,
-        kind : KIND.REACTION,
-        rarity : RARITY.UNCOMMON,
-        usageHintAI : USAGE_HINT.BUFF,
-        oncePerBattle : false,
-        canBlock : false,
-        isMeta : false,
-        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-            windowEvent.queueCustom(
-                onEnter :: {
-                    user.attack(
-                        target:targets[0],
-                        amount:user.stats.ATK * (0.5),
-                        damageType : Damage.TYPE.PHYS,
-                        damageClass: Damage.CLASS.HP,
-                        targetPart:targetParts[0],
-                        targetDefendPart:targetDefendParts[0]
-                    );        
-                }
-            )
-        }
-    }
-)
+
 
 Arts.newEntry(
     data: {
@@ -4145,7 +4117,7 @@ Arts.newEntry(
         onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             @:Entity = import(module:'game_class.entity.mt');
             when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).base.name == 'None')
-                windowEvent.queueMessage(text:targets[0] + ' has no weapon to dull!');                    
+                windowEvent.queueMessage(text:targets[0].name + ' has no weapon to dull!');                    
 
 
             windowEvent.queueMessage(text:user.name + ' dulls ' + targets[0].name + '\'s weapon!');
@@ -4885,6 +4857,9 @@ Arts.newEntry(
         isMeta : true,
         onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             user.deck.hand = [];
+            foreach(user.deck.hand) ::(k, c) {
+                user.deck.discardFromHand(:c);
+            }
             user.drawArt(count:5);            
         }
     }
@@ -4950,12 +4925,67 @@ Arts.newEntry(
             @:party = import(module:'game_singleton.world.mt').party;                    
 
             when(party.isMember(entity:user)) ::<= {
-                targets[0].deck.view();
+                targets[0].deck.viewHand();
             }
         }
     }
 )    
 
+Arts.newEntry(
+    data: {
+        name: 'Retaliate',
+        id : 'base:retaliate',
+        targetMode : TARGET_MODE.NONE,
+        description: 'The user retaliates to an ability, damaging the enemy based on ATK. This damage is not blockable.',
+        durationTurns: 0,
+        kind : KIND.REACTION,
+        rarity : RARITY.UNCOMMON,
+        usageHintAI : USAGE_HINT.OFFENSIVE,
+        oncePerBattle : false,
+        canBlock : false,
+        isMeta : false,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+            windowEvent.queueMessage(
+                text: user.name + ' retaliates to ' + targets[0].name + '\'s Art!'
+            );
+            windowEvent.queueCustom(
+                onEnter :: {
+                    user.attack(
+                        target:targets[0],
+                        amount:user.stats.ATK * (0.5),
+                        damageType : Damage.TYPE.PHYS,
+                        damageClass: Damage.CLASS.HP,
+                        targetPart:targetParts[0],
+                        targetDefendPart:targetDefendParts[0]
+                    );        
+                }
+            )
+            return false;
+        }
+    }
+)
+
+Arts.newEntry(
+    data: {
+        name: 'Cancel',
+        id : 'base:cancel',
+        targetMode : TARGET_MODE.NONE,
+        description: 'The user cancels an ability Art.',
+        durationTurns: 0,
+        kind : KIND.REACTION,
+        rarity : RARITY.UNCOMMON,
+        usageHintAI : USAGE_HINT.DEBUFF,
+        oncePerBattle : false,
+        canBlock : false,
+        isMeta : false,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+            windowEvent.queueMessage(
+                text: user.name + ' retaliates to ' + targets[0].name + '\'s Art!'
+            );
+            return true;
+        }
+    }
+)
 
 
 };

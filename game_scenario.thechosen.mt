@@ -632,7 +632,7 @@ return {
         
         
         /////
-        /*
+        
         @:world = import(module:'game_singleton.world.mt');
         @:enemies = [
             world.island.newInhabitant(),
@@ -658,7 +658,7 @@ return {
                 instance.gameOver(reason:'The party was wiped out.');
             }
         );
-        */
+        
         /////
         
     },
