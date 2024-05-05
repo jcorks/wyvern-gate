@@ -63,6 +63,25 @@
 }
 
 
+@:getTraits::(handCard) {
+    @:art = Arts.find(:handCard.id);
+    when(art.traits == 0) 'None';
+    
+    @out = '';
+    @val = art.traits;
+    
+    foreach(Arts.TRAITS) ::(k, val) {
+        if (art.traits & val)
+            out = out + (if (out == '') 
+                Arts.traitToString(:val)
+            else 
+                ', ' + Arts.traitToString(:val))
+    }
+    
+    return out;
+    
+}
+
 
 @:renderArt::(handCard, topWeight, leftWeight){
     @:art = Arts.find(id:handCard.id);
@@ -76,12 +95,13 @@
               (Arts.KIND.EFFECT): "Effect (^^)",
               (Arts.KIND.REACTION): "Reaction (!!)"
             },
+            "Traits: " + getTraits(:handCard),
             if (art.kind == Arts.KIND.ABILITY)
                 "Lv. " + handCard.level 
             else 
                 "",
             "",
-            (if (art.isMeta) "A meta Art. " else "") + art.description
+            art.description
         ])
     );
 }

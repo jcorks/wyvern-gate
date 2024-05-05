@@ -83,27 +83,72 @@
     return temp->keys;
 }
 
-@:assembleDeck ::(state) {
+
+@:outfitDeck ::(this, deck) {
+    @:world = import(module:'game_singleton.world.mt');
+    when(this.supportArts) ::<= {
+        foreach(this.supportArts)::(k, v) {
+            deck.addArt(id:v);
+        }
+    }
+        
+ 
+
+
+    // profession is expected to pick up the slack
+    when (this.species.special == true) empty;
+    
+    // otherwise its default tier bs 
+    match(world.island.tier) {
+      (0, 1): ::<= {
+        deck.addArt(id:'base:pebble');
+        deck.addArt(id:'base:diversify');
+        deck.addArt(id:'base:brace');            
+        deck.addArt(id:'base:mind-games');
+      },
+      
+      (2): ::<= {
+        deck.addArt(id:'base:pebble');
+        deck.addArt(id:'base:retaliate');
+        deck.addArt(id:'base:diversify');
+        deck.addArt(id:'base:brace');            
+        deck.addArt(id:'base:mind-games');
+        deck.addArt(id:'base:crossed-wires');
+        deck.addArt(id:'base:recycle');          
+      },
+      
+      (3): ::<= {
+        deck.addArt(id:'base:pebble');
+        deck.addArt(id:'base:retaliate');
+        deck.addArt(id:'base:diversify');
+        deck.addArt(id:'base:brace');            
+        deck.addArt(id:'base:mind-games');
+        deck.addArt(id:'base:crossed-wires');
+        deck.addArt(id:'base:recycle');          
+        deck.addArt(id:'base:cancel');    
+      },
+
+      (4): ::<= {
+        deck.addArt(id:'base:pebble');
+        deck.addArt(id:'base:retaliate');
+        deck.addArt(id:'base:diversify');
+        deck.addArt(id:'base:brace');            
+        deck.addArt(id:'base:mind-games');
+        deck.addArt(id:'base:crossed-wires');
+        deck.addArt(id:'base:recycle');          
+        deck.addArt(id:'base:cancel');    
+        deck.addArt(id:'base:cancel');    
+      }
+
+      
+    }
+}
+
+@:assembleDeck ::(this, state) {
     @:deck = ArtsDeck.new();
     
     
-    // add standard 
-    deck.addArt(id:'base:pebble');
-    deck.addArt(id:'base:defend');
-    deck.addArt(id:'base:retaliate');
-    deck.addArt(id:'base:wyvern-prayer');
-    
-    
-    // for now: meta standard
-    deck.addArt(id:'base:diversify');
-    deck.addArt(id:'base:mind-games');
-    deck.addArt(id:'base:crossed-wires');
-    deck.addArt(id:'base:recycle');
-    deck.addArt(id:'base:reevaluate');
-    deck.addArt(id:'base:brace');
-    deck.addArt(id:'base:agility');
-    deck.addArt(id:'base:foresight');
-    deck.addArt(id:'base:cancel');
+    outfitDeck(deck, this);
     
     
     // profession boosts
@@ -257,6 +302,7 @@
         level : 0,
         modData : empty,
         deck : empty,
+        supportArts : empty
     },
     
     private : {
@@ -434,8 +480,9 @@
             _.this.recalculateStats();             
             _.this.flags.reset();
             @:state = _.state;
+            @:this = _.this;
             if (state.deck == empty) ::<= {
-                state.deck = assembleDeck(state);
+                state.deck = assembleDeck(this, state);
             }
         },
         
@@ -464,6 +511,12 @@
         deck : {
             get ::<- _.state.deck
         },
+        
+        
+        supportArts : {
+            get ::<- _.state.supportArts,
+            set ::(value) <- _.state.supportArts = value
+        },
             
         blockPoints : {
             get :: {
@@ -486,7 +539,6 @@
                 return am;
             }
         },
-            
 
         // called to signal that a battle has started involving this entity
         battleEnd :: {
@@ -1647,7 +1699,7 @@
             @:this = _.this;
             @:deck = _.state.deck;
             @:world = import(module:'game_singleton.world.mt');
-            if (world.party.isMember(entity:_.this))
+            if (world.party.leader == _.this)
                 deck.discardPlayer()
             else ::<= {
                 windowEvent.queueMessage(
@@ -1666,7 +1718,7 @@
             @:deck = state.deck;
             @:world = import(module:'game_singleton.world.mt');
 
-            if (world.party.isMember(entity:this)) ::<= {
+            if (world.party.leader == this) ::<= {
                 windowEvent.queueMessage(
                     text: '' + this.name + ' is able to react to this Art. You can either choose a Reaction Art or cancel to pass.'
                 );

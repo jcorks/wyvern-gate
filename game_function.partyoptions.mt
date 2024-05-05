@@ -55,7 +55,7 @@ return ::{
                     
                 
                 canvas.movePen(x: x+3, y: top + 2);
-                canvas.drawText(text: member.name + ' - (' + member.species.name + ' ' + member.profession.name + ')');
+                canvas.drawText(text: member.name + ' - (' + member.species.name + ' ' + member.profession.name + ')' + (if (party.leader == member) ' - Leader' else ''));
                 canvas.movePen(x: x+3, y: top + 3);
                 canvas.drawText(text: member.renderHP() + 'HP: ' + member.hp + ' / ' + member.stats.HP + '    AP: ' + member.ap + ' / ' + member.stats.AP + '\n');
                 canvas.movePen(x: x+3, y: top + 4);
@@ -129,7 +129,9 @@ return ::{
                 leftWeight: 1,
                 topWeight: 1,
                 choices: [
+                    'Make Leader',
                     'Describe',
+                    'Arts...',
                     'Equip'
                 ],
                 prompt: names[whom],
@@ -145,14 +147,25 @@ return ::{
                     
                     match(choice) {
 
+                      // make leader 
+                      (1): ::<= {
+                        if (member == party.leader) ::<= {
+                            windowEvent.queueMessage(text: member.name + ' is already the leader.');
+                        } else ::<= {
+                            party.leader = member;
+                            windowEvent.queueMessage(text: member.name + ' is now the leader. If they die, all will be lost.');
+                        }
+                      },
+
                       // describe
-                      (1): member.describe(excludeStats:true),
+                      (2): member.describe(excludeStats:true),
 
 
+                      (3): member.configureArts(),
 
 
                       // Equip / unequip
-                      (2):::<= {
+                      (4):::<= {
                         @Entity = import(module:'game_class.entity.mt');
 
                         @slotToName::(slot) {

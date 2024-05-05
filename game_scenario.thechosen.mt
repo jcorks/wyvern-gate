@@ -441,6 +441,18 @@ return {
             loading(
                 message: 'Saving...',
                 do :: {
+                    @:basicArts = [
+                        'base:pebble',
+                        'base:defend',
+                        'base:retaliate',
+                        'base:reevaluate'
+                    ];
+
+                    party.members->foreach(::(k, v) {
+                        v.supportArts = [...basicArts];
+                    });
+                
+                
                     @somewhere = LargeMap.getAPosition(map:island.map);
                     island.map.setPointer(
                         x: somewhere.x,
@@ -633,6 +645,7 @@ return {
         
         /////
         
+        
         @:world = import(module:'game_singleton.world.mt');
         @:enemies = [
             world.island.newInhabitant(),
@@ -658,6 +671,7 @@ return {
                 instance.gameOver(reason:'The party was wiped out.');
             }
         );
+        
         
         /////
         

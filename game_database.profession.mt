@@ -1159,7 +1159,10 @@ Profession.newEntry(data:{
         'base:triplestrike',
         'base:leg-sweep',
         'base:unarm',
-        'base:doublestrike'
+        'base:doublestrike',
+        'base:cancel',
+        'base:cancel',
+        'base:retaliate'
     ],
     passives : [
     ]

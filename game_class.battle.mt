@@ -698,7 +698,7 @@
                 }
 
                 @:onAllyTurn = ::(battle, user, landmark, allies, enemies) {
-                    if (party.isMember(entity:user))
+                    if (party.leader == user)
                         battlemenu(
                             party:party_,
                             battle,
@@ -940,16 +940,6 @@
             },
             
             join ::(group, sameGroupAs) {
-                foreach(group) ::(i, entity) {
-                    when(turn->findIndex(value:entity) != -1) 
-                        error(detail: 'Tried to join battle when was already a part of the battle');
-                    windowEvent.queueMessage(text:entity.name + ' joins the fray!');
-                    entity.battleStart(battle:this);
-                    entity.startTurn(
-                        enemies: this.getEnemies(entity),
-                        allies: this.getAllies(entity)
-                    );
-                }
 
                 @:newGroup = if (sameGroupAs != empty)
                     ent2group[sameGroupAs]
@@ -966,6 +956,17 @@
                 }
                 if (sameGroupAs == empty)
                     groups->push(value:newGroup);
+                    
+                foreach(group) ::(i, entity) {
+                    when(turn->findIndex(value:entity) != -1) 
+                        error(detail: 'Tried to join battle when was already a part of the battle');
+                    windowEvent.queueMessage(text:entity.name + ' joins the fray!');
+                    entity.battleStart(battle:this);
+                    entity.startTurn(
+                        enemies: this.getEnemies(entity),
+                        allies: this.getAllies(entity)
+                    );
+                }
             },
             
             render :: {
@@ -989,7 +990,7 @@
                 @pendingChoices = [];
                 @:art = Arts.find(id:action.card.id);
                 if (art.canBlock && action.targets->size > 0) ::<= {
-                    pendingChoices = [...action.targets]->filter(by::(value) <- world.party.isMember(entity:value));
+                    pendingChoices = [...action.targets]->filter(by::(value) <- world.party.leader == value);
                 }
             
                 @:finish ::(useArtReturn) {
@@ -1130,9 +1131,15 @@
                         // react here
                         checkReactions(
                             onPass::{
-                                chooseDefend(::{
-                                    doAction();
-                                });
+                                windowEvent.queueCustom(
+                                    onEnter ::{
+                                        when (entityTurn.isIncapacitated())
+                                            endTurn();
+                                        chooseDefend(::{
+                                            doAction();
+                                        });
+                                    }
+                                );
                             },
                             onReject::{
                                 finish();                              

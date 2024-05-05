@@ -59,7 +59,8 @@
                 return {:::} {
                     foreach(hand) ::(k, v) {
                         @art = Arts.find(id:v.id);
-                        if (art.usageHintAI != Arts.USAGE_HINT.DEBUFF)
+                        if (art.usageHintAI != Arts.USAGE_HINT.DEBUFF &&
+                            art.usageHintAI != Arts.USAGE_HINT.OFFENSIVE)
                             send(:v);
                     } 
                 }

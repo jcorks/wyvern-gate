@@ -30,7 +30,9 @@
     items : {
         inventory : empty,
         members : empty,
-        karma : 5500
+        karma : 5500,
+        arts : [],
+        leader : 0
     },
 
     define:::(this, state) {   
@@ -43,6 +45,15 @@
             reset ::{
                 state.members = [];
                 state.inventory = Inventory.new(size:40);
+            },
+            
+            leader : {
+                get ::<- state.members[state.leader],
+                set ::(value) {
+                    state.leader = state.members->findIndex(:value);
+                    if (state.leader < 0)
+                        state.leader = 0
+                }
             },
         
             add::(member => Entity.type) {
@@ -103,6 +114,30 @@
             
             isIncapacitated :: {
                 return state.members->all(condition:::(value) <- value.isIncapacitated());
+            },
+            
+            addSupportArt ::(id) {
+                @index = state.arts->findIndexCondition(::(value) <- value.id == id);
+                when(index == -1) ::<={
+                    state.arts->push(:{
+                        id: id,
+                        count: 1
+                    });
+                }
+                
+                state.arts[index].count+=1;
+            },
+            
+            takeSupportArt ::(id) {
+                @index = state.arts->findIndexCondition(::(value) <- value.id == id);
+                when(index == -1) empty;
+                state.arts[index].count-=1;
+                if (state.arts[index].count == 0) 
+                    state.arts->remove(:index);
+            },
+            
+            arts : {
+                get ::<- [...state.arts]
             },
             
             addGoldAnimated ::(amount, onDone) {

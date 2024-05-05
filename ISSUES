@@ -10,6 +10,11 @@ Known bugs / concerns:
   reloading the save will reset the day and take you out of the dungeon.
 
 Coming changes:
+
+    Arts:
+        - Parry: grants the "parry" effect that will nullify damage ONCE and disappear.
+
+
           
     The Warrior Scenario
         - This game scenario features a Wyvern's challenge to defeat it 
