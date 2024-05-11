@@ -572,7 +572,6 @@
             when(choice == CURSOR_ACTIONS.CANCEL ||
                  choice == CURSOR_ACTIONS.CONFIRM) ::<= {
                 onMenu();
-                
                 resolveNext();
                 return false;
             }           
@@ -1168,7 +1167,7 @@
                 canvas.commit();                
                 choiceStack[choiceStack->keycount-1].rendered = empty;
                 if (clearResolve) ::<= {
-                    resolveQueueCurrent = [];
+                    resolveQueueCurrent->setSize(:0);
                 }
             },
        

@@ -667,7 +667,6 @@ return empty;
                             windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
                         hasVisitIsland = true;
                     }
-                    breakpoint();
                     when (restorePos == empty && atGate != empty) ::<= {
                         @gate = island.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
                         when(gate->size == 0) empty;
