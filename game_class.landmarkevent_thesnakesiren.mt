@@ -23,11 +23,7 @@
             @:beast = world.island.newInhabitant();
             beast.name = 'the Snake Siren';
             beast.species = Species.find(id:'base:beast');
-            beast.profession = Profession.new(base:Profession.database.find(id:'base:snake-siren'));               
-            beast.clearAbilities();
-            foreach(beast.profession.gainSP(amount:10))::(i, ability) {
-                beast.learnAbility(id:ability);
-            }
+            beast.profession = Profession.find(id:'base:snake-siren');               
 
             beast.stats.load(serialized:StatSet.new(
                 HP:   140,

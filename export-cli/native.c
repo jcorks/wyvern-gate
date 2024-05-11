@@ -120,7 +120,6 @@ static matteValue_t wyvern_gate__native__bfs(
     int height = matte_value_as_number(store, args[1]);    
     
     assert(matte_value_object_get_number_key_count(store, args[2]) == width * height);
-    assert(matte_value_object_get_number_key_count(store, args[5]) == 0);
 
 
     wyvern_gate__native__bfs__map_t map;

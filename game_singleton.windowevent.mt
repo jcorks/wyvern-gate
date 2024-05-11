@@ -964,7 +964,7 @@
                     leftWeight, topWeight,
                     prompt:speaker,
                     renderable,
-                    lines : canvas.refitLines(:[text]),
+                    lines : canvas.refitLines(input:[text]),
                     pageAfter,
                     onLeave
                 );              

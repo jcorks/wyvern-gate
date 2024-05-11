@@ -46,14 +46,10 @@
             @:beast = island_.newInhabitant();
             beast.name = 'the Treasure Golem';
             beast.species = Species.find(id:'base:treasure-golem');
-            beast.profession = Profession.new(base:Profession.database.find(id:'base:treasure-golem'));               
+            beast.profession = Profession.find(id:'base:treasure-golem');               
             @:inv = Inventory.new();
             inv.addGold(amount:900 + (Number.random()*200)->floor);
             beast.forceDrop = inv;
-            beast.clearAbilities();
-            foreach(beast.profession.gainSP(amount:10))::(i, ability) {
-                beast.learnAbility(id:ability);
-            }
 
             beast.stats.load(serialized:StatSet.new(
                 HP:   60,

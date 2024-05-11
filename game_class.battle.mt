@@ -81,7 +81,7 @@
         
         
         canvas.renderTextFrameGeneral(
-            lines:canvas.refitLines(:lines),
+            lines:canvas.refitLines(input:lines),
             topWeight: 0,
             leftWeight: 0.5
         );
@@ -978,7 +978,22 @@
                 // failsafe. not normally needed.
                 when (entityTurn.isIncapacitated())
                     endTurn();
+                
+                @:passesSupportCheck ::{
+                    @:art = Arts.find(:action.card.id);
+                    when(art.traits & Arts.TRAITS.SUPPORT == 0) true;
+                    when(random.flipCoin()) true;
+                    return false;
+                }
                     
+                @:requiresAP = !passesSupportCheck();
+                    
+                when (requiresAP && entityTurn.ap == 0) ::<= {
+                    @:art = Arts.find(:action.card.id);
+                    windowEvent.queueMessage(
+                        text: entityTurn.name + ' tried to use the Art ' + art.name + ' but couldn\'t muster the mental strength!'
+                    );
+                }
                     
                 @:Entity = import(module:'game_class.entity.mt');
                 @:world = import(module:'game_singleton.world.mt');
@@ -1029,7 +1044,7 @@
             
                 // react andy time
                 @checkReactions ::(onPass, onReject) {
-                    @toReact = getAll()->filter(::(value) <- value.deck.containsReaction());
+                    @toReact = getAll()->filter(::(value) <- value.isIncapacitated() == false && value.deck.containsReaction());
                     toReact->sort(:::(a, b) <- a.stats.SPD > b.stats.SPD);
                     when(toReact->size == 0)
                         onPass();
@@ -1056,6 +1071,14 @@
                             windowEvent.queueMessage(
                                 text: reactor.name + ' reacts with the Art ' + art.name + '!'
                             );
+            
+                            if (requiresAP) ::<= {                
+                                windowEvent.queueMessage(
+                                    text: entityTurn.name + ' uses an Arts Point for the support Art!'
+                                );
+                                entityTurn.ap -= 1;
+                            }
+                            
                             
                             @cancel = art.onAction(
                                 level: 1,

@@ -15,6 +15,7 @@
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:CARD_WIDTH = 8;
 @:CARD_HEIGHT = 7;
+@:MAX_ART_WIDTH = (canvas.width * 0.7)->floor;
 @:renderCard ::<= {
     @:cardSymbols = [
         '//',
@@ -83,26 +84,39 @@
 }
 
 
+@:getRarity::(rarity) {
+    return match(rarity) {
+        (0): 'Common',
+        (1): 'Uncommon',
+        (2): 'Rare',
+        (3): 'Epic'
+    }
+}
+
 @:renderArt::(handCard, topWeight, leftWeight){
     @:art = Arts.find(id:handCard.id);
     canvas.renderTextFrameGeneral(
         topWeight,
         leftWeight,
-        lines : canvas.refitLines(:[
-            art.name,
-            " - " + match(art.kind) {
-              (Arts.KIND.ABILITY): "Ability (//)",
-              (Arts.KIND.EFFECT): "Effect (^^)",
-              (Arts.KIND.REACTION): "Reaction (!!)"
-            },
-            "Traits: " + getTraits(:handCard),
-            if (art.kind == Arts.KIND.ABILITY)
-                "Lv. " + handCard.level 
-            else 
+        lines : canvas.refitLines(
+            maxWidth : MAX_ART_WIDTH,
+            input : [
+                art.name,
+                " - Kind: " + match(art.kind) {
+                  (Arts.KIND.ABILITY): "Ability (//)",
+                  (Arts.KIND.EFFECT): "Effect (^^)",
+                  (Arts.KIND.REACTION): "Reaction (!!)"
+                },
+                " - Rarity: " + getRarity(:art.rarity),
+                " - Traits: " + getTraits(:handCard),
+                if (art.kind == Arts.KIND.ABILITY)
+                    "Lv. " + handCard.level 
+                else 
+                    "",
                 "",
-            "",
-            art.description
-        ])
+                art.description
+            ]
+        )
     );
 }
 
@@ -145,6 +159,8 @@
             c.id = id;
             return c;
         },
+        
+        renderArt : renderArt
     },
 
     define:::(this, state) {
@@ -268,6 +284,8 @@
                     text: prompt
                 );
             },
+            
+
             
             viewHand ::(prompt) {
                 @bg;

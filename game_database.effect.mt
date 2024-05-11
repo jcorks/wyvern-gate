@@ -20,9 +20,10 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-
 @:FLAGS = {
-    AILMENT : 1
+    AILMENT : 1,
+    BUFF : 2,
+    DEBUFF : 4
 };
 
 
@@ -34,6 +35,7 @@
 @:Scene = import(module:'game_database.scene.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:g = import(module:'game_function.g.mt');
+@:EffectStack = import(:'game_class.effectstack.mt');
 
 
     
@@ -52,45 +54,25 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 1,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: holder.name + ' takes a defensive stance!'
-            );
-            if (holder.hp < holder.stats.HP * 0.5) ::<= {
+        events : {
+            onAffliction ::(from, item, holder) {
                 windowEvent.queueMessage(
-                    text: holder.name + ' catches their breath while defending!'
+                    text: holder.name + ' takes a defensive stance!'
                 );
-                holder.heal(amount:holder.stats.HP * 0.1);
+                if (holder.hp < holder.stats.HP * 0.5) ::<= {
+                    windowEvent.queueMessage(
+                        text: holder.name + ' catches their breath while defending!'
+                    );
+                    holder.heal(amount:holder.stats.HP * 0.1);
+                }
+            },
+
+            onDamage ::(from, item, holder, attacker, damage) {
+                windowEvent.queueMessage(text:holder.name + "'s defending stance reduces damage!");
+                damage.amount *= 0.6;
             }
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            windowEvent.queueMessage(text:holder.name + "'s defending stance reduces damage!");
-            damage.amount *= 0.6;
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
         }
     }
 )
@@ -105,40 +87,16 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 1,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEF: 50
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: holder.name + ' braces for damage!'
-            );
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: holder.name + ' braces for damage!'
+                );
+            }
         }
     }
 )
@@ -153,68 +111,49 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 1,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEX: 20
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: holder.name + ' is now able to dodge attacks!'
-            );
-        },
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: holder.name + ' is now able to dodge attacks!'
+                );
+            },
 
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-            @:StateFlags = import(module:'game_class.stateflags.mt');
-            @whiff = false;
-            @:hitrate::(this, attacker) {
-                //if (dexPenalty != empty)
-                //    attacker *= dexPenalty;
+            onAttacked ::(from, item, holder, by, damage) {
+                @:StateFlags = import(module:'game_class.stateflags.mt');
+                @whiff = false;
+                @:hitrate::(this, attacker) {
+                    //if (dexPenalty != empty)
+                    //    attacker *= dexPenalty;
+                        
+                    when (attacker <= 1) 0.45;
+                    @:diff = attacker/this; 
+                    when(diff > 1) 1.0; 
+                    return 1 - 0.45 * ((1-diff)**0.9);
+                }
+                if (Number.random() > hitrate(
+                    this:     holder.stats.DEX,
+                    attacker: by.stats.DEX
+                ))
+                    whiff = true;
+                
+                
+                when(whiff) ::<= {
+                    windowEvent.queueMessage(text:random.pickArrayItem(list:[
+                        holder.name + ' lithely dodges ' + by.name + '\'s attack!',                 
+                        holder.name + ' narrowly dodges ' + by.name + '\'s attack!',                 
+                        holder.name + ' dances around ' + by.name + '\'s attack!',                 
+                        by.name + '\'s attack completely misses ' + holder.name + '!'
+                    ]));
+                    holder.flags.add(flag:StateFlags.DODGED_ATTACK);
+                    damage.amount = 0;
                     
-                when (attacker <= 1) 0.45;
-                @:diff = attacker/this; 
-                when(diff > 1) 1.0; 
-                return 1 - 0.45 * ((1-diff)**0.9);
+                    return EffectStack.CANCEL_PROPOGATION;
+                }        
             }
-            if (Number.random() > hitrate(
-                this:     holder.stats.DEX,
-                attacker: by.stats.DEX
-            ))
-                whiff = true;
-            
-            
-            when(whiff) ::<= {
-                windowEvent.queueMessage(text:random.pickArrayItem(list:[
-                    holder.name + ' lithely dodges ' + by.name + '\'s attack!',                 
-                    holder.name + ' narrowly dodges ' + by.name + '\'s attack!',                 
-                    holder.name + ' dances around ' + by.name + '\'s attack!',                 
-                    by.name + '\'s attack completely misses ' + holder.name + '!'
-                ]));
-                holder.flags.add(flag:StateFlags.DODGED_ATTACK);
-                damage.amount = 0;
-            }        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
         }
     }
 )
@@ -228,40 +167,19 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 1,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: holder.name + ' takes a guarding stance!'
-            );
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            windowEvent.queueMessage(text:holder.name + "'s defending stance reduces damage significantly!");
-            damage.amount *= 0.1;
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: holder.name + ' takes a guarding stance!'
+                );
             
+            },
+            onDamage ::(from, item, holder, attacker, damage) {
+                windowEvent.queueMessage(text:holder.name + "'s defending stance reduces damage significantly!");
+                damage.amount *= 0.1;
+            }
         }
     }
 )
@@ -276,40 +194,17 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-            if (!holder.isIncapacitated() && random.try(percentSuccess:40)) ::<= {
-                windowEvent.queueMessage(text:holder.name + "'s ghostly body bends around the attack!");
-                damage.amount = 0;
-            }        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
+        events : {
+            onAttacked ::(from, item, holder, by, damage) {
+                if (!holder.isIncapacitated() && random.try(percentSuccess:40)) ::<= {
+                    windowEvent.queueMessage(text:holder.name + "'s ghostly body bends around the attack!");
+                    damage.amount = 0;
+                }        
+                return EffectStack.CANCEL_PROPOGATION;
+            }
         }
     }
 )
@@ -325,40 +220,17 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (!holder.isIncapacitated() && random.try(percentSuccess:35)) ::<= {
-                windowEvent.queueMessage(text:holder.name + " ferociously repels the attack!");
-                damage.amount = 0;
+        events : {
+            onDamage ::(from, item, holder, attacker, damage) {
+                when (!holder.isIncapacitated() && random.try(percentSuccess:35)) ::<= {
+                    windowEvent.queueMessage(text:holder.name + " ferociously repels the attack!");
+                    damage.amount = 0;
+                    return EffectStack.CANCEL_PROPOGATION;
+                }
             }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
         }
     }
 )
@@ -373,46 +245,23 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (!holder.isIncapacitated() && random.try(percentSuccess:60)) ::<= {
-                windowEvent.queueMessage(text:
-                    random.pickArrayItem(list: [
-                        holder.name + " predicts and avoids the attack!",
-                        holder.name + " easily avoids the attack!",
-                        holder.name + " seems to have no trouble avoiding the attack!",
-                    ])
-                );
-                damage.amount = 0;
+        events : {
+            onDamage ::(from, item, holder, attacker, damage) {
+                when (!holder.isIncapacitated() && random.try(percentSuccess:60)) ::<= {
+                    windowEvent.queueMessage(text:
+                        random.pickArrayItem(list: [
+                            holder.name + " predicts and avoids the attack!",
+                            holder.name + " easily avoids the attack!",
+                            holder.name + " seems to have no trouble avoiding the attack!",
+                        ])
+                    );
+                    damage.amount = 0;
+                    return EffectStack.CANCEL_PROPOGATION;
+                }
             }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
         }
     }
 )
@@ -429,36 +278,12 @@ Effect.newEntry(
         blockPoints : 1,
         flags : 0,
         stats: StatSet.new(ATK:-50, DEF:200),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: holder.name + ' changes their stance to be defensive!'
-            );
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: holder.name + ' changes their stance to be defensive!'
+                );
+            }
         }
     }
 )        
@@ -475,36 +300,12 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(DEF:-50, ATK:200),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: holder.name + ' changes their stance to be offensive!'
-            );
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: holder.name + ' changes their stance to be offensive!'
+                );
+            }
         }
     }
 ) 
@@ -520,36 +321,12 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(ATK:-50, SPD:100, DEX:100),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: holder.name + ' changes their stance to be light on their feet!'
-            );
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
+        events : { 
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: holder.name + ' changes their stance to be light on their feet!'
+                );
+            }
         }
     }
 ) 
@@ -565,36 +342,12 @@ Effect.newEntry(
         blockPoints : 1,
         flags : 0,
         stats: StatSet.new(SPD:-50, DEF:200),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: holder.name + ' changes their stance to be heavy and sturdy!'
-            );
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: holder.name + ' changes their stance to be heavy and sturdy!'
+                );
+            }
         }
     }
 )         
@@ -611,36 +364,12 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(SPD:-50, INT:200),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: holder.name + ' changes their stance for mental focus!'
-            );
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: holder.name + ' changes their stance for mental focus!'
+                );
+            }
         }
     }
 )         
@@ -657,36 +386,12 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(SPD:-30, DEF:-30, ATK:200, DEX:100),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: holder.name + ' changes their stance for maximum attack!'
-            );
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: holder.name + ' changes their stance for maximum attack!'
+                );
+            }
         }
     }
 ) 
@@ -702,51 +407,30 @@ Effect.newEntry(
         stats: StatSet.new(),
         blockPoints : 0,
         flags : 0,
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: holder.name + ' changes their stance to reflect attacks!'
-            );
-        },
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: holder.name + ' changes their stance to reflect attacks!'
+                );
+            },
 
-        onRemoveEffect ::(user, item, holder) {
-        
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
+            onDamage ::(from, item, holder, attacker, damage) {
+                when (holder == attacker) empty;
+                // handles the DBZ-style case pretty well!
+                @:amount = (damage.amount / 2)->floor;
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            when (holder == from) empty;
-            // handles the DBZ-style case pretty well!
-            @:amount = (damage.amount / 2)->floor;
-
-            when(amount <= 0) empty;
-            windowEvent.queueMessage(
-                text: holder.name + ' retaliates!'
-            );
+                when(amount <= 0) empty;
+                windowEvent.queueMessage(
+                    text: holder.name + ' retaliates!'
+                );
 
 
-            from.damage(from:holder, damage:Damage.new(
-                amount,
-                damageType:Damage.TYPE.PHYS,
-                damageClass:Damage.CLASS.HP
-            ),dodgeable: true);
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
+                attacker.damage(attacker:holder, damage:Damage.new(
+                    amount,
+                    damageType:Damage.TYPE.PHYS,
+                    damageClass:Damage.CLASS.HP
+                ),dodgeable: true);
+            }
         }
     }
 )                 
@@ -760,52 +444,31 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: holder.name + ' is prepared for an attack!'
-            );
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: holder.name + ' is prepared for an attack!'
+                );
+            },
+            onDamage ::(from, item, holder, attacker, damage) {
+                @dmg = damage.amount * 0.75;
+                when (dmg < 1) empty;
+                damage.amount = 0;
+                windowEvent.queueMessage(
+                    text: holder.name + ' counters!'
+                );
 
 
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            @dmg = damage.amount * 0.75;
-            when (dmg < 1) empty;
-            damage.amount = 0;
-            windowEvent.queueMessage(
-                text: holder.name + ' counters!'
-            );
-
-
-            holder.attack(
-                target:from,
-                amount: dmg,
-                damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
-            );                        
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
+                holder.attack(
+                    target:attacker,
+                    amount: dmg,
+                    damageType : Damage.TYPE.PHYS,
+                    damageClass: Damage.CLASS.HP
+                );              
+                return EffectStack.CANCEL_PROPOGATION;  
+            }
         }
     }
 )
@@ -821,44 +484,25 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: holder.name + ' changes their stance to evade attacks!'
-            );
-        },
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: holder.name + ' changes their stance to evade attacks!'
+                );
+            },
 
-        onRemoveEffect ::(user, item, holder) {
-        
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
+            onDamage ::(from, item, holder, attacker, damage) {
+                when (holder == attacker) empty;
+                when(Number.random() > .5) empty;
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
+                windowEvent.queueMessage(
+                    text: holder.name + ' evades!'
+                );
 
+                damage.amount = 0;
+                return EffectStack.CANCEL_PROPOGATION;  
 
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            when (holder == from) empty;
-            when(Number.random() > 5) empty;
-
-            windowEvent.queueMessage(
-                text: holder.name + ' evades!'
-            );
-
-            damage.amount = 0;
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            
+            }
         }
     }
 )               
@@ -872,41 +516,21 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.DEBUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:user.name + " snuck behind " + holder.name + '!');
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            breakpoint();
-            if (from == user) ::<= {
-                windowEvent.queueMessage(text:user.name + "'s sneaking takes " + holder.name + ' by surprise!');
-                damage.amount *= 3;
-            }
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:from.name + " snuck behind " + holder.name + '!');
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            },
+            onDamage ::(from, item, holder, attacker, damage) {
+                breakpoint();
+                if (attacker == from) ::<= {
+                    windowEvent.queueMessage(text:from.name + "'s sneaking takes " + holder.name + ' by surprise!');
+                    damage.amount *= 3;
+                }
+                
+            }
         }
     }
 )
@@ -921,37 +545,18 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             INT: 100
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + ' focuses their mind');
-        },
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + ' focuses their mind');
+            },
 
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s focus returns to normal.');
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s focus returns to normal.');
+            }
         }
     }
 )        
@@ -966,38 +571,19 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEF: 100
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + ' is covered in a shell of light!');
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + ' is covered in a shell of light!');
+            },
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s shell of light fades away.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s shell of light fades away.');
+            }        
+        }       
     }
 )  
 
@@ -1010,40 +596,25 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEF: 10
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:'A shield of light appears before ' + holder.name + '!');
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:'A shield of light appears before ' + holder.name + '!');
+            },
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s shield of light fades away.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-            if (Number.random() < 0.3) ::<= {
-                windowEvent.queueMessage(text:holder.name + '\'s shield of light blocks the attack!');
-                damage.amount = 0;
-            }                
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s shield of light fades away.');
+            },                
+            onAttacked ::(from, item, holder, by, damage) {
+                when (Number.random() < 0.3) ::<= {
+                    windowEvent.queueMessage(text:holder.name + '\'s shield of light blocks the attack!');
+                    damage.amount = 0;
+                    return EffectStack.CANCEL_PROPOGATION;  
+                }                
+            }
         }
     }
 )
@@ -1061,36 +632,14 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-            windowEvent.queueMessage(text:'It casts Protect on ' + holder.name + '!');
-            holder.addEffect(
-                from:user, id: 'base:protect', durationTurns: 3
-            );                        
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                windowEvent.queueMessage(text:'It casts Protect on ' + holder.name + '!');
+                holder.addEffect(
+                    attacker:from, id: 'base:protect', durationTurns: 3
+                );                        
+            }
         }
     }
 ) 
@@ -1107,35 +656,13 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-            holder.addEffect(
-                from:user, id: 'base:evade', durationTurns: 1
-            );                        
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                holder.addEffect(
+                    attacker:from, id: 'base:evade', durationTurns: 1
+                );                        
+            }
         }
     }
 ) 
@@ -1149,36 +676,18 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + ' is covered in a mysterious wind!');
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-            windowEvent.queueMessage(text:holder.name + '\'s mysterious wind caused the attack to miss!');
-            damage.amount = 0;
-        },
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + ' is covered in a mysterious wind!');
+            },
+            onAttacked ::(from, item, holder, by, damage) {
+                windowEvent.queueMessage(text:holder.name + '\'s mysterious wind caused the attack to miss!');
+                damage.amount = 0;
+                return EffectStack.CANCEL_PROPOGATION;  
+            }
         }
     }
 ) 
@@ -1196,36 +705,14 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            when(holder.hp == 0) empty;
-            windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-            holder.heal(
-                amount: holder.stats.HP * 0.05
-            );                        
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                when(holder.hp == 0) empty;
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                holder.heal(
+                    amount: holder.stats.HP * 0.05
+                );                        
+            }
         }
     }
 ) 
@@ -1242,43 +729,21 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            if (random.try(percentSuccess:10)) ::<= {
-                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-                holder.damage(
-                    from:holder,
-                    damage: Damage.new(
-                        amount: 1,
-                        damageType: Damage.TYPE.NEUTRAL,
-                        damageClass: Damage.CLASS.HP
-                    ),
-                    dodgeable: false
-                );                        
+        events : {
+            onAffliction ::(from, item, holder) {
+                if (random.try(percentSuccess:10)) ::<= {
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                    holder.damage(
+                        from:holder,
+                        damage: Damage.new(
+                            amount: 1,
+                            damageType: Damage.TYPE.NEUTRAL,
+                            damageClass: Damage.CLASS.HP
+                        ),
+                        dodgeable: false
+                    );                        
+                }
             }
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 ) 
@@ -1295,43 +760,21 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            if (random.try(percentSuccess:10)) ::<= {
-                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-                holder.damage(
-                    from:holder,
-                    damage: Damage.new(
-                        amount: 1,
-                        damageType: Damage.TYPE.NEUTRAL,
-                        damageClass: Damage.CLASS.AP
-                    ),
-                    dodgeable: false
-                );                        
+        events : {
+            onAffliction ::(from, item, holder) {
+                if (random.try(percentSuccess:10)) ::<= {
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                    holder.damage(
+                        from:holder,
+                        damage: Damage.new(
+                            amount: 1,
+                            damageType: Damage.TYPE.NEUTRAL,
+                            damageClass: Damage.CLASS.AP
+                        ),
+                        dodgeable: false
+                    );                        
+                }
             }
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 ) 
@@ -1348,36 +791,14 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            if (random.try(percentSuccess:5)) ::<= {
-                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-                holder.unequipItem(item, silent: true);
-                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' disintegrates.');                
+        events : {
+            onAffliction ::(from, item, holder) {
+                if (random.try(percentSuccess:5)) ::<= {
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                    holder.unequipItem(item, silent: true);
+                    windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' disintegrates.');                
+                }
             }
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 ) 
@@ -1394,36 +815,14 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-            windowEvent.queueMessage(text:'It covers ' + holder.name + ' in spikes of light!');
-            holder.addEffect(
-                from:user, id: 'base:spikes', durationTurns: 3
-            );                        
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                windowEvent.queueMessage(text:'It covers ' + holder.name + ' in spikes of light!');
+                holder.addEffect(
+                    from:from, id: 'base:spikes', durationTurns: 3
+                );                        
+            }
         }
     }
 ) 
@@ -1437,42 +836,26 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEF: 10
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + ' is covered in spikes of light.');
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + ' is covered in spikes of light.');
+            },
+            onAttacked ::(from, item, holder, by, damage) {
+                windowEvent.queueMessage(text:by.name + ' gets hurt by ' + holder.name + '\'s spikes of light!');
+                by.damage(attacker:holder, damage:Damage.new(
+                    amount:random.integer(from:1, to:4),
+                    damageType:Damage.TYPE.LIGHT,
+                    damageClass:Damage.CLASS.HP
+                ),dodgeable: false);
+            },
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-            windowEvent.queueMessage(text:by.name + ' gets hurt by ' + holder.name + '\'s spikes of light!');
-            by.damage(from:holder, damage:Damage.new(
-                amount:random.integer(from:1, to:4),
-                damageType:Damage.TYPE.LIGHT,
-                damageClass:Damage.CLASS.HP
-            ),dodgeable: false);
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s spikes of light fade.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s spikes of light fade.');
+            }
         }
     }
 ) 
@@ -1491,35 +874,13 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-            holder.healAP(
-                amount: holder.stats.AP * 0.05
-            );                        
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                holder.healAP(
+                    amount: holder.stats.AP * 0.05
+                );                        
+            }
         }
     }
 ) 
@@ -1536,36 +897,14 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-            windowEvent.queueMessage(text:'It casts Shield on ' + holder.name + '!');
-            holder.addEffect(
-                from:user, id: 'base:shield', durationTurns: 3
-            );                        
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                windowEvent.queueMessage(text:'It casts Shield on ' + holder.name + '!');
+                holder.addEffect(
+                    from:from, id: 'base:shield', durationTurns: 3
+                );                        
+            }
         }
     }
 )         
@@ -1583,35 +922,13 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-            holder.addEffect(
-                from:user, id: 'base:strength-boost', durationTurns: 3
-            );                        
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                holder.addEffect(
+                    from:from, id: 'base:strength-boost', durationTurns: 3
+                );                        
+            }
         }
     }
 )   
@@ -1625,37 +942,17 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             ATK:70
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s power is increased!');
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s power boost fades!');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s power is increased!');
+            },
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s power boost fades!');
+            }
         }
     }
 )  
@@ -1672,35 +969,13 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-            holder.addEffect(
-                from:user, id: 'base:defense-boost', durationTurns: 3
-            );                        
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                holder.addEffect(
+                    from:from, id: 'base:defense-boost', durationTurns: 3
+                );                        
+            }
         }
     }
 )   
@@ -1714,37 +989,17 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEF:70
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s defense is increased!');
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s defense boost fades!');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s defense is increased!');
+            },
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s defense boost fades!');
+            }
         }
     }
 )  
@@ -1761,35 +1016,13 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-            holder.addEffect(
-                from:user, id: 'base:mind-boost', durationTurns: 3
-            );                        
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                holder.addEffect(
+                    from:from, id: 'base:mind-boost', durationTurns: 3
+                );                        
+            }
         }
     }
 )   
@@ -1803,37 +1036,17 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             INT:70
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s mental acuity is increased!');
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s intelligence boost fades!');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s mental acuity is increased!');
+            },
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s intelligence boost fades!');
+            }
         }
     }
 )  
@@ -1850,35 +1063,13 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-            holder.addEffect(
-                from:user, id: 'base:dex-boost', durationTurns: 3
-            );                        
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                holder.addEffect(
+                    from:from, id: 'base:dex-boost', durationTurns: 3
+                );                        
+            }
         }
     }
 )   
@@ -1892,37 +1083,17 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEX:70
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s dexterity is increased!');
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s dexterity boost fades!');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s dexterity is increased!');
+            },
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s dexterity boost fades!');
+            }
         }
     }
 )  
@@ -1939,35 +1110,13 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
-            holder.addEffect(
-                from:user, id: 'base:speed-boost', durationTurns: 3
-            );                        
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        onRemoveEffect ::(user, item, holder) {
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+                holder.addEffect(
+                    from:from, id: 'base:speed-boost', durationTurns: 3
+                );                        
+            }
         }
     }
 )   
@@ -1981,37 +1130,17 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             SPD:70
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s speed is increased!');
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s speed boost fades!');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s speed is increased!');
+            },
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s speed boost fades!');
+            }
         }
     }
 )  
@@ -2023,42 +1152,20 @@ Effect.newEntry(
     data : {
         name : 'Night Veil',
         id : 'base:night-veil',
-        description: 'DEF +40%',
+        description: 'DEF +50%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEF: 50
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s Night Veil fades away.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
+        events : {
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s Night Veil fades away.');
+            }        
+        }        
     }
 )  
 
@@ -2066,42 +1173,20 @@ Effect.newEntry(
     data : {
         name : 'Dayshroud',
         id : 'base:dayshroud',
-        description: 'DEF +40%',
+        description: 'DEF +50%',
         battleOnly : true,
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEF: 50
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s Dayshroud fades away.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
+        events : {
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s Dayshroud fades away.');
+            }
+        }        
     }
 )  
 
@@ -2114,37 +1199,15 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             ATK: 40
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s Call of the Night fades away.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
+        events : {
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s Call of the Night fades away.');
+            }        
+        }        
     }
 )  
 
@@ -2158,45 +1221,25 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEF: 70,
             ATK: 70
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s Lunacy fades away.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            windowEvent.queueMessage(text:holder.name + ' attacks in a blind rage!');
-            holder.attack(
-                target:random.pickArrayItem(list:holder.enemies),
-                amount:holder.stats.ATK * (0.5),
-                damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
-            );                   
-        
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s Lunacy fades away.');
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                windowEvent.queueMessage(text:holder.name + ' attacks in a blind rage!');
+                holder.attack(
+                    target:random.pickArrayItem(list:holder.enemies),
+                    amount:holder.stats.ATK * (0.5),
+                    damageType : Damage.TYPE.PHYS,
+                    damageClass: Damage.CLASS.HP
+                );                   
+            }
         }
     }
 )
@@ -2211,37 +1254,15 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             ATK: 100
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s Call of the Night fades away.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
+        events : {
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s Call of the Night fades away.');
+            }
+        }        
     }
 )  
 
@@ -2254,36 +1275,14 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEF: 100
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s Night Veil fades away.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s Night Veil fades away.');
+            }                
         }
     }
 )  
@@ -2298,37 +1297,16 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEF: 100
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s Dayshroud fades away.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
+        events : {
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s Dayshroud fades away.');
+            }
+        }        
     }
 )  
 
@@ -2341,36 +1319,18 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s Moonsong fades.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            when(holder.hp == 0) empty;
-            holder.heal(amount:holder.stats.HP * 0.05);
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s Moonsong fades.');
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                when(holder.hp == 0) empty;
+                holder.heal(amount:holder.stats.HP * 0.05);
+            }
         }
     }
 )  
@@ -2384,36 +1344,18 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s Sol Attunement fades.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            when(holder.hp == 0) empty;
-            holder.heal(amount:holder.stats.HP * 0.05);
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s Sol Attunement fades.');
+            },                
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                when(holder.hp == 0) empty;
+                holder.heal(amount:holder.stats.HP * 0.05);
+            }
         }
     }
 )          
@@ -2427,36 +1369,18 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s Moonsong fades.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            when(holder.hp == 0) empty;
-            holder.heal(amount:holder.stats.HP * 0.15);
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s Moonsong fades.');
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                when(holder.hp == 0) empty;
+                holder.heal(amount:holder.stats.HP * 0.15);
+            }
         }
     }
 )       
@@ -2470,36 +1394,19 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s Sol Attunement fades.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            when(holder.hp == 0) empty;
-            holder.heal(amount:holder.stats.HP * 0.15);
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s Sol Attunement fades.');
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                when(holder.hp == 0) empty;
+                holder.heal(amount:holder.stats.HP * 0.15);
+            }
         }
     }
 )          
@@ -2513,46 +1420,29 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:'A halo appears above ' + holder.name + '!');
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:'A halo appears above ' + holder.name + '!');
+            },
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + '\'s halo disappears.');
-        },                
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (holder.hp == 0) ::<= {
-                damage.amount = 0;
-                windowEvent.queueMessage(text:holder.name + ' is protected from death!');
-                holder.removeEffects(
-                    effectBases : [
-                        Effect.find(id:'base:grace')
-                    ]
-                );
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + '\'s halo disappears.');
+            },                
+            onDamage ::(from, item, holder, attacker, damage) {
+                if (holder.hp == 0) ::<= {
+                    damage.amount = 0;
+                    windowEvent.queueMessage(text:holder.name + ' is protected from death!');
+                    holder.removeEffects(
+                        effectBases : [
+                            Effect.find(id:'base:grace')
+                        ]
+                    );
+                }
+                   
             }
-               
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )     
@@ -2569,35 +1459,13 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: "The " + item.name + ' is consumed.'
-            );
-            item.throwOut();                
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: "The " + item.name + ' is consumed.'
+                );
+                item.throwOut();                
+            }
         }
     }
 )
@@ -2613,37 +1481,15 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            if (Number.random() > 0.5) ::<= {
-                windowEvent.queueMessage(
-                    text: "The " + item.name + ' broke.'
-                );
-                item.throwOut();                
+        events : {
+            onAffliction ::(from, item, holder) {
+                if (Number.random() > 0.5) ::<= {
+                    windowEvent.queueMessage(
+                        text: "The " + item.name + ' broke.'
+                    );
+                    item.throwOut();                
+                }
             }
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )        
@@ -2659,57 +1505,35 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: user.name + ' flung the ' + item.name + ' at ' + holder.name + '!'
-            );
-            
-            windowEvent.queueCustom(
-                onEnter::{
-                    if (Number.random() > 0.8) ::<= {
-                        holder.inventory.add(item);
-                        windowEvent.queueMessage(
-                            text: holder.name + ' caught the flung ' + item.name + '!!'
-                        );
-                    } else ::<= {
-                        holder.damage(
-                            from: user,
-                            damage: Damage.new(
-                                amount:user.stats.ATK*(item.base.weight * 0.1),
-                                damageType : Damage.TYPE.NEUTRAL,
-                                damageClass: Damage.CLASS.HP
-                            ),
-                            dodgeable: true                                    
-                        );
-                    }                        
-                }
-            );
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: from.name + ' flung the ' + item.name + ' at ' + holder.name + '!'
+                );
+                
+                windowEvent.queueCustom(
+                    onEnter::{
+                        if (Number.random() > 0.8) ::<= {
+                            holder.inventory.add(item);
+                            windowEvent.queueMessage(
+                                text: holder.name + ' caught the flung ' + item.name + '!!'
+                            );
+                        } else ::<= {
+                            holder.damage(
+                                attacker: from,
+                                damage: Damage.new(
+                                    amount:from.stats.ATK*(item.base.weight * 0.1),
+                                    damageType : Damage.TYPE.NEUTRAL,
+                                    damageClass: Damage.CLASS.HP
+                                ),
+                                dodgeable: true                                    
+                            );
+                        }                        
+                    }
+                );
 
-            item.throwOut();
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+                item.throwOut();
+            }
         }
     }
 )    
@@ -2725,34 +1549,12 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            holder.heal(amount:holder.stats.HP);
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                holder.heal(amount:holder.stats.HP);
+            }
         }
     }
 )
@@ -2766,34 +1568,12 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            holder.healAP(amount:holder.stats.AP);
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                holder.healAP(amount:holder.stats.AP);
+            }
         }
     }
 )
@@ -2809,38 +1589,16 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            @:world = import(module:'game_singleton.world.mt');
-            @:amount = (50 + Number.random()*400)->floor;                    
-            windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
-            world.party.addGoldAnimated(
-                amount:amount,
-                onDone::{}
-            );
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                @:world = import(module:'game_singleton.world.mt');
+                @:amount = (50 + Number.random()*400)->floor;                    
+                windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
+                world.party.addGoldAnimated(
+                    amount:amount,
+                    onDone::{}
+                );
+            }
         }
     }
 )        
@@ -2856,47 +1614,28 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            @:world = import(module:'game_singleton.world.mt');
+        events : {
+            onAffliction ::(from, item, holder) {
+            },
             
-            
-            when(Number.random() > 0.7) empty;
-            when(user.isIncapacitated()) empty;
-            when(!world.party.isMember(entity:holder)) empty;
+            onRemoveEffect ::(from, item, holder) {
+                @:world = import(module:'game_singleton.world.mt');
+                
+                
+                when(Number.random() > 0.7) empty;
+                when(from.isIncapacitated()) empty;
+                when(!world.party.isMember(entity:holder)) empty;
 
 
-            windowEvent.queueMessage(
-                text: '' + holder.name + ' found some food and cooked a meal for the party.'
-            );
-            foreach(world.party.members)::(index, member) {
-                member.heal(amount:member.stats.HP * 0.1);
-                member.healAP(amount:member.stats.AP * 0.1);
+                windowEvent.queueMessage(
+                    text: '' + holder.name + ' found some food and cooked a meal for the party.'
+                );
+                foreach(world.party.members)::(index, member) {
+                    member.heal(amount:member.stats.HP * 0.1);
+                    member.healAP(amount:member.stats.AP * 0.1);
+                }
+                
             }
-            
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )
@@ -2912,45 +1651,23 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            @:world = import(module:'game_singleton.world.mt');
-            
-            
-            when(Number.random() > 0.7) empty;
-            when(user.isIncapacitated()) empty;
-            when(!world.party.isMember(entity:holder)) empty;
+        events : {            
+            onRemoveEffect ::(from, item, holder) {
+                @:world = import(module:'game_singleton.world.mt');
+                
+                
+                when(Number.random() > 0.7) empty;
+                when(from.isIncapacitated()) empty;
+                when(!world.party.isMember(entity:holder)) empty;
 
 
-            @:amt = (Number.random() * 20)->ceil;
-            windowEvent.queueMessage(
-                text: '' + holder.name + ' happened to notice an additional ' + g(g:amt) + ' dropped on the ground.'
-            );
-            world.party.inventory.addGold(amount:amt);
-            
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+                @:amt = (Number.random() * 20)->ceil;
+                windowEvent.queueMessage(
+                    text: '' + holder.name + ' happened to notice an additional ' + g(g:amt) + ' dropped on the ground.'
+                );
+                world.party.inventory.addGold(amount:amt);
+                
+            }
         }
     }
 )
@@ -2967,51 +1684,29 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            @:world = import(module:'game_singleton.world.mt');
-            @:Item  = import(module:'game_mutator.item.mt');
-            
-            when(user.isIncapacitated()) empty;
-            when(!world.party.isMember(entity:holder)) empty;
-                                
-            when(Number.random() < 0.5) empty;                    
+        events : {
+            onRemoveEffect ::(from, item, holder) {
+                @:world = import(module:'game_singleton.world.mt');
+                @:Item  = import(module:'game_mutator.item.mt');
+                
+                when(from.isIncapacitated()) empty;
+                when(!world.party.isMember(entity:holder)) empty;
+                                    
+                when(Number.random() < 0.5) empty;                    
 
-            @:amt = 1;
-            windowEvent.queueMessage(
-                text: holder.name + ' scavenged for ingredients...'
-            );
-            windowEvent.queueMessage(
-                text: holder.name + ' found ' + amt + ' ingredient(s).'
-            );
+                @:amt = 1;
+                windowEvent.queueMessage(
+                    text: holder.name + ' scavenged for ingredients...'
+                );
+                windowEvent.queueMessage(
+                    text: holder.name + ' found ' + amt + ' ingredient(s).'
+                );
 
-            for(0, amt)::(i) {                    
-                world.party.inventory.add(item:Item.new(base:Item.database.find(id:'base:ingredient')));
+                for(0, amt)::(i) {                    
+                    world.party.inventory.add(item:Item.new(base:Item.database.find(id:'base:ingredient')));
+                }
+                
             }
-            
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )
@@ -3026,36 +1721,14 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(ATK:30),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(
-                text: user.name + ' readies their trained hands!'
-            );
-        },
-        
-        onRemoveEffect ::(user, item, holder) {                    
-        },                
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: holder.name + ' readies their trained hands!'
+                );
+            }
         }
     }
 )
@@ -3071,32 +1744,9 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(ATK:30),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {                    
-        },                
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
+        events : {
         
         }
     }
@@ -3111,34 +1761,9 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(ATK:70),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {                    
-        },                
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
+        events : {}
     }
 )           
 
@@ -3153,32 +1778,15 @@ Effect.newEntry(
         stats: StatSet.new(SPD:-10),
         blockPoints : 0,
         flags : FLAGS.AILMENT,
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {                    
-            holder.addEffect(from:holder, id:'base:poisonroot', durationTurns:30);                            
-        },                
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            windowEvent.queueMessage(text: 'The poisonroot continues to grow on ' + holder.name);        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            
+            onRemoveEffect ::(from, item, holder) {                    
+                holder.addEffect(from:holder, id:'base:poisonroot', durationTurns:30);                            
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                windowEvent.queueMessage(text: 'The poisonroot continues to grow on ' + holder.name);        
+            }
         }
     }
 )
@@ -3194,38 +1802,21 @@ Effect.newEntry(
         stackable: true,
         stats: StatSet.new(SPD:-10),
         blockPoints : 0,
-        flags : FLAGS.AILMENT,
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {     
-            windowEvent.queueMessage(text:'The poisonroot vines dissipate from ' + holder.name + '.'); 
-        },                
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
+        flags : FLAGS.DEBUFF,
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            windowEvent.queueMessage(text:user.name + ' is strangled by the poisonroot!');                    
-            holder.damage(from:user, damage: Damage.new(
-                amount: random.integer(from:1, to:4),
-                damageType: Damage.TYPE.POISON,
-                damageClass: Damage.CLASS.HP
-            ),dodgeable: false);                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {        
+            onRemoveEffect ::(from, item, holder) {     
+                windowEvent.queueMessage(text:'The poisonroot vines dissipate from ' + holder.name + '.'); 
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                windowEvent.queueMessage(text:from.name + ' is strangled by the poisonroot!');                    
+                holder.damage(attacker:from, damage: Damage.new(
+                    amount: random.integer(from:1, to:4),
+                    damageType: Damage.TYPE.POISON,
+                    damageClass: Damage.CLASS.HP
+                ),dodgeable: false);                
+            }
         }
     }
 )
@@ -3239,35 +1830,17 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : FLAGS.AILMENT,
+        flags : FLAGS.DEBUFF,
         stats: StatSet.new(SPD:-10),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {                    
-            holder.addEffect(from:holder, id:'base:triproot', durationTurns:30);                            
-        },                
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            windowEvent.queueMessage(text: 'The triproot continues to grow on ' + holder.name);        
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onRemoveEffect ::(from, item, holder) {                    
+                holder.addEffect(from:holder, id:'base:triproot', durationTurns:30);                            
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                windowEvent.queueMessage(text: 'The triproot continues to grow on ' + holder.name);        
+            
+            }
         }
     }
 )
@@ -3282,37 +1855,19 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : FLAGS.AILMENT,
+        flags : FLAGS.DEBUFF,
         stats: StatSet.new(SPD:-10),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {                    
-            windowEvent.queueMessage(text:'The triproot vines dissipate from ' + holder.name + '.'); 
-        },                
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            if (Number.random() < 0.4) ::<= {
-                windowEvent.queueMessage(text:'The triproot trips ' + holder.name + '!');
-                holder.addEffect(from:holder, id:'base:stunned', durationTurns:1);                                                
+        events : {        
+            onRemoveEffect ::(from, item, holder) {                    
+                windowEvent.queueMessage(text:'The triproot vines dissipate from ' + holder.name + '.'); 
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                if (Number.random() < 0.4) ::<= {
+                    windowEvent.queueMessage(text:'The triproot trips ' + holder.name + '!');
+                    holder.addEffect(from:holder, id:'base:stunned', durationTurns:1);                                                
+                }
             }
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )
@@ -3329,33 +1884,15 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(SPD:-10),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {                    
-            holder.addEffect(from:holder, id:'base:healroot', durationTurns:30);                            
-        },                
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            windowEvent.queueMessage(text: 'The healroot continues to grow on ' + holder.name);        
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {        
+            onRemoveEffect ::(from, item, holder) {                    
+                holder.addEffect(from:holder, id:'base:healroot', durationTurns:30);                            
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                windowEvent.queueMessage(text: 'The healroot continues to grow on ' + holder.name);        
+            
+            }
         }
     }
 )
@@ -3370,36 +1907,18 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(SPD:-10),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {                    
-            windowEvent.queueMessage(text:'The healroot vines dissipate from ' + holder.name + '.'); 
-        },                
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            when(holder.hp == 0) empty;
-            windowEvent.queueMessage(text:'The healroot soothe\'s ' + holder.name + '.');
-            holder.heal(amount:holder.stats.HP * 0.05);
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {        
+            onRemoveEffect ::(from, item, holder) {                    
+                windowEvent.queueMessage(text:'The healroot vines dissipate from ' + holder.name + '.'); 
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                when(holder.hp == 0) empty;
+                windowEvent.queueMessage(text:'The healroot soothe\'s ' + holder.name + '.');
+                holder.heal(amount:holder.stats.HP * 0.05);
+            }
         }
     }
 )
@@ -3415,55 +1934,35 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEF: 100
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:user.name + ' resumes a normal stance!');
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
+        events : {
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:from.name + ' resumes a normal stance!');
+            },                
+            onDamage ::(from, item, holder, attacker, damage) {
+                @:amount = damage.amount;
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            @:amount = damage.amount;
+                when(from == holder) ::<= {
+                    windowEvent.queueMessage(text:from.name + ' braces for damage!');            
+                }
 
-            when(user == holder) ::<= {
-                windowEvent.queueMessage(text:user.name + ' braces for damage!');            
+                damage.amount = 0;
+                windowEvent.queueMessage(text:from.name + ' leaps in front of ' + holder.name + ', taking damage in their stead!');
+
+                from.damage(
+                    attacker,
+                    damage: Damage.new(
+                        amount,
+                        damageType : Damage.TYPE.NEUTRAL,
+                        damageClass: Damage.CLASS.HP
+                    ),dodgeable: false
+                );                    
+                
+
             }
-
-            damage.amount = 0;
-            windowEvent.queueMessage(text:user.name + ' leaps in front of ' + holder.name + ', taking damage in their stead!');
-
-            user.damage(
-                from,
-                damage: Damage.new(
-                    amount,
-                    damageType : Damage.TYPE.NEUTRAL,
-                    damageClass: Damage.CLASS.HP
-                ),dodgeable: false
-            );                    
-            
-
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )
@@ -3477,38 +1976,19 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + ' is strongly guarding themself');
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (from != holder) ::<= {
-                windowEvent.queueMessage(text:holder.name + ' is protected from the damage!');
-                damage.amount = 0;                        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + ' is strongly guarding themself');
+            },
+            
+            onDamage ::(from, item, holder, attacker, damage) {
+                if (attacker != holder) ::<= {
+                    windowEvent.queueMessage(text:holder.name + ' is protected from the damage!');
+                    damage.amount = 0;                        
+                }
             }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )
@@ -3524,34 +2004,13 @@ Effect.newEntry(
         stats: StatSet.new(),
         blockPoints : 0,
         flags : 0,
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-            if (turnIndex >= turnCount)
-                windowEvent.queueMessage(text:holder.name + ' realizes ' + user.name + "'s argument was complete junk!")
-            else                    
-                windowEvent.queueMessage(text:holder.name + ' thinks about ' + user.name + "'s argument!");
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
+                if (turnIndex >= turnCount)
+                    windowEvent.queueMessage(text:holder.name + ' realizes ' + from.name + "'s argument was complete junk!")
+                else                    
+                    windowEvent.queueMessage(text:holder.name + ' thinks about ' + from.name + "'s argument!");
+            }
         }
     }
 )
@@ -3566,35 +2025,14 @@ Effect.newEntry(
         stackable: false,
         blockPoints : -3,
         stats: StatSet.new(),
-        flags : 0,
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-            if (turnIndex >= turnCount)
-                windowEvent.queueMessage(text:holder.name + ' broke free from the grapple!')
-            else                    
-                windowEvent.queueMessage(text:holder.name + ' is being grappled and is unable to move!');
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        flags : FLAGS.DEBUFF,
+        events : {
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
+                if (turnIndex >= turnCount)
+                    windowEvent.queueMessage(text:holder.name + ' broke free from the grapple!')
+                else                    
+                    windowEvent.queueMessage(text:holder.name + ' is being grappled and is unable to move!');
+            }
         }
     }
 )   
@@ -3608,36 +2046,15 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : -3,
-        flags : 0,
+        flags : FLAGS.DEBUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-            if (turnIndex >= turnCount)
-                windowEvent.queueMessage(text:holder.name + ' broke free from the snare!')
-            else                    
-                windowEvent.queueMessage(text:holder.name + ' is ensnared and is unable to move!');
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
+                if (turnIndex >= turnCount)
+                    windowEvent.queueMessage(text:holder.name + ' broke free from the snare!')
+                else                    
+                    windowEvent.queueMessage(text:holder.name + ' is ensnared and is unable to move!');
+            }
         }
     }
 )  
@@ -3653,31 +2070,10 @@ Effect.newEntry(
         blockPoints : -3,
         flags : 0,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-            windowEvent.queueMessage(text:holder.name + ' is in the middle of grappling and cannot move!');
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
+                windowEvent.queueMessage(text:holder.name + ' is in the middle of grappling and cannot move!');
+            }
         }
     }
 )
@@ -3693,31 +2089,10 @@ Effect.newEntry(
         blockPoints : -3,
         flags : 0,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-            windowEvent.queueMessage(text:holder.name + ' is busy keeping someone ensared and cannot move!');
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
+                windowEvent.queueMessage(text:holder.name + ' is busy keeping someone ensared and cannot move!');
+            }
         }
     }
 )                        
@@ -3735,33 +2110,7 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
+        events : {}
     }
 )
 Effect.newEntry(
@@ -3773,34 +2122,16 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : -3,
-        flags : FLAGS.AILMENT,
+        flags : FLAGS.DEBUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + ' was stunned!');
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + ' came to their senses!');
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + ' was stunned!');
+            },
+            
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + ' came to their senses!');
+            }
         }
     }
 )
@@ -3814,34 +2145,11 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             ATK: 20
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
         }
     }
 )
@@ -3855,35 +2163,11 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.DEBUFF,
         stats: StatSet.new(
             DEF: -20
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
+        events : {}
     }
 )        
 
@@ -3896,35 +2180,11 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.DEBUFF,
         stats: StatSet.new(
             ATK: -20
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
+        events : {}
     }
 )
 
@@ -3937,35 +2197,11 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEF: 20
         ),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
-        }
+        events : {}
     }
 )  
 
@@ -3979,43 +2215,25 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             
         ),
-        onAffliction ::(user, item, holder) {
-            @:world = import(module:'game_singleton.world.mt');
+        events : {
+            onAffliction ::(from, item, holder) {
+                @:world = import(module:'game_singleton.world.mt');
 
-            if (world.time > world.TIME.EVENING) ::<= {
-                windowEvent.queueMessage(text:'The moon shimmers... ' + holder.name +' softly glows');                    
+                if (world.time > world.TIME.EVENING) ::<= {
+                    windowEvent.queueMessage(text:'The moon shimmers... ' + holder.name +' softly glows');                    
+                }
+            },
+            onStatRecalculate ::(from, item, holder, stats) {
+                @:world = import(module:'game_singleton.world.mt');
+
+                if (world.time > world.TIME.EVENING) ::<= {
+                    stats.modRate(stats:StatSet.new(INT:40, DEF:40, ATK:40));
+                }                    
             }
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            @:world = import(module:'game_singleton.world.mt');
-
-            if (world.time > world.TIME.EVENING) ::<= {
-                stats.modRate(stats:StatSet.new(INT:40, DEF:40, ATK:40));
-            }                    
         }
     }
 )
@@ -4029,37 +2247,16 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             ATK:35,
             DEF:35,
             SPD:35
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name +' is ready to coordinate!');                    
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name +' is ready to coordinate!');                    
+            }
         }
     }
 )
@@ -4072,36 +2269,22 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name +' braces for incoming damage!');                    
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name +' braces for incoming damage!');                    
+            },
+            
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + ' no longer braces for damage.');
+            },                
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + ' no longer braces for damage.');
-        },                
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            stats.modRate(stats:StatSet.new(DEF:50));
+            onStatRecalculate ::(from, item, holder, stats) {
+                stats.modRate(stats:StatSet.new(DEF:50));
+            }
         }
     }
 )
@@ -4116,43 +2299,26 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             
         ),
-        onAffliction ::(user, item, holder) {
-            @:world = import(module:'game_singleton.world.mt');
+        events : {
+            onAffliction ::(from, item, holder) {
+                @:world = import(module:'game_singleton.world.mt');
 
-            if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
-                windowEvent.queueMessage(text:'The sun intensifies... ' + holder.name +' softly glows');                    
+                if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
+                    windowEvent.queueMessage(text:'The sun intensifies... ' + holder.name +' softly glows');                    
+                }
+            },
+
+            onStatRecalculate ::(from, item, holder, stats) {
+                @:world = import(module:'game_singleton.world.mt');
+
+                if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
+                    stats.modRate(stats:StatSet.new(INT:40, DEF:40, ATK:40));
+                }                    
             }
-        },
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-            @:world = import(module:'game_singleton.world.mt');
-
-            if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
-                stats.modRate(stats:StatSet.new(INT:40, DEF:40, ATK:40));
-            }                    
         }
     }
 )
@@ -4169,39 +2335,19 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
+        events : {
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (Number.random() > 0.8 && damage.damageType == Damage.TYPE.PHYS) ::<= {
-                @:Entity = import(module:'game_class.entity.mt');
-            
-                windowEvent.queueMessage(text:holder.name + " parries the blow, but their non-combat weapon breaks in the process!");
-                damage.amount = 0;
-                @:item = holder.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
-                holder.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
-                item.throwOut();                      
+            onDamage ::(from, item, holder, attacker, damage) {
+                if (Number.random() > 0.8 && damage.damageType == Damage.TYPE.PHYS) ::<= {
+                    @:Entity = import(module:'game_class.entity.mt');
+                
+                    windowEvent.queueMessage(text:holder.name + " parries the blow, but their non-combat weapon breaks in the process!");
+                    damage.amount = 0;
+                    @:item = holder.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
+                    holder.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+                    item.throwOut();                      
+                }
             }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )   
@@ -4216,52 +2362,30 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            breakpoint();
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (holder.hp == 0) ::<= {
-                windowEvent.queueMessage(text:holder.name + " glows!");
-                holder.unequipItem(item, silent:true);
-                item.throwOut();                      
+        events : {
+            onDamage ::(from, item, holder, attacker, damage) {
+                if (holder.hp == 0) ::<= {
+                    windowEvent.queueMessage(text:holder.name + " glows!");
+                    holder.unequipItem(item, silent:true);
+                    item.throwOut();                      
 
 
-                if (random.try(percentSuccess:50)) ::<= {
+                    if (random.try(percentSuccess:50)) ::<= {
 
-                    @:Entity = import(module:'game_class.entity.mt');
-                
-                    damage.amount = 0;
-                    holder.heal(amount:holder.stats.HP);
-
-                    windowEvent.queueMessage(text:'The ' + item.name + " shatters after reviving " + holder.name + "!");
-                } else ::<= {
-                    windowEvent.queueMessage(text:'The ' + item.name + " failed to revive " + holder.name + "!");
+                        @:Entity = import(module:'game_class.entity.mt');
                     
+                        damage.amount = 0;
+                        holder.heal(amount:holder.stats.HP);
+
+                        windowEvent.queueMessage(text:'The ' + item.name + " shatters after reviving " + holder.name + "!");
+                    } else ::<= {
+                        windowEvent.queueMessage(text:'The ' + item.name + " failed to revive " + holder.name + "!");
+                        
+                    }
                 }
             }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )   
@@ -4276,37 +2400,17 @@ Effect.newEntry(
         skipTurn : false,
         stackable: false,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (from != holder) ::<= {
-                @:Entity = import(module:'game_class.entity.mt');                    
-                windowEvent.queueMessage(text:holder.name + " dodges the damage from Flight!");
-                damage.amount = 0;
+        events : {
+            onDamage ::(from, item, holder, attacker, damage) {
+                if (attacker != holder) ::<= {
+                    @:Entity = import(module:'game_class.entity.mt');                    
+                    windowEvent.queueMessage(text:holder.name + " dodges the damage from Flight!");
+                    damage.amount = 0;
+                    return EffectStack.CANCEL_PROPOGATION
+                }
             }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )        
@@ -4320,39 +2424,15 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        
-        onPostAttackOther ::(user, item, holder, to) {
-            if (to.isIncapacitated()) ::<= {
-                windowEvent.queueMessage(text:holder.name + "'s ending blow to " + to.name + " increases "+ holder.name + "'s abilities due to their Assassin's Pride.");                        
-                user.addEffect(from:holder, id: 'base:pride', durationTurns: 10);                        
+        events : {
+            onPostAttackOther ::(from, item, holder, to) {
+                if (to.isIncapacitated()) ::<= {
+                    windowEvent.queueMessage(text:holder.name + "'s ending blow to " + to.name + " increases "+ holder.name + "'s abilities due to their Assassin's Pride.");                        
+                    from.addEffect(from:holder, id: 'base:pride', durationTurns: 10);                        
+                }
             }
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )        
@@ -4365,39 +2445,15 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             ATK:25,
             SPD:25
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " is feeling prideful.");
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " is feeling prideful.");
+            }
         }
     }
 )        
@@ -4411,36 +2467,15 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.DEBUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (user == from) ::<= {
-                windowEvent.queueMessage(text: user.name + '\'s duel challenge focuses damage!');
-                damage.amount *= 2.25;
+        events : {
+            onDamage ::(from, item, holder, attacker, damage) {
+                if (from == attacker) ::<= {
+                    windowEvent.queueMessage(text: from.name + '\'s duel challenge focuses damage!');
+                    damage.amount *= 2.25;
+                }
             }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {                
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )  
@@ -4455,41 +2490,19 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            if (Number.random() > 0.7) ::<={
-                windowEvent.queueMessage(
-                    text: "The " + item.name + ' is used in its entirety.'
-                );
-                item.throwOut();                                    
-            } else ::<={
-                windowEvent.queueMessage(
-                    text: "A bit of the " + item.name + ' is used.'
-                );                    
+        events : {
+            onAffliction ::(from, item, holder) {
+                if (Number.random() > 0.7) ::<={
+                    windowEvent.queueMessage(
+                        text: "The " + item.name + ' is used in its entirety.'
+                    );
+                    item.throwOut();                                    
+                } else ::<={
+                    windowEvent.queueMessage(
+                        text: "A bit of the " + item.name + ' is used.'
+                    );                    
+                }
             }
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )  
@@ -4509,44 +2522,28 @@ Effect.newEntry(
             DEF: -20,
             SPD: -20
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " started to bleed out!");
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " is no longer bleeding out.");
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " started to bleed out!");
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            windowEvent.queueMessage(text:holder.name + " suffered from bleeding!");
+            },
             
-            holder.damage(
-                from: holder,
-                damage: Damage.new(
-                    amount:holder.stats.HP*0.05,
-                    damageType : Damage.TYPE.NEUTRAL,
-                    damageClass: Damage.CLASS.HP
-                ),dodgeable: false
-            );
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " is no longer bleeding out.");
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                windowEvent.queueMessage(text:holder.name + " suffered from bleeding!");
+                
+                holder.damage(
+                    attacker: holder,
+                    damage: Damage.new(
+                        amount:holder.stats.HP*0.05,
+                        damageType : Damage.TYPE.NEUTRAL,
+                        damageClass: Damage.CLASS.HP
+                    ),dodgeable: false
+                );
+            }
         }
     }
 )     
@@ -4562,42 +2559,20 @@ Effect.newEntry(
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:"The " + item.name + " explodes on " + user.name + "!");
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:"The " + item.name + " explodes on " + from.name + "!");
+                
+                holder.damage(
+                    attacker: holder,
+                    damage: Damage.new(
+                        amount:random.integer(from:10, to:20),
+                        damageType : Damage.TYPE.FIRE,
+                        damageClass: Damage.CLASS.HP                                                       
+                    ),dodgeable: false 
+                );
             
-            holder.damage(
-                from: holder,
-                damage: Damage.new(
-                    amount:random.integer(from:10, to:20),
-                    damageType : Damage.TYPE.FIRE,
-                    damageClass: Damage.CLASS.HP                                                       
-                ),dodgeable: false 
-            );
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            }
         }
     }
 )        
@@ -4610,46 +2585,30 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : FLAGS.AILMENT,
+        flags : FLAGS.DEBUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:'Glowing purple runes were imprinted on ' + holder.name + "!");
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:'The poison rune fades from ' + holder.name + '.');
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:'Glowing purple runes were imprinted on ' + holder.name + "!");
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            windowEvent.queueMessage(text:holder.name + " was hurt by the poison rune!");
+            },
             
-            holder.damage(
-                from: holder,
-                damage: Damage.new(
-                    amount:random.integer(from:1, to:3),
-                    damageType : Damage.TYPE.POISON,
-                    damageClass: Damage.CLASS.HP
-                ),dodgeable: false 
-            );
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:'The poison rune fades from ' + holder.name + '.');
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                windowEvent.queueMessage(text:holder.name + " was hurt by the poison rune!");
+                
+                holder.damage(
+                    attacker: holder,
+                    damage: Damage.new(
+                        amount:random.integer(from:1, to:3),
+                        damageType : Damage.TYPE.POISON,
+                        damageClass: Damage.CLASS.HP
+                    ),dodgeable: false 
+                );
+            }
         }
     }
 )
@@ -4663,37 +2622,17 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.DEBUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:'Glowing orange runes were imprinted on ' + holder.name + "!");
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:'The destruction rune fades from ' + holder.name + '.');
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:'Glowing orange runes were imprinted on ' + holder.name + "!");
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            },
+            
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:'The destruction rune fades from ' + holder.name + '.');
+            }
         }
     }
 )
@@ -4706,39 +2645,23 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:'Glowing cyan runes were imprinted on ' + holder.name + "!");
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:'The regeneration rune fades from ' + holder.name + '.');
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:'Glowing cyan runes were imprinted on ' + holder.name + "!");
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            when(holder.hp == 0) empty;
-            windowEvent.queueMessage(text:holder.name + " was healed by the regeneration rune.");
-            holder.heal(amount:holder.stats.HP * 0.03);
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            },
+            
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:'The regeneration rune fades from ' + holder.name + '.');
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                when(holder.hp == 0) empty;
+                windowEvent.queueMessage(text:holder.name + " was healed by the regeneration rune.");
+                holder.heal(amount:holder.stats.HP * 0.03);
+            }
         }
     }
 )        
@@ -4751,39 +2674,19 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
             DEF: 100
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:'Glowing deep-blue runes were imprinted on ' + holder.name + "!");
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:'The shield rune fades from ' + holder.name + '.');
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:'Glowing deep-blue runes were imprinted on ' + holder.name + "!");
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            },
+            
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:'The shield rune fades from ' + holder.name + '.');
+            }
         }
     }
 )        
@@ -4798,38 +2701,18 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:'Glowing green runes were imprinted on ' + holder.name + "!");
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:'The cure rune fades from ' + holder.name + '.');
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:'Glowing green runes were imprinted on ' + holder.name + "!");
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            },
+            
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:'The cure rune fades from ' + holder.name + '.');
+            }
         }
     }
 ) 
@@ -4848,44 +2731,28 @@ Effect.newEntry(
         blockPoints : 0,
         flags : FLAGS.AILMENT,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " was poisoned!");
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " is no longer poisoned.");
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " was poisoned!");
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            windowEvent.queueMessage(text:holder.name + " was hurt by the poison!");
+            },
             
-            holder.damage(
-                from: holder,
-                damage: Damage.new(
-                    amount:holder.stats.HP*0.05,
-                    damageType : Damage.TYPE.NEUTRAL,
-                    damageClass: Damage.CLASS.HP
-                ),dodgeable: false 
-            );
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " is no longer poisoned.");
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                windowEvent.queueMessage(text:holder.name + " was hurt by the poison!");
+                
+                holder.damage(
+                    attacker: holder,
+                    damage: Damage.new(
+                        amount:holder.stats.HP*0.05,
+                        damageType : Damage.TYPE.NEUTRAL,
+                        damageClass: Damage.CLASS.HP
+                    ),dodgeable: false 
+                );
+            }
         }
     }
 )     
@@ -4901,38 +2768,21 @@ Effect.newEntry(
         blockPoints : 0,
         flags : FLAGS.AILMENT,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " was blinded!");
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " is no longer blind.");
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-            when (Number.random() > 0.5) empty;
-            windowEvent.queueMessage(text:holder.name + " missed in their blindness!");
-            damage.amount = 0;
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " was blinded!");
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
+            },
+            
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " is no longer blind.");
+            },                
 
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            onPreAttackOther ::(from, item, holder, to, damage) {
+                when (Number.random() > 0.5) empty;
+                windowEvent.queueMessage(text:holder.name + " missed in their blindness!");
+                damage.amount = 0;
+            }
         }
     }
 )             
@@ -4949,44 +2799,28 @@ Effect.newEntry(
         blockPoints : 0,
         flags : FLAGS.AILMENT,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " was burned!");
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " is no longer burned.");
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " was burned!");
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-            when(Number.random() > 0.5) empty;
-            windowEvent.queueMessage(text:holder.name + " was hurt by burns!");
-            holder.damage(
-                from:holder,
-                damage : Damage.new(
-                    amount: holder.stats.HP / 16,
-                    damageClass: Damage.CLASS.HP,
-                    damageType: Damage.TYPE.NEUTRAL                                                   
-                ),dodgeable: false 
-            );
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            },
+            
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " is no longer burned.");
+            },                
+            
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+                when(Number.random() > 0.5) empty;
+                windowEvent.queueMessage(text:holder.name + " was hurt by burns!");
+                holder.damage(
+                    attacker:holder,
+                    damage : Damage.new(
+                        amount: holder.stats.HP / 16,
+                        damageClass: Damage.CLASS.HP,
+                        damageType: Damage.TYPE.NEUTRAL                                                   
+                    ),dodgeable: false 
+                );
+            }
         }
     }
 ) 
@@ -5001,34 +2835,15 @@ Effect.newEntry(
         blockPoints : -3,
         flags : FLAGS.AILMENT,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " was frozen");
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " is no longer frozen.");
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " was frozen");
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            },
+            
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " is no longer frozen.");
+            }
         }
     }
 )         
@@ -5047,34 +2862,15 @@ Effect.newEntry(
             SPD: -100,
             ATK: -100
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " was paralyzed");
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " is no longer paralyzed.");
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " was paralyzed");
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            },
+            
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " is no longer paralyzed.");
+            }
         }
     }
 ) 
@@ -5089,39 +2885,20 @@ Effect.newEntry(
         skipTurn : true,
         stackable: false,
         blockPoints : -3,
-        flags : FLAGS.AILMENT,
+        flags : FLAGS.DEBUFF,
         stats: StatSet.new(
             SPD: -100,
             DEF: -100
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " was mesmerized!");
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " is no longer mesmerized.");
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " was mesmerized!");
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            },
+            
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " is no longer mesmerized.");
+            }
         }
     }
 ) 
@@ -5139,34 +2916,15 @@ Effect.newEntry(
         flags : 0,
         stats: StatSet.new(
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " was wrapped and encoiled!");
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " is no longer wrapped.");
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " was wrapped and encoiled!");
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            },
+            
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " is no longer wrapped.");
+            }
         }
     }
 ) 
@@ -5185,34 +2943,15 @@ Effect.newEntry(
         stats: StatSet.new(
             DEF: -50
         ),
-        onAffliction ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " was petrified!");
-        
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-            windowEvent.queueMessage(text:holder.name + " is no longer petrified!");
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " was petrified!");
             
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
+            },
+            
+            onRemoveEffect ::(from, item, holder) {
+                windowEvent.queueMessage(text:holder.name + " is no longer petrified!");
+            }
         }
     }
 )
@@ -5226,42 +2965,21 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : FLAGS.AILMENT,
+        flags : FLAGS.DEBUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
+        events : {
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (damage.damageType == Damage.TYPE.FIRE) ::<= {
-                damage.amount *= 2;
+            onDamage ::(from, item, holder, attacker, damage) {
+                if (damage.damageType == Damage.TYPE.FIRE) ::<= {
+                    damage.amount *= 2;
+                }
+                if (damage.damageType == Damage.TYPE.ICE) ::<= {
+                    damage.amount *= 2;
+                }
+                if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
+                    damage.amount *= 2;
+                }
             }
-            if (damage.damageType == Damage.TYPE.ICE) ::<= {
-                damage.amount *= 2;
-            }
-            if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
-                damage.amount *= 2;
-            }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )
@@ -5271,53 +2989,27 @@ Effect.newEntry(
     data : {
         name : 'Elemental Shield',
         id : 'base:elemental-shield',
-        description: 'Nullify ',
+        description: 'Nullify most types of elemental damage.',
         battleOnly : true,
         skipTurn : false,
         stats: StatSet.new(),
         stackable: false,
         blockPoints : 0,
-        flags : 0,
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-        },
+        flags : FLAGS.BUFF,
+        events : {
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            @:effects = holder.effects;
-            
-            @fire    = effects->filter(by:::(value) <- value.name == 'Burning')->keycount != 0;
-            @ice     = effects->filter(by:::(value) <- value.name == 'Icy')->keycount != 0;
-            @thunder = effects->filter(by:::(value) <- value.name == 'Shock')->keycount != 0;
-            
-            if (fire && holder.damage.damageType == Damage.TYPE.FIRE) ::<= {
-                damage.amount *= 0;
+            onDamage ::(from, item, holder, attacker, damage) {
+                
+                if (damage.damageType == Damage.TYPE.FIRE) ::<= {
+                    damage.amount *= 0;
+                }
+                if (damage.damageType == Damage.TYPE.ICE) ::<= {
+                    damage.amount *= 0;
+                }
+                if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
+                    damage.amount *= 0;
+                }
             }
-            if (ice && damage.damageType == Damage.TYPE.ICE) ::<= {
-                damage.amount *= 0;
-            }
-            if (thunder && damage.damageType == Damage.TYPE.THUNDER) ::<= {
-                damage.amount *= 0;
-            }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )
@@ -5332,41 +3024,22 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-            to.damage(from:to, damage: Damage.new(
-                amount: random.integer(from:1, to:4),
-                damageType: Damage.TYPE.FIRE,
-                damageClass: Damage.CLASS.HP
-            ),dodgeable: false);
-        },
+        events : {
+            onPostAttackOther ::(from, item, holder, to) {
+                to.damage(attacker:to, damage: Damage.new(
+                    amount: random.integer(from:1, to:4),
+                    damageType: Damage.TYPE.FIRE,
+                    damageClass: Damage.CLASS.HP
+                ),dodgeable: false);
+            },
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (damage.damageType == Damage.TYPE.ICE) ::<= {
-                damage.amount *= 0.5;
+            onDamage ::(from, item, holder, attacker, damage) {
+                if (damage.damageType == Damage.TYPE.ICE) ::<= {
+                    damage.amount *= 0.5;
+                }
             }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )         
@@ -5380,41 +3053,22 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-            to.damage(from:to, damage: Damage.new(
-                amount: random.integer(from:1, to:4),
-                damageType: Damage.TYPE.ICE,
-                damageClass: Damage.CLASS.HP
-            ),dodgeable: false);
-        },
+        events : {
+            onPostAttackOther ::(from, item, holder, to) {
+                to.damage(attacker:to, damage: Damage.new(
+                    amount: random.integer(from:1, to:4),
+                    damageType: Damage.TYPE.ICE,
+                    damageClass: Damage.CLASS.HP
+                ),dodgeable: false);
+            },
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (damage.damageType == Damage.TYPE.FIRE) ::<= {
-                damage.amount *= 0.5;
+            onDamage ::(from, item, holder, attacker, damage) {
+                if (damage.damageType == Damage.TYPE.FIRE) ::<= {
+                    damage.amount *= 0.5;
+                }
             }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )
@@ -5428,41 +3082,21 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-            to.damage(from:to, damage: Damage.new(
-                amount: random.integer(from:1, to:4),
-                damageType: Damage.TYPE.THUNDER,
-                damageClass: Damage.CLASS.HP
-            ),dodgeable: false);
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
-                damage.amount *= 0.5;
+        events : {
+            onPostAttackOther ::(from, item, holder, to) {
+                to.damage(attacker:to, damage: Damage.new(
+                    amount: random.integer(from:1, to:4),
+                    damageType: Damage.TYPE.THUNDER,
+                    damageClass: Damage.CLASS.HP
+                ),dodgeable: false);
+            },
+            onDamage ::(from, item, holder, attacker, damage) {
+                if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
+                    damage.amount *= 0.5;
+                }
             }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )
@@ -5476,43 +3110,23 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-            to.damage(from:to, damage: Damage.new(
-                amount: random.integer(from:1, to:4),
-                damageType: Damage.TYPE.POISON,
-                damageClass: Damage.CLASS.HP
-            ),
-            dodgeable: false
-            );
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (damage.damageType == Damage.TYPE.POISON) ::<= {
-                damage.amount *= 0.5;
+        events : {
+            onPostAttackOther ::(from, item, holder, to) {
+                to.damage(attacker:to, damage: Damage.new(
+                    amount: random.integer(from:1, to:4),
+                    damageType: Damage.TYPE.POISON,
+                    damageClass: Damage.CLASS.HP
+                ),
+                dodgeable: false
+                );
+            },
+            onDamage ::(from, item, holder, attacker, damage) {
+                if (damage.damageType == Damage.TYPE.POISON) ::<= {
+                    damage.amount *= 0.5;
+                }
             }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )
@@ -5526,41 +3140,21 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-            to.damage(from:to, damage: Damage.new(
-                amount: random.integer(from:1, to:4),
-                damageType: Damage.TYPE.LIGHT,
-                damageClass: Damage.CLASS.HP
-            ),dodgeable: false);
-        },
-
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (damage.damageType == Damage.TYPE.DARK) ::<= {
-                damage.amount *= 0.5;
+        events : {
+            onPostAttackOther ::(from, item, holder, to) {
+                to.damage(attacker:to, damage: Damage.new(
+                    amount: random.integer(from:1, to:4),
+                    damageType: Damage.TYPE.LIGHT,
+                    damageClass: Damage.CLASS.HP
+                ),dodgeable: false);
+            },
+            onDamage ::(from, item, holder, attacker, damage) {
+                if (damage.damageType == Damage.TYPE.DARK) ::<= {
+                    damage.amount *= 0.5;
+                }
             }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 )        
@@ -5573,40 +3167,22 @@ Effect.newEntry(
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
+        flags : FLAGS.BUFF,
         stats: StatSet.new(),
-        onAffliction ::(user, item, holder) {
-        },
-        
-        onRemoveEffect ::(user, item, holder) {
-        },                
-        onPostAttackOther ::(user, item, holder, to) {
-            to.damage(from:to, damage: Damage.new(
-                amount: random.integer(from:1, to:4),
-                damageType: Damage.TYPE.DARK,
-                damageClass: Damage.CLASS.HP
-            ),dodgeable: false);
-        },
+        events : {
+            onPostAttackOther ::(from, item, holder, to) {
+                to.damage(attacker:to, damage: Damage.new(
+                    amount: random.integer(from:1, to:4),
+                    damageType: Damage.TYPE.DARK,
+                    damageClass: Damage.CLASS.HP
+                ),dodgeable: false);
+            },
 
-        onPreAttackOther ::(user, item, holder, to, damage) {
-        },
-        onAttacked ::(user, item, holder, by, damage) {
-        
-        },
-        onSuccessfulBlock::(user, item, holder, from, damage) {
-        
-        },
-        onDamage ::(user, item, holder, from, damage) {
-            if (damage.damageType == Damage.TYPE.LIGHT) ::<= {
-                damage.amount *= 0.5;
+            onDamage ::(from, item, holder, attacker, damage) {
+                if (damage.damageType == Damage.TYPE.LIGHT) ::<= {
+                    damage.amount *= 0.5;
+                }
             }
-        },
-        
-        onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-
-        },
-        onStatRecalculate ::(user, item, holder, stats) {
-        
         }
     }
 ) 
@@ -5626,15 +3202,7 @@ Effect.newEntry(
         stats : StatSet.type,
         flags : Number,
         blockPoints : Number,
-        onAffliction : Function, //Called once when first activated
-        onPostAttackOther : Function, // Called AFTER the user has explicitly damaged a target
-        onPreAttackOther : Function, // called when user is giving damage
-        onAttacked : Function, // called when user is attacked, before being damaged.
-        onRemoveEffect : Function, //Called once when removed. All effects will be removed at some point.
-        onDamage : Function, // when the holder of the effect is hurt
-        onNextTurn : Function, //< on end phase of turn once added as an effect. Not called if duration is 0
-        onStatRecalculate : Function, // on start of a turn. Not called if duration is 0
-        onSuccessfulBlock : Function, // when a targetted body part is blocked by the receiver.
+        events : Object,
         stackable : Boolean // whether multiple of the same effect can coexist
     },
     reset

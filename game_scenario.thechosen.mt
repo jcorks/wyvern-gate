@@ -643,9 +643,9 @@ return {
         instance.islandTravel();           
         
         
-        /////
+        ////////////////////
         
-        
+        /*
         @:world = import(module:'game_singleton.world.mt');
         @:enemies = [
             world.island.newInhabitant(),
@@ -671,9 +671,9 @@ return {
                 instance.gameOver(reason:'The party was wiped out.');
             }
         );
+        */
         
-        
-        /////
+        //////////////////////
         
     },
     
@@ -2100,32 +2100,11 @@ return {
                 blockPoints : 0,
                 flags : 0,
                 stats: StatSet.new(),
-                onAffliction ::(user, item, holder) {
-                    Scene.start(id:'thechosen:scene_sentimentalbox', onDone::{});            
-                },
                 
-                onRemoveEffect ::(user, item, holder) {
-                },                
-                onPostAttackOther ::(user, item, holder, to) {
-                },
-
-                onPreAttackOther ::(user, item, holder, to, damage) {
-                },
-                onAttacked ::(user, item, holder, by, damage) {
-                
-                },
-                
-                onSuccessfulBlock::(user, item, holder, from, damage) {
-                
-                },
-                onDamage ::(user, item, holder, from, damage) {
-                },
-                
-                onNextTurn ::(user, item, holder, turnIndex, turnCount) {
-                
-                },
-                onStatRecalculate ::(user, item, holder, stats) {
-                
+                events : {
+                    onAffliction ::(user, item, holder) {
+                        Scene.start(id:'thechosen:scene_sentimentalbox', onDone::{});            
+                    }
                 }
             }
         )
@@ -2478,7 +2457,7 @@ return {
                         @enemies = [];
                         
                         
-                        for(0, 3)::(i) {
+                        for(0, if (island.tier <= 1) 2 else 3)::(i) {
                             @:enemy = island.newAggressor();
                             enemy.inventory.clear();
                             enemy.anonymize();

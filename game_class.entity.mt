@@ -36,6 +36,7 @@
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:ArtsDeck = import(module:'game_class.artsdeck.mt');
+@:EffectStack = import(:'game_class.effectstack.mt');
 
 
 // returns EXP recommended for next level
@@ -147,25 +148,53 @@
 @:assembleDeck ::(this, state) {
     @:deck = ArtsDeck.new();
     
-    
-    outfitDeck(deck, this);
-    
+
+    // add weapon
+    @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
+    if (hand != empty) ::<= {
+        deck.addArt(id:hand.arts[0]);
+        deck.addArt(id:hand.arts[1]);
+    }    
     
     // profession boosts
     foreach(state.profession.arts) ::(k, v) {
         deck.addArt(id:v);
     }
     
-    // add weapon
-    @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
-    if (hand != empty) ::<= {
-        deck.addArt(id:hand.art);
-    }    
     
-    deck.shuffle();
-    deck.redraw();
+    outfitDeck(deck, this);
+    
+
+    
     
     return deck;
+}
+
+
+@initializeEffectStackProper ::(this, state) {
+    
+    if (state.innateEffects != empty) ::<= {
+        foreach(state.innateEffects) ::(i, v) {
+            this.effectStack.addInnate(id:v);
+        }
+    }
+    
+    foreach(this.profession.passives)::(index, passiveName) {
+        this.effectStack.addInnate(
+            id:passiveName
+        );
+    }
+
+
+    foreach(state.equips) ::(i, item) {
+        when(item == empty) empty;
+        foreach(item.equipEffects)::(index, effect) {
+            this.effectStack.addInnate(
+                id:effect,
+                item
+            );
+        }
+    }
 }
 
 
@@ -186,50 +215,6 @@
 
 @none;
 @displayedHurt = {};
-
-@:resetEffects ::(priv, this, state) {
-    priv.effects = [];
-    
-    foreach(state.innateEffects) ::(k, name) {
-        this.addEffect(
-            from:this, 
-            id:name, 
-            durationTurns: -1
-        );                
-    }
-    
-    for(0, EQUIP_SLOTS.RING_R+1)::(slot) {
-        @:equip = state.equips[slot];
-        when(equip == empty) empty;
-        foreach(equip.equipEffects)::(index, effect) {
-            this.addEffect(
-                from:this, 
-                item:equip,
-                id:effect, 
-                durationTurns: -1
-            );
-        }
-    }
-    
-    
-    foreach(this.profession.passives)::(index, passiveName) {
-        this.addEffect(
-            from:this, 
-            id:passiveName, 
-            durationTurns: -1
-        );
-    }
-    
-    foreach(this.species.passives)::(index, passiveName) {
-        this.addEffect(
-            from:this, 
-            id:passiveName, 
-            durationTurns: -1
-        );
-    }
-
-
-}
 
 
 
@@ -279,7 +264,6 @@
         name  : '',
         nickname  : '',
         species   : empty,
-        profession  : 0,
         personality   : empty,
         emotionalState  : empty,
         favoritePlace  : empty,
@@ -293,7 +277,6 @@
         aiAbilityChance : 0,
         profession : empty,
         canMake : empty,
-        innateEffects : empty,
         forceDrop : empty,
         equips : empty,
         abilitiesLearned : empty,
@@ -302,10 +285,12 @@
         level : 0,
         modData : empty,
         deck : empty,
-        supportArts : empty
+        supportArts : empty,
+        innateEffects : empty
     },
     
     private : {
+        effectStack : Nullable,
         battle : Nullable,
         overrideInteract : Nullable,
         requestsRemove : Boolean,
@@ -313,7 +298,6 @@
         enemies : Nullable,
         allies : Nullable,
         abilitiesUsedBattle : Nullable,
-        effects : Nullable,
         owns : Nullable
     },
     
@@ -331,6 +315,9 @@
             @:world = import(module:'game_singleton.world.mt');
             @:state = _.state;
             @:this = _.this;
+
+            state.innateEffects = innateEffects;
+            
             state.worldID = world.getNextID();
             state.stats = StatSet.new(
                 HP:1,
@@ -427,9 +414,11 @@
             }
             state.inventory.addGold(amount:(Number.random() * 100)->ceil);
             state.favoriteItem = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
-            state.innateEffects = innateEffects;
-            if (state.innateEffects == empty)  
-                state.innateEffects = [];
+
+
+            foreach(this.species.passives)::(index, passiveName) {
+                this.effectStack.addInnate(id:passiveName);
+            }
 
 
             /*
@@ -479,19 +468,22 @@
             _.enemies = enemies;
             _.this.recalculateStats();             
             _.this.flags.reset();
-            @:state = _.state;
-            @:this = _.this;
-            if (state.deck == empty) ::<= {
-                state.deck = assembleDeck(this, state);
-            }
         },
         
         // called to signal that a battle has started involving this entity
         battleStart ::(battle) {
+            @:state = _.state;
+            @:this = _.this;
             _.battle = battle;
             _.requestsRemove = false;
             _.abilitiesUsedBattle = {}
-            resetEffects(priv:_, this:_.this, state:_.state);              
+            state.deck = assembleDeck(this, state);
+            state.deck.shuffle();
+            state.deck.redraw();
+            _.effectStack = EffectStack.new(parent:this);
+            initializeEffectStackProper(*_);
+
+            //resetEffects(priv:_, this:_.this, state:_.state);              
         },
         
         battle : {
@@ -520,17 +512,16 @@
             
         blockPoints : {
             get :: {
-                @:effects = _.effects;
                 @:this = _.this;
+                @:state = _.state;
                 when(this.isIncapacitated()) 0;
                 @:am = ::<= {
                     @wep = this.getEquipped(slot:EQUIP_SLOTS.HAND_LR);
                     @amount = if (wep.base.id == 'base:none') 0 else wep.base.blockPoints;
                     
-                    if (effects != empty) ::<= {
-                        foreach(effects) ::(index, effect) {
-                            amount += effect.effect.blockPoints
-                        }
+                    foreach(this.effectStack.getAll()) ::(index, f) {
+                        @:effect = Effect.find(:f.id);
+                        amount += effect.blockPoints
                     }
                     
                     return amount;
@@ -539,23 +530,90 @@
                 return am;
             }
         },
+        
+        assembleDeck ::{
+            return assembleDeck(*_);
+        },
+        
+
+        viewDeckArts ::(prompt) {
+            @:state = _.state;
+            @:this = _.this;
+
+            @:choices = [];
+            @:choiceActs = [];
+
+            @:pushArt::(id){
+                @art = Arts.find(:id);
+                choices->push(:' ' + art.name);
+                choiceActs->push(:id);
+            }
+
+            // add weapon
+            @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
+            if (hand != empty) ::<= {
+                choices->push(:'Weapon:');
+                choiceActs->push(:empty);
+                pushArt(id:hand.arts[0]);
+                pushArt(id:hand.arts[1]);
+            }    
+
+
+            
+            // profession boosts
+            choices->push(:'Profession:');
+            choiceActs->push(:empty);
+            foreach(state.profession.arts) ::(k, v) {
+                pushArt(id:v);
+            }
+
+
+            
+            if (this.supportArts) ::<= {
+                choices->push(:'Support:');
+                choiceActs->push(:empty);
+                foreach(this.supportArts)::(k, v) {
+                    pushArt(id:v);
+                }
+            }            
+        
+        
+            @which = 0;
+            windowEvent.queueChoices(
+                choices,
+                prompt,
+                leftWeight: 1,
+                topWeight: 0.5,
+                canCancel: true,
+                renderable : {
+                    render::{
+                        when(choiceActs[which] == empty) empty;
+                        ArtsDeck.renderArt(
+                            handCard: ArtsDeck.synthesizeHandCard(id:choiceActs[which]),
+                            topWeight: 0.5,
+                            leftWeight: 0
+                        );
+                    }
+                },
+                onHover::(choice) {
+                    which = choice-1
+                },
+                
+                onChoice::(choice) {
+                    which = choice-1;
+                }
+            );
+        },        
 
         // called to signal that a battle has started involving this entity
         battleEnd :: {
             _.battle = empty;
             @:this = _.this;
-            foreach(_.effects)::(index, effect) {
-
-                effect.effect.onRemoveEffect(
-                    user:effect.from, 
-                    holder:this,
-                    item:effect.item
-                );
-            }
+            _.this.effectStack.clear(all:true);
+            _.effectStack = empty;
             _.allies = empty;
             _.enemies = empty;
             _.abilitiesUsedBattle = empty;                
-            _.effects = empty;
             
             _.state.deck = empty;
             
@@ -576,14 +634,8 @@
             
             
             state.stats.resetMod();
-            
-            if (this.effects != empty) ::<= {
-                foreach(this.effects)::(index, effect) {
-                    effect.effect.onStatRecalculate(user:effect.user, stats:state.stats, holder:this);
-                    state.stats.modRate(stats:effect.effect.stats);
-                }
-            }
-            
+            if (this.effectStack)
+                this.effectStack.modStats(stats:state.stats);            
             @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
             @weaponAffinity = false;
             if (hand != empty)
@@ -635,19 +687,9 @@
             
             state.deck.redraw();
             @act = true;
-            foreach(_.effects)::(index, effect) {                        
-                if (effect.duration != -1 && effect.turnIndex >= effect.duration) ::<= {
-                    this.removeEffectInstance(instance:effect);
-                } else ::<= {
-                    if (effect.effect.skipTurn == true) ::<= {
-                        if (this.isIncapacitated() == false)
-                            windowEvent.queueMessage(text:this.name + ' is unable to act due to their ' + effect.effect.name + ' status!');                            
-                        act = false;
-                    }
-                    effect.effect.onNextTurn(user:effect.from, turnIndex:effect.turnIndex, turnCount: effect.duration, holder:this, item:effect.item);                    
-                    effect.turnIndex += 1;
-                }
-            }
+            
+            this.effectStack.nextTurn();
+            this.checkStatChanged();
             
             if (this.stats.SPD < 0) ::<= {
                 windowEvent.queueMessage(text:this.name + ' cannot move! (negative speed)');
@@ -708,9 +750,24 @@
             
             set ::(value) {
                 @:state = _.state;
+                @:this = _.this;
+                if (this.effectStack) ::<= {
+                    foreach(this.profession.passives)::(index, passiveName) {
+                        this.effectStack.removeInnate(
+                            id:passiveName
+                        );
+                    }
+                }
+
                 state.profession = value;
-                
-                                    
+
+                if (this.effectStack) ::<= {
+                    foreach(this.profession.passives)::(index, passiveName) {
+                        this.effectStack.addInnate(
+                            id:passiveName
+                        );
+                    }                
+                }
                 state.growth.resetMod();
                 state.growth.mod(stats:state.species.growth);
                 state.growth.mod(stats:state.personality.growth);
@@ -736,8 +793,8 @@
             }
         },
             
-        effects : {
-            get ::<- [...(_.effects)]
+        effectStack : {
+            get ::<- _.effectStack
         },
         
         overrideInteract : {
@@ -762,10 +819,9 @@
             if (targetPart == empty) targetPart = Entity.normalizedDamageTarget();
             if (targetDefendPart == empty) targetPart = Entity.normalizedDamageTarget();
         
-            @:inBattle = _.effects != empty;
-            if (!inBattle)
-                this.battleStart(); // dummy battle for effect shells.
-            @:effects = _.effects;
+            @:hasNoEffectStack = _.effectStack == empty;
+        
+            @:effectStack = if (hasNoEffectStack) EffectStack.new() else _.this.effectStack;
             @:retval = ::<= {
                 @:dmg = Damage.new(
                     amount,
@@ -776,16 +832,22 @@
                 @:damaged = [];
                 // TODO: add weapon affinities if phys and equip weapon
                 // phys is always assumed to be with equipped weapon
-                foreach(effects)::(index, effect) {
-                    when (dmg.amount <= 0) empty;
-                    effect.effect.onPreAttackOther(user:effect.from, item:effect.item, holder:this, to:target, damage:dmg);
-                }
+                effectStack.emitEvent(
+                    name: 'onPreAttackOther',
+                    to : target, 
+                    damage : dmg,
+                    emitCondition ::(effectInstance) <- dmg.amount > 0
+                );
                 
                 when(dmg.amount <= 0) empty;
-                foreach(target.effects)::(index, effect) {
-                    when (dmg.amount <= 0) empty;
-                    effect.effect.onAttacked(user:target, item:effect.item, holder:target, by:this, damage:dmg);                
-                }
+
+                if (target.effectStack)
+                    target.effectStack.emitEvent(
+                        name: 'onAttacked',
+                        attacker : this, 
+                        damage : dmg,
+                        emitCondition ::(effectInstance) <- dmg.amount > 0
+                    );
                 
 
                 when(dmg.amount <= 0) empty;
@@ -801,7 +863,7 @@
                 @missBody = false;
                 @missLimb = false;
                 if (critChance < 0.75) critChance = 0.75;
-                if (Number.random() > critChance) ::<={
+                if (Number.random() > critChance || dmg.forceCrit) ::<={
                     dmg.amount += this.stats.DEX * 1.5;
                     isCrit = true;
                 }
@@ -842,9 +904,11 @@
                                 text: target.name + ' predicted ' + this.name + '\'s attack to their ' + which + ' and successfully blocked it!'
                             );
                             
-                            foreach(target.effects)::(index, effect) {
-                                effect.effect.onSuccessfulBlock(user:effect.from, item:effect.item, holder:target, from:this, damage:dmg);                
-                            }
+                            target.effectStack.emitEvent(
+                                name : 'onSuccessfulBlock',
+                                attacker: this,
+                                damage: dmg
+                            );
                             dmg.amount = 0;
                         } else ::<= {
                             dmg.amount *= .4;
@@ -892,7 +956,7 @@
 
 
                 @:hpWas0 = if (target.hp == 0) true else false;
-                @:result = target.damage(from:this, damage:dmg, dodgeable:true, critical:isCrit);
+                @:result = target.damage(attacker:this, damage:dmg, dodgeable:true, critical:isCrit);
                 
                 if (backupStats != empty)
                     this.stats.load(serialized:backupStats);
@@ -941,10 +1005,10 @@
 
 
 
-                
-                foreach(effects)::(index, effect) {
-                    effect.effect.onPostAttackOther(user:effect.from, item:effect.item, holder:this, to:target);
-                }
+                effectStack.emitEvent(
+                    name : 'onPostAttackOther',
+                    to: target
+                );
 
                 when(hpWas0 && target.hp == 0) ::<= {
                     this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
@@ -955,9 +1019,12 @@
                 return true;
             }
             
-            if (!inBattle)
-                this.battleEnd();
-                
+            if (hasNoEffectStack)                
+                _.this.effectStack.clear(all:true);
+            if (hasNoEffectStack)                
+                _.effectStack = empty;
+
+
             windowEvent.queueCustom(
                 onEnter :: {
                     displayedHurt->remove(key:target);
@@ -966,7 +1033,7 @@
             return retval;
         },
             
-        damage ::(from => Object, damage => Damage.type, dodgeable => Boolean, critical, exact) {
+        damage ::(attacker => Object, damage => Object, dodgeable => Boolean, critical, exact) {
             @:this = _.this;
             @:state = _.state;
             
@@ -974,17 +1041,14 @@
             if (alreadyKnockedOut)
                 dodgeable = false;
                 
-            if (from == this)
+            if (attacker == this)
                 dodgeable = false;
                 
                 
-            @:inBattle = _.effects != empty;
-            if (!inBattle)
-                this.battleStart(); // dummy battle for effect shells.
-
-            @:effects = _.effects;
-
-
+            @:hasNoEffectStack = _.effectStack == empty;
+            
+            if (hasNoEffectStack)
+                _.effectStack = EffectStack.new();
 
 
                 
@@ -1022,11 +1086,11 @@
                 
 
 
-                if (from.stats.DEX > this.stats.DEX)               
+                if (attacker.stats.DEX > this.stats.DEX)               
                     // as DEX increases: randomness decreases 
                     // amount of reliable damage increases
                     // This models user skill vs receiver skill
-                    damage.amount = damage.amount + damage.amount * ((Number.random() - 0.5) * (this.stats.DEX / from.stats.DEX) + (1 -  this.stats.DEX / from.stats.DEX))
+                    damage.amount = damage.amount + damage.amount * ((Number.random() - 0.5) * (this.stats.DEX / attacker.stats.DEX) + (1 -  this.stats.DEX / attacker.stats.DEX))
                 else
                     damage.amount = damage.amount + damage.amount * (Number.random() - 0.5)
                 ; 
@@ -1034,14 +1098,16 @@
                 
 
 
-                damage.amount -= state.stats.DEF/4;
+                damage.amount -= state.stats.DEF/3;
                 if (damage.amount <= 0) damage.amount = 1;
 
 
-                foreach(effects)::(index, effect) {
-                    if (damage.amount > 0 || exact != empty)
-                        effect.effect.onDamage(user:effect.from, item:effect.item, holder:this, from, damage);
-                }
+                this.effectStack.emitEvent(
+                    name : 'onDamage',
+                    attacker,
+                    damage,
+                    emitCondition ::(v) <- (damage.amount > 0 || exact != empty)
+                );
 
                 if (exact)
                     damage.amount = originalAmount;
@@ -1066,6 +1132,8 @@
                     }
                 }
                 
+                damage.amount = (damage.amount)->ceil
+                
                 if (damage.damageClass == Damage.CLASS.HP) ::<= {
                     state.hp -= damage.amount;
                     if (state.hp < 0) state.hp = 0;
@@ -1088,19 +1156,19 @@
                 state.flags.add(flag:StateFlags.HURT);
                 
                 if (damage.damageType == Damage.TYPE.FIRE && Number.random() > 0.98)
-                    this.addEffect(from, id:'base:burned',durationTurns:5);
+                    this.addEffect(from:attacker, id:'base:burned',durationTurns:5);
                 if (damage.damageType == Damage.TYPE.ICE && Number.random() > 0.98)
-                    this.addEffect(from, id:'base:frozen',durationTurns:2);
+                    this.addEffect(from:attacker, id:'base:frozen',durationTurns:2);
                 if (damage.damageType == Damage.TYPE.THUNDER && Number.random() > 0.98)
-                    this.addEffect(from, id:'base:paralyzed',durationTurns:2);
+                    this.addEffect(from:attacker, id:'base:paralyzed',durationTurns:2);
                 if (damage.damageType == Damage.TYPE.PHYS && Number.random() > 0.99) 
-                    this.addEffect(from, id:'base:bleeding',durationTurns:5);
+                    this.addEffect(from:attacker, id:'base:bleeding',durationTurns:5);
                 if (damage.damageType == Damage.TYPE.POISON && Number.random() > 0.98) 
-                    this.addEffect(from, id:'base:poisoned',durationTurns:5);
+                    this.addEffect(from:attacker, id:'base:poisoned',durationTurns:5);
                 if (damage.damageType == Damage.TYPE.DARK && Number.random() > 0.98)
-                    this.addEffect(from, id:'base:blind',durationTurns:2);
+                    this.addEffect(from:attacker, id:'base:blind',durationTurns:2);
                 if (damage.damageType == Damage.TYPE.LIGHT && Number.random() > 0.98)
-                    this.addEffect(from, id:'base:petrified',durationTurns:2);
+                    this.addEffect(from:attacker, id:'base:petrified',durationTurns:2);
                 
                 
                 if (!alreadyKnockedOut && world.party.isMember(entity:this) && state.hp == 0 && Number.random() > 0.7 && world.party.members->size > 1) ::<= {
@@ -1120,13 +1188,16 @@
                         world.accoladeIncrement(name:'knockouts');                                        
 
                     this.flags.add(flag:StateFlags.FALLEN);
-                    from.flags.add(flag:StateFlags.DEFEATED_ENEMY);
+                    attacker.flags.add(flag:StateFlags.DEFEATED_ENEMY);
                 }
 
                 return true;
             }
-            if (!inBattle)
-                this.battleEnd();
+            if (hasNoEffectStack)
+                this.effectStack.clear(all:true);
+            if (hasNoEffectStack)
+                _.effectStack = empty;
+                
 
             return retval;
         },
@@ -1369,60 +1440,22 @@
         addEffect::(from => Object, id => String, durationTurns => Number, item) {
             @:state = _.state;
             @:this = _.this;
-            @:effects = _.effects;
-
-            // temporarily make effects active but remove them right after.
-            @inBattle = effects != empty;
-            if (!inBattle)
-                this.battleStart();
-            @:effects = _.effects;
-
-
-            if (durationTurns == empty) durationTurns = -1;
             
-            @:effect = Effect.find(id);
-            @:existingEffectIndex = effects->findIndexCondition(::(value) <- value.effect.id == id);               
-            when (effect.stackable == false && existingEffectIndex != -1) ::<= {
-                // reset duration of effect and source.
-                @einst = effects[existingEffectIndex];
-                einst.duration = durationTurns;
-                einst.turnIndex = 0;
-                einst.item = item;
-                einst.from = from;
-            }
-            
-            @einst = {
-                from: from,
-                item : item,
-                effect : effect,
+            if (_.battle == empty)
+                _.effectStack = EffectStack.new(parent:this);
+                
+            this.effectStack.add(
+                from,
+                id,
                 duration: durationTurns,
-                turnIndex: 0
-            }
-            if (einst.effect == empty || einst.duration->type != Number) error(detail:'Bad addEffect() call: effect or duration was invalid.');                
-            if (durationTurns != 0)
-                effects->push(value:einst);
-            
-
-            einst.effect.onAffliction(
-                user:from, 
-                holder:this,
                 item
             );
+            this.checkStatChanged();
             
-            @:oldStats = StatSet.new();
-            oldStats.load(serialized:this.stats.save());
-            this.recalculateStats();
-            if (StatSet.isDifferent(stats:oldStats, other:this.stats)) ::<= {
-                windowEvent.queueDisplay(
-                    prompt: this.name + ': stats changed!',
-                    lines: StatSet.diffToLines(
-                        stats:oldStats,
-                        other:this.stats
-                    )
-                );
-            }
-            if (!inBattle)
-                this.battleEnd();
+            if (_.battle == empty)
+                this.effectStack.clear(all:true);
+            if (_.battle == empty)
+                _.effectStack = empty;
 
         },
             
@@ -1430,53 +1463,26 @@
         removeEffects::(effectBases => Object) {
             @:state = _.state;
             @:this = _.this;
-            when(_.effects == empty) empty;
-            _.effects = _.effects->filter(by:::(value) {
-                @:current = value.effect;
-                @:keep = effectBases->all(condition:::(value) <-
-                    value != current
-                );
-                
-                if (!keep) ::<={
-                
-                    value.effect.onRemoveEffect(
-                        user:value.from, 
-                        holder:this,
-                        item:value.item
-                    );
-
-                    @:oldStats = StatSet.new();
-                    oldStats.load(serialized:this.stats.save());
-                    this.recalculateStats();
-                    if (StatSet.isDifferent(stats:oldStats, other:this.stats)) ::<= {
-                        windowEvent.queueDisplay(
-                            prompt: this.name + ': stats changed!',
-                            lines: StatSet.diffToLines(
-                                stats:oldStats,
-                                other:this.stats
-                            )
-                        );
-                    }
-
-
-                }
-            });
+            
+            @:table = {};
+            foreach(effectBases) ::(i, id) {
+                table[id] = true;
+            }
+            
+            this.effectStack.removeByFilter(::(value) <- table[value.id] == true);
+            this.checkStatChanged();
         },
-        
-        removeEffectInstance::(instance) {
+
+        removeEffectInstance::(instance => Object) {
             @:state = _.state;
             @:this = _.this;
-            @:effects = _.effects;
-            when(effects == empty) empty;
-            @index = effects->findIndex(value:instance);
-            when(index == -1) empty;
-            @value = effects[index];
-            effects->remove(key:index);
-            value.effect.onRemoveEffect(
-                user:value.from, 
-                holder:this,
-                item:value.item
-            );
+            this.effectStack.removeByFilter(::(value) <- value == instance);
+            this.checkStatChanged();
+        },
+        
+        checkStatChanged::(instance) {
+            @:state = _.state;
+            @:this = _.this;
 
             @:oldStats = StatSet.new();
             oldStats.load(serialized:this.stats.save());
@@ -1494,12 +1500,14 @@
 
         
         hp : {
+            set ::(value) <- _.state.hp = value,
             get :: {
                 return _.state.hp;
             }
         },
             
         ap : {
+            set ::(value) <- _.state.ap = value,
             get :: {
                 return _.state.ap;
             }
@@ -1569,12 +1577,11 @@
             
             item.equippedBy = this;
             
-            if (_.effects != empty) ::<= {
+            if (_.effectStack) ::<= {
                 foreach(item.equipEffects)::(index, effect) {
-                    this.addEffect(
-                        from:this, 
-                        id:effect, 
-                        durationTurns: -1
+                    this.effectStack.addInnate(
+                        id:effect,
+                        item
                     );
                 }
             }
@@ -1615,14 +1622,6 @@
             return _.state.equips->any(func::(value) <- value == item);
         },
             
-        resetEffects :: {
-            resetEffects(
-                priv:_,
-                this: _.this,
-                state: _.state
-            );
-        },
-            
         // returns an array of equip slots that the item can fit in.
         getSlotsForItem ::(item => Item.type) {
             return match(item.base.equipType) {
@@ -1640,12 +1639,22 @@
             @:state = _.state;
             @:this = _.this;
             @:current = state.equips[slot];
-            @:effects = _.effects;
             when (current == empty) empty;
             state.equips[slot] = empty;                
             
             current.equippedBy = empty;
 
+
+            if (_.effectStack) ::<= {
+                foreach(current.equipEffects) ::(i, id) {
+                    this.effectStack.removeInnate(
+                        item: current,
+                        id
+                    );
+                }
+            }
+
+            /*
             if (effects != empty) ::<= {
                 foreach(current.equipEffects)::(i, effect) {
                     @:effectObj = effects->filter(by:::(value) <- value.effect.id == effect)[0];
@@ -1657,7 +1666,7 @@
                     
                     effects->remove(key:effects->findIndex(value:effectObj));
                 }
-            }
+            }*/
             
             this.recalculateStats();
             return current;
@@ -1916,7 +1925,8 @@
                         hand.name 
                 ;
             }
-            @:effects = _.effects;
+            
+            @:effects = if (_.this.effectStack) _.this.effectStack.getAll() else empty;
             windowEvent.queueMessageSet(
                 speaker: this.name,
                 pageAfter:canvas.height-4,
@@ -1944,8 +1954,9 @@
                       
                      if (effects != empty) ::<= {
                         @out = ' - Effects - \n\n';
-                        foreach(this.effects)::(index, effect) {
-                            out = out + effect.effect.name + ': ' + effect.effect.description + '\n';
+                        foreach(effects)::(index, f) {
+                            @:effect = Effect.find(:f.id);
+                            out = out + effect.name + ': ' + effect.description + '\n';
                         }
                         return out;
                      } else ::<= {

@@ -26,17 +26,12 @@
             @:specter = world.island.newInhabitant();
             specter.name = 'the Wyvern Specter';
             specter.species = Species.find(id:'base:wyvern-specter');
-            specter.profession = Profession.new(base:Profession.database.find(id:'base:wyvern-specter'));               
+            specter.profession = Profession.find(id:'base:wyvern-specter');               
 
             @:inv = Inventory.new();
             inv.add(item:Item.new(base:Item.database.find(id:'base:life-crystal'
             )));            
             specter.forceDrop = inv;
-            
-            specter.clearAbilities();
-            foreach(specter.profession.gainSP(amount:10))::(i, ability) {
-                specter.learnAbility(id:ability);
-            }
 
             specter.stats.load(serialized:StatSet.new(
                 HP:   120,

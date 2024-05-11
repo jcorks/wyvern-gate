@@ -266,14 +266,14 @@ return class(
             // Takes an array of strings and returns a new array of strings 
             // that will fit once displayed. the standard is CANVAS_WIDTH - 4 
             // to leave room for the window frame if any.
-            refitLines::(input => Object) {
+            refitLines::(input => Object, maxWidth) {
                 @:lines = [];
                 foreach(input) ::(k, v) {
                     lines->push(:v);
                     if (k != input->size-1)
                         lines->push(:'\n');
                 }
-                @:MAX_WIDTH = CANVAS_WIDTH - 4;
+                @:MAX_WIDTH = if (maxWidth == empty) CANVAS_WIDTH - 4 else maxWidth;
                 
                 @:text = String.combine(:lines);
                 lines->setSize(:0);
@@ -328,9 +328,9 @@ return class(
                 }
             
                 
-                @left   = (this.width - (width+4))*leftWeight;
+                @left   = ((this.width - (width+4))*leftWeight)->floor;
                 width   = width + 4;
-                @top    = (this.height - (lines->keycount + 4)) * topWeight;
+                @top    = ((this.height - (lines->keycount + 4)) * topWeight)->floor;
                 @height = lines->keycount + 4;
                 
                 if (top < 0) top = 0;

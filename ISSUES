@@ -10,10 +10,41 @@ Known bugs / concerns:
   reloading the save will reset the day and take you out of the dungeon.
 
 Coming changes:
-
+    Weapon enchants:
+        - Trigger effects will now cast a support art instead of an effect 
+        - Triggers will be restricted to the following 
+            - On Ability
+            - On Damage 
+            - On Turn Start 
+        - frequency is maintained.
+        - 10% chance that an enchant is a trigger effect when placing on item.
     Arts:
-        - Parry: grants the "parry" effect that will nullify damage ONCE and disappear.
-
+        - Named effects:
+            - These are effects that are common between Arts with specific triggers specific to the Art 
+            - Named effects:
+                - Soul Summon N: create a 1HP Spirit combatant on your side with HALF of your current stats (stats with all modifiers)
+                - Charge N: additional charge token 
+                - Banish N: additional banish token 
+                - Recast: next Art is done twice 
+                - Bulwark: +5 max HP for 5 turns 
+                - Parry: nullifies next incoming damage 
+                - Finishing blow: next attack is x2 damage. discard a card 
+                - Blocking: 0.5x damage for next attack.
+        - Elongate: all effects on target are now double theyre remaining duration
+        - Sentance:
+            - for every charge token, give a banish token. Charge tokens reduce to 0.
+            
+        
+            
+        - Command: take control of all allies actions for 3 turns 
+        - Refresh: 
+            - remove target field card.
+        - Field arts
+            - changes that persist as long as the card is active.
+            - Magic Mist change: destroy all field effect arts
+            - On discard: heal 1 
+            - On discard: [named effect here]
+            
 
           
     The Warrior Scenario

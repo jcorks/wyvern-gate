@@ -43,11 +43,7 @@
             @:beast = island_.newInhabitant();
             beast.name = 'Cave Bat';
             beast.species = Species.find(id:'base:cave-bat');
-            beast.profession = Profession.new(base:Profession.database.find(id:'base:cave-bat'));               
-            beast.clearAbilities();
-            foreach(beast.profession.gainSP(amount:10))::(i, ability) {
-                beast.learnAbility(id:ability);
-            }
+            beast.profession = Profession.find(id:'base:cave-bat');               
 
             beast.stats.load(serialized:StatSet.new(
                 HP:   7,

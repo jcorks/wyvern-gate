@@ -100,6 +100,33 @@ return ::{
     }
 
     
+    @:viewArts::(member) {
+        @:choices = [];
+        @:choiceActions = [];
+        
+        
+        choices->push(:'View All');
+        choiceActions->push(::{
+            member.viewDeckArts(prompt: member.name + '\'s deck:');
+        });
+        
+        choices->push(:'Edit Supports...');
+    
+    
+        windowEvent.queueChoices(
+            prompt: 'Arts:',
+            leftWeight: 1,
+            topWeight: 1,
+            choices,
+            keep:true,
+            canCancel: true,
+            onChoice::(choice) {
+                choiceActions[choice-1]();
+            }
+        );
+    }
+    
+    
     windowEvent.queueCursorMove(
         leftWeight: 1,
         topWeight: 1,
@@ -161,7 +188,7 @@ return ::{
                       (2): member.describe(excludeStats:true),
 
 
-                      (3): member.configureArts(),
+                      (3): viewArts(:member),
 
 
                       // Equip / unequip

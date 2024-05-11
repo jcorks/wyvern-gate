@@ -267,7 +267,7 @@ Arts.newEntry(
                         // skip if already has Coordinated effect.
                         //when(ent.effects->any(condition::(value) <- value.name == user.profession.name)) empty;
                         for(0, (level/2)->floor + 1) ::(i) {
-                            targets[0].addEffect(from:user, id: 'base:coordinated', durationTurns: 1000000);
+                            targets[0].addEffect(holder:targets[0], from:user, id: 'base:coordinated', durationTurns: 1000000);
                         }
                     }
                 }
@@ -656,7 +656,7 @@ Arts.newEntry(
         description: "Damages all enemies with Fire based on the user's INT. If day time, the damage is boosted.",
         durationTurns: 0,
         kind : KIND.ABILITY,
-        rarity : RARITY.UNCOMMON,
+        rarity : RARITY.RARE,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
         canBlock : false,
@@ -1511,45 +1511,15 @@ Arts.newEntry(
 
             windowEvent.queueCustom(
                 onEnter :: {
-
-                    
-                    @:effects = [...targets[0].effects->filter(by:::(value) <- 
-                        match(value.effect.id) {
-                          (
+                    targets[0].removeEffects(
+                        :[
                             'base:poison-rune',
                             'base:destruction-rune',
                             'base:regeneration-rune',
                             'base:cure-rune',
                             'base:Shield Rune'                             
-                          ): true,
-                          default: false
-                        }
-                    )]->map(to:::(value) <- value.effect);
-                    
-                    @toRemove = [];
-                    breakpoint();
-                    foreach(effects)::(i, effect) {
-                        toRemove->push(value:effect);
-                        match(effect.id) {                              
-                          ('base:destruction-rune'): ::<= {
-                            windowEvent.queueMessage(text:'The release of the Destruction Rune causes it to explode on ' + targets[0].name + '!');
-                            targets[0].damage(from:user, damage:Damage.new(
-                                amount:user.stats.INT * (1.2),
-                                damageType:Damage.TYPE.PHYS,
-                                damageClass:Damage.CLASS.HP
-                            ),dodgeable: false);                
-                          },
-
-                          ('base:cure-rune'): ::<= {
-                            windowEvent.queueMessage(text:'The release of the Cure Rune causes it to heal ' + targets[0].name + '!');
-                            targets[0].heal(
-                                amount: targets[0].stats.HP * 0.3
-                            );                
-                          }
-                        }                      
-                    }
-                    
-                    targets[0].removeEffects(effectBases:toRemove);   
+                        ]
+                    );
                 }
             );                     
         }
@@ -1676,8 +1646,8 @@ Arts.newEntry(
                 text: user.name + ' casts Multiply Runes on ' + targets[0].name + '!'
             );
             
-            @:effects = targets[0].effects->filter(by:::(value) <- 
-                match(value.effect.name) {
+            @:effects = targets[0].effectStack.getAll()->filter(by:::(value) <- 
+                match(value.id) {
                   (
                     'base:poison-rune',
                     'base:destruction-rune',
@@ -1692,7 +1662,7 @@ Arts.newEntry(
             windowEvent.queueCustom(
                 onEnter :: {
                     foreach(effects)::(i, effect) {
-                        targets[0].addEffect(from:user, id:effect.effect.id, durationTurns:10);
+                        targets[0].addEffect(from:user, id:effect.id, durationTurns:10);
                     }
                 }
             )
@@ -1793,6 +1763,7 @@ Arts.newEntry(
                     targets[0].addEffect(from:user, id: 'base:stunned', durationTurns: 2);                        
                 }
             );
+            return true;
         }
     }
 )
@@ -1818,7 +1789,9 @@ Arts.newEntry(
             when(random.try(percentSuccess:70)) ::<= {
                 windowEvent.queueMessage(
                     text: targets[0].name + ' avoided the trap!'
-                );                                
+                );       
+                return false;
+                         
             }
             windowEvent.queueCustom(
                 onEnter :: {
@@ -1830,6 +1803,7 @@ Arts.newEntry(
                     ),dodgeable: false);  
                 }
             );
+            return true;
         }
     }
 )
@@ -2802,7 +2776,7 @@ Arts.newEntry(
             foreach(targets)::(i, target) {
                 windowEvent.queueCustom(
                     onEnter :: {
-                        targets[0].heal(amount:((target.stats.HP*(0.25 + (level-1) * 0.15)->ceil)));
+                        target.heal(amount:((target.stats.HP*(0.25 + (level-1) * 0.15)->ceil)));
                     }
                 )
             }
@@ -3571,20 +3545,19 @@ Arts.newEntry(
         oncePerBattle : false,
         canBlock : false,
         onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-            @:effects = targets[0].effects;
-            @:toRemove = [];
-            foreach(effects)::(i, effect) {
-                if (effect.id == 'base:healroot-growing' ||
-                    effect.id == 'base:triproot-growing' ||
-                    effect.id == 'base:poisonroot-growing')
-                    toRemove->push(value:effect.base);
-            }
-            
-            when(toRemove->keycount == 0)
+            @:which = [
+                'base:healroot-growing',
+                'base:triproot-growing',
+                'base:poisonroot-growing'                    
+            ]
+
+            @:effects = targets[0].effectStack.getAll()->filter(::(value) <- which->findIndex(:value.id) != -1);            
+            when(effects->keycount == 0)
                 windowEvent.queueMessage(text:'Nothing happened!');
+
             windowEvent.queueCustom(
                 onEnter :: {
-                    targets[0].removeEffects(effectBases:toRemove);
+                    targets[0].removeEffects(:which);
                 }
             )
             windowEvent.queueMessage(text:user.name + ' accelerated the growth of the seeds on ' + targets[0].name + '!');
@@ -3648,7 +3621,7 @@ Arts.newEntry(
         name: 'Elemental Shield',
         id : 'base:elemental-shield',
         targetMode : TARGET_MODE.NONE,
-        description: "Nullifies most Thunder, Fire, and Ice damage.",
+        description: "Nullifies most Thunder, Fire, and Ice damage for 5 turns.",
         durationTurns: 0,
         kind : KIND.EFFECT,
         traits : TRAITS.MAGIC,
@@ -3660,7 +3633,7 @@ Arts.newEntry(
             windowEvent.queueMessage(text:user.name + ' becomes shielded to elemental damage!');
             windowEvent.queueCustom(
                 onEnter :: {
-                    user.addEffect(from:user, id:'base:elemental-shield', durationTurns:20);                            
+                    user.addEffect(from:user, id:'base:elemental-shield', durationTurns:5);                            
                 }
             )
         }
@@ -4523,7 +4496,7 @@ Arts.newEntry(
             
             when(turnIndex == 2) ::<= {
                 breakpoint();
-                when ([...targets[0].effects]->filter(by:::(value) <- value.effect.id == 'base:wrapped')->size == 0) empty;
+                when (targets[0].effectStack.getAll()->filter(by:::(value) <- value.id == 'base:wrapped')->size == 0) empty;
                 
                 windowEvent.queueMessage(
                     text: 'While wrapping ' + targets[0].name + ' in their coils, ' + user.name + ' tries to devour ' + targets[0].name + '!'
@@ -4547,9 +4520,11 @@ Arts.newEntry(
                 
                 windowEvent.queueCustom(
                     onEnter :: {
-                        targets[0].removeEffectInstance(
-                            instance: targets[0].effects->filter(by:::(value) <- value.from == user && value.effect.id == 'base:wrapped')[0]
+                        @:which = targets[0].effectStack.getAll()->filter(
+                            ::(value) <- value.from == user && value.id == 'base:wrapped'
                         );
+                        when (which->size == 0) empty;
+                        targets[0].removeEffectInstance(:which);
                     }
                 )
                 
@@ -4847,7 +4822,7 @@ Arts.newEntry(
         name: 'Pebble',
         id : 'base:pebble',
         targetMode : TARGET_MODE.ONEPART,
-        description: "Throws a pebble at a target, causing one damage.",
+        description: "Throws a pebble at a target, causing a small amount of damage.",
         durationTurns: 0,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,

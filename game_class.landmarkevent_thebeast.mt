@@ -21,11 +21,7 @@
             @:beast = world.island.newInhabitant();
             beast.name = 'the Dungeon Beast';
             beast.species = Species.find(id:'base:beast');
-            beast.profession = Profession.new(base:Profession.database.find(id:'base:beast'));               
-            beast.clearAbilities();
-            foreach(beast.profession.gainSP(amount:10))::(i, ability) {
-                beast.learnAbility(id:ability);
-            }
+            beast.profession = Profession.find(id:'base:beast');               
 
             beast.stats.load(serialized:StatSet.new(
                 HP:   75,

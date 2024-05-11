@@ -1727,7 +1727,7 @@ Item.database.newEntry(data : {
         'base:explosion',
         'base:flash',
         'base:cure',
-        'base:greater-cure',
+        'base:cure-all',
         'base:summon-fire-sprite',
         'base:summon-ice-elemental',
         'base:summon-thunder-spawn'
@@ -1784,7 +1784,7 @@ Item.database.newEntry(data : {
         'base:explosion',
         'base:flash',
         'base:cure',
-        'base:greater-cure'
+        'base:cure-all'
     ],
 
     // fatigued
@@ -3297,7 +3297,7 @@ Item.database.newEntry(data : {
     state.description = String.combine(strings:[
         base.description,
         ' ',
-        (if (state.art == '') '' else 'If equipped, grants the art: "' + Arts.find(id:state.art).name + '". '),
+        (if (state.arts == empty) '' else 'If equipped, grants the Arts: "' + Arts.find(id:state.arts[0]).name + '" and "' + Arts.find(id:state.arts[1]).name + '". '),
         if (state.size == empty) '' else 'It is ' + sizeToString(state) + '. ',
         if (state.hasEmblem) (
             if (base.isApparel) 
@@ -3348,7 +3348,7 @@ Item.database.newEntry(data : {
         equipEffects : empty,
         useEffects : empty,
         intuition : 0,
-        art : '',
+        arts : empty,
         stats : empty,
         design : empty,
         modData : empty
@@ -3417,10 +3417,13 @@ Item.database.newEntry(data : {
             state.equipEffects = [];
             state.useEffects = [];
             state.stats = StatSet.new();
-            state.art = ::<= {
+            state.arts = ::<= {
                 when (artsHint) artsHint;
-                @:out = random.pickArrayItem(list:base.possibleArts);
-                when(out == empty) '';
+                @:out = [
+                    random.pickArrayItem(list:base.possibleArts),
+                    random.pickArrayItem(list:base.possibleArts)
+                ]
+                when(out[0] == empty) empty;
                 return out;
             }
             state.base = base;
@@ -3615,8 +3618,8 @@ Item.database.newEntry(data : {
             get ::<- _.equippedBy
         },
 
-        art : {
-            get ::<- if (_.state.art == '') empty else _.state.art
+        arts : {
+            get ::<- if (_.state.arts == empty) empty else _.state.arts
         },
             
         equipEffects : {

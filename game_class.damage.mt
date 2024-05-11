@@ -34,63 +34,27 @@
     AP : 1
 }
 
-@:Damage = class(
+@:type = Object.newType(
     name: 'Wyvern.Damage',
-    statics : {
-        TYPE : {get::<-TYPE},
-        CLASS : {get::<-CLASS}
-    },
-    define:::(this) {
-        @type_;
-        @amount_;
-        @dclass;
-        
-        this.constructor = ::(amount => Number, damageType => Number, damageClass => Number) {
-            amount_ = (amount)->ceil;
-            if (amount_ <= 0) amount_ = 1;// minimum of 1 damage
-            type_ = damageType;
-            dclass = damageClass;
-        };
-        
-        this.interface = {
-        
-            reduce ::(byRatio) {
-                amount_ *= byRatio;
-            },
-            
-            amount : {
-                get :: {
-                    return amount_;
-                },
-                
-                set ::(value => Number) {
-                    amount_ = value->ceil;
-                    if (amount_ <= 0) amount_ = 0;
-                }
-            },
-            
-            damageType : {
-                get :: {
-                    return type_;
-                },
-                
-                set ::(value => Number) {
-                    type_ = value;
-                }
-            },
-            
-            damageClass : {
-                get :: {
-                    return dclass;
-                },
-                
-                set ::(value => Number) {
-                    dclass = value;
-                }
-            
-            }
-        
-        }    
+    layout : {
+        damageClass : Number,
+        amount : Number,
+        damageType : Number,
+        forceCrit : Boolean
     }
 );
+
+@:Damage = {
+    TYPE : TYPE,
+    CLASS : CLASS,
+    new ::(amount, damageType, damageClass) {
+        @:out = Object.instantiate(type);
+        out.damageClass = damageClass;
+        out.damageType = damageType;
+        out.amount = amount;
+        out.forceCrit = false;
+        return out;
+    }
+}
+
 return Damage;

@@ -176,6 +176,17 @@
                     defaultAttack();
 
                 @:ability = Arts.find(id:card.id);
+                
+                
+                @:world = import(module:'game_singleton.world.mt');
+                @:party = world.party;
+                
+                // discourage abilities until players get their bearings, please!
+                @:tier = world.island.tier;
+                when ([...enemies]->filter(::(value) <- party.isMember(:value))->size > 0 &&
+                      random.try(percentSuccess:80 - (tier * 30)))
+                      defaultAttack();
+                     
 
                 when (ability.usageHintAI == Arts.USAGE_HINT.HEAL &&                
                     user_.hp == user_.stats.HP)
