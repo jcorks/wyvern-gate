@@ -116,6 +116,37 @@
                 return state.members->all(condition:::(value) <- value.isIncapacitated());
             },
             
+            queueCollectSupportArt::{
+                @:Arts = import(:'game_database.arts.mt');
+                @:ArtsDeck = import(:'game_class.artsdeck.mt');
+                @:art = Arts.getRandomFiltered(::(value) <- value.traits & Arts.TRAITS.SUPPORT);
+            
+                @:newArtRender ::{
+                    ArtsDeck.renderArt(
+                        handCard:ArtsDeck.synthesizeHandCard(id:art.id),
+                        topWeight: 0
+                    );
+                }
+            
+                windowEvent.queueMessage(
+                    topWeight: 1,
+                    text: 'A new Art has revealed itself!',
+                    renderable : {
+                        render : newArtRender
+                    }
+                );
+                
+                this.addSupportArt(id:art.id);
+
+                windowEvent.queueMessage(
+                    topWeight: 1,
+                    text: 'The Art was added to the Trunk. It is now available when editing a party member\'s Arts in the Party menu.',
+                    renderable : {
+                        render : newArtRender
+                    }                            
+                );            
+            },
+            
             addSupportArt ::(id) {
                 @index = state.arts->findIndexCondition(::(value) <- value.id == id);
                 when(index == -1) ::<={

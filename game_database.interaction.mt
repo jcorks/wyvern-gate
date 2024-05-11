@@ -33,6 +33,7 @@
 @:correctA = import(module:'game_function.correcta.mt');
 @:g = import(module:'game_function.g.mt');
 @:Scene = import(module:'game_database.scene.mt');
+@:chooseMultiple = import(:'game_function.choosemultiple.mt');
 
 
 
@@ -1022,6 +1023,157 @@ Interaction.newEntry(
         
     }
 )
+
+Interaction.newEntry(
+    data : {
+        name : 'Uncover Art',
+        id :  'base:uncover:arts',
+        keepInteractionMenu : true,
+        onInteract ::(location, party) {
+            @:world = import(module:'game_singleton.world.mt');
+            when(location.ownedBy == empty)
+                windowEvent.queueMessage(
+                    text: "No one is at the shop to sell you anything."
+                );
+                
+            when(location.ownedBy.isIncapacitated())
+                windowEvent.queueMessage(
+                    text: location.ownedBy.name + ' is incapacitated and cannot provide this service.'
+                );
+
+            windowEvent.queueMessage(
+                speaker: 'Arts Tecker',
+                text: '"For merely 200G, I can unlock a new Art within you for use in battle."'
+            );
+
+
+            when(world.party.inventory.gold < 200)
+                windowEvent.queueMessage(
+                    text: 'The party cannot afford this service.'
+                );
+
+            windowEvent.queueAskBoolean(
+                prompt: 'Learn new Support Art for 200G?',
+                onChoice::(which) {
+                    when(which == false) empty;
+                    
+                    world.party.addGoldAnimated(amount:-200, onDone::{
+                        windowEvent.queueMessage(
+                            speaker: 'Arts Tecker',
+                            text: '"Deep within your soul, I unlock your potential..."'                        
+                        );
+                        
+                        world.party.queueCollectSupportArt();
+
+                        windowEvent.queueMessage(
+                            speaker: 'Arts Tecker',
+                            text: '"Enjoy your new Art... Haha..."'                        
+                        );
+                    });
+                }            
+            );
+        },
+    }
+)
+
+
+Interaction.newEntry(
+    data : {
+        name : 'Exchange Arts',
+        id :  'base:trade:arts',
+        keepInteractionMenu : true,
+        onInteract ::(location, party) {
+            @:world = import(module:'game_singleton.world.mt');
+            when(location.ownedBy == empty)
+                windowEvent.queueMessage(
+                    text: "No one is at the shop to sell you anything."
+                );
+                
+            when(location.ownedBy.isIncapacitated())
+                windowEvent.queueMessage(
+                    text: location.ownedBy.name + ' is incapacitated and cannot provide this service.'
+                );
+
+            windowEvent.queueMessage(
+                speaker: 'Arts Tecker',
+                text: '"For 3 of your reserve Support Arts, I may give you one from my collection..."'
+            );
+
+
+            when(world.party.arts->size < 3)
+                windowEvent.queueMessage(
+                    text: 'The party does not have 3 Support Arts in the Trunk for trading.'
+                );
+
+            windowEvent.queueAskBoolean(
+                prompt: 'Trade 3 arts for a new one?',
+                onChoice::(which) {
+                    when(which == false) empty;
+                    
+                    windowEvent.queueMessage(
+                        speaker: 'Arts Tecker',
+                        text: '"Choose 3 Support Arts to trade..."'                        
+                    );
+                    
+                    
+                    
+                    @:choiceItems = [];
+                    @:choiceNames = [];
+                    
+                    @:Arts = import(:'game_database.arts.mt');
+                    @:ArtsDeck = import(:'game_class.artsdeck.mt');
+                    
+                    foreach(world.party.arts) ::(k, v) {
+                        for(0, v.count) ::(i) {
+                            choiceItems->push(:v.id);
+                            choiceNames->push(:Arts.find(:v.id).name);
+                        }
+                    }
+                    
+                    @hoveredArt;
+                    chooseMultiple(
+                        choiceItems,
+                        choiceNames,
+                        count: 3,
+                        prompt: 'Trade arts',
+                        leftWeight: 1,
+                        renderable : {
+                            render :: {
+                                when(hoveredArt == empty) empty;
+                                ArtsDeck.renderArt(
+                                    handCard:ArtsDeck.synthesizeHandCard(id:hoveredArt),
+                                    topWeight: 0.5,
+                                    leftWeight: 0
+                                );                                    
+                            }
+                        },
+                        onHover::(item) {
+                            hoveredArt = item;
+                        },
+                        
+                        onChoice::(items) {                    
+                            windowEvent.queueMessage(
+                                text: 'The Arts Tecker uses magick of some kind on the party...'                        
+                            );
+
+                            world.party.queueCollectSupportArt();
+
+                            foreach(items) ::(k, id) {
+                                world.party.takeSupportArt(:id);
+                            }
+
+                            windowEvent.queueMessage(
+                                speaker: 'Arts Tecker',
+                                text: '"Enjoy your new Art... Haha..."'                        
+                            );
+                        }
+                    );
+                }
+            );
+        },
+    }
+)
+
 
 Interaction.newEntry(
     data : {

@@ -111,7 +111,10 @@ return ::{
         });
         
         choices->push(:'Edit Supports...');
-    
+        choiceActions->push(::{
+            member.editSupports();
+        });
+        
     
         windowEvent.queueChoices(
             prompt: 'Arts:',

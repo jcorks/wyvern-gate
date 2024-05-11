@@ -782,6 +782,8 @@
                         startEnd(
                             message: 'The battle is won.'
                         );
+                        
+                        party.queueCollectSupportArt();
 
 
                         windowEvent.queueCustom(

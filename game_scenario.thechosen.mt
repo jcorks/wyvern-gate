@@ -443,7 +443,7 @@ return {
                 do :: {
                     @:basicArts = [
                         'base:pebble',
-                        'base:defend',
+                        'base:brace',
                         'base:retaliate',
                         'base:reevaluate'
                     ];
@@ -641,6 +641,13 @@ return {
     onResume ::(data) {
         @:instance = import(module:'game_singleton.instance.mt');
         instance.islandTravel();           
+        
+        
+        ///////////////////
+        for(0, 4) ::(i) {
+            @:world = import(module:'game_singleton.world.mt');
+            world.party.queueCollectSupportArt();        
+        }        
         
         
         ////////////////////

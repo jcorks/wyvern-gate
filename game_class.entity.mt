@@ -535,6 +535,177 @@
             return assembleDeck(*_);
         },
         
+        editSupports ::{
+            @:state = _.state;
+            @:this = _.this;
+            
+            @:equipped::{
+                when(this.supportArts->size == 0)
+                    windowEvent.queueMessage(
+                        text: this.name + ' currently has no Support Arts. View the Trunk to add some.'
+                    );
+            
+                @:choices = [];
+                @:choiceActs = [];
+
+                @:pushArt::(id){
+                    @art = Arts.find(:id);
+                    choices->push(:' ' + art.name);
+                    choiceActs->push(:id);
+                }
+            
+            
+                @which = 0;
+                windowEvent.queueChoices(
+                    onGetChoices ::{
+                        choices->setSize(:0);
+                        choiceActs->setSize(:0);        
+                        foreach(this.supportArts)::(k, v) {
+                            pushArt(id:v);
+                        }
+                        return choices;
+                    },
+                    prompt : this.name + ' : Supports',
+                    leftWeight: 1,
+                    topWeight: 0.5,
+                    canCancel: true,
+                    keep:true,
+                    renderable : {
+                        render::{
+                            when(choiceActs[which] == empty) empty;
+                            ArtsDeck.renderArt(
+                                handCard: ArtsDeck.synthesizeHandCard(id:choiceActs[which]),
+                                topWeight: 0.5,
+                                leftWeight: 0
+                            );
+                        }
+                    },
+                    onHover::(choice) {
+                        which = choice-1
+                    },
+                    
+                    onChoice::(choice) {
+                        which = choice-1;
+                        which = choice-1;
+                        when(choiceActs[which] == empty) empty;
+                        
+                        @:art = Arts.find(id:choiceActs[which]);
+                        
+                        windowEvent.queueChoices(
+                            prompt: art.name,
+                            choices : [
+                                'Put in Trunk'
+                            ],
+                            canCancel: true,
+                            onChoice::(choice) {
+                                @:world = import(module:'game_singleton.world.mt');
+                                world.party.addSupportArt(id:art.id);
+                                state.supportArts->remove(:state.supportArts->findIndex(:art.id));
+                            }
+                        );
+
+                    }
+                );
+
+                
+            }
+            
+            
+            @:trunk::{
+                when(this.supportArts->size == 0)
+                    windowEvent.queueMessage(
+                        text: 'The party\'s Support Trunk currently has no Support Arts.'
+                    );
+
+
+                @:choices = [];
+                @:choiceActs = [];
+
+                @:pushArt::(id){
+                    @art = Arts.find(:id);
+                    choices->push(:' ' + art.name);
+                    choiceActs->push(:id);
+                }
+                
+            
+                @which = 0;
+                windowEvent.queueChoices(
+                    prompt: 'Support Trunk:',
+                    leftWeight: 1,
+                    topWeight: 0.5,
+                    canCancel: true,
+                    keep:true,
+                    onGetChoices ::{
+                        @:world = import(module:'game_singleton.world.mt');
+                        choices->setSize(:0);
+                        choiceActs->setSize(:0);
+                        foreach(world.party.arts) ::(k, v) {
+                            for(0, v.count)::(i) {
+                                pushArt(:v.id);
+                            }
+                        }
+                        return choices;            
+                    },
+                    
+                    renderable : {
+                        render::{
+                            when(choiceActs[which] == empty) empty;
+                            ArtsDeck.renderArt(
+                                handCard: ArtsDeck.synthesizeHandCard(id:choiceActs[which]),
+                                topWeight: 0.5,
+                                leftWeight: 0
+                            );
+                        }
+                    },
+                    onHover::(choice) {
+                        which = choice-1
+                    },
+                    
+                    onChoice::(choice) {
+                        which = choice-1;
+                        when(choiceActs[which] == empty) empty;
+                        
+                        @:art = Arts.find(id:choiceActs[which]);
+                        
+                        windowEvent.queueChoices(
+                            prompt: art.name,
+                            choices : [
+                                'Put in ' + this.name + '\'s Deck'
+                            ],
+                            canCancel: true,
+                            onChoice::(choice) {
+                                @:world = import(module:'game_singleton.world.mt');
+                                world.party.takeSupportArt(id:art.id);
+                                state.supportArts->push(:art.id);
+                            }
+                        );
+                    }
+                );
+
+
+            
+            }
+            
+            
+
+            windowEvent.queueChoices(
+                prompt: this.name + ': Support Arts',
+                leftWeight: 1,
+                topWeight : 1,
+                choices : [
+                    'Equipped...',
+                    'Trunk...',
+                ],
+                canCancel: true,
+                keep : true,
+                onChoice::(choice) {
+                    match(choice) {
+                      (1): equipped(),
+                      (2): trunk()
+                    }
+                }
+            );            
+        },
 
         viewDeckArts ::(prompt) {
             @:state = _.state;

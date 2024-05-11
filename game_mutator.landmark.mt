@@ -69,6 +69,7 @@ Landmark.database.newEntry(
         ],
         requiredLocations : [
             'base:shop',
+            'base:arts-tecker',
             'base:school',
             'base:tavern',
             'base:blacksmith',
@@ -117,6 +118,7 @@ Landmark.database.newEntry(
             'base:shop',
             'base:shop',
             'base:shop',
+            'base:arts-tecker',
             'base:tavern',
             'base:arena',
             'base:inn',
@@ -500,6 +502,7 @@ Landmark.database.newEntry(
             {id:'base:home', rarity:1},
             {id:'base:tavern', rarity:7},
             {id:'base:shop', rarity:7},
+            {id:'base:arts-tecker', rarity:7},
             {id:'base:farm', rarity:4}
         ],
         requiredLocations : [],

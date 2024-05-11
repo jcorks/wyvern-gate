@@ -166,7 +166,7 @@ Location.database.newEntry(data:{
     rarity: 100,
     ownVerb: 'owned',
     category : CATEGORY.RESIDENTIAL,
-    symbol: '^',
+    symbol: '',
     minStructureSize : 1,
     onePerLandmark : false,
 
@@ -411,6 +411,71 @@ Location.database.newEntry(data:{
     
     }
 })
+
+Location.database.newEntry(data:{
+    name: 'Arts Tecker',
+    id: 'base:arts-tecker',
+    rarity: 100,
+    ownVerb : 'run',
+    category : CATEGORY.BUSINESS,
+    symbol: '^',
+    onePerLandmark : false,
+    minStructureSize : 1,
+
+    descriptions: [
+        "A mystical and exotic shop that provides services rather than goods.",
+    ],
+    interactions : [
+        'base:trade:arts',
+        'base:uncover:arts',
+        'base:talk',
+        'base:examine'
+    ],
+    
+    aggressiveInteractions : [
+        'base:steal',
+        'base:vandalize',            
+    ],
+
+
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {
+        @:Profession = import(module:'game_database.profession.mt');
+        location.ownedBy = location.landmark.island.newInhabitant();            
+        location.ownedBy.profession = Profession.find(id:'base:arcanist');
+        location.ownedBy.normalizeStats();              
+        location.name = 'Arts Tecker';
+        location.inventory.maxItems = 50;
+
+        @:nameGen = import(module:'game_singleton.namegen.mt');
+        @:story = import(module:'game_singleton.story.mt');
+
+
+
+
+        location.inventory.add(item:Item.new(base:Item.database.find(
+            id: 'base:skill-crystal'
+        )));                
+        location.inventory.add(item:Item.new(base:Item.database.find(
+            id: 'base:skill-crystal'
+        )));                
+    },
+    onInteract ::(location) {
+        return true;
+
+    },            
+    
+    onCreate ::(location) {
+
+    },
+    
+    onTimeChange::(location, time) {
+    
+    }
+})
+
 
 
 Location.database.newEntry(data:{
