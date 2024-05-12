@@ -143,6 +143,13 @@
     }
 }
 
+@:EVENTS = {
+    DRAW : 0,
+    DISCARD : 1,
+    SHUFFLE : 2,
+    LEVEL : 3
+}
+
 @:ArtsDeck = LoadableClass.create(
     name: 'Wyvern.ArtsDeck',
     items : {
@@ -153,6 +160,10 @@
     },
 
     statics : {
+        EVENTS : {
+            get ::<- EVENTS
+        },
+    
         synthesizeHandCard ::(id, level) {
             @c = Object.instantiate(type:HandCard);
             c.level = if (level == empty) 1 else level;
@@ -164,12 +175,21 @@
     },
 
     define:::(this, state) {
+        @:subscribers = {};
+    
         @:addHandCard::(id) {
             @:card = Object.instantiate(type:HandCard);
             card.id = id;
             card.owner = state;
             card.level = 1;
             state.hand->push(value:card);
+            emitEvent(event:EVENTS.DRAW, card);
+        }
+        
+        @:emitEvent::(*args) {
+            foreach(subscribers) ::(k, fn) {
+                fn(*args);
+            }
         }
     
         this.interface = {
@@ -177,6 +197,11 @@
                 state.deck = [];
                 state.hand = [];
                 state.discard = [];
+            },
+            
+            
+            subscribe ::(callback) {
+                subscribers->push(:callback);
             },
             
             handSize : {
@@ -210,11 +235,12 @@
                 }
             },
             
-            draw ::{
+            draw ::(silent){
                 if (state.deck->size == 0) ::<= {
                     state.deck = state.discard;
                     state.discard = [];
                     this.shuffle();
+                    emitEvent(event:EVENTS.SHUFFLE);
                 }
                 addHandCard(id:state.deck->pop);            
             },
@@ -224,6 +250,7 @@
                 if (cardRec.owner)
                     cardRec.owner.discard->push(value:cardRec.id); // handles if using other peoples cards
                 state.hand->remove(key:which);
+                emitEvent(event:EVENTS.DISCARD, card:cardRec);
             },
 
             discardFromHand ::(card) {
@@ -424,7 +451,14 @@
                 );
             },
             
+            levelUp::(levelIndex, discardIndex) {
+                @:handCard = this.hand[levelIndex];
+                @:discard = this.hand[discardIndex];
+                handCard.level += handCard.level;
+                this.discardFromHand(:discard);
             
+                emitEvent(event:EVENTS.LEVEL, card:handCard);
+            },
             
             chooseArtPlayer ::(onChoice, onCancel, canCancel, act, filter) {
                 selected = 0;
@@ -518,8 +552,11 @@
                                     choices,
                                     canCancel: true,
                                     onChoice::(choice) {        
-                                        handCard.level += choiceCards[choice-1].level;
-                                        this.discardFromHand(:choiceCards[choice-1]);
+                                        this.levelUp(
+                                            levelIndex: this.hand->findIndex(:handCard),
+                                            discardIndex: this.hand->findIndex(:choiceCards[choice-1])
+                                        );
+
                                         windowEvent.queueMessage(
                                             queueID,
                                             text: 'The card was sacrificed to increase the ' + Arts.find(id:handCard.id).name + ' art to Lv. ' + handCard.level + '.'

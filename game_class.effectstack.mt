@@ -22,30 +22,212 @@
 
     Known Events:
 
-    onAffliction : Function, //Called once when first activated
-    onPostAttackOther : Function, // Called AFTER the user has explicitly damaged a target
-    onPreAttackOther : Function, // called when user is giving damage
-    onAttacked : Function, // called when user is attacked, before being damaged.
-    onRemoveEffect : Function, //Called once when removed. All effects will be removed at some point.
-    onDamage : Function, // when the holder of the effect is hurt
-    onNextTurn : Function, //< on end phase of turn once added as an effect. Not called if duration is 0
-    onStatRecalculate : Function, // on start of a turn. Not called if duration is 0
-    onSuccessfulBlock : Function, // when a targetted body part is blocked by the receiver.
+    Event:      onAffliction
+    About:      called after an effect has first been added.
+    returns:    ignored 
+    args:
 
-New events:
 
-    onDraw
-    onHeal
-    onDiscard 
-    onStartTurn
-    onReaction 
-    onBlocked 
-    onAddEffect // returns whether the effect is allowed
-....onCrit 
-....onCritted
-....onKill 
-....onKnockout
-....onStatusAilment
+    Event:      onPreAttackOther
+    About:      called before user is giving damage. set damage amount to 0 to cancel the attack.
+                Propogation stops if damage.amount <= 0
+    returns:    ignored 
+    args:
+        - to: The one being attacked.
+        - damage: the damage information from the attack (Damage.type)
+    
+
+        
+    Event:      onPostAttackOther
+    About:      Called AFTER the user has explicitly damaged a target 
+    returns:    ignored 
+    args:
+        - to: the one being attacked 
+        - damage: the damage information from the attack. (Damage.type)
+
+    
+    Event:      onPreAttacked
+    About:      called when user is attacked, before being damaged. set damage amount to 0 to cancel attack
+                Propogation stops if damage.amount <= 0
+    returns:    ignored 
+    args:       
+        - attacker: the one attacking 
+        - damage: the damage information from the attack. (Damage.type);
+
+    
+    Event:      onPostAttacked
+    About:      called when user is attacked after damage is successful and non-zero
+    returns:    ignored 
+    args:       
+        - attacker: the one attacking
+        - damage: the damage information from the attack. (Damage.type)
+
+
+    Event:      onRemoveEffect
+    About:      Called once when removed. All effects will be removed at some point.
+    returns:    ignored
+    args:
+        
+    
+    
+    Event:      onPreDamage
+    About:      Called before damaging. Can cancel by setting damage amount to 0. This also cancels propogation
+    returns:    ignored 
+    args:
+        - attacker: the one attacking 
+        - damage: the damage information from the attack. (Damage.type);
+
+
+    Event:      onPostDamage
+    About:      Called after damaging. 
+    returns:    ignored 
+    args:
+        - attacker: the one attacking 
+        - damage: the damage information from the attack. (Damage.type);
+
+        
+        
+    Event:      onNextTurn
+    About:      on end phase of turn once added as an effect. Not called if duration is 0. 
+    returns:    Cancels holders turn if any return false
+                returning false does not stop propogation
+    args:
+        
+    Events:     onStatRecalculate
+    About:      when stats are recalculated for the holder.
+    returns:    ignored
+    args:
+    
+
+    
+    Event:      onDraw
+    About:      when a new card is drawn by the holder
+    returns:    ignored
+    args:
+        - card: the card being drawn 
+        
+        
+        
+    Event:      onShuffle
+    About:      when the deck is shuffled
+    returns:    ignored
+    args:
+        
+    Event:      onDiscard
+    About:      when a card is discarded, including usage
+    returns:    ignored
+    args:
+        - card: the card being discarded (hand card)
+        
+    Event:      onLevel
+    About:      ability upgraded
+    returns:    ignored 
+    args:
+        - card: the card being leveled (hand card)
+    
+
+    Event:      onPreHeal 
+    About:      Called before healing is applied. amount can be set to 0 to cancel healing 
+    returns:    ignored
+    args
+        - healingData
+            - amount: healing which is applied. propogation is cancelled if amount is 0 or below.
+
+
+            
+    Event:      onPostHeal
+    About:      After healing is applied
+    returns:    ignored
+    args
+        - amount: amount being healed
+
+
+    Event:      onPreReact
+    About:      Called before reacting
+    returns:    Return false from a callback to cancel the reaction.
+    args:
+        - card: The card being used to react
+        
+        
+    Event:      onPostReact 
+    About:      Called after reacting is applied.
+    returns:    ignored
+    args:
+        - card: The card reacted with.
+        
+        
+    Event:      onPreBlock 
+    About:      Called before blocking is calculated
+    returns:    ignored
+    args:
+        - attacker: the one attacking
+        - damage: the damage data. damage has not been applied so the amount is still editable.
+        - blockData
+            - targetDefendPart: the part chosen by the holder to block 
+            - targetPart: the part chosen by the attacker to attack
+            
+    Event:      onSuccessfulBlock
+    About:      Called when a targetted body part is blocked by the receiver.
+    returns:    ignored 
+    args:
+        - attacker: the one attacking
+        - damage: the info about the damaged
+        - blockData
+            - targetDefendPart: the part chosen by the holder to block 
+            - targetPart: the part chosen by the attacker to attack
+
+    Event:      onGotBlocked
+    About:      Called when the holder's attack got blocked 
+    returns:    ignored 
+    args:
+        - to: the one being attacked
+
+
+    Event:      onPreAddEffect
+    About:      called before adding an effect. EffectData is editable
+    returns:    return false to prevent effect from being added
+    args:
+        - from: the entity giving the effect       
+        - item: the item involved with the effect 
+        - effectData 
+            - id: the effect being given 
+            - durationTurns: the duration in turns
+
+
+    Event:      onPostAddEffect 
+    About:      called after adding an effect.
+    returns:    ignored 
+    args:
+        - from: the entity giving the effect
+        - item: the item involved with the effect
+        - effectID: the art id of the effect
+        - effectDurationTurns: the number of turns that the effect will be added for
+
+    Event:      onCritted 
+    About:      called after getting critical hit 
+    returns:    ignored 
+    args:
+        - attacker: the one performing the crit.
+
+    Event:      onCrit 
+    About:      called after getting critical hit on a target
+    returns:    ignored 
+    args:
+        - to: the one receiving the critical hit
+
+
+    Event:      onKill 
+    About:      called after killing a target
+    returns:    ignored 
+    args:
+        - to: the one getting killed
+
+
+    Event:      onKnockout 
+    About:      called after knocking out a target
+    returns:    ignored 
+    args:
+        - to: the one getting knocked out
 
 */
 
@@ -193,8 +375,7 @@ New events:
                 else 
                     getAll()
                 ;
-                when(all->size == 0) empty;
-                breakpoint();
+                when(all->size == 0) [];
 
             
                 @:ret = [];
@@ -255,17 +436,13 @@ New events:
                 }
                 @:ret = this.emitEvent(
                     name: 'onRemoveEffect',
-                    filter::(value) <- inSet[value] == true, 
-                    holder
+                    filter::(value) <- inSet[value] == true
                 );                
                 foreach(inSet) ::(i, e) {
                     state.effects->remove(:state.effects->findIndex(:i));                
                 }
                 
-                this.emitEvent(
-                    holder,
-                    name : 'onNextTurn'
-                );
+
             },
             
             clear::(all)  {
@@ -283,8 +460,7 @@ New events:
                 
                 @:ret = this.emitEvent(
                     name: 'onRemoveEffect',
-                    filter::(value) <- inSet[value] == true, 
-                    holder
+                    filter::(value) <- inSet[value] == true
                 );
                 state.effects = [];
                 if (all == true)

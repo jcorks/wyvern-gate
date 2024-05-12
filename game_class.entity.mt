@@ -148,6 +148,30 @@
 @:assembleDeck ::(this, state) {
     @:deck = ArtsDeck.new();
     
+    
+    deck.subscribe(::(event, card) {
+        match(event) {
+          (ArtsDeck.EVENTS.DRAW): this.effectStack.emitEvent(
+            name: 'onDraw',
+            card
+          ),
+
+          (ArtsDeck.EVENTS.DISCARD): this.effectStack.emitEvent(
+            name: 'onDiscard',
+            card
+          ),
+
+          (ArtsDeck.EVENTS.LEVEL): this.effectStack.emitEvent(
+            name: 'onLevel',
+            card
+          ),
+
+          (ArtsDeck.EVENTS.SHUFFLE): this.effectStack.emitEvent(
+            name: 'onShuffle'
+          )
+        }
+    });
+    
 
     // add weapon
     @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
@@ -172,6 +196,7 @@
 
 
 @initializeEffectStackProper ::(this, state) {
+    
     
     if (state.innateEffects != empty) ::<= {
         foreach(state.innateEffects) ::(i, v) {
@@ -477,10 +502,10 @@
             _.battle = battle;
             _.requestsRemove = false;
             _.abilitiesUsedBattle = {}
+            _.effectStack = EffectStack.new(parent:this);
             state.deck = assembleDeck(this, state);
             state.deck.shuffle();
             state.deck.redraw();
-            _.effectStack = EffectStack.new(parent:this);
             initializeEffectStackProper(*_);
 
             //resetEffects(priv:_, this:_.this, state:_.state);              
@@ -529,10 +554,6 @@
                 when (am < 0) 0;
                 return am;
             }
-        },
-        
-        assembleDeck ::{
-            return assembleDeck(*_);
         },
         
         editSupports ::{
@@ -860,7 +881,13 @@
             @act = true;
             
             this.effectStack.nextTurn();
+            
+            @:rets = this.effectStack.emitEvent(
+                name : 'onNextTurn'
+            );            
             this.checkStatChanged();
+
+            when(rets->findIndexCondition(::(value) <- value.returned == false) != -1) false;
             
             if (this.stats.SPD < 0) ::<= {
                 windowEvent.queueMessage(text:this.name + ' cannot move! (negative speed)');
@@ -990,9 +1017,12 @@
             if (targetPart == empty) targetPart = Entity.normalizedDamageTarget();
             if (targetDefendPart == empty) targetPart = Entity.normalizedDamageTarget();
         
-            @:hasNoEffectStack = _.effectStack == empty;
+            @:hasNoEffectStack = this.effectStack == empty;
         
-            @:effectStack = if (hasNoEffectStack) EffectStack.new() else _.this.effectStack;
+            if (hasNoEffectStack) 
+                _.effectStack = EffectStack.new();
+                
+            @:effectStack = _.effectStack;
             @:retval = ::<= {
                 @:dmg = Damage.new(
                     amount,
@@ -1003,6 +1033,7 @@
                 @:damaged = [];
                 // TODO: add weapon affinities if phys and equip weapon
                 // phys is always assumed to be with equipped weapon
+
                 effectStack.emitEvent(
                     name: 'onPreAttackOther',
                     to : target, 
@@ -1014,7 +1045,7 @@
 
                 if (target.effectStack)
                     target.effectStack.emitEvent(
-                        name: 'onAttacked',
+                        name: 'onPreAttacked',
                         attacker : this, 
                         damage : dmg,
                         emitCondition ::(effectInstance) <- dmg.amount > 0
@@ -1049,14 +1080,29 @@
                 @imperfectGuard = false;
 
                 if (targetPart != empty) ::<= {
+                
                     if (targetDefendPart == empty)
                         targetDefendPart = 0;
                     if (target.species.canBlock == false)
                         targetDefendPart = 0;
                     if (target.isIncapacitated())
-                        targetDefendPart = 0;
+                        targetDefendPart = 0
+                    else ::<= {
+                        @:blockData = {
+                            targetDefendPart : targetDefendPart,
+                            targetPart : targetPart
+                        };
+                        if (target.effectStack)
+                            target.effectStack.emitEvent(
+                                name: 'onPreBlock',
+                                attacker : this, 
+                                damage : dmg,
+                                blockData
+                            );     
                         
-                        
+                        targetDefendPart = blockData.targetDefendPart
+                        targetPart = blockData.targetPart;
+                    }                   
                     if (targetDefendPart == 0 && target.species.canBlock == true && target.isIncapacitated() == false) 
                         windowEvent.queueMessage(text: target.name + ' wasn\'t given a chance to block!');
 
@@ -1075,12 +1121,23 @@
                                 text: target.name + ' predicted ' + this.name + '\'s attack to their ' + which + ' and successfully blocked it!'
                             );
                             
-                            target.effectStack.emitEvent(
-                                name : 'onSuccessfulBlock',
-                                attacker: this,
-                                damage: dmg
-                            );
+                            @:blockData = {
+                                targetDefendPart : targetDefendPart,
+                                targetPart : targetPart
+                            };
+                            if (target.effectStack)
+                                target.effectStack.emitEvent(
+                                    name : 'onSuccessfulBlock',
+                                    attacker: this,
+                                    damage: dmg,
+                                    blockData
+                                );
                             dmg.amount = 0;
+                            
+                            this.effectStack.emitEvent(
+                                name: 'onGotBlocked',
+                                to: target
+                            );
                         } else ::<= {
                             dmg.amount *= .4;
                         }
@@ -1178,8 +1235,17 @@
 
                 effectStack.emitEvent(
                     name : 'onPostAttackOther',
-                    to: target
+                    to: target,
+                    damage: dmg
                 );
+                
+                if (target.effectStack)
+                    target.effectStack.emitEvent(
+                        name: 'onPostAttacked',
+                        attacker : this, 
+                        damage : dmg
+                    );
+                
 
                 when(hpWas0 && target.hp == 0) ::<= {
                     this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
@@ -1216,7 +1282,7 @@
                 dodgeable = false;
                 
                 
-            @:hasNoEffectStack = _.effectStack == empty;
+            @:hasNoEffectStack = this.effectStack == empty;
             
             if (hasNoEffectStack)
                 _.effectStack = EffectStack.new();
@@ -1286,8 +1352,19 @@
                 when (damage.amount == 0) false;
 
                 
-                if (critical == true)
+                if (critical == true) ::<= {
                     windowEvent.queueMessage(text: 'Critical damage!');
+                    this.effectStack.emitEvent(
+                        name: 'onCritted',
+                        attacker
+                    );
+
+                    if (attacker.effectStack)
+                        attacker.effectStack.emitEvent(
+                            name: 'onCrit',
+                            to: this
+                        );
+                }
 
 
                 @damageTypeName ::{
@@ -1341,6 +1418,14 @@
                 if (damage.damageType == Damage.TYPE.LIGHT && Number.random() > 0.98)
                     this.addEffect(from:attacker, id:'base:petrified',durationTurns:2);
                 
+
+                this.effectStack.emitEvent(
+                    name : 'onPostDamage',
+                    attacker,
+                    damage
+                );
+
+
                 
                 if (!alreadyKnockedOut && world.party.isMember(entity:this) && state.hp == 0 && Number.random() > 0.7 && world.party.members->size > 1) ::<= {
                     windowEvent.queueMessage(
@@ -1360,6 +1445,12 @@
 
                     this.flags.add(flag:StateFlags.FALLEN);
                     attacker.flags.add(flag:StateFlags.DEFEATED_ENEMY);
+                    
+                    if (attacker.effectStack)
+                        attacker.effectStack.emitEvent(
+                            name: 'onKnockout',
+                            to: this
+                        );
                 }
 
                 return true;
@@ -1386,15 +1477,38 @@
         heal ::(amount => Number, silent) {
             @:state = _.state;
             @:this = _.this;
+
+            @healingData = {
+                amount : amount
+            };
+            if (this.effectStack)
+                this.effectStack.emitEvent(
+                    name: 'onPreHeal',
+                    healingData: healingData,
+                    emitCondition ::(effectInstance) <- healingData.amount > 0
+                );
+            when(healingData.amount <= 0) empty;
+            amount = healingData.amount;
+
+
             
             if (state.hp > state.stats.HP) state.hp = state.stats.HP;
             when(state.hp >= state.stats.HP) empty;
             amount = amount->ceil;
             state.hp += amount;
             this.flags.add(flag:StateFlags.HEALED);
+
+
             if (state.hp > state.stats.HP) state.hp = state.stats.HP;
             if (silent == empty)
                 windowEvent.queueMessage(text: '' + this.name + ' heals ' + amount + ' HP (HP:' + this.renderHP() + ')');
+
+            if (this.effectStack)
+                this.effectStack.emitEvent(
+                    name: 'onPostHeal',
+                    amount: amount,
+                    emitCondition ::(effectInstance) <- healingData.amount > 0
+                );
         },
             
         getCanMake ::{
@@ -1604,6 +1718,14 @@
                 }
             }
 
+
+            if (from != empty) ::<= {
+                from.effectStack.emitEvent(
+                    name : 'onKill',
+                    to: this
+                );
+            }
+
             state.flags.add(flag:StateFlags.DIED);
             state.isDead = true;                
         },
@@ -1614,6 +1736,25 @@
             
             if (_.battle == empty)
                 _.effectStack = EffectStack.new(parent:this);
+
+
+            @:effectData = {
+                id : id,
+                durationTurns : durationTurns
+            }
+
+            @:rets = this.effectStack.emitEvent(
+                name: 'onPreAddEffect',
+                from,
+                item,
+                effectData
+            );
+            
+            id = effectData.id;
+            durationTurns = effectData.durationTurns;
+            
+            
+            when(rets->findIndexCondition(::(value) <- value.returned == false) != -1) empty;
                 
             this.effectStack.add(
                 from,
@@ -1622,6 +1763,15 @@
                 item
             );
             this.checkStatChanged();
+
+
+            this.effectStack.emitEvent(
+                name: 'onPostAddEffect',
+                from,
+                effectID: id,
+                effectDurationTurns: durationTurns                
+            );
+            
             
             if (_.battle == empty)
                 this.effectStack.clear(all:true);
@@ -1897,6 +2047,25 @@
             @:state = _.state;
             @:deck = state.deck;
             @:world = import(module:'game_singleton.world.mt');
+            
+            
+            @:confirm ::(card){
+                @:rets = this.effectStack.emitEvent(
+                    name: 'onPreReact',
+                    card: card
+                );
+                
+                // event cancelled reaction.
+                when (rets->findIndexCondition(::(value) <- value.returned == false) != -1) onReact();
+                
+                onReact(:card);
+
+                @:rets = this.effectStack.emitEvent(
+                    name: 'onPostReact',
+                    card: card
+                );
+                
+            }
 
             if (world.party.leader == this) ::<= {
                 windowEvent.queueMessage(

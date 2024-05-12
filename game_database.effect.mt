@@ -51,7 +51,6 @@ Effect.newEntry(
         id: 'base:defend',
         description: 'Reduces damage by 40%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 1,
         flags : FLAGS.BUFF,
@@ -69,7 +68,7 @@ Effect.newEntry(
                 }
             },
 
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 windowEvent.queueMessage(text:holder.name + "'s defending stance reduces damage!");
                 damage.amount *= 0.6;
             }
@@ -84,7 +83,6 @@ Effect.newEntry(
         id: 'base:brace',
         description: 'Increased defense and grants an additional block point.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 1,
         flags : FLAGS.BUFF,
@@ -108,7 +106,6 @@ Effect.newEntry(
         id: 'base:agile',
         description: 'The holder may now dodge attacks. If the holder has more DEX than the attacker, the chance of dodging increases if the holder\'s DEX is greater than the attacker\'s.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 1,
         flags : FLAGS.BUFF,
@@ -122,7 +119,7 @@ Effect.newEntry(
                 );
             },
 
-            onAttacked ::(from, item, holder, by, damage) {
+            onPreAttacked ::(from, item, holder, by, damage) {
                 @:StateFlags = import(module:'game_class.stateflags.mt');
                 @whiff = false;
                 @:hitrate::(this, attacker) {
@@ -164,7 +161,6 @@ Effect.newEntry(
         id : 'base:guard',
         description: 'Reduces damage by 90%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 1,
         flags : FLAGS.BUFF,
@@ -176,7 +172,7 @@ Effect.newEntry(
                 );
             
             },
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 windowEvent.queueMessage(text:holder.name + "'s defending stance reduces damage significantly!");
                 damage.amount *= 0.1;
             }
@@ -191,14 +187,13 @@ Effect.newEntry(
         id : 'base:apparition',
         description: 'Ghostly apparition makes it particularly hard to hit.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
         stats: StatSet.new(
         ),
         events : {
-            onAttacked ::(from, item, holder, by, damage) {
+            onPreAttacked ::(from, item, holder, by, damage) {
                 if (!holder.isIncapacitated() && random.try(percentSuccess:40)) ::<= {
                     windowEvent.queueMessage(text:holder.name + "'s ghostly body bends around the attack!");
                     damage.amount = 0;
@@ -217,14 +212,13 @@ Effect.newEntry(
         id : 'base:the-beast',
         description: 'The ferocity of this creature makes it particularly hard to hit.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
         stats: StatSet.new(
         ),
         events : {
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 when (!holder.isIncapacitated() && random.try(percentSuccess:35)) ::<= {
                     windowEvent.queueMessage(text:holder.name + " ferociously repels the attack!");
                     damage.amount = 0;
@@ -242,14 +236,13 @@ Effect.newEntry(
         id : 'base:seasoned-adventurer',
         description: 'Is considerably harder to hit, as they are an experienced fighter.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
         stats: StatSet.new(
         ),
         events : {
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 when (!holder.isIncapacitated() && random.try(percentSuccess:60)) ::<= {
                     windowEvent.queueMessage(text:
                         random.pickArrayItem(list: [
@@ -273,7 +266,6 @@ Effect.newEntry(
         id : 'base:defensive-stance',
         description: 'ATK -50%, DEF +200%, additional block point.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 1,
         flags : 0,
@@ -295,7 +287,6 @@ Effect.newEntry(
         id : 'base:offensive-stance',
         description: 'DEF -50%, ATK +200%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -316,7 +307,6 @@ Effect.newEntry(
         id : 'base:light-stance',        
         description: 'ATK -50%, SPD +100%, DEX +100%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -337,7 +327,6 @@ Effect.newEntry(
         id : 'base:heavy-stance',
         description: 'SPD -50%, DEF +200%, additional block point.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 1,
         flags : 0,
@@ -359,7 +348,6 @@ Effect.newEntry(
         id : 'base:meditative-stance',
         description: 'SPD -50%, INT +200%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -381,7 +369,6 @@ Effect.newEntry(
         id : 'base:striking-stance',
         description: 'SPD -30%, DEF -30%, ATK +200%, DEX +100%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -402,7 +389,6 @@ Effect.newEntry(
         id : 'base:reflective-stance',
         description: 'Attack retaliation',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         stats: StatSet.new(),
         blockPoints : 0,
@@ -414,7 +400,7 @@ Effect.newEntry(
                 );
             },
 
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 when (holder == attacker) empty;
                 // handles the DBZ-style case pretty well!
                 @:amount = (damage.amount / 2)->floor;
@@ -441,18 +427,22 @@ Effect.newEntry(
         id : 'base:counter',
         description: 'Dodges attacks and retaliates.',
         battleOnly : true,
-        skipTurn : true,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
         stats: StatSet.new(),
         events : {
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
+                windowEvent.queueMessage(text:holder.name + ' is busy concentrating on countering enemy attacks!');
+                return false;
+            },
+
             onAffliction ::(from, item, holder) {
                 windowEvent.queueMessage(
                     text: holder.name + ' is prepared for an attack!'
                 );
             },
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 @dmg = damage.amount * 0.75;
                 when (dmg < 1) empty;
                 damage.amount = 0;
@@ -479,7 +469,6 @@ Effect.newEntry(
         id : 'base:evasive-stance',
         description: '%50 chance damage nullify when from others.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -491,7 +480,7 @@ Effect.newEntry(
                 );
             },
 
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 when (holder == attacker) empty;
                 when(Number.random() > .5) empty;
 
@@ -513,7 +502,6 @@ Effect.newEntry(
         id : 'base:sneaked',
         description: 'Guarantees next damage from user is x3',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.DEBUFF,
@@ -523,7 +511,7 @@ Effect.newEntry(
                 windowEvent.queueMessage(text:from.name + " snuck behind " + holder.name + '!');
             
             },
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 breakpoint();
                 if (attacker == from) ::<= {
                     windowEvent.queueMessage(text:from.name + "'s sneaking takes " + holder.name + ' by surprise!');
@@ -542,7 +530,6 @@ Effect.newEntry(
         id : 'base:mind-focused',
         description: 'INT +100%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -568,7 +555,6 @@ Effect.newEntry(
         id : 'base:protect',
         description: 'DEF +100%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -593,7 +579,6 @@ Effect.newEntry(
         id : 'base:shield',
         description: 'DEF +10%, 30% chance to block',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -608,7 +593,7 @@ Effect.newEntry(
             onRemoveEffect ::(from, item, holder) {
                 windowEvent.queueMessage(text:holder.name + '\'s shield of light fades away.');
             },                
-            onAttacked ::(from, item, holder, by, damage) {
+            onPreAttacked ::(from, item, holder, by, damage) {
                 when (Number.random() < 0.3) ::<= {
                     windowEvent.queueMessage(text:holder.name + '\'s shield of light blocks the attack!');
                     damage.amount = 0;
@@ -626,7 +611,6 @@ Effect.newEntry(
         id : 'base:trigger-protect',
         description: 'Casts Protect',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -650,7 +634,6 @@ Effect.newEntry(
         id : 'base:trigger-evade',
         description: 'Allows the user to evade all attacks for the next turn.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -673,7 +656,6 @@ Effect.newEntry(
         id : 'base:evade',
         description: 'Allows the user to evade all attacks.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -683,7 +665,7 @@ Effect.newEntry(
             onAffliction ::(from, item, holder) {
                 windowEvent.queueMessage(text:holder.name + ' is covered in a mysterious wind!');
             },
-            onAttacked ::(from, item, holder, by, damage) {
+            onPreAttacked ::(from, item, holder, by, damage) {
                 windowEvent.queueMessage(text:holder.name + '\'s mysterious wind caused the attack to miss!');
                 damage.amount = 0;
                 return EffectStack.CANCEL_PROPOGATION;  
@@ -699,7 +681,6 @@ Effect.newEntry(
         id : 'base:trigger-regen',
         description: 'Slightly heals wounds.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -723,7 +704,6 @@ Effect.newEntry(
         id : 'base:trigger-hurt-chance',
         description: '10% chance to hurt for 1HP.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -754,7 +734,6 @@ Effect.newEntry(
         id : 'base:trigger-fatigue-chance',
         description: '10% chance to hurt for 1AP.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -785,7 +764,6 @@ Effect.newEntry(
         id : 'base:trigger-break-chance',
         description: '5% chance to break item.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -809,7 +787,6 @@ Effect.newEntry(
         id : 'base:trigger-spikes',
         description: 'Casts Spikes',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -833,7 +810,6 @@ Effect.newEntry(
         id : 'base:spikes',
         description: 'DEF +10%, light damage when attacked.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -844,7 +820,7 @@ Effect.newEntry(
             onAffliction ::(from, item, holder) {
                 windowEvent.queueMessage(text:holder.name + ' is covered in spikes of light.');
             },
-            onAttacked ::(from, item, holder, by, damage) {
+            onPreAttacked ::(from, item, holder, by, damage) {
                 windowEvent.queueMessage(text:by.name + ' gets hurt by ' + holder.name + '\'s spikes of light!');
                 by.damage(attacker:holder, damage:Damage.new(
                     amount:random.integer(from:1, to:4),
@@ -868,7 +844,6 @@ Effect.newEntry(
         id : 'base:trigger-ap-regen',
         description: 'Slightly recovers AP.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -891,7 +866,6 @@ Effect.newEntry(
         id : 'base:trigger-shield',
         description: 'Casts Shield',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -916,7 +890,6 @@ Effect.newEntry(
         id : 'base:trigger-strength-boost',
         description: 'Triggers a boost in strength.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -939,7 +912,6 @@ Effect.newEntry(
         id : 'base:strength-boost',
         description: 'ATK +70%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -963,7 +935,6 @@ Effect.newEntry(
         id : 'base:trigger-defense-boost',
         description: 'Triggers a boost in defense.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -986,7 +957,6 @@ Effect.newEntry(
         id : 'base:defense-boost',
         description: 'DEF +70%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1010,7 +980,6 @@ Effect.newEntry(
         id : 'base:trigger-mind-boost',
         description: 'Triggers a boost in mental acuity.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -1033,7 +1002,6 @@ Effect.newEntry(
         id : 'base:mind-boost',
         description: 'INT +70%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1057,7 +1025,6 @@ Effect.newEntry(
         id : 'base:trigger-dex-boost',
         description: 'Triggers a boost in dexterity.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -1080,7 +1047,6 @@ Effect.newEntry(
         id : 'base:dex-boost',
         description: 'DEX +70%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1104,7 +1070,6 @@ Effect.newEntry(
         id : 'base:trigger-speed-boost',
         description: 'Triggers a boost in speed.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -1127,7 +1092,6 @@ Effect.newEntry(
         id : 'base:speed-boost',
         description: 'SPD +70%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1154,7 +1118,6 @@ Effect.newEntry(
         id : 'base:night-veil',
         description: 'DEF +50%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1175,7 +1138,6 @@ Effect.newEntry(
         id : 'base:dayshroud',
         description: 'DEF +50%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1196,7 +1158,6 @@ Effect.newEntry(
         id : 'base:call-of-the-night',
         description: 'ATK +40%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1218,7 +1179,6 @@ Effect.newEntry(
         id : 'base:lunacy',
         description: 'Skips turn and, instead, attacks a random enemy. ATK,DEF +70%.',
         battleOnly : true,
-        skipTurn : true,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1239,6 +1199,7 @@ Effect.newEntry(
                     damageType : Damage.TYPE.PHYS,
                     damageClass: Damage.CLASS.HP
                 );                   
+                return false;
             }
         }
     }
@@ -1251,7 +1212,6 @@ Effect.newEntry(
         id : 'base:greater-call-of-the-night',
         description: 'ATK +100%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1272,7 +1232,6 @@ Effect.newEntry(
         id : 'base:greater-night-veil',
         description: 'DEF +100%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1294,7 +1253,6 @@ Effect.newEntry(
         id : 'base:greater-dayshroud',
         description: 'DEF +100%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1316,7 +1274,6 @@ Effect.newEntry(
         id : 'base:moonsong',
         description: 'Heals 5% HP every turn',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1341,7 +1298,6 @@ Effect.newEntry(
         id : 'base:sol-attunement',
         description: 'Heals 5% HP every turn',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1366,7 +1322,6 @@ Effect.newEntry(
         id : 'base:greater-moonsong',
         description: 'Heals 15% HP every turn',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1391,7 +1346,6 @@ Effect.newEntry(
         id : 'base:greater-sol-attunement',
         description: 'Heals 15% HP every turn',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1417,7 +1371,6 @@ Effect.newEntry(
         id : 'base:grace',
         description: 'If hurt while HP is 0, the damage is nullified and this effect disappears.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1431,7 +1384,7 @@ Effect.newEntry(
             onRemoveEffect ::(from, item, holder) {
                 windowEvent.queueMessage(text:holder.name + '\'s halo disappears.');
             },                
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 if (holder.hp == 0) ::<= {
                     damage.amount = 0;
                     windowEvent.queueMessage(text:holder.name + ' is protected from death!');
@@ -1454,7 +1407,6 @@ Effect.newEntry(
         id : 'base:consume-item',
         description: 'The item is destroyed in the process of its effects',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : 0,
@@ -1476,7 +1428,6 @@ Effect.newEntry(
         id : 'base:break-item',
         description: 'The item is destroyed in the process of misuse or strain',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : 0,
@@ -1500,7 +1451,6 @@ Effect.newEntry(
         id : 'base:fling',
         description: 'The item is violently lunged at a target, likely causing damage. The target may catch the item.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : 0,
@@ -1546,7 +1496,6 @@ Effect.newEntry(
         id : 'base:hp-recovery-all',
         description: 'Heals 100% of HP.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1565,7 +1514,6 @@ Effect.newEntry(
         id : 'base:ap-recovery-all',
         description: 'Heals 100% of AP.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1584,7 +1532,6 @@ Effect.newEntry(
         id : 'base:treasure-1',
         description: 'Opening gives a fair number of G.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : 0,
@@ -1609,7 +1556,6 @@ Effect.newEntry(
         id : 'base:field-cook',
         description: 'Chance to cook a meal after battle.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -1646,7 +1592,6 @@ Effect.newEntry(
         id : 'base:penny-picker',
         description: 'Looks on the ground for G after battle.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -1679,7 +1624,6 @@ Effect.newEntry(
         id : 'base:alchemists-scavenging',
         description: 'Scavenges for alchemist ingredients.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : 0,
@@ -1718,7 +1662,6 @@ Effect.newEntry(
         id : 'base:trained-hand',
         description: 'ATK +30%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1741,7 +1684,6 @@ Effect.newEntry(
         id : 'base:focus-perception',
         description: 'ATK +30%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1758,7 +1700,6 @@ Effect.newEntry(
         id : 'base:cheered',
         description: 'ATK +70%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1773,7 +1714,6 @@ Effect.newEntry(
         id : 'base:poisonroot-growing',
         description: 'Vines grow on target. SPD -10%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,                
         stats: StatSet.new(SPD:-10),
         blockPoints : 0,
@@ -1798,7 +1738,6 @@ Effect.newEntry(
         id : 'base:poisonroot',
         description: 'Every turn takes poison damage. SPD -10%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         stats: StatSet.new(SPD:-10),
         blockPoints : 0,
@@ -1827,7 +1766,6 @@ Effect.newEntry(
         id : 'base:triproot-growing',
         description: 'Vines grow on target. SPD -10%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.DEBUFF,
@@ -1852,7 +1790,6 @@ Effect.newEntry(
         id : 'base:triproot',
         description: 'Every turn 40% chance to trip. SPD -10%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.DEBUFF,
@@ -1879,7 +1816,6 @@ Effect.newEntry(
         id : 'base:healroot-growing',
         description: 'Vines grow on target. SPD -10%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : 0,
@@ -1904,7 +1840,6 @@ Effect.newEntry(
         id : 'base:healroot',
         description: 'Every turn heal 5% HP. SPD -10%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1931,7 +1866,6 @@ Effect.newEntry(
         id : 'base:defend-other',
         description: 'Takes hits for another.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1942,7 +1876,7 @@ Effect.newEntry(
             onRemoveEffect ::(from, item, holder) {
                 windowEvent.queueMessage(text:from.name + ' resumes a normal stance!');
             },                
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 @:amount = damage.amount;
 
                 when(from == holder) ::<= {
@@ -1973,7 +1907,6 @@ Effect.newEntry(
         id : 'base:perfect-guard',
         description: 'All damage is nullified.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -1983,7 +1916,7 @@ Effect.newEntry(
                 windowEvent.queueMessage(text:holder.name + ' is strongly guarding themself');
             },
             
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 if (attacker != holder) ::<= {
                     windowEvent.queueMessage(text:holder.name + ' is protected from the damage!');
                     damage.amount = 0;                        
@@ -1999,7 +1932,6 @@ Effect.newEntry(
         id : 'base:convinced',
         description: 'Unable to act.',
         battleOnly : true,
-        skipTurn : true,
         stackable: false,
         stats: StatSet.new(),
         blockPoints : 0,
@@ -2010,6 +1942,7 @@ Effect.newEntry(
                     windowEvent.queueMessage(text:holder.name + ' realizes ' + from.name + "'s argument was complete junk!")
                 else                    
                     windowEvent.queueMessage(text:holder.name + ' thinks about ' + from.name + "'s argument!");
+                return false;
             }
         }
     }
@@ -2021,7 +1954,6 @@ Effect.newEntry(
         id : 'base:grappled',
         description: 'Unable to act.',
         battleOnly : true,
-        skipTurn : true,
         stackable: false,
         blockPoints : -3,
         stats: StatSet.new(),
@@ -2032,6 +1964,7 @@ Effect.newEntry(
                     windowEvent.queueMessage(text:holder.name + ' broke free from the grapple!')
                 else                    
                     windowEvent.queueMessage(text:holder.name + ' is being grappled and is unable to move!');
+                return false;
             }
         }
     }
@@ -2043,7 +1976,6 @@ Effect.newEntry(
         id : 'base:ensnared',
         description: 'Unable to act.',
         battleOnly : true,
-        skipTurn : true,
         stackable: false,
         blockPoints : -3,
         flags : FLAGS.DEBUFF,
@@ -2054,6 +1986,7 @@ Effect.newEntry(
                     windowEvent.queueMessage(text:holder.name + ' broke free from the snare!')
                 else                    
                     windowEvent.queueMessage(text:holder.name + ' is ensnared and is unable to move!');
+                return false;
             }
         }
     }
@@ -2065,7 +1998,6 @@ Effect.newEntry(
         id : 'base:grappling',
         description: 'Unable to act.',
         battleOnly : true,
-        skipTurn : true,
         stackable: false,
         blockPoints : -3,
         flags : 0,
@@ -2073,6 +2005,7 @@ Effect.newEntry(
         events : {
             onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
                 windowEvent.queueMessage(text:holder.name + ' is in the middle of grappling and cannot move!');
+                return false;
             }
         }
     }
@@ -2084,7 +2017,6 @@ Effect.newEntry(
         id : 'base:ensnaring',
         description: 'Unable to act.',
         battleOnly : true,
-        skipTurn : true,
         stackable: false,
         blockPoints : -3,
         flags : 0,
@@ -2092,6 +2024,7 @@ Effect.newEntry(
         events : {
             onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
                 windowEvent.queueMessage(text:holder.name + ' is busy keeping someone ensared and cannot move!');
+                return false;
             }
         }
     }
@@ -2105,12 +2038,16 @@ Effect.newEntry(
         id : 'base:bribed',
         description: 'Unable to act.',
         battleOnly : true,
-        skipTurn : true,
         stackable: false,
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
-        events : {}
+        events : {
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
+                windowEvent.queueMessage(text:holder.name + ' was bribed and can no longer act!');
+                return false;
+            }
+        }
     }
 )
 Effect.newEntry(
@@ -2119,12 +2056,16 @@ Effect.newEntry(
         id : 'base:stunned',
         description: 'Unable to act.',
         battleOnly : true,
-        skipTurn : true,
         stackable: false,
         blockPoints : -3,
         flags : FLAGS.DEBUFF,
         stats: StatSet.new(),
         events : {
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
+                windowEvent.queueMessage(text:holder.name + ' is still stunned!');
+                return false;
+            },
+
             onAffliction ::(from, item, holder) {
                 windowEvent.queueMessage(text:holder.name + ' was stunned!');
             },
@@ -2142,7 +2083,6 @@ Effect.newEntry(
         id : 'base:sharpen',
         description: 'ATK +20%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -2160,7 +2100,6 @@ Effect.newEntry(
         id : 'base:weaken-armor',
         description: 'DEF -20%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.DEBUFF,
@@ -2177,7 +2116,6 @@ Effect.newEntry(
         id : 'base:dull-weapon',
         description: 'ATK -20%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.DEBUFF,
@@ -2194,7 +2132,6 @@ Effect.newEntry(
         id : 'base:strengthen-armor',
         description: 'DEF +20%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -2212,7 +2149,6 @@ Effect.newEntry(
         id : 'base:lunar-affinity',
         description: 'INT,DEF,ATK +40% if night time.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -2244,7 +2180,6 @@ Effect.newEntry(
         id : 'base:coordinated',
         description: 'SPD,DEF,ATK +35%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -2266,7 +2201,6 @@ Effect.newEntry(
         id : 'base:proceed-with-caution',
         description: 'DEF + 50%',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -2296,7 +2230,6 @@ Effect.newEntry(
         id : 'base:solar-affinity',
         description: 'INT,DEF,ATK +40% if day time.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -2330,14 +2263,13 @@ Effect.newEntry(
         id : 'base:non-combat-weapon',
         description: '20% chance to deflect attack then break weapon.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
         events : {
 
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 if (Number.random() > 0.8 && damage.damageType == Damage.TYPE.PHYS) ::<= {
                     @:Entity = import(module:'game_class.entity.mt');
                 
@@ -2359,13 +2291,12 @@ Effect.newEntry(
         id : 'base:auto-life',
         description: '50% chance to fully revive if damaged while at 0 HP. This breaks the item.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
         stats: StatSet.new(),
         events : {
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 if (holder.hp == 0) ::<= {
                     windowEvent.queueMessage(text:holder.name + " glows!");
                     holder.unequipItem(item, silent:true);
@@ -2397,13 +2328,12 @@ Effect.newEntry(
         id : 'base:flight',
         description: 'Dodges attacks.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
         stats: StatSet.new(),
         events : {
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 if (attacker != holder) ::<= {
                     @:Entity = import(module:'game_class.entity.mt');                    
                     windowEvent.queueMessage(text:holder.name + " dodges the damage from Flight!");
@@ -2421,7 +2351,6 @@ Effect.newEntry(
         id : 'base:assassins-pride',
         description: 'SPD, ATK +25% for each slain.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -2442,7 +2371,6 @@ Effect.newEntry(
         id : 'base:pride',
         description: 'SPD, ATK +25%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -2464,13 +2392,12 @@ Effect.newEntry(
         id : 'base:dueled',
         description: 'If attacked by user, 1.5x damage.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.DEBUFF,
         stats: StatSet.new(),
         events : {
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 if (from == attacker) ::<= {
                     windowEvent.queueMessage(text: from.name + '\'s duel challenge focuses damage!');
                     damage.amount *= 2.25;
@@ -2485,7 +2412,6 @@ Effect.newEntry(
         id : 'base:consume-item-partially',
         description: 'The item has a chance of being used up',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : 0,
@@ -2513,7 +2439,6 @@ Effect.newEntry(
         id : 'base:bleeding',
         description: 'Damage every turn to holder. ATK,DEF,SPD -20%.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.AILMENT,
@@ -2554,7 +2479,6 @@ Effect.newEntry(
         id : 'base:explode',
         description: 'Damage to holder.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : 0,
@@ -2582,7 +2506,6 @@ Effect.newEntry(
         id : 'base:poison-rune',
         description: 'Damage every turn to holder.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.DEBUFF,
@@ -2619,7 +2542,6 @@ Effect.newEntry(
         id : 'base:destruction-rune',
         description: 'Causes INT-based damage when rune is released.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.DEBUFF,
@@ -2642,7 +2564,6 @@ Effect.newEntry(
         id : 'base:regeneration-rune',
         description: 'Heals holder every turn.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -2671,7 +2592,6 @@ Effect.newEntry(
         id : 'base:shield-rune',
         description: '+100% DEF while active.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -2698,7 +2618,6 @@ Effect.newEntry(
         id : 'base:cure-rune',
         description: 'Cures the holder when the rune is released.',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -2726,7 +2645,6 @@ Effect.newEntry(
         id : 'base:poisoned',
         description: 'Damage every turn to holder.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.AILMENT,
@@ -2763,7 +2681,6 @@ Effect.newEntry(
         id : 'base:blind',
         description: '50% chance to miss attacks.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.AILMENT,
@@ -2794,7 +2711,6 @@ Effect.newEntry(
         id : 'base:burned',
         description: '50% chance to get damage each turn.',
         battleOnly : true,
-        skipTurn : false,
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.AILMENT,
@@ -2830,12 +2746,17 @@ Effect.newEntry(
         id : 'base:frozen',
         description: 'Unable to act.',
         battleOnly : true,
-        skipTurn : true,
         stackable: false,
         blockPoints : -3,
         flags : FLAGS.AILMENT,
         stats: StatSet.new(),
         events : {
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
+                windowEvent.queueMessage(text:holder.name + ' is still frozen and unable to act!');
+                return false;
+            },
+            
+        
             onAffliction ::(from, item, holder) {
                 windowEvent.queueMessage(text:holder.name + " was frozen");
             
@@ -2854,7 +2775,6 @@ Effect.newEntry(
         id : 'base:paralyzed',
         description: 'SPD,ATK -100%',
         battleOnly : true,
-        skipTurn : true,
         stackable: false,
         blockPoints : -3,
         flags : FLAGS.AILMENT,
@@ -2863,6 +2783,11 @@ Effect.newEntry(
             ATK: -100
         ),
         events : {
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
+                windowEvent.queueMessage(text:holder.name + ' is still paralyzed and unable to act!');
+                return false;
+            },
+
             onAffliction ::(from, item, holder) {
                 windowEvent.queueMessage(text:holder.name + " was paralyzed");
             
@@ -2882,7 +2807,6 @@ Effect.newEntry(
         id : 'base:mesmerized',
         description: 'SPD,DEF -100%',
         battleOnly : true,
-        skipTurn : true,
         stackable: false,
         blockPoints : -3,
         flags : FLAGS.DEBUFF,
@@ -2891,6 +2815,11 @@ Effect.newEntry(
             DEF: -100
         ),
         events : {
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
+                windowEvent.queueMessage(text:holder.name + ' is still mesmerized and unable to act!');
+                return false;
+            },
+
             onAffliction ::(from, item, holder) {
                 windowEvent.queueMessage(text:holder.name + " was mesmerized!");
             
@@ -2910,13 +2839,17 @@ Effect.newEntry(
         id : 'base:wrapped',
         description: 'Can\'t move.',
         battleOnly : true,
-        skipTurn : true,
         stackable: false,
         blockPoints : -3,
         flags : 0,
         stats: StatSet.new(
         ),
         events : {
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
+                windowEvent.queueMessage(text:holder.name + ' is still wrapped and unable to act!');
+                return false;
+            },
+
             onAffliction ::(from, item, holder) {
                 windowEvent.queueMessage(text:holder.name + " was wrapped and encoiled!");
             
@@ -2936,7 +2869,6 @@ Effect.newEntry(
         id : 'base:petrified',
         description: 'Unable to act. DEF -50%',
         battleOnly : true,
-        skipTurn : true,
         stackable: false,
         blockPoints : -3,
         flags : FLAGS.AILMENT,
@@ -2944,6 +2876,11 @@ Effect.newEntry(
             DEF: -50
         ),
         events : {
+            onNextTurn ::(from, item, holder, turnIndex, turnCount) {                
+                windowEvent.queueMessage(text:holder.name + ' is still petrified and unable to act!');
+                return false;
+            },
+
             onAffliction ::(from, item, holder) {
                 windowEvent.queueMessage(text:holder.name + " was petrified!");
             
@@ -2962,14 +2899,13 @@ Effect.newEntry(
         id : 'base:elemental-tag',
         description: 'Weakness to Fire, Ice, and Thunder damage by 100%',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.DEBUFF,
         stats: StatSet.new(),
         events : {
 
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 if (damage.damageType == Damage.TYPE.FIRE) ::<= {
                     damage.amount *= 2;
                 }
@@ -2991,14 +2927,13 @@ Effect.newEntry(
         id : 'base:elemental-shield',
         description: 'Nullify most types of elemental damage.',
         battleOnly : true,
-        skipTurn : false,
         stats: StatSet.new(),
         stackable: false,
         blockPoints : 0,
         flags : FLAGS.BUFF,
         events : {
 
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 
                 if (damage.damageType == Damage.TYPE.FIRE) ::<= {
                     damage.amount *= 0;
@@ -3021,7 +2956,6 @@ Effect.newEntry(
         id : 'base:burning',
         description: 'Gives fire damage and gives 50% ice resist',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -3035,7 +2969,7 @@ Effect.newEntry(
                 ),dodgeable: false);
             },
 
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 if (damage.damageType == Damage.TYPE.ICE) ::<= {
                     damage.amount *= 0.5;
                 }
@@ -3050,7 +2984,6 @@ Effect.newEntry(
         id : 'base:icy',
         description: 'Gives ice damage and gives 50% fire resist',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -3064,7 +2997,7 @@ Effect.newEntry(
                 ),dodgeable: false);
             },
 
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 if (damage.damageType == Damage.TYPE.FIRE) ::<= {
                     damage.amount *= 0.5;
                 }
@@ -3079,7 +3012,6 @@ Effect.newEntry(
         id : 'base:shock',
         description: 'Gives thunder damage and gives 50% thunder resist',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -3092,7 +3024,7 @@ Effect.newEntry(
                     damageClass: Damage.CLASS.HP
                 ),dodgeable: false);
             },
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
                     damage.amount *= 0.5;
                 }
@@ -3107,7 +3039,6 @@ Effect.newEntry(
         id : 'base:toxic',
         description: 'Gives poison damage and gives 50% poison resist',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -3122,7 +3053,7 @@ Effect.newEntry(
                 dodgeable: false
                 );
             },
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 if (damage.damageType == Damage.TYPE.POISON) ::<= {
                     damage.amount *= 0.5;
                 }
@@ -3137,7 +3068,6 @@ Effect.newEntry(
         id : 'base:shimmering',
         description: 'Gives light damage and gives 50% dark resist',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -3150,7 +3080,7 @@ Effect.newEntry(
                     damageClass: Damage.CLASS.HP
                 ),dodgeable: false);
             },
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 if (damage.damageType == Damage.TYPE.DARK) ::<= {
                     damage.amount *= 0.5;
                 }
@@ -3164,7 +3094,6 @@ Effect.newEntry(
         id : 'base:dark',
         description: 'Gives dark damage and gives 50% light resist',
         battleOnly : true,
-        skipTurn : false,
         stackable: true,
         blockPoints : 0,
         flags : FLAGS.BUFF,
@@ -3178,7 +3107,7 @@ Effect.newEntry(
                 ),dodgeable: false);
             },
 
-            onDamage ::(from, item, holder, attacker, damage) {
+            onPreDamage ::(from, item, holder, attacker, damage) {
                 if (damage.damageType == Damage.TYPE.LIGHT) ::<= {
                     damage.amount *= 0.5;
                 }
@@ -3198,7 +3127,6 @@ Effect.newEntry(
         id : String,
         description : String,
         battleOnly : Boolean,
-        skipTurn : Boolean, // whether this effect makes the user not act for a turn
         stats : StatSet.type,
         flags : Number,
         blockPoints : Number,

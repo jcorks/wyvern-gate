@@ -1076,7 +1076,7 @@
             
                             if (requiresAP) ::<= {                
                                 windowEvent.queueMessage(
-                                    text: entityTurn.name + ' uses an Arts Point for the support Art!'
+                                    text: entityTurn.name + ' uses an Arts Point for the Support Art!'
                                 );
                                 entityTurn.ap -= 1;
                             }

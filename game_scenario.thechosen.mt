@@ -644,15 +644,17 @@ return {
         
         
         ///////////////////
+        /*
         for(0, 4) ::(i) {
             @:world = import(module:'game_singleton.world.mt');
             world.party.queueCollectSupportArt();        
-        }        
+        } 
+        */       
         
         
         ////////////////////
         
-        /*
+        
         @:world = import(module:'game_singleton.world.mt');
         @:enemies = [
             world.island.newInhabitant(),
@@ -678,7 +680,7 @@ return {
                 instance.gameOver(reason:'The party was wiped out.');
             }
         );
-        */
+        
         
         //////////////////////
         
