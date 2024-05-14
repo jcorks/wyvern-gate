@@ -220,6 +220,15 @@
             );
         }
     }
+    
+    this.effectStack.subscribe(
+        ::(*args) {
+            foreach(this.equips) ::(i, v) {
+                when(v.id == 'base:none') empty;
+                v.commitEffectEvent(*args);
+            }
+        }
+    );
 }
 
 
@@ -865,11 +874,6 @@
             @:state = _.state;
             @:this = _.this;
             @:equips = state.equips;
-            foreach(EQUIP_SLOTS)::(str, i) {
-                when(i == 0 && equips[0] == equips[1]) empty;
-                when(equips[i] == empty) empty;
-                equips[i].onTurnEnd(wielder:this, battle);
-            }
         },
 
         // lets the entity know that their turn has come.            

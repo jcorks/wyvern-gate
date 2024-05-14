@@ -27,41 +27,6 @@
 @:reset :: {
 @:StateFlags = import(module:'game_class.stateflags.mt');
 
-ItemEnchantCondition.newEntry(
-    data : {
-        name : 'On Defend',
-        id : 'base:on-defend',
-        description : 'After the wielder defends',
-        isState : false,
-        onTurnCheck ::(wielder, item, battle) {
-            return wielder.flags.has(flag:StateFlags.DEFENDED);
-        }                
-    }
-)
-
-ItemEnchantCondition.newEntry(
-    data : {
-        name : 'On Attack',
-        id : 'base:on-attack',
-        description : 'After the wielder attacks',
-        isState : false,
-        onTurnCheck ::(wielder, item, battle) {
-            return wielder.flags.has(flag:StateFlags.ATTACKED);
-        }
-    }
-)
-
-ItemEnchantCondition.newEntry(
-    data : {
-        name : 'On Ability',
-        id : 'base:on-ability',
-        description : 'After the wielder uses an ability',
-        isState : false,
-        onTurnCheck ::(wielder, item, battle) {
-            return wielder.flags.has(flag:StateFlags.ABILITY);
-        }                                
-    }
-)
 
 ItemEnchantCondition.newEntry(
     data : {
@@ -69,9 +34,7 @@ ItemEnchantCondition.newEntry(
         id : 'base:on-heal',
         description : 'After the wielder heals',                
         isState : false,
-        onTurnCheck ::(wielder, item, battle) {
-            return wielder.flags.has(flag:StateFlags.HEALED);
-        }                                
+        effectEvent: 'onPostHeal',         
     }
 )
 
@@ -81,11 +44,30 @@ ItemEnchantCondition.newEntry(
         id : 'base:on-hurt',
         description : 'After the wielder is hurt',                
         isState : false,
-        onTurnCheck ::(wielder, item, battle) {
-            return wielder.flags.has(flag:StateFlags.HURT);
-        }                                
+        effectEvent: 'onPostDamage'            
     }
 )
+
+ItemEnchantCondition.newEntry(
+    data : {
+        name : 'On Discard',
+        id : 'base:on-discard',
+        description : 'After the wielder discards an Art',
+        isState : false,
+        effectEvent: 'onDiscard'
+    }
+)
+
+ItemEnchantCondition.newEntry(
+    data : {
+        name : 'On React',
+        id : 'base:on-react',
+        description : 'After the wielder reacts',
+        isState : false,
+        effectEvent: 'onPostReact'
+    }
+)
+
 
 ItemEnchantCondition.newEntry(
     data : {
@@ -93,23 +75,24 @@ ItemEnchantCondition.newEntry(
         id : 'base:on-defeat-enemy',
         description : 'After the wielder defeats an enemy',                
         isState : false,
-        onTurnCheck ::(wielder, item, battle) {
-            return wielder.flags.has(flag:StateFlags.DEFEATED_ENEMY);
-        }                                
+        effectEvent: 'onKnockout'
     }
-)        
+)      
+
+
 
 ItemEnchantCondition.newEntry(
     data : {
-        name : 'On Dodge Attack', // Dex build!
-        id : 'base:on-dodge-attack',
-        description : 'After the wielder dodges an attack',                
+        name : 'On Critical Hit',
+        id : 'base:on-crit',
+        description : 'After the wielder successfully lands a critical hit',
         isState : false,
-        onTurnCheck ::(wielder, item, battle) {
-            return wielder.flags.has(flag:StateFlags.DODGED_ATTACK);
-        }                                
+        effectEvent : 'onCrit'
     }
-)   
+)
+
+
+ 
 
 ItemEnchantCondition.newEntry(
     data : {
@@ -117,22 +100,18 @@ ItemEnchantCondition.newEntry(
         id : 'base:on-block-attack',
         description : 'After the wielder blocks an attack',                
         isState : false,
-        onTurnCheck ::(wielder, item, battle) {
-            return wielder.flags.has(flag:StateFlags.BLOCKED_ATTACK);
-        }                                
+        effectEvent : 'onSuccessfulBlock'
     }
 )   
 
 
 ItemEnchantCondition.newEntry(
     data : {
-        name : 'End Of Turn',
-        id : 'base:end-of-turn',
-        description : 'At the end of the wielder\'s turn',                
+        name : 'On Turn',
+        id : 'base:turn',
+        description : 'At the start of the wielder\'s turn',                
         isState : false,
-        onTurnCheck ::(wielder, item, battle) {
-            return true;
-        }                                
+        effectEvent : 'onNextTurn'
     }
 )
 }
@@ -145,7 +124,7 @@ ItemEnchantCondition.newEntry(
         id : String,
         description : String,
         isState : Boolean,
-        onTurnCheck : Function
+        effectEvent : String
     },
     reset
 );

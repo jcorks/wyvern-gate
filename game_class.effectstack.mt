@@ -241,7 +241,8 @@
         effects : empty,
     },
     define:::(state, this) {
-            
+        @:subscribers = {};
+        
         @:getAll :: <- [
             ...state.innateEffects,
             ...state.effects
@@ -264,6 +265,10 @@
             load ::(serialized, parent) {
                 holder = parent;
                 state.load(serialized, parent:this);
+            },
+            
+            subscribe ::(callback) {
+                subscribers->push(:callback);
             },
             
             save :: {
@@ -376,6 +381,16 @@
                     getAll()
                 ;
                 when(all->size == 0) [];
+
+                if (subscribers->size > 0) ::<= {
+                    args.from = v.from;
+                    args.item = v.item;
+                    args.holder = holder;
+
+                    foreach(subscribers) ::(k, v) {
+                        v(*args);
+                    }
+                }
 
             
                 @:ret = [];

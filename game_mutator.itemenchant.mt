@@ -26,7 +26,7 @@
     33,
     60,
     80,
-    100
+    95
 ];
 
 @:CONDITION_CHANCE_NAMES = [
@@ -34,7 +34,7 @@
     'sometimes',
     'often',
     'very often',
-    'always'
+    'almost always'
 ];
 
 

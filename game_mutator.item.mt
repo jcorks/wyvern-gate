@@ -3726,11 +3726,11 @@ Item.database.newEntry(data : {
             }
         },
             
-        onTurnEnd ::(wielder, battle){
+        commitEffectEvent ::(name, holder, battle) {
             @:state = _.state;
             @:this = _.this;
             foreach(state.enchants)::(i, enchant) {
-                enchant.onTurnCheck(wielder, item:this, battle);
+                enchant.check(wielder, item:this, battle);
             }
         },
         
