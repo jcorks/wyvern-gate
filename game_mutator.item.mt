@@ -3291,10 +3291,10 @@ Item.database.newEntry(data : {
 }
 
 
-@:recalculateDescription ::(this, state){
+@:calculateDescription ::(this, state){
     @:Arts = import(module:'game_database.arts.mt');
     @:base = this.base;
-    state.description = String.combine(strings:[
+    @out = String.combine(strings:[
         base.description,
         ' ',
         (if (state.arts == empty) '' else 'If equipped, grants the Arts: "' + Arts.find(id:state.arts[0]).name + '" and "' + Arts.find(id:state.arts[1]).name + '". '),
@@ -3313,9 +3313,10 @@ Item.database.newEntry(data : {
         if (base.blockPoints > 1) 'This equipment helps block multiple additional parts of the body while equipped in combat.' else '',
     ]);
     if (base.canBeColored) ::<= {
-        state.description = state.description->replace(key:'$color$', with:state.color.name);
-        state.description = state.description->replace(key:'$design$', with:state.design.name);
+        out = out->replace(key:'$color$', with:state.color.name);
+        out = out->replace(key:'$design$', with:state.design.name);
     }
+    return out;
 }
 
 
@@ -3522,9 +3523,14 @@ Item.database.newEntry(data : {
                     
                     for(0, enchantCount)::(i) {
                         @mod = ItemEnchant.new(
-                            base:ItemEnchant.database.getRandomFiltered(
-                                filter::(value) <- value.tier <= world.island.tier && (if (base.canHaveTriggerEnchants == false) value.triggerConditionEffects->keycount == 0 else true)
-                            )
+                            base:
+                            if (random.try(percentSuccess:15)) 
+                                ItemEnchant.database.find(id:'base:art')
+                            else
+                                ItemEnchant.database.getRandomFiltered(
+                                    filter::(value) <- 
+                                    value.tier <= world.island.tier && (if (base.canHaveTriggerEnchants == false) value.triggerConditionEffects->keycount == 0 else true)
+                                )
                         )
                         this.addEnchant(mod);
                     }
@@ -3548,7 +3554,6 @@ Item.database.newEntry(data : {
             state.price = (state.price)->ceil;
             
             base.onCreate(item:this, creationHint);
-            recalculateDescription(*_);
             recalculateName(*_);
             
             return this;
@@ -3722,15 +3727,16 @@ Item.database.newEntry(data : {
         description : {
             get :: {
                 @:state = _.state;
-                return state.description + '\nEquip effects: \n' + state.stats.descriptionRate;
+                return calculateDescription(*_) + '\nEquip effects: \n' + state.stats.descriptionRate;
             }
         },
             
-        commitEffectEvent ::(name, holder, battle) {
+        commitEffectEvent ::(*args) {
             @:state = _.state;
             @:this = _.this;
+            args.item = this;
             foreach(state.enchants)::(i, enchant) {
-                enchant.check(wielder, item:this, battle);
+                enchant.processEvent(*args);
             }
         },
         

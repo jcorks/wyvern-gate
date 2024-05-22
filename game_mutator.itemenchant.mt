@@ -20,6 +20,8 @@
 @:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:random = import(module:'game_singleton.random.mt');
+@:Arts = import(:'game_database.arts.mt');
+@:ArtsDeck = import(:'game_class.artsdeck.mt');
 
 @:CONDITION_CHANCES = [
     10,
@@ -47,19 +49,20 @@
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
+// The art is special. All itemenchants have a flat 15% chance to arts.
 ItemEnchant.database.newEntry(
     data : {
-        name : 'Protect',
-        id : 'base:protect',
-        description : ', will $1 cast Protect on the wielder for a while, which greatly increases defense.',
+        name : 'Art',
+        id : 'base:art',
+        description : ', will $1 perform the Art "$2": $3',
         equipMod : StatSet.new(
         ),
         levelMinimum : 1,
-        priceMod: 350,
+        priceMod: 1000,
         tier : 0,
         
         triggerConditionEffects : [
-            'base:trigger-protect' // 1 HP
+            'placeholderart',
         ],
         
         equipEffects : [
@@ -68,7 +71,7 @@ ItemEnchant.database.newEntry(
         useEffects : []
     }
 )
-
+/*
 ItemEnchant.database.newEntry(
     data : {
         name : 'Evade',
@@ -113,7 +116,7 @@ ItemEnchant.database.newEntry(
         
         useEffects : []
     }
-)
+)*/
 
 ItemEnchant.database.newEntry(
     data : {
@@ -182,7 +185,7 @@ ItemEnchant.database.newEntry(
     }
 )
 
-
+/*
 ItemEnchant.database.newEntry(
     data : {
         name : 'Spikes',
@@ -205,7 +208,7 @@ ItemEnchant.database.newEntry(
     }
 )
 
-/*
+
 ItemEnchant.database.newEntry(
     data : {
         name : 'Ensnare',
@@ -228,7 +231,7 @@ ItemEnchant.database.newEntry(
 )
 */
 
-
+/*
 ItemEnchant.database.newEntry(
     data : {
         name : 'Ease',
@@ -382,7 +385,7 @@ ItemEnchant.database.newEntry(
         useEffects : []
     }
 )
-
+*/
 
 
 ItemEnchant.database.newEntry(
@@ -1459,7 +1462,8 @@ ItemEnchant.database.newEntry(
     items : {
         condition : empty,
         conditionChance : 0,
-        conditionChanceName  : ''
+        conditionChanceName  : '',
+        artID : ''
     },
 
     database: Database.new(
@@ -1487,6 +1491,14 @@ ItemEnchant.database.newEntry(
             defaultLoad ::(base, conditionHint) {
                 state.base = base;
                 
+                if (base.id == 'base:art') ::<= {
+                    state.artID = Arts.getRandomFiltered(::(value) <- 
+                        (value.traits & Arts.TRAITS.SUPPORT) != 0 &&
+                        (value.kind != Arts.KIND.REACTION) &&
+                        (value.traits & Arts.TRAITS.SPECIAL) == 0
+                    ).id;   
+                }
+                
                 if (base.triggerConditionEffects->keycount > 0) ::<= {
                     if (conditionHint != empty) ::<= {
                         state.condition = ItemEnchantCondition.find(id:conditionHint);
@@ -1500,12 +1512,18 @@ ItemEnchant.database.newEntry(
                 return this;
             },
             
+            art : {
+                get ::<- state.artID
+            },
+            
 
             description : {
                 get ::{
                     when(state.condition == empty) state.base.description;
-                    return state.condition.description + (state.base.description)->replace(key:'$1', with: state.conditionChanceName);
-                    
+                    @out = state.condition.description + (state.base.description)->replace(key:'$1', with: state.conditionChanceName);
+                    when (state.artID == '') out;
+                    out = out->replace(key:'$2', with: Arts.find(id:state.artID).name);
+                    return out->replace(key:'$3', with: Arts.find(id:state.artID).description);                    
                 }
             },
             
@@ -1517,15 +1535,42 @@ ItemEnchant.database.newEntry(
                 }
             },
             
-            onTurnCheck ::(wielder, item, battle) {
+            processEvent ::(*args) {
+                @:world = import(module:'game_singleton.world.mt');
                 when(state.condition == empty) empty;
-                if (state.condition.onTurnCheck(wielder, item, battle) == true) ::<= {
+                if (state.condition.effectEvent == args.name) ::<= {
                     when(!random.try(percentSuccess:state.conditionChance)) empty;
-                
-                    foreach(state.base.triggerConditionEffects)::(i, effectName) {
-                        wielder.addEffect(
-                            from:wielder, id: effectName, durationTurns: 1, item
-                        );                        
+                    if (state.artID != '') ::<= {
+                        foreach(state.base.triggerConditionEffects)::(i, effectName) {
+                            args.holder.addEffect(
+                                from:args.holder, id: effectName, durationTurns: 1, item:args.item
+                            );                        
+                        }
+                    } else ::<= {
+                        when(args.holder.battle == empty) empty;
+
+                        @:battle = args.holder.battle;
+
+                        if (world.party.isMember(:args.holder)) ::<= {
+                            args.holder.playerUseArt(
+                                commitAction ::(action) {
+                                    battle.entityCommitAction(action:action);                                
+                                },
+                                card:ArtsDeck.synthesizeHandCard(id:state.artID),
+                                allies : args.holder.battle.getAllies(entity:args.holder.user),
+                                enemies : args.holder.battle.getEnemies(entity:args.holder.user),
+                                onCancel :: {
+                                    
+                                }
+                            );
+                        } else ::<= {
+                            args.holder.battleAI.commitTargettedAction(
+                                battle,
+                                card: ArtsDeck.synthesizeHandCard(id: state.artID),
+                                allies : args.holder.battle.getAllies(entity:args.holder.user),
+                                enemies : args.holder.battle.getEnemies(entity:args.holder.user)
+                            );
+                        }
                     }
                 }
             }

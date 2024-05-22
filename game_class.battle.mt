@@ -482,9 +482,7 @@
                     act(
                         battle:this,
                         user:ent,
-                        landmark:landmark_,
-                        allies:getAllies(ent),
-                        enemies:getEnemies(ent)
+                        landmark:landmark_
                     );
                     if (onAct_) onAct_();
                     
@@ -496,10 +494,7 @@
             when(ended) empty;
             // first reset stats according to current effects 
             foreach(turn)::(index, entity) {
-                entity.startTurn(
-                    enemies: this.getEnemies(entity),
-                    allies: this.getAllies(entity)
-                );
+                entity.startTurn();
             }
             
             // then resort based on speed
@@ -964,10 +959,7 @@
                         error(detail: 'Tried to join battle when was already a part of the battle');
                     windowEvent.queueMessage(text:entity.name + ' joins the fray!');
                     entity.battleStart(battle:this);
-                    entity.startTurn(
-                        enemies: this.getEnemies(entity),
-                        allies: this.getAllies(entity)
-                    );
+                    entity.startTurn();
                 }
             },
             
@@ -1076,9 +1068,9 @@
             
                             if (requiresAP) ::<= {                
                                 windowEvent.queueMessage(
-                                    text: entityTurn.name + ' uses an Arts Point for the Support Art!'
+                                    text: reactor.name + ' uses an Arts Point for the Support Art!'
                                 );
-                                entityTurn.ap -= 1;
+                                reactor.ap -= 1;
                             }
                             
                             
@@ -1153,23 +1145,28 @@
                             prompt: entityTurn.name + ' uses the Art: ' + art.name + '!'
                         );
                         
-                        // react here
-                        checkReactions(
-                            onPass::{
-                                windowEvent.queueCustom(
-                                    onEnter ::{
-                                        when (entityTurn.isIncapacitated())
-                                            endTurn();
-                                        chooseDefend(::{
-                                            doAction();
-                                        });
+                        windowEvent.queueCustom(
+                            onEnter :: {
+                                // react here
+                                checkReactions(
+                                    onPass::{
+                                        windowEvent.queueCustom(
+                                            onEnter ::{
+                                                when (entityTurn.isIncapacitated())
+                                                    endTurn();
+                                                chooseDefend(::{
+                                                    doAction();
+                                                });
+                                            }
+                                        );
+                                    },
+                                    onReject::{
+                                        finish();                              
                                     }
                                 );
-                            },
-                            onReject::{
-                                finish();                              
                             }
-                        );
+                        
+                        )
                     }
                 );
             },

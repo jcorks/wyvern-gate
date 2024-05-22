@@ -383,10 +383,7 @@
                 when(all->size == 0) [];
 
                 if (subscribers->size > 0) ::<= {
-                    args.from = v.from;
-                    args.item = v.item;
                     args.holder = holder;
-
                     foreach(subscribers) ::(k, v) {
                         v(*args);
                     }

@@ -17,179 +17,6 @@
 
 
 
-@:playerUseAbility = ::(commitAction, onCancel, allies, enemies, card) {
-    
-    @:art = Arts.find(id:card.id);
-    @:level = card.level;
-    
-    @:Entity = import(module:'game_class.entity.mt');
-
-    match(art.targetMode) {
-      (Arts.TARGET_MODE.ONE,
-       Arts.TARGET_MODE.ONEPART): ::<={
-        @:all = [
-            ...enemies,
-            ...allies
-        ];
-        
-        
-        @:allNames = [...all]->map(to:::(value)<- value.name);
-      
-        @:chooseOnePart ::(onDone) {
-            @:text = 
-            [
-                [
-                    'The attack aims for the head.',
-                    'While fairly difficult to hit, when it lands it will',
-                    'almost definitely cause a critical hit.'
-                ],
-                [
-                    'The attack aims for the body.',
-                    'While easiest to hit, when it lands it will',
-                    'cause additional general damage.'
-                ],
-                [
-                    'The attack aims for the limbs.',
-                    'While slightly difficult hit, when it lands it will',
-                    'has a high chance to stun the target for a turn.'
-                ]
-            ];
-            
-            @hovered = 0;
-            windowEvent.queueChoices(
-                prompt: 'Use where?',
-                choices : [
-                    'Aim for the head',
-                    'Aim for the body',
-                    'Aim for the limbs',
-                ],
-                canCancel: true,
-                topWeight: 0.2,
-                leftWeight: 0.5,
-                onHover ::(choice) {
-                    hovered = choice-1;
-                },
-                renderable : {
-                    render :: {
-                        canvas.renderTextFrameGeneral(
-                            topWeight: 0.7,
-                            leftWeight: 0.5,
-                            lines : text[hovered]
-                        );
-                    }
-                },
-                onChoice::(choice) {
-                    onDone(
-                        which:match(choice) {
-                          (1): Entity.DAMAGE_TARGET.HEAD,
-                          (2): Entity.DAMAGE_TARGET.BODY,
-                          (3): Entity.DAMAGE_TARGET.LIMBS
-                        }
-                    );
-                }
-            );
-        }
-      
-        windowEvent.queueChoices(
-          leftWeight: 1,
-          topWeight: 1,
-          prompt: 'Against whom?',
-          choices: allNames,
-          canCancel: true,
-          onCancel,
-          keep: true,
-          onChoice::(choice) {
-            when(choice == 0) empty;
-            
-            if (art.targetMode == Arts.TARGET_MODE.ONEPART) ::<= {
-                chooseOnePart(onDone::(which){
-                    commitAction(action:
-                        BattleAction.new(
-                            card,
-                            targets: [all[choice-1]],
-                            targetParts: [which],
-                            extraData: {}
-                        )                                    
-                    )
-                });
-            } else ::<= {
-                commitAction(action:
-                    BattleAction.new(
-                        card,
-                        targets: [all[choice-1]],
-                        targetParts: [Entity.normalizedDamageTarget()],
-                        extraData: {}
-                    )
-                );
-            }
-          }
-        );
-        
-      },
-      (Arts.TARGET_MODE.ALLALLY): ::<={
-        commitAction(action:
-            BattleAction.new(
-                card,
-                targets: allies,
-                targetParts: [...allies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                                    
-                extraData: {}
-            )
-        );                          
-      },
-      (Arts.TARGET_MODE.ALLENEMY): ::<={
-        commitAction(action:
-            BattleAction.new(
-                card,
-                targets: enemies,
-                targetParts: [...enemies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                                    
-                extraData: {}                                
-            )
-        );
-      },
-
-      (Arts.TARGET_MODE.ALL): ::<={
-        commitAction(action:
-            BattleAction.new(
-                card,
-                targets: [...allies, ...enemies],
-                targetParts: [...allies, ...enemies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                                    
-                extraData: {}                                
-            )
-        );
-      },
-
-
-
-      (Arts.TARGET_MODE.NONE): ::<={
-        commitAction(action:
-            BattleAction.new(
-                card,
-                targets: [],
-                targetParts : [],
-                extraData: {}                                
-            )
-        );
-      },
-
-      (Arts.TARGET_MODE.RANDOM): ::<={
-        @all = [];
-        foreach(allies)::(index, ally) {
-            all->push(value:ally);
-        }
-        foreach(enemies)::(index, enemy) {
-            all->push(value:enemy);
-        }
-
-        commitAction(action:
-            BattleAction.new(
-                card,
-                targets: random.pickArrayItem(list:all),
-                extraData: {}                                
-            )
-        );
-      }
-    }  
-}
 
 
 
@@ -199,10 +26,8 @@ return {
             name : 'Attack',
             filter::(user, battle) <- true,
             onSelect::(user, battle, commitAction) {
-                playerUseAbility(
+                user.playerUseArt(
                     card: ArtsDeck.synthesizeHandCard(id:'base:attack'),
-                    allies : battle.getAllies(entity:user),
-                    enemies : battle.getEnemies(entity:user),
                     commitAction
                 )                
             }
@@ -217,13 +42,11 @@ return {
                     canCancel: true,
                     act: 'Use',
                     onChoice::(card, backout) {
-                        playerUseAbility(
+                        user.playerUseArt(
                             card,
                             onCancel ::{
                                 backout();
                             },
-                            allies : battle.getAllies(entity:user),
-                            enemies : battle.getEnemies(entity:user),
                             commitAction::(action){
                                 backout();
                                 commitAction(action);

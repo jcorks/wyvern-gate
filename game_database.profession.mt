@@ -91,12 +91,12 @@ Profession.newEntry(data:{
     learnable : true,
     arts : [
         // only one stance at a time
-        'base:defensive-stance',  //X +%75 Def -50% Atk
-        'base:offensive-stance',  //X +%75 Atk -50% Def
-        'base:light-stance',      //X +75% Speed -50% Atk
-        'base:heavy-stance',      //X +75% Def -50% Spd 
-        'base:meditative-stance', //X +75% INT -50% Spd
-        'base:striking-stance',   //X +100% ATK, -30%Def,Spd
+        'base:doublestrike',  //X +%75 Def -50% Atk
+        'base:triplestrike',  //X +%75 Atk -50% Def
+        'base:doublestrike',  //X +%75 Def -50% Atk
+        'base:triplestrike',  //X +%75 Atk -50% Def
+        'base:combo-strike',      //X +75% Speed -50% Atk
+        'base:counter',      //X +75% Def -50% Spd 
         'base:reflective-stance', //X if hit, retaliates
         'base:evasive-stance',    //X 50% chance evade
         
@@ -1261,6 +1261,40 @@ Profession.newEntry(data:{
         'base:doublestrike',
         'base:poison-attack',
         'base:petrify'
+    ],
+    passives : [
+    ]
+}) 
+
+
+
+Profession.newEntry(data:{
+    name: 'Spirit',
+    id : 'base:spirit',
+    weaponAffinity: 'base:none',
+    description : "", 
+    levelMinimum : 100,
+
+    growth: StatSet.new(
+        HP:  7,
+        AP:  7,
+        ATK: 6,
+        INT: 1,
+        DEF: 7,
+        SPD: 7,
+        LUK: 10,
+        DEX: 3
+    ),
+    minKarma : 0,
+    maxKarma : 50,
+    learnable : false,
+    
+    arts : [
+        'base:doublestrike',
+        'base:attack',
+        'base:attack',
+        'base:attack',
+        'base:attack'
     ],
     passives : [
     ]

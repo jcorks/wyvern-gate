@@ -41,8 +41,10 @@
                 user_ = user;
             },
             
-            chooseReaction::(source, battle, enemies, allies) {
-
+            chooseReaction::(source, battle) {
+                @:enemies = battle.getEnemies(:user_);
+                @:allies = battle.getAllies(:user_);
+                
                 @hand = user_.deck.hand->filter(
                     ::(value) <- Arts.find(id:value.id).usageHintAI != Arts.USAGE_HINT.DONTUSE &&
                                  Arts.find(id:value.id).kind == Arts.KIND.REACTION
@@ -65,64 +67,68 @@
                     } 
                 }
             },
-            
-            takeTurn ::(battle, enemies, allies){
-                @:Entity = import(module:'game_class.entity.mt');
+
+            commitTargettedAction::(battle, card) {
+                @:enemies = battle.getEnemies(:user_);
+                @:allies = battle.getAllies(:user_);
+                @:Entity = import(module:'game_class.entity.mt');                
+                @:art = Arts.find(id:card.id);
+                @atEnemy = (art.usageHintAI == Arts.USAGE_HINT.OFFENSIVE) ||
+                           (art.usageHintAI == Arts.USAGE_HINT.DEBUFF);
                 
-                
-                @:commitTargettedAction::(card) {
-                    @:art = Arts.find(id:card.id);
-                    @atEnemy = (art.usageHintAI == Arts.USAGE_HINT.OFFENSIVE) ||
-                               (art.usageHintAI == Arts.USAGE_HINT.DEBUFF);
-                    
-                    @targets = [];
-                    @targetParts = [];
-                    match(art.targetMode) {
-                      (Arts.TARGET_MODE.ONE,
-                       Arts.TARGET_MODE.ONEPART) :::<= {
-                        if (atEnemy) 
-                            targets->push(value:Random.pickArrayItem(list:enemies))
-                        else 
-                            targets->push(value:Random.pickArrayItem(list:allies))
-                        ;
-                      },
-                      
-                      (Arts.TARGET_MODE.ALLALLY) :::<= {
-                        targets = [...allies];
-                      },                  
+                @targets = [];
+                @targetParts = [];
+                match(art.targetMode) {
+                  (Arts.TARGET_MODE.ONE,
+                   Arts.TARGET_MODE.ONEPART) :::<= {
+                    if (atEnemy) 
+                        targets->push(value:Random.pickArrayItem(list:enemies))
+                    else 
+                        targets->push(value:Random.pickArrayItem(list:allies))
+                    ;
+                  },
+                  
+                  (Arts.TARGET_MODE.ALLALLY) :::<= {
+                    targets = [...allies];
+                  },                  
 
-                      (Arts.TARGET_MODE.ALLENEMY) :::<= {
-                        targets = [...enemies];
-                      },                  
+                  (Arts.TARGET_MODE.ALLENEMY) :::<= {
+                    targets = [...enemies];
+                  },                  
 
-                      (Arts.TARGET_MODE.NONE) :::<= {
-                      },
+                  (Arts.TARGET_MODE.NONE) :::<= {
+                  },
 
 
-                      (Arts.TARGET_MODE.RANDOM) :::<= {
-                        if (Number.random() < 0.5) 
-                            targets->push(value:Random.pickArrayItem(list:enemies))
-                        else 
-                            targets->push(value:Random.pickArrayItem(list:allies))
-                        ;                    
-                      }
+                  (Arts.TARGET_MODE.RANDOM) :::<= {
+                    if (Number.random() < 0.5) 
+                        targets->push(value:Random.pickArrayItem(list:enemies))
+                    else 
+                        targets->push(value:Random.pickArrayItem(list:allies))
+                    ;                    
+                  }
 
-                    }
-                    foreach(targets) ::(index, t) {
-                        targetParts[index] = Entity.normalizedDamageTarget();
-                    }
-                    windowEvent.onResolveAll(
-                        onDone:: {
-                            battle.entityCommitAction(action:BattleAction.new(
-                                card,
-                                targets: targets,
-                                targetParts : targetParts,
-                                extraData: {}                        
-                            ));   
-                        }
-                    );          
                 }
-                
+                foreach(targets) ::(index, t) {
+                    targetParts[index] = Entity.normalizedDamageTarget();
+                }
+                windowEvent.onResolveAll(
+                    onDone:: {
+                        battle.entityCommitAction(action:BattleAction.new(
+                            card,
+                            targets: targets,
+                            targetParts : targetParts,
+                            extraData: {}                        
+                        ));   
+                    }
+                );          
+            },
+            
+            takeTurn ::(battle){
+                @:enemies = battle.getEnemies(:user_);
+                @:allies = battle.getAllies(:user_);
+
+                @:Entity = import(module:'game_class.entity.mt');                
                 @:defaultAttack = ::{
                     user_.deck.discardFromHand(card:random.pickArrayItem(list:user_.deck.hand));
 
@@ -159,7 +165,9 @@
                 foreach(hand) ::(k, v) {
                     @art = Arts.find(id:v.id);
                     if (art.kind == Arts.KIND.EFFECT && random.flipCoin()) ::<= {
-                        commitTargettedAction(
+                        this.commitTargettedAction(
+                            battle,
+                            allies, enemies,
                             card:v
                         );
                         hand->remove(key:hand->findIndex(value:v));
@@ -192,7 +200,7 @@
                     user_.hp == user_.stats.HP)
                     defaultAttack();
                 
-                commitTargettedAction(card:card);
+                this.commitTargettedAction(card:card, battle);
             }
         }   
     }  

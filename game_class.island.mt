@@ -385,7 +385,7 @@
                         return [
                             ... Species.getRandomSet(
                                     count : 2,
-                                    filter:::(value) <- value.special == false
+                                    filter:::(value) <- (value.traits & Species.TRAITS.SPECIAL) == 0
                                 )
                         ]->map(
                             to :::(value) <- {
@@ -569,7 +569,7 @@
                         random.pickArrayItemWeighted(list:state.species).species
                     else
                         Species.getRandomFiltered(
-                            filter:::(value) <- value.special == false
+                            filter:::(value) <- (value.traits & Species.TRAITS.SPECIAL) == 0
                         ).id
                 ;
                     

@@ -21,6 +21,12 @@
 
 
 
+@:TRAITS = {
+    SPECIAL : 1,
+    SUMMON : 2
+};
+
+
 
 // 36 points
 @:reset ::{
@@ -49,7 +55,7 @@ Species.newEntry(data:{
         'base:body',
         'base:tail'
     ],
-    special : false,
+    traits : 0,
     canBlock : true,
     passives : [
     ],
@@ -83,7 +89,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -116,7 +122,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -149,7 +155,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -181,7 +187,7 @@ Species.newEntry(data:{
     swarms : false,
     
     canBlock : true,
-    special : false,
+    traits : 0,
     passives : [
     ]
 })    
@@ -213,7 +219,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -245,7 +251,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -279,7 +285,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -313,7 +319,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -344,7 +350,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })    
@@ -377,7 +383,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -410,7 +416,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -442,7 +448,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -475,7 +481,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -507,7 +513,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -538,7 +544,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -570,7 +576,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -598,7 +604,7 @@ Species.newEntry(data:{
     ],        
     swarms : false,
     canBlock : true,
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -628,7 +634,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -663,7 +669,7 @@ Species.newEntry(data:{
     swarms : true,
         
     canBlock : true,
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -695,7 +701,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -727,7 +733,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -760,7 +766,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -780,7 +786,7 @@ Species.newEntry(data:{
         SPD: 6,
         DEX: 7
     ),
-    special : false,
+    traits : 0,
     qualities : [
         'base:snout',
         'base:fur',
@@ -825,7 +831,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : false,
+    traits : 0,
     passives : [
     ]
 })
@@ -851,7 +857,7 @@ Species.newEntry(data:{
     swarms : true,
     canBlock : false,
     
-    special : true,
+    traits : TRAITS.SPECIAL,
     passives : [
     ]
 })
@@ -879,7 +885,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : false,
     
-    special : true,
+    traits : TRAITS.SPECIAL  | TRAITS.SUMMON,
     passives : [
     ]
 })
@@ -905,7 +911,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : false,
     
-    special : true,
+    traits : TRAITS.SPECIAL | TRAITS.SUMMON,
     passives : [
     ]
 })
@@ -931,7 +937,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : false,
     
-    special : true,
+    traits : TRAITS.SPECIAL | TRAITS.SUMMON,
     passives : [
     ]
 })    
@@ -958,7 +964,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : false,
     
-    special : true,
+    traits : TRAITS.SPECIAL | TRAITS.SUMMON,
     passives : [
     ]
 })    
@@ -985,7 +991,7 @@ Species.newEntry(data:{
     swarms : false,
     canBlock : true,
     
-    special : true,
+    traits : TRAITS.SPECIAL,
     passives : [
     ]
 })
@@ -1010,7 +1016,7 @@ Species.newEntry(data:{
     qualities : [
     ],
     swarms: true,
-    special : true,
+    traits : TRAITS.SPECIAL,
     canBlock : false,
     passives : [
         'base:apparition'
@@ -1038,7 +1044,7 @@ Species.newEntry(data:{
     swarms : true,
     canBlock : false,
     
-    special : true,
+    traits : TRAITS.SPECIAL,
     passives : [
         'base:the-beast'
     ]
@@ -1065,7 +1071,7 @@ Species.newEntry(data:{
     swarms : true,
     canBlock : false,
     
-    special : true,
+    traits : TRAITS.SPECIAL,
     passives : [
     ]
 })
@@ -1090,7 +1096,33 @@ Species.newEntry(data:{
     ],
     swarms : true,
     
-    special : true,
+    traits : TRAITS.SPECIAL,
+    canBlock : false,
+    passives : [
+    ]
+})
+
+
+Species.newEntry(data:{
+    name : 'Spirit',
+    id : 'base:spirit',
+    rarity : 2000000000000,
+    description: 'A small apparition.',
+    growth : StatSet.new(
+        HP : 1,
+        AP : 5,
+        ATK: 5,
+        DEF: 5,
+        INT: 1,
+        LUK: 5,
+        SPD: 5,
+        DEX: 5
+    ),
+    qualities : [
+    ],
+    swarms : true,
+    
+    traits : TRAITS.SPECIAL | TRAITS.SUMMON,
     canBlock : false,
     passives : [
     ]
@@ -1098,8 +1130,18 @@ Species.newEntry(data:{
 }
 
 
-@:Species = Database.new(
+@:Species = class(
+    inherits: [Database],
+    define::(this) {
+        this.interface = {        
+            TRAITS : {get::<- TRAITS},
+        }
+    }
+).new(
     name : 'Wyvern.Species',
+    statics : {
+        
+    },
     attributes : {
         name : String,
         id : String,
@@ -1108,7 +1150,7 @@ Species.newEntry(data:{
         description : String,
         growth : StatSet.type,
         passives : Object,
-        special : Boolean,
+        traits : Number,
         swarms : Boolean,
         canBlock : Boolean
     },

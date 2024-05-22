@@ -59,7 +59,8 @@
     SUPPORT : 128,
     LIGHT : 256,
     DARK : 512,
-    POISON : 1024    
+    POISON : 1024,
+    SPECIAL : 2048 
 }
 
 
@@ -87,7 +88,7 @@ Arts.newEntry(
         oncePerBattle : false,
         canBlock : true,
         kind : KIND.ABILITY,
-        traits : TRAITS.PHYSICAL,
+        traits : TRAITS.PHYSICAL | TRAITS.SPECIAL,
         rarity : RARITY.COMMON,
         onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
@@ -344,14 +345,14 @@ Arts.newEntry(
 
             windowEvent.queueCustom(
                 onEnter :: {
-                    @target = random.pickArrayItem(list:user.enemies);
+                    @target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
                     user.attack(
                         target,
                         amount:user.stats.ATK * (0.4 + (level-1)*0.1),
                         damageType : Damage.TYPE.PHYS,
                         damageClass: Damage.CLASS.HP,
-                        targetPart: targetParts[user.enemies->findIndex(value:target)],
-                        targetDefendPart:targetDefendParts[user.enemies->findIndex(value:target)]
+                        targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
+                        targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
                     );
                 }
             );
@@ -359,14 +360,14 @@ Arts.newEntry(
             windowEvent.queueCustom(
                 onEnter :: {
 
-                    @target = random.pickArrayItem(list:user.enemies);
+                    @target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
                     user.attack(
                         target,
                         amount:user.stats.ATK * (0.4 + (level-1)*0.1),
                         damageType : Damage.TYPE.PHYS,
                         damageClass: Damage.CLASS.HP,
-                        targetPart : targetParts[user.enemies->findIndex(value:target)],
-                        targetDefendPart:targetDefendParts[user.enemies->findIndex(value:target)]
+                        targetPart : targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
+                        targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
                     );
                 }
             );
@@ -399,14 +400,14 @@ Arts.newEntry(
             windowEvent.queueCustom(
                 onEnter :: {
                     
-                    @target = random.pickArrayItem(list:user.enemies);
+                    @target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
                     user.attack(
                         target,
                         amount:user.stats.ATK * (0.4 + (level-1)*0.07),
                         damageType : Damage.TYPE.PHYS,
                         damageClass: Damage.CLASS.HP,
-                        targetPart: targetParts[user.enemies->findIndex(value:target)],
-                        targetDefendPart:targetDefendParts[user.enemies->findIndex(value:target)]
+                        targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
+                        targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
                     );
                 }
             ); 
@@ -414,28 +415,28 @@ Arts.newEntry(
 
             windowEvent.queueCustom(
                 onEnter :: {
-                    @:target = random.pickArrayItem(list:user.enemies);
+                    @:target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
                     user.attack(
                         target,
                         amount:user.stats.ATK * (0.4 + (level-1)*0.07),
                         damageType : Damage.TYPE.PHYS,
                         damageClass: Damage.CLASS.HP,
-                        targetPart: targetParts[user.enemies->findIndex(value:target)],
-                        targetDefendPart:targetDefendParts[user.enemies->findIndex(value:target)]
+                        targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
+                        targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
                     );
                 }
             );
 
             windowEvent.queueCustom(
                 onEnter :: {
-                    @:target = random.pickArrayItem(list:user.enemies);
+                    @:target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
                     user.attack(
                         target,
                         amount:user.stats.ATK * (0.4 + (level-1)*0.07),
                         damageType : Damage.TYPE.PHYS,
                         damageClass: Damage.CLASS.HP,
-                        targetPart: targetParts[user.enemies->findIndex(value:target)],
-                        targetDefendPart:targetDefendParts[user.enemies->findIndex(value:target)]
+                        targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
+                        targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
                     );
                 }
             );
@@ -485,7 +486,7 @@ Arts.newEntry(
             windowEvent.queueMessage(text:user.name + ' cheers for the party!');
             windowEvent.queueCustom(
                 onEnter :: {
-                    foreach(user.allies)::(index, ally) {
+                    foreach(user.battle.getAllies(:user))::(index, ally) {
                         ally.addEffect(from:user, id: 'base:cheered', durationTurns: 5);                        
                     }
                 }
@@ -674,7 +675,7 @@ Arts.newEntry(
             
 
             
-            foreach(user.enemies)::(index, enemy) {
+            foreach((user.battle.getEnemies(:user)))::(index, enemy) {
                 windowEvent.queueCustom(
                     onEnter :: {
 
@@ -1103,7 +1104,7 @@ Arts.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' tries to sweep everyone\'s legs!'
             );
-            foreach(user.enemies)::(i, enemy) {
+            foreach((user.battle.getEnemies(:user)))::(i, enemy) {
                 windowEvent.queueCustom(
                     onEnter :: {
 
@@ -2016,17 +2017,7 @@ Arts.newEntry(
             );
 
             // limit 2 summons at a time.
-            @count = 0;
-            foreach(user.allies)::(i, ally) {
-                match(ally.name) {
-                    ('the Fire Sprite',
-                    'the Ice Elemental',
-                    'the Thunder Spawn',
-                    'the Guiding Light'): ::<= {
-                        count += 1;
-                    }
-                }
-            }
+            @count = [...user.battle.getAllies(:user)]->filter(::(value) <- (value.species.traits & Species.TRAITS.SUMMON) != 0)->size;
             when (count >= 2) 
                 windowEvent.queueMessage(
                     text: '...but the summoning fizzled!'
@@ -2075,17 +2066,8 @@ Arts.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' summons an Ice Elemental!'
             );
-            @count = 0;
-            foreach(user.allies)::(i, ally) {
-                match(ally.name) {
-                    ('the Fire Sprite',
-                    'the Ice Elemental',
-                    'the Thunder Spawn',
-                    'the Guiding Light'): ::<= {
-                        count += 1;
-                    }
-                }
-            }
+            @count = [...user.battle.getAllies(:user)]->filter(::(value) <- (value.species.traits & Species.TRAITS.SUMMON) != 0)->size;
+
             when (count >= 2) 
                 windowEvent.queueMessage(
                     text: '...but the summoning fizzled!'
@@ -2135,17 +2117,8 @@ Arts.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' summons a Thunder Spawn!'
             );
-            @count = 0;
-            foreach(user.allies)::(i, ally) {
-                match(ally.name) {
-                    ('the Fire Sprite',
-                    'the Ice Elemental',
-                    'the Thunder Spawn',
-                    'the Guiding Light'): ::<= {
-                        count += 1;
-                    }
-                }
-            }
+            @count = [...user.battle.getAllies(:user)]->filter(::(value) <- (value.species.traits & Species.TRAITS.SUMMON) != 0)->size;
+
             when (count >= 2) 
                 windowEvent.queueMessage(
                     text: '...but the summoning fizzled!'
@@ -2194,17 +2167,8 @@ Arts.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' summons a Guiding Light!'
             );
-            @count = 0;
-            foreach(user.allies)::(i, ally) {
-                match(ally.name) {
-                    ('the Fire Sprite',
-                    'the Ice Elemental',
-                    'the Thunder Spawn',
-                    'the Guiding Light'): ::<= {
-                        count += 1;
-                    }
-                }
-            }
+            @count = [...user.battle.getAllies(:user)]->filter(::(value) <- (value.species.traits & Species.TRAITS.SUMMON) != 0)->size;
+
             when (count >= 2) 
                 windowEvent.queueMessage(
                     text: '...but the summoning fizzled!'
@@ -2239,7 +2203,7 @@ Arts.newEntry(
     data: {
         name: 'Unsummon',
         id : 'base:unsummon',
-        targetMode : TARGET_MODE.ONE,
+        targetMode : TARGET_MODE.ALLENEMY,
         description: 'Magick that removes a summoned entity.',
         durationTurns: 0,
         kind : KIND.EFFECT,
@@ -2250,27 +2214,22 @@ Arts.newEntry(
         canBlock : false,
         onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
-                text: user.name + ' casts Unsummon on ' + targets[0].name + '!'
+                text: user.name + ' casts Unsummon!'
             );
 
             windowEvent.queueCustom(
                 onEnter :: {
-
-                    if (match(targets[0].name) {
-                        ('the Fire Sprite',
-                         'the Ice Elemental',
-                         'the Thunder Spawn',
-                         'the Guiding Light'): true,
-                        default: false
-                    }) ::<= {
-                        windowEvent.queueMessage(
-                            text: targets[0].name + ' faded into nothingness!'
-                        );                            
-                        targets[0].kill(silent:true);  
-                    } else ::<= {
-                        windowEvent.queueMessage(
-                            text: targets[0].name + ' was unaffected!'
-                        );                                                        
+                    foreach(targets) ::(k, target) {
+                        if ((target.species.straits & TRAITS.SUMMON) != 0) ::<= {
+                            windowEvent.queueMessage(
+                                text: target.name + ' faded into nothingness!'
+                            );                            
+                            target.kill(silent:true);  
+                        } else ::<= {
+                            windowEvent.queueMessage(
+                                text: target.name + ' was unaffected!'
+                            );                                                        
+                        }
                     }
                 }
             )
@@ -2445,7 +2404,7 @@ Arts.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' casts Ice!'
             );
-            foreach(user.enemies)::(index, enemy) {
+            foreach((user.battle.getEnemies(:user)))::(index, enemy) {
                 windowEvent.queueCustom(
                     onEnter :: {
 
@@ -2479,7 +2438,7 @@ Arts.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' casts Frozen Flame!'
             );
-            foreach(user.enemies)::(index, enemy) {
+            foreach((user.battle.getEnemies(:user)))::(index, enemy) {
                 windowEvent.queueCustom(
                     onEnter :: {
                         user.attack(
@@ -2548,7 +2507,7 @@ Arts.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' casts Explosion!'
             );
-            foreach(user.enemies)::(index, enemy) {
+            foreach((user.battle.getEnemies(:user)))::(index, enemy) {
                 windowEvent.queueCustom(
                     onEnter :: {
                         user.attack(
@@ -2581,7 +2540,7 @@ Arts.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' casts Flash!'
             );
-            foreach(user.enemies)::(index, enemy) {
+            foreach((user.battle.getEnemies(:user)))::(index, enemy) {
                 when(enemy.isIncapacitated()) empty;
                 if (random.try(percentSuccess:40 * (level*10)))
                     windowEvent.queueCustom(
@@ -2616,7 +2575,7 @@ Arts.newEntry(
                 text: user.name + ' casts Thunder!'
             );
             for(0, 4 + (level-1)*2)::(index) {
-                @:target = random.pickArrayItem(list:user.enemies);
+                @:target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
                 windowEvent.queueCustom(
                     onEnter :: {
                         user.attack(
@@ -2651,7 +2610,7 @@ Arts.newEntry(
                 text: user.name + ' wildly swings!'
             );
             for(0, 4 + (level-1)*2)::(index) {
-                @:target = random.pickArrayItem(list:user.enemies);
+                @:target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
                 windowEvent.queueCustom(
                     onEnter :: {
                         user.attack(
@@ -2660,7 +2619,7 @@ Arts.newEntry(
                             damageType : Damage.TYPE.PHYS,
                             damageClass: Damage.CLASS.HP,
                             targetPart: Entity.normalizedDamageTarget(),
-                            targetDefendPart:targetDefendParts[user.enemies->findIndex(value:target)]
+                            targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
                         );
                     }
                 )
@@ -2913,7 +2872,7 @@ Arts.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' casts Protect All!'
             );
-            foreach(user.allies)::(index, ally) {
+            foreach(user.battle.getAllies(:user))::(index, ally) {
                 windowEvent.queueCustom(
                     onEnter :: {
                         ally.addEffect(from:user, id: 'base:protect', durationTurns: 5);
@@ -4364,7 +4323,7 @@ Arts.newEntry(
         oncePerBattle : false,
         canBlock : false,
         onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-            when (user.allies->any(condition:::(value) <- value == targets[0]))
+            when (user.battle.getAllies(:user)->any(condition:::(value) <- value == targets[0]))
                 windowEvent.queueMessage(text: "Are you... trying to bribe me? we're... we're on the same team..");
                 
             @:cost = ((targets[0].level*100 + targets[0].stats.sum * 4) * (1 - (level-1)*0.08))->ceil;
@@ -4442,7 +4401,7 @@ Arts.newEntry(
             windowEvent.queueMessage(
                 text: user.name + ' sings a haunting, sweet song!'
             );
-            foreach(user.enemies)::(index, enemy) {
+            foreach((user.battle.getEnemies(:user)))::(index, enemy) {
                 when(enemy.isIncapacitated()) empty;
                 if (random.flipCoin())
                     windowEvent.queueCustom(
@@ -4468,7 +4427,7 @@ Arts.newEntry(
         description: 'Wraps around one enemy, followed by a feast.',
         durationTurns: 2,
         kind : KIND.ABILITY,
-        traits : TRAITS.PHYSICAL,
+        traits : TRAITS.PHYSICAL | TRAITS.SPECIAL,
         rarity : RARITY.RARE,
         usageHintAI : USAGE_HINT.OFFENSIVE,
         oncePerBattle : false,
@@ -4691,6 +4650,184 @@ Arts.newEntry(
     }
 )
 
+Arts.newEntry(
+    data: {
+        name: 'Catch Breath',
+        id : 'base:catch-breath',
+        targetMode : TARGET_MODE.NONE,
+        description: 'Discards entire hand, gain 2 HP.',
+        durationTurns: 0,
+        kind : KIND.EFFECT,
+        traits : TRAITS.SUPPORT,
+        rarity : RARITY.RARE,
+        usageHintAI : USAGE_HINT.HEAL,
+        oncePerBattle : false,
+        canBlock : false,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+            user.deck.hand = [];
+            foreach(user.deck.hand) ::(k, c) {
+                user.deck.discardFromHand(:c);
+            }
+            user.heal(amount:2);
+        }
+    }
+)
+
+
+Arts.newEntry(
+    data: {
+        name: 'Makeshift Breather',
+        id : 'base:makeshift-breather',
+        targetMode : TARGET_MODE.NONE,
+        description: 'Sacrifice item, gain 2 HP.',
+        durationTurns: 0,
+        kind : KIND.EFFECT,
+        traits : TRAITS.SUPPORT,
+        rarity : RARITY.RARE,
+        usageHintAI : USAGE_HINT.HEAL,
+        oncePerBattle : false,
+        canBlock : false,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+            @:pickitem = import(:'game_function.pickitem.mt');
+            @:world = import(module:'game_singleton.world.mt');
+            if (world.party.isMember(:user)) ::<= {
+                pickitem(
+                    canCancel: false,
+                    inventory : world.party.inventory,
+                    onPick ::(item){
+                        world.party.inventory.remove(:item);
+                        user.heal(amount:2);                
+                    }
+                );
+            } else ::<= {
+                user.heal(amount:2);                            
+            }
+        }
+    }
+)
+
+Arts.newEntry(
+    data: {
+        name: 'Makeshift Transmutation',
+        id : 'base:makeshift-transmutation',
+        targetMode : TARGET_MODE.NONE,
+        description: 'Sacrifice item. Summons a small spirit to fight on your side.',
+        durationTurns: 0,
+        kind : KIND.EFFECT,
+        traits : TRAITS.SUPPORT,
+        rarity : RARITY.RARE,
+        usageHintAI : USAGE_HINT.HEAL,
+        oncePerBattle : false,
+        canBlock : false,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+            @:world = import(module:'game_singleton.world.mt');
+            @:summon ::{
+
+                @:Entity = import(module:'game_class.entity.mt');
+                @:Species = import(module:'game_database.species.mt');
+                @:sprite = Entity.new(
+                    island : world.island,
+                    speciesHint: 'base:spirit',
+                    professionHint: 'base:spirit',
+                    levelHint:4
+                );
+                sprite.name = 'the Spirit';
+                            
+                @:battle = user.battle;
+
+                windowEvent.queueCustom(
+                    onEnter :: {
+
+                        battle.join(
+                            group: [sprite],
+                            sameGroupAs:user
+                        );
+                    }
+                )             
+            }
+
+
+            @:pickitem = import(:'game_function.pickitem.mt');
+            if (world.party.isMember(:user)) ::<= {
+                pickitem(
+                    canCancel: false,
+                    inventory : world.party.inventory,
+                    onPick ::(item){
+                        world.party.inventory.remove(:item);
+                        summon();                
+                    }
+                );
+            } else ::<= {
+                summon();                
+            }
+        }
+    }
+)
+
+Arts.newEntry(
+    data: {
+        name: 'Makeshift Shield',
+        id : 'base:quick-shield',
+        targetMode : TARGET_MODE.ONE,
+        description: 'Sacrifice an item. The user heals 4 Shield HP. This counts as healing.',
+        durationTurns: 0,
+        kind : KIND.EFFECT,
+        traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
+        rarity : RARITY.RARE,
+        usageHintAI : USAGE_HINT.OFFENSIVE,
+        oncePerBattle : false,
+        canBlock : false,
+        isSupport : true,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+            @:pickitem = import(:'game_function.pickitem.mt');
+            @:world = import(module:'game_singleton.world.mt');
+            if (world.party.isMember(:user)) ::<= {
+                pickitem(
+                    canCancel: false,
+                    inventory : world.party.inventory,
+                    onPick ::(item){
+                        world.party.inventory.remove(:item);
+                        targets[0].heal(amount:4, isShield:true);                     
+                    }
+                );
+            } else ::<= {
+                targets[0].heal(amount:4, isShield:true);                     
+            }
+        }
+    }
+)
+
+
+Arts.newEntry(
+    data: {
+        name: 'Mutual Destruction',
+        id : 'base:mutual-destruction',
+        targetMode : TARGET_MODE.ONE,
+        description: '50% chance success rate. Target gains 10 Banish tokens. Random teammate gains 10 banish tokens. If a combatant has 10 Banish tokens, they are evicted from battle.',
+        durationTurns: 0,
+        kind : KIND.EFFECT,
+        traits : TRAITS.SUPPORT,
+        rarity : RARITY.EPIC,
+        usageHintAI : USAGE_HINT.DONTUSE,
+        oncePerBattle : false,
+        canBlock : false,
+        isSupport : true,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+            @:world = import(module:'game_singleton.world.mt');
+            when(random.flipCoin()) 
+                windowEvent.queueMessage(
+                    text: '... but nothing happened!'
+                );
+
+            @:sacr = random.pickArrayItem(:user.battle.getAllies(:user));
+
+            sacr.gainBanishTokens(:10);
+            targets[0].gainBanishTokens(:10);
+        }
+    }
+)
+
+
 
 Arts.newEntry(
     data: {
@@ -4796,6 +4933,31 @@ Arts.newEntry(
 
 Arts.newEntry(
     data: {
+        name: 'Quick Shield',
+        id : 'base:quick-shield',
+        targetMode : TARGET_MODE.ONE,
+        description: 'The user heals 2 Shield HP. This counts as healing.',
+        durationTurns: 0,
+        kind : KIND.REACTION,
+        traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
+        rarity : RARITY.RARE,
+        usageHintAI : USAGE_HINT.OFFENSIVE,
+        oncePerBattle : false,
+        canBlock : false,
+        isSupport : true,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+            windowEvent.queueMessage(
+                text: user.name + ' casts a shield spell in response to ' + targets[0].name + '\'s Art!'
+            );
+            targets[0].heal(amount:2, isShield:true);                     
+            return false;
+        }
+    }
+)
+
+
+Arts.newEntry(
+    data: {
         name: 'Cancel',
         id : 'base:cancel',
         targetMode : TARGET_MODE.NONE,
@@ -4810,7 +4972,7 @@ Arts.newEntry(
         isSupport : true,
         onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
             windowEvent.queueMessage(
-                text: user.name + ' retaliates to ' + targets[0].name + '\'s Art!'
+                text: user.name + ' cancels ' + targets[0].name + '\'s Art!'
             );
             return true;
         }
@@ -4848,6 +5010,309 @@ Arts.newEntry(
                     );                        
                 }
             )
+        }
+    }
+)
+
+
+Arts.newEntry(
+    data: {
+        name: 'Blood\'s Pain',
+        id : 'base:bloods-pain',
+        targetMode : TARGET_MODE.ONEPART,
+        description: "Sacrifice 2 HP. Deal damage to target based on ATK.",
+        durationTurns: 0,
+        usageHintAI : USAGE_HINT.OFFENSIVE,
+        oncePerBattle : false,
+        canBlock : true,
+        isSupport : true,
+        kind : KIND.EFFECT,
+        traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
+        rarity : RARITY.UNCOMMON,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {            
+            windowEvent.queueCustom(
+                onEnter :: {
+                    user.damage(
+                        attacker: user,
+                        damage : Damage.new(
+                            amount : 2,
+                            damageType : Damage.TYPE.NEUTRAL,
+                            damageClass: Damage.CLASS.HP
+                        ),
+                        dodgeable : false,
+                        critical : false,
+                        exact : true
+                    );                        
+
+
+                    user.attack(
+                        target:targets[0],
+                        amount:user.stats.ATK * (0.3),
+                        damageType : Damage.TYPE.PHYS,
+                        damageClass: Damage.CLASS.HP,
+                        targetPart:targetParts[0],
+                        targetDefendPart:targetDefendParts[0]
+                    );                        
+                }
+            )
+        }
+    }
+)
+
+Arts.newEntry(
+    data: {
+        name: 'Blood\'s Shield',
+        id : 'base:bloods-shield',
+        targetMode : TARGET_MODE.ONE,
+        description: "Sacrifice 1 HP. Target receives 2 Shield HP. This counts as healing.",
+        durationTurns: 0,
+        usageHintAI : USAGE_HINT.BUFF,
+        oncePerBattle : false,
+        canBlock : true,
+        isSupport : true,
+        kind : KIND.EFFECT,
+        traits : TRAITS.SUPPORT,
+        rarity : RARITY.UNCOMMON,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {            
+            windowEvent.queueCustom(
+                onEnter :: {
+                    user.damage(
+                        attacker: user,
+                        damage : Damage.new(
+                            amount : 1,
+                            damageType : Damage.TYPE.NEUTRAL,
+                            damageClass: Damage.CLASS.HP
+                        ),
+                        dodgeable : false,
+                        critical : false,
+                        exact : true
+                    );                        
+
+                    targets[0].heal(amount:2, isShield:2);                     
+                }
+            )
+        }
+    }
+)
+
+
+Arts.newEntry(
+    data: {
+        name: 'Blood\'s Exaltation',
+        id : 'base:bloods-exaltation',
+        targetMode : TARGET_MODE.ONE,
+        description: "Sacrifice 2 HP. Target does x2 damage on next attack.",
+        durationTurns: 0,
+        usageHintAI : USAGE_HINT.OFFENSIVE,
+        oncePerBattle : false,
+        canBlock : true,
+        isSupport : true,
+        kind : KIND.EFFECT,
+        traits : TRAITS.SUPPORT,
+        rarity : RARITY.EPIC,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {            
+            windowEvent.queueCustom(
+                onEnter :: {
+                    user.damage(
+                        attacker: user,
+                        damage : Damage.new(
+                            amount : 2,
+                            damageType : Damage.TYPE.NEUTRAL,
+                            damageClass: Damage.CLASS.HP
+                        ),
+                        dodgeable : false,
+                        critical : false,
+                        exact : true
+                    );                        
+
+                    targets[0].addEffect(from:user, id:'base:next-attack-x2', durationTurns:9999);
+                }
+            )
+        }
+    }
+)
+
+Arts.newEntry(
+    data: {
+        name: 'Blood\'s Ward',
+        id : 'base:bloods-ward',
+        targetMode : TARGET_MODE.ONE,
+        description: "Sacrifice 1 HP. Cancel target Art.",
+        durationTurns: 0,
+        usageHintAI : USAGE_HINT.OFFENSIVE,
+        oncePerBattle : false,
+        canBlock : true,
+        isSupport : true,
+        kind : KIND.REACTION,
+        traits : TRAITS.SUPPORT,
+        rarity : RARITY.COMMON,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {            
+            windowEvent.queueCustom(
+                onEnter :: {
+                    user.damage(
+                        attacker: user,
+                        damage : Damage.new(
+                            amount : 1,
+                            damageType : Damage.TYPE.NEUTRAL,
+                            damageClass: Damage.CLASS.HP
+                        ),
+                        dodgeable : false,
+                        critical : false,
+                        exact : true
+                    );                        
+                    windowEvent.queueMessage(
+                        text: user.name + ' cancels ' + targets[0].name + '\'s Art!'
+                    );
+                }
+            )
+            return true;
+        }
+    }
+)
+
+Arts.newEntry(
+    data: {
+        name: 'Blood\'s Seeking',
+        id : 'base:bloods-seeking',
+        targetMode : TARGET_MODE.ONE,
+        description: "Sacrifice 2 HP. Search user\'s discard pile for an Art. Add the Art to the user\'s hand.",
+        durationTurns: 0,
+        usageHintAI : USAGE_HINT.BUFF,
+        oncePerBattle : false,
+        canBlock : true,
+        isSupport : true,
+        kind : KIND.EFFECT,
+        traits : TRAITS.SUPPORT,
+        rarity : RARITY.EPIC,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {            
+            windowEvent.queueCustom(
+                onEnter :: {
+                    user.damage(
+                        attacker: user,
+                        damage : Damage.new(
+                            amount : 2,
+                            damageType : Damage.TYPE.NEUTRAL,
+                            damageClass: Damage.CLASS.HP
+                        ),
+                        dodgeable : false,
+                        critical : false,
+                        exact : true
+                    );                  
+                    
+                    windowEvent.queueMessage(
+                        text : 'Pick a card from ' + user.name + ' discard to add to your hand.'
+                    );  
+
+                    user.deck.chooseDiscard(
+                        act: 'Add to hand.',
+                        onChoice::(id, backout) {
+                            backout();
+                            user.addHandCard(id); 
+                        }
+                    );                     
+                }
+            )
+        }
+    }
+)
+
+Arts.newEntry(
+    data: {
+        name: 'Blood\'s Sacrifice',
+        id : 'base:bloods-sacrifice',
+        targetMode : TARGET_MODE.ONE,
+        description: "Sacrifice 2 HP. View target\'s hand and forces discarding of a card of the user\'s choosing.",
+        durationTurns: 0,
+        usageHintAI : USAGE_HINT.OFFENSIVE,
+        oncePerBattle : false,
+        canBlock : true,
+        isSupport : true,
+        kind : KIND.EFFECT,
+        traits : TRAITS.SUPPORT,
+        rarity : RARITY.EPIC,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {            
+            windowEvent.queueCustom(
+                onEnter :: {
+                    user.damage(
+                        attacker: user,
+                        damage : Damage.new(
+                            amount : 2,
+                            damageType : Damage.TYPE.NEUTRAL,
+                            damageClass: Damage.CLASS.HP
+                        ),
+                        dodgeable : false,
+                        critical : false,
+                        exact : true
+                    );                        
+
+                    targets[0].discardArt(chosenBy:user);                     
+                }
+            )
+        }
+    }
+)
+
+
+Arts.newEntry(
+    data: {
+        name: 'Blood\'s Summoning',
+        id : 'base:bloods-summoning',
+        targetMode : TARGET_MODE.NONE,
+        description: "Sacrifice 2 HP. Summons a small spirit to fight on your side.",
+        durationTurns: 0,
+        usageHintAI : USAGE_HINT.OFFENSIVE,
+        oncePerBattle : false,
+        canBlock : true,
+        isSupport : true,
+        kind : KIND.EFFECT,
+        traits : TRAITS.SUPPORT,
+        rarity : RARITY.EPIC,
+        onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {            
+            windowEvent.queueCustom(
+                onEnter :: {
+                    user.damage(
+                        attacker: user,
+                        damage : Damage.new(
+                            amount : 2,
+                            damageType : Damage.TYPE.NEUTRAL,
+                            damageClass: Damage.CLASS.HP
+                        ),
+                        dodgeable : false,
+                        critical : false,
+                        exact : true
+                    );                                                      
+                }
+            )
+            
+            
+            windowEvent.queueMessage(
+                text: user.name + ' summons a Spirit!'
+            );
+
+
+
+            @:world = import(module:'game_singleton.world.mt');
+            @:Entity = import(module:'game_class.entity.mt');
+            @:Species = import(module:'game_database.species.mt');
+            @:sprite = Entity.new(
+                island : world.island,
+                speciesHint: 'base:spirit',
+                professionHint: 'base:spirit',
+                levelHint:4
+            );
+            sprite.name = 'the Spirit';
+                        
+            @:battle = user.battle;
+
+            windowEvent.queueCustom(
+                onEnter :: {
+
+                    battle.join(
+                        group: [sprite],
+                        sameGroupAs:user
+                    );
+                }
+            )            
         }
     }
 )

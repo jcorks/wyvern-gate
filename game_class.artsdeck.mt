@@ -245,6 +245,10 @@
                 addHandCard(id:state.deck->pop);            
             },
             
+            addHandCard::(id) {
+                addHandCard(id);
+            },
+            
             discardFromHandIndex ::(which) {
                 @:cardRec = state.hand[which];
                 if (cardRec.owner)
@@ -282,17 +286,21 @@
                 windowEvent.queueMessage(
                     text: 'Choose a card to discard.'
                 );
-                this.chooseArtPlayer(
-                    act: 'Discard',
-                    canCancel: false,
-                    onChoice::(
-                        card,
-                        backout
-                    ) {
-                        this.discardFromHand(card);
-                        backout();
+                windowEvent.queueCustom(
+                    onEnter :: {
+                        this.chooseArtPlayer(
+                            act: 'Discard',
+                            canCancel: false,
+                            onChoice::(
+                                card,
+                                backout
+                            ) {
+                                this.discardFromHand(card);
+                                backout();
+                            }
+                        )
                     }
-                )
+                );
             },
             
             revealArt ::(handCard, prompt) {
@@ -340,8 +348,7 @@
                         
                     }                
                 );
-            },
-            
+            },            
             containsReaction ::{
                 return {:::} {
                     foreach(state.hand) ::(k, card) {
@@ -384,16 +391,10 @@
                 );    
                 
 
-                @:queueID = windowEvent.addResolveQueue();                
-                windowEvent.queueCustom(
-                    onEnter::{
-                        windowEvent.setActiveResolveQueue(:queueID);
-                    }
-                );
+                windowEvent.pushResolveQueue();                
                 
                 @selected = 0;
                 windowEvent.queueChoices(
-                    queueID,
                     prompt: 'Discarded Arts',
                     leftWeight: 1,
                     topWeight: 1,
@@ -415,7 +416,7 @@
                     },
                     canCancel,
                     onCancel :: {
-                        windowEvent.removeResolveQueue(:queueID);    
+                        windowEvent.popResolveQueue();
                         if (onCancel)
                             onCancel();                
                     },
@@ -428,7 +429,7 @@
                         @:choices = [if (act) act else 'Use'];                        
                         @:choiceActions = [
                             ::{
-                                windowEvent.removeResolveQueue(:queueID);
+                                windowEvent.popResolveQueue();
                                 onChoice(id:list[choice-1], backout ::{
                                     windowEvent.jumpToTag(
                                         name: 'ARTSDISCARDCHOOSE',
@@ -441,7 +442,6 @@
 
                         windowEvent.queueChoices(
                             choices,
-                            queueID,
                             canCancel: true,
                             onChoice ::(choice) {
                                 choiceActions[choice-1]();
@@ -471,18 +471,16 @@
                     ) enabled->push(:i);
                 }
                 
-                @:queueID = windowEvent.addResolveQueue();                
+                windowEvent.pushResolveQueue();                
                 @bg;
                 windowEvent.queueCustom(
                     onEnter::{
                         bg = canvas.addBackground(::{
                             renderHand(state, enabled);
                         });
-                        windowEvent.setActiveResolveQueue(:queueID);
                     }
                 );
                 windowEvent.queueChoices(
-                    queueID,
                     hideWindow : true,
                     keep : true,
                     onGetChoices ::<- [...enabled]->map(::(value)<- '' + value),
@@ -495,7 +493,7 @@
                     },
                     canCancel,
                     onCancel :: {
-                        windowEvent.removeResolveQueue(:queueID);    
+                        windowEvent.popResolveQueue();                
                         if (onCancel)
                             onCancel();                
                     },
@@ -514,7 +512,7 @@
                         @:choices = [if (act) act else 'Use'];                        
                         @:choiceActions = [
                             ::{
-                                windowEvent.removeResolveQueue(:queueID);
+                                windowEvent.popResolveQueue();                
                                 onChoice(card:handCard, backout ::{
                                     windowEvent.jumpToTag(
                                         name: 'ARTSDECKCHOOSE',
@@ -531,13 +529,11 @@
                                 // need at least 2 of the same kind
                                 when([...state.hand]->filter(::(value) <- value.id == handCard.id)->size < 2) ::<= {
                                     windowEvent.queueMessage(
-                                        queueID,
                                         text: 'Leveling Ability Arts requires more than 1 of the same Ability.'
                                     );
                                 } 
                                 
                                 windowEvent.queueMessage(
-                                    queueID,
                                     text: 'Choose the ' + Arts.find(id:handCard.id).name + ' Art to combine with this one.'
                                 );        
                                 
@@ -548,7 +544,6 @@
                                 });
                                 
                                 windowEvent.queueChoices(
-                                    queueID,
                                     choices,
                                     canCancel: true,
                                     onChoice::(choice) {        
@@ -558,7 +553,6 @@
                                         );
 
                                         windowEvent.queueMessage(
-                                            queueID,
                                             text: 'The card was sacrificed to increase the ' + Arts.find(id:handCard.id).name + ' art to Lv. ' + handCard.level + '.'
                                         );
                                     }
@@ -567,7 +561,6 @@
                         }
                         windowEvent.queueChoices(
                             choices,
-                            queueID,
                             canCancel: true,
                             onChoice ::(choice) {
                                 choiceActions[choice-1]();

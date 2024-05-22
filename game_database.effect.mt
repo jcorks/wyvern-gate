@@ -99,6 +99,37 @@ Effect.newEntry(
     }
 )
 
+Effect.newEntry(
+    data : {
+        name : 'x2 Damage',
+        id : 'base:next-attack-x2',
+        description: 'Next attack\'s damage will be 2 times as strong.',
+        battleOnly : true,
+        stackable : true,
+        blockPoints: 0,
+        flags : FLAGS.BUFF,
+        stats: StatSet.new(),
+        events : {
+            onAffliction ::(from, item, holder) {
+                windowEvent.queueMessage(
+                    text: holder.name + ' is primed for more damage!'
+                );
+            },
+
+            onPreAttackOther ::(from, item, holder, to, damage) {
+                windowEvent.queueMessage(
+                    text: holder.name + '\'s attack was boosted x2!'
+                );
+
+                damage.amount *= 2;
+                holder.removeEffectInstance(:
+                    holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:next-attack-x2')[0]
+                )
+            }
+        }
+    }
+);
+
 
 Effect.newEntry(
     data : {
@@ -1194,7 +1225,7 @@ Effect.newEntry(
             onNextTurn ::(from, item, holder, turnIndex, turnCount) {
                 windowEvent.queueMessage(text:holder.name + ' attacks in a blind rage!');
                 holder.attack(
-                    target:random.pickArrayItem(list:holder.enemies),
+                    target:random.pickArrayItem(:holder.battle.getEnemies(:holder)),
                     amount:holder.stats.ATK * (0.5),
                     damageType : Damage.TYPE.PHYS,
                     damageClass: Damage.CLASS.HP
@@ -2554,6 +2585,12 @@ Effect.newEntry(
             
             onRemoveEffect ::(from, item, holder) {
                 windowEvent.queueMessage(text:'The destruction rune fades from ' + holder.name + '.');
+                from.attack(
+                    target:holder,
+                    amount:from.stats.INT * (1.2),
+                    damageType : Damage.TYPE.FIRE,
+                    damageClass: Damage.CLASS.HP
+                );
             }
         }
     }
@@ -2631,6 +2668,7 @@ Effect.newEntry(
             
             onRemoveEffect ::(from, item, holder) {
                 windowEvent.queueMessage(text:'The cure rune fades from ' + holder.name + '.');
+                holder.heal(amount:(holder.stats.HP * (0.4))->ceil);
             }
         }
     }

@@ -13,9 +13,8 @@
 
 
 
-#define CHECK_ARG(__V__, __T__) if((__V__).binID != __T__) assert(!"Incorrect parameter value.");
-
-
+#define CHECK_ARG(__V__, __T__) if(matte_value_type(__V__) != __T__) \
+    assert(!"*Loud incorrect buzzer noise*");
 
 #define wyvern_gate__native__bfs__xy_to_id(__x__, __y__) ((__x__) + (__y__)*map.width)
 #define wyvern_gate__native__bfs__id_to_x(__id__) (__id__%(map.width))

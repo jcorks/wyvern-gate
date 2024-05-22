@@ -23,7 +23,11 @@
 return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, onHover, renderable, filter, keep, pageAfter) {
     @names = []
     @items = []
+    windowEvent.pushResolveQueue();
     windowEvent.queueChoices(
+        onCancel ::{
+            windowEvent.popResolveQueue();        
+        },
         leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
         topWeight:  if (topWeight == empty)  1 else topWeight => Number,
         prompt: if (prompt == empty) 'Choose an item:' else prompt => String,
@@ -57,6 +61,7 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
         },
         keep: if (keep == empty) true else keep,
         onChoice ::(choice) {
+            windowEvent.popResolveQueue();        
             when(choice == 0) onPick();
             onPick(item:items[choice-1]);
         }

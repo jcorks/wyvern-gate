@@ -192,7 +192,7 @@ return class(
                 get ::<- debugLines[0]
             },
             
-            renderBarAsString ::(width, fillFraction) {
+            renderBarAsString ::(width, fillFraction, character) {
                 if (width == empty) width = 12;
                 
                 @ratio = fillFraction;;
@@ -200,10 +200,12 @@ return class(
                 if (ratio < 0) ratio = 0;
                 @numFilled = ((width - 2) * (ratio))->floor;
                 if (fillFraction > 0 && numFilled < 1) numFilled = 1;
+                if (character == empty)
+                    character = '▓'
                 
                 @out = ' ';
                 for(0, numFilled)::(i) {
-                    out = out+'▓';
+                    out = out+character;
                 }
                 for(0, width - numFilled - 2)::(i) {
                     out = out+'▁';

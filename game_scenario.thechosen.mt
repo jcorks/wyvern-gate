@@ -322,7 +322,7 @@ return {
         
         for(0, 5) ::(i) {
             @:p0 = keyhome.islandEntry.newInhabitant(
-                speciesHint: Species.getRandomFiltered(filter::(value) <- value.special == false).id,
+                speciesHint: Species.getRandomFiltered(filter::(value) <- (value.traits & Species.TRAITS.SPECIAL) == 0).id,
                 levelHint:story.levelHint-1
             );
             p0.normalizeStats();        
@@ -442,10 +442,34 @@ return {
                 message: 'Saving...',
                 do :: {
                     @:basicArts = [
+                        /*
                         'base:pebble',
                         'base:brace',
                         'base:retaliate',
-                        'base:reevaluate'
+                        'base:reevaluate',
+                        */
+                        
+                        //////////////
+                        'base:bloods-sacrifice',
+                        'base:bloods-summoning',
+                        'base:bloods-exaltation',
+                        'base:bloods-seeking',
+                        'base:bloods-ward',
+                        'base:bloods-shield',
+                        'base:bloods-sacrifice',
+                        'base:bloods-summoning',
+                        'base:bloods-exaltation',
+                        'base:bloods-seeking',
+                        'base:bloods-ward',
+                        'base:bloods-shield',
+                        'base:bloods-sacrifice',
+                        'base:bloods-summoning',
+                        'base:bloods-exaltation',
+                        'base:bloods-seeking',
+                        'base:bloods-ward',
+                        'base:bloods-shield',
+
+                        //////////////
                     ];
 
                     party.members->foreach(::(k, v) {
@@ -680,6 +704,7 @@ return {
                 instance.gameOver(reason:'The party was wiped out.');
             }
         );
+        
         
         
         //////////////////////
@@ -3878,7 +3903,7 @@ return {
             swarms : false,
             canBlock : true,
             
-            special : true,
+            traits : Species.TRAITS.SPECIAL,
             passives : [
             ]
         })
@@ -3903,7 +3928,7 @@ return {
             swarms : false,
             canBlock : true,
             
-            special : true,
+            traits : Species.TRAITS.SPECIAL,
             passives : [
                 'base:icy'
             ]
@@ -3930,7 +3955,7 @@ return {
             swarms : false,
             canBlock : true,
             
-            special : true,
+            traits : Species.TRAITS.SPECIAL,
             passives : [
                 'base:shock'
             ]
@@ -3957,7 +3982,7 @@ return {
             swarms : false,
             canBlock : true,
             
-            special : true,
+            traits : Species.TRAITS.SPECIAL,
             passives : [
                 'base:shimmering'
             ]

@@ -22,6 +22,7 @@
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
+@:Arts = import(module:'game_database.arts.mt');
 @:g = import(module:'game_function.g.mt');
 
 
@@ -116,10 +117,14 @@
                 return state.members->all(condition:::(value) <- value.isIncapacitated());
             },
             
-            queueCollectSupportArt::{
+            queueCollectSupportArt::(
+                art : Arts.getRandomFiltered(::(value) <- 
+                    (value.traits & Arts.TRAITS.SUPPORT) &&
+                    (value.traits & Arts.TRAITS.SPECIAL == 0)               
+                )
+            ) {
                 @:Arts = import(:'game_database.arts.mt');
                 @:ArtsDeck = import(:'game_class.artsdeck.mt');
-                @:art = Arts.getRandomFiltered(::(value) <- value.traits & Arts.TRAITS.SUPPORT);
             
                 @:newArtRender ::{
                     ArtsDeck.renderArt(
@@ -130,7 +135,7 @@
             
                 windowEvent.queueMessage(
                     topWeight: 1,
-                    text: 'A new Art has revealed itself!',
+                    text: 'Two new Arts have been revealed!',
                     renderable : {
                         render : newArtRender
                     }
@@ -138,9 +143,11 @@
                 
                 this.addSupportArt(id:art.id);
 
+                this.addSupportArt(id:art.id);
+
                 windowEvent.queueMessage(
                     topWeight: 1,
-                    text: 'The Art was added to the Trunk. It is now available when editing a party member\'s Arts in the Party menu.',
+                    text: 'The Arts were added to the Trunk. They are now available when editing a party member\'s Arts in the Party menu.',
                     renderable : {
                         render : newArtRender
                     }                            

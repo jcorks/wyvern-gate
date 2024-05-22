@@ -74,7 +74,7 @@
                 foreach(attributes_) ::(key, typ) {
                     @val = data[key];
                     when(val == empty)
-                        error(detail:'Internal error: database item is missing property ' + key);
+                        error(detail:'Internal error: database item is missing property \"' + key + '\"');
 
                     when(key->type != String)
                         error(detail:'Internal error: database attribute property key isnt a string!');
