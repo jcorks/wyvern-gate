@@ -13,146 +13,146 @@
 
 @:reset ::{
 LandmarkEvent.database.newEntry(
-    data : {
-        id: 'base:item-specter',
-        startup ::(parent) {
-            @:ItemSpecter = import(module:'game_class.landmarkevent_itemspecter.mt');
-            @:a = ItemSpecter.new(parent);
-            return a;
-        },
+  data : {
+    id: 'base:item-specter',
+    startup ::(parent) {
+      @:ItemSpecter = import(module:'game_class.landmarkevent_itemspecter.mt');
+      @:a = ItemSpecter.new(parent);
+      return a;
+    },
 
-        
-        step ::(data, landmark) {
-            data.step();
-        },
-        
-        isActive ::(data) {
-            return data.isActive()
-        }
+    
+    step ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
     }
+  }
 );
 
 LandmarkEvent.database.newEntry(
-    data : {
-        id: 'base:dungeon-encounters',
-        startup ::(parent) {
-            @:DungeonEncounters = import(module:'game_class.landmarkevent_dungeonencounters.mt');
-            // TODO: make dungeon encounters loadable
-            @:a = DungeonEncounters.new(parent);   
-            return a;
-        },
-        
-        step ::(data, landmark) {
-            data.step();
-        },
-        
-        isActive ::(data) {
-            return data.isActive()
-        }
+  data : {
+    id: 'base:dungeon-encounters',
+    startup ::(parent) {
+      @:DungeonEncounters = import(module:'game_class.landmarkevent_dungeonencounters.mt');
+      // TODO: make dungeon encounters loadable
+      @:a = DungeonEncounters.new(parent);   
+      return a;
+    },
+    
+    step ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
     }
+  }
 );
 
 LandmarkEvent.database.newEntry(
-    data : {
-        id: 'base:the-beast',
-        startup ::(parent) {
-            @:b = import(module:'game_class.landmarkevent_thebeast.mt');
-            @:a = b.new(parent);
-            return a;
-        },
+  data : {
+    id: 'base:the-beast',
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_thebeast.mt');
+      @:a = b.new(parent);
+      return a;
+    },
 
-        
-        step ::(data, landmark) {
-            data.step();
-        },
-        
-        isActive ::(data) {
-            return data.isActive()
-        }
+    
+    step ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
     }
+  }
 );
 
 LandmarkEvent.database.newEntry(
-    data : {
-        id: 'base:the-mirror',
-        startup ::(parent) {
-            @:b = import(module:'game_class.landmarkevent_themirror.mt');
-            @:a = b.new(parent);
-            return a;
-        },
+  data : {
+    id: 'base:the-mirror',
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_themirror.mt');
+      @:a = b.new(parent);
+      return a;
+    },
 
-        
-        step ::(data, landmark) {
-            data.step();
-        },
-        
-        isActive ::(data) {
-            return data.isActive()
-        }
+    
+    step ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
     }
-);
-
-
-LandmarkEvent.database.newEntry(
-    data : {
-        id: 'base:treasure-golem',
-        startup ::(parent) {
-            @:b = import(module:'game_class.landmarkevent_treasuregolem.mt');
-            @:a = b.new(parent);
-            return a;
-        },
-
-        
-        step ::(data, landmark) {
-            data.step();
-        },
-        
-        isActive ::(data) {
-            return data.isActive()
-        }
-    }
+  }
 );
 
 
 LandmarkEvent.database.newEntry(
-    data : {
-        id: 'base:cave-bat',
-        startup ::(parent) {
-            @:b = import(module:'game_class.landmarkevent_cavebat.mt');
-            @:a = b.new(parent);
-            return a;
-        },
+  data : {
+    id: 'base:treasure-golem',
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_treasuregolem.mt');
+      @:a = b.new(parent);
+      return a;
+    },
 
-        
-        step ::(data, landmark) {
-            data.step();
-        },
-        
-        isActive ::(data) {
-            return data.isActive()
-        }
+    
+    step ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
     }
+  }
 );
 
 
 LandmarkEvent.database.newEntry(
-    data : {
-        id: 'base:the-snakesiren',
-        startup ::(parent) {
-            @:b = import(module:'game_class.landmarkevent_thesnakesiren.mt');
-            @:a = b.new(parent);
-            return a;
-        },
+  data : {
+    id: 'base:cave-bat',
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_cavebat.mt');
+      @:a = b.new(parent);
+      return a;
+    },
 
-        
-        step ::(data, landmark) {
-            data.step();
-        },
-        
-        isActive ::(data) {
-            return data.isActive()
-        }
+    
+    step ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
     }
+  }
+);
+
+
+LandmarkEvent.database.newEntry(
+  data : {
+    id: 'base:the-snakesiren',
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_thesnakesiren.mt');
+      @:a = b.new(parent);
+      return a;
+    },
+
+    
+    step ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
+    }
+  }
 );
 
 
@@ -161,52 +161,52 @@ LandmarkEvent.database.newEntry(
 // essentially an opaque wrapper for custom per-step 
 // controllers of landmarks.
 @:LandmarkEvent = databaseItemMutatorClass.create(
-    name : 'Wyvern.LandmarkEvent',
-    items : {
-        data : empty // maintained    
+  name : 'Wyvern.LandmarkEvent',
+  items : {
+    data : empty // maintained  
+  },
+  
+  database : Database.new(
+    name:'Wyvern.LandmarkEvent.Base',
+    attributes : {
+      id : String,
+      startup : Function,
+      step : Function,
+      isActive : Function
     },
+    reset
+  ),
+  
+  define::(this, state) {
     
-    database : Database.new(
-        name:'Wyvern.LandmarkEvent.Base',
-        attributes : {
-            id : String,
-            startup : Function,
-            step : Function,
-            isActive : Function
-        },
-        reset
-    ),
-    
-    define::(this, state) {
+    @landmark_;
         
-        @landmark_;
-                
-        this.interface = {
-            initialize ::(parent) {
-                landmark_ = parent;
-            },
-                        
-            defaultLoad ::(base) {
-                state.base = base;
-                state.data = base.startup(parent:this);
-            },
+    this.interface = {
+      initialize ::(parent) {
+        landmark_ = parent;
+      },
             
-            landmark : {
-                get ::<- landmark_
-            },
-            
-            step::{
-                state.base.step(
-                    landmark:landmark_,
-                    data:state.data
-                );
-            },
-            
-            isActive ::{
-                return state.base.isActive(data:state.data);
-            }
-        }
+      defaultLoad ::(base) {
+        state.base = base;
+        state.data = base.startup(parent:this);
+      },
+      
+      landmark : {
+        get ::<- landmark_
+      },
+      
+      step::{
+        state.base.step(
+          landmark:landmark_,
+          data:state.data
+        );
+      },
+      
+      isActive ::{
+        return state.base.isActive(data:state.data);
+      }
     }
+  }
 );
 
 

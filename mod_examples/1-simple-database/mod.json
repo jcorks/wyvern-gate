@@ -1,11 +1,11 @@
 {
-    "id": "mod.example.rasa.fryingpan",
-    "name": "Example mod: Frying pan!",
-    "description": "Adds a frying pan to the game",
-    "author": "Johnathan Corkery",
-    "website": "https://github.com/jcorks/wyvern-gate",
-    "files" : [
-        "main.mt"
-    ],
-    "loadFirst" : []
+  "id": "mod.example.rasa.fryingpan",
+  "name": "Example mod: Frying pan!",
+  "description": "Adds a frying pan to the game",
+  "author": "Johnathan Corkery",
+  "website": "https://github.com/jcorks/wyvern-gate",
+  "files" : [
+    "main.mt"
+  ],
+  "loadFirst" : []
 }

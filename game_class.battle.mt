@@ -1,19 +1,19 @@
 /*
-    Wyvern Gate, a procedural, console-based RPG
-    Copyright (C) 2023, Johnathan Corkery (jcorkery@umich.edu)
+  Wyvern Gate, a procedural, console-based RPG
+  Copyright (C) 2023, Johnathan Corkery (jcorkery@umich.edu)
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:class = import(module:'Matte.Core.Class');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
@@ -31,1147 +31,1147 @@
 @:HP_KNOWN_LIMIT = 99;
 
 @:combatChooseDefend::(targetPart, attacker, defender, onDone) {
-    when (defender.blockPoints == 0) onDone(which:0);
-    @:Entity = import(module:'game_class.entity.mt');
+  when (defender.blockPoints == 0) onDone(which:0);
+  @:Entity = import(module:'game_class.entity.mt');
 
-    @:notAttack = ::<= {
-        @:list = [
-            Entity.DAMAGE_TARGET.HEAD,
-            Entity.DAMAGE_TARGET.BODY,
-            Entity.DAMAGE_TARGET.LIMBS
-        ]
-        
-        list->remove(key:list->findIndex(value:targetPart));
-        return random.pickArrayItem(list);
-    }
-
-    @blockPoints = defender.blockPoints;
+  @:notAttack = ::<= {
+    @:list = [
+      Entity.DAMAGE_TARGET.HEAD,
+      Entity.DAMAGE_TARGET.BODY,
+      Entity.DAMAGE_TARGET.LIMBS
+    ]
     
-    @:partToString::(part) {
-        return match(part) {
-          (Entity.DAMAGE_TARGET.HEAD): 'head',
-          (Entity.DAMAGE_TARGET.BODY): 'body',
-          (Entity.DAMAGE_TARGET.LIMBS): 'limbs'
-        }
-    }
-    @blocking = 0;
-    @:showNot = random.try(percentSuccess:70);
-    
-    @:renderFrame ::{
-        @:lines = [
-            attacker.name + ' is preparing to attack ' + defender.name + '.',
-            'How will ' + defender.name + ' respond?',
-            '',
-            defender.name + ' is currently capable of defending ' + defender.blockPoints + ' ' + (if (defender.blockPoints == 1) 'part' else 'parts') + ' of their body.',
-            '',
-            if (defender.stats.INT > attacker.stats.INT) defender.name + '\'s intuition tells them that the enemy will:' else '',
-            if (defender.stats.INT > attacker.stats.INT)
-                if (showNot)
-                    '- NOT attack the ' + partToString(part:notAttack)
-                else
-                    '- DEFINITELY attack the ' + partToString(part:targetPart)
-            else 
-                '',
-            'Able to block: ' + blockPoints + ' point(s).'
-        ];
+    list->remove(key:list->findIndex(value:targetPart));
+    return random.pickArrayItem(list);
+  }
 
-        if ((blocking & Entity.DAMAGE_TARGET.HEAD) != 0)  lines->push(value:'Currently blocking: Head')
-        if ((blocking & Entity.DAMAGE_TARGET.BODY) != 0)  lines->push(value:'Currently blocking: Body')
-        if ((blocking & Entity.DAMAGE_TARGET.LIMBS) != 0) lines->push(value:'Currently blocking: Limbs')
-        
-        
-        canvas.renderTextFrameGeneral(
-            lines:canvas.refitLines(input:lines),
-            topWeight: 0,
-            leftWeight: 0.5
-        );
-        
-        
+  @blockPoints = defender.blockPoints;
+  
+  @:partToString::(part) {
+    return match(part) {
+      (Entity.DAMAGE_TARGET.HEAD): 'head',
+      (Entity.DAMAGE_TARGET.BODY): 'body',
+      (Entity.DAMAGE_TARGET.LIMBS): 'limbs'
     }
+  }
+  @blocking = 0;
+  @:showNot = random.try(percentSuccess:70);
+  
+  @:renderFrame ::{
+    @:lines = [
+      attacker.name + ' is preparing to attack ' + defender.name + '.',
+      'How will ' + defender.name + ' respond?',
+      '',
+      defender.name + ' is currently capable of defending ' + defender.blockPoints + ' ' + (if (defender.blockPoints == 1) 'part' else 'parts') + ' of their body.',
+      '',
+      if (defender.stats.INT > attacker.stats.INT) defender.name + '\'s intuition tells them that the enemy will:' else '',
+      if (defender.stats.INT > attacker.stats.INT)
+        if (showNot)
+          '- NOT attack the ' + partToString(part:notAttack)
+        else
+          '- DEFINITELY attack the ' + partToString(part:targetPart)
+      else 
+        '',
+      'Able to block: ' + blockPoints + ' point(s).'
+    ];
 
-    @choiceNames;
-    @choices;
+    if ((blocking & Entity.DAMAGE_TARGET.HEAD) != 0)  lines->push(value:'Currently blocking: Head')
+    if ((blocking & Entity.DAMAGE_TARGET.BODY) != 0)  lines->push(value:'Currently blocking: Body')
+    if ((blocking & Entity.DAMAGE_TARGET.LIMBS) != 0) lines->push(value:'Currently blocking: Limbs')
     
-    @:resetBlocking = ::{
-        blockPoints = defender.blockPoints;
-        blocking = 0
-        choiceNames = [
-            'Defend the head',
-            'Defend the body',
-            'Defend the limbs'
-        ];
+    
+    canvas.renderTextFrameGeneral(
+      lines:canvas.refitLines(input:lines),
+      topWeight: 0,
+      leftWeight: 0.5
+    );
+    
+    
+  }
+
+  @choiceNames;
+  @choices;
+  
+  @:resetBlocking = ::{
+    blockPoints = defender.blockPoints;
+    blocking = 0
+    choiceNames = [
+      'Defend the head',
+      'Defend the body',
+      'Defend the limbs'
+    ];
+    
+    choices = [
+      Entity.DAMAGE_TARGET.HEAD,
+      Entity.DAMAGE_TARGET.BODY,
+      Entity.DAMAGE_TARGET.LIMBS
+    ]
+    doNext();
+  
+  }
+  
+  @:doNext = ::{
+
+    windowEvent.queueChoices(
+      renderable : {
+        render : renderFrame
+      },
+      topWeight:0.9,
+      leftWeight: 0.5,
+      onGetChoices ::{
+        return choiceNames
+      },
+      canCancel: true,   
+      onCancel :: {
+        resetBlocking();
+      },
+      onChoice ::(choice) {
+        blocking |= choices[choice-1];
+        choices->remove(key:choice-1);
+        choiceNames->remove(key:choice-1);
+        blockPoints-=1;
         
-        choices = [
-            Entity.DAMAGE_TARGET.HEAD,
-            Entity.DAMAGE_TARGET.BODY,
-            Entity.DAMAGE_TARGET.LIMBS
-        ]
+        when(blockPoints == 0)
+          onDone(which:blocking);
         doNext();
-    
-    }
-    
-    @:doNext = ::{
-
-        windowEvent.queueChoices(
-            renderable : {
-                render : renderFrame
-            },
-            topWeight:0.9,
-            leftWeight: 0.5,
-            onGetChoices ::{
-                return choiceNames
-            },
-            canCancel: true,   
-            onCancel :: {
-                resetBlocking();
-            },
-            onChoice ::(choice) {
-                blocking |= choices[choice-1];
-                choices->remove(key:choice-1);
-                choiceNames->remove(key:choice-1);
-                blockPoints-=1;
-                
-                when(blockPoints == 0)
-                    onDone(which:blocking);
-                doNext();
-            }
-        );
-    }
-    resetBlocking();
+      }
+    );
+  }
+  resetBlocking();
 }
 
 
 @:battleLoot ::(rngLoot, defeated, landmark, party, finishEnd) {
 
-    @:Item = import(module:'game_mutator.item.mt');
+  @:Item = import(module:'game_mutator.item.mt');
 
 
-    @:forcedAcquisition = [];
-    foreach(defeated) ::(k, enemy) {
-        @:inv = enemy.forceDrop;
-        if (inv != empty)
-            forcedAcquisition->push(value:inv);
+  @:forcedAcquisition = [];
+  foreach(defeated) ::(k, enemy) {
+    @:inv = enemy.forceDrop;
+    if (inv != empty)
+      forcedAcquisition->push(value:inv);
+  }
+
+  foreach(forcedAcquisition) ::(i, inv) {
+    foreach(inv.items) ::(n, item) {
+      windowEvent.queueMessage(text: 'The party acquired ' + correctA(word:item.name) + '.');
+      party.inventory.add(item);
     }
-
-    foreach(forcedAcquisition) ::(i, inv) {
-        foreach(inv.items) ::(n, item) {
-            windowEvent.queueMessage(text: 'The party acquired ' + correctA(word:item.name) + '.');
-            party.inventory.add(item);
-        }
-        if (inv.gold > 0) ::<= {
-            windowEvent.queueMessage(text: 'The party acquired ' + g(g:inv.gold) + '.');
-            party.addGoldAnimated(
-                amount:inv.gold,
-                onDone::{}
-            );
-        }
+    if (inv.gold > 0) ::<= {
+      windowEvent.queueMessage(text: 'The party acquired ' + g(g:inv.gold) + '.');
+      party.addGoldAnimated(
+        amount:inv.gold,
+        onDone::{}
+      );
     }
+  }
 
 
-    if (rngLoot && random.try(percentSuccess:7)) ::<= {
-        windowEvent.queueMessage(text: 'What\'s this? They dropped something during the fight...');
+  if (rngLoot && random.try(percentSuccess:7)) ::<= {
+    windowEvent.queueMessage(text: 'What\'s this? They dropped something during the fight...');
 
-        @:lootTable = [
-            {
-                func::{
-                    windowEvent.queueMessage(text: 'It turned out to be junk.');
-                },
-                rarity: 100 / 30
-            },
+    @:lootTable = [
+      {
+        func::{
+          windowEvent.queueMessage(text: 'It turned out to be junk.');
+        },
+        rarity: 100 / 30
+      },
+      
+      {   
+        func::{
+          windowEvent.queueMessage(text: 'Jackpot! They dropped some gold!');
+          @:amount = (200 + Number.random()*300)->floor;
+          windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
+          party.addGoldAnimated(
+            amount:amount,
+            onDone::{}
+          );
+        },
+        rarity: 100 / 40
+      },
+
+      {   
+        func::{
+          windowEvent.queueMessage(text: 'Oh wow, they dropped something rare-looking!');
+          
+          when(party.inventory.slotsLeft < 1) ::<= {
+            windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
+          }
+          @itemMaterials = [
+            'base:gold',
+            'base:crystal',
+            'base:mythril',
+            'base:quicksilver',
+            'base:dragonglass',
+            'base:sunstone',
+            'base:moonstone',
+            'base:adamantine'
+          ]
+          
+          @itemQualities = [
+            'base:kings',
+            'base:queens',
+            'base:masterwork',
+            'base:legendary'
+          ]
+          
+          @item = Item.new(
+            base: Item.database.getRandomFiltered(
+              filter::(value) <- (
+                value.isUnique == false &&
+                value.hasMaterial == true &&
+                value.hasQuality == true
+              )
+            ),
+            rngEnchantHint:true,     
+            qualityHint : random.pickArrayItem(list:itemQualities),
+            materialHint : random.pickArrayItem(list:itemMaterials)
+          )  
+
+
+          @message = 'The party found ' + correctA(word:item.name);
+          windowEvent.queueMessage(text: message);
+
+
+          party.inventory.add(item);
             
-            {   
-                func::{
-                    windowEvent.queueMessage(text: 'Jackpot! They dropped some gold!');
-                    @:amount = (200 + Number.random()*300)->floor;
-                    windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
-                    party.addGoldAnimated(
-                        amount:amount,
-                        onDone::{}
-                    );
-                },
-                rarity: 100 / 40
-            },
+        },
+        rarity: 100 / 30
+      },
 
-            {   
-                func::{
-                    windowEvent.queueMessage(text: 'Oh wow, they dropped something rare-looking!');
-                    
-                    when(party.inventory.slotsLeft < 1) ::<= {
-                        windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
-                    }
-                    @itemMaterials = [
-                        'base:gold',
-                        'base:crystal',
-                        'base:mythril',
-                        'base:quicksilver',
-                        'base:dragonglass',
-                        'base:sunstone',
-                        'base:moonstone',
-                        'base:adamantine'
-                    ]
-                    
-                    @itemQualities = [
-                        'base:kings',
-                        'base:queens',
-                        'base:masterwork',
-                        'base:legendary'
-                    ]
-                    
-                    @item = Item.new(
-                        base: Item.database.getRandomFiltered(
-                            filter::(value) <- (
-                                value.isUnique == false &&
-                                value.hasMaterial == true &&
-                                value.hasQuality == true
-                            )
-                        ),
-                        rngEnchantHint:true,         
-                        qualityHint : random.pickArrayItem(list:itemQualities),
-                        materialHint : random.pickArrayItem(list:itemMaterials)
-                    )    
+      
+    ]
+    
 
-
-                    @message = 'The party found ' + correctA(word:item.name);
-                    windowEvent.queueMessage(text: message);
-
-
-                    party.inventory.add(item);
-                        
-                },
-                rarity: 100 / 30
-            },
-
-            
-        ]
-        
-
-        random.pickArrayItemWeighted(list:lootTable).func();
+    random.pickArrayItemWeighted(list:lootTable).func();
+  }
+    
+    
+    
+    
+    
+  windowEvent.queueCustom(
+    onEnter ::{},
+    onLeave ::{
+      finishEnd();      
     }
-        
-        
-        
-        
-        
-    windowEvent.queueCustom(
-        onEnter ::{},
-        onLeave ::{
-            finishEnd();            
-        }
-    );
+  );
 
 }
 
 
 @:Battle = class(
 
-    define:::(this) {    
-        // array of arrays of entities 
-        // each group is a set of allies. all other group members are 
-        // potential enemies    
-        @groups;
-        @ent2group;
-        @group2party;
-        @winningGroup;
-        
-        @:enemyAIs = [];
-        @onEnemyTurn_;
-        @onAllyTurn_;
-        @landmark_;
-        @active = false;
-        @ended;
-        @entityTurn;
-        @onTurn_;
-        @onAct_;
-        @defeated;
-        @backgroundID;
-        
+  define:::(this) {  
+    // array of arrays of entities 
+    // each group is a set of allies. all other group members are 
+    // potential enemies  
+    @groups;
+    @ent2group;
+    @group2party;
+    @winningGroup;
     
-        // some actions last multiple turns.
-        // indexed by Entity.
-        @actions = {} 
-        @turn = [];
-        @turnIndex = 0;
-        @redraw;
-        @party_;
-        @turnPoppable = [];
-        
-        @result;
-        @externalRenderable;
-        @battleEnd;
-        
-        @:getAllies::(ent) {
-            return [...ent2group[ent]];
-        }
-
-        @:getEnemies::(ent) {   
-            @:out = [];
-            foreach(groups->filter(by::(value) <- value->findIndex(value:ent) == -1)) ::(k, group) {
-                foreach(group) ::(i, ent) {
-                    out->push(value:ent);
-                }
-            }   
-            return out;
-        }
-        
-        @:getAll::{
-            @:out = {};
-            foreach(groups) ::(k, v) {
-                foreach(v) ::(k, m) {
-                    out->push(:m);
-                }
-            }
-            return out;
-        }
-
-        // defeated enemies were removed from their active groups
-        //
-        @:getEnemiesDefeated::(ent) {
-            when(winningGroup == empty)
-                error(detail:'This can only be called upon a team winning');
-            @:out = getEnemies(ent);
-            foreach(defeated->keys) ::(k, enemy) {
-                if (ent2group[enemy] != ent2group[ent])
-                    out->push(value:enemy);
-            }
-            return out;
-        }
-
-        
-        @:checkRemove :: {
-            // see if anyone died
-            @removed = [];
-            foreach(turn)::(index, entity) {                    
-                when(entity.isDead == false && entity.requestsRemove == false) empty;
-                if (group2party[ent2group[entity]] && entity.isDead) ::<= {
-                    @:world = import(module:'game_singleton.world.mt')
-                    world.scenario.onDeath(entity);
-                }
-                @:group  = ent2group[entity];
-                
-                @index = group->findIndex(value:entity);
-                if (index != -1) ::<= {
-                    defeated[group[index]] = true;
-                    group->remove(key:index);
-                }
-                if (group->size == 0)
-                    groups->remove(key:groups->findIndex(value:group));
-
-                index = turnPoppable->findIndex(value:entity);
-                if (index != -1) turnPoppable->remove(key:index);
-                removed->push(value:entity);
-            }
-            
-            foreach(removed) ::(i, ent) {
-                @:ind = turn->findIndex(value:ent);
-                if (ind != -1)
-                    turn->remove(key:ind);
-            }
-                                
-        }
-        
-        @:endTurn ::{
-            turnIndex+=1;
-            checkRemove();  
-            if (turnPoppable->keycount == 0) ::<= {      
-                foreach(turn)::(index, entity) {
-                    entity.endTurn(battle:this);
-                }
-
-
-                winningGroup = empty;
-                @everyoneWipedOut = true;
-                {:::} {
-                    foreach(groups) ::(k, group) {
-                        @groupAlive = {:::} {
-                            foreach(group) ::(i, entity) {
-                                if (!entity.isIncapacitated())
-                                    send(message:true);
-                            }
-                            return false;
-                        }
-                        
-                        
-                        
-                        if (groupAlive) ::<= {
-                            everyoneWipedOut = false;
-                        
-                            if (winningGroup == empty)
-                                winningGroup = group
-                            // more than one group still alive, no winning team.
-                            else ::<= {
-                                winningGroup = empty;
-                                send();
-                            }
-                        }
-                    }
-                }
-
-
-                
-                if (winningGroup != empty || everyoneWipedOut) ::<= {
-                    ended = true;
-                    foreach(groups) ::(k, group) {
-                        foreach(group) ::(i, ent) {
-                            ent.battleEnd();
-                        }
-                    }                    
-                }       
-            }
-            breakpoint();
-            windowEvent.queueCustom(
-                onEnter ::{
-                    windowEvent.jumpToTag(
-                        name:'Battle'
-                    )
-                }
-            );
-        }
-        
-        @:nextTurn ::{
-            when (turnPoppable->keycount == 0) empty;
-            windowEvent.onResolveAll(
-              onDone:: {
-              
-                @:ent = turnPoppable[0];
-                turnPoppable->remove(key:0);
-                entityTurn = ent;
-
-                windowEvent.queueMessage(
-                    text: 'It is now ' + ent.name + '\'s turn.'
-                );
-
-                
-                // act turn can signal to not act
-                when(!ent.actTurn()) ::<={
-                    endTurn();
-                }
-
-
-                // may have died this turn.
-                when (ent.isIncapacitated()) ::<={
-                    endTurn();
-                }
-                
-                // multi turn actions
-                if (actions[ent]) ::<= {
-                    @:action = actions[ent];
-                    action.turnIndex += 1;
-                    
-                    
-                    @:ret = ent.useArt(
-                        art:action.art,
-                        targets:action.targets,
-                        targetParts:action.targetParts,
-                        targetDefendParts: [],
-                        turnIndex : action.turnIndex,
-                        extraData : action.extraData
-                    );
-                    ent.flags.add(flag:StateFlags.WENT);
-
-                    
-                    if (action.turnIndex >= action.art.durationTurns || ret == Arts.CANCEL_MULTITURN) ::<= {
-                        actions[ent] = empty;
-                    }
-                    endTurn();
-                } else ::<= {
-
-
-                    // normal turn: request action from the act function
-                    // given by the caller
-                    @:act = if (group2party[ent2group[ent]]) onAllyTurn_ else onEnemyTurn_;
-                    act(
-                        battle:this,
-                        user:ent,
-                        landmark:landmark_
-                    );
-                    if (onAct_) onAct_();
-                    
-                }                
-            });
-        }
-        
-        @:initTurn ::{
-            when(ended) empty;
-            // first reset stats according to current effects 
-            foreach(turn)::(index, entity) {
-                entity.startTurn();
-            }
-            
-            // then resort based on speed
-            turn->setSize(size:0);
-            foreach(groups) ::(k, group) {
-                foreach(group) ::(i, ent) {
-                    turn->push(value:ent);
-                }
-            }    
-
-            turn->sort(
-                comparator:::(a, b) {
-                    return a.stats.SPD <
-                           b.stats.SPD;
-                }
-            );
-            
-            turnPoppable = [...turn];
-            
-            // then do turns.
-            // Every turn returns a BattleAction:
-            // includes an ability and targetset
-            turnIndex = 0;
-        }
+    @:enemyAIs = [];
+    @onEnemyTurn_;
+    @onAllyTurn_;
+    @landmark_;
+    @active = false;
+    @ended;
+    @entityTurn;
+    @onTurn_;
+    @onAct_;
+    @defeated;
+    @backgroundID;
     
-
-        
-        
-        @:renderTurnOrder  :: {
-            @:lines = [];
-            @width = 0;
-            foreach(turn)::(index, entity) {
-                @line = (if(turnIndex == index) '--> ' else '    ') + entity.name + (if(entity.isIncapacitated()) ' (down)' else '');
-                lines->push(value:line);                
-                if (width < line->length)
-                    width = line->length;
-            }      
-            width+= 4;
-            @:top = 0;
-            @:left = canvas.width - (width);
-            @:height = lines->keycount+4;
-            
-            canvas.renderFrame(
-                top, left, width, height
-            );
-            
-            canvas.movePen(y:top, x:left+2);
-            canvas.drawText(text:'Turn Order');
-            
-            foreach(lines)::(index, line) {
-                canvas.movePen(y:top+index+2, x:left+2);
-                canvas.drawText(text:line);
-            }
-        }
-                
-        @:renderFrac::(value, outOf) {
-            when (outOf > HP_KNOWN_LIMIT || value < 0) 
-                '?? / ??';
-                
-            return 
-                (if (value < 10) ''+value+' ' else ''+value)
-                + ' / ' +
-                (if (outOf < 10) ''+outOf+' ' else ''+outOf)
-        }
-        @:renderStatusBox::{
-            
-                
-            @lines = [];
-            
-            foreach(groups) ::(k, group) {
-                if (k != 0) ::<= {
-                    if (groups->size <= 2) ::<= {
-                        lines->push(value:'');
-                        lines->push(value:'  - vs -   ');
-                        lines->push(value:''); 
-                    } else ::<= {
-                        lines->push(value:'  - vs -   ');                    
-                    }
-                                   
-                }
-                foreach(group)::(index, ally) {
-                    if (Entity.isDisplayedHurt(entity:ally)) ::<= {
-                        lines->push(value:' ////////// ' + '  ' + ally.name);// + ' - Lv ' + ally.level);
-                        lines->push(value:'HP: ' + 'X  / X ' + '    AP: ' + 'X  / X');
-                    } else ::<= {
-                        lines->push(value:ally.renderHP() + '  ' + ally.name);// + ' - Lv ' + ally.level);
-                        lines->push(value:
-                            'HP: ' + renderFrac(value:ally.hp, outOf:ally.stats.HP) + 
-                            '    AP: ' + renderFrac(value:ally.ap, outOf:ally.stats.AP));                    
-                    }
-                }
-            }
-            
-
-            /*
-            foreach(enemies_)::(index, enemy) {
-                lines->push(value:enemy.renderHP() + '  ' + enemy.name);// + ' - Lv ' + enemy.level);
-                lines->push(value:'HP: ' + enemy.hp + ' / ' + enemy.stats.HP);
-            }*/
-
-
-            @:height = lines->keycount+4;
-            @width = 0;
-            @top = canvas.height/2 - height/2;     
-            foreach(lines)::(index, text) <-
-                if (text->length > width) 
-                    width = text->length
-            ;
-            
-            
-            
-            canvas.renderFrame(
-                top:top,
-                left:0,
-                width:width + 4,
-                height:height
-            );
-            
-            foreach(lines)::(index, line) {
-                canvas.movePen(x:2, y:top+index+2);
-                canvas.drawText(text:line);
-            }
-            
-        }
-        
-
-
-        
-        
-        this.interface = {
-            partyWon :: {
-                when(result == empty) false;
-                return {:::} {
-                    foreach(result) ::(k, ent) {
-                        if (party_.isMember(entity:ent))
-                            send(message:true);
-                    }
-                    return false;
-                }  
-            },
-        
-            start ::(
-                party => Party.type,
-                npcBattle,
-            
-                allies => Object,
-                enemies => Object,
-                landmark => Object,
-                
-                onTurn,
-                onAct,
-                loot,
-                exp,
-                
-                renderable,
-                
-                onStart,
-                onEnd => Function
-            ) {
-                defeated = {};
-                onTurn_ = onTurn;
-                onAct_ = onAct;
-                groups = [
-                    [...allies],
-                    [...enemies]
-                ];
-                ent2group = [];
-                group2party = [];
-                
-                foreach(allies) ::(i, ally) {
-                    ent2group[ally] = groups[0];
-                }
-
-                foreach(enemies) ::(i, enemy) {
-                    ent2group[enemy] = groups[1];
-                }
-                
-                if (npcBattle == empty)
-                    group2party[groups[0]] = true;
-
-                
-                canvas.pushState();
-                turn = [];
-                turnIndex = 0;
-                active = true;
-                ended = false;
-                externalRenderable = renderable;
-                            
-                party_ = party;
-                foreach(groups) ::(i, group) {
-                    foreach(group)::(index, ent) {
-                        ent.battleStart(
-                            battle: this
-                        );
-                    }
-                }
-
-                @:onAllyTurn = ::(battle, user, landmark, allies, enemies) {
-                    if (party.leader == user)
-                        battlemenu(
-                            party:party_,
-                            battle,
-                            user,
-                            landmark,
-                            allies,
-                            enemies 
-                        )
-                    else 
-                        user.battleAI.takeTurn(battle, enemies, allies);
-                    ;
-                }
-                
-                
-                @:onEnemyTurn = ::(battle, user, landmark, allies, enemies) {                        
-                    user.battleAI.takeTurn(battle, enemies, allies);
-                }
-
-                if (npcBattle == empty) ::<= {
-                    windowEvent.queueMessage(
-                        text: if (groups[1]->keycount == 1) 
-                            "You're confronted by someone!"
-                        else 
-                            "You're confronted by " + groups[1]->keycount + ' enemies!'
-                    );    
-                    
-                    foreach(groups[1])::(index, enemy) {
-                        windowEvent.queueMessage(
-                            text: enemy.name + ' blocks your path!'
-                        );                    
-                    }
-                }
-                onAllyTurn_ = onAllyTurn;
-                onEnemyTurn_ = onEnemyTurn;
-                landmark_ = landmark;
-                
-                
-                
-                foreach(groups) ::(i, group) {
-                    foreach(group)::(index, ent) {
-                        turn->push(value:ent);
-                    }
-                }
-                
-                turn->sort(
-                    comparator:::(a, b) {
-                        return a.stats.SPD <
-                               b.stats.SPD;
-                    }
-                );
- 
-                battleEnd = ::{
-                    @:startEnd ::(message) {
-                        active = false;
-
-                        windowEvent.queueMessage(
-                            text: message
-                        );
-                        if (windowEvent.canJumpToTag(name:'Battle'))                                            
-                            windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);                    
-
-                    }
-                
-                    @:finishEnd :: {
-                        groups = [];
-                        onEnd(result);                                        
-                    }
-                    result = winningGroup;
-                    
-                    
-                    
-                    
-                    when (npcBattle != empty) ::<= {
-                        startEnd(message:'The battle is over.');
-                        finishEnd();
-                    } 
-
-
-                    if (this.partyWon()) ::<= {            
-
-                        startEnd(
-                            message: 'The battle is won.'
-                        );
-                        
-                        party.queueCollectSupportArt();
-
-
-                        windowEvent.queueCustom(
-                            onEnter ::{},
-                            onLeave ::{
-
-
-                                @:Entity = import(module:'game_class.entity.mt');
-                                @hasWeapon = false;
-                                foreach(party_.members)::(index, ally) {   
-                                    @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
-                                    if (wep.name != 'None' && wep.canGainIntuition()) 
-                                        hasWeapon = true;
-                                };
-
-
-
-                                if (hasWeapon && random.try(percentSuccess:10)) ::<= {
-                                    windowEvent.queueMessage(text:'The party feels their intuition with their weapons grow.');
-
-                                    @:world = import(module:'game_singleton.world.mt')
-                                    world.accoladeIncrement(name:'intuitionGained');
-                                    @:choice = match(random.integer(from:1, to:3)) {
-                                        // inward -> AP, INT, DEF
-                                        (1): random.pickArrayItem(list:[1, 4, 3]),
-                                        // skyward -> DEX, SPD, LUK 
-                                        (2): random.pickArrayItem(list:[6, 7, 5]),
-                                        // forward -> ATK, HP 
-                                        (3): random.pickArrayItem(list:[2, 0])
-                                    };
-
-
-                                    foreach(party_.members)::(index, ally) {   
-                                        @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
-                                        when (wep.name == 'None') empty;
-
-                                        when (!wep.canGainIntuition())
-                                            windowEvent.queueMessage(text:ally.name + ' has already reached peak intuition with their weapon.');
-                                        ally.recalculateStats();
-                                        @:oldAllyStats = StatSet.new();
-                                        oldAllyStats.load(serialized:ally.stats.save());
-                                        @:stats = wep.stats;                             
-                                        @:oldStats = StatSet.new();
-                                        oldStats.add(stats);
-                                        stats.add(stats:StatSet.new(
-                                            HP: if (choice == 0) 7 else 0,
-                                            AP: if (choice == 1) 7 else 0,
-                                            ATK: if (choice == 2) 7 else 0,
-                                            DEF: if (choice == 3) 7 else 0,
-                                            INT: if (choice == 4) 7 else 0,
-                                            LUK: if (choice == 5) 7 else 0,
-                                            DEX: if (choice == 6) 7 else 0,
-                                            SPD: if (choice == 7) 7 else 0
-                                        ));
-                                        
-                                        oldStats.printDiffRate(other:stats, prompt:wep.name);
-                                        ally.recalculateStats();
-                                        oldAllyStats.printDiff(other:ally.stats, prompt:ally.name);
-                                    }
-                                }
-
-                                battleLoot(
-                                    rngLoot : loot,
-                                    defeated:getEnemiesDefeated(ent:party.members[0]),
-                                    landmark, 
-                                    party, 
-                                    finishEnd
-                                );
-
-                            }
-                        );
-
-                    } else ::<= {
-                        startEnd(
-                            message: 'The battle is lost.'
-                        );
-
-                        windowEvent.queueCustom(onEnter::{
-                            onEnd(result); 
-                        });                       
-                    }
-                }
-
-
-                @started = false;
-                windowEvent.queueCustom(
-                    keep: true,
-                    jumpTag: 'Battle',
-                    onEnter :: {
-                        backgroundID = canvas.addBackground(render::{
-                            this.render();
-                        });
-                    },
-                    onLeave ::{
-                        canvas.removeBackground(
-                            id:backgroundID
-                        );
-                    },
-                    renderable : {
-                        render ::{
-                            canvas.blackout();
-                        }
-                    },
-                    onUpdate::{
-                        when(ended) ::<= {
-                            if (windowEvent.hasAnyQueued() == false) ::<= {
-                                battleEnd();                                
-                            }
-                        }
-
-                    
-                    
-                        if (!started && onStart) ::<= {
-                            onStart();
-                            started = true;
-                        }
-                        
-                        if (turnPoppable->keycount == 0)
-                            initTurn();  
-                        nextTurn();
-                    }
-                );
-
-                return this;            
-            },        
-        
-            result : {
-                get ::<- result
-            },
-            
-            getAllies ::(entity) {
-                return getAllies(ent:entity)
-            },
-
-            getEnemies ::(entity) {
-                return getEnemies(ent:entity)
-            },
-            
-            getMembers :: {
-                @:out = [];
-                foreach(groups) ::(k, group) {
-                    foreach(group) ::(i, ent) {
-                        out->push(value:ent);
-                    }
-                }   
-                return out;
-            },
-
-            
-            isActive : {
-                get ::<- active
-            },
-            
-            landmark : {
-                get ::<- landmark_
-            },
-            
-            join ::(group, sameGroupAs) {
-
-                @:newGroup = if (sameGroupAs != empty)
-                    ent2group[sameGroupAs]
-                else 
-                    []
-                    
-
-                if (party_.isMember(entity:group[0]))
-                    group2party[newGroup] = true;
-
-                foreach(group) ::(i, entity) {
-                    newGroup->push(value:entity);
-                    ent2group[entity] = newGroup;
-                }
-                if (sameGroupAs == empty)
-                    groups->push(value:newGroup);
-                    
-                foreach(group) ::(i, entity) {
-                    when(turn->findIndex(value:entity) != -1) 
-                        error(detail: 'Tried to join battle when was already a part of the battle');
-                    windowEvent.queueMessage(text:entity.name + ' joins the fray!');
-                    entity.battleStart(battle:this);
-                    entity.startTurn();
-                }
-            },
-            
-            render :: {
-                renderStatusBox();
-                renderTurnOrder();
-            },
-            
-            entityCommitAction::(action) {
-                // failsafe. not normally needed.
-                when (entityTurn.isIncapacitated())
-                    endTurn();
-                
-                @:passesSupportCheck ::{
-                    @:art = Arts.find(:action.card.id);
-                    when(art.traits & Arts.TRAITS.SUPPORT == 0) true;
-                    when(random.flipCoin()) true;
-                    return false;
-                }
-                    
-                @:requiresAP = !passesSupportCheck();
-                    
-                when (requiresAP && entityTurn.ap == 0) ::<= {
-                    @:art = Arts.find(:action.card.id);
-                    windowEvent.queueMessage(
-                        text: entityTurn.name + ' tried to use the Art ' + art.name + ' but couldn\'t muster the mental strength!'
-                    );
-                }
-                    
-                @:Entity = import(module:'game_class.entity.mt');
-                @:world = import(module:'game_singleton.world.mt');
-                @:targetDefendParts = [];
-                foreach(action.targets) ::(index, target) {
-                    targetDefendParts[index] = if (target.blockPoints <= 0 || random.try(percentSuccess:35)) 0 else Entity.normalizedDamageTarget(blockPoints:target.blockPoints);
-                }
-                
-                @pendingChoices = [];
-                @:art = Arts.find(id:action.card.id);
-                if (art.canBlock && action.targets->size > 0) ::<= {
-                    pendingChoices = [...action.targets]->filter(by::(value) <- world.party.leader == value);
-                }
-            
-                @:finish ::(useArtReturn) {
-                    if (art.kind == Arts.KIND.ABILITY) ::<= {
-                        entityTurn.flags.add(flag:StateFlags.WENT);
-                        if (art.name != 'Wait' &&
-                            art.name != 'Use Item')
-                            entityTurn.flags.add(flag:StateFlags.ABILITY);
-
-                        if (art.durationTurns > 0 && useArtReturn != Arts.CANCEL_MULTITURN) ::<= {
-                            actions[entityTurn] = action;
-                        }  
-
-                        windowEvent.queueCustom(
-                            onEnter ::{
-                                endTurn();
-                            }
-                        );
-                    }                
-                }
-            
-                
-                @:doAction ::{
-                    @:ret = entityTurn.useArt(
-                        art:Arts.find(id:action.card.id),
-                        level: action.card.level,
-                        targets:action.targets,
-                        targetParts:action.targetParts,
-                        targetDefendParts: targetDefendParts,
-                        turnIndex : action.turnIndex,
-                        extraData : action.extraData
-                    );
-            
-                    finish(:ret);                   
-                }
-            
-                // react andy time
-                @checkReactions ::(onPass, onReject) {
-                    @toReact = getAll()->filter(::(value) <- value.isIncapacitated() == false && value.deck.containsReaction());
-                    toReact->sort(:::(a, b) <- a.stats.SPD > b.stats.SPD);
-                    when(toReact->size == 0)
-                        onPass();
-
-                    @:tryNext:: {
-                        when(toReact->size == 0)
-                            onPass();
-                            
-                        @reactor = toReact->pop;
-                        when(reactor == entityTurn)
-                            tryNext();
-
-                        reactor.react(
-                          source: entityTurn,
-                          onReact::(card) {
-                            when(card == empty)
-                                tryNext();
-                                
-                                
-                            reactor.deck.discardFromHand(:card);
-                            @art = Arts.find(:card.id);
-                            
-                            
-                            windowEvent.queueMessage(
-                                text: reactor.name + ' reacts with the Art ' + art.name + '!'
-                            );
-            
-                            if (requiresAP) ::<= {                
-                                windowEvent.queueMessage(
-                                    text: reactor.name + ' uses an Arts Point for the Support Art!'
-                                );
-                                reactor.ap -= 1;
-                            }
-                            
-                            
-                            @cancel = art.onAction(
-                                level: 1,
-                                user: reactor,
-                                targets : [entityTurn],
-                                targetDefendParts: [0],
-                                targetParts : [Entity.normalizedDamageTarget()],
-                                turnIndex: 0
-                            );
-                            
-                            when(reactor.isIncapacitated())
-                                windowEvent.queueCustom(
-                                    onEnter ::{
-                                        endTurn();
-                                    }
-                                );
-
-                            
-                            when(cancel) ::<= {
-                                windowEvent.queueMessage(text: reactor.name + '\'s ' + art.name + ' cancelled ' + entityTurn.name + '\'s Art!');
-                                windowEvent.queueCustom(
-                                    onEnter :: {
-                                        onReject();
-                                    }
-                                )
-                            }
-                                
-                            windowEvent.queueCustom(
-                                onEnter :: {
-                                    tryNext();                                
-                                }
-                            );
-                            
-                        })
-                    }
-                    
-                    tryNext();
-                
-                }
-            
-                @:chooseDefend ::(onDone) {
-                    @:doNext = :: {
-                        when(pendingChoices->size == 0) onDone();
-                        @:next = pendingChoices->pop;
-                        when(random.try(percentSuccess:35)) ::<= { // todo: luck delta affecting chance
-                            targetDefendParts[action.targets->findIndex(value:next)] = 0;
-                            doNext();
-                        }
-                        combatChooseDefend(
-                            targetPart: action.targetParts[action.targets->findIndex(value:next)],
-                            attacker:entityTurn,
-                            defender:next,
-                            onDone ::(which) {
-                                @:index = action.targets->findIndex(value:next);
-                                targetDefendParts[index] = which;
-                                doNext();
-                            }
-                        );
-                    }
-                    doNext();                  
-                }
-            
-            
-                action.turnIndex = 0;
-                entityTurn.deck.discardFromHand(card:action.card);
-                windowEvent.onResolveAll(
-                    onDone :: {
-                        entityTurn.deck.revealArt(
-                            handCard:action.card,
-                            prompt: entityTurn.name + ' uses the Art: ' + art.name + '!'
-                        );
-                        
-                        windowEvent.queueCustom(
-                            onEnter :: {
-                                // react here
-                                checkReactions(
-                                    onPass::{
-                                        windowEvent.queueCustom(
-                                            onEnter ::{
-                                                when (entityTurn.isIncapacitated())
-                                                    endTurn();
-                                                chooseDefend(::{
-                                                    doAction();
-                                                });
-                                            }
-                                        );
-                                    },
-                                    onReject::{
-                                        finish();                              
-                                    }
-                                );
-                            }
-                        
-                        )
-                    }
-                );
-            },
-        }
+  
+    // some actions last multiple turns.
+    // indexed by Entity.
+    @actions = {} 
+    @turn = [];
+    @turnIndex = 0;
+    @redraw;
+    @party_;
+    @turnPoppable = [];
+    
+    @result;
+    @externalRenderable;
+    @battleEnd;
+    
+    @:getAllies::(ent) {
+      return [...ent2group[ent]];
     }
+
+    @:getEnemies::(ent) {   
+      @:out = [];
+      foreach(groups->filter(by::(value) <- value->findIndex(value:ent) == -1)) ::(k, group) {
+        foreach(group) ::(i, ent) {
+          out->push(value:ent);
+        }
+      }   
+      return out;
+    }
+    
+    @:getAll::{
+      @:out = {};
+      foreach(groups) ::(k, v) {
+        foreach(v) ::(k, m) {
+          out->push(:m);
+        }
+      }
+      return out;
+    }
+
+    // defeated enemies were removed from their active groups
+    //
+    @:getEnemiesDefeated::(ent) {
+      when(winningGroup == empty)
+        error(detail:'This can only be called upon a team winning');
+      @:out = getEnemies(ent);
+      foreach(defeated->keys) ::(k, enemy) {
+        if (ent2group[enemy] != ent2group[ent])
+          out->push(value:enemy);
+      }
+      return out;
+    }
+
+    
+    @:checkRemove :: {
+      // see if anyone died
+      @removed = [];
+      foreach(turn)::(index, entity) {          
+        when(entity.isDead == false && entity.requestsRemove == false) empty;
+        if (group2party[ent2group[entity]] && entity.isDead) ::<= {
+          @:world = import(module:'game_singleton.world.mt')
+          world.scenario.onDeath(entity);
+        }
+        @:group  = ent2group[entity];
+        
+        @index = group->findIndex(value:entity);
+        if (index != -1) ::<= {
+          defeated[group[index]] = true;
+          group->remove(key:index);
+        }
+        if (group->size == 0)
+          groups->remove(key:groups->findIndex(value:group));
+
+        index = turnPoppable->findIndex(value:entity);
+        if (index != -1) turnPoppable->remove(key:index);
+        removed->push(value:entity);
+      }
+      
+      foreach(removed) ::(i, ent) {
+        @:ind = turn->findIndex(value:ent);
+        if (ind != -1)
+          turn->remove(key:ind);
+      }
+                
+    }
+    
+    @:endTurn ::{
+      turnIndex+=1;
+      checkRemove();  
+      if (turnPoppable->keycount == 0) ::<= {    
+        foreach(turn)::(index, entity) {
+          entity.endTurn(battle:this);
+        }
+
+
+        winningGroup = empty;
+        @everyoneWipedOut = true;
+        {:::} {
+          foreach(groups) ::(k, group) {
+            @groupAlive = {:::} {
+              foreach(group) ::(i, entity) {
+                if (!entity.isIncapacitated())
+                  send(message:true);
+              }
+              return false;
+            }
+            
+            
+            
+            if (groupAlive) ::<= {
+              everyoneWipedOut = false;
+            
+              if (winningGroup == empty)
+                winningGroup = group
+              // more than one group still alive, no winning team.
+              else ::<= {
+                winningGroup = empty;
+                send();
+              }
+            }
+          }
+        }
+
+
+        
+        if (winningGroup != empty || everyoneWipedOut) ::<= {
+          ended = true;
+          foreach(groups) ::(k, group) {
+            foreach(group) ::(i, ent) {
+              ent.battleEnd();
+            }
+          }          
+        }     
+      }
+      breakpoint();
+      windowEvent.queueCustom(
+        onEnter ::{
+          windowEvent.jumpToTag(
+            name:'Battle'
+          )
+        }
+      );
+    }
+    
+    @:nextTurn ::{
+      when (turnPoppable->keycount == 0) empty;
+      windowEvent.onResolveAll(
+        onDone:: {
+        
+        @:ent = turnPoppable[0];
+        turnPoppable->remove(key:0);
+        entityTurn = ent;
+
+        windowEvent.queueMessage(
+          text: 'It is now ' + ent.name + '\'s turn.'
+        );
+
+        
+        // act turn can signal to not act
+        when(!ent.actTurn()) ::<={
+          endTurn();
+        }
+
+
+        // may have died this turn.
+        when (ent.isIncapacitated()) ::<={
+          endTurn();
+        }
+        
+        // multi turn actions
+        if (actions[ent]) ::<= {
+          @:action = actions[ent];
+          action.turnIndex += 1;
+          
+          
+          @:ret = ent.useArt(
+            art:action.art,
+            targets:action.targets,
+            targetParts:action.targetParts,
+            targetDefendParts: [],
+            turnIndex : action.turnIndex,
+            extraData : action.extraData
+          );
+          ent.flags.add(flag:StateFlags.WENT);
+
+          
+          if (action.turnIndex >= action.art.durationTurns || ret == Arts.CANCEL_MULTITURN) ::<= {
+            actions[ent] = empty;
+          }
+          endTurn();
+        } else ::<= {
+
+
+          // normal turn: request action from the act function
+          // given by the caller
+          @:act = if (group2party[ent2group[ent]]) onAllyTurn_ else onEnemyTurn_;
+          act(
+            battle:this,
+            user:ent,
+            landmark:landmark_
+          );
+          if (onAct_) onAct_();
+          
+        }        
+      });
+    }
+    
+    @:initTurn ::{
+      when(ended) empty;
+      // first reset stats according to current effects 
+      foreach(turn)::(index, entity) {
+        entity.startTurn();
+      }
+      
+      // then resort based on speed
+      turn->setSize(size:0);
+      foreach(groups) ::(k, group) {
+        foreach(group) ::(i, ent) {
+          turn->push(value:ent);
+        }
+      }  
+
+      turn->sort(
+        comparator:::(a, b) {
+          return a.stats.SPD <
+               b.stats.SPD;
+        }
+      );
+      
+      turnPoppable = [...turn];
+      
+      // then do turns.
+      // Every turn returns a BattleAction:
+      // includes an ability and targetset
+      turnIndex = 0;
+    }
+  
+
+    
+    
+    @:renderTurnOrder  :: {
+      @:lines = [];
+      @width = 0;
+      foreach(turn)::(index, entity) {
+        @line = (if(turnIndex == index) '--> ' else '  ') + entity.name + (if(entity.isIncapacitated()) ' (down)' else '');
+        lines->push(value:line);        
+        if (width < line->length)
+          width = line->length;
+      }    
+      width+= 4;
+      @:top = 0;
+      @:left = canvas.width - (width);
+      @:height = lines->keycount+4;
+      
+      canvas.renderFrame(
+        top, left, width, height
+      );
+      
+      canvas.movePen(y:top, x:left+2);
+      canvas.drawText(text:'Turn Order');
+      
+      foreach(lines)::(index, line) {
+        canvas.movePen(y:top+index+2, x:left+2);
+        canvas.drawText(text:line);
+      }
+    }
+        
+    @:renderFrac::(value, outOf) {
+      when (outOf > HP_KNOWN_LIMIT || value < 0) 
+        '?? / ??';
+        
+      return 
+        (if (value < 10) ''+value+' ' else ''+value)
+        + ' / ' +
+        (if (outOf < 10) ''+outOf+' ' else ''+outOf)
+    }
+    @:renderStatusBox::{
+      
+        
+      @lines = [];
+      
+      foreach(groups) ::(k, group) {
+        if (k != 0) ::<= {
+          if (groups->size <= 2) ::<= {
+            lines->push(value:'');
+            lines->push(value:'  - vs -   ');
+            lines->push(value:''); 
+          } else ::<= {
+            lines->push(value:'  - vs -   ');          
+          }
+                   
+        }
+        foreach(group)::(index, ally) {
+          if (Entity.isDisplayedHurt(entity:ally)) ::<= {
+            lines->push(value:' ////////// ' + '  ' + ally.name);// + ' - Lv ' + ally.level);
+            lines->push(value:'HP: ' + 'X  / X ' + '  AP: ' + 'X  / X');
+          } else ::<= {
+            lines->push(value:ally.renderHP() + '  ' + ally.name);// + ' - Lv ' + ally.level);
+            lines->push(value:
+              'HP: ' + renderFrac(value:ally.hp, outOf:ally.stats.HP) + 
+              '  AP: ' + renderFrac(value:ally.ap, outOf:ally.stats.AP));          
+          }
+        }
+      }
+      
+
+      /*
+      foreach(enemies_)::(index, enemy) {
+        lines->push(value:enemy.renderHP() + '  ' + enemy.name);// + ' - Lv ' + enemy.level);
+        lines->push(value:'HP: ' + enemy.hp + ' / ' + enemy.stats.HP);
+      }*/
+
+
+      @:height = lines->keycount+4;
+      @width = 0;
+      @top = canvas.height/2 - height/2;   
+      foreach(lines)::(index, text) <-
+        if (text->length > width) 
+          width = text->length
+      ;
+      
+      
+      
+      canvas.renderFrame(
+        top:top,
+        left:0,
+        width:width + 4,
+        height:height
+      );
+      
+      foreach(lines)::(index, line) {
+        canvas.movePen(x:2, y:top+index+2);
+        canvas.drawText(text:line);
+      }
+      
+    }
+    
+
+
+    
+    
+    this.interface = {
+      partyWon :: {
+        when(result == empty) false;
+        return {:::} {
+          foreach(result) ::(k, ent) {
+            if (party_.isMember(entity:ent))
+              send(message:true);
+          }
+          return false;
+        }  
+      },
+    
+      start ::(
+        party => Party.type,
+        npcBattle,
+      
+        allies => Object,
+        enemies => Object,
+        landmark => Object,
+        
+        onTurn,
+        onAct,
+        loot,
+        exp,
+        
+        renderable,
+        
+        onStart,
+        onEnd => Function
+      ) {
+        defeated = {};
+        onTurn_ = onTurn;
+        onAct_ = onAct;
+        groups = [
+          [...allies],
+          [...enemies]
+        ];
+        ent2group = [];
+        group2party = [];
+        
+        foreach(allies) ::(i, ally) {
+          ent2group[ally] = groups[0];
+        }
+
+        foreach(enemies) ::(i, enemy) {
+          ent2group[enemy] = groups[1];
+        }
+        
+        if (npcBattle == empty)
+          group2party[groups[0]] = true;
+
+        
+        canvas.pushState();
+        turn = [];
+        turnIndex = 0;
+        active = true;
+        ended = false;
+        externalRenderable = renderable;
+              
+        party_ = party;
+        foreach(groups) ::(i, group) {
+          foreach(group)::(index, ent) {
+            ent.battleStart(
+              battle: this
+            );
+          }
+        }
+
+        @:onAllyTurn = ::(battle, user, landmark, allies, enemies) {
+          if (party.leader == user)
+            battlemenu(
+              party:party_,
+              battle,
+              user,
+              landmark,
+              allies,
+              enemies 
+            )
+          else 
+            user.battleAI.takeTurn(battle);
+          ;
+        }
+        
+        
+        @:onEnemyTurn = ::(battle, user, landmark) {            
+          user.battleAI.takeTurn(battle);
+        }
+
+        if (npcBattle == empty) ::<= {
+          windowEvent.queueMessage(
+            text: if (groups[1]->keycount == 1) 
+              "You're confronted by someone!"
+            else 
+              "You're confronted by " + groups[1]->keycount + ' enemies!'
+          );  
+          
+          foreach(groups[1])::(index, enemy) {
+            windowEvent.queueMessage(
+              text: enemy.name + ' blocks your path!'
+            );          
+          }
+        }
+        onAllyTurn_ = onAllyTurn;
+        onEnemyTurn_ = onEnemyTurn;
+        landmark_ = landmark;
+        
+        
+        
+        foreach(groups) ::(i, group) {
+          foreach(group)::(index, ent) {
+            turn->push(value:ent);
+          }
+        }
+        
+        turn->sort(
+          comparator:::(a, b) {
+            return a.stats.SPD <
+                 b.stats.SPD;
+          }
+        );
+ 
+        battleEnd = ::{
+          @:startEnd ::(message) {
+            active = false;
+
+            windowEvent.queueMessage(
+              text: message
+            );
+            if (windowEvent.canJumpToTag(name:'Battle'))                      
+              windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);          
+
+          }
+        
+          @:finishEnd :: {
+            groups = [];
+            onEnd(result);                    
+          }
+          result = winningGroup;
+          
+          
+          
+          
+          when (npcBattle != empty) ::<= {
+            startEnd(message:'The battle is over.');
+            finishEnd();
+          } 
+
+
+          if (this.partyWon()) ::<= {      
+
+            startEnd(
+              message: 'The battle is won.'
+            );
+            
+            party.queueCollectSupportArt();
+
+
+            windowEvent.queueCustom(
+              onEnter ::{},
+              onLeave ::{
+
+
+                @:Entity = import(module:'game_class.entity.mt');
+                @hasWeapon = false;
+                foreach(party_.members)::(index, ally) {   
+                  @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
+                  if (wep.name != 'None' && wep.canGainIntuition()) 
+                    hasWeapon = true;
+                };
+
+
+
+                if (hasWeapon && random.try(percentSuccess:10)) ::<= {
+                  windowEvent.queueMessage(text:'The party feels their intuition with their weapons grow.');
+
+                  @:world = import(module:'game_singleton.world.mt')
+                  world.accoladeIncrement(name:'intuitionGained');
+                  @:choice = match(random.integer(from:1, to:3)) {
+                    // inward -> AP, INT, DEF
+                    (1): random.pickArrayItem(list:[1, 4, 3]),
+                    // skyward -> DEX, SPD, LUK 
+                    (2): random.pickArrayItem(list:[6, 7, 5]),
+                    // forward -> ATK, HP 
+                    (3): random.pickArrayItem(list:[2, 0])
+                  };
+
+
+                  foreach(party_.members)::(index, ally) {   
+                    @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
+                    when (wep.name == 'None') empty;
+
+                    when (!wep.canGainIntuition())
+                      windowEvent.queueMessage(text:ally.name + ' has already reached peak intuition with their weapon.');
+                    ally.recalculateStats();
+                    @:oldAllyStats = StatSet.new();
+                    oldAllyStats.load(serialized:ally.stats.save());
+                    @:stats = wep.stats;               
+                    @:oldStats = StatSet.new();
+                    oldStats.add(stats);
+                    stats.add(stats:StatSet.new(
+                      HP: if (choice == 0) 7 else 0,
+                      AP: if (choice == 1) 7 else 0,
+                      ATK: if (choice == 2) 7 else 0,
+                      DEF: if (choice == 3) 7 else 0,
+                      INT: if (choice == 4) 7 else 0,
+                      LUK: if (choice == 5) 7 else 0,
+                      DEX: if (choice == 6) 7 else 0,
+                      SPD: if (choice == 7) 7 else 0
+                    ));
+                    
+                    oldStats.printDiffRate(other:stats, prompt:wep.name);
+                    ally.recalculateStats();
+                    oldAllyStats.printDiff(other:ally.stats, prompt:ally.name);
+                  }
+                }
+
+                battleLoot(
+                  rngLoot : loot,
+                  defeated:getEnemiesDefeated(ent:party.members[0]),
+                  landmark, 
+                  party, 
+                  finishEnd
+                );
+
+              }
+            );
+
+          } else ::<= {
+            startEnd(
+              message: 'The battle is lost.'
+            );
+
+            windowEvent.queueCustom(onEnter::{
+              onEnd(result); 
+            });             
+          }
+        }
+
+
+        @started = false;
+        windowEvent.queueCustom(
+          keep: true,
+          jumpTag: 'Battle',
+          onEnter :: {
+            backgroundID = canvas.addBackground(render::{
+              this.render();
+            });
+          },
+          onLeave ::{
+            canvas.removeBackground(
+              id:backgroundID
+            );
+          },
+          renderable : {
+            render ::{
+              canvas.blackout();
+            }
+          },
+          onUpdate::{
+            when(ended) ::<= {
+              if (windowEvent.hasAnyQueued() == false) ::<= {
+                battleEnd();                
+              }
+            }
+
+          
+          
+            if (!started && onStart) ::<= {
+              onStart();
+              started = true;
+            }
+            
+            if (turnPoppable->keycount == 0)
+              initTurn();  
+            nextTurn();
+          }
+        );
+
+        return this;      
+      },    
+    
+      result : {
+        get ::<- result
+      },
+      
+      getAllies ::(entity) {
+        return getAllies(ent:entity)
+      },
+
+      getEnemies ::(entity) {
+        return getEnemies(ent:entity)
+      },
+      
+      getMembers :: {
+        @:out = [];
+        foreach(groups) ::(k, group) {
+          foreach(group) ::(i, ent) {
+            out->push(value:ent);
+          }
+        }   
+        return out;
+      },
+
+      
+      isActive : {
+        get ::<- active
+      },
+      
+      landmark : {
+        get ::<- landmark_
+      },
+      
+      join ::(group, sameGroupAs) {
+
+        @:newGroup = if (sameGroupAs != empty)
+          ent2group[sameGroupAs]
+        else 
+          []
+          
+
+        if (party_.isMember(entity:group[0]))
+          group2party[newGroup] = true;
+
+        foreach(group) ::(i, entity) {
+          newGroup->push(value:entity);
+          ent2group[entity] = newGroup;
+        }
+        if (sameGroupAs == empty)
+          groups->push(value:newGroup);
+          
+        foreach(group) ::(i, entity) {
+          when(turn->findIndex(value:entity) != -1) 
+            error(detail: 'Tried to join battle when was already a part of the battle');
+          windowEvent.queueMessage(text:entity.name + ' joins the fray!');
+          entity.battleStart(battle:this);
+          entity.startTurn();
+        }
+      },
+      
+      render :: {
+        renderStatusBox();
+        renderTurnOrder();
+      },
+      
+      entityCommitAction::(action) {
+        // failsafe. not normally needed.
+        when (entityTurn.isIncapacitated())
+          endTurn();
+        
+        @:passesSupportCheck ::{
+          @:art = Arts.find(:action.card.id);
+          when(art.traits & Arts.TRAITS.SUPPORT == 0) true;
+          when(random.flipCoin()) true;
+          return false;
+        }
+          
+        @:requiresAP = !passesSupportCheck();
+          
+        when (requiresAP && entityTurn.ap == 0) ::<= {
+          @:art = Arts.find(:action.card.id);
+          windowEvent.queueMessage(
+            text: entityTurn.name + ' tried to use the Art ' + art.name + ' but couldn\'t muster the mental strength!'
+          );
+        }
+          
+        @:Entity = import(module:'game_class.entity.mt');
+        @:world = import(module:'game_singleton.world.mt');
+        @:targetDefendParts = [];
+        foreach(action.targets) ::(index, target) {
+          targetDefendParts[index] = if (target.blockPoints <= 0 || random.try(percentSuccess:35)) 0 else Entity.normalizedDamageTarget(blockPoints:target.blockPoints);
+        }
+        
+        @pendingChoices = [];
+        @:art = Arts.find(id:action.card.id);
+        if (art.canBlock && action.targets->size > 0) ::<= {
+          pendingChoices = [...action.targets]->filter(by::(value) <- world.party.leader == value);
+        }
+      
+        @:finish ::(useArtReturn) {
+          if (art.kind == Arts.KIND.ABILITY) ::<= {
+            entityTurn.flags.add(flag:StateFlags.WENT);
+            if (art.name != 'Wait' &&
+              art.name != 'Use Item')
+              entityTurn.flags.add(flag:StateFlags.ABILITY);
+
+            if (art.durationTurns > 0 && useArtReturn != Arts.CANCEL_MULTITURN) ::<= {
+              actions[entityTurn] = action;
+            }  
+
+            windowEvent.queueCustom(
+              onEnter ::{
+                endTurn();
+              }
+            );
+          }        
+        }
+      
+        
+        @:doAction ::{
+          @:ret = entityTurn.useArt(
+            art:Arts.find(id:action.card.id),
+            level: action.card.level,
+            targets:action.targets,
+            targetParts:action.targetParts,
+            targetDefendParts: targetDefendParts,
+            turnIndex : action.turnIndex,
+            extraData : action.extraData
+          );
+      
+          finish(:ret);           
+        }
+      
+        // react andy time
+        @checkReactions ::(onPass, onReject) {
+          @toReact = getAll()->filter(::(value) <- value.isIncapacitated() == false && value.deck.containsReaction());
+          toReact->sort(:::(a, b) <- a.stats.SPD > b.stats.SPD);
+          when(toReact->size == 0)
+            onPass();
+
+          @:tryNext:: {
+            when(toReact->size == 0)
+              onPass();
+              
+            @reactor = toReact->pop;
+            when(reactor == entityTurn)
+              tryNext();
+
+            reactor.react(
+              source: entityTurn,
+              onReact::(card) {
+              when(card == empty)
+                tryNext();
+                
+                
+              reactor.deck.discardFromHand(:card);
+              @art = Arts.find(:card.id);
+              
+              
+              windowEvent.queueMessage(
+                text: reactor.name + ' reacts with the Art ' + art.name + '!'
+              );
+      
+              if (requiresAP) ::<= {        
+                windowEvent.queueMessage(
+                  text: reactor.name + ' uses an Arts Point for the Support Art!'
+                );
+                reactor.ap -= 1;
+              }
+              
+              
+              @cancel = art.onAction(
+                level: 1,
+                user: reactor,
+                targets : [entityTurn],
+                targetDefendParts: [0],
+                targetParts : [Entity.normalizedDamageTarget()],
+                turnIndex: 0
+              );
+              
+              when(reactor.isIncapacitated())
+                windowEvent.queueCustom(
+                  onEnter ::{
+                    endTurn();
+                  }
+                );
+
+              
+              when(cancel) ::<= {
+                windowEvent.queueMessage(text: reactor.name + '\'s ' + art.name + ' cancelled ' + entityTurn.name + '\'s Art!');
+                windowEvent.queueCustom(
+                  onEnter :: {
+                    onReject();
+                  }
+                )
+              }
+                
+              windowEvent.queueCustom(
+                onEnter :: {
+                  tryNext();                
+                }
+              );
+              
+            })
+          }
+          
+          tryNext();
+        
+        }
+      
+        @:chooseDefend ::(onDone) {
+          @:doNext = :: {
+            when(pendingChoices->size == 0) onDone();
+            @:next = pendingChoices->pop;
+            when(random.try(percentSuccess:35)) ::<= { // todo: luck delta affecting chance
+              targetDefendParts[action.targets->findIndex(value:next)] = 0;
+              doNext();
+            }
+            combatChooseDefend(
+              targetPart: action.targetParts[action.targets->findIndex(value:next)],
+              attacker:entityTurn,
+              defender:next,
+              onDone ::(which) {
+                @:index = action.targets->findIndex(value:next);
+                targetDefendParts[index] = which;
+                doNext();
+              }
+            );
+          }
+          doNext();          
+        }
+      
+      
+        action.turnIndex = 0;
+        entityTurn.deck.discardFromHand(card:action.card);
+        windowEvent.onResolveAll(
+          onDone :: {
+            entityTurn.deck.revealArt(
+              handCard:action.card,
+              prompt: entityTurn.name + ' uses the Art: ' + art.name + '!'
+            );
+            
+            windowEvent.queueCustom(
+              onEnter :: {
+                // react here
+                checkReactions(
+                  onPass::{
+                    windowEvent.queueCustom(
+                      onEnter ::{
+                        when (entityTurn.isIncapacitated())
+                          endTurn();
+                        chooseDefend(::{
+                          doAction();
+                        });
+                      }
+                    );
+                  },
+                  onReject::{
+                    finish();                
+                  }
+                );
+              }
+            
+            )
+          }
+        );
+      },
+    }
+  }
 );
 
 return Battle;

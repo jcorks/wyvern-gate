@@ -1,21 +1,21 @@
 
 
 /*
-    Wyvern Gate, a procedural, console-based RPG
-    Copyright (C) 2023, Johnathan Corkery (jcorkery@umich.edu)
+  Wyvern Gate, a procedural, console-based RPG
+  Copyright (C) 2023, Johnathan Corkery (jcorkery@umich.edu)
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 @:Entity = import(module:'game_class.entity.mt');
@@ -53,7 +53,7 @@
 // Called when loading the state.
 // arg: slot (number, 0-2)
 // return: state (string)
-@:external_onLoadState     = getExternalFunction(name:'external_onLoadState');
+@:external_onLoadState   = getExternalFunction(name:'external_onLoadState');
 
 // Called when querying available save files.
 // return: array of strings
@@ -79,14 +79,14 @@
 // returns the appropriate cursor action number 
 //
 
-//    LEFT : 0,
-//    UP : 1,
-//    RIGHT : 2,
-//    DOWN : 3,
-//    CONFIRM : 4,
-//    CANCEL : 5,
+//  LEFT : 0,
+//  UP : 1,
+//  RIGHT : 2,
+//  DOWN : 3,
+//  CONFIRM : 4,
+//  CANCEL : 5,
 
-@:external_getInput      = getExternalFunction(name:'external_getInput');
+@:external_getInput    = getExternalFunction(name:'external_getInput');
 
 
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
@@ -97,66 +97,66 @@
 @canvasChanged = false;
 
 @rerender = :: {
-    @:lines = currentCanvas;
-    external_onStartCommit();
-    foreach(lines)::(index, line) {
-        external_onCommitText(a:line);
-    }
-    external_onEndCommit();
-    canvasChanged = false;    
-    canvas.onFrameComplete();
+  @:lines = currentCanvas;
+  external_onStartCommit();
+  foreach(lines)::(index, line) {
+    external_onCommitText(a:line);
+  }
+  external_onEndCommit();
+  canvasChanged = false;  
+  canvas.onFrameComplete();
 }
 
 canvas.onCommit = ::(lines, renderNow){
-    currentCanvas = lines;
-    canvasChanged = true;
-    if (renderNow != empty)
-        rerender();
+  currentCanvas = lines;
+  canvasChanged = true;
+  if (renderNow != empty)
+    rerender();
 }
 
 
 instance.mainMenu(
-    canvasHeight: 20,
-    canvasWidth: 80,
-        
-    onSaveState :::(
-        slot,
-        data
-    ) {
-        external_onSaveState(a:slot, b:data);
-    },
-
-    onListSlots ::{
-        return external_onListSlots();
-    },
+  canvasHeight: 20,
+  canvasWidth: 80,
     
-    onQuit ::{
-        external_onQuit();
-    },
+  onSaveState :::(
+    slot,
+    data
+  ) {
+    external_onSaveState(a:slot, b:data);
+  },
 
-    onLoadSettings ::{
-        return external_onLoadSettings();
-    },
-    
-    onSaveSettings ::(data) {
-        external_onSaveSettings(a:data);
-    },
+  onListSlots ::{
+    return external_onListSlots();
+  },
+  
+  onQuit ::{
+    external_onQuit();
+  },
 
-    preloadMods :: {
-        return [];
-    },
+  onLoadSettings ::{
+    return external_onLoadSettings();
+  },
+  
+  onSaveSettings ::(data) {
+    external_onSaveSettings(a:data);
+  },
 
-    onLoadState :::(
-        slot
-    ) {
-        return {:::} {
-            return external_onLoadState(a:slot);
-        } : {
-            onError:::(detail) {
-                return empty;
-            }
-        }
+  preloadMods :: {
+    return [];
+  },
+
+  onLoadState :::(
+    slot
+  ) {
+    return {:::} {
+      return external_onLoadState(a:slot);
+    } : {
+      onError:::(detail) {
+        return empty;
+      }
     }
+  }
 );
 
 
@@ -166,12 +166,12 @@ instance.mainMenu(
 
 // user code calls the returned function every frame
 return ::{
-    @val = external_getInput();
-    windowEvent.commitInput(input:val);
-    
-    if (canvasChanged) ::<= {
-        rerender();
-    }
+  @val = external_getInput();
+  windowEvent.commitInput(input:val);
+  
+  if (canvasChanged) ::<= {
+    rerender();
+  }
 
 }
 
