@@ -242,6 +242,7 @@
           this.shuffle();
           emitEvent(event:EVENTS.SHUFFLE);
         }
+        when (state.deck->size == 0) empty;
         addHandCard(id:state.deck->pop);      
       },
       

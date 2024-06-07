@@ -40,6 +40,8 @@
 @:BattleAction = import(:'game_struct.battleaction.mt');
 
 
+@:MIN_SUPPORT_COUNT = 5;
+
 // returns EXP recommended for next level
 @:levelUp ::(level, stats => StatSet.type, growthPotential => StatSet.type, whichStat) {
       
@@ -557,6 +559,11 @@
               canCancel: true,
               onChoice::(choice) {
                 @:world = import(module:'game_singleton.world.mt');
+                
+                when (state.supportArts->size == MIN_SUPPORT_COUNT) ::<= {
+                  windowEvent.queueMessage(text: 'Each person must have at least 5 supports in their deck. Please try adding a different Support to this person\'s deck before removing this Art.');
+                }
+                
                 world.party.addSupportArt(id:art.id);
                 state.supportArts->remove(:state.supportArts->findIndex(:art.id));
               }

@@ -452,7 +452,7 @@ Playing the Game
       canvas.movePen(x:0, y:2);
       canvas.drawText(text: 'Score ');
       canvas.movePen(x:0, y:3);
-      canvas.drawText(text: (if (attacker == player) '*' else ' ') + '  Party    : ' + ::<= {
+      canvas.drawText(text: (if (attacker == player) '*' else ' ') + '  Party        : ' + ::<= {
         @out = '';
         for(0, player.points->keycount) ::(i) {
           out = out + 'o';

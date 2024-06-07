@@ -579,6 +579,7 @@ Interaction.newEntry(
           // drunkard
           (chance < 0.88)::<= {              
           @:talkee = location.landmark.island.newInhabitant();
+          talkee.supportArts = []; // drunk, no supports
           talkee.anonymize();
           windowEvent.queueMessage(
             text:'Someone stumbles toward you...'

@@ -1957,7 +1957,25 @@ Effect.newEntry(
   }
 )
 
-   
+Effect.newEntry(
+  data : {
+    name : 'Learn Arts',
+    id : 'base:learn-arts',
+    description: 'Grants the learning of Arts for use later.',
+    battleOnly : false,
+    stackable: false,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(
+    ),
+    events : {
+      onAffliction ::(from, item, holder) {
+        @:world = import(module:'game_singleton.world.mt');
+        world.party.queueCollectSupportArt();
+      },
+    }
+  }
+)
 
 Effect.newEntry(
   data : {

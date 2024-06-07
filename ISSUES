@@ -4,21 +4,16 @@ Known bugs / concerns:
 - releasing runes doesnt seem to actually remove the rune effects despite 
   triggering the onRemove effect 
 - healing actions by AI sometimes choose non-hurt targets
+- equipping an item in battle will throw an error
 - Some time of day displays go offscreen when the island name 
   is too long.
+- Title screen lagging
 - On Windows in topaz, sometimes the settings arent read to unlock scenarios.
 - In the trader scenario, having a day end in a dungeon will cause the game to save. 
   reloading the save will reset the day and take you out of the dungeon.
 
 Coming changes:
-    Weapon enchants:
-        - Trigger effects will now cast a support art instead of an effect 
-        - Triggers will be restricted to the following 
-            - On Ability
-            - On Damage 
-            - On Turn Start 
-        - frequency is maintained.
-        - 10% chance that an enchant is a trigger effect when placing on item.
+
     Arts:
         - Named effects:
             - These are effects that are common between Arts with specific triggers specific to the Art 
@@ -31,8 +26,8 @@ Coming changes:
                 - Parry: nullifies next incoming damage 
                 - Finishing blow: next attack is x2 damage. discard a card 
                 - Blocking: 0.5x damage for next attack.
-        - Elongate: all effects on target are now double theyre remaining duration
-        - Sentance:
+        - Elongate: all effects on target are now double their remaining duration
+        - Sentence:
             - for every charge token, give a banish token. Charge tokens reduce to 0.
         - Shared pain: deal damage to target equal to amount of missing HP of user
         - Banishing light: The next attack that were to deal damage to target instead deals 1/3rd of the amount as banish tokens.

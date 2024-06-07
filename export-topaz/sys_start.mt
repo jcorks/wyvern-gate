@@ -24,7 +24,7 @@
 @:enterLocation = ::(location, action) {
     @:oldPath = Topaz.Resources.getPath();
     Topaz.Resources.setPath(path:location);
-    
+        
     {:::} {
         action();
     } : {
@@ -34,6 +34,7 @@
         }
     }
     Topaz.Resources.setPath(path:oldPath);
+
 }
 
 
@@ -124,7 +125,7 @@ return ::(terminal, arg, onDone) {
         }
 
         @:saveAsset = Topaz.Resources.createAsset(name:'WYVERN_SAVE', type:Topaz.Asset.Type.Data);
-        @:settingsAsset = Topaz.Resources.createAsset(name:'settings', type:Topaz.Asset.Type.Data);
+        @settingsAsset;
         instance.mainMenu(
             canvasHeight: 22,
             canvasWidth: 80,
@@ -152,7 +153,9 @@ return ::(terminal, arg, onDone) {
             onLoadSettings :: {
                 @data;
                 enterLocation(location:SAVEPATH, action::{
-                    Topaz.Resources.readDataAssetFromPath(asset:settingsAsset, path:'settings');
+                    settingsAsset = Topaz.Resources.createDataAssetFromPath(
+                        path:'settings'
+                    );
                     @:asset = settingsAsset;
 
                     when (asset == empty) empty;

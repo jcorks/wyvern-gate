@@ -72,7 +72,7 @@ Personality.newEntry(data: {
     SPEECH_EVENT.GREET : [
       "How's it goin'?",
       "Quite a fine day today.",
-      "Mmmm a nice breeze coming in."
+      "Mmmm, what a lovely day."
     ],
 
     
