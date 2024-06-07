@@ -44,6 +44,7 @@
       beast.name = 'Cave Bat';
       beast.species = Species.find(id:'base:cave-bat');
       beast.profession = Profession.find(id:'base:cave-bat');         
+      beast.supportArts = [];      
 
       beast.stats.load(serialized:StatSet.new(
         HP:   7,

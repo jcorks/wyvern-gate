@@ -328,7 +328,8 @@
           id : id,
           duration : duration,
           turnCount : 0,
-          from : from
+          from : from,
+          item : item
         };
         state.effects->push(:r);
         
@@ -403,7 +404,7 @@
             args.from = v.from;
             args.item = v.item;
             args.holder = holder;
-            if (v.turnCount) ::<= {
+            if (v.turnCount != empty) ::<= {
               args.turnCount = v.turnCount;
               args.turnIndex = v.turnCount - v.duration;
             } else ::<= {
@@ -438,7 +439,7 @@
         );
       },
       
-      nextTurn:: {
+      endTurn:: {
         @:inSet = {};
         foreach(state.effects) ::(i, e) {
           e.duration -= 1;

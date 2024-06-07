@@ -219,7 +219,7 @@ return {
                   windowEvent.queueMessage(text:opener.name + ' narrowly dodges the trap.');             
                 } else ::<= {
                   opener.damage(
-                    from: opener,
+                    attacker: opener,
                     damage: Damage.new(
                       amount:opener.stats.HP * (0.7),
                       damageType : Damage.TYPE.PHYS,

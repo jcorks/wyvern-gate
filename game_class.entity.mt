@@ -99,51 +99,7 @@
 
   // profession is expected to pick up the slack
   when ((this.species.traits & Species.TRAITS.SPECIAL) != 0) empty;
-  
-  // otherwise its default tier bs 
-  match(world.island.tier) {
-    (0, 1): ::<= {
-      deck.addArt(id:'base:pebble');
-      deck.addArt(id:'base:diversify');
-      deck.addArt(id:'base:brace');      
-      deck.addArt(id:'base:mind-games');
-    },
-    
-    (2): ::<= {
-      deck.addArt(id:'base:pebble');
-      deck.addArt(id:'base:retaliate');
-      deck.addArt(id:'base:diversify');
-      deck.addArt(id:'base:brace');      
-      deck.addArt(id:'base:mind-games');
-      deck.addArt(id:'base:crossed-wires');
-      deck.addArt(id:'base:recycle');      
-    },
-    
-    (3): ::<= {
-      deck.addArt(id:'base:pebble');
-      deck.addArt(id:'base:retaliate');
-      deck.addArt(id:'base:diversify');
-      deck.addArt(id:'base:brace');      
-      deck.addArt(id:'base:mind-games');
-      deck.addArt(id:'base:crossed-wires');
-      deck.addArt(id:'base:recycle');      
-      deck.addArt(id:'base:cancel');  
-    },
 
-    (4): ::<= {
-      deck.addArt(id:'base:pebble');
-      deck.addArt(id:'base:retaliate');
-      deck.addArt(id:'base:diversify');
-      deck.addArt(id:'base:brace');      
-      deck.addArt(id:'base:mind-games');
-      deck.addArt(id:'base:crossed-wires');
-      deck.addArt(id:'base:recycle');      
-      deck.addArt(id:'base:cancel');  
-      deck.addArt(id:'base:cancel');  
-    }
-
-    
-  }
 }
 
 @:assembleDeck ::(this, state) {
@@ -226,7 +182,7 @@
     ::(*args) {
       foreach(state.equips) ::(i, v) {
         when(v == empty) empty;
-        when(v.id == 'base:none') empty;
+        when(v.base.id == 'base:none') empty;
         v.commitEffectEvent(*args);
       }
     }
@@ -354,6 +310,9 @@
       state.innateEffects = innateEffects;
       
       state.worldID = world.getNextID();
+
+      // starting supports
+      state.supportArts = [];
       state.stats = StatSet.new(
         HP:1,
         AP:1,
@@ -574,51 +533,21 @@
             text: this.name + ' currently has no Support Arts. View the Trunk to add some.'
           );
       
-        @:choices = [];
-        @:choiceActs = [];
-
-        @:pushArt::(id){
-          @art = Arts.find(:id);
-          choices->push(:' ' + art.name);
-          choiceActs->push(:id);
-        }
-      
-      
-        @which = 0;
-        windowEvent.queueChoices(
-          onGetChoices ::{
-            choices->setSize(:0);
-            choiceActs->setSize(:0);    
-            foreach(this.supportArts)::(k, v) {
-              pushArt(id:v);
-            }
-            return choices;
+        @:pickArt = import(:'game_function.pickart.mt');
+        pickArt( 
+          prompt : 'Equipped:', 
+          onGetList :: {
+            return this.supportArts;
           },
-          prompt : this.name + ' : Supports',
-          leftWeight: 1,
-          topWeight: 0.5,
-          canCancel: true,
-          keep:true,
-          renderable : {
-            render::{
-              when(choiceActs[which] == empty) empty;
-              ArtsDeck.renderArt(
-                handCard: ArtsDeck.synthesizeHandCard(id:choiceActs[which]),
-                topWeight: 0.5,
-                leftWeight: 0
-              );
-            }
-          },
-          onHover::(choice) {
-            which = choice-1
-          },
-          
+          canCancel:true,
+          keep: true,
           onChoice::(choice) {
-            which = choice-1;
-            which = choice-1;
-            when(choiceActs[which] == empty) empty;
+            @:which = choice;
+            @:id = this.supportArts[which];
             
-            @:art = Arts.find(id:choiceActs[which]);
+            when(id == empty) empty;
+            
+            @:art = Arts.find(id:id);
             
             windowEvent.queueChoices(
               prompt: art.name,
@@ -641,60 +570,30 @@
       
       
       @:trunk::{
-        when(this.supportArts->size == 0)
+        @:world = import(module:'game_singleton.world.mt');
+
+        when(world.party.arts->size == 0)
           windowEvent.queueMessage(
             text: 'The party\'s Support Trunk currently has no Support Arts.'
           );
-
-
-        @:choices = [];
-        @:choiceActs = [];
-
-        @:pushArt::(id){
-          @art = Arts.find(:id);
-          choices->push(:' ' + art.name);
-          choiceActs->push(:id);
-        }
-        
-      
-        @which = 0;
-        windowEvent.queueChoices(
-          prompt: 'Support Trunk:',
-          leftWeight: 1,
-          topWeight: 0.5,
-          canCancel: true,
-          keep:true,
-          onGetChoices ::{
-            @:world = import(module:'game_singleton.world.mt');
-            choices->setSize(:0);
-            choiceActs->setSize(:0);
-            foreach(world.party.arts) ::(k, v) {
-              for(0, v.count)::(i) {
-                pushArt(:v.id);
-              }
-            }
-            return choices;      
-          },
           
-          renderable : {
-            render::{
-              when(choiceActs[which] == empty) empty;
-              ArtsDeck.renderArt(
-                handCard: ArtsDeck.synthesizeHandCard(id:choiceActs[which]),
-                topWeight: 0.5,
-                leftWeight: 0
-              );
-            }
+        @list;
+
+        @:pickArt = import(:'game_function.pickart.mt');
+        pickArt(
+          keep: true,
+          prompt : 'Support Trunk:', 
+          canCancel:true,
+          onGetList :: {
+            list = [...world.party.arts]->map(::(value) <- value.id);
+            return list;
           },
-          onHover::(choice) {
-            which = choice-1
-          },
-          
           onChoice::(choice) {
-            which = choice-1;
-            when(choiceActs[which] == empty) empty;
+            @which = choice;
+            @id = list[which];
+            when(id == empty) empty;
             
-            @:art = Arts.find(id:choiceActs[which]);
+            @:art = Arts.find(id);
             
             windowEvent.queueChoices(
               prompt: art.name,
@@ -737,81 +636,29 @@
     },
 
     viewDeckArts ::(prompt) {
-      @:state = _.state;
       @:this = _.this;
-
-      @:choices = [];
-      @:choiceActs = [];
-
-      @:typeToStr = [
-        '//',
-        '!!',
-        '^^',
-        '**',
-      ]
-
-      @:pushArt::(id){
-        @art = Arts.find(:id);
-        choices->push(:'▆ - ' + typeToStr[(art.kind)]);
-        choiceActs->push(:id);
-      }
-
+      @:state = _.state;
       // add weapon
+      @:categories = {}
+
       @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
       if (hand != empty) ::<= {
-        choices->push(:'Weapon:');
-        choiceActs->push(:empty);
-        pushArt(id:hand.arts[0]);
-        pushArt(id:hand.arts[1]);
+        categories['Weapon'] = [
+          hand.arts[0],        
+          hand.arts[1]
+        ]
       }  
 
-
-      
       // profession boosts
-      choices->push(:'Profession:');
-      choiceActs->push(:empty);
-      foreach(state.profession.arts) ::(k, v) {
-        pushArt(id:v);
+      categories['Profession'] = [...state.profession.arts];
+
+      if (this.supportArts) ::<= {
+        categories['Support'] = [...this.supportArts];
       }
 
-
       
-      if (this.supportArts) ::<= {
-        choices->push(:'Support:');
-        choiceActs->push(:empty);
-        foreach(this.supportArts)::(k, v) {
-          pushArt(id:v);
-        }
-      }      
-    
-    
-      @which = 0;
-      windowEvent.queueChoices(
-        choices,
-        prompt,
-        leftWeight: 1,
-        topWeight: 0.5,
-        maxWidth: 0.3,
-        canCancel: true,
-        renderable : {
-          render::{
-            when(choiceActs[which] == empty) empty;
-            ArtsDeck.renderArt(
-              handCard: ArtsDeck.synthesizeHandCard(id:choiceActs[which]),
-              topWeight: 0.5,
-              leftWeight: 0,
-              maxWidth: 0.7
-            );
-          }
-        },
-        onHover::(choice) {
-          which = choice-1
-        },
-        
-        onChoice::(choice) {
-          which = choice-1;
-        }
-      );
+      @:pickArt = import(:'game_function.pickart.mt');
+      pickArt(categories, prompt, canCancel:true);
     },    
 
     // called to signal that a battle has started involving this entity
@@ -880,6 +727,7 @@
       @:state = _.state;
       @:this = _.this;
       @:equips = state.equips;
+      this.effectStack.endTurn();
     },
 
     // lets the entity know that their turn has come.      
@@ -890,7 +738,6 @@
       state.deck.redraw();
       @act = true;
       
-      this.effectStack.nextTurn();
       
       @:rets = this.effectStack.emitEvent(
         name : 'onNextTurn'
@@ -1859,7 +1706,7 @@
     },
     
     shield : {
-      get ::<- _.state.shield;
+      get ::<- _.state.shield
     },
       
     ap : {

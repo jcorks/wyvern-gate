@@ -27,6 +27,7 @@
       specter.name = 'the Wyvern Specter';
       specter.species = Species.find(id:'base:wyvern-specter');
       specter.profession = Profession.find(id:'base:wyvern-specter');         
+      specter.supportArts = [];      
 
       @:inv = Inventory.new();
       inv.add(item:Item.new(base:Item.database.find(id:'base:life-crystal'

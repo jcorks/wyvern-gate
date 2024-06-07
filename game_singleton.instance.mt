@@ -685,9 +685,9 @@ return empty;
               landmark:gate,
               where: ::(landmark)<- gategate[0]
             );        
-            if (hasVisitIsland)
-              windowEvent.resolveAllQueued(:onReady)
-            else
+            if (hasVisitIsland) ::<= {
+              windowEvent.onResolveAll(:onReady)
+            } else
               if (onReady)
                 onReady();
           }

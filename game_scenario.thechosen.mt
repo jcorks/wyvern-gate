@@ -442,32 +442,13 @@ return {
         message: 'Saving...',
         do :: {
           @:basicArts = [
-            /*
             'base:pebble',
             'base:brace',
             'base:retaliate',
             'base:reevaluate',
-            */
+            'base:agility',
             
             //////////////
-            'base:bloods-sacrifice',
-            'base:bloods-summoning',
-            'base:bloods-exaltation',
-            'base:bloods-seeking',
-            'base:bloods-ward',
-            'base:bloods-shield',
-            'base:bloods-sacrifice',
-            'base:bloods-summoning',
-            'base:bloods-exaltation',
-            'base:bloods-seeking',
-            'base:bloods-ward',
-            'base:bloods-shield',
-            'base:bloods-sacrifice',
-            'base:bloods-summoning',
-            'base:bloods-exaltation',
-            'base:bloods-seeking',
-            'base:bloods-ward',
-            'base:bloods-shield',
 
             //////////////
           ];
@@ -1446,15 +1427,15 @@ return {
         @:Scene = import(module:'game_database.scene.mt');
         @:StatSet = import(module:'game_class.statset.mt');
         location.ownedBy = location.landmark.island.newInhabitant();
+        location.ownedBy.supportArts = [
+          'base:cancel',
+          'base:retaliate',
+          'base:bloods-shield',                  
+        ];      
         location.ownedBy.name = 'Wyvern of Fire';
         location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-fire');
-        location.ownedBy.profession = Profession.new(base:Profession.find(id:'thechosen:wyvern-of-fire'));         
-        location.ownedBy.clearAbilities();
-        foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
-          location.ownedBy.learnAbility(id:ability);
-        }
+        location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-fire')         
 
-        
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
           if (world.scenario.data.fireWyvernDefeated == false) ::<= {
             Scene.start(id:'thechosen:scene_wyvernfire0', onDone::{}, location, landmark:location.landmark);
@@ -1529,9 +1510,15 @@ return {
         @:Scene = import(module:'game_database.scene.mt');
         @:StatSet = import(module:'game_class.statset.mt');
         location.ownedBy = location.landmark.island.newInhabitant();
+        location.ownedBy.supportArts = [
+          'base:cancel',
+          'base:retaliate',
+          'base:bloods-shield',                  
+          'base:bloods-exaltation',                  
+        ];      
         location.ownedBy.name = 'Wyvern of Ice';
         location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-ice');
-        location.ownedBy.profession = Profession.new(base:Profession.find(id:'thechosen:wyvern-of-ice'));         
+        location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-ice');
         location.ownedBy.clearAbilities();
         foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
           location.ownedBy.learnAbility(id:ability);
@@ -1614,8 +1601,15 @@ return {
         @:Entity = import(module:'game_class.entity.mt');
         location.ownedBy = location.landmark.island.newInhabitant();
         location.ownedBy.name = 'Wyvern of Thunder';
+        location.ownedBy.supportArts = [
+          'base:cancel',
+          'base:retaliate',
+          'base:bloods-shield',                  
+          'base:bloods-exaltation',                  
+          'base:bloods-ward',                  
+        ];      
         location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-thunder');
-        location.ownedBy.profession = Profession.new(base:Profession.find(id:'thechosen:wyvern-of-thunder'));         
+        location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-thunder') 
         location.ownedBy.clearAbilities();
         foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
           location.ownedBy.learnAbility(id:ability);
@@ -1699,9 +1693,16 @@ return {
         @:Scene = import(module:'game_database.scene.mt');
         @:StatSet = import(module:'game_class.statset.mt');
         location.ownedBy = location.landmark.island.newInhabitant();
+        location.ownedBy.supportArts = [
+          'base:cancel',
+          'base:retaliate',
+          'base:bloods-shield',                  
+          'base:bloods-exaltation',                  
+          'base:bloods-ward',                  
+        ];      
         location.ownedBy.name = 'Wyvern of Light';
         location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-light');
-        location.ownedBy.profession = Profession.new(base:Profession.find(id:'thechosen:wyvern-of-light'));         
+        location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-light')
         location.ownedBy.clearAbilities();
         foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
           location.ownedBy.learnAbility(id:ability);

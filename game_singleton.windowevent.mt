@@ -255,7 +255,7 @@
     // this is normally done for you, but
     // when jumping, sometimes it is required.
     @:resolveNext::(noCommit, level) {
-      @:inst = resolveQueues[resolveQueues->size-1];
+      @inst = resolveQueues[resolveQueues->size-1];
       @:queue = inst.queue;
       @:onResolveAll = inst.onResolveAll;
 
@@ -1384,6 +1384,11 @@
       // unless youre sure you dont want the queued items here!
       popResolveQueue :: {
         resolveQueues->pop;
+        if (resolveQueues->size == 0)
+          resolveQueues->push(:{
+            onResolveAll : {},
+            queue : {}
+          });        
       },
             
       

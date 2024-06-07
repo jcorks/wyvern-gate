@@ -3297,7 +3297,13 @@ Item.database.newEntry(data : {
   @out = String.combine(strings:[
     base.description,
     ' ',
-    (if (state.arts == empty) '' else 'If equipped, grants the Arts: "' + Arts.find(id:state.arts[0]).name + '" and "' + Arts.find(id:state.arts[1]).name + '". '),
+    (if (state.arts == empty) '' else 'If equipped, ' + 
+      (if (state.arts[0] == state.arts[1])
+          'the Art "' + Arts.find(id:state.arts[0]).name + '" becomes available often in battle. '
+        else
+          'the Arts "' + Arts.find(id:state.arts[0]).name + '" and "' + Arts.find(id:state.arts[1]).name + '" become available in battle. '
+      )
+    ),
     if (state.size == empty) '' else 'It is ' + sizeToString(state) + '. ',
     if (state.hasEmblem) (
       if (base.isApparel) 
@@ -3334,7 +3340,6 @@ Item.database.newEntry(data : {
     apparel : empty,
     customPrefix : '',
     customName : '',
-    description : '',
     hasEmblem : false,
     size : 0,
     price : 0,
@@ -3727,7 +3732,7 @@ Item.database.newEntry(data : {
     description : {
       get :: {
         @:state = _.state;
-        return calculateDescription(*_) + '\nEquip effects: \n' + state.stats.descriptionRate;
+        return calculateDescription(*_);
       }
     },
       
@@ -3754,7 +3759,7 @@ Item.database.newEntry(data : {
       @:Effect = import(module:'game_database.effect.mt');
       windowEvent.queueMessage(
         speaker:this.name,
-        text:state.description,
+        text:this.description,
         pageAfter:canvas.height-4
       );
       

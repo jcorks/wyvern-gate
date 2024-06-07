@@ -270,6 +270,7 @@
   @:areas = [];
   
   @:AREA_SIZE = 7; 
+  @:MINIMUM_AREA_COUNT = 4;
   
   @:AREA_GAP = random.pickArrayItem(
     list: [
@@ -379,9 +380,30 @@
   }
   
   // generate starting areas and map nodes
+  @:areaList = [];
+  @iter = 0;
+  @alreadyArea = 0;
   for(0, AREA_HEIGHT) ::(y) {
     for(0, AREA_WIDTH) ::(x) {
-      @:node = if (random.try(percentSuccess:AREA_CHANCE)) ::<= {
+      areaList[iter] = random.try(percentSuccess:AREA_CHANCE);
+      if (areaList[iter])
+        alreadyArea += 1;
+
+
+      iter += 1;
+    }
+  }
+  
+  if (alreadyArea < MINIMUM_AREA_COUNT) ::<= {
+    for(alreadyArea, MINIMUM_AREA_COUNT) ::(i) {
+      areaList[random.integer(from:0, to:AREA_HEIGHT*AREA_WIDTH-1)] = true;
+    }
+  }
+    
+  iter = 0;
+  for(0, AREA_HEIGHT) ::(y) {
+    for(0, AREA_WIDTH) ::(x) {
+      @:node = if (areaList[iter]) ::<= {
         @:n = generateAreaNode(x, y);
         // pick 2 directions to be open
         @:list = generateWays(x, y);
@@ -400,7 +422,8 @@
       
 
       
-      gridNodes[x + y*AREA_WIDTH] = node;
+      gridNodes[iter] = node;
+      iter += 1;
     }
   }
   

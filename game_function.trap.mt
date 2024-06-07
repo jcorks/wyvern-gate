@@ -72,7 +72,7 @@
       windowEvent.queueMessage(text:whom.name + ' narrowly dodges the trap.');             
     } else ::<= {
       whom.damage(
-        from: whom,
+        attacker: whom,
         damage: Damage.new(
           amount:whom.stats.HP * (0.5),
           damageType : Damage.TYPE.PHYS,

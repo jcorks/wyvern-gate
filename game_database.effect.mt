@@ -133,11 +133,46 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
+    name : 'Banishing Light',
+    id : 'base:banishing-light',
+    description: 'Next attack received is translated instead to Banish stacks. The count is equivalent to 1/3rd the damage, rounded up.',
+    battleOnly : true,
+    stackable : true,
+    blockPoints: 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onAffliction ::(from, item, holder) {
+        windowEvent.queueMessage(
+          text: holder.name + ' is inflicted with Banishing Light!'
+        );
+      },
+
+      onPreAttacked ::(from, item, holder, attacker, damage) {
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Banishing Light translated the damage into Banishing!'
+        );
+
+        for(0, (damage.amount/3)->ceil) ::(i) {
+          holder.addEffect(from, id:'base:banish', durationTurns:10000);      
+        }
+        damage.amount = 0;
+        holder.removeEffectInstance(:
+          holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:banishing-light')[0]
+        )
+      }
+    }
+  }
+);
+
+
+Effect.newEntry(
+  data : {
     name : 'Agile',
     id: 'base:agile',
     description: 'The holder may now dodge attacks. If the holder has more DEX than the attacker, the chance of dodging increases if the holder\'s DEX is greater than the attacker\'s.',
     battleOnly : true,
-    stackable: false,
+    stackable: true,
     blockPoints : 1,
     flags : FLAGS.BUFF,
     stats: StatSet.new(
@@ -150,7 +185,7 @@ Effect.newEntry(
         );
       },
 
-      onPreAttacked ::(from, item, holder, by, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage) {
         @:StateFlags = import(module:'game_class.stateflags.mt');
         @whiff = false;
         @:hitrate::(this, attacker) {
@@ -159,22 +194,22 @@ Effect.newEntry(
             
           when (attacker <= 1) 0.45;
           @:diff = attacker/this; 
-          when(diff > 1) 1.0; 
-          return 1 - 0.45 * ((1-diff)**0.9);
+          when(diff > 1) 0.85; 
+          return 0.45 + (0.85 - 0.45) * ((1-diff)**0.9);
         }
         if (Number.random() > hitrate(
           this:   holder.stats.DEX,
-          attacker: by.stats.DEX
+          attacker: attacker.stats.DEX
         ))
           whiff = true;
         
         
         when(whiff) ::<= {
           windowEvent.queueMessage(text:random.pickArrayItem(list:[
-            holder.name + ' lithely dodges ' + by.name + '\'s attack!',         
-            holder.name + ' narrowly dodges ' + by.name + '\'s attack!',         
-            holder.name + ' dances around ' + by.name + '\'s attack!',         
-            by.name + '\'s attack completely misses ' + holder.name + '!'
+            holder.name + ' lithely dodges ' + attacker.name + '\'s attack!',         
+            holder.name + ' narrowly dodges ' + attacker.name + '\'s attack!',         
+            holder.name + ' dances around ' + attacker.name + '\'s attack!',         
+            attacker.name + '\'s attack completely misses ' + holder.name + '!'
           ]));
           holder.flags.add(flag:StateFlags.DODGED_ATTACK);
           damage.amount = 0;
@@ -224,7 +259,7 @@ Effect.newEntry(
     stats: StatSet.new(
     ),
     events : {
-      onPreAttacked ::(from, item, holder, by, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage) {
         if (!holder.isIncapacitated() && random.try(percentSuccess:40)) ::<= {
           windowEvent.queueMessage(text:holder.name + "'s ghostly body bends around the attack!");
           damage.amount = 0;
@@ -474,8 +509,8 @@ Effect.newEntry(
         );
       },
       onPreDamage ::(from, item, holder, attacker, damage) {
-        @dmg = damage.amount * 0.75;
         when (dmg < 1) empty;
+        @dmg = damage.amount * 0.75;
         damage.amount = 0;
         windowEvent.queueMessage(
           text: holder.name + ' counters!'
@@ -624,7 +659,7 @@ Effect.newEntry(
       onRemoveEffect ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + '\'s shield of light fades away.');
       },        
-      onPreAttacked ::(from, item, holder, by, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage) {
         when (Number.random() < 0.3) ::<= {
           windowEvent.queueMessage(text:holder.name + '\'s shield of light blocks the attack!');
           damage.amount = 0;
@@ -696,7 +731,7 @@ Effect.newEntry(
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + ' is covered in a mysterious wind!');
       },
-      onPreAttacked ::(from, item, holder, by, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage) {
         windowEvent.queueMessage(text:holder.name + '\'s mysterious wind caused the attack to miss!');
         damage.amount = 0;
         return EffectStack.CANCEL_PROPOGATION;  
@@ -777,7 +812,7 @@ Effect.newEntry(
         if (random.try(percentSuccess:10)) ::<= {
           windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
           holder.damage(
-            from:holder,
+            attacker:holder,
             damage: Damage.new(
               amount: 1,
               damageType: Damage.TYPE.NEUTRAL,
@@ -807,7 +842,7 @@ Effect.newEntry(
         if (random.try(percentSuccess:10)) ::<= {
           windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
           holder.damage(
-            from:holder,
+            attacker:holder,
             damage: Damage.new(
               amount: 1,
               damageType: Damage.TYPE.NEUTRAL,
@@ -883,9 +918,9 @@ Effect.newEntry(
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + ' is covered in spikes of light.');
       },
-      onPreAttacked ::(from, item, holder, by, damage) {
-        windowEvent.queueMessage(text:by.name + ' gets hurt by ' + holder.name + '\'s spikes of light!');
-        by.damage(attacker:holder, damage:Damage.new(
+      onPreAttacked ::(from, item, holder, attacker, damage) {
+        windowEvent.queueMessage(text:attacker.name + ' gets hurt by ' + holder.name + '\'s spikes of light!');
+        attacker.damage(attacker:holder, damage:Damage.new(
           amount:random.integer(from:1, to:4),
           damageType:Damage.TYPE.LIGHT,
           damageClass:Damage.CLASS.HP
@@ -1666,7 +1701,7 @@ Effect.newEntry(
         
         
         when(Number.random() > 0.7) empty;
-        when(from.isIncapacitated()) empty;
+        when(holder.isIncapacitated()) empty;
         when(!world.party.isMember(entity:holder)) empty;
 
 
@@ -1697,7 +1732,7 @@ Effect.newEntry(
         @:world = import(module:'game_singleton.world.mt');
         @:Item  = import(module:'game_mutator.item.mt');
         
-        when(from.isIncapacitated()) empty;
+        when(holder.isIncapacitated()) empty;
         when(!world.party.isMember(entity:holder)) empty;
                   
         when(Number.random() < 0.5) empty;          
@@ -3266,6 +3301,34 @@ Effect.newEntry(
     }
   }
 ) 
+
+Effect.newEntry(
+  data : {
+    name : 'Banish',
+    id : 'base:banish',
+    description: '-15% ATK, -15% SPD. At 10 stacks, the holder is removed from battle.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.DEBUFF | FLAGS.AILMENT,
+    stats: StatSet.new(
+      ATK: -15,
+      SPD: -15
+    ),
+    events : {
+      onAffliction ::(from, item, holder, to) {
+        if ([...holder.effectStack.getAll()]->filter(::(value) <- value.id == 'base:banish')->size >= 10) ::<= {
+          windowEvent.queueMessage(
+            text: holder.name + ' has acquired 10 or more stacks of Banish!'
+          );
+          
+          holder.battle.evict(:holder);
+        }
+      }
+    }
+  }
+) 
+
 }
 
 @:Effect = Database.new(

@@ -130,7 +130,7 @@ Event.database.newEntry(
 
 
               member.damage(
-                from: member,
+                attacker: member,
                 damage: Damage.new(
                   amount:member.stats.AP * (0.1),
                   damageType : Damage.TYPE.PHYS,

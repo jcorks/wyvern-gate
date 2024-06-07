@@ -150,7 +150,7 @@ Arts.newEntry(
               windowEvent.queueMessage(
                 text: user.name + ' does a connecting blow, finishing off ' + targets[0].name +'!'
               );              
-              targets[0].damage(from:user, damage:Damage.new(
+              targets[0].damage(attacker:user, damage:Damage.new(
                 amount:999999,
                 damageType:Damage.TYPE.PHYS,
                 damageClass:Damage.CLASS.HP
@@ -1231,7 +1231,6 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],              
-            from: user,
             amount:user.stats.ATK * (0.7) * (item.base.weight * 4) * (1 + (level-1)*0.2),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
@@ -1798,7 +1797,7 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
 
-          targets[0].damage(from:user, damage:Damage.new(
+          targets[0].damage(attacker:user, damage:Damage.new(
             amount:50,
             damageType:Damage.TYPE.FIRE,
             damageClass:Damage.CLASS.HP
@@ -1838,7 +1837,7 @@ Arts.newEntry(
                 text: target.name + ' avoided the trap!'
               );                
             }
-            target.damage(from:user, damage:Damage.new(
+            target.damage(attacker:user, damage:Damage.new(
               amount:50,
               damageType:Damage.TYPE.PHYS,
               damageClass:Damage.CLASS.HP
@@ -3974,12 +3973,8 @@ Arts.newEntry(
 
 
       windowEvent.queueMessage(text:targets[0].name + ' listens intently!');
-      windowEvent.queueCustom(
-        onEnter :: {
-          targets[0].addEffect(
-            from:user, id: 'base:convinced', durationTurns: 1+(Number.random()*3)->floor 
-          );
-        }
+      targets[0].addEffect(
+        from:user, id: 'base:convinced', durationTurns: 1+(Number.random()*3)->floor 
       )
     }
   }
@@ -4393,7 +4388,7 @@ Arts.newEntry(
     name: 'Sweet Song',
     id : 'base:sweet-song',
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Alluring song that captivates the listener',
+    description: 'Alluring song that captivates the listener.',
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : 0,
@@ -4428,7 +4423,7 @@ Arts.newEntry(
     name: 'Wrap',
     id : 'base:wrap',
     targetMode : TARGET_MODE.ONE,
-    description: 'Wraps around one enemy, followed by a feast.',
+    description: 'Wraps around one enemy, followed by ????',
     durationTurns: 2,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL | TRAITS.SPECIAL,
@@ -4512,7 +4507,6 @@ Arts.newEntry(
       usageHintAI : USAGE_HINT.OFFENSIVE,
       oncePerBattle : false,
       canBlock : true,
-      isSupport : false,
       onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
         windowEvent.queueMessage(
           text: user.name + ' attacks ' + targets[0].name + '!'
@@ -4541,7 +4535,7 @@ Arts.newEntry(
 
 /*
 
-  Meta arts
+  Support arts
 
 */
 
@@ -4781,7 +4775,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     oncePerBattle : false,
     canBlock : false,
-    isSupport : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:pickitem = import(:'game_function.pickitem.mt');
       @:world = import(module:'game_singleton.world.mt');
@@ -4807,7 +4800,7 @@ Arts.newEntry(
     name: 'Mutual Destruction',
     id : 'base:mutual-destruction',
     targetMode : TARGET_MODE.ONE,
-    description: '50% chance success rate. Target gains 10 Banish tokens. Random teammate gains 10 banish tokens. If a combatant has 10 Banish tokens, they are evicted from battle.',
+    description: '50% chance success rate. Target gains 10 Banish stacks. Random teammate gains 10 banish stacks. If a combatant has 10 Banish stacks, they are evicted from battle.',
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
@@ -4815,7 +4808,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     oncePerBattle : false,
     canBlock : false,
-    isSupport : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       when(random.flipCoin()) 
@@ -4825,8 +4817,10 @@ Arts.newEntry(
 
       @:sacr = random.pickArrayItem(:user.battle.getAllies(:user));
 
-      sacr.gainBanishTokens(:10);
-      targets[0].gainBanishTokens(:10);
+      for(0, 10) ::(i) {
+        sacr.addEffect(from:user, id:'base:banish', durationTurns:10000);      
+        targets[0].addEffect(from:user, id:'base:banish', durationTurns:10000);      
+      }
     }
   }
 )
@@ -4866,7 +4860,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     oncePerBattle : false,
     canBlock : false,
-    isSupport : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.discardArt();
       user.addEffect(from:user, id:'base:agile', durationTurns:5);
@@ -4887,7 +4880,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DEBUFF,
     oncePerBattle : false,
     canBlock : false,
-    isSupport : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.discardArt();
       windowEvent.queueMessage(text:user.name + ' views ' + targets[0].name + ' Arts hand.');
@@ -4905,7 +4897,7 @@ Arts.newEntry(
     name: 'Retaliate',
     id : 'base:retaliate',
     targetMode : TARGET_MODE.NONE,
-    description: 'The user retaliates to an ability, damaging the enemy based on ATK. This damage is not blockable.',
+    description: 'The user retaliates to an Art, damaging the enemy based on ATK. This damage is not blockable.',
     durationTurns: 0,
     kind : KIND.REACTION,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
@@ -4913,7 +4905,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     oncePerBattle : false,
     canBlock : false,
-    isSupport : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' retaliates to ' + targets[0].name + '\'s Art!'
@@ -4945,10 +4936,9 @@ Arts.newEntry(
     kind : KIND.REACTION,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
-    usageHintAI : USAGE_HINT.OFFENSIVE,
+    usageHintAI : USAGE_HINT.BUFF,
     oncePerBattle : false,
     canBlock : false,
-    isSupport : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts a shield spell in response to ' + targets[0].name + '\'s Art!'
@@ -4973,7 +4963,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DEBUFF,
     oncePerBattle : false,
     canBlock : false,
-    isSupport : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' cancels ' + targets[0].name + '\'s Art!'
@@ -4993,7 +4982,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     oncePerBattle : false,
     canBlock : true,
-    isSupport : true,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
@@ -5021,6 +5009,63 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
+    name: 'Shared Pain',
+    id : 'base:shared-pain',
+    targetMode : TARGET_MODE.ONEPART,
+    description: "Deal a physical attack to target which has a base damage value equal to how much HP is missing from this character\'s current max HP.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
+    rarity : RARITY.RARE,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      windowEvent.queueCustom(
+        onEnter :: {
+          user.attack(
+            target:targets[0],
+            amount:user.stats.HP - user.hp,
+            damageType : Damage.TYPE.PHYS,
+            damageClass: Damage.CLASS.HP,
+            targetPart:targetParts[0],
+            targetDefendPart:targetDefendParts[0]
+          );   
+        }
+      )
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Banishing Light',
+    id : 'base:banishing-light',
+    targetMode : TARGET_MODE.ONEPART,
+    description: "The target receives the Banishing Light effect. Banishing Light: Next time the target would receive damage, the target receives 1/3rd the amount, rounded up, as Banish stacks. When a combatant acquires 10 stacks of Banish, they are evicted from battle.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
+    rarity : RARITY.RARE,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id:'banishing-light', durationTurns:9999); 
+        }
+      )
+    }
+  }
+)
+
+
+
+
+Arts.newEntry(
+  data: {
     name: 'Blood\'s Pain',
     id : 'base:bloods-pain',
     targetMode : TARGET_MODE.ONEPART,
@@ -5029,7 +5074,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     oncePerBattle : false,
     canBlock : true,
-    isSupport : true,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.UNCOMMON,
@@ -5072,8 +5116,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     oncePerBattle : false,
-    canBlock : true,
-    isSupport : true,
+    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.UNCOMMON,
@@ -5109,8 +5152,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     oncePerBattle : false,
-    canBlock : true,
-    isSupport : true,
+    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -5145,8 +5187,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     oncePerBattle : false,
-    canBlock : true,
-    isSupport : true,
+    canBlock : false,
     kind : KIND.REACTION,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.COMMON,
@@ -5183,8 +5224,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     oncePerBattle : false,
-    canBlock : true,
-    isSupport : true,
+    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -5229,8 +5269,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     oncePerBattle : false,
-    canBlock : true,
-    isSupport : true,
+    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -5265,8 +5304,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     oncePerBattle : false,
-    canBlock : true,
-    isSupport : true,
+    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -5302,8 +5340,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     oncePerBattle : false,
-    canBlock : true,
-    isSupport : true,
+    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
@@ -5352,8 +5389,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     oncePerBattle : false,
-    canBlock : true,
-    isSupport : true,
+    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -5374,8 +5410,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     oncePerBattle : false,
-    canBlock : true,
-    isSupport : true,
+    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -5439,8 +5474,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     oncePerBattle : false,
-    canBlock : true,
-    isSupport : true,
+    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.RARE,
@@ -5460,8 +5494,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     oncePerBattle : false,
-    canBlock : true,
-    isSupport : true,
+    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -5483,7 +5516,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     oncePerBattle : false,
     canBlock : true,
-    isSupport : true,
     kind : KIND.ABILITY,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.EPIC,
@@ -5518,13 +5550,12 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     oncePerBattle : false,
-    canBlock : true,
-    isSupport : true,
+    canBlock : false,
     kind : KIND.ABILITY,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      target[0].addEffect(from:user, id:'base:enlarge', durationTurns:2);      
+      targets[0].addEffect(from:user, id:'base:enlarge', durationTurns:2);      
       
     }
   }
@@ -5540,16 +5571,133 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     oncePerBattle : false,
-    canBlock : true,
-    isSupport : true,
+    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.RARE,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       if (targets[0].shield == 0)
-        targets[0].heal(amount:1, isShield:true);           
+        targets[0].heal(amount:1, isShield:true)          
       else      
         targets[0].heal(amount:targets[0].shield, isShield:true);           
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Banish',
+    id : 'base:banish',
+    targetMode : TARGET_MODE.ONE,
+    description: "Add 2 Banish stacks to target. When a combatant has 10 Banish stacks, they are evicted from battle.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      for(0, 2) ::(i) {
+        targets[0].addEffect(from:user, id:'base:banish', durationTurns:10000);      
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Bound Banish',
+    id : 'base:banish',
+    targetMode : TARGET_MODE.ONE,
+    description: "Paralyze user for 2 turns, preventing their action. Add 3 Banish stacks to target. When a combatant has 10 Banish stacks, they are evicted from battle.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.RARE,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:paralyzed',durationTurns:2);
+      for(0, 3) ::(i) {
+        targets[0].addEffect(from:user, id:'base:banish', durationTurns:10000);      
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Proliferate',
+    id : 'base:proliferate',
+    targetMode : TARGET_MODE.ONE,
+    description: "All effects on target are doubled. These new effects last for 2 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DONTUSE,
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.EPIC,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      foreach(targets[0].effectStack.getAll()) ::(k, inst) {
+        targets[0].addEffect(
+          from:user, id:'base:paralyzed', durationTurns:2
+        );
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Proliferate All',
+    id : 'base:proliferate',
+    targetMode : TARGET_MODE.ALL,
+    description: "All effects on all targets are doubled. These new effects last for 2 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DONTUSE,
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.EPIC,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      foreach(targets) ::(k, target) {
+        foreach(target.effectStack.getAll()) ::(k, inst) {
+          target.addEffect(
+            from:user, id:'base:paralyzed', durationTurns:2
+          );
+        }
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Banishing Aura',
+    id : 'base:banishing-aura',
+    targetMode : TARGET_MODE.ALL,
+    description: "Accumulate 3 Banish stacks on all combatants. When a combatant acquires 10 stacks of Banish, they are evicted from battle.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DONTUSE,
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.EPIC,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      foreach(targets) ::(k, inst) {
+        for(0, 3) ::(i) {
+          inst.addEffect(
+            from:user, id:'base:banish', durationTurns:10000
+          );
+        }
+      }
     }
   }
 )
@@ -5569,7 +5717,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     oncePerBattle : false,
     canBlock : false,
-    isSupport : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' closes their eyes, lifts their arms, and prays to the Wyverns for guidance!'
@@ -5605,7 +5752,7 @@ Arts.newEntry(
           windowEvent.queueCustom(
             onEnter :: {
               foreach(targets) ::(k, target) {
-                target.damage(from:user, damage:Damage.new(
+                target.damage(attacker:user, damage:Damage.new(
                   amount:target.hp-1,
                   damageType:Damage.TYPE.LIGHT,
                   damageClass:Damage.CLASS.HP
@@ -5624,7 +5771,7 @@ Arts.newEntry(
           windowEvent.queueCustom(
             onEnter :: {
               foreach(targets) ::(k, target) {
-                target.damage(from:user, damage:Damage.new(
+                target.damage(attacker:user, damage:Damage.new(
                   amount:(target.hp/2)->floor,
                   damageType:Damage.TYPE.LIGHT,
                   damageClass:Damage.CLASS.HP

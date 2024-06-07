@@ -118,38 +118,49 @@
       },
       
       queueCollectSupportArt::(
-        art : Arts.getRandomFiltered(::(value) <- 
-          (value.traits & Arts.TRAITS.SUPPORT) &&
-          (value.traits & Arts.TRAITS.SPECIAL == 0)         
-        )
+        arts
       ) {
+        if (arts == empty)
+          arts = [
+            Arts.getRandomFiltered(::(value) <- 
+              (value.traits & Arts.TRAITS.SUPPORT) != 0 &&
+              ((value.traits & Arts.TRAITS.SPECIAL) == 0)         
+            ),        
+            Arts.getRandomFiltered(::(value) <- 
+              (value.traits & Arts.TRAITS.SUPPORT) != 0 &&
+              ((value.traits & Arts.TRAITS.SPECIAL) == 0)         
+            )
+          ]        
+          
         @:ArtsDeck = import(:'game_class.artsdeck.mt');
       
-        @:newArtRender ::{
+        @:newArtRender ::(art){
           ArtsDeck.renderArt(
             handCard:ArtsDeck.synthesizeHandCard(id:art.id),
             topWeight: 0
           );
         }
       
+        this.addSupportArt(id:arts[0].id);
         windowEvent.queueMessage(
           topWeight: 1,
-          text: 'Two new Arts have been revealed!',
+          text: 'A new Art has been revealed!',
           renderable : {
-            render : newArtRender
+            render :: {newArtRender(:arts[0]);}
           }
         );
         
-        this.addSupportArt(id:art.id);
-
-        this.addSupportArt(id:art.id);
-
+        this.addSupportArt(id:arts[1].id);
         windowEvent.queueMessage(
           topWeight: 1,
-          text: 'The Arts were added to the Trunk. They are now available when editing a party member\'s Arts in the Party menu.',
+          text: 'A new Art has been revealed!',
           renderable : {
-            render : newArtRender
-          }              
+            render ::{newArtRender(:arts[1]);}
+          }
+        );
+
+        windowEvent.queueMessage(
+          text: 'The Arts were added to the Trunk. They are now available when editing a party member\'s Arts in the Party menu.'
         );      
       },
       

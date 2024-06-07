@@ -1039,21 +1039,21 @@ Interaction.newEntry(
 
       windowEvent.queueMessage(
         speaker: 'Arts Tecker',
-        text: '"For merely 200G, I can unlock a new Art within you for use in battle."'
+        text: '"For merely 150G, I can unlock new Arts within you for use in battle."'
       );
 
 
-      when(world.party.inventory.gold < 200)
+      when(world.party.inventory.gold < 150)
         windowEvent.queueMessage(
           text: 'The party cannot afford this service.'
         );
 
       windowEvent.queueAskBoolean(
-        prompt: 'Learn new Support Art for 200G?',
+        prompt: 'Learn new Support Arts for 150G?',
         onChoice::(which) {
           when(which == false) empty;
           
-          world.party.addGoldAnimated(amount:-200, onDone::{
+          world.party.addGoldAnimated(amount:-150, onDone::{
             windowEvent.queueMessage(
               speaker: 'Arts Tecker',
               text: '"Deep within your soul, I unlock your potential..."'            
@@ -1063,7 +1063,7 @@ Interaction.newEntry(
 
             windowEvent.queueMessage(
               speaker: 'Arts Tecker',
-              text: '"Enjoy your new Art... Haha..."'            
+              text: '"Enjoy your new Arts... Haha..."'            
             );
           });
         }      
@@ -1231,7 +1231,7 @@ Interaction.newEntry(
 
           @:Damage = import(module:'game_class.damage.mt');
           smith.damage(
-            from: smith,
+            attacker: smith,
             damage: Damage.new(
               amount: 1,
               damageType: Damage.TYPE.FIRE,
@@ -1763,7 +1763,7 @@ Interaction.newEntry(
               party.addGoldAnimated(
                 amount:-cost,
                 onDone::{
-                  whom.profession = Profession.new(base:Profession.database.find(id: location.ownedBy.profession.base.id));
+                  whom.profession = Profession.database.find(id: location.ownedBy.profession.base.id);
 
                   windowEvent.queueMessage(
                     text: '' + whom.name + " is now " + correctA(word:whom.profession.base.name) + '.'
@@ -2320,7 +2320,7 @@ Interaction.newEntry(
             @:statue = Entity.new(island:location.landmark.island, levelHint: 5);
             statue.name = 'the Wyvern Statue';
             @:landed = whom.damage(
-              from: statue,
+              attacker: statue,
               damage: Damage.new(
                 amount: 1,
                 damageType: Damage.TYPE.NEUTRAL,

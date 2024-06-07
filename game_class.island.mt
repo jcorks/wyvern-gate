@@ -157,27 +157,47 @@
 
     // augments an entity based on the current tier
     @augmentTiered = ::(entity) {
+      @:Arts = import(module:'game_database.arts.mt');
+
+    
+    
       match(state.tier) {
         (0):::<= {
           entity.capHP(max:11);
+          entity.supportArts = [
+            'base:pebble',
+            'base:diversify',
+            'base:brace',
+            'base:mind-games',
+            Arts.getRandomFiltered(::(value) <- 
+              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
+              &&
+              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
+            ).id
+          ]
         }, // tier zero has no mods 
 
         // tier 1: learn 1 to 2 skills
         (1):::<= {
           entity.capHP(max:14);
-          entity.learnNextAbility();
-          if (Number.random() > 0.5)
-            entity.learnNextAbility();
-              
+          entity.supportArts = [
+            'base:retaliate',
+            'base:diversify',
+            'base:brace',  
+            'base:mind-games',
+            'base:crossed-wires',
+            Arts.getRandomFiltered(::(value) <- 
+              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
+              &&
+              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
+            ).id
+          ]
         },
         
 
         // tier 2: learn 1 to 2 skills and get equips
         (2):::<= {
           entity.capHP(max:16);
-          entity.learnNextAbility();
-          if (Number.random() > 0.5)
-            entity.learnNextAbility();
           
           @:Item = import(module:'game_mutator.item.mt');
           // add a weapon
@@ -195,6 +215,20 @@
             inventory:entity.inventory, 
             silent:true
           );
+          
+          
+          entity.supportArts = [
+            'base:retaliate',
+            'base:diversify',
+            'base:mind-games',
+            'base:recycle',    
+            'base:cancel',
+            Arts.getRandomFiltered(::(value) <- 
+              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
+              &&
+              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
+            ).id
+          ]
         },
         
 
@@ -202,9 +236,6 @@
         // tier 3: learn 1 to 2 skills and get equips
         (3):::<= {
           entity.capHP(max:20);
-          for(0, 10)::(i) {
-            entity.learnNextAbility();        
-          }
 
           
           @:Item = import(module:'game_mutator.item.mt');
@@ -223,14 +254,26 @@
             inventory:entity.inventory, 
             silent:true
           );
+          
+          entity.supportArts = [
+            'base:pebble',
+            'base:retaliate',
+            'base:diversify',
+            'base:mind-games',
+            'base:crossed-wires',
+            'base:recycle',      
+            'base:cancel',
+            Arts.getRandomFiltered(::(value) <- 
+              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
+              &&
+              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
+            ).id                      
+          ]
         },
         
         
         // tier 2: learn 1 to 2 skills and get equips
         default: ::<= {
-          for(0, 10)::(i) {
-            entity.learnNextAbility();        
-          }
 
           
           @:Item = import(module:'game_mutator.item.mt');
@@ -266,6 +309,20 @@
             inventory:entity.inventory, 
             silent:true
           );
+
+          entity.supportArts = [
+            'base:pebble',
+            'base:diversify',
+            'base:cancel'
+          ]
+          for(0, 4)::(i) {
+            entity.supportArts->push(:Arts.getRandomFiltered(::(value) <- 
+              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
+              &&
+              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
+            ).id)          
+          }
+
 
         }       
         

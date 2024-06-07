@@ -24,6 +24,7 @@
       beast.name = 'the Snake Siren';
       beast.species = Species.find(id:'base:beast');
       beast.profession = Profession.find(id:'base:snake-siren');         
+      beast.supportArts = [];      
 
       beast.stats.load(serialized:StatSet.new(
         HP:   140,

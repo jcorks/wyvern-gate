@@ -936,6 +936,30 @@
         get ::<- landmark_
       },
       
+      evict ::(entity) {
+        
+        @:group  = ent2group[entity];
+
+        @index = group->findIndex(value:entity);
+        if (index != -1) ::<= {
+          defeated[group[index]] = true;
+          group->remove(key:index);
+        }
+        if (group->size == 0)
+          groups->remove(key:groups->findIndex(value:group));
+
+        index = turnPoppable->findIndex(value:entity);
+        if (index != -1) turnPoppable->remove(key:index);
+        
+        @:ind = turn->findIndex(value:entity);
+        if (ind != -1)
+          turn->remove(key:ind);
+          
+        windowEvent.queueMessage(
+          text: entity.name + ' was evicted from battle.'
+        );
+      },
+      
       join ::(group, sameGroupAs) {
 
         @:newGroup = if (sameGroupAs != empty)

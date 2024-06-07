@@ -95,6 +95,7 @@
 }
 
 @:renderArt::(handCard, topWeight, leftWeight, maxWidth){
+  if (maxWidth == empty) maxWidth = 1;
   @:art = Arts.find(id:handCard.id);
   canvas.renderTextFrameGeneral(
     topWeight,
@@ -132,7 +133,7 @@
   @:y = canvas.height - (CARD_HEIGHT+1);
   
   for(0, state.hand->size) ::(i) {
-    renderCard(x, y:y + (if (i == index) -2 else 0), handCard:state.hand[i]);
+    renderCard(x, y:y + (if (i == index) -1 else 0), handCard:state.hand[i]);
     x += CARD_WIDTH;
     
     if (i == index) ::<= {

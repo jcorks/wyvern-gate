@@ -28,6 +28,30 @@
   items : [],
   define:::(this, state) {
     @user_;
+    @:Entity = import(module:'game_class.entity.mt');        
+
+    @:defaultAttack = ::(battle){
+      user_.deck.discardFromHand(card:random.pickArrayItem(list:user_.deck.hand));
+      @:enemies = battle.getEnemies(:user_);
+
+      windowEvent.onResolveAll(
+        onDone:: {
+
+          battle.entityCommitAction(action:BattleAction.new(
+            card: ArtsDeck.synthesizeHandCard(id:'base:attack'),
+
+            targets: [
+              Random.pickArrayItem(list:enemies)
+            ],
+            targetParts : [
+              Entity.normalizedDamageTarget()
+            ],
+            extraData: {}            
+          ));       
+        }
+      );
+    }
+
     
       
     this.interface = {
@@ -68,10 +92,9 @@
         }
       },
 
-      commitTargettedAction::(battle, card) {
+      commitTargettedAction::(battle, card, condition) {
         @:enemies = battle.getEnemies(:user_);
         @:allies = battle.getAllies(:user_);
-        @:Entity = import(module:'game_class.entity.mt');        
         @:art = Arts.find(id:card.id);
         @atEnemy = (art.usageHintAI == Arts.USAGE_HINT.OFFENSIVE) ||
                (art.usageHintAI == Arts.USAGE_HINT.DEBUFF);
@@ -109,6 +132,13 @@
           }
 
         }
+        
+        if (condition)
+          targets = [...targets]->filter(:condition);
+        
+        when (targets->size == 0 && art.targetMode != Arts.TARGET_MODE.NONE)
+          defaultAttack(battle);
+        
         foreach(targets) ::(index, t) {
           targetParts[index] = Entity.normalizedDamageTarget();
         }
@@ -123,34 +153,17 @@
           }
         );      
       },
+
+
+
       
       takeTurn ::(battle){
         @:enemies = battle.getEnemies(:user_);
         @:allies = battle.getAllies(:user_);
 
         @:Entity = import(module:'game_class.entity.mt');        
-        @:defaultAttack = ::{
-          user_.deck.discardFromHand(card:random.pickArrayItem(list:user_.deck.hand));
-
-          windowEvent.onResolveAll(
-            onDone:: {
-
-              battle.entityCommitAction(action:BattleAction.new(
-                card: ArtsDeck.synthesizeHandCard(id:'base:attack'),
-
-                targets: [
-                  Random.pickArrayItem(list:enemies)
-                ],
-                targetParts : [
-                  Entity.normalizedDamageTarget()
-                ],
-                extraData: {}            
-              ));       
-            }
-          );
-        }
       
-        when(enemies->keycount == 0)
+        when(enemies->keycount == 0 || enemies->findIndexCondition(::(value) <- !value.isIncapacitated()) == -1)
           battle.entityCommitAction(action:BattleAction.new(
             card: ArtsDeck.synthesizeHandCard(id:'base:wait'),
             targets: [],
@@ -175,12 +188,12 @@
 
 
         when(hand->keycount == 0)
-          defaultAttack();
+          defaultAttack(battle);
       
           
         @card = Random.pickArrayItem(list:hand->filter(by::(value) <- Arts.find(id:value.id).kind == Arts.KIND.ABILITY));
         when (card == empty)
-          defaultAttack();
+          defaultAttack(battle);
 
         @:ability = Arts.find(id:card.id);
         
@@ -192,14 +205,15 @@
         @:tier = world.island.tier;
         when ([...enemies]->filter(::(value) <- party.isMember(:value))->size > 0 &&
             random.try(percentSuccess:80 - (tier * 30)))
-            defaultAttack();
+            defaultAttack(battle);
            
-
-        when (ability.usageHintAI == Arts.USAGE_HINT.HEAL &&        
-          user_.hp == user_.stats.HP)
-          defaultAttack();
+        @condition;
         
-        this.commitTargettedAction(card:card, battle);
+        if (ability.usageHintAI == Arts.USAGE_HINT.HEAL) ::<= {
+          condition = ::(value) <- value.hp < value.stats.HP
+        }
+        
+        this.commitTargettedAction(card:card, battle, condition);
       }
     }   
   }  

@@ -2475,7 +2475,7 @@
             renderable : {
               render ::{
                 canvas.renderTextFrameGeneral(
-                  lines: canvas.refitLines(:[
+                  lines: canvas.refitLines(input:[
                     shopper.name + ' wants to buy: ',
                     displayName + ' (worth: ' + (if(worthless) 'WORTHLESS' else g(g:standardPrice)) + ')',
                     if (isPopular) 'NOTE: this item is currently in demand.' else if (isUnpopular) 'NOTE: this item is currently experiencing a price-drop.' else '',
@@ -2712,7 +2712,7 @@
 
               shopper.anonymize();
               
-              @:item = random.removeArrayItem(list:state.shopInventory.items);
+              @:item = random.pickArrayItem(list:state.shopInventory.items);
               
               windowEvent.queueMessage(
                 speaker: shopper.name,
@@ -3412,11 +3412,11 @@ return {
     )
   ],
   interactionsBattle : [
-    commonInteractions.battle.act,
+    commonInteractions.battle.attack,
+    commonInteractions.battle.arts,
     commonInteractions.battle.check,
     commonInteractions.battle.item,
-    commonInteractions.battle.wait,
-    commonInteractions.battle.pray
+    commonInteractions.battle.wait
   ],
   interactionsOptions : [
     commonInteractions.options.system,
@@ -3796,7 +3796,7 @@ return {
         location.ownedBy = location.landmark.island.newInhabitant();
         location.ownedBy.name = 'Wyvern of Fortune';
         location.ownedBy.species = Species.find(id:'base:wyvern');
-        location.ownedBy.profession = Profession.new(base:Profession.database.find(id:'base:wyvern'));         
+        location.ownedBy.profession = Profession.database.find(id:'base:wyvern')
         location.ownedBy.clearAbilities();
         foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
           location.ownedBy.learnAbility(id:ability);
@@ -3862,7 +3862,7 @@ return {
       ),
       useEffects : [
       ],
-      possibleAbilities : [
+      possibleArts : [
       ],
 
       equipEffects : [],
@@ -3906,7 +3906,7 @@ return {
       ),
       useEffects : [
       ],
-      possibleAbilities : [
+      possibleArts : [
       ],
 
       equipEffects : [],
