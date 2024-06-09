@@ -972,7 +972,7 @@ Landmark.database.newEntry(
           if (locations->keycount > 0) ::<={
             out = out + ' with ' + locations->keycount + ' locations';//:\n';
             //foreach(in:locations, do:::(index, inhabitant) {
-            //  out = out + '   ' + inhabitant.name + ', a ' + inhabitant.species.name + ' ' + inhabitant.profession.base.name +'\n';
+            //  out = out + '   ' + inhabitant.name + ', a ' + inhabitant.species.name + ' ' + inhabitant.profession.name +'\n';
             //});
           }
           return out;

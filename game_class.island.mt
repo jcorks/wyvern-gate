@@ -515,7 +515,7 @@
       
       description : {
         get :: {
-          @out = 'A ' + Island.climateToString(climate:state.climate) + ' island, ' + state.name + ' is mostly populated by people of ' + state.species[0].species + ' and ' + state.species[1].species + ' descent. ';//The island is known for its ' + professions[0].profession.name + 's and ' + professions[1].profession.name + 's.\n';
+          @out = 'A ' + Island.climateToString(climate:state.climate) + ' island, ' + state.name + ' is mostly populated by people of ' + Species.find(:state.species[0].species).name + ' and ' + Species.find(:state.species[1].species).name + ' descent. ';//The island is known for its ' + professions[0].profession.name + 's and ' + professions[1].profession.name + 's.\n';
           //out = out + this.class.describeEncounterRate(rate:encounterRate) + '\n';
           //out = out + '(Level range: ' + levelMin + ' - ' + levelMax + ')' + '\n\n';
           /*

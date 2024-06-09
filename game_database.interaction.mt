@@ -1200,13 +1200,13 @@ Interaction.newEntry(
         windowEvent.queueMessage(
           speaker: smith.name,
           text: 
-            if (smith.profession.base.id == 'base:blacksmith')
+            if (smith.profession.id == 'base:blacksmith')
               '"No problem!"'
             else 
               '"I\'m no blacksmith, but I\'ll try my best!"'
         );
 
-        @success = if (smith.profession.base.id == 'base:blacksmith') true else random.flipCoin();                     
+        @success = if (smith.profession.id == 'base:blacksmith') true else random.flipCoin();                     
         
 
         windowEvent.queueMessage(
@@ -1287,7 +1287,7 @@ Interaction.newEntry(
       }
 
     
-      @:smiths = party.members->filter(by:::(value) <- value.profession.base.id == 'base:blacksmith');
+      @:smiths = party.members->filter(by:::(value) <- value.profession.id == 'base:blacksmith');
 
       @:choosePartySmith ::{
         @hasHammer = [...party.members]->filter(
@@ -1733,21 +1733,21 @@ Interaction.newEntry(
           @:whom = party.members[choice-1];
           @cost = ((whom.level + whom.stats.sum/30)*10)->ceil;
 
-          when(whom.profession.base.id == location.ownedBy.profession.base.id)
+          when(whom.profession.id == location.ownedBy.profession.id)
             windowEvent.queueMessage(
-              text: whom.name + ' is already ' + correctA(word:location.ownedBy.profession.base.name) + '.'
+              text: whom.name + ' is already ' + correctA(word:location.ownedBy.profession.name) + '.'
             );
           
           windowEvent.queueMessage(
             text:
-              'Profession: ' + location.ownedBy.profession.base.name + '\n\n' +
-              location.ownedBy.profession.base.description + '\n' +
-              'Weapon affinity: ' + Item.database.find(id:location.ownedBy.profession.base.weaponAffinity).name
+              'Profession: ' + location.ownedBy.profession.name + '\n\n' +
+              location.ownedBy.profession.description + '\n' +
+              'Weapon affinity: ' + Item.database.find(id:location.ownedBy.profession.weaponAffinity).name
           );
 
 
           windowEvent.queueMessage(
-            text: 'Changing ' + whom.name + "'s profession from " + whom.profession.base.name + ' to ' + location.ownedBy.profession.base.name + ' will cost ' + g(g:cost) + '.'
+            text: 'Changing ' + whom.name + "'s profession from " + whom.profession.name + ' to ' + location.ownedBy.profession.name + ' will cost ' + g(g:cost) + '.'
 
           );
 
@@ -1764,10 +1764,10 @@ Interaction.newEntry(
               party.addGoldAnimated(
                 amount:-cost,
                 onDone::{
-                  whom.profession = Profession.database.find(id: location.ownedBy.profession.base.id);
+                  whom.profession = Profession.database.find(id: location.ownedBy.profession.id);
 
                   windowEvent.queueMessage(
-                    text: '' + whom.name + " is now " + correctA(word:whom.profession.base.name) + '.'
+                    text: '' + whom.name + " is now " + correctA(word:whom.profession.name) + '.'
                   );                
                 }
               );     

@@ -1,5 +1,11 @@
 Known bugs / concerns:
 
+- fetch quest, spawn area
+- make sentimental box cursed?
+- arena bet: detailed desc vs low detail for quick at a glance
+- shortsword 2 handed?
+- contextual visit menu options, up top instead of bottom
+- erroneous ids in island description
 - shield HP persists outside battle
 - releasing runes doesnt seem to actually remove the rune effects despite 
   triggering the onRemove effect 

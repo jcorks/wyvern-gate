@@ -2981,7 +2981,7 @@ Item.database.newEntry(data : {
     DEX: -20
   ),
   useEffects : [
-    'base:learn-skill',
+    'base:learn-arts',
     'base:consume-item'     
   ],
   equipEffects : [],

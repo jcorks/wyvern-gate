@@ -21,7 +21,7 @@ return ::(wish) {
 
       
       foreach(world.party.members) ::(k, member) {
-        initialMessage = initialMessage + member.name + ' - ' + member.species.name + ', ' + member.profession.base.name + '\n'
+        initialMessage = initialMessage + member.name + ' - ' + member.species.name + ', ' + member.profession.name + '\n'
       }
       
       initialMessage = initialMessage + '\n\nWorld - ' + world.saveName + '\n';
