@@ -1,6 +1,8 @@
 @:Topaz = import(module:'Topaz');
 @:class = import(module:'Matte.Core.Class');
 
+
+
 return class(
     define::(this) {
         @location = [''];
@@ -316,11 +318,17 @@ return class(
                                   input == Topaz.Key.ralt) && enterHeld) 
                                   ||
                                 ((input == Topaz.Key.enter) && altHeld)
-                            )
+                            ) ::<= {
+                                @:Settings = import(:'sys_settings.mt');
+                                @:props = {
+                                    fullscreen : if(Topaz.ViewManager.getDefault().getParameter(param:Topaz.Display.Parameter.Fullscreen)==1) false else true
+                                }
                                 Topaz.ViewManager.getDefault().setParameter(
                                     param:Topaz.Display.Parameter.Fullscreen,
-                                    value: if(Topaz.ViewManager.getDefault().getParameter(param:Topaz.Display.Parameter.Fullscreen)==1) 0 else 1
-                                );                            
+                                    value: props.fullscreen == true
+                                );  
+                                Settings.set(:props);
+                            }                          
                                 
 
                             when (!programActive) empty;

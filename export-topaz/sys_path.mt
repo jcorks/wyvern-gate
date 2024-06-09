@@ -15,6 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+@:Topaz = import(module:'Topaz');
 
 return ::<= {
     @location_ = ".";
@@ -22,9 +23,9 @@ return ::<= {
     @:enterLocation = ::(action) {
         @:oldPath = Topaz.Resources.getPath();
         Topaz.Resources.setPath(path:location_);
-            
+        @ret;
         {:::} {
-            action();
+            ret = action();
         } : {
             onError ::(message) {
                 Topaz.Resources.setPath(path:oldPath);            
@@ -32,13 +33,13 @@ return ::<= {
             }
         }
         Topaz.Resources.setPath(path:oldPath);
-
+        return ret;
     }
 
     return {
-        enter::(action) <- enterLocation
-        setPath::(location) {
-            
+        enter::(action) <- enterLocation(:action),
+        setMainPath::(location) {
+            location_ = location;
         }
     };
 }

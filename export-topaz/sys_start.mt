@@ -17,42 +17,31 @@
 */
 @:Topaz = import(module:'Topaz');
 @Shell = import(module:'sys_shell.mt');
+@:Paths = import(module:'sys_path.mt');
+@:JSON = import(module:'Matte.Core.JSON');
 
 @:FRAME_ANIMATION_POST_MS = 32;
 
-@:SAVEPATH = ::<= {
-    return {:::} {
-        foreach(Topaz.getArguments()) ::(k, arg) {
-            if (arg->contains(key:'savelocation:'))
-                send(
-                    message:arg->substr(
-                        from:'savelocation:'->length, 
-                        to:arg->length-1
-                    )
-                ) 
-                    
+Paths.setMainPath(::<= {
+        return {:::} {
+            foreach(Topaz.getArguments()) ::(k, arg) {
+                if (arg->contains(key:'savelocation:'))
+                    send(
+                        message:arg->substr(
+                            from:'savelocation:'->length, 
+                            to:arg->length-1
+                        )
+                    ) 
+                        
+            }
+            
+            return Topaz.Resources.getPath();
         }
-        
-        return Topaz.Resources.getPath();
     }
-}
+})
 @MODS_PATH = 'mods';
 
-@:enterLocation = ::(location, action) {
-    @:oldPath = Topaz.Resources.getPath();
-    Topaz.Resources.setPath(path:location);
-        
-    {:::} {
-        action();
-    } : {
-        onError ::(message) {
-            Topaz.Resources.setPath(path:oldPath);            
-            error(detail:message.detail);
-        }
-    }
-    Topaz.Resources.setPath(path:oldPath);
 
-}
 
 
 
@@ -151,7 +140,7 @@ return ::(terminal, arg, onDone) {
                 data
             ) {
 
-                enterLocation(location:SAVEPATH, action::{                
+                Paths.enter(::{                
                     saveAsset.setFromString(string:data);
                     @:outputPath =  'WYVERNSAVE_' + slot;
                     if (Topaz.Resources.writeAsset(
@@ -168,29 +157,11 @@ return ::(terminal, arg, onDone) {
             },
 
             onLoadSettings :: {
-                @data;
-                enterLocation(location:SAVEPATH, action::{
-                    settingsAsset = Topaz.Resources.createDataAssetFromPath(
-                        path:'settings'
-                    );
-                    @:asset = settingsAsset;
-
-                    when (asset == empty) empty;
-                    data = asset.getAsString();
-                    Topaz.Resources.removeAsset(asset);
-                    when (data == '') empty;
-                });
-                return if (data == empty || data == '') empty else data;
+                @:obj = Settings.getObject();
+                return JSON.encode(:obj);
             },
             onSaveSettings ::(data) {
-                enterLocation(location:SAVEPATH, action::{                
-                    settingsAsset.setFromString(string:data);
-                    if (Topaz.Resources.writeAsset(
-                        asset:settingsAsset,
-                        fileType: 'text',
-                        outputPath:'settings'
-                    ) == 0) error(detail:'settings could not be written!');
-                });
+                Settings.save(:JSON.decode(:data));
             },
 
             onListSlots ::{

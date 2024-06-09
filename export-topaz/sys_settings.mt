@@ -16,35 +16,45 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:Topaz = import(module:'Topaz');
-
+@:paths = import(module:'sys_path.mt');
 return ::<= {
 
 
 
     @:dump ::{
-        @:settingsAsset = Topaz.Resources.createDataAssetFromPath(
-            path:'settings'
-        );
-        @:asset = settingsAsset;
-        when (asset == empty) {};
-        data = asset.getAsString();
-        Topaz.Resources.removeAsset(asset);
-        when(data == '') {};
-        return import('Matte.Core.JSON').decode(:data);
+        return paths.enter(::{
+            @:settingsAsset = Topaz.Resources.createDataAssetFromPath(
+                path:'settings'
+            );
+            when (settingsAsset == empty) {};
+            @:data = settingsAsset.getAsString();
+            Topaz.Resources.removeAsset(:settingsAsset);
+            when(data == '') {};
+            return import(:'Matte.Core.JSON').decode(:data);
+        });
     }
     
     
     @:save ::(object) {
-        @:str = import('Matte.Core.JSON').encode(:object);
-        @:settingsAsset = Topaz.Resources.createDataAssetFromPath(
-            path:'settings'
-        );
-        settingsAsset
+        return paths.enter(::{
+            @:str = import(:'Matte.Core.JSON').encode(:object);
+            @:settingsAsset = Topaz.Resources.createAsset(
+                name:'settings',
+                type:Topaz.Asset.Type.Data
+            );
+            settingsAsset.setFromString(string:str);
+            Topaz.Resources.writeAsset(
+                asset: settingsAsset,
+                fileType: '',
+                outputPath: 'settings'
+            );
+            Topaz.Resources.removeAsset(:settingsAsset);
+        });
     }
 
 
     return {
-        set(props) {
+        set::(props) {
             @:dumped = dump();
             foreach(props) ::(k, v) {
                 dumped[k] = v;
@@ -52,7 +62,7 @@ return ::<= {
             save(:dumped);
         },
         
-        get() {
+        getObject:: {
             return dump();
         }
     }

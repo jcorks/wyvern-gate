@@ -9,7 +9,11 @@ return ::(terminal, arg, onDone) {
     }
     @:enable = (arg == 'on');
 
-
+    @:Settings = import(:'sys_settings.mt');
+    @:props = {
+        fullscreen : enable
+    }
+    Settings.set(:props);
     Topaz.ViewManager.getDefault().setParameter(
         param:Topaz.Display.Parameter.Fullscreen,
         value:enable

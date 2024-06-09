@@ -2,6 +2,11 @@
 
 @:Topaz = import(module:'Topaz');
 @:Terminal = import(module:'sys_terminal.mt');
+@Settings = import(:'sys_settings.mt');
+@:settings = Settings.getObject();
+    
+
+
 // if topaz is detected, setup its canvas and main loop
 
 @:term = Terminal.new();
@@ -32,11 +37,11 @@ display.getViewport().resize(
 display.getViewport().attach(child:term);
 //display.getViewport().setFiltered(enabled:false);
 
-
-display.setParameter(
-    param:Topaz.Display.Parameter.Fullscreen,
-    value:true
-);
+if (settings.fullscreen == true || settings.fullscreen == empty)
+    display.setParameter(
+        param:Topaz.Display.Parameter.Fullscreen,
+        value:true
+    );
 
 
 
