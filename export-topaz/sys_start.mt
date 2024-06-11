@@ -161,7 +161,7 @@ return ::(terminal, arg, onDone) {
                 return JSON.encode(:obj);
             },
             onSaveSettings ::(data) {
-                Settings.save(:JSON.decode(:data));
+                Settings.setProps(:JSON.decode(:data));
             },
 
             onListSlots ::{

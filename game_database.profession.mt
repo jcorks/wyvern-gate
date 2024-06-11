@@ -339,7 +339,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Guard',
   id : 'base:guard',
-  weaponAffinity: 'base:polearm',
+  weaponAffinity: 'base:halberd',
   description : "Standard profession excelling in defending others, for better or for worse.", 
   growth: StatSet.new(
     HP:  6,

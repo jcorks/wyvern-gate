@@ -62,9 +62,9 @@ Scene.newEntry(
             
             
             @:e = [
-              island.newInhabitant(professionHint:'Guard'),
-              island.newInhabitant(professionHint:'Guard'),
-              island.newInhabitant(professionHint:'Guard')            
+              island.newInhabitant(professionHint:'base:guard'),
+              island.newInhabitant(professionHint:'base:guard'),
+              island.newInhabitant(professionHint:'base:guard')            
             ];
             
             foreach(e)::(index, guard) {

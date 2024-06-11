@@ -171,8 +171,14 @@
               windowEvent.queueMessage(
                 text: whom.name + ' attempts to steal from ' + this.name + '.'
               );
-
+              
               @:stealSuccess ::{
+                when (this.inventory.isEmpty) ::<= {
+                  windowEvent.queueMessage(
+                    text: this.name + ' had nothing on their person.'
+                  );        
+                }
+
                 @:item = this.inventory.items[0];
                 windowEvent.queueMessage(
                   text: whom.name + ' steals ' + correctA(word:item.name) + ' from ' + this.name + '.'
@@ -185,11 +191,6 @@
 
               // whoops always successful
               when (this.isIncapacitated()) ::<= {
-                when (this.inventory.isEmpty) ::<= {
-                  windowEvent.queueMessage(
-                    text: this.name + ' had nothing on their person.'
-                  );        
-                }
                 stealSuccess();
               }
 
