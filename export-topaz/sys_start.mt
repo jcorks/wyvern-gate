@@ -19,6 +19,7 @@
 @Shell = import(module:'sys_shell.mt');
 @:Paths = import(module:'sys_path.mt');
 @:JSON = import(module:'Matte.Core.JSON');
+@:Settings = import(module:'sys_settings.mt')
 
 @:FRAME_ANIMATION_POST_MS = 32;
 
@@ -38,7 +39,7 @@ Paths.setMainPath(::<= {
             return Topaz.Resources.getPath();
         }
     }
-})
+)
 @MODS_PATH = 'mods';
 
 
@@ -166,7 +167,7 @@ return ::(terminal, arg, onDone) {
 
             onListSlots ::{
                 @:output = [];
-                @:path = Topaz.Filesystem.getPathFromString(path:SAVEPATH);
+                @:path = Topaz.Filesystem.getPathFromString(path:'.');
                 foreach(path.getChildren()) ::(k, child) {
                     if (child.getName()->contains(key:'WYVERNSAVE_'))
                         output->push(value:child.getName()->split(token:'_')[1]);
@@ -178,7 +179,7 @@ return ::(terminal, arg, onDone) {
                 slot
             ) {
                 @:oldPath = Topaz.Resources.getPath();
-                Topaz.Resources.setPath(path:SAVEPATH);
+                Topaz.Resources.setPath(path:'.');
 
 
                 @:asset = Topaz.Resources.createDataAssetFromPath(path:'WYVERNSAVE_' + slot, name:slot);
