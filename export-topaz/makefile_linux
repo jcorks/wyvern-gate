@@ -2,7 +2,7 @@ all:
 	cd ./topaz/system/script/matte/src/m2s && gcc ./mt_to_string.c -o ../m2sc
 	cd ./topaz/system/script/matte/src/ && ./m2sc
 	cd ./topaz/build/make/linux_matte/ && make 
-	gcc -g ./c/* -I./topaz/include/  -I./topaz/system/script/matte/src/ -o ./output/wyvern-gate-bin ./topaz/build/make/linux_matte/libtopaz.a $(shell pkg-config --libs alsa ogg vorbis vorbisfile opengl freetype2 glfw3 x11) -lm -ldl
+	gcc -fsanitize=address -fsanitize=undefined ./c/* -I./topaz/include/  -I./topaz/system/script/matte/src/ -o ./output/wyvern-gate-bin ./topaz/build/make/linux_matte/libtopaz.a $(shell pkg-config --libs alsa ogg vorbis vorbisfile opengl freetype2 glfw3 x11) -lm -ldl
 
 clean:
 	cd ./topaz/build/make/linux_matte/ && make clean

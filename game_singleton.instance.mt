@@ -784,7 +784,7 @@ return empty;
         @:islandChoices = ::{   
         
           @islandOptions;
-        
+          @choiceActions;
           enteredChoices = true;
           windowEvent.queueChoices(
             leftWeight: 1,
@@ -797,28 +797,49 @@ return empty;
             onGetChoices ::{
               islandOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island));
               
-              @:choices = [...islandOptions]->map(to::(value) <- value.name);
+              @choices = [];
+              choiceActions = [];
               @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
-
-              choices->push(value: 'Options');
 
               if (visitable != empty) ::<= {
                 foreach(visitable)::(i, vis) {
-                  choices->push(value:'Visit ' + vis.name);        
+                  choices->push(value:'Visit ' + vis.name); 
+                  choiceActions->push(::{
+                    @:landmark = vis.data;
+
+                    @where = ::(landmark) <- landmark.gate;
+
+                    when (landmark.base.pointOfNoReturn == true) ::<= {
+                      windowEvent.queueMessage(
+                        text: "It may be difficult to return... "
+                      );
+                      windowEvent.queueAskBoolean(
+                        prompt:'Enter?',
+                        onChoice::(which) {
+                          if (which == true)
+                            this.visitLandmark(landmark, where);
+                        }
+                      )
+                    }
+                    this.visitLandmark(landmark, where);              
+                    if (windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
+                      windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
+                    }                  
+                  });       
                 }
               }
               
-              return choices;
-            },
-            onChoice::(choice) {
-              @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
-
-              if (choice-1 < islandOptions->size) ::<= {
-                islandOptions[choice-1].onSelect(island);
-                if (!islandOptions[choice-1].keepInteractionMenu && windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
-                  windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
-                }
-              } else if (choice-1 == islandOptions->size) ::<= {
+              foreach(islandOptions) ::(k, value) {
+                choices->push(:value.name);
+                choiceActions->push(::{
+                  value.onSelect(island);
+                  if (!value.keepInteractionMenu && windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
+                    windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
+                  }              
+                })
+              }
+              choices->push(value: 'Options');
+              choiceActions->push(::{
                 @:options = [...world.scenario.base.interactionsOptions]->filter(by::(value) <- value.filter(island));
                 @:choices = [...options]->map(to::(value) <- value.name);
 
@@ -836,30 +857,12 @@ return empty;
                     if (!options[choice-1].keepInteractionMenu && windowEvent.canJumpToTag(name:'LandmarkInteractionOptions'))
                       windowEvent.jumpToTag(name:'LandmarkInteractionOptions', goBeforeTag:true, doResolveNext:true);
                   }
-                );
-              } else ::<= {
-                @:landmark = visitable[choice-(islandOptions->size + 1 + 1)].data;
-
-                @where = ::(landmark) <- landmark.gate;
-
-                when (landmark.base.pointOfNoReturn == true) ::<= {
-                  windowEvent.queueMessage(
-                    text: "It may be difficult to return... "
-                  );
-                  windowEvent.queueAskBoolean(
-                    prompt:'Enter?',
-                    onChoice::(which) {
-                      if (which == true)
-                        this.visitLandmark(landmark, where);
-                    }
-                  )
-                }
-                this.visitLandmark(landmark, where);              
-                if (windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
-                  windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
-                }
-
-              }
+                );              
+              });
+              return choices;
+            },
+            onChoice::(choice) {
+              choiceActions[choice-1]();
             }
           );
         } 
@@ -894,7 +897,7 @@ return empty;
 
         
         @stepCount = 0;
-
+        @choiceActions = [];
 
         @:landmarkChoices = ::{
           @landmarkOptions;
@@ -907,29 +910,28 @@ return empty;
             onGetChoices ::{
               landmarkOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island:island_, landmark));
               
-              @:choices = [...landmarkOptions]->map(to::(value) <- value.name);
-
-              choices->push(value: 'Options');
-              
-              
+              choiceActions = [];
+              @:choices = [];
               @locationAt = landmark.map.getNamedItemsUnderPointer();
               if (locationAt != empty) ::<= {
                 foreach(locationAt)::(i, loc) {
                   choices->push(value:'Check ' + loc.name);
+                  choiceActions->push(::{
+                    locationAt = loc.data;
+                    locationAt.interact();                  
+                  });
                 }
+              }              
+              
+              foreach(landmarkOptions) ::(k, value) {
+                choices->push(:value.name);
+                choiceActions->push(::{
+                  value.onSelect(island:island_, landmark);                
+                });       
               }
-
-              return choices;        
-            },
-            renderable:landmark.map,
-            onChoice::(choice) {
-              when(choice == empty) empty;
-              @locationAt = landmark.map.getNamedItemsUnderPointer();
-                
-
-              if (choice-1 < landmarkOptions->size) ::<= {
-                landmarkOptions[choice-1].onSelect(island:island_, landmark);
-              } else if (choice-1 == landmarkOptions->size) ::<= {
+              
+              choices->push(value: 'Options');
+              choiceActions->push(::{
                 @:options = [...world.scenario.base.interactionsOptions]->filter(by::(value) <- value.filter(island:island_, landmark));
                 @:choices = [...options]->map(to::(value) <- value.name);
 
@@ -944,13 +946,16 @@ return empty;
                     when(choice == 0) empty;
                     options[choice-1].onSelect(island:island_, landmark);
                   }
-                );
-              } else ::<= {
-                choice -= landmarkOptions->size + 2;
-                when(choice >= locationAt->keycount) empty;
-                locationAt = locationAt[choice].data;
-                locationAt.interact();
-              }
+                );              
+              });
+              
+
+
+              return choices;        
+            },
+            renderable:landmark.map,
+            onChoice::(choice) {
+              choiceActions[choice-1]();
             }
           );
         }
