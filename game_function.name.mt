@@ -93,9 +93,12 @@ return ::(
       }
       
       when(choice == 3) ::<= {
-        onDone(name);
-        if (windowEvent.canJumpToTag(name:'name'))
-          windowEvent.jumpToTag(name:'name', doResolveNext:true, goBeforeTag:true);            
+        if (name->length > 0) ::<= {
+          onDone(name);
+          if (windowEvent.canJumpToTag(name:'name'))
+            windowEvent.jumpToTag(name:'name', doResolveNext:true, goBeforeTag:true);            
+          
+        }
       }
       
       name = name + select[choice-1];
