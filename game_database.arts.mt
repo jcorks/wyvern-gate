@@ -61,7 +61,8 @@
   LIGHT : 256,
   DARK : 512,
   POISON : 1024,
-  SPECIAL : 2048 
+  SPECIAL : 2048,
+  COSTLESS : 4096
 }
 
 
@@ -89,7 +90,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : true,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL | TRAITS.SPECIAL,
+    traits : TRAITS.PHYSICAL | TRAITS.SPECIAL | TRAITS.COSTLESS,
     rarity : RARITY.COMMON,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
@@ -3408,7 +3409,7 @@ Arts.newEntry(
     description: 'Does nothing.',
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
-    traits : 0,
+    traits : TRAITS.SPECIAL | TRAITS.COSTLESS,
     kind : KIND.ABILITY,
     rarity : RARITY.COMMON,
     oncePerBattle : false,
