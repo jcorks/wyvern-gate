@@ -375,6 +375,14 @@
         @:name = args.name => String;
         @:emitCondition = args.emitCondition;
       
+
+        if (subscribers->size > 0) ::<= {
+          args.holder = holder;
+          foreach(subscribers) ::(k, v) {
+            v(*args);
+          }
+        }
+
         
         @all = if (args.filter)
           [...getAll()]->filter(:args.filter)
@@ -383,12 +391,6 @@
         ;
         when(all->size == 0) [];
 
-        if (subscribers->size > 0) ::<= {
-          args.holder = holder;
-          foreach(subscribers) ::(k, v) {
-            v(*args);
-          }
-        }
 
       
         @:ret = [];

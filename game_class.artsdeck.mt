@@ -7,7 +7,7 @@
   name: 'Wyvern.HandCard',
   layout : {
     id : String,
-    owner: Object,
+    owner: Nullable,
     level : Number
   }
 );
@@ -177,13 +177,14 @@
   define:::(this, state) {
     @:subscribers = {};
   
-    @:addHandCard::(id) {
+    @:addHandCard::(id, noDeck) {
       @:card = Object.instantiate(type:HandCard);
       card.id = id;
-      card.owner = state;
+      card.owner = if (noDeck == true) empty else state;
       card.level = 1;
       state.hand->push(value:card);
       emitEvent(event:EVENTS.DRAW, card);
+      return card;
     }
     
     @:emitEvent::(*args) {
@@ -247,7 +248,11 @@
       },
       
       addHandCard::(id) {
-        addHandCard(id);
+        return addHandCard(id);
+      },
+      
+      addHandCardTemporary::(id) {
+        return addHandCard(id, noDeck:true);
       },
       
       discardFromHandIndex ::(which) {
@@ -585,5 +590,6 @@
     }
   }
 )
+
 
 return ArtsDeck;

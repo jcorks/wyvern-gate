@@ -670,6 +670,24 @@ Effect.newEntry(
   }
 )
 
+Effect.newEntry(
+  data : {
+    name : 'Trigger Item Art',
+    id : 'base:trigger-itemart',
+    description: 'Casts an Art from an item.',
+    battleOnly : true,
+    stackable: false,
+    blockPoints : 0,
+    flags : 0,
+    stats: StatSet.new(
+    ),
+    events : {
+      onAffliction ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+      }
+    }
+  }
+) 
 
 Effect.newEntry(
   data : {
@@ -2556,7 +2574,7 @@ Effect.newEntry(
       onPostAttackOther ::(from, item, holder, to) {
         if (to.isIncapacitated()) ::<= {
           windowEvent.queueMessage(text:holder.name + "'s ending blow to " + to.name + " increases "+ holder.name + "'s abilities due to their Assassin's Pride.");            
-          from.addEffect(from:holder, id: 'base:pride', durationTurns: 10);            
+          holder.addEffect(from:holder, id: 'base:pride', durationTurns: 10);            
         }
       }
     }

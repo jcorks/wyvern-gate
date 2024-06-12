@@ -330,7 +330,7 @@
 
 
       state.hp = 1;
-      state.ap = 1;
+      state.ap = 0;
       state.flags = StateFlags.new();
       state.isDead = false;
       state.name = NameGen.person();
@@ -476,6 +476,7 @@
       state.deck.shuffle();
       state.deck.redraw();
       initializeEffectStackProper(*_);
+      state.ap = (state.stats.AP / 2)->floor
 
       //resetEffects(priv:_, this:_.this, state:_.state);        
     },
@@ -678,7 +679,8 @@
       
       _.state.deck = empty;
       
-      _.this.recalculateStats();                
+      _.this.recalculateStats(); 
+      _.state.ap = 0;               
     },
 
       
@@ -744,6 +746,7 @@
       
       state.deck.redraw();
       @act = true;
+      state.ap += 1;
       
       
       @:rets = this.effectStack.emitEvent(
@@ -1048,12 +1051,39 @@
             }
           }
         }
+
+        @isDexed = false;
+        if (random.try(percentSuccess:33)) ::<= {
+          isDexed = true;
+          // Dex can increase/reduce the damage of specifically attacks
+
+          if (this.stats.DEX > target.stats.DEX) ::<= {       
+            damage.amount = damage.amount * (1.2 + (Number.random()-0.5)*0.25);
+          } else ::<= {
+            damage.amount = damage.amount * (0.75 + (Number.random()-0.5)*0.25);          
+          }
+        }
+        
+        
         when(dmg.amount <= 0) empty;
 
 
 
         @:hpWas0 = if (target.hp == 0) true else false;
         @:result = target.damage(attacker:this, damage:dmg, dodgeable:true, critical:isCrit);
+        
+        if (isDexed) ::<= {
+          if (this.stats.DEX > target.stats.DEX) ::<= {       
+            windowEvent.queueMessage(
+              text: this.name + '\'s accuracy increased the potency of the blow!'
+            );
+          } else ::<= {
+            windowEvent.queueMessage(
+              text: target.name + '\'s managed to avoid the full force of the blow!'
+            );
+          }
+        }
+        
         
         if (backupStats != empty)
           this.stats.load(serialized:backupStats);
@@ -1191,15 +1221,7 @@
         }
         
 
-
-        if (attacker.stats.DEX > this.stats.DEX)         
-          // as DEX increases: randomness decreases 
-          // amount of reliable damage increases
-          // This models user skill vs receiver skill
-          damage.amount = damage.amount + damage.amount * ((Number.random() - 0.5) * (this.stats.DEX / attacker.stats.DEX) + (1 -  this.stats.DEX / attacker.stats.DEX))
-        else
-          damage.amount = damage.amount + damage.amount * (Number.random() - 0.5)
-        ; 
+        damage.amount = damage.amount + damage.amount * (Number.random() - 0.5) * 0.5; // 25% spread
         
         
 
@@ -1209,7 +1231,7 @@
 
 
         this.effectStack.emitEvent(
-          name : 'onDamage',
+          name : 'onPreDamage',
           attacker,
           damage,
           emitCondition ::(v) <- (damage.amount > 0 || exact != empty)
@@ -2376,7 +2398,7 @@
         set: [ 
           '     Name:   ' + this.name + '\n\n' +
           '     HP:     ' + this.hp + ' / ' + this.stats.HP + '\n' + 
-          '     AP:     ' + this.ap + ' / ' + this.stats.AP + '\n\n' + 
+          '     AP:     ' + this.stats.AP + '\n\n' + 
           '  species:   ' + state.species.name + '\n' +
           ' profession: ' + this.profession.name + '\n' +
           ' fave. wep.: ' + state.faveWeapon.name + '\n' +

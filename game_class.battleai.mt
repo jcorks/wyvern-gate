@@ -206,6 +206,10 @@
         when ([...enemies]->filter(::(value) <- party.isMember(:value))->size > 0 &&
             random.try(percentSuccess:80 - (tier * 30)))
             defaultAttack(battle);
+
+        // need enough to use an art
+        when (user_.ap < 2)
+            defaultAttack(battle); 
            
         @condition;
         

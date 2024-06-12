@@ -29,6 +29,7 @@
 @:Entity = import(module:'game_class.entity.mt');
 
 @:HP_KNOWN_LIMIT = 99;
+@:AP_COST = 2;
 
 @:combatChooseDefend::(targetPart, attacker, defender, onDone) {
   when (defender.blockPoints == 0) onDone(which:0);
@@ -997,16 +998,15 @@
         when (entityTurn.isIncapacitated())
           endTurn();
         
-        @:passesSupportCheck ::{
+        @:passesCheck ::{
           @:art = Arts.find(:action.card.id);
           when(art.traits & Arts.TRAITS.SUPPORT == 0) true;
-          when(random.flipCoin()) true;
           return false;
         }
           
-        @:requiresAP = !passesSupportCheck();
+        @:requiresAP = ((Arts.find(:action.card.id).traits & Arts.TRAITS.COSTLESS) == 0);
           
-        when (requiresAP && entityTurn.ap == 0) ::<= {
+        when (requiresAP && entityTurn.ap < AP_COST) ::<= {
           @:art = Arts.find(:action.card.id);
           windowEvent.queueMessage(
             text: entityTurn.name + ' tried to use the Art ' + art.name + ' but couldn\'t muster the mental strength!'

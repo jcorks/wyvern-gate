@@ -39,7 +39,9 @@
   'almost always'
 ];
 
-
+@:TRAITS = {
+    SPECIAL : 1
+}
 
 
 
@@ -54,7 +56,7 @@ ItemEnchant.database.newEntry(
   data : {
     name : 'Art',
     id : 'base:art',
-    description : ', will $1 perform the Art "$2": $3',
+    description : ', will $1 add the Art "$2" to the wielder\'s hand: $3',
     equipMod : StatSet.new(
     ),
     levelMinimum : 1,
@@ -62,13 +64,14 @@ ItemEnchant.database.newEntry(
     tier : 0,
     
     triggerConditionEffects : [
-      'placeholderart',
+      'base:trigger-itemart',
     ],
     
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : TRAITS.SPECIAL
   }
 )
 /*
@@ -136,7 +139,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -159,7 +163,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -181,7 +186,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -406,7 +412,8 @@ ItemEnchant.database.newEntry(
       "base:burning"
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -428,7 +435,8 @@ ItemEnchant.database.newEntry(
       "base:icy"
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -450,7 +458,8 @@ ItemEnchant.database.newEntry(
       "base:shock"
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -472,7 +481,8 @@ ItemEnchant.database.newEntry(
       "base:toxic"
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -494,7 +504,8 @@ ItemEnchant.database.newEntry(
       "base:shimmering"
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -516,7 +527,8 @@ ItemEnchant.database.newEntry(
       "base:dark"
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -544,7 +556,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -570,7 +583,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )    
 
@@ -596,7 +610,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 ) 
 
@@ -622,7 +637,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -648,7 +664,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -676,7 +693,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -701,7 +719,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -726,7 +745,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -751,7 +771,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -777,7 +798,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -802,7 +824,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -827,7 +850,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -852,7 +876,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -877,7 +902,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -902,7 +928,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -927,7 +954,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -964,7 +992,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -989,7 +1018,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1014,7 +1044,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1039,7 +1070,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1065,7 +1097,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1090,7 +1123,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1115,7 +1149,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1140,7 +1175,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1165,7 +1201,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1190,7 +1227,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1215,7 +1253,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1241,7 +1280,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1268,7 +1308,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1294,7 +1335,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1317,7 +1359,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1339,7 +1382,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1361,7 +1405,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1384,7 +1429,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1406,7 +1452,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1428,7 +1475,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
@@ -1451,7 +1499,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 }
@@ -1478,7 +1527,8 @@ ItemEnchant.database.newEntry(
       equipEffects : Object,
       triggerConditionEffects : Object,
       priceMod : Number,
-      tier : Number
+      tier : Number,
+      traits : Number
     },
     reset
   ),
@@ -1536,17 +1586,31 @@ ItemEnchant.database.newEntry(
       },
       
       processEvent ::(*args) {
+        breakpoint();
         @:world = import(module:'game_singleton.world.mt');
         when(state.condition == empty) empty;
         if (state.condition.effectEvent == args.name) ::<= {
           when(!random.try(percentSuccess:state.conditionChance)) empty;
+          foreach(state.base.triggerConditionEffects)::(i, effectName) {
+            args.holder.addEffect(
+              from:args.holder, id: effectName, durationTurns: 1, item:args.item
+            );
+          }
+
           if (state.artID != '') ::<= {
-            foreach(state.base.triggerConditionEffects)::(i, effectName) {
-              args.holder.addEffect(
-                from:args.holder, id: effectName, durationTurns: 1, item:args.item
-              );            
-            }
-          } else ::<= {
+            when(args.holder.battle == empty) empty;
+
+            @:battle = args.holder.battle;
+
+            @:card = args.holder.deck.addHandCardTemporary(
+              :state.artID
+            );
+            args.holder.deck.revealArt(
+              handCard:card, 
+              prompt:'The Art ' + Arts.find(:state.artID).name + ' was added to ' + args.holder.name + '\'s hand.'
+            );
+            /*
+            // insanity: instant casting
             when(args.holder.battle == empty) empty;
 
             @:battle = args.holder.battle;
@@ -1571,6 +1635,7 @@ ItemEnchant.database.newEntry(
                 enemies : args.holder.battle.getEnemies(entity:args.holder.user)
               );
             }
+            */
           }
         }
       }
