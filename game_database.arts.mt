@@ -3749,7 +3749,7 @@ Arts.newEntry(
 */
 
 
-/*
+
 Arts.newEntry(
   data: {
     name: 'Equip Item',
@@ -3759,10 +3759,13 @@ Arts.newEntry(
     durationTurns: 0,
     hpCost : 0,
     apCost : 0,
+    kind : KIND.ABILITY,
+    traits : TRAITS.SPECIAL | TRAITS.COSTLESS,
+    rarity : RARITY.RARE,
     usageHintAI: USAGE_HINT.DONTUSE,
     oncePerBattle : false,
     canBlock : false,
-    onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(user, level, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:item = extraData[0];
       user.equip(
         item, 
@@ -3772,7 +3775,7 @@ Arts.newEntry(
     }
   }
 )
-*/
+
 
 Arts.newEntry(
   data: {

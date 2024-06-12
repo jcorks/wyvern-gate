@@ -175,14 +175,17 @@
         
         @:hand = user_.deck.hand->filter(by::(value) <- Arts.find(id:value.id).usageHintAI != Arts.USAGE_HINT.DONTUSE);
         
+        
+        @projectedAP = user_.ap; 
         foreach(hand) ::(k, v) {
           @art = Arts.find(id:v.id);
           if (art.kind == Arts.KIND.EFFECT && random.flipCoin()) ::<= {
-            when (user_.ap < 2) empty;
+            when (projectedAP < 2) empty;
             this.commitTargettedAction(
               battle,
               card:v
             );
+            projectedAP -= 2;
             hand->remove(key:hand->findIndex(value:v));
           }
         }        
@@ -210,7 +213,7 @@
 
         // need enough to use an art
         breakpoint();
-        when (user_.ap < 2)
+        when (projectedAP < 2)
             defaultAttack(battle); 
            
         @condition;
