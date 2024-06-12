@@ -3416,6 +3416,7 @@ Arts.newEntry(
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:'' + user.name + ' waits.');
+      user.healAP(amount:3);
     }
   }
 )

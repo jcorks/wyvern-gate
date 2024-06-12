@@ -239,7 +239,7 @@ return ::(
       windowEvent.queueChoices(
         leftWeight: if (leftWeight == empty) 1 else leftWeight,
         topWeight: if (topWeight == empty) 1 else topWeight,
-        prompt: '[' + choiceItem.name + ']',
+        prompt: choiceItem.name,
         canCancel : true,
         keep:true,
         jumpTag: 'Item',

@@ -543,7 +543,7 @@
       );
       
       canvas.movePen(y:top, x:left+2);
-      canvas.drawText(text:'Turn Order');
+      canvas.drawText(text:'[Turn Order]');
       
       foreach(lines)::(index, line) {
         canvas.movePen(y:top+index+2, x:left+2);
@@ -1012,6 +1012,8 @@
             text: entityTurn.name + ' tried to use the Art ' + art.name + ' but couldn\'t muster the mental strength!'
           );
         }
+        if (requiresAP)
+          entityTurn.ap -= AP_COST;
           
         @:Entity = import(module:'game_class.entity.mt');
         @:world = import(module:'game_singleton.world.mt');
@@ -1027,6 +1029,7 @@
         }
       
         @:finish ::(useArtReturn) {
+
           if (art.kind == Arts.KIND.ABILITY) ::<= {
             entityTurn.flags.add(flag:StateFlags.WENT);
             if (art.name != 'Wait' &&
@@ -1072,7 +1075,7 @@
               onPass();
               
             @reactor = toReact->pop;
-            when(reactor == entityTurn)
+            when(reactor == entityTurn || reactor.ap < AP_COST)
               tryNext();
 
             reactor.react(
@@ -1090,12 +1093,7 @@
                 text: reactor.name + ' reacts with the Art ' + art.name + '!'
               );
       
-              if (requiresAP) ::<= {        
-                windowEvent.queueMessage(
-                  text: reactor.name + ' uses an Arts Point for the Support Art!'
-                );
-                reactor.ap -= 1;
-              }
+              reactor.ap -= AP_COST;
               
               
               @cancel = art.onAction(

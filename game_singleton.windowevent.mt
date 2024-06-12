@@ -132,6 +132,20 @@
     @:getResolveQueue ::{
       return resolveQueues[resolveQueues->size-1].queue;
     }
+    
+    @:pushResolveQueueTop ::(fns, setID) {
+      return getResolveQueue()->push(:{
+        fns : fns,
+        setID : setID
+      });
+    }
+    
+    
+    
+    @:removeSetID ::(setID) {
+      @:q = getResolveQueue()->filter(::(value) <- value.setID != setID)
+      resolveQueues[resolveQueues->size-1].queue = q;
+    }
 
     resolveQueues->push(:{
       onResolveAll : {},
@@ -260,7 +274,7 @@
       @:onResolveAll = inst.onResolveAll;
 
       if (queue->keycount) ::<= {
-        @:cbs = queue[0];
+        @:cbs = queue[0].fns;
         queue->remove(key:0);
         foreach(cbs)::(i, cb) <- cb();
       } else ::<= {
@@ -930,12 +944,16 @@
       return match(input) {
         (CURSOR_ACTIONS.CONFIRM, 
          CURSOR_ACTIONS.CANCEL): ::<= {
-        when (data.busy) ::<= {
-          data.busy = false;
-          return false;
-        } 
-        return true;
-         },
+          when (data.busy) ::<= {
+            data.busy = false;
+            return false;
+          } 
+          // if queued in a set, remove remaining waiting
+          if (input == CURSOR_ACTIONS.CANCEL && data.setID != empty) ::<= {
+            removeSetID(:data.setID)
+          }
+          return true;
+        },
         default: false
       }
     }
@@ -964,7 +982,7 @@
       // Similar to message, but accepts a set of 
       // messages to display
       queueMessageSet::(
-          speaker, 
+          speakers, 
           set => Object, 
           leftWeight, 
           topWeight, 
@@ -973,17 +991,19 @@
           pageAfter, 
           onLeave
         ) {
+        @:setID = {};
         foreach(set)::(i, text) {
           when(text == '' || text == empty) empty;
           this.queueMessage(
-            speaker,
+            speaker: speakers[i],
             text,
             leftWeight,
             topWeight,
             maxWidth,
             maxHeight,
             pageAfter,
-            onLeave
+            onLeave,
+            setID
           )
         }
         
@@ -1003,7 +1023,8 @@
           maxHeight,
           pageAfter, 
           renderable, 
-          onLeave
+          onLeave,
+          setID
       ) {
         if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
         // first: split the text.
@@ -1021,7 +1042,8 @@
           renderable,
           lines : canvas.refitLines(input:[text]),
           pageAfter,
-          onLeave
+          onLeave,
+          setID
         );        
       },
       
@@ -1039,14 +1061,15 @@
         maxHeight,
         renderable, 
         onLeave, 
-        skipAnimation
+        skipAnimation,
+        setID
       ) {
         when(requestAutoSkip) ::<= {
           if (onLeave) onLeave();
         }
 
         @:queuePage ::(iter, width, more){
-          getResolveQueue()->push(value:[::{
+          pushResolveQueueTop(fns:[::{
             @:limit = min(a:iter+pageAfter, b:lines->keycount)-1;
             @:linesOut = lines->subset(
               from:iter, 
@@ -1071,9 +1094,10 @@
               onLeave: onLeave,
               mode: CHOICE_MODE.DISPLAY,
               renderable: renderable,
-              skipAnimation : skipAnimation
+              skipAnimation : skipAnimation,
+              setID : setID
             });
-          }]);
+          }], setID);
         }
         if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
 
@@ -1122,7 +1146,7 @@
           if (onLeave) onLeave();
         }
 
-        getResolveQueue()->push(value:[::{
+        pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
             mode: CHOICE_MODE.CUSTOM,
             keep: keep,
@@ -1172,7 +1196,7 @@
         pageAfter, 
         hideWindow
       ) {
-        getResolveQueue()->push(value:[::{
+        pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
             onCancel : onCancel,
             mode: CHOICE_MODE.CURSOR,
@@ -1225,7 +1249,7 @@
       ) {
 
 
-        getResolveQueue()->push(value:[::{
+        pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
             onCancel: onCancel,
             mode: CHOICE_MODE.SLIDER,
@@ -1311,7 +1335,7 @@
         onLeave, 
         onCancel
       ) {
-        getResolveQueue()->push(value:[::{
+        pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
             onCancel: onCancel,
             mode:if (isCursor) CHOICE_MODE.COLUMN_CURSOR else CHOICE_MODE.COLUMN_NUMBER,
@@ -1346,7 +1370,7 @@
         canCancel, 
         trap
       ) {
-        getResolveQueue()->push(value:[::{
+        pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
             canCancel: canCancel,
             mode: CHOICE_MODE.CURSOR_MOVE,

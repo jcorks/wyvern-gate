@@ -336,7 +336,7 @@ return class(
       
 
         
-        @width = if (title!=empty) title->length else 0;
+        @width = if (title!=empty) (title->length + 2) else 0;
         foreach(lines) ::(k, v) {
           if (v->length > width)
             width = v->length;
@@ -360,9 +360,9 @@ return class(
           this.drawText(text:line);
         }
 
-        if (title != empty) ::<= {
+        if (title != empty && title != '') ::<= {
           this.movePen(x: left+2, y:top);
-          this.drawText(text:title);
+          this.drawText(text:'['+title+']');
         }
 
         if (notchText != empty) ::<= {

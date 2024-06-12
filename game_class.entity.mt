@@ -1058,9 +1058,9 @@
           // Dex can increase/reduce the damage of specifically attacks
 
           if (this.stats.DEX > target.stats.DEX) ::<= {       
-            damage.amount = damage.amount * (1.2 + (Number.random()-0.5)*0.25);
+            dmg.amount = dmg.amount * (1.2 + (Number.random()-0.5)*0.25);
           } else ::<= {
-            damage.amount = damage.amount * (0.75 + (Number.random()-0.5)*0.25);          
+            dmg.amount = dmg.amount * (0.75 + (Number.random()-0.5)*0.25);          
           }
         }
         
@@ -2376,10 +2376,6 @@
       plainStats.resetMod();
 
 
-      if (excludeStats != true)
-        plainStats.printDiff(other:state.stats, 
-          prompt:this.name + '(Base -> w/Mods.)'
-        );
       
       @:getRightHandName ::{
         @:hand = this.getEquipped(slot:EQUIP_SLOTS.HAND_LR);
@@ -2393,7 +2389,14 @@
       
       @:effects = if (_.this.effectStack) _.this.effectStack.getAll() else empty;
       windowEvent.queueMessageSet(
-        speaker: this.name,
+        speakers: [ 
+          this.name + ': Summary',
+          this.name + ': ' + if (excludeStats != true) '(Base -> w/Mods.)' else '',
+          this.name + ': Description',
+          this.name + ': Equipment',
+          this.name + ': Effects'
+        ],
+          
         pageAfter:canvas.height-4,
         set: [ 
           '     Name:   ' + this.name + '\n\n' +
@@ -2404,11 +2407,23 @@
           ' fave. wep.: ' + state.faveWeapon.name + '\n' +
           'personality: ' + state.personality.name + '\n\n'
           ,
+          if (excludeStats != true)
+            StatSet.diffToLines(
+              stats:plainStats, 
+              other:state.stats
+            )->reduce(
+              ::(previous, value) <- 
+                if (previous != empty) 
+                  previous + '\n' + value
+                else 
+                  value
+            )
+          else
+            '', 
           this.describeQualities()
           ,
            
-          ' -Equipment-  \n'        
-            + 'hand(l): ' + this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).name + '\n'
+              'hand(l): ' + this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).name + '\n'
             + 'hand(r): ' + getRightHandName() + '\n'
             + 'armor  : ' + this.getEquipped(slot:EQUIP_SLOTS.ARMOR).name + '\n'
             + 'amulet : ' + this.getEquipped(slot:EQUIP_SLOTS.AMULET).name + '\n'
@@ -2418,7 +2433,7 @@
           ,
             
            if (effects != empty) ::<= {
-            @out = ' - Effects - \n\n';
+            @out = '';
             foreach(effects)::(index, f) {
               @:effect = Effect.find(:f.id);
               out = out + effect.name + ': ' + effect.description + '\n';

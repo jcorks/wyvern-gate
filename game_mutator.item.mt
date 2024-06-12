@@ -3757,64 +3757,49 @@ Item.database.newEntry(data : {
       @:state = _.state;
       @:this = _.this;
       @:Effect = import(module:'game_database.effect.mt');
-      windowEvent.queueMessage(
-        speaker:this.name,
-        text:this.description,
-        pageAfter:canvas.height-4
-      );
-      
-      if (state.enchants->keycount != 0) ::<= {
-        windowEvent.queueMessage(
-          speaker:this.name + ' - Enchantments',
-          pageAfter:canvas.height-4,
-          text:::<={
+      windowEvent.queueMessageSet(
+        speakers : [
+          this.name + ': Description',
+          this.name + ': Enchantments',
+          this.name + ': Equip Stats',
+          this.name + ': Equip Effects',
+          this.name + ': Use Effects'
+        ],
+        set : [
+          this.description,
+          
+          if (state.enchants->keycount != 0) ::<= {
             @out = '';
             when (state.enchants->keycount == 0) 'None.';
             foreach(state.enchants)::(i, mod) {
               out = out + romanNum(value:i+1) + ' - ' + mod.description + '\n';
             }
             return out;
-          }
-        );        
-      }        
-      
-      windowEvent.queueMessage(
-        speaker:this.name + ' - Equip Stats',
-        text:state.stats.descriptionRate,
-        pageAfter:canvas.height-4
-      );
-
-      if (state.equipEffects->keycount != 0) ::<= {
-        windowEvent.queueMessage(
-          speaker:this.name + ' - Equip Effects',
-          pageAfter:canvas.height-4,
-          text:::<={
+          } else '',
+          
+          state.stats.descriptionRate,
+          
+          if (state.equipEffects->keycount != 0) ::<= {
             @out = '';
             when (state.equipEffects->keycount == 0) 'None.';
             foreach(state.equipEffects)::(i, effect) {
               out = out + '. ' + Effect.find(id:effect).description + '\n';
             }
             return out;
-          }
-        );
-      }
-      
-
-              
-      windowEvent.queueMessage(
-        speaker:_.this.name + ' - Use Effects',
-        pageAfter:canvas.height-4,
-        text:::<={
-          @out = '';
-          when (state.useEffects->keycount == 0) 'None.';
-          foreach(state.useEffects)::(i, effect) {
-            out = out + '- ' + Effect.find(id:effect).description + '\n';
-          }
-          return out;
-        }
-      );  
-
-
+          } else '',     
+          
+          if (state.useEffects->size > 0) ::<= {
+            @out = '';
+            when (state.useEffects->keycount == 0) 'None.';
+            foreach(state.useEffects)::(i, effect) {
+              out = out + '- ' + Effect.find(id:effect).description + '\n';
+            }
+            return out;
+          } else '',
+            
+        ],
+        pageAfter:canvas.height-4
+      )
       if (by != empty) ::<= {
         when(by.profession.weaponAffinity != state.base.name) empty;
         windowEvent.queueMessage(

@@ -178,6 +178,7 @@
         foreach(hand) ::(k, v) {
           @art = Arts.find(id:v.id);
           if (art.kind == Arts.KIND.EFFECT && random.flipCoin()) ::<= {
+            when (user_.ap < 2) empty;
             this.commitTargettedAction(
               battle,
               card:v
@@ -208,6 +209,7 @@
             defaultAttack(battle);
 
         // need enough to use an art
+        breakpoint();
         when (user_.ap < 2)
             defaultAttack(battle); 
            
