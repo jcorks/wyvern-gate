@@ -1764,7 +1764,7 @@ Interaction.newEntry(
               party.addGoldAnimated(
                 amount:-cost,
                 onDone::{
-                  whom.profession = Profession.database.find(id: location.ownedBy.profession.id);
+                  whom.profession = Profession.find(id: location.ownedBy.profession.id);
 
                   windowEvent.queueMessage(
                     text: '' + whom.name + " is now " + correctA(word:whom.profession.name) + '.'

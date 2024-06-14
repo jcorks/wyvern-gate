@@ -3796,7 +3796,7 @@ return {
         location.ownedBy = location.landmark.island.newInhabitant();
         location.ownedBy.name = 'Wyvern of Fortune';
         location.ownedBy.species = Species.find(id:'base:wyvern');
-        location.ownedBy.profession = Profession.database.find(id:'base:wyvern')
+        location.ownedBy.profession = Profession.find(id:'base:wyvern')
         location.ownedBy.clearAbilities();
         foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
           location.ownedBy.learnAbility(id:ability);
