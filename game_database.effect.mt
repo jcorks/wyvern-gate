@@ -509,8 +509,8 @@ Effect.newEntry(
         );
       },
       onPreDamage ::(from, item, holder, attacker, damage) {
-        when (dmg < 1) empty;
         @dmg = damage.amount * 0.75;
+        when (dmg < 1) empty;
         damage.amount = 0;
         windowEvent.queueMessage(
           text: holder.name + ' counters!'
@@ -782,7 +782,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:from.name + ' was hurt from a curse!');
         from.damage(attacker:from, damage: Damage.new(
           amount: 1,
-          damageType: Damage.TYPE.PHYSICAL,
+          damageType: Damage.TYPE.PHYS,
           damageClass: Damage.CLASS.HP
         ),dodgeable: false);
       }

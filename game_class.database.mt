@@ -18,7 +18,6 @@
 @:class = import(module:'Matte.Core.Class');
 @:Random = import(module:'game_singleton.random.mt');
 
-@:Item2Database = {};
 @:LOOKUP = {};
 @:ItemType = Object.newType(name:'Wyvern.Database.Item');
 

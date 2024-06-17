@@ -1075,11 +1075,11 @@
         if (isDexed) ::<= {
           if (this.stats.DEX > target.stats.DEX) ::<= {       
             windowEvent.queueMessage(
-              text: this.name + '\'s accuracy increased the potency of the blow!'
+              text: this.name + '\'s dexterity increased the potency of the blow!'
             );
           } else ::<= {
             windowEvent.queueMessage(
-              text: target.name + '\'s managed to avoid the full force of the blow!'
+              text: target.name + '\'s dextrously avoided the full force of the blow!'
             );
           }
         }

@@ -355,7 +355,7 @@ return empty;
 
                 @:enterName = import(module:'game_function.name.mt');
 
-
+                breakpoint();
                 @choices = Scenario.database.getAll();
                 choices->sort(comparator:::(a, b) {
                   when(a.name < b.name) -1;
@@ -1051,6 +1051,14 @@ return empty;
         foreach(modMainOrdered) ::(i, modMain) {
           modMain.onDatabaseStartup();
         }
+      },
+      
+      quitRun ::{
+        world.resetAll();
+        Database.reset();
+        island_ = empty;
+        landmark_ = empty;
+        windowEvent.jumpToTag(name:'MainMenu');
       },
 
       island : {

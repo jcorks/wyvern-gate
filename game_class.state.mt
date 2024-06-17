@@ -118,8 +118,8 @@ isTag[TAG__SPARSE_ARRAY] = true;
   @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
   match(value->type) {
     (Number, String, Boolean, Empty):::<= {
-    when(isTag[key]) empty;
-    output[key] = value
+      when(isTag[key]) empty;
+      output[key] = value
     },
 
     

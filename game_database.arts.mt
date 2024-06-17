@@ -87,6 +87,7 @@ Arts.newEntry(
     description: "Damages a target based on the user's ATK.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     kind : KIND.ABILITY,
@@ -125,6 +126,7 @@ Arts.newEntry(
     description: "Deals 1 HP. 5% chance to 1hit K.O. Each level increases the chance by 5%.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     kind : KIND.ABILITY,
@@ -179,6 +181,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     traits : TRAITS.PHYSICAL,
@@ -216,6 +219,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -255,6 +259,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -290,6 +295,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -338,6 +344,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -391,6 +398,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -458,6 +466,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -482,6 +491,7 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     traits : 0,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -509,6 +519,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -542,6 +553,7 @@ Arts.newEntry(
     kind : KIND.ABILITY,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     traits : TRAITS.MAGIC,
     canBlock : false,
@@ -577,6 +589,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.FIRE,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -619,6 +632,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.FIRE,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -661,6 +675,7 @@ Arts.newEntry(
     kind : KIND.ABILITY,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     traits : TRAITS.MAGIC | TRAITS.FIRE,
@@ -706,6 +721,7 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -749,6 +765,7 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -791,6 +808,7 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -835,6 +853,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -874,6 +893,7 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -917,6 +937,7 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -960,6 +981,7 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     traits : TRAITS.PHYSICAL,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1002,6 +1024,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1048,6 +1071,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1100,6 +1124,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1139,6 +1164,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1176,6 +1202,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1216,6 +1243,7 @@ Arts.newEntry(
     canBlock : true,
     traits : TRAITS.PHYSICAL,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:pickItem = import(module:'game_function.pickitem.mt');
@@ -1257,6 +1285,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1295,6 +1324,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.ICE,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1332,6 +1362,7 @@ Arts.newEntry(
     kind : KIND.ABILITY,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1373,6 +1404,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1398,6 +1430,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1431,6 +1464,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1479,6 +1513,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1504,6 +1539,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1538,6 +1574,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1565,6 +1602,7 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1590,6 +1628,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1615,6 +1654,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1641,6 +1681,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1684,6 +1725,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL | TRAITS.POISON,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1720,6 +1762,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL | TRAITS.LIGHT,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1755,6 +1798,7 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     canBlock : false,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
@@ -1782,6 +1826,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     traits : TRAITS.PHYSICAL,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : true,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1822,6 +1867,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : true,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1862,6 +1908,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1897,6 +1944,7 @@ Arts.newEntry(
     traits : TRAITS.HEAL,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1924,6 +1972,7 @@ Arts.newEntry(
     traits : TRAITS.HEAL,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1950,6 +1999,7 @@ Arts.newEntry(
     traits : TRAITS.HEAL,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2008,6 +2058,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2062,6 +2113,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2113,6 +2165,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2164,6 +2217,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2214,6 +2268,9 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {
+        return [...enemies]->filter(::(value) <- (value.species.straits & TRAITS.SUMMON) != 0)->size > 0;
+    },
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2252,6 +2309,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.FIRE,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2284,6 +2342,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.FIRE,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2322,6 +2381,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.FIRE,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2354,6 +2414,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.OFFENSIVE,	
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2402,6 +2463,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.ICE,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2436,6 +2498,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.ICE,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2472,6 +2535,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2505,6 +2569,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.FIRE,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2538,6 +2603,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2572,6 +2638,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.THUNDER,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2607,6 +2674,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2643,6 +2711,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.HEAL,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2671,6 +2740,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.HEAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2700,6 +2770,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2729,6 +2800,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.HEAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2759,6 +2831,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2785,6 +2858,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2811,6 +2885,7 @@ Arts.newEntry(
     traits : TRAITS.HEAL | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2837,6 +2912,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.HEAL,
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2870,6 +2946,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2898,6 +2975,7 @@ Arts.newEntry(
     traits : TRAITS.HEAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2925,6 +3003,7 @@ Arts.newEntry(
     traits : TRAITS.HEAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2954,6 +3033,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3002,6 +3082,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     traits : TRAITS.PHYSICAL,
     usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3027,6 +3108,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3080,6 +3162,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3103,6 +3186,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3129,6 +3213,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3153,6 +3238,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3177,6 +3263,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3202,6 +3289,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3228,6 +3316,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3255,6 +3344,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3281,6 +3371,7 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     traits : 0,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3307,6 +3398,7 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     traits : 0,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3333,6 +3425,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3360,6 +3453,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3386,6 +3480,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3409,6 +3504,7 @@ Arts.newEntry(
     description: 'Does nothing.',
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     traits : TRAITS.SPECIAL | TRAITS.COSTLESS,
     kind : KIND.ABILITY,
     rarity : RARITY.COMMON,
@@ -3433,6 +3529,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3457,6 +3554,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3481,6 +3579,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3506,6 +3605,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.EPIC,
     usageHintAI: USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3541,6 +3641,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.FIRE,
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3566,6 +3667,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
     usageHintAI: USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3591,6 +3693,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
     usageHintAI: USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3617,6 +3720,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.ICE,
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3641,6 +3745,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC | TRAITS.THUNDER,
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3665,6 +3770,7 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
     usageHintAI: USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3694,6 +3800,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     isSupport: false,
     usageHintAI: USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3727,6 +3834,7 @@ Arts.newEntry(
     hpCost : 0,
     apCost : 0,
     usageHintAI: USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3763,6 +3871,7 @@ Arts.newEntry(
     traits : TRAITS.SPECIAL | TRAITS.COSTLESS,
     rarity : RARITY.RARE,
     usageHintAI: USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(user, level, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3788,6 +3897,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
     usageHintAI: USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3813,6 +3923,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
     usageHintAI: USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3838,6 +3949,12 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {
+        allies = [...allies]->filter(::(value) <- value.getEquipped(
+            :Entity.EQUIP_SLOTS.ARMOR
+        ).base.name != 'base:none');
+        return [random.pickArrayItem(:allies)];    
+    },
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3871,6 +3988,12 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {
+        enemies = [...enemies]->filter(::(value) <- value.getEquipped(
+            :Entity.EQUIP_SLOTS.HAND_LR
+        ).base.name != 'base:none');
+        return [random.pickArrayItem(:enemies)];    
+    },
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3902,6 +4025,12 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {
+        enemies = [...enemies]->filter(::(value) <- value.getEquipped(
+            :Entity.EQUIP_SLOTS.HAND_LR
+        ).base.name != 'base:none');
+        return [random.pickArrayItem(:enemies)];
+    },
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3934,7 +4063,13 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
-    usageHintAI: USAGE_HINT.DEBUFF,
+    usageHintAI: USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {
+        allies = [...allies]->filter(::(value) <- value.getEquipped(
+            :Entity.EQUIP_SLOTS.ARMOR
+        ).base.name != 'base:none');
+        return [random.pickArrayItem(:allies)];
+    },
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3968,6 +4103,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.UNCOMMON,
     usageHintAI: USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -3996,6 +4132,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4042,6 +4179,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4093,6 +4231,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4143,6 +4282,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4193,6 +4333,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4243,6 +4384,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4274,6 +4416,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4324,6 +4467,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     traits : 0,
     usageHintAI: USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4399,6 +4543,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4434,6 +4579,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL | TRAITS.SPECIAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4510,6 +4656,7 @@ Arts.newEntry(
       traits : TRAITS.PHYSICAL,
       rarity : RARITY.RARE,
       usageHintAI : USAGE_HINT.OFFENSIVE,
+      shouldAIuse ::(user, enemies, allies) {},
       oncePerBattle : false,
       canBlock : true,
       onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4556,6 +4703,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4575,6 +4723,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4594,6 +4743,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4621,6 +4771,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4641,6 +4792,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4664,6 +4816,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4688,6 +4841,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4720,6 +4874,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4778,6 +4933,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4811,6 +4967,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4843,6 +5000,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4863,6 +5021,7 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     traits : TRAITS.SUPPORT,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4883,6 +5042,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4908,6 +5068,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4942,6 +5103,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4966,6 +5128,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -4985,6 +5148,7 @@ Arts.newEntry(
     description: "Throws a pebble at a target, causing a small amount of damage.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     kind : KIND.EFFECT,
@@ -5020,6 +5184,7 @@ Arts.newEntry(
     description: "Deal a physical attack to target which has a base damage value equal to how much HP is missing from this character\'s current max HP.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     kind : KIND.EFFECT,
@@ -5051,6 +5216,7 @@ Arts.newEntry(
     description: "The target receives the Banishing Light effect. Banishing Light: Next time the target would receive damage, the target receives 1/3rd the amount, rounded up, as Banish stacks. When a combatant acquires 10 stacks of Banish, they are evicted from battle.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     kind : KIND.EFFECT,
@@ -5059,7 +5225,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
-          targets[0].addEffect(from:user, id:'banishing-light', durationTurns:9999); 
+          targets[0].addEffect(from:user, id:'base:banishing-light', durationTurns:9999); 
         }
       )
     }
@@ -5077,6 +5243,7 @@ Arts.newEntry(
     description: "Sacrifice 2 HP. Deal damage to target based on ATK.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) <- user.hp > 2,
     oncePerBattle : false,
     canBlock : true,
     kind : KIND.EFFECT,
@@ -5120,6 +5287,7 @@ Arts.newEntry(
     description: "Sacrifice 1 HP. Target receives 2 Shield HP. This counts as healing.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) <- user.hp > 1,
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5156,6 +5324,7 @@ Arts.newEntry(
     description: "Sacrifice 2 HP. Target does x2 damage on next attack.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) <- user.hp > 2,
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5191,6 +5360,7 @@ Arts.newEntry(
     description: "Sacrifice 1 HP. Cancel target Art.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) <- user.hp > 1,
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.REACTION,
@@ -5228,6 +5398,7 @@ Arts.newEntry(
     description: "Sacrifice 2 HP. Search user\'s discard pile for an Art. Add the Art to the user\'s hand.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) <- user.hp > 2,
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5273,6 +5444,7 @@ Arts.newEntry(
     description: "Sacrifice 2 HP. View target\'s hand and forces discarding of a card of the user\'s choosing.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) <- user.hp > 2,
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5308,6 +5480,7 @@ Arts.newEntry(
     description: "Sacrifice 2 HP. The target receives the Evade status, preventing all attack damage for 2 turns.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) <- user.hp > 2,
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5344,6 +5517,7 @@ Arts.newEntry(
     description: "Summons a very powerful Cursed Light to fight alongside the user. The Cursed Light has the effect Cursed Binding, where each time the Cursed Light damages an enemy, the original user receives 1 damage.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5393,6 +5567,7 @@ Arts.newEntry(
     description: "Adds the effect Cursed Binding on a target for 10 turns, where each time the target attacks, the target receives 1 damage.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5414,6 +5589,7 @@ Arts.newEntry(
     description: "Sacrifice 2 HP. Summons a small spirit to fight on your side.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) <- user.hp > 2,
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5478,6 +5654,7 @@ Arts.newEntry(
     description: "Add the Unbalanced effect on target, which reduces ATK by 90% for 2 turns. Draw an Arts card.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5498,6 +5675,7 @@ Arts.newEntry(
     description: "Add the Desperate effect on user, which reduces max HP by 50% and DEF by 100% but makes all attacks x2.5 damage for 2 turns. Draw an Arts card.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5519,6 +5697,7 @@ Arts.newEntry(
     description: "Deal damage to a target where the base damage is equal to the current HP and 1/3 the DEF of the user.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
     kind : KIND.ABILITY,
@@ -5554,6 +5733,7 @@ Arts.newEntry(
     description: "Adds the Enlarged effect, making the target have 50% more max HP and 50% more DEF for 2 turns.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.ABILITY,
@@ -5575,6 +5755,7 @@ Arts.newEntry(
     description: "Target\'s Shield HP is doubled. If the target has no Shield HP, the target receives 1 Shield HP.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5598,6 +5779,7 @@ Arts.newEntry(
     description: "Add 2 Banish stacks to target. When a combatant has 10 Banish stacks, they are evicted from battle.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5619,6 +5801,7 @@ Arts.newEntry(
     description: "Paralyze user for 2 turns, preventing their action. Add 3 Banish stacks to target. When a combatant has 10 Banish stacks, they are evicted from battle.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5642,6 +5825,7 @@ Arts.newEntry(
     description: "All effects on target are doubled. These new effects last for 2 turns.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5665,6 +5849,7 @@ Arts.newEntry(
     description: "All effects on all targets are doubled. These new effects last for 2 turns.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5690,6 +5875,7 @@ Arts.newEntry(
     description: "Accumulate 3 Banish stacks on all combatants. When a combatant acquires 10 stacks of Banish, they are evicted from battle.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
@@ -5720,6 +5906,7 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -5881,6 +6068,11 @@ Arts.newEntry(
     description : String,
     targetMode : Number,
     usageHintAI : Number,
+    // returns false if conditions arent good to use the art. 
+    // If returns empty, behavior continues as normal. 
+    // If returns an object, should contain the targets for 
+    // that Art that should be used
+    shouldAIuse : Function, 
     oncePerBattle : Boolean,
     kind : Number,
     traits : Number,

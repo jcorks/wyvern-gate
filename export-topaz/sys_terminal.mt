@@ -19,7 +19,7 @@
 //@:Random = import(module:'singleton.random.mt');
 @:Topaz   = import(module:'Topaz');
 @:class   = import(module:'Matte.Core.Class');
-
+@:Settings = import(:'sys_settings.mt');
 @:display = Topaz.ViewManager.getDefault();
 
 
@@ -37,20 +37,22 @@ display.setParameter(
 Topaz.FontManager.registerFont(asset:font);
 
 
-@:shader = Topaz.Resources.createDataAssetFromPath(
-    path:'sys_crt.glsl',
-    name:'sys_crt.glsl'
-);
 
-@:ret = display.setPostProcessShader(
-    vertexShader   : shader.getAsString(),
-    fragmentShader : shader.getAsString()
-);
+if (Settings.getObject().disableShaders != true) ::<= {
+    @:shader = Topaz.Resources.createDataAssetFromPath(
+        path:'sys_crt.glsl',
+        name:'sys_crt.glsl'
+    );
 
-if (ret != empty) ::<= {
-    error(detail:ret);
+    @:ret = display.setPostProcessShader(
+        vertexShader   : shader.getAsString(),
+        fragmentShader : shader.getAsString()
+    );
+
+    if (ret != empty) ::<= {
+        error(detail:ret);
+    }
 }
-
 
 
 

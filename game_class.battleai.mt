@@ -92,7 +92,7 @@
         }
       },
 
-      commitTargettedAction::(battle, card, condition) {
+      commitTargettedAction::(battle, card, condition, overrideTargets) {
         @:enemies = battle.getEnemies(:user_);
         @:allies = battle.getAllies(:user_);
         @:art = Arts.find(id:card.id);
@@ -101,36 +101,40 @@
         
         @targets = [];
         @targetParts = [];
-        match(art.targetMode) {
-          (Arts.TARGET_MODE.ONE,
-           Arts.TARGET_MODE.ONEPART) :::<= {
-            if (atEnemy) 
-              targets->push(value:Random.pickArrayItem(list:enemies))
-            else 
-              targets->push(value:Random.pickArrayItem(list:allies))
-            ;
-          },
-          
-          (Arts.TARGET_MODE.ALLALLY) :::<= {
-            targets = [...allies];
-          },          
+        if (overrideTargets == empty) ::<= {
+          match(art.targetMode) {
+            (Arts.TARGET_MODE.ONE,
+             Arts.TARGET_MODE.ONEPART) :::<= {
+              if (atEnemy) 
+                targets->push(value:Random.pickArrayItem(list:enemies))
+              else 
+                targets->push(value:Random.pickArrayItem(list:allies))
+              ;
+            },
+            
+            (Arts.TARGET_MODE.ALLALLY) :::<= {
+              targets = [...allies];
+            },          
 
-          (Arts.TARGET_MODE.ALLENEMY) :::<= {
-            targets = [...enemies];
-          },          
+            (Arts.TARGET_MODE.ALLENEMY) :::<= {
+              targets = [...enemies];
+            },          
 
-          (Arts.TARGET_MODE.NONE) :::<= {
-          },
+            (Arts.TARGET_MODE.NONE) :::<= {
+            },
 
 
-          (Arts.TARGET_MODE.RANDOM) :::<= {
-            if (Number.random() < 0.5) 
-              targets->push(value:Random.pickArrayItem(list:enemies))
-            else 
-              targets->push(value:Random.pickArrayItem(list:allies))
-            ;          
+            (Arts.TARGET_MODE.RANDOM) :::<= {
+              if (Number.random() < 0.5) 
+                targets->push(value:Random.pickArrayItem(list:enemies))
+              else 
+                targets->push(value:Random.pickArrayItem(list:allies))
+              ;          
+            }
+
           }
-
+        } else ::<= {
+          targets = overrideTargets;
         }
         
         if (condition)
@@ -173,20 +177,35 @@
       
         
         
-        @:hand = user_.deck.hand->filter(by::(value) <- Arts.find(id:value.id).usageHintAI != Arts.USAGE_HINT.DONTUSE);
-        
+        @hand = [...user_.deck.hand]->map(to::(value) <- {
+            card:value, 
+            overrideTargets:(Arts.find(id:value.id).shouldAIuse(
+                user:user_,
+                enemies,
+                allies
+            ))
+        });
+
+
+        hand = hand->filter(::(value) <- 
+            (Arts.find(id:value.card.id).usageHintAI != Arts.USAGE_HINT.DONTUSE) &&
+            (value.overrideTargets != false)
+        );
+                
         
         @projectedAP = user_.ap; 
-        foreach(hand) ::(k, v) {
+        foreach(hand) ::(k, full) {
+          @v = full.card;
           @art = Arts.find(id:v.id);
           if (art.kind == Arts.KIND.EFFECT && random.flipCoin()) ::<= {
             when (projectedAP < 2) empty;
             this.commitTargettedAction(
               battle,
-              card:v
+              card:v,
+              overrideTargets:full.overrideTargets
             );
             projectedAP -= 2;
-            hand->remove(key:hand->findIndex(value:v));
+            hand->remove(key:hand->findIndex(value:full));
           }
         }        
 
@@ -195,11 +214,11 @@
           defaultAttack(battle);
       
           
-        @card = Random.pickArrayItem(list:hand->filter(by::(value) <- Arts.find(id:value.id).kind == Arts.KIND.ABILITY));
-        when (card == empty)
+        @c = Random.pickArrayItem(list:hand->filter(by::(value) <- Arts.find(id:value.card.id).kind == Arts.KIND.ABILITY));
+        when (c == empty)
           defaultAttack(battle);
 
-        @:ability = Arts.find(id:card.id);
+        @:ability = Arts.find(id:c.card.id);
         
         
         @:world = import(module:'game_singleton.world.mt');
@@ -222,7 +241,7 @@
           condition = ::(value) <- value.hp < value.stats.HP
         }
         
-        this.commitTargettedAction(card:card, battle, condition);
+        this.commitTargettedAction(card:c.card, battle, condition, overrideTargets:c.overrideTargets);
       }
     }   
   }  

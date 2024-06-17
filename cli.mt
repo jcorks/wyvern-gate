@@ -233,9 +233,10 @@ instance.mainMenu(
     @:preload ::(json) {
       foreach(json.files) ::(i, file) {
         {:::} {
-          import(
+          breakpoint();
+          importModule(
             module:file,
-            alias:json.name + '/' + file,
+            alias:json.id + '/' + file,
             preloadOnly: true 
           )
         } : {
@@ -284,7 +285,7 @@ instance.mainMenu(
       );
     } : {
       onError ::(message) {
-        // ignore.
+        error(detail:message.detail);
       }
     }
     return mods;  

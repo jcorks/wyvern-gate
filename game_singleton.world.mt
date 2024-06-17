@@ -224,6 +224,28 @@
         state.accolades = {};
         state.modData = {};
       },    
+      resetAll ::{
+        state.saveName = '';
+        state.step = 0;
+        state.turn = 0;
+        state.time = TIME.LATE_MORNING;
+        state.day = 0;
+        state.year = 1033;
+        state.party = empty;
+        state.islandID = 0;
+        state.orphanedIsland = empty;
+        state.idPool = 0;
+        state.story = empty;
+        state.npcs = empty;
+        state.finished = false;
+        state.wish = empty;
+        state.scenario = empty;
+        state.accolades = empty;
+        state.modData = empty;
+        loadableIslands = [];
+        battle = Battle.new();
+        island = empty;
+      },
     
       TIME : {
         get ::<- TIME

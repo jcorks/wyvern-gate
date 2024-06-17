@@ -50,6 +50,10 @@
         // Function to be called when a party member experiences death.
         onDeath : Function,
         
+        // Whether the naming of the file is skipped. If false,
+        // the file name is the empty string.
+        skipName : Boolean,
+        
         
         
         

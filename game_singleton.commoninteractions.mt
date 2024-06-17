@@ -159,7 +159,8 @@ return {
           ],
           onChoice::(choice) {
             when(choice == 2) empty;
-            windowEvent.jumpToTag(name:'MainMenu');
+            @:instance = import(module:'game_singleton.instance.mt');
+            instance.quitRun();
           }
         );      
       }
