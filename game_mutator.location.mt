@@ -122,7 +122,7 @@ Location.database.newEntry(data:{
   onFirstInteract ::(location){
     location.ownedBy = location.landmark.island.newInhabitant();
     @:Profession = import(module:'game_database.profession.mt');
-    location.ownedBy.profession = Profession.database.find(id:'base:farmer');  
+    location.ownedBy.profession = Profession.find(id:'base:farmer');  
     location.ownedBy.normalizeStats();        
     @:story = import(module:'game_singleton.story.mt');
     
