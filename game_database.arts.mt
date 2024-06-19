@@ -2269,7 +2269,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, enemies, allies) {
-        return [...enemies]->filter(::(value) <- (value.species.straits & TRAITS.SUMMON) != 0)->size > 0;
+        return [...enemies]->filter(::(value) <- (value.species.traits & TRAITS.SUMMON) != 0)->size > 0;
     },
     oncePerBattle : false,
     canBlock : false,
@@ -2281,7 +2281,7 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
           foreach(targets) ::(k, target) {
-            if ((target.species.straits & TRAITS.SUMMON) != 0) ::<= {
+            if ((target.species.traits & TRAITS.SUMMON) != 0) ::<= {
               windowEvent.queueMessage(
                 text: target.name + ' faded into nothingness!'
               );              
