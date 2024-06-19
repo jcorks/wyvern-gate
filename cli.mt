@@ -233,7 +233,6 @@ instance.mainMenu(
     @:preload ::(json) {
       foreach(json.files) ::(i, file) {
         {:::} {
-          breakpoint();
           importModule(
             module:file,
             alias:json.id + '/' + file,

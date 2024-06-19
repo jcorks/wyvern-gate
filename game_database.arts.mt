@@ -3952,7 +3952,8 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {
         allies = [...allies]->filter(::(value) <- value.getEquipped(
             :Entity.EQUIP_SLOTS.ARMOR
-        ).base.name != 'base:none');
+        ).base.id != 'base:none');
+        when(allies->size == 0) false;        
         return [random.pickArrayItem(:allies)];    
     },
     oncePerBattle : false,
@@ -3991,7 +3992,8 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {
         enemies = [...enemies]->filter(::(value) <- value.getEquipped(
             :Entity.EQUIP_SLOTS.HAND_LR
-        ).base.name != 'base:none');
+        ).base.id != 'base:none');
+        when(enemies->size == 0) false;
         return [random.pickArrayItem(:enemies)];    
     },
     oncePerBattle : false,
@@ -4028,7 +4030,8 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {
         enemies = [...enemies]->filter(::(value) <- value.getEquipped(
             :Entity.EQUIP_SLOTS.HAND_LR
-        ).base.name != 'base:none');
+        ).base.id != 'base:none');
+        when(enemies->size == 0) false;
         return [random.pickArrayItem(:enemies)];
     },
     oncePerBattle : false,
@@ -4067,7 +4070,8 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {
         allies = [...allies]->filter(::(value) <- value.getEquipped(
             :Entity.EQUIP_SLOTS.ARMOR
-        ).base.name != 'base:none');
+        ).base.id != 'base:none');
+        when(allies->size == 0) false;
         return [random.pickArrayItem(:allies)];
     },
     oncePerBattle : false,

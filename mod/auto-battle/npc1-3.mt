@@ -5,6 +5,7 @@ return {
   giveWeapon : false,
   giveArmor : false,
   arts : [
+    'base:pebble',
     'base:pebble'
   ]
 }

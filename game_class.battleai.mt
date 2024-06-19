@@ -189,7 +189,7 @@
 
         hand = hand->filter(::(value) <- 
             (Arts.find(id:value.card.id).usageHintAI != Arts.USAGE_HINT.DONTUSE) &&
-            (value.overrideTargets != false)
+            (!(value.overrideTargets->type == Boolean && value.overrideTargets == false))
         );
                 
         
@@ -202,7 +202,7 @@
             this.commitTargettedAction(
               battle,
               card:v,
-              overrideTargets:full.overrideTargets
+              overrideTargets:if (full.overrideTargets->type != Boolean) full.overrideTargets
             );
             projectedAP -= 2;
             hand->remove(key:hand->findIndex(value:full));
