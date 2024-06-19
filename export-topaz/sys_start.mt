@@ -250,7 +250,6 @@ return ::(terminal, arg, onDone) {
 
             onLoadSettings :: {
                 @:obj = Settings.getObject();
-                Topaz.debug();
                 return JSON.encode(:obj);
             },
             onSaveSettings ::(data) {

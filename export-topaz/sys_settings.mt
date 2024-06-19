@@ -23,7 +23,6 @@ return ::<= {
 
     @:dump ::{
         return paths.enter(::{
-            Topaz.debug();
             @:settingsAsset = Topaz.Resources.createDataAssetFromPath(
                 path:'settings',
                 name:'settings'

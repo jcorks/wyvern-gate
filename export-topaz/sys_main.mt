@@ -42,6 +42,9 @@ if (settings.fullscreen == true || settings.fullscreen == empty)
         param:Topaz.Display.Parameter.Fullscreen,
         value:true
     );
+    
+if (settings.showConsole == true) 
+    Topaz.Console.enable(:true);
 
 
 
