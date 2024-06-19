@@ -40,7 +40,7 @@ Paths.setMainPath(::<= {
         }
     }
 )
-@MODS_PATH = 'mods';
+@MOD_DIR = 'mods';
 
 
 
@@ -154,11 +154,103 @@ return ::(terminal, arg, onDone) {
 
             preloadMods :: {
                 @:mods = [];
-                return mods;
+
+                @enterNewLocation ::(action, path) {
+                    @CWD = Topaz.Resources.getPath();
+                    Topaz.Resources.setPath(:path);
+                    @output;
+                    {:::} {
+                      output = action();
+                    } : {
+                        onError::(message) {
+                            Topaz.Resources.setPath(:CWD);
+                            error(detail:message.detail);        
+                        }
+                    }
+                    Topaz.Resources.setPath(:CWD);
+                    return output;
+                }
+
+
+                @:jsonTypes = {
+                    name : String,
+                    name : String,
+                    description : String,
+                    author : String,
+                    website : String,
+                    files : Object,
+                    loadFirst : Object
+                }
+
+                @:checkTypes ::(path, json) {
+                    foreach(jsonTypes) ::(name, type) {
+                        when(json[name]->type != type)
+                        error(detail:path + ': mod.json: "' + name + '" must be a ' + String(from:type) + '!');
+                    }
+                }
+
+
+                @:preload ::(json) {
+                    foreach(json.files) ::(i, file) {
+                        {:::} {
+                            importModule(
+                                module:file,
+                                alias:json.id + '/' + file,
+                                preloadOnly: true 
+                            )
+                        } : {
+                            onError::(message) {
+                                error(detail: 'Could not preload / compile ' + json.name + '/' + file + ':' + message.detail);
+                            }
+                        }
+                    }
+                }
+
+
+                @:loadModJSON ::(file) {
+                    enterNewLocation(
+                        path: file.asString(),
+                        action :: {
+                            // first, get the JSON 
+                            @:json = {:::} {
+                                @:asset = Topaz.Resources.createDataAssetFromPath(path: 'mod.json', name: 'mod.json');
+                                @:data = asset.getAsString();
+
+                                if (data == empty || data == '')
+                                error();
+
+                                @:obj = JSON.decode(string:data);
+                                Topaz.Resources.removeAsset(:asset);
+                                return obj;
+                            } : {
+                                onError ::(message) {
+                                    error(detail: 'Could not read or parse mod.json file within ' + file.asString() + '!');
+                                }
+                            }
+
+                            checkTypes(path:file.path, json);
+                            preload(json);
+                            mods->push(value:json);
+                        }
+                    )
+                }
+                {:::} {
+                    @:path = Topaz.Filesystem.getPathFromString(path:Topaz.Resources.getPath() + '/' + MOD_DIR);
+                
+                    foreach(path.getChildren()) ::(k, file) {
+                        loadModJSON(file);
+                    }
+                } : {
+                    onError ::(message) {
+                        error(detail:message.detail);
+                    }
+                }
+                return mods;              
             },
 
             onLoadSettings :: {
                 @:obj = Settings.getObject();
+                Topaz.debug();
                 return JSON.encode(:obj);
             },
             onSaveSettings ::(data) {

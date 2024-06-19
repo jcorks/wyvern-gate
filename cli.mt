@@ -25,7 +25,7 @@
 @:JSON = import(module:'Matte.Core.JSON');
 @:time = import(module:'Matte.System.Time');
 
-@MOD_DIR = './mod';
+@MOD_DIR = './mods';
 
 {:::} {
   MOD_DIR = import(module:'wyvern_gate__native__get_mod_dir')(); 
