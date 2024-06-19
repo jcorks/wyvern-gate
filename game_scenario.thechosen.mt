@@ -258,6 +258,7 @@
 return {
   name : 'The Chosen',
   id : 'rasa:thechosen',
+  skipName : false,
   onBegin ::(data) {
     @:instance = import(module:'game_singleton.instance.mt');
     @:story = import(module:'game_singleton.story.mt');

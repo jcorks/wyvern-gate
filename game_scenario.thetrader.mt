@@ -3375,7 +3375,7 @@ return {
     
     data.trader.removeHireeEntity(entity);
   },
-
+  skipName : false,
 
   interactionsLandmark : [],
   interactionsWalk : [

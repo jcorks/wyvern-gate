@@ -2,10 +2,16 @@
   "id": "mod.example.rasa.auto-battle",
   "name": "Auto Battle",
   "description": "Starts a 3v3 battle for testing purposes.",
-  "author": "Johnathan Corkery",
+  "author": "Rasa",
   "website": "https://github.com/jcorks/wyvern-gate",
   "files" : [
-    "main.mt"
+    "main.mt",
+    "npc1-1.mt",
+    "npc1-2.mt",
+    "npc1-3.mt",
+    "npc2-1.mt",
+    "npc2-2.mt",
+    "npc2-3.mt"
   ],
   "loadFirst" : []
 }

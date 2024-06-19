@@ -638,7 +638,7 @@
       },
     
       start ::(
-        party => Party.type,
+        party => Object,
         npcBattle,
       
         allies => Object,

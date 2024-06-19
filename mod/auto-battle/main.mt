@@ -10,7 +10,7 @@ return {
   onDatabaseStartup :: {
     breakpoint();
     Scenario.database.newEntry(data:{
-      name : 'Battle Time',
+      name : 'Test Battle',
       
       id: 'mod.example.rasa.auto-battle:start',
       
@@ -18,25 +18,109 @@ return {
       onBegin ::(data) {
 
         @:world = import(module:'game_singleton.world.mt');
-        world.initializeNPCs();
+        @:instance = import(module:'game_singleton.instance.mt');
+
+        @:Entity = import(module:'game_class.entity.mt');
+        @:Species = import(module:'game_database.species.mt');
+        @:Profession = import(module:'game_database.profession.mt');
+    
+    
+        @:island = world.createIsland().island;
+        world.island = island;
+    
+        @:getNPC::(data) {
+          @:ent = Entity.new(
+            island,
+            
+            speciesHint:  if (data.species == empty)
+                  Species.getRandomFiltered(
+                  filter:::(value) <- (value.traits & Species.TRAITS.SPECIAL) == 0
+                ).id 
+              else 
+                data.species,
+                
+            levelHint: if (data.level == empty)
+                6
+              else 
+                data.level,
+            professionHint: if (data.profession == empty) 
+                Profession.getRandomFiltered(filter::(value)<-value.learnable).id 
+              else 
+                data.profession
+          );
+          
+          if (data.giveWeapon) ::<= {
+            @:wep = Item.database.getRandomFiltered(
+              filter:::(value) <-
+                value.isUnique == false &&
+                value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
+            );
+              
+            ent.equip(
+              slot:Entity.EQUIP_SLOTS.HAND_LR, 
+              item:Item.new(
+                base:wep
+              ), 
+              inventory:ent.inventory, 
+              silent:true
+            );          
+          }
+          
+          
+          if (data.giveArmor) ::<= {
+            @:wep = Item.database.getRandomFiltered(
+              filter:::(value) <-
+                value.isUnique == false &&
+                value.equipType == Item.database.statics.TYPE.ARMOR
+            );;
+              
+            ent.equip(
+              slot:Entity.EQUIP_SLOTS.ARMOR, 
+              item:Item.new(
+                base: wep
+              ), 
+              inventory:ent.inventory, 
+              silent:true
+            );          
+          }
+          
+          foreach(data.arts) ::(k, v) {
+            ent.supportArts->push(:v);
+          }
+
+          if (data.name) 
+            ent.name = data.name;
+          
+          return ent;
+        }
+        
+        @:teamA = [
+          getNPC(:import(:'mod.example.rasa.auto-battle/npc1-1.mt')),
+          getNPC(:import(:'mod.example.rasa.auto-battle/npc1-2.mt')),      
+          getNPC(:import(:'mod.example.rasa.auto-battle/npc1-3.mt'))
+        ]
+
+
+
+        @:teamB = [
+          getNPC(:import(:'mod.example.rasa.auto-battle/npc2-1.mt')),
+          getNPC(:import(:'mod.example.rasa.auto-battle/npc2-2.mt')),      
+          getNPC(:import(:'mod.example.rasa.auto-battle/npc2-3.mt'))
+        ]
+        
+        
+
         world.battle.start(
-          party: {},
-          allies:[
-              world.island.newInhabitant(),
-              world.island.newInhabitant(),      
-              world.island.newInhabitant()
-          ],
-          enemies : [
-              world.island.newInhabitant(),
-              world.island.newInhabitant(),      
-              world.island.newInhabitant()      
-          ],
+          party: import(:'game_class.party.mt').new(),
+          npcBattle : true,
+          allies: teamA,
+          enemies : teamB,
           landmark: {},
           onStart :: {
           },
           onEnd ::(result) {          
             @:instance = import(module:'game_singleton.instance.mt');
-            instance.endRun();
+            instance.quitRun();
           }
         );
 
@@ -51,6 +135,7 @@ return {
       // Called when a party member dies.
       onDeath ::(data, entity){},
 
+      skipName : true,
 
       // List of interactions available when talking to an Entity.  
       // This is specifically when at a location owned by an Entity.

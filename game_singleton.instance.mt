@@ -355,7 +355,6 @@ return empty;
 
                 @:enterName = import(module:'game_function.name.mt');
 
-                breakpoint();
                 @choices = Scenario.database.getAll();
                 choices->sort(comparator:::(a, b) {
                   when(a.name < b.name) -1;
@@ -388,6 +387,8 @@ return empty;
                       this.startNew();
                       //this.startInstance();              
                     }
+                    when(world.scenario.base.skipName) 
+                      startNewWorld(:'');
 
                     enterName(
                       prompt: 'Enter a file name.',

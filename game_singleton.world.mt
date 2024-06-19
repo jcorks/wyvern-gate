@@ -713,6 +713,19 @@
         loadableIslands->push(value:island);
       },
       
+      createIsland ::{
+        @:Item = import(module:'game_mutator.item.mt');
+        @:keyhome = Item.new(
+          base: Item.database.find(id:'base:wyvern-key')
+        );
+        keyhome.addIslandEntry(world:this);
+        @:island = keyhome.islandEntry;    
+        return {
+          island : island,
+          key : keyhome
+        };  
+      },
+      
       load ::(serialized) {
         loadableIslands = [];
         state.load(parent:this, loadFirst:['scenario'], serialized);
