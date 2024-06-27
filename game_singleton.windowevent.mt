@@ -129,6 +129,14 @@
     @isCursor = true;
     @choiceStack = [];
     @resolveQueues = {};
+    @requestAutoSkip = false;
+    @autoSkipIndex = empty;
+    
+    resolveQueues->push(:{
+      onResolveAll : {},
+      queue : {}
+    });
+    
     @:getResolveQueue ::{
       return resolveQueues[resolveQueues->size-1].queue;
     }
@@ -147,14 +155,7 @@
       resolveQueues[resolveQueues->size-1].queue = q;
     }
 
-    resolveQueues->push(:{
-      onResolveAll : {},
-      queue : {}
-    });
 
-
-    @requestAutoSkip = false;
-    @autoSkipIndex = empty;
 
   
     @:choiceStackPush::(value) {
@@ -977,6 +978,19 @@
       
       RENDER_AGAIN : {
         get ::<- 1
+      },
+      
+      clearAll ::{
+        onInput = empty;
+        isCursor = true;
+        choiceStack = [];
+        resolveQueues = {};
+        requestAutoSkip = false;
+        autoSkipIndex = empty;      
+        resolveQueues->push(:{
+          onResolveAll : {},
+          queue : {}
+        });
       },
       
       // Similar to message, but accepts a set of 

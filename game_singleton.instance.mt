@@ -92,7 +92,7 @@ import(module:'game_class.island.mt');
 }
 @:JSON = import(module:'Matte.Core.JSON');
 @:GIT_COMMIT = import(module:'GIT_COMMIT');
-@:VERSION = '0.1.8b - ' + GIT_COMMIT;
+@:VERSION = '0.1.9a - ' + GIT_COMMIT;
 @world = import(module:'game_singleton.world.mt');
 import(module:'game_function.newrecord.mt');
 
@@ -493,7 +493,7 @@ return empty;
           return choiceNames;      
         }
 
-        
+        windowEvent.clearAll();
         windowEvent.queueChoices(
           onGetChoices ::{
             return genChoices();

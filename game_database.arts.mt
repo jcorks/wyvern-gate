@@ -2269,11 +2269,14 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, enemies, allies) {
-        return [...enemies]->filter(::(value) <- (value.species.traits & TRAITS.SUMMON) != 0)->size > 0;
+        @:Species = import(module:'game_database.species.mt');
+        return [...enemies]->filter(::(value) <- (value.species.traits & Species.TRAITS.SUMMON) != 0)->size > 0;
     },
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      @:Species = import(module:'game_database.species.mt');
+
       windowEvent.queueMessage(
         text: user.name + ' casts Unsummon!'
       );
@@ -2281,7 +2284,7 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
           foreach(targets) ::(k, target) {
-            if ((target.species.traits & TRAITS.SUMMON) != 0) ::<= {
+            if ((target.species.traits & Species.TRAITS.SUMMON) != 0) ::<= {
               windowEvent.queueMessage(
                 text: target.name + ' faded into nothingness!'
               );              

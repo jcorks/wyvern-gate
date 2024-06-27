@@ -35,14 +35,12 @@ return class(
             foreach(message.summary->split(token:'\n'))::(i, line) {
                 term.print(line);
                 Topaz.Console.print(message:line);
-                printPrompt();
-                programActive = false;
-                onProgramCycle = ::{}
-                onProgramUnicode = ::(unicode){}
-                onProgramKeyboard = ::(input, value){}
-
             }
-
+            printPrompt();
+            programActive = false;
+            onProgramCycle = ::{}
+            onProgramUnicode = ::(unicode){}
+            onProgramKeyboard = ::(input, value){}
         }
 
         @:runCommand = ::(command, arg) {
