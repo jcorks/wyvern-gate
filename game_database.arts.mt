@@ -70,7 +70,7 @@
 
 
 
-
+@Arts;
 @:reset = ::{
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Item = import(module:'game_mutator.item.mt');
@@ -852,7 +852,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     rarity : RARITY.RARE,
     traits : TRAITS.MAGIC,
-    usageHintAI : USAGE_HINT.BUFF,
+    usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
@@ -2417,7 +2417,15 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.OFFENSIVE,	
-    shouldAIuse ::(user, enemies, allies) {},
+    shouldAIuse ::(user, enemies, allies) {
+        return [...enemies]->filter(::(value) <- {:::} {
+          foreach(Entity.EQUIP_SLOTS)::(i, slot) {
+            @out = value.getEquipped(slot);
+            if (out && out.base.name != 'base:none') send(:true);
+          }        
+          return false
+        })
+    },
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -2430,7 +2438,7 @@ Arts.newEntry(
         @:list = [];
         foreach(Entity.EQUIP_SLOTS)::(i, slot) {
           @out = targets[0].getEquipped(slot);
-          if (out)
+          if (out && out.base.name != 'base:none')
             list->push(value:out);
         }
         return Random.pickArrayItem(list);
@@ -2814,7 +2822,7 @@ Arts.newEntry(
       foreach(targets)::(i, target) {
         windowEvent.queueCustom(
           onEnter :: {
-            target.heal(amount:((target.stats.HP*(0.25 + (level-1) * 0.15)->ceil)));
+            target.heal(amount:((target.stats.HP*(0.05 + (level-1) * 0.10)->ceil)));
           }
         )
       }
@@ -3586,7 +3594,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:targets[0].name + ' was covered in triproot seeds!');
+      windowEvent.queueMessage(text:targets[0].name + ' was covered in healroot seeds!');
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id:'base:healroot-growing', durationTurns:2);              
@@ -4526,13 +4534,16 @@ Arts.newEntry(
         
         // NPC -> NPC
         default: ::<={
-          windowEvent.queueCustom(
-            onEnter :: {
-              targets[0].addEffect(
-                from:user, id: 'base:bribed', durationTurns: -1
-              );                     
-            }
-          )
+          when (random.try(percentSuccess:20))
+            windowEvent.queueCustom(
+              onEnter :: {
+                targets[0].addEffect(
+                  from:user, id: 'base:bribed', durationTurns: -1
+                );                     
+              }
+            )
+
+          windowEvent.queueMessage(text: targets[0].name + ' ignored the ' + g(g:cost) + " bribe!");
         }
       }
     }
@@ -6041,7 +6052,7 @@ Arts.newEntry(
 
 };
 
-@:Arts = class(
+Arts = class(
   inherits: [Database],
   define::(this) {
     this.interface = {    

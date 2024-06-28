@@ -339,6 +339,7 @@
 
     
     @:checkRemove :: {
+      breakpoint();
       // see if anyone died
       @removed = [];
       foreach(turn)::(index, entity) {          
@@ -551,12 +552,12 @@
       }
     }
         
-    @:renderFrac::(value, outOf) {
+    @:renderFrac::(isDead, value, outOf) {
       when (outOf > HP_KNOWN_LIMIT || value < 0) 
         '?? / ??';
         
       return 
-        (if (value < 10) ''+value+' ' else ''+value)
+        (if (isDead) '--' else (if (value < 10) ''+value+' ' else ''+value))
         + ' / ' +
         (if (outOf < 10) ''+outOf+' ' else ''+outOf)
     }
@@ -583,8 +584,8 @@
           } else ::<= {
             lines->push(value:ally.renderHP() + '  ' + ally.name);// + ' - Lv ' + ally.level);
             lines->push(value:
-              'HP: ' + renderFrac(value:ally.hp, outOf:ally.stats.HP) + 
-              '  AP: ' + renderFrac(value:ally.ap, outOf:ally.stats.AP));          
+              'HP: ' + renderFrac(isDead:ally.isDead, value:ally.hp, outOf:ally.stats.HP) + 
+              '  AP: ' + renderFrac(isDead:ally.isDead, value:ally.ap, outOf:ally.stats.AP));          
           }
         }
       }
@@ -1024,7 +1025,7 @@
         
         @pendingChoices = [];
         @:art = Arts.find(id:action.card.id);
-        if (art.canBlock && action.targets->size > 0) ::<= {
+        if (world.party != empty && art.canBlock && action.targets->size > 0) ::<= {
           pendingChoices = [...action.targets]->filter(by::(value) <- world.party.leader == value);
         }
       
@@ -1059,8 +1060,11 @@
             turnIndex : action.turnIndex,
             extraData : action.extraData
           );
-      
-          finish(:ret);           
+          windowEvent.queueCustom(
+            onEnter ::{
+              finish(:ret);           
+            }
+          );
         }
       
         // react andy time

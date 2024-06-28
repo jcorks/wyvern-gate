@@ -226,12 +226,12 @@
         
         // discourage abilities until players get their bearings, please!
         @:tier = world.island.tier;
-        when ([...enemies]->filter(::(value) <- party.isMember(:value))->size > 0 &&
+        
+        when (party != empty && [...enemies]->filter(::(value) <- party.isMember(:value))->size > 0 &&
             random.try(percentSuccess:80 - (tier * 30)))
             defaultAttack(battle);
 
         // need enough to use an art
-        breakpoint();
         when (projectedAP < 2)
             defaultAttack(battle); 
            

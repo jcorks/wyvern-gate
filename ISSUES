@@ -22,6 +22,9 @@ Known bugs / concerns:
   reloading the save will reset the day and take you out of the dungeon.
 
 Coming changes:
+    - Rendering HP loss in battle as a tweened animation, similar to shop level ups 
+      - includes per-personality phrases for above 2/3rd HP and below 1/3rd HP 
+    - Improve targetting body part to include a damage calculation spread and maybe display target's effects.
 
     Arts:
         - Named effects:

@@ -153,6 +153,118 @@
   return deck;
 }
 
+@:animateDamage ::(this, from, to, caption) {
+  @hp = from - to;
+  @frame = 0;
+
+  @:getShakeWeight ::{
+    when(hp <= 1) 0.5;
+    @scale = from - to;
+    when(frame > hp) 0.5;
+    if (scale > 10) scale = 10;
+    @shakeScale = scale / 15.0;
+    return 0.5 + (-shakeScale/2 + Number.random()*shakeScale)
+  }
+  
+  windowEvent.queueCustom(
+    onEnter ::{},
+    isAnimation: true,
+    onInput ::(input) {
+      match(input) {
+        (windowEvent.CURSOR_ACTIONS.CONFIRM,
+         windowEvent.CURSOR_ACTIONS.CANCEL):
+        hp = 0
+      }
+    },
+    animationFrame ::{
+      canvas.renderTextFrameGeneral(
+        leftWeight: getShakeWeight(),
+        topWeight : getShakeWeight(),
+        lines : [
+          caption,
+          '',
+          canvas.renderBarAsString(width:40, fillFraction: (to + hp) / this.stats.HP),
+          'HP: ' + (to + hp->round) + ' / ' + this.stats.HP
+        ]
+      );
+      frame += 1;
+
+      
+      hp = hp * 0.9;
+
+      when(hp->abs <= 0.15)
+        canvas.ANIMATION_FINISHED;
+    }
+  );
+    
+  windowEvent.queueDisplay(
+    leftWeight: 0.5,
+    topWeight : 0.5,
+    skipAnimation: true,
+    lines : [
+      caption,
+      '',
+      canvas.renderBarAsString(width:40, fillFraction: (to) / this.stats.HP),
+      'HP: ' + (to) + ' / ' + this.stats.HP
+    ]        
+  );    
+
+}
+
+@:animateDeath ::(this) {
+  @frame = 0;
+
+  @:getShakeWeight ::{
+    @:shakeScale = frame / 30;
+    return 0.5 + (-shakeScale/2 + Number.random()*shakeScale)
+  }
+  
+  windowEvent.queueCustom(
+    onEnter ::{},
+    isAnimation: true,
+    onInput ::(input) {
+      match(input) {
+        (windowEvent.CURSOR_ACTIONS.CONFIRM,
+         windowEvent.CURSOR_ACTIONS.CANCEL):
+          frame = 20
+      }
+    },
+    animationFrame ::{
+      canvas.renderTextFrameGeneral(
+        leftWeight: getShakeWeight(),
+        topWeight : getShakeWeight(),
+        lines : [
+          this.name,
+          '',
+          canvas.renderBarAsString(width:40, fillFraction: 0),
+          'HP: ' + '0 ' + ' / ' + this.stats.HP
+        ]
+      );
+      frame += 1;
+
+      when(frame > 20)
+        canvas.ANIMATION_FINISHED;
+    }
+  );
+    
+  windowEvent.queueDisplay(
+    leftWeight: 0.5,
+    topWeight : 0.5,
+    skipAnimation: true,
+    lines : [
+      this.name,
+      '',
+      if (this.name->contains(key:'Wyvern'))
+          '     ------ D E F E A T E D -------     '
+        else
+          '     ---------- D E A D  ----------     ',
+      'HP: ' + '--' + ' / ' + this.stats.HP
+    ]        
+  );    
+
+}
+
+
 
 @initializeEffectStackProper ::(this, state) {
   
@@ -1150,6 +1262,8 @@
           this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
           target.flags.add(flag:StateFlags.DIED);
           target.kill(from:this);        
+          
+          animateDeath(this);
         }
 
         return true;
@@ -1279,9 +1393,11 @@
           windowEvent.queueMessage(text: '' + this.name + ' received ' + damage.amount + ' '+damageTypeName() + 'damage to their shield (HP:' + this.renderHP() + ')' );        
         } else ::<= {
           if (damage.damageClass == Damage.CLASS.HP) ::<= {
+            @:oldHP = state.hp;
             state.hp -= damage.amount;
             if (state.hp < 0) state.hp = 0;
-            windowEvent.queueMessage(text: '' + this.name + ' received ' + damage.amount + ' '+damageTypeName() + 'damage (HP:' + this.renderHP() + ')' );
+            if (!alreadyKnockedOut)
+              animateDamage(this, from:oldHP, to:state.hp, caption: '' + this.name + ' received ' + damage.amount + ' '+damageTypeName() + 'damage');
           } else ::<= {
             state.ap -= damage.amount;
             if (state.ap < 0) state.ap = 0;        
@@ -1290,7 +1406,7 @@
         }
         @:world = import(module:'game_singleton.world.mt');
 
-        if (world.party.isMember(entity:this) && state.hp != 0 && damage.amount > state.stats.HP * 0.2 && Number.random() > 0.7)
+        if (world.party != empty && world.party.isMember(entity:this) && state.hp != 0 && damage.amount > state.stats.HP * 0.2 && Number.random() > 0.7)
           windowEvent.queueMessage(
             speaker: this.name,
             text: '"' + random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.HURT]) + '"'
@@ -1608,11 +1724,6 @@
       @:state = _.state;
       @:this = _.this;
       state.hp = 0;
-      if (silent == empty)
-        if (this.name->contains(key:'Wyvern'))
-          windowEvent.queueMessage(text: '' + this.name + ' has been defeated!')      
-        else 
-          windowEvent.queueMessage(text: '' + this.name + ' has died!');        
 
 
       // basically if anyone dies its a bad time

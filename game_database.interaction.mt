@@ -1797,7 +1797,7 @@ Interaction.newEntry(
         )          
       ;
       
-      @:generateTeam ::{
+      @:generateTeam ::(other){
         @:count = 3;
         @:members = [];
 
@@ -1807,9 +1807,23 @@ Interaction.newEntry(
           combatant.equip(item:weapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true, inventory: combatant.inventory);
 
           members->push(value:combatant);
-        }      
+        }     
+        
+        @name = 'The ' + Material.getRandom().name + ' ' + getAWeapon().base.name + 's';
+        
+        // prevent same names from occurring
+        if (other != empty && name == other.name) ::<= {
+          {:::} {
+            forever::{
+              when(name != other.name) send();
+              name = 'The ' + Material.getRandom().name + ' ' + getAWeapon().base.name + 's';
+            }
+          }
+        }
+       
+         
         return {
-          name : 'The ' + Material.getRandom().name + ' ' + getAWeapon().base.name + 's',
+          name : name,
           members : members
         }
       }
@@ -1832,8 +1846,8 @@ Interaction.newEntry(
       teamB = location.data.bet_teamB;
       
       
-      if (teamA == empty) teamA = generateTeam();
-      if (teamB == empty) teamB = generateTeam();
+      if (teamA == empty) teamA = generateTeam(:teamB);
+      if (teamB == empty) teamB = generateTeam(:teamA);
 
       location.data.bet_teamA = teamA;
       location.data.bet_teamB = teamB;

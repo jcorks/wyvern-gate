@@ -350,6 +350,35 @@ return {
       keepInteractionMenu : false,
       filter::(island, landmark) <- true,
       onSelect::(island, landmark) {
+        @:Landmark = import(module:'game_mutator.landmark.mt');
+        @:world = import(module:'game_singleton.world.mt');
+        when(landmark != empty && landmark.base.landmarkType == Landmark.database.statics.TYPE.DUNGEON) 
+          windowEvent.queueChoices(
+            prompt: 'Wait until...',
+            choices : [
+              'Morning (?)',
+              'Evening (?)'
+            ],
+            
+            canCancel: true,
+            onChoice ::(choice) {
+              when(choice == 0) empty;
+              
+              landmark.wait(:if(choice == 1) world.TIME.LATE_MORNING else world.TIME.LATE_EVENING);
+                
+              windowEvent.queueMessage(
+                text: 'The party waits for some time to pass...',
+                renderable : {
+                  render ::{
+                    canvas.blackout();
+                  }
+                }
+              )
+            }
+          ) 
+
+      
+      
         windowEvent.queueChoices(
           prompt: 'Wait until...',
           choices : [

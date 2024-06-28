@@ -253,7 +253,7 @@ return ::(terminal, arg, onDone) {
                 return JSON.encode(:obj);
             },
             onSaveSettings ::(data) {
-                Settings.setProps(:JSON.decode(:data));
+                Settings.set(:JSON.decode(:data));
             },
 
             onListSlots ::{
