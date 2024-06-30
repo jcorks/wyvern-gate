@@ -20,5 +20,5 @@
 
 return ::(amount) {
   when(amount > KNOWN_HP_LIMIT) '??';
-  return amount;
+  return String(:amount);
 }

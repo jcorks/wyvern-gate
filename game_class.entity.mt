@@ -169,6 +169,7 @@
     return 0.5 + (-shakeScale/2 + Number.random()*shakeScale)
   }
   
+  @:maxHP = displayHP(:this.stats.HP);
   windowEvent.queueCustom(
     onEnter ::{},
     isAnimation: true,
@@ -180,7 +181,6 @@
       }
     },
     animationFrame ::{  
-      @:maxHP = displayHP(:this.stats.HP);
       canvas.renderTextFrameGeneral(
         leftWeight: getShakeWeight(),
         topWeight : getShakeWeight(),
@@ -209,7 +209,7 @@
       caption,
       '',
       canvas.renderBarAsString(width:40, fillFraction: (to) / this.stats.HP),
-      'HP: ' + (to) + ' / ' + displayHP(:this.stats.HP)
+      'HP: ' + (if (maxHP == '??') '??' else to) + ' / ' + displayHP(:this.stats.HP)
     ]        
   );    
 
