@@ -38,9 +38,11 @@
 @:ArtsDeck = import(module:'game_class.artsdeck.mt');
 @:EffectStack = import(:'game_class.effectstack.mt');
 @:BattleAction = import(:'game_struct.battleaction.mt');
+@:displayHP = import(:'game_function.displayhp.mt');
 
 
 @:MIN_SUPPORT_COUNT = 5;
+@:DAMAGE_RNG_SPREAD = 0.3;
 
 // returns EXP recommended for next level
 @:levelUp ::(level, stats => StatSet.type, growthPotential => StatSet.type, whichStat) {
@@ -153,6 +155,7 @@
   return deck;
 }
 
+
 @:animateDamage ::(this, from, to, caption) {
   @hp = from - to;
   @frame = 0;
@@ -184,7 +187,7 @@
           caption,
           '',
           canvas.renderBarAsString(width:40, fillFraction: (to + hp) / this.stats.HP),
-          'HP: ' + (to + hp->round) + ' / ' + this.stats.HP
+          'HP: ' + (to + hp->round) + ' / ' + displayHP(:this.stats.HP)
         ]
       );
       frame += 1;
@@ -205,7 +208,7 @@
       caption,
       '',
       canvas.renderBarAsString(width:40, fillFraction: (to) / this.stats.HP),
-      'HP: ' + (to) + ' / ' + this.stats.HP
+      'HP: ' + (to) + ' / ' + displayHP(:this.stats.HP)
     ]        
   );    
 
@@ -215,7 +218,8 @@
   @frame = 0;
 
   @:getShakeWeight ::{
-    @:shakeScale = frame / 30;
+    @shakeScale = 1 - frame / 15;
+    when(shakeScale < 0) 0.5;
     return 0.5 + (-shakeScale/2 + Number.random()*shakeScale)
   }
   
@@ -237,7 +241,7 @@
           this.name,
           '',
           canvas.renderBarAsString(width:40, fillFraction: 0),
-          'HP: ' + '0 ' + ' / ' + this.stats.HP
+          'HP: ' + '0 ' + ' / ' + displayHP(:this.stats.HP)
         ]
       );
       frame += 1;
@@ -258,7 +262,7 @@
           '     ------ D E F E A T E D -------     '
         else
           '     ---------- D E A D  ----------     ',
-      'HP: ' + '--' + ' / ' + this.stats.HP
+      'HP: ' + '--' + ' / ' + displayHP(:this.stats.HP)
     ]        
   );    
 
@@ -574,6 +578,24 @@
     startTurn :: {
       _.this.recalculateStats();       
       _.this.flags.reset();
+    },
+    
+    getArtMinDamage ::(handCard) {
+      @:this = _.this;
+      @:art = Arts.find(id:handCard.id);
+      @dmg= art.baseDamage(user:this, level:handCard.level);
+      when(dmg == empty) empty;
+      
+      return (dmg * (1 - 0.5 * DAMAGE_RNG_SPREAD))->ceil;
+    },
+
+    getArtMaxDamage ::(handCard) {
+      @:this = _.this;
+      @:art = Arts.find(id:handCard.id);
+      @dmg= art.baseDamage(user:this, level:handCard.level);
+      when(dmg == empty) empty;
+      
+      return (dmg * (1 + 0.5 * DAMAGE_RNG_SPREAD))->ceil;
     },
     
     // called to signal that a battle has started involving this entity
@@ -1039,7 +1061,9 @@
         when(dmg.amount <= 0) empty;
 
 
-        @critChance = 0.999 - (this.stats.LUK/1.2) / 100;
+        @critChance = (this.stats.LUK - target.stats.LUK) / 100;
+        if (critChance < 0.001) critChance = 0.001;
+        critChance *= 100;
         @isCrit = false;
         @isHitHead = false;
         @isLimbHit = false;
@@ -1048,9 +1072,10 @@
         @missHead = false;
         @missBody = false;
         @missLimb = false;
-        if (critChance < 0.75) critChance = 0.75;
-        if (Number.random() > critChance || dmg.forceCrit) ::<={
-          dmg.amount += this.stats.DEX * 1.5;
+        if (critChance > 25) critChance = 25;
+        if (random.try(percentSuccess:critChance) || dmg.forceCrit) ::<={
+          if (dmg.amount < 5) dmg.amount = 5;
+          dmg.amount *= (1.75 + (this.stats.LUK / 3));
           isCrit = true;
         }
 
@@ -1090,7 +1115,7 @@
           if (targetDefendPart == 0 && target.species.canBlock == true && target.isIncapacitated() == false) 
             windowEvent.queueMessage(text: target.name + ' wasn\'t given a chance to block!');
 
-          if ((targetPart & targetDefendPart) != 0) ::<= {
+          if (isCrit == false && (targetPart & targetDefendPart) != 0) ::<= {
           
             // Cant defend EVERYTHING perfectly. If you guard multiple parts of 
             // your body, even with gear, you still arent a perfect fortress
@@ -1133,30 +1158,34 @@
             backupStats = this.stats.save();
             match(true) {
               ((targetPart & DAMAGE_TARGET.HEAD) != 0):::<= {
+                when(isCrit)
+                  isHitHead = true;
+              
                 if (random.try(percentSuccess:15)) ::<= {
-                  if (random.try(percentSuccess:90)) ::<= {
-                    isCrit = true;
-                    dmg.amount += this.stats.DEX * 1.5;
-                  } else
-                    dmg.amount *= 1.4;
+                  isCrit = true;
+                  dmg.amount += this.stats.DEX * 1.5;
                   isHitHead = true;
                 } else ::<= {
                   missHead = true;
-                  dmg.amount *= 0.1;
+                  dmg.amount = 1;
                 }
               },
 
               ((targetPart & DAMAGE_TARGET.BODY) != 0):::<= {
-                dmg.amount *= 1.3;               
+                when(isCrit)
+                  isHitBody = true;
+                dmg.amount *= 1;               
                 isHitBody = true;   
               },
 
               ((targetPart & DAMAGE_TARGET.LIMBS) != 0):::<= {
+                when(isCrit)
+                  isLimbHit = true;
                 if (random.try(percentSuccess:45)) ::<= {
                   isLimbHit = true;
                 } else ::<= {
                   missLimb = true;
-                  dmg.amount *= 0.1;
+                  dmg.amount = 1;
                 }
               }
 
@@ -1164,15 +1193,29 @@
           }
         }
 
-        @isDexed = false;
-        if (random.try(percentSuccess:33)) ::<= {
-          isDexed = true;
-          // Dex can increase/reduce the damage of specifically attacks
+        when(dmg.amount <= 0) empty;
 
-          if (this.stats.DEX > target.stats.DEX) ::<= {       
-            dmg.amount = dmg.amount * (1.2 + (Number.random()-0.5)*0.25);
+
+        @isDexed = false;
+        @isDefed = false;
+        if (!target.isIncapacitated() && random.try(percentSuccess:33)) ::<= {
+          if (this.stats.DEX > target.stats.DEF) ::<= {       
+            windowEvent.queueMessage(
+              text: target.name + ' tried to completely nullify the damage, but ' + this.name + ' went through ' + target.name + '\'s defenses thanks to their high DEX!'
+            );
+
           } else ::<= {
-            dmg.amount = dmg.amount * (0.75 + (Number.random()-0.5)*0.25);          
+
+            @ratioDiff = ((target.stats.DEF - this.stats.DEX) / (target.stats.DEF)) * 0.8;
+            if (ratioDiff > 1)
+              ratioDiff = 1;
+              
+            if (random.try(percentSuccess:ratioDiff*100)) ::<= {
+              windowEvent.queueMessage(
+                text: target.name + ' defended themself from the incoming attack due to their high DEF!'
+              );
+              dmg.amount = 0;
+            }
           }
         }
         
@@ -1184,17 +1227,7 @@
         @:hpWas0 = if (target.hp == 0) true else false;
         @:result = target.damage(attacker:this, damage:dmg, dodgeable:true, critical:isCrit);
         
-        if (isDexed) ::<= {
-          if (this.stats.DEX > target.stats.DEX) ::<= {       
-            windowEvent.queueMessage(
-              text: this.name + '\'s dexterity increased the potency of the blow!'
-            );
-          } else ::<= {
-            windowEvent.queueMessage(
-              text: target.name + '\'s dextrously avoided the full force of the blow!'
-            );
-          }
-        }
+
         
         
         if (backupStats != empty)
@@ -1232,10 +1265,10 @@
           
           
           if (missHead) ::<= {
-            windowEvent.queueMessage(text: 'The hit missed the head, but still managed to hit ' + target.name +'!');            
+            windowEvent.queueMessage(text: 'The hit missed the head, but still managed to hit ' + target.name +' for minimal damage!');            
           }
           if (missLimb) ::<= {
-            windowEvent.queueMessage(text: 'The hit missed the limbs, but still managed to hit ' + target.name +'!');            
+            windowEvent.queueMessage(text: 'The hit missed the limbs, but still managed to hit ' + target.name +' for minimal damage!');            
           }
 
         }
@@ -1263,7 +1296,7 @@
           target.flags.add(flag:StateFlags.DIED);
           target.kill(from:this);        
           
-          animateDeath(this);
+          animateDeath(:target);
         }
 
         return true;
@@ -1335,12 +1368,11 @@
         }
         
 
-        damage.amount = damage.amount + damage.amount * (Number.random() - 0.5) * 0.5; // 25% spread
+        damage.amount *= 1 + (Number.random() - 0.5) * DAMAGE_RNG_SPREAD
         
         
 
 
-        damage.amount -= state.stats.DEF/3;
         if (damage.amount <= 0) damage.amount = 1;
 
 
@@ -1439,7 +1471,7 @@
 
 
         
-        if (!alreadyKnockedOut && world.party.isMember(entity:this) && state.hp == 0 && Number.random() > 0.7 && world.party.members->size > 1) ::<= {
+        if (world.party != empty && !alreadyKnockedOut && world.party.isMember(entity:this) && state.hp == 0 && Number.random() > 0.7 && world.party.members->size > 1) ::<= {
           windowEvent.queueMessage(
             speaker: this.name,
             text: '"' + random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.DEATH]) + '"'
@@ -2073,16 +2105,16 @@
               [
                 'The attack aims for the head.',
                 'While fairly difficult to hit, when it lands it will',
-                'almost definitely cause a critical hit.'
+                'critical hit. Otherwise, deals 1 damage.'
               ],
               [
                 'The attack aims for the body.',
-                'While easiest to hit, when it lands it will',
-                'cause additional general damage.'
+                'This is the easiest to hit, but provides no additional',
+                'effect.'
               ],
               [
                 'The attack aims for the limbs.',
-                'While slightly difficult hit, when it lands it will',
+                'While slightly difficult to hit, when it lands it ',
                 'has a high chance to stun the target for a turn.'
               ]
             ];
@@ -2314,6 +2346,7 @@
         windowEvent.queueCustom(
           onEnter :: {
             deck.chooseArtPlayer(
+              user:this,
               act: 'React',
               canCancel: true,
               filter::(value) <- Arts.find(:value.id).kind == Arts.KIND.REACTION,

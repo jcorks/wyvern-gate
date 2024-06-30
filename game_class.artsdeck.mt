@@ -94,9 +94,17 @@
   }
 }
 
-@:renderArt::(handCard, topWeight, leftWeight, maxWidth){
+@:renderArt::(user, handCard, topWeight, leftWeight, maxWidth){
   if (maxWidth == empty) maxWidth = 1;
   @:art = Arts.find(id:handCard.id);
+  @baseDamageMax;
+  @baseDamageMin;  
+  
+  if (user) ::<= {
+    baseDamageMin = user.getArtMinDamage(:handCard);
+    baseDamageMax = user.getArtMaxDamage(:handCard);
+  }
+
   canvas.renderTextFrameGeneral(
     topWeight,
     leftWeight,
@@ -114,14 +122,15 @@
         "Lv. " + handCard.level 
       else 
         "",
-      "",
-      art.description
+      '',
+      art.description,
+      if (user != empty && baseDamageMin != empty) 'Around: ' + baseDamageMin + ' - ' + baseDamageMax + " damage" else '',
     ]
   );
 }
 
 @selected = 0;
-@:renderHand ::(state, enabled){
+@:renderHand ::(user, state, enabled){
   @index;
   if (enabled != empty) ::<= {
     index = enabled[selected]
@@ -137,7 +146,7 @@
     x += CARD_WIDTH;
     
     if (i == index) ::<= {
-      renderArt(handCard:state.hand[i], topWeight:0.1);
+      renderArt(user, handCard:state.hand[i], topWeight:0.1);
     }
     
   }
@@ -310,7 +319,7 @@
         );
       },
       
-      revealArt ::(handCard, prompt) {
+      revealArt ::(user, handCard, prompt) {
         windowEvent.queueMessage(
           renderable : {
             render ::{
@@ -319,7 +328,7 @@
                 y: 4,
                 handCard
               );
-              renderArt(handCard, topWeight:0.3);
+              renderArt(user, handCard, topWeight:0.3);
             }
           },
           topWeight: 1,
@@ -329,12 +338,12 @@
       
 
       
-      viewHand ::(prompt) {
+      viewHand ::(user, prompt) {
         @bg;
         windowEvent.queueCustom(
           onEnter::{
             bg = canvas.addBackground(::{
-              renderHand(state);
+              renderHand(user, state);
             });
           }
         );
@@ -375,6 +384,7 @@
 
       
       chooseDiscardPlayer ::(
+        user,
         onChoice,
         onCancel,
         canCancel,
@@ -416,8 +426,10 @@
           renderable : {
             render ::{
               breakpoint();
-              renderArt(handCard:
-                ArtsDeck.synthesizeHandCard(id:list[selected], level:1), 
+              renderArt(
+                user,
+                handCard:
+                  ArtsDeck.synthesizeHandCard(id:list[selected], level:1), 
                 leftWeight:0.4, 
                 topWeight:0.5
               );            
@@ -474,7 +486,7 @@
         emitEvent(event:EVENTS.LEVEL, card:handCard);
       },
       
-      chooseArtPlayer ::(onChoice, onCancel, canCancel, act, filter) {
+      chooseArtPlayer ::(user, onChoice, onCancel, canCancel, act, filter) {
         selected = 0;
   
         @enabled = [];
@@ -490,7 +502,7 @@
         windowEvent.queueCustom(
           onEnter::{
             bg = canvas.addBackground(::{
-              renderHand(state, enabled);
+              renderHand(user, state, enabled);
             });
           }
         );

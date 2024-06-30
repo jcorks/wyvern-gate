@@ -26,10 +26,27 @@ return {
       name : 'Attack',
       filter::(user, battle) <- true,
       onSelect::(user, battle, commitAction) {
-        user.playerUseArt(
-          card: ArtsDeck.synthesizeHandCard(id:'base:attack'),
-          commitAction
-        )        
+        @:card = ArtsDeck.synthesizeHandCard(id:'base:attack');
+
+        windowEvent.queueChoices(
+          choices : [
+            'Use',
+          ],
+          canCancel: true,
+          topWeight : 1,
+          renderable : {
+            render ::{
+              ArtsDeck.renderArt(user, handCard:card, topWeight:0.1);
+              
+            },
+          },
+          onChoice::(choice) {
+            user.playerUseArt(
+              card: card,
+              commitAction
+            )        
+          }
+        );
       }
     ),
     
@@ -39,6 +56,7 @@ return {
       onSelect::(user, battle, commitAction) {
         
         user.deck.chooseArtPlayer(
+          user,
           canCancel: true,
           act: 'Use',
           onChoice::(card, backout) {

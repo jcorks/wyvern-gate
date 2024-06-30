@@ -43,7 +43,7 @@ return {
                 6
               else 
                 data.level,
-            professionHint: if (data.profession == empty) 
+            professionHint: if (empty == empty) 
                 Profession.getRandomFiltered(filter::(value)<-value.learnable).id 
               else 
                 data.profession

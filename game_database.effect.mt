@@ -795,7 +795,7 @@ Effect.newEntry(
   data : {
     name : 'Trigger Regen',
     id : 'base:trigger-regen',
-    description: 'Slightly heals wounds.',
+    description: 'Heals 2 HP.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -807,7 +807,7 @@ Effect.newEntry(
         when(holder.hp == 0) empty;
         windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
         holder.heal(
-          amount: holder.stats.HP * 0.05
+          amount: 2
         );            
       }
     }
@@ -1388,7 +1388,7 @@ Effect.newEntry(
   data : {
     name : 'Moonsong',
     id : 'base:moonsong',
-    description: 'Heals 5% HP every turn',
+    description: 'Heals 1 HP every turn',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -1402,7 +1402,7 @@ Effect.newEntry(
       
       onNextTurn ::(from, item, holder, turnIndex, turnCount) {
         when(holder.hp == 0) empty;
-        holder.heal(amount:holder.stats.HP * 0.05);
+        holder.heal(amount:1);
       }
     }
   }
@@ -1412,7 +1412,7 @@ Effect.newEntry(
   data : {
     name : 'Sol Attunement',
     id : 'base:sol-attunement',
-    description: 'Heals 5% HP every turn',
+    description: 'Heals 1 HP every turn',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -1426,7 +1426,7 @@ Effect.newEntry(
       },        
       onNextTurn ::(from, item, holder, turnIndex, turnCount) {
         when(holder.hp == 0) empty;
-        holder.heal(amount:holder.stats.HP * 0.05);
+        holder.heal(amount:1);
       }
     }
   }
@@ -1436,7 +1436,7 @@ Effect.newEntry(
   data : {
     name : 'Greater Moonsong',
     id : 'base:greater-moonsong',
-    description: 'Heals 15% HP every turn',
+    description: 'Heals 2 HP every turn',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -1450,7 +1450,7 @@ Effect.newEntry(
       
       onNextTurn ::(from, item, holder, turnIndex, turnCount) {
         when(holder.hp == 0) empty;
-        holder.heal(amount:holder.stats.HP * 0.15);
+        holder.heal(amount:2);
       }
     }
   }
@@ -1460,7 +1460,7 @@ Effect.newEntry(
   data : {
     name : 'Greater Sol Attunement',
     id : 'base:greater-sol-attunement',
-    description: 'Heals 15% HP every turn',
+    description: 'Heals 2 HP every turn',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -1475,7 +1475,7 @@ Effect.newEntry(
       
       onNextTurn ::(from, item, holder, turnIndex, turnCount) {
         when(holder.hp == 0) empty;
-        holder.heal(amount:holder.stats.HP * 0.15);
+        holder.heal(amount:2);
       }
     }
   }
@@ -1955,7 +1955,7 @@ Effect.newEntry(
   data : {
     name : 'Healroot',
     id : 'base:healroot',
-    description: 'Every turn heal 5% HP. SPD -10%',
+    description: 'Every turn heal 2 HP. SPD -10%',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -1969,7 +1969,7 @@ Effect.newEntry(
       onNextTurn ::(from, item, holder, turnIndex, turnCount) {
         when(holder.hp == 0) empty;
         windowEvent.queueMessage(text:'The healroot soothe\'s ' + holder.name + '.');
-        holder.heal(amount:holder.stats.HP * 0.05);
+        holder.heal(amount:2);
       }
     }
   }
@@ -2802,7 +2802,7 @@ Effect.newEntry(
       onNextTurn ::(from, item, holder, turnIndex, turnCount) {
         when(holder.hp == 0) empty;
         windowEvent.queueMessage(text:holder.name + " was healed by the regeneration rune.");
-        holder.heal(amount:holder.stats.HP * 0.03);
+        holder.heal(amount:1);
       }
     }
   }
@@ -2837,7 +2837,7 @@ Effect.newEntry(
   data : {
     name : 'Cure Rune',
     id : 'base:cure-rune',
-    description: 'Cures the holder when the rune is released.',
+    description: 'Cures the holder by 3 HP when the rune is released.',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -2852,7 +2852,7 @@ Effect.newEntry(
       
       onRemoveEffect ::(from, item, holder) {
         windowEvent.queueMessage(text:'The cure rune fades from ' + holder.name + '.');
-        holder.heal(amount:(holder.stats.HP * (0.4))->ceil);
+        holder.heal(amount:3);
       }
     }
   }

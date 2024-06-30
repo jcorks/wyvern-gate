@@ -93,6 +93,7 @@ Arts.newEntry(
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL | TRAITS.SPECIAL | TRAITS.COSTLESS,
     rarity : RARITY.COMMON,
+    baseDamage ::(level, user) <- user.stats.ATK * (0.5) * level,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' attacks ' + targets[0].name + '!'
@@ -102,7 +103,7 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:user.stats.ATK * (0.5) * level,
+            amount:Arts.find(:'base:attack').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart:targetParts[0],
@@ -132,6 +133,7 @@ Arts.newEntry(
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) <- 1,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' attempts to defeat ' + targets[0].name + ' in one attack!'
@@ -185,6 +187,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : true,
     traits : TRAITS.PHYSICAL,
+    baseDamage ::(level, user) <- (user.stats.ATK * (0.2) + user.stats.DEX * (0.5)) * (1 + 0.1*(level-1)),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' takes aim at ' + targets[0].name + '!'
@@ -194,7 +197,7 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:(user.stats.ATK * (0.2) + user.stats.DEX * (0.5)) * (1 + 0.1*(level-1)),
+            amount:Arts.find(:'base:precise-strike').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart:targetParts[0],
@@ -222,6 +225,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
+    baseDamage ::(level, user) <- user.stats.DEX * (0.5),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' attempts to tranquilize ' + targets[0].name + '!'
@@ -231,7 +235,7 @@ Arts.newEntry(
         onEnter :: {
           if (user.attack(
             target:targets[0],
-            amount:user.stats.DEX * (0.5),
+            amount:Arts.find(:'base:tranquilizer').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart:targetParts[0],
@@ -262,6 +266,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' coordinates with others!'
@@ -289,7 +294,7 @@ Arts.newEntry(
     name: 'Follow Up',
     id : 'base:follow-up',
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target based on the user's ATK, doing 150% more damage if the target was hit since their last turn. Additional levels increase the boost by 20%.",
+    description: "Damages a target based on the user's ATK, doing 100% more damage if the target was hit since their last turn. Additional levels increase the boost by 20%.",
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -298,6 +303,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
+    baseDamage ::(level, user)<- user.stats.ATK * (0.5 + 0.15 * level),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' attacks ' + targets[0].name + ' as a follow-up!'
@@ -310,7 +316,7 @@ Arts.newEntry(
           if (targets[0].flags.has(flag:StateFlags.HURT)) 
             user.attack(
               target:targets[0],
-              amount:user.stats.ATK * (1.25 + level*0.2),
+              amount:Arts.find(:'base:follow-up').baseDamage(level, user)*2,
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
               targetPart:targetParts[0],
@@ -319,7 +325,7 @@ Arts.newEntry(
           else
             user.attack(
               target:targets[0],
-              amount:user.stats.ATK * (0.5),
+              amount:Arts.find(:'base:follow-up').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
               targetPart : targetParts[0],
@@ -347,6 +353,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
+    baseDamage::(level, user) <- user.stats.ATK * (0.4 + (level-1)*0.1),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' attacks twice!'
@@ -357,7 +364,7 @@ Arts.newEntry(
           @target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
           user.attack(
             target,
-            amount:user.stats.ATK * (0.4 + (level-1)*0.1),
+            amount: Arts.find(:'base:doublestrike').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
@@ -372,7 +379,7 @@ Arts.newEntry(
           @target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
           user.attack(
             target,
-            amount:user.stats.ATK * (0.4 + (level-1)*0.1),
+            amount:Arts.find(:'base:doublestrike').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart : targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
@@ -401,6 +408,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
+    baseDamage::(level, user) <- user.stats.ATK * (0.4 + (level-1)*0.07),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' attacks three times!'
@@ -413,7 +421,7 @@ Arts.newEntry(
           @target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
           user.attack(
             target,
-            amount:user.stats.ATK * (0.4 + (level-1)*0.07),
+            amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
@@ -428,7 +436,7 @@ Arts.newEntry(
           @:target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
           user.attack(
             target,
-            amount:user.stats.ATK * (0.4 + (level-1)*0.07),
+            amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
@@ -442,7 +450,7 @@ Arts.newEntry(
           @:target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
           user.attack(
             target,
-            amount:user.stats.ATK * (0.4 + (level-1)*0.07),
+            amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
@@ -469,6 +477,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:user.name + ' focuses their perception, increasing their ATK temporarily!');
       windowEvent.queueCustom(
@@ -494,6 +503,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:user.name + ' cheers for the party!');
       windowEvent.queueCustom(
@@ -522,6 +532,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:user.name + '\'s Lunar Blessing made it night time!');
 
@@ -557,6 +568,7 @@ Arts.newEntry(
     oncePerBattle : false,
     traits : TRAITS.MAGIC,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:user.name + '\'s Solar Blessing made it day time!');
       @:world = import(module:'game_singleton.world.mt');
@@ -592,6 +604,10 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {
+      @:world = import(module:'game_singleton.world.mt');
+      return user.stats.INT * (if (world.time >= world.TIME.EVENING) 1.4 else 0.8) * (1 + (level-1)*0.05);
+    },
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' fires a glowing beam of moonlight!'
@@ -608,7 +624,7 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target: targets[0],
-            amount:user.stats.INT * (if (world.time >= world.TIME.EVENING) 1.4 else 0.8) * (1 + (level-1)*0.05),
+            amount: Arts.find(:'base:moonbeam').baseDamage(user, level),
             damageType : Damage.TYPE.FIRE,
             damageClass: Damage.CLASS.HP,
             targetPart: targetParts[0],
@@ -635,6 +651,10 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {
+      @:world = import(module:'game_singleton.world.mt');
+      return user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.4 else 0.8) * (1 + (level-1)*0.05);    
+    },
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' fires a glowing beam of sunlight!'
@@ -651,7 +671,7 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target: targets[0],
-            amount:user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.4 else 0.8) * (1 + (level-1)*0.05),
+            amount:Arts.find(:'base:sunbeam').baseDamage(level, user),
             damageType : Damage.TYPE.FIRE,
             damageClass: Damage.CLASS.HP,
             targetPart : targetParts[0],
@@ -679,6 +699,10 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     traits : TRAITS.MAGIC | TRAITS.FIRE,
+    baseDamage ::(level, user) {
+      @:world = import(module:'game_singleton.world.mt');
+      return user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.7 else 0.4) * (1 + (level-1)*.08);
+    },
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' lets loose a burst of sunlight!'
@@ -698,7 +722,7 @@ Arts.newEntry(
 
             user.attack(
               target: enemy,
-              amount:user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.7 else 0.4) * (1 + (level-1)*.08),
+              amount: Arts.find(:'base:sunburst').baseDamage(level, user),
               damageType : Damage.TYPE.FIRE,
               damageClass: Damage.CLASS.HP
             );
@@ -724,6 +748,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Night Veil on ' + targets[0].name + '!'
@@ -768,6 +793,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Dayshroud on ' + targets[0].name + '!'
@@ -811,6 +837,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Call of the Night on ' + targets[0].name + '!'
@@ -856,6 +883,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Lunacy on ' + targets[0].name + '!'
@@ -896,6 +924,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Moonsong on ' + targets[0].name + '!'
@@ -940,6 +969,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Sol Attunement on ' + targets[0].name + '!'
@@ -984,6 +1014,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' tries to ensnare ' + targets[0].name + '!'
@@ -1027,6 +1058,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' makes an eerie call!'
@@ -1074,6 +1106,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' attempts to tame ' + targets[0].name + '!'
@@ -1127,6 +1160,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' tries to sweep everyone\'s legs!'
@@ -1167,6 +1201,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
+    baseDamage ::(level, user) <- user.stats.ATK * (0.35) * (1 + (level-1)*.05),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' does a big swing!'
@@ -1176,7 +1211,7 @@ Arts.newEntry(
           onEnter :: {
             user.attack(
               target,
-              amount:user.stats.ATK * (0.35) * (1 + (level-1)*.05),
+              amount:Arts.find(:'base:big-swing').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
               targetPart: Entity.DAMAGE_TARGET.BODY,
@@ -1205,6 +1240,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
+    baseDamage ::(level, user) <- user.stats.ATK * (0.7) * (1 + (level-1)*0.1),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' bashes ' + targets[0].name + '!'
@@ -1215,7 +1251,7 @@ Arts.newEntry(
 
           user.attack(
             target:targets[0],
-            amount:user.stats.ATK * (0.7) * (1 + (level-1)*0.1),
+            amount:Arts.find(:'base:tackle').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart: Entity.DAMAGE_TARGET.BODY,
@@ -1236,7 +1272,7 @@ Arts.newEntry(
     name: 'Throw Item',
     id : 'base:throw-item',
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target by throwing an item. Additional levels increase the damage done.",
+    description: "Damages a target by throwing an item. The base damage is boosted by the weight of the item chosen. Additional levels increase the damage done.",
     durationTurns: 0,
     kind : KIND.ABILITY,
     rarity : RARITY.UNCOMMON,
@@ -1245,6 +1281,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
+    baseDamage ::(level, user) <- user.stats.ATK * (0.7) * (1 + (level-1)*0.2),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:pickItem = import(module:'game_function.pickitem.mt');
       @:world = import(module:'game_singleton.world.mt');
@@ -1260,7 +1297,7 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],              
-            amount:user.stats.ATK * (0.7) * (item.base.weight * 4) * (1 + (level-1)*0.2),
+            amount:Arts.find(:'base:throw-item').baseDamage(level, user) * (item.base.weight * 4),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart: targetParts[0],
@@ -1288,6 +1325,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
+    baseDamage::(level, user) <- user.stats.ATK * (0.3),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' tries to stun ' + targets[0].name + '!'
@@ -1298,7 +1336,7 @@ Arts.newEntry(
           
           if (user.attack(
             target:targets[0],
-            amount:user.stats.ATK * (0.3),
+            amount:Arts.find(:'base:stun').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart: Entity.DAMAGE_TARGET.BODY,
@@ -1327,6 +1365,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
+    baseDamage ::(level, user) <- user.stats.ATK * (0.4) * (1 + (level-1)*0.07),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: 'A cold air emminates from ' + user.name + '!'
@@ -1337,7 +1376,7 @@ Arts.newEntry(
 
           if (user.attack(
             target:targets[0],
-            amount:user.stats.ATK * (0.4) * (1 + (level-1)*0.07),
+            amount:Arts.find(:'base:sheer-cold').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart: targetParts[0],
@@ -1398,7 +1437,7 @@ Arts.newEntry(
     name: 'Flight',
     id : 'base:flight',
     targetMode : TARGET_MODE.ONE,
-    description: "Causes the target to fly, making all damage miss the target for 3 turns. The effect lasts an additional turn for each level.",
+    description: "Causes the target to fly, making all damage miss the target for a turn. The effect lasts an additional turn for each level.",
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC,
@@ -1407,13 +1446,14 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Flight on ' + targets[0].name + '!'
       );
       windowEvent.queueCustom(
         onEnter :: {
-          targets[0].addEffect(from:user, id: 'base:flight', durationTurns: 2+level);
+          targets[0].addEffect(from:user, id: 'base:flight', durationTurns: level);
         }
       )
     }
@@ -1433,6 +1473,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' tries to grapple ' + targets[0].name + '!'
@@ -1467,6 +1508,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
+    baseDamage ::(level, user) <- user.stats.ATK * (0.35) * (1 + (level-1)*0.05),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' does a combo strike on ' + targets[0].name + '!'
@@ -1477,7 +1519,7 @@ Arts.newEntry(
           
           user.attack(
             target: targets[0],
-            amount:user.stats.ATK * (0.35) * (1 + (level-1)*0.05),
+            amount: Arts.find(:'base:combo-strike').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart: targetParts[0],
@@ -1490,7 +1532,7 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target: targets[0],
-            amount:user.stats.ATK * (0.35) * (1 + (level-1)*0.05),
+            amount:Arts.find(:'base:combo-strike').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart: targetParts[0],
@@ -1507,7 +1549,7 @@ Arts.newEntry(
     name: 'Poison Rune',
     id : 'base:poison-rune',
     targetMode : TARGET_MODE.ONE,
-    description: "Places a poison rune on a target, which causes damage to the target each turn.",
+    description: "Places a poison rune on a target, which causes 1 to 3 damage to the target each turn.",
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
@@ -1516,6 +1558,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Poison Rune on ' + targets[0].name + '!'
@@ -1542,6 +1585,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' releases all the runes on ' + targets[0].name + '!'
@@ -1577,6 +1621,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage::(level, user) <- user.stats.INT * (1.2),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Destruction Rune on ' + targets[0].name + '!'
@@ -1596,7 +1641,7 @@ Arts.newEntry(
     name: 'Regeneration Rune',
     id : 'base:regeneration-rune',
     targetMode : TARGET_MODE.ONE,
-    description: "Places a regeneration rune on a target, which slightly heals a target every turn.",
+    description: "Places a regeneration rune on a target, which slightly heals a target by 1 HP every turn.",
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.UNCOMMON,
@@ -1605,6 +1650,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Regeneration Rune on ' + targets[0].name + '!'
@@ -1631,6 +1677,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Shield Rune on ' + targets[0].name + '!'
@@ -1648,7 +1695,7 @@ Arts.newEntry(
     name: 'Cure Rune',
     id : 'base:cure-rune',
     targetMode : TARGET_MODE.ONE,
-    description: "Places a cure rune on a target, which heals the target when the rune is released.",
+    description: "Places a cure rune on a target, which heals the target when the rune is released by 3 HP.",
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
@@ -1657,6 +1704,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Cure Rune on ' + targets[0].name + '!'
@@ -1684,6 +1732,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Multiply Runes on ' + targets[0].name + '!'
@@ -1728,6 +1777,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
+    baseDamage ::(level, user)<- user.stats.ATK * (0.3) * (1 + (level-1)*0.05),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' prepares a poison attack against ' + targets[0].name + '!'
@@ -1737,7 +1787,7 @@ Arts.newEntry(
 
           if (user.attack(
             target: targets[0],
-            amount:user.stats.ATK * (0.3) * (1 + (level-1)*0.05),
+            amount: Arts.find(:'base:poison-attack').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart: targetParts[0],
@@ -1765,6 +1815,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
+    baseDamage::(level, user) <- user.stats.ATK * (0.3) * (1 + (level-1)*0.05),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' prepares a petrifying attack against ' + targets[0].name + '!'
@@ -1774,7 +1825,7 @@ Arts.newEntry(
 
           if (user.attack(
             target: targets[0],
-            amount:user.stats.ATK * (0.3) * (1 + (level-1)*0.05),
+            amount: Arts.find(:'base:petrify').baseDamage(level, user),
             damageType : Damage.TYPE.LIGHT,
             damageClass: Damage.CLASS.HP,
             targetPart: targetParts[0],
@@ -1800,6 +1851,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : true,
+    baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' activates the tripwire right under ' + targets[0].name + '!'
@@ -1829,6 +1881,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : true,
     canBlock : false,
+    baseDamage::(level, user) <- 50,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' activates the tripwire explosive right under ' + targets[0].name + '!'
@@ -1870,6 +1923,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : true,
     canBlock : false,
+    baseDamage::(level, user) <- 50,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' activates a floor trap, revealing a spike pit under the enemies!'
@@ -1911,6 +1965,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : true,
+    baseDamage::(level, user) <- user.stats.ATK * (0.3) * (1 + (level-1)*0.07),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' stabs ' + targets[0].name + '!'
@@ -1920,7 +1975,7 @@ Arts.newEntry(
         onEnter :: {
           if (user.attack(
             target: targets[0],
-            amount:user.stats.ATK * (0.3) * (1 + (level-1)*0.07),
+            amount: Arts.find(:'base:stab').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart: targetParts[0],
@@ -1938,7 +1993,7 @@ Arts.newEntry(
     name: 'First Aid',
     id : 'base:first-aid',
     targetMode : TARGET_MODE.ONE,
-    description: "Heals a target by a small amount. Additional levels increase the potency.",
+    description: "Heals a target by 3 HP. Additional levels increase the potency by 2 points.",
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.HEAL,
@@ -1947,13 +2002,14 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' does first aid on ' + targets[0].name + '!'
       );
       windowEvent.queueCustom(
         onEnter :: {
-          targets[0].heal(amount:((targets[0].stats.HP*(0.15 + (level-1)*0.07))->ceil));
+          targets[0].heal(amount:1 + level*2);
         }
       )
     }
@@ -1966,7 +2022,7 @@ Arts.newEntry(
     name: 'Mend',
     id : 'base:mend',
     targetMode : TARGET_MODE.ONE,
-    description: "Heals a target by a small amount.",
+    description: "Heals a target by 2 HP.",
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.HEAL,
@@ -1975,13 +2031,14 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' mends ' + targets[0].name + '!'
       );
       windowEvent.queueCustom(
         onEnter :: {
-          targets[0].heal(amount:((targets[0].stats.HP*0.25)->ceil));
+          targets[0].heal(amount:2);
         }
       );
     }
@@ -1993,7 +2050,7 @@ Arts.newEntry(
     name: 'Give Snack',
     id : 'base:give-snack',
     targetMode : TARGET_MODE.ONE,
-    description: "Heals a target by a small amount.",
+    description: "Either heals or recovers AP by a small amount.",
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.HEAL,
@@ -2002,6 +2059,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' gives a snack to ' + targets[0].name + '!'
@@ -2034,7 +2092,7 @@ Arts.newEntry(
           windowEvent.queueCustom(
             onEnter :: {
               targets[0].heal(
-                amount:((targets[0].stats.HP*0.15)->ceil) 
+                amount:3 
               );              
             }
           )
@@ -2061,6 +2119,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @:Species = import(module:'game_database.species.mt');
@@ -2116,6 +2175,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
       windowEvent.queueMessage(
@@ -2168,6 +2228,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
       windowEvent.queueMessage(
@@ -2220,6 +2281,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
       windowEvent.queueMessage(
@@ -2274,6 +2336,7 @@ Arts.newEntry(
     },
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
 
@@ -2315,6 +2378,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) <- user.stats.INT * (1.2) * (1 + (level-1)*0.15),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Fire on ' + targets[0].name + '!'
@@ -2323,7 +2387,7 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:user.stats.INT * (1.2) * (1 + (level-1)*0.15),
+            amount:Arts.find(:'base:fire').baseDamage(level, user),
             damageType : Damage.TYPE.FIRE,
             damageClass: Damage.CLASS.HP
           );
@@ -2348,6 +2412,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) <- user.stats.INT * (0.6) * (1 + (level-1)*0.08),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' generates a great amount of heat!'
@@ -2358,7 +2423,7 @@ Arts.newEntry(
           onEnter :: {
             if (user.attack(
               target:target,
-              amount:user.stats.INT * (0.6) * (1 + (level-1)*0.08),
+              amount: Arts.find(:'base:backdraft').baseDamage(level, user),
               damageType : Damage.TYPE.FIRE,
               damageClass: Damage.CLASS.HP
             ))
@@ -2387,6 +2452,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) <- user.stats.INT * (2.0) * (1 + (level-1) * 0.15),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Flare on ' + targets[0].name + '!'
@@ -2395,7 +2461,7 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:user.stats.INT * (2.0) * (1 + (level-1) * 0.15),
+            amount: Arts.find(:'base:flare').baseDamage(level, user),
             damageType : Damage.TYPE.FIRE,
             damageClass: Damage.CLASS.HP
           );
@@ -2416,18 +2482,19 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     rarity : RARITY.RARE,
     traits : TRAITS.MAGIC,
-    usageHintAI : USAGE_HINT.OFFENSIVE,	
+    usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, enemies, allies) {
         return [...enemies]->filter(::(value) <- {:::} {
           foreach(Entity.EQUIP_SLOTS)::(i, slot) {
             @out = value.getEquipped(slot);
-            if (out && out.base.name != 'base:none') send(:true);
+            if (out != empty && out.base.name != 'base:none') send(:true);
           }        
           return false
         })
     },
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Dematerialize on ' + targets[0].name + '!'
@@ -2438,7 +2505,7 @@ Arts.newEntry(
         @:list = [];
         foreach(Entity.EQUIP_SLOTS)::(i, slot) {
           @out = targets[0].getEquipped(slot);
-          if (out && out.base.name != 'base:none')
+          if (out != empty && out.base.name != 'base:none')
             list->push(value:out);
         }
         return Random.pickArrayItem(list);
@@ -2477,6 +2544,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) <- user.stats.INT * (0.6 + (0.2)*(level-1)),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Ice!'
@@ -2487,7 +2555,7 @@ Arts.newEntry(
 
             user.attack(
               target:enemy,
-              amount:user.stats.INT * (0.8 + (0.2)*(level-1)),
+              amount: Arts.find(:'base:ice').baseDamage(level, user),
               damageType : Damage.TYPE.ICE,
               damageClass: Damage.CLASS.HP
             );
@@ -2512,6 +2580,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) <- user.stats.INT * (0.75) * (1 + (level-1)* 0.15),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Frozen Flame!'
@@ -2521,7 +2590,7 @@ Arts.newEntry(
           onEnter :: {
             user.attack(
               target:enemy,
-              amount:user.stats.INT * (0.75) * (1 + (level-1)* 0.15),
+              amount: Arts.find(:'base:frozen-flame').baseDamage(level, user),
               damageType : Damage.TYPE.ICE,
               damageClass: Damage.CLASS.HP
             );
@@ -2549,6 +2618,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Telekinesis!'
@@ -2583,6 +2653,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) <- user.stats.INT * (0.85) * (1 + (level-1)*0.1),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Explosion!'
@@ -2592,7 +2663,7 @@ Arts.newEntry(
           onEnter :: {
             user.attack(
               target:enemy,
-              amount:user.stats.INT * (1.2) * (1 + (level-1)*0.1),
+              amount:Arts.find(:'base:explosion').baseDamage(level, user),
               damageType : Damage.TYPE.FIRE,
               damageClass: Damage.CLASS.HP
             );
@@ -2617,6 +2688,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Flash!'
@@ -2652,6 +2724,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) <- user.stats.INT * (0.45),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Thunder!'
@@ -2662,7 +2735,7 @@ Arts.newEntry(
           onEnter :: {
             user.attack(
               target,
-              amount:user.stats.INT * (0.45),
+              amount:Arts.find(:'base:thunder').baseDamage(level, user),
               damageType : Damage.TYPE.THUNDER,
               damageClass: Damage.CLASS.HP
             );
@@ -2683,11 +2756,12 @@ Arts.newEntry(
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
-    rarity : RARITY.RARE,
+    rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage::(level, user) <- user.stats.ATK * (0.9),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' wildly swings!'
@@ -2698,7 +2772,7 @@ Arts.newEntry(
           onEnter :: {
             user.attack(
               target,
-              amount:user.stats.ATK * (0.9),
+              amount:Arts.find(:'base:wild-swing').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
               targetPart: Entity.normalizedDamageTarget(),
@@ -2716,7 +2790,7 @@ Arts.newEntry(
     name: 'Cure',
     id : 'base:cure',
     targetMode : TARGET_MODE.ONE,
-    description: "Heals a target by a small amount. Additional levels increase potency.",
+    description: "Heals a target by 5 HP. Additional levels increase potency by 2 HP.",
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.HEAL,
@@ -2725,13 +2799,14 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Cure on ' + targets[0].name + '!'
       );
       windowEvent.queueCustom(
         onEnter :: {
-          targets[0].heal(amount:((targets[0].stats.HP*(0.5 + (level-1)*0.1))->ceil));
+          targets[0].heal(amount:3 + level*2);
         }
       )
     }
@@ -2754,6 +2829,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Cleanse on ' + targets[0].name + '!'
@@ -2784,6 +2860,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       foreach(targets)::(i, target) {
         windowEvent.queueMessage(
@@ -2805,7 +2882,7 @@ Arts.newEntry(
     name: 'Cure All',
     id : 'base:cure-all',
     targetMode : TARGET_MODE.ALLALLY,
-    description: "Heals all party members by a small amount. Additional levels increase the effect.",
+    description: "Heals all party members by a 3HP. Additional levels increase the effect by 2 points.",
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.HEAL,
@@ -2814,6 +2891,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Cure All!'
@@ -2822,7 +2900,7 @@ Arts.newEntry(
       foreach(targets)::(i, target) {
         windowEvent.queueCustom(
           onEnter :: {
-            target.heal(amount:((target.stats.HP*(0.05 + (level-1) * 0.10)->ceil)));
+            target.heal(amount:1 + level*2);
           }
         )
       }
@@ -2845,6 +2923,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Protect on ' + targets[0].name + '!'
@@ -2872,6 +2951,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' challenges ' + targets[0].name + ' to a duel!'
@@ -2899,6 +2979,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Grace on ' + targets[0].name + '!'
@@ -2926,6 +3007,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Pheonix Soul on ' + targets[0].name + '!'
@@ -2960,6 +3042,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Protect All!'
@@ -2989,6 +3072,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' meditates!'
@@ -3017,6 +3101,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Soothe on ' + targets[0].name + '!'
@@ -3047,6 +3132,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
 
@@ -3087,7 +3173,7 @@ Arts.newEntry(
     name: 'Counter',
     id : 'base:counter',
     targetMode : TARGET_MODE.NONE,
-    description: 'If attacked, dodges and retaliates for 3 turns.',
+    description: 'If attacked, dodges and retaliates for 3 turns. Countering negates an attack\'s damage and redirects a portion of the damage back at the attacker.',
     durationTurns: 0,
     kind : KIND.REACTION,
     rarity : RARITY.RARE,
@@ -3096,6 +3182,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
@@ -3122,6 +3209,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @:Entity = import(module:'game_class.entity.mt');
@@ -3143,18 +3231,6 @@ Arts.newEntry(
           }
         )
         windowEvent.queueMessage(text:targets[0].name + ' lost grip of their ' + equipped.name + '!');
-      } else ::<= {
-        windowEvent.queueMessage(text:targets[0].name + " swiftly dodged and retaliated!");            
-        windowEvent.queueCustom(
-          onEnter :: {
-            targets[0].attack(
-              target:user,
-              amount:targets[0].stats.ATK * (0.2),
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP
-            );
-          }
-        )
       }
 
     }
@@ -3176,6 +3252,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
@@ -3200,6 +3277,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
@@ -3227,6 +3305,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
@@ -3252,6 +3331,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
@@ -3277,6 +3357,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
@@ -3303,6 +3384,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
@@ -3330,6 +3412,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -3358,6 +3441,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -3385,6 +3469,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -3412,6 +3497,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -3439,6 +3525,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -3467,6 +3554,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -3494,6 +3582,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
@@ -3521,6 +3610,7 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:'' + user.name + ' waits.');
       user.healAP(amount:3);
@@ -3543,6 +3633,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:targets[0].name + ' was covered in poisonroot seeds!');
       windowEvent.queueCustom(
@@ -3568,6 +3659,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:targets[0].name + ' was covered in triproot seeds!');
       windowEvent.queueCustom(
@@ -3584,7 +3676,7 @@ Arts.newEntry(
     name: 'Plant Healroot',
     id : 'base:plant-healroot',
     targetMode : TARGET_MODE.ONE,
-    description: "Plants a healroot seed on the target. Grows in 4 turns and heals 5% HP turn.",
+    description: "Plants a healroot seed on the target. Grows in 4 turns and heals 2 HP turn.",
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.PHYSICAL,
@@ -3593,6 +3685,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:targets[0].name + ' was covered in healroot seeds!');
       windowEvent.queueCustom(
@@ -3619,6 +3712,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:which = [
         'base:healroot-growing',
@@ -3655,6 +3749,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:user.name + ' becomes shrouded in flame!');
       windowEvent.queueCustom(
@@ -3681,6 +3776,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:targets[0].name + ' becomes weak to elemental damage!');
       windowEvent.queueCustom(
@@ -3707,6 +3803,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:user.name + ' becomes shielded to elemental damage!');
       windowEvent.queueCustom(
@@ -3734,6 +3831,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:user.name + ' becomes shrouded in an icy wind!');
       windowEvent.queueCustom(
@@ -3759,6 +3857,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:user.name + ' becomes shrouded in electric arcs!');
       windowEvent.queueCustom(
@@ -3784,6 +3883,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:user.name + ' becomes shrouded in light');
       windowEvent.queueCustom(
@@ -3814,6 +3914,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:item = extraData[0];
       when (targets->size == 0) ::<= {
@@ -3885,6 +3986,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(user, level, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:item = extraData[0];
       user.equip(
@@ -3911,6 +4013,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
@@ -3937,6 +4040,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
@@ -3969,6 +4073,7 @@ Arts.newEntry(
     },
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
       when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).base.name == 'None')
@@ -4009,6 +4114,7 @@ Arts.newEntry(
     },
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
       when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.ARMOR).base.name == 'None')
@@ -4047,6 +4153,7 @@ Arts.newEntry(
     },
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
       when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).base.name == 'None')
@@ -4087,6 +4194,7 @@ Arts.newEntry(
     },
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
       when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.ARMOR).base.name == 'None')
@@ -4121,6 +4229,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text:user.name + ' tries to convince ' + targets[0].name + ' to wait!');
       
@@ -4150,6 +4259,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @inventory;
@@ -4197,6 +4307,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @inventory;
@@ -4249,6 +4360,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @inventory;
@@ -4300,6 +4412,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @inventory;
@@ -4351,6 +4464,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @inventory;
@@ -4402,6 +4516,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(text: user.name + ' looked around and found an Ingredient!');
       windowEvent.queueCustom(
@@ -4434,6 +4549,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @inventory;
@@ -4485,6 +4601,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       when (user.battle.getAllies(:user)->any(condition:::(value) <- value == targets[0]))
         windowEvent.queueMessage(text: "Are you... trying to bribe me? we're... we're on the same team..");
@@ -4564,6 +4681,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' sings a haunting, sweet song!'
@@ -4600,6 +4718,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       when(turnIndex == 0) ::<= {
         windowEvent.queueMessage(
@@ -4677,6 +4796,7 @@ Arts.newEntry(
       shouldAIuse ::(user, enemies, allies) {},
       oncePerBattle : false,
       canBlock : true,
+      baseDamage ::(level, user) {},
       onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
         windowEvent.queueMessage(
           text: user.name + ' attacks ' + targets[0].name + '!'
@@ -4724,6 +4844,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.drawArt(count:2);
     }
@@ -4744,6 +4865,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       targets[0].discardArt();
     }
@@ -4764,6 +4886,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:oldHand = [...user.deck.hand]
       user.deck.hand = [...targets[0].deck.hand];
@@ -4792,6 +4915,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.discardArt();
       user.drawArt();      
@@ -4813,6 +4937,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.deck.hand = [];
       foreach(user.deck.hand) ::(k, c) {
@@ -4837,6 +4962,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.deck.hand = [];
       foreach(user.deck.hand) ::(k, c) {
@@ -4862,6 +4988,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:pickitem = import(:'game_function.pickitem.mt');
       @:world = import(module:'game_singleton.world.mt');
@@ -4895,6 +5022,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @:summon ::{
@@ -4954,6 +5082,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:pickitem = import(:'game_function.pickitem.mt');
       @:world = import(module:'game_singleton.world.mt');
@@ -4988,6 +5117,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       when(random.flipCoin()) 
@@ -5021,6 +5151,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.discardArt();
       user.addEffect(from:user, id:'base:brace', durationTurns:2);
@@ -5042,6 +5173,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.discardArt();
       user.addEffect(from:user, id:'base:agile', durationTurns:5);
@@ -5063,6 +5195,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.discardArt();
       windowEvent.queueMessage(text:user.name + ' views ' + targets[0].name + ' Arts hand.');
@@ -5089,6 +5222,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) <- user.stats.ATK * (0.5),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' retaliates to ' + targets[0].name + '\'s Art!'
@@ -5124,6 +5258,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts a shield spell in response to ' + targets[0].name + '\'s Art!'
@@ -5149,6 +5284,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' cancels ' + targets[0].name + '\'s Art!'
@@ -5172,6 +5308,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
+    baseDamage ::(level, user) <- 1,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' suddenly throws a pebble at ' + targets[0].name + '!'
@@ -5208,6 +5345,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
@@ -5240,6 +5378,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
@@ -5267,6 +5406,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) <- user.stats.ATK * (0.3),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
@@ -5311,6 +5451,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
@@ -5348,6 +5489,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
@@ -5384,6 +5526,7 @@ Arts.newEntry(
     kind : KIND.REACTION,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.COMMON,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
@@ -5422,6 +5565,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
@@ -5468,6 +5612,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
@@ -5504,6 +5649,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
@@ -5541,6 +5687,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Species = import(module:'game_database.species.mt');
       windowEvent.queueMessage(
@@ -5591,6 +5738,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       targets[0].addEffect(from:targets[0], id:'base:cursed-binding', durationTurns:10);
     }
@@ -5613,6 +5761,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
@@ -5678,6 +5827,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.RARE,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:unbalanced', durationTurns:2);      
       user.drawArt(count:1); 
@@ -5699,6 +5849,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
+    baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:desparate', durationTurns:2);      
       user.drawArt(count:1); 
@@ -5712,7 +5863,7 @@ Arts.newEntry(
     name: 'Bodyslam',
     id : 'base:bodyslam',
     targetMode : TARGET_MODE.ONE,
-    description: "Deal damage to a target where the base damage is equal to the current HP and 1/3 the DEF of the user.",
+    description: "Deal damage to a target where the base damage is equal to the current HP and 1/3 the DEF of the user. The user is stunned after use for 1 turn.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, enemies, allies) {},
@@ -5721,6 +5872,7 @@ Arts.newEntry(
     kind : KIND.ABILITY,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.EPIC,
+    baseDamage ::(level, user) <- user.stats.HP + user.stats.DEF/3,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueMessage(
         text: user.name + ' bodyslams ' + targets[0].name + '!'
@@ -5730,7 +5882,7 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:user.stats.HP + user.stats.DEF/3,
+            amount:Arts.find(:'base:bodyslam').baseDamage(level, user),
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart:targetParts[0],
@@ -5738,6 +5890,12 @@ Arts.newEntry(
           );        
         }
       );    
+
+      windowEvent.queueCustom(
+        onEnter :: {
+          user.addEffect(from:user, id: 'base:stunned', durationTurns: 1);  
+        }
+      );      
     }
   }
 );
@@ -5757,6 +5915,7 @@ Arts.newEntry(
     kind : KIND.ABILITY,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
+    baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:enlarge', durationTurns:2);      
       
@@ -5779,6 +5938,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.RARE,
+    baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       if (targets[0].shield == 0)
         targets[0].heal(amount:1, isShield:true)          
@@ -5803,6 +5963,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.UNCOMMON,
+    baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       for(0, 2) ::(i) {
         targets[0].addEffect(from:user, id:'base:banish', durationTurns:10000);      
@@ -5825,6 +5986,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.RARE,
+    baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:paralyzed',durationTurns:2);
       for(0, 3) ::(i) {
@@ -5849,6 +6011,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
+    baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       foreach(targets[0].effectStack.getAll()) ::(k, inst) {
         targets[0].addEffect(
@@ -5873,6 +6036,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
+    baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       foreach(targets) ::(k, target) {
         foreach(target.effectStack.getAll()) ::(k, inst) {
@@ -5899,6 +6063,7 @@ Arts.newEntry(
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
+    baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       foreach(targets) ::(k, inst) {
         for(0, 3) ::(i) {
@@ -5927,6 +6092,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
+    baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' closes their eyes, lifts their arms, and prays to the Wyverns for guidance!'
@@ -6095,6 +6261,7 @@ Arts = class(
     kind : Number,
     traits : Number,
     rarity : Number,
+    baseDamage : Function,
     durationTurns : Number, // multiduration turns supercede the choice of action
     canBlock : Boolean, // whether the targets get a chance to block
 

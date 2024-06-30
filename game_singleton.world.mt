@@ -229,9 +229,9 @@
         state.step = 0;
         state.turn = 0;
         state.time = TIME.LATE_MORNING;
-        state.day = 0;
+        state.day = (Number.random()*100)->floor;
         state.year = 1033;
-        state.party = empty;
+        state.party = Party.new();
         state.islandID = 0;
         state.orphanedIsland = empty;
         state.idPool = 0;
@@ -240,8 +240,8 @@
         state.finished = false;
         state.wish = empty;
         state.scenario = empty;
-        state.accolades = empty;
-        state.modData = empty;
+        state.accolades = {};
+        state.modData = {};
         loadableIslands = [];
         battle = Battle.new();
         island = empty;

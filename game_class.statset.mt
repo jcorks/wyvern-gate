@@ -19,6 +19,7 @@
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:displayHP = import(:'game_function.displayhp.mt');
 
 
 @:NAMES = [
@@ -68,7 +69,7 @@
         ],
         
         [
-          ''+stats.HP,
+          ''+displayHP(:stats.HP),
           ''+stats.AP,
           ''+stats.ATK,
           ''+stats.DEF,
@@ -90,7 +91,7 @@
         ],
         
         [
-          ''+other.HP,
+          ''+displayHP(:other.HP),
           ''+other.AP,
           ''+other.ATK,
           ''+other.DEF,
@@ -363,7 +364,7 @@
       get :: {
         @:state = _.state;
         return 
-          'HP:  ' + state.HP + '\n' +
+          'HP:  ' + displayHP(:state.HP) + '\n' +
           'AP:  ' + state.AP + '\n' +
           'ATK: ' + state.ATK + '\n' +
           'DEF: ' + state.DEF + '\n' +

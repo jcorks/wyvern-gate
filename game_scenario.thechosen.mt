@@ -529,11 +529,11 @@ return {
           "HP - This stat indicates how much a person can withstand before succumbing to a knockout. The higher this stat, the more damage they can withstand.\n\n"+
           "AP - This stat indicates how often a person can use special abilities. The higher this stat, the more a person can do outside of normal actions.\n\n"+
           "ATK - This stat measures the physical strength a person possesses. The higher this stat, the more physical damage this person can do to foes.\n\n"+
-          "DEF - This stat measures how a person's body will naturally reduce harm. The higher this stat, the less damage a person will take.\n\n"+
+          "DEF - This stat measures how likely a person's will be able to avoid harm. The higher this stat, the more likely a person will be able to shrug off an attack entirely.\n\n"+
           "INT - This stat measures the intellect and intuition of a person. The higher this stat, the more a user is aware of the world around them. Certain abilities, such as spells, will benefit from this as well.\n\n"+
           "SPD - This stat measures how fast a person can move. The higher this stat, the more apt they are at acting before others.\n\n"+
           "LUK - This stat measures how lucky a person is. The higher this stat, the more a person may get out of difficult situations.\n\n"+
-          "DEX - This stat measures the precision and grace with which a person acts. The higher this stat, the more accurate their actions and the more they avoid danger.\n\n"+
+          "DEX - This stat measures the precision and grace with which a person acts. The higher this stat, the more likely an attack will pierce through defenses.\n\n"+
           "All stats are important, but some stats may be more important at times than others."          
       );
     };

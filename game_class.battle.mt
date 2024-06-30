@@ -27,8 +27,7 @@
 @:Arts = import(module:'game_database.arts.mt');
 @:g = import(module:'game_function.g.mt');
 @:Entity = import(module:'game_class.entity.mt');
-
-@:HP_KNOWN_LIMIT = 99;
+@:displayHP = import(:'game_function.displayhp.mt');
 @:AP_COST = 2;
 
 @:combatChooseDefend::(targetPart, attacker, defender, onDone) {
@@ -553,7 +552,7 @@
     }
         
     @:renderFrac::(isDead, value, outOf) {
-      when (outOf > HP_KNOWN_LIMIT || value < 0) 
+      when (outOf > 99 || value < 0) 
         '?? / ??';
         
       return 
@@ -1167,6 +1166,7 @@
         windowEvent.onResolveAll(
           onDone :: {
             entityTurn.deck.revealArt(
+              user:entityTurn,
               handCard:action.card,
               prompt: entityTurn.name + ' uses the Art: ' + art.name + '!'
             );

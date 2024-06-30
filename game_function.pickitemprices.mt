@@ -24,7 +24,7 @@
 return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, goldMultiplier, onHover, renderable, filter, header, leftJustified) {
   when(inventory.items->size == 0) ::<= {
     windowEvent.queueMessage(
-      message: 'This inventory is empty.',
+      text: 'This inventory is empty.',
       onLeave :: {
         onPick();
       }
