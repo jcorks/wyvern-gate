@@ -179,7 +179,8 @@
         hp = 0
       }
     },
-    animationFrame ::{
+    animationFrame ::{  
+      @:maxHP = displayHP(:this.stats.HP);
       canvas.renderTextFrameGeneral(
         leftWeight: getShakeWeight(),
         topWeight : getShakeWeight(),
@@ -187,7 +188,7 @@
           caption,
           '',
           canvas.renderBarAsString(width:40, fillFraction: (to + hp) / this.stats.HP),
-          'HP: ' + (to + hp->round) + ' / ' + displayHP(:this.stats.HP)
+          'HP: ' + (if (maxHP == '??') '??' else to + hp->round) + ' / ' + maxHP
         ]
       );
       frame += 1;
@@ -815,6 +816,7 @@
       
       _.this.recalculateStats(); 
       _.state.ap = 0;               
+      _.state.shield = 0;
     },
 
       
