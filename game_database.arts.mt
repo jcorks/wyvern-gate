@@ -6238,7 +6238,12 @@ Arts = class(
           (16): 'Ice',
           (32): 'Thunder',
           (64): 'Status',
-          (128): 'Support'
+          (128): 'Support',
+          (256): 'Light',
+          (512): 'Dark',
+          (1024): 'Poison',
+          (2048): 'Special',
+          (4096): 'Costless'
         }
         return '';
       }

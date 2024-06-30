@@ -687,7 +687,7 @@ return empty;
               where: ::(landmark)<- gategate[0]
             );        
             if (hasVisitIsland) ::<= {
-              windowEvent.onResolveAll(:onReady)
+              windowEvent.onResolveAll(onDone:onReady)
             } else
               if (onReady)
                 onReady();
