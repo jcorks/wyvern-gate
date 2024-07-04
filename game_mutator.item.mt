@@ -3344,7 +3344,7 @@ Item.database.newEntry(data : {
     size : 0,
     price : 0,
     color : empty,
-    island : empty,
+    islandID : 0,
     islandLevelHint : 0,
     islandNameHint : '',
     islandTierHint : 0,
@@ -3636,16 +3636,6 @@ Item.database.newEntry(data : {
       get ::<- _.state.equipEffects
     },
       
-    islandEntry : {
-      set ::(value) {
-        @:state = _.state;
-        state.island = value;
-        state.price *= 1 + ((state.island.levelMin) / (5 + 5*Number.random()));
-        state.price = state.price->ceil;
-      
-      },
-      get ::<- _.state.island
-    },
       
     setIslandGenAttributes ::(levelHint => Number, nameHint => String, tierHint => Number, extraLandmarks) {
       @:state = _.state;
@@ -3654,46 +3644,25 @@ Item.database.newEntry(data : {
       state.islandTierHint = tierHint;
       state.islandExtraLandmarks = extraLandmarks;
     },
+    
+    islandGenAttributes : {
+      get ::<- {
+        levelHint: _.state.islandLevelHint,
+        nameHint: _.state.islandNameHint,
+        tierHint: _.state.islandTierHint,
+        extraLandmarks: _.state.islandExtraLandmarks        
+      }
+    },
+    
+    islandID : {
+      get ::<- _.state.islandID,
+      set ::(value)<- _.state.islandID = value
+    },
       
     modData : {
       get ::<- _.state.modData
     },
       
-    addIslandEntry ::(world, island) {
-      @:state = _.state;
-      @:this = _.this;
-      when (state.island != empty) empty;
-
-      @:Island = import(module:'game_class.island.mt');
-
-
-      if (island == empty) ::<= {
-        this.islandEntry = Island.new(
-          levelHint: (state.islandLevelHint)=>Number,
-          nameHint: (state.islandNameHint)=>String,
-          tierHint: (state.islandTierHint)=>Number,
-          extraLandmarks: state.islandExtraLandmarks
-        );        
-      } else 
-        this.islandEntry = island;
-
-
-      
-              
-      
-      /*
-      @:levelToStratum = ::(level) {
-        return match((level / 5)->floor) {
-          (0): 'IV',
-          (1): 'III',
-          (2): 'II',
-          (3): 'I',
-          default: 'Unknown'
-        }
-      }
-      state.customName = 'Key to ' + state.island.name + ' - Stratum ' + levelToStratum(level:state.island.levelMin);
-      */
-    },
       
     resetContainer :: {
       _.container = empty;

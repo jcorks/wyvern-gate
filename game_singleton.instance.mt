@@ -118,7 +118,6 @@ return class(
   define:::(this) {
     @onSaveState;
     @onLoadState;
-    @island_;
     @landmark_;
     @settings;
     @onSaveSettings_;
@@ -316,8 +315,6 @@ return empty;
                 canCancel: true,
                 onChoice::(choice) {
                   when(choice == 0) empty;
-                  @:data = onLoadState(slot:choices[choice-1]);
-                  
                   loading(
                     message: 'Loading scenario...',
                     do:: {
@@ -325,7 +322,7 @@ return empty;
                       loading(
                         message: 'Loading save...',
                         do :: {
-                          this.load(serialized:JSON.decode(string:data));
+                          world.load(serialized:this.getSaveDataRaw(:choices[choice-1]));
                           pointOfNoReturn(
                             do::<- this.startResume()
                           );
@@ -643,14 +640,9 @@ return empty;
         }      
       },
       
-      visitIsland ::(key, restorePos, noMenu, atGate, onReady) {      
+      visitCurrentIsland ::(restorePos, atGate, onReady) {      
         @:doVisit :: {
-          if (key != empty) ::<= {
-            key => Item.type;
-            world.island = key.islandEntry;
-          }
           @:island = world.island;
-          island_ = island;
           
           // check if we're AT a location.
           island.map.title = "(Map of " + island.name + ')';
@@ -662,12 +654,10 @@ return empty;
           }
 
           @hasVisitIsland;
-          if (noMenu == empty || noMenu == false) ::<= {
-            this.islandTravel();
-            if (windowEvent.canJumpToTag(name:'VisitIsland'))
-              windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
-            hasVisitIsland = true;
-          }
+          this.islandTravel();
+          if (windowEvent.canJumpToTag(name:'VisitIsland'))
+            windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
+          hasVisitIsland = true;
           when (restorePos == empty && atGate != empty) ::<= {
             @gate = island.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
             when(gate->size == 0) empty;
@@ -696,18 +686,7 @@ return empty;
             onReady();
         }
 
-        if (key != empty && key.islandEntry == empty)
-          loading(
-            message: '...',
-            do ::{
-              key.addIslandEntry(world);
-              doVisit();
-            }
-          )
-        else 
-          doVisit();        
-        
-
+        doVisit();        
       },  
 
       islandTravel ::{
@@ -894,6 +873,7 @@ return empty;
         
         landmark.updateTitle();
         landmark.base.onVisit(landmark, island:landmark.island);
+        @:island = world.island;
 
 
         
@@ -909,7 +889,7 @@ return empty;
             keep:true,
             canCancel:true,
             onGetChoices ::{
-              landmarkOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island:island_, landmark));
+              landmarkOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island, landmark));
               
               choiceActions = [];
               @:choices = [];
@@ -927,13 +907,13 @@ return empty;
               foreach(landmarkOptions) ::(k, value) {
                 choices->push(:value.name);
                 choiceActions->push(::{
-                  value.onSelect(island:island_, landmark);                
+                  value.onSelect(island, landmark);                
                 });       
               }
               
               choices->push(value: 'Options');
               choiceActions->push(::{
-                @:options = [...world.scenario.base.interactionsOptions]->filter(by::(value) <- value.filter(island:island_, landmark));
+                @:options = [...world.scenario.base.interactionsOptions]->filter(by::(value) <- value.filter(island, landmark));
                 @:choices = [...options]->map(to::(value) <- value.name);
 
                 windowEvent.queueChoices(
@@ -945,7 +925,7 @@ return empty;
                   choices,
                   onChoice::(choice) {
                     when(choice == 0) empty;
-                    options[choice-1].onSelect(island:island_, landmark);
+                    options[choice-1].onSelect(island, landmark);
                   }
                 );              
               });
@@ -1027,8 +1007,8 @@ return empty;
         set ::(value) <- onLoadState = value
       },
       
-      savestate ::{
-        onSaveState(slot:world.saveName, data:JSON.encode(object:this.save()));          
+      savestate ::(saveOverride){
+        onSaveState(slot:world.saveName, data:JSON.encode(object:if (saveOverride) saveOverride else world.save()));          
       },
 
       save ::{  
@@ -1054,24 +1034,14 @@ return empty;
         }
       },
       
+      getSaveDataRaw::(slot) <- JSON.decode(string:onLoadState(slot:if (slot) slot else world.saveName)),
+      
       quitRun ::{
         world.resetAll();
         Database.reset();
-        island_ = empty;
         landmark_ = empty;
         windowEvent.jumpToTag(name:'MainMenu');
       },
-
-      island : {
-        get ::<- island_,
-        set ::(value) <- island_ = value
-      },
-      
-      load ::(serialized) {
-        world.load(serialized);
-        @:island = world.island;
-        island_ = island;        
-      }
     }
   }
 ).new();

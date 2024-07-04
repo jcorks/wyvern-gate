@@ -1400,10 +1400,10 @@ Interaction.newEntry(
             @:instance = import(module:'game_singleton.instance.mt');
 
 
-            if (keys[choice-1].islandEntry == empty)
-              keys[choice-1].addIslandEntry();
+            @:key = keys[choice-1];
+            world.loadIsland(:key);
+
             instance.visitIsland(
-              key:keys[choice-1],
               atGate:true
             );
           });

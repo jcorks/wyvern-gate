@@ -3133,7 +3133,7 @@ return {
         'base:wyvern-gate'
       ]
     ));
-    instance.visitIsland(key:keyhome, noMenu:true);
+    world.loadIsland(:keyhome);
 
     party = world.party;
     party.reset();

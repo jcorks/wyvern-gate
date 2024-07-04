@@ -298,12 +298,29 @@ return {
       ],
       tierHint: 0  
     )
-    keyhome.addIslandEntry(world);
-    instance.visitIsland(noMenu:true, key:keyhome);
+    world.loadIsland(:keyhome);
 
     party = world.party;
     party.reset();
-    @:island = keyhome.islandEntry;
+    @:island = world.island;
+
+
+    for(0, 4) ::(i) {
+      @:key = Item.new(
+        base: Item.database.find(id:'base:wyvern-key')
+      );
+      @:name = namegen.island();
+      key.setIslandGenAttributes(
+        nameHint:name, 
+        levelHint:story.levelHint,
+        extraLandmarks : [
+          'thechosen:shrine-of-fire'
+        ],
+        tierHint: 0  
+      )  
+      key.name = 'Key of ' + name;
+      party.inventory.add(:key);  
+    }
 
 
     
@@ -313,7 +330,7 @@ return {
     
     // since both the party members are from this island, 
     // they will already know all its locations
-    foreach(keyhome.islandEntry.landmarks)::(index, landmark) {
+    foreach(island.landmarks)::(index, landmark) {
       landmark.discover(); 
     }
     
@@ -323,7 +340,7 @@ return {
     @:choices = [];
     
     for(0, 5) ::(i) {
-      @:p0 = keyhome.islandEntry.newInhabitant(
+      @:p0 = island.newInhabitant(
         speciesHint: Species.getRandomFiltered(filter::(value) <- (value.traits & Species.TRAITS.SPECIAL) == 0).id,
         levelHint:story.levelHint-1
       );
@@ -469,7 +486,7 @@ return {
           @:Scene = import(module:'game_database.scene.mt');
           Scene.start(id:'thechosen:scene_intro', onDone::{          
           //Scene.start(id:'thechosen:scene_wyvernlight1_quest', onDone ::{
-            instance.visitIsland(key:keyhome);            
+            instance.visitCurrentIsland();            
             windowEvent.queueMessage(
               speaker: party.members[0].name,
               text: '"I should probably open that box now..."'
@@ -2708,8 +2725,12 @@ return {
             world.scenario.data.fireWyvernDefeated = true;
             
             @:instance = import(module:'game_singleton.instance.mt');
-
-            instance.visitIsland(key, atGate:true, onReady:doNext);
+            windowEvent.queueCustom(
+              onEnter ::{
+                world.loadIsland(:key);
+                instance.visitCurrentIsland(atGate:true, onReady:doNext);
+              }
+            );
           }
           
           
@@ -2860,7 +2881,8 @@ return {
             windowEvent.queueCustom(
               onEnter ::{
                 @:instance = import(module:'game_singleton.instance.mt');
-                instance.visitIsland(key, atGate:true);
+                world.loadIsland(:key);
+                instance.visitCurrentIsland(atGate:true);
                 doNext();    
               }
             );        
@@ -2961,7 +2983,8 @@ return {
             
             @:instance = import(module:'game_singleton.instance.mt');
 
-            instance.visitIsland(key, atGate:true, onReady:doNext);
+            world.loadIsland(:key);
+            instance.visitCurrentIsland(atGate:true, onReady:doNext);
           }
           
           
@@ -3073,7 +3096,8 @@ return {
             windowEvent.queueCustom(
               onEnter ::{
                 @:instance = import(module:'game_singleton.instance.mt');
-                instance.visitIsland(key, atGate:true);
+                world.loadIsland(:key);
+                instance.visitCurrentIsland(atGate:true);
                 doNext();    
               }
             );        
@@ -3195,12 +3219,8 @@ return {
             world.scenario.data.thunderWyvernDefeated = true;
             
             @:instance = import(module:'game_singleton.instance.mt');
-            // cancel and flush current VisitIsland session
-            if (key.islandEntry == empty)
-              key.addIslandEntry(world);
-
-
-            instance.visitIsland(key, atGate:true, onReady:doNext);
+            world.loadIsland(:key);
+            instance.visitCurrentIsland(atGate:true, onReady:doNext);
           }
           
           
@@ -3434,7 +3454,8 @@ return {
             windowEvent.queueCustom(
               onEnter :: {
                 @:instance = import(module:'game_singleton.instance.mt');
-                instance.visitIsland(key, atGate:true);
+                world.loadIsland(:key);
+                instance.visitCurrentIsland(atGate:true);
                 doNext();     
               }
             );       
@@ -3677,7 +3698,8 @@ return {
             windowEvent.queueCustom(
               onEnter :: {
                 @:instance = import(module:'game_singleton.instance.mt');
-                instance.visitIsland(key, atGate:true);
+                world.loadIsland(:key);
+                instance.visitCurrentIsland(atGate:true);
                 doNext();     
               }
             ); 
@@ -3687,12 +3709,9 @@ return {
 
             
             @:instance = import(module:'game_singleton.instance.mt');
-            // cancel and flush current VisitIsland session
-            if (key.islandEntry == empty)
-              key.addIslandEntry(world);
 
-
-            instance.visitIsland(key, atGate:true, onReady:doNext);
+            world.loadIsland(:key);
+            instance.visitCurrentIsland(atGate:true, onReady:doNext);
           } 
         ]
       }
@@ -3744,16 +3763,12 @@ return {
             windowEvent.queueCustom(
               onEnter :: {
                 @:instance = import(module:'game_singleton.instance.mt');
-                instance.visitIsland(key, atGate:true);
+                world.loadIsland(:key);
+                instance.visitCurrentIsland(atGate:true, onReady:doNext);
                 doNext();     
               }
             ); 
 
-            // cancel and flush current VisitIsland session
-            if (key.islandEntry == empty)
-              key.addIslandEntry(world);
-
-            instance.visitIsland(key, atGate:true, onReady:doNext);   
           }
         ]
       }
@@ -4191,10 +4206,9 @@ return {
                   );
                   instance.visitLandmark(landmark:d);            
                 } else ::<= {
-                  if (keys[choice-1].islandEntry == empty)
-                    keys[choice-1].addIslandEntry();
-                  instance.visitIsland(
-                    key:keys[choice-1],
+                  @:key = keys[choice-1];
+                  world.loadIsland(:key);
+                  instance.visitCurrentIsland(
                     atGate:true
                   );
                 }

@@ -401,7 +401,7 @@
 
       },
       
-      defaultLoad::(levelHint, nameHint, tierHint, landmarksHint, sizeWHint, sizeHHint, possibleEventsHint, extraLandmarks, hasSpeciesBias) {
+      defaultLoad::(worldID, levelHint, nameHint, tierHint, landmarksHint, sizeWHint, sizeHHint, possibleEventsHint, extraLandmarks, hasSpeciesBias) {
         @:world = import(module:'game_singleton.world.mt');
 
         @:oldIsland = world.island;
@@ -425,7 +425,8 @@
           state.sizeH  = if (sizeHHint != empty) sizeHHint else sizeH;
           state.stepsSinceLastEvent = 0;
           state.map = LargeMap.create(parent:this, sizeW, sizeH);
-          state.worldID = world.getNextID();
+          state.map.title = '';
+          state.worldID = worldID;
           state.climate = random.integer(
             from:Island.CLIMATE.WARM, 
             to  :Island.CLIMATE.COLD
@@ -498,13 +499,11 @@
 
       save ::{
         @:world = import(module:'game_singleton.world.mt');
-        world.addLoadableIsland(island:this);
         return state.save();
       },
       load ::(serialized) {
         @:world = import(module:'game_singleton.world.mt');
         state.load(parent:this, serialized);
-        world.addLoadableIsland(island:this);
       },
       
       name : {

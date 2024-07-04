@@ -149,12 +149,8 @@
     day : 0,
     year : 1033,
     party : empty,
-    islandID : 0,
-    orphanedIsland : empty, // IN THE CASE that a user has tossed or otherwise 
-                // lost the key to the island they are residing in 
-                // the island becomes orphaned. The world becomes 
-                // the sole owner of the island.
-    idPool : 0,
+    currentIslandID : 0,
+    idPool : 1,
     story : empty,
     npcs : empty,
     finished : false,
@@ -169,20 +165,6 @@
 
     @battle = Battle.new();
     @island = empty;
-    @loadableIslands = [];
-  
-    @:findIsland ::{
-      {:::}{
-        foreach(loadableIslands) ::(k, is) {
-          if (is.worldID == state.islandID) ::<= {
-            island = is;
-            send();
-          }        
-        }
-        
-        error(detail: 'Internal error: Could not find loadable island.');
-      }
-    }
 
     
     @:getDayString = ::{
@@ -242,7 +224,6 @@
         state.scenario = empty;
         state.accolades = {};
         state.modData = {};
-        loadableIslands = [];
         battle = Battle.new();
         island = empty;
       },
@@ -301,13 +282,10 @@
       },
       
       island : {
-        get :: <- island,
-        set ::(value) {
-          if (value)
-            state.islandID = value.worldID;
-          island = value;
-        }
+        get ::<- island,
+        set ::(value) <- island = value
       },
+      
       
       scenario : {
         get ::<- state.scenario,
@@ -416,7 +394,8 @@
         @:currentIsland = this.island;
         this.island = Island.new(
           tierHint: 0,
-          levelHint : 6
+          levelHint : 6,
+          worldID : 0
         );
         
         state.npcs = {
@@ -668,7 +647,7 @@
             return ent;          
           }
         } 
-        this.island = currentIsland;
+        island = currentIsland;
         
             
       },
@@ -679,65 +658,84 @@
       
       save ::{
         State.startRootSerializeGuard();
+        // first load
+        @:instance = import(:'game_singleton.instance.mt');
+        @:save = instance.getSaveDataRaw();
+      
+        // then save the island and update the entry
+        // the islands property is saved outside of the world.
+        @:islandSave = island.save();
+        
+        // update the island.
+        if (save.islands == empty)
+          save.islands = [];
+        save.islands[island.worldID] = islandSave;
+        save.world = state.save();
 
-        loadableIslands = [];
-        @:out = state.save()
+        // cleanup
+        State.endRootSerializeGuard();
+        return save;        
+      },
 
-        // check to see if we have an orphaned island
-        @hasIsland = false;
-        {:::} {
-          foreach(loadableIslands) ::(k, is) {
-            if (state.islandID == is.worldID) ::<= {
-              hasIsland = true;
-              send();
-            }
-          }
+      // makes the key's island the current island. If the key's island 
+      // doesnt exist, it is made, saved, and set to the island
+      loadIsland ::(key) {
+        // first load existing save. The save has all the current islands 
+        @:instance = import(:'game_singleton.instance.mt');
+        @save = instance.getSaveDataRaw();
+        if (save == empty) ::<= {
+          save = this.save();
         }
         
-        @:output = if (hasIsland == false) ::<= {
-          state.orphanedIsland = island;
-          State.endRootSerializeGuard();
-          State.startRootSerializeGuard();
-          return state.save(); // TODO: is there a faster way that isnt messy?
-        } else out;
-        
-        
-        State.endRootSerializeGuard();
-        
-        loadableIslands = [];        
-        return output;        
-      },
+        @needsSave = false;
+        // get ID if none exists
+        if (key.islandID == empty) ::<= {
+          key.islandID = this.getNextID();
+          needsSave = true;
+        }
 
-      // for initial loading from state.
-      addLoadableIsland ::(island) {
-        loadableIslands->push(value:island);
-      },
-      
-      createIsland ::{
-        @:Item = import(module:'game_mutator.item.mt');
-        @:keyhome = Item.new(
-          base: Item.database.find(id:'base:wyvern-key')
+        if (save.islands == empty)
+          save.islands = [];
+
+        // retrieve, creating if it doesnt exist
+        @which = save.islands[key.islandID];
+        if (which == empty) ::<= {
+          save.islands[key.islandID] = Island.new(
+            *{worldID : key.islandID, ...key.islandGenAttributes}
+          ).save(); 
+          
+          // save to OLD data with new island. That way, old data is consistent 
+          // and not overwrite. It just will have an extra island reference that 
+          // will get lost on loading / saving next time.
+          needsSave = true;
+          which = save.islands[key.islandID];
+        }
+        
+        // some transient data needs to be saved, like 
+        // consuming a worldID and adding a new island entry
+        if (needsSave)
+          instance.savestate(:save);
+
+        state.currentIslandID = key.islandID;
+        island = Island.new(
+          tierHint: 0,
+          levelHint : 6,
+          worldID : 0
         );
-        keyhome.addIslandEntry(world:this);
-        @:island = keyhome.islandEntry;    
-        return {
-          island : island,
-          key : keyhome
-        };  
+        island.load(serialized:which);
       },
+     
       
       load ::(serialized) {
-        loadableIslands = [];
-        state.load(parent:this, loadFirst:['scenario'], serialized);
-        // overwrite singleton with saved instance
-        @:st = state.story;
-        state.story = import(module:'game_singleton.story.mt');
-        state.story.load(serialized:st.save());
-        findIsland();        
-        loadableIslands = [];
-        state.orphanedIsland = empty;
+        state.load(parent:this, serialized:serialized.world, loadFirst:['scenario']);
+        
+        island = Island.new(
+          tierHint: 0,
+          levelHint : 6,
+          worldID : 0
+        );
+        island.load(:serialized.islands[state.currentIslandID]);
       }
-      
     }
   }
 );
