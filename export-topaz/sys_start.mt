@@ -141,15 +141,16 @@ return ::(terminal, arg, onDone) {
                 data
             ) {
 
-                Paths.enter(::{                
-                    saveAsset.setFromString(string:data);
+                //Paths.enter(::{                
                     @:outputPath =  'WYVERNSAVE_' + slot;
-                    if (Topaz.Resources.writeAsset(
-                        asset:saveAsset,
-                        fileType: 'text',
-                        outputPath
-                    ) == 0) error(detail:outputPath + ' could not be written!');
-                })
+                    @:basePath = Topaz.Resources.getPath();
+                    
+                    @:Filesystem = import(:'Matte.System.Filesystem');
+                    Filesystem.writeJSON(
+                      path: basePath + '/' + outputPath,
+                      object:data 
+                    );
+                //})
             },
 
             preloadMods :: {
@@ -272,14 +273,10 @@ return ::(terminal, arg, onDone) {
                 @:oldPath = Topaz.Resources.getPath();
                 Topaz.Resources.setPath(path:'.');
 
-
-                @:asset = Topaz.Resources.createDataAssetFromPath(path:'WYVERNSAVE_' + slot, name:slot);
-                @:data = asset.getAsString();
-                Topaz.Resources.removeAsset(asset);
-
-                Topaz.Resources.setPath(path:oldPath);
-                return data;
-
+                @:Filesystem = import(:'Matte.System.Filesystem');
+                return Filesystem.readJSON(
+                  path: Topaz.Resources.getPath() + '/WYVERNSAVE_' + slot
+                );
             },
             
             onQuit ::{

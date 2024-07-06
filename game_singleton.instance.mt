@@ -572,7 +572,7 @@ return empty;
       },
     
       startNew ::{
-      
+        this.savestate(:{});
 
 
       
@@ -676,7 +676,7 @@ return empty;
               landmark:gate,
               where: ::(landmark)<- gategate[0]
             );        
-            if (hasVisitIsland) ::<= {
+            if (hasVisitIsland && onReady) ::<= {
               windowEvent.onResolveAll(onDone:onReady)
             } else
               if (onReady)
@@ -1008,7 +1008,7 @@ return empty;
       },
       
       savestate ::(saveOverride){
-        onSaveState(slot:world.saveName, data:JSON.encode(object:if (saveOverride) saveOverride else world.save()));          
+        onSaveState(slot:world.saveName, data:if (saveOverride) saveOverride else world.save());          
       },
 
       save ::{  
@@ -1034,7 +1034,7 @@ return empty;
         }
       },
       
-      getSaveDataRaw::(slot) <- JSON.decode(string:onLoadState(slot:if (slot) slot else world.saveName)),
+      getSaveDataRaw::(slot) <- onLoadState(slot:if (slot) slot else world.saveName),
       
       quitRun ::{
         world.resetAll();

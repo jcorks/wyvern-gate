@@ -298,7 +298,7 @@ return {
       ],
       tierHint: 0  
     )
-    world.loadIsland(:keyhome);
+    world.loadIsland(key:keyhome, skipSave:true);
 
     party = world.party;
     party.reset();
@@ -457,6 +457,11 @@ return {
     }
     
     @:finish ::{
+      windowEvent.queueMessage(
+        text: 'Upon certain events, the game will save automatically. However, it is encouraged to save often.'
+      );
+    
+    
       loading(
         message: 'Saving...',
         do :: {
@@ -2727,7 +2732,7 @@ return {
             @:instance = import(module:'game_singleton.instance.mt');
             windowEvent.queueCustom(
               onEnter ::{
-                world.loadIsland(:key);
+                world.loadIsland(key);
                 instance.visitCurrentIsland(atGate:true, onReady:doNext);
               }
             );
@@ -2881,7 +2886,7 @@ return {
             windowEvent.queueCustom(
               onEnter ::{
                 @:instance = import(module:'game_singleton.instance.mt');
-                world.loadIsland(:key);
+                world.loadIsland(key);
                 instance.visitCurrentIsland(atGate:true);
                 doNext();    
               }
@@ -2983,7 +2988,7 @@ return {
             
             @:instance = import(module:'game_singleton.instance.mt');
 
-            world.loadIsland(:key);
+            world.loadIsland(key);
             instance.visitCurrentIsland(atGate:true, onReady:doNext);
           }
           
@@ -3096,7 +3101,7 @@ return {
             windowEvent.queueCustom(
               onEnter ::{
                 @:instance = import(module:'game_singleton.instance.mt');
-                world.loadIsland(:key);
+                world.loadIsland(key);
                 instance.visitCurrentIsland(atGate:true);
                 doNext();    
               }
@@ -3219,7 +3224,7 @@ return {
             world.scenario.data.thunderWyvernDefeated = true;
             
             @:instance = import(module:'game_singleton.instance.mt');
-            world.loadIsland(:key);
+            world.loadIsland(key);
             instance.visitCurrentIsland(atGate:true, onReady:doNext);
           }
           
@@ -3454,7 +3459,7 @@ return {
             windowEvent.queueCustom(
               onEnter :: {
                 @:instance = import(module:'game_singleton.instance.mt');
-                world.loadIsland(:key);
+                world.loadIsland(key);
                 instance.visitCurrentIsland(atGate:true);
                 doNext();     
               }
@@ -3698,7 +3703,7 @@ return {
             windowEvent.queueCustom(
               onEnter :: {
                 @:instance = import(module:'game_singleton.instance.mt');
-                world.loadIsland(:key);
+                world.loadIsland(key);
                 instance.visitCurrentIsland(atGate:true);
                 doNext();     
               }
@@ -3710,7 +3715,7 @@ return {
             
             @:instance = import(module:'game_singleton.instance.mt');
 
-            world.loadIsland(:key);
+            world.loadIsland(key);
             instance.visitCurrentIsland(atGate:true, onReady:doNext);
           } 
         ]
@@ -3763,7 +3768,7 @@ return {
             windowEvent.queueCustom(
               onEnter :: {
                 @:instance = import(module:'game_singleton.instance.mt');
-                world.loadIsland(:key);
+                world.loadIsland(key);
                 instance.visitCurrentIsland(atGate:true, onReady:doNext);
                 doNext();     
               }
@@ -4207,7 +4212,7 @@ return {
                   instance.visitLandmark(landmark:d);            
                 } else ::<= {
                   @:key = keys[choice-1];
-                  world.loadIsland(:key);
+                  world.loadIsland(key);
                   instance.visitCurrentIsland(
                     atGate:true
                   );

@@ -214,7 +214,6 @@
         state.day = (Number.random()*100)->floor;
         state.year = 1033;
         state.party = Party.new();
-        state.islandID = 0;
         state.orphanedIsland = empty;
         state.idPool = 0;
         state.story = empty;
@@ -679,7 +678,8 @@
 
       // makes the key's island the current island. If the key's island 
       // doesnt exist, it is made, saved, and set to the island
-      loadIsland ::(key) {
+      loadIsland ::(key, skipSave) {
+        breakpoint();
         // first load existing save. The save has all the current islands 
         @:instance = import(:'game_singleton.instance.mt');
         @save = instance.getSaveDataRaw();
@@ -687,53 +687,64 @@
           save = this.save();
         }
         
-        @needsSave = false;
         // get ID if none exists
-        if (key.islandID == empty) ::<= {
+        if (key.islandID == 0) ::<= {
           key.islandID = this.getNextID();
-          needsSave = true;
         }
 
         if (save.islands == empty)
           save.islands = [];
+          
+        if (island != empty)
+          save.islands[island.worldID] = island.save();
 
         // retrieve, creating if it doesnt exist
         @which = save.islands[key.islandID];
+        @alreadyLoaded;
         if (which == empty) ::<= {
-          save.islands[key.islandID] = Island.new(
+          @:newIsland = Island.new(
             *{worldID : key.islandID, ...key.islandGenAttributes}
-          ).save(); 
+          );
+
+          alreadyLoaded = newIsland;
           
-          // save to OLD data with new island. That way, old data is consistent 
-          // and not overwrite. It just will have an extra island reference that 
-          // will get lost on loading / saving next time.
-          needsSave = true;
+          // need a location too if first making.
+          @gate = newIsland.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
+          when(gate->size == 0) empty;
+          
+          gate = gate[0];
+          newIsland.map.setPointer(
+            x: gate.x,
+            y: gate.y
+          );               
+        
+          save.islands[key.islandID] = newIsland.save(); 
           which = save.islands[key.islandID];
         }
         
-        // some transient data needs to be saved, like 
-        // consuming a worldID and adding a new island entry
-        if (needsSave)
-          instance.savestate(:save);
+
 
         state.currentIslandID = key.islandID;
-        island = Island.new(
-          tierHint: 0,
-          levelHint : 6,
-          worldID : 0
-        );
-        island.load(serialized:which);
+        if (alreadyLoaded != empty)
+          island = alreadyLoaded 
+        else ::<= {
+          island = Island.new(createEmpty:true);
+          island.load(serialized:which);
+        }
+        
+        save.world = state.save();
+
+        // traveling always triggers a save.
+        if (skipSave == empty || skipSave == false)
+          instance.savestate(:save);
       },
      
       
       load ::(serialized) {
         state.load(parent:this, serialized:serialized.world, loadFirst:['scenario']);
         
-        island = Island.new(
-          tierHint: 0,
-          levelHint : 6,
-          worldID : 0
-        );
+        island = Island.new(createEmpty:true);
+        breakpoint();
         island.load(:serialized.islands[state.currentIslandID]);
       }
     }

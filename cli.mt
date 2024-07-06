@@ -138,9 +138,9 @@ instance.mainMenu(
     enterNewLocation(
       path: './',
       action::(filesystem) {
-        filesystem.writeString(
+        filesystem.writeJSON(
           path: 'save_' + slot,
-          string: data
+          object: data
         );
       }
     );
@@ -168,7 +168,7 @@ instance.mainMenu(
       return enterNewLocation(
         path: './',
         action::(filesystem) {
-          return filesystem.readString(
+          return filesystem.readJSON(
             path: 'save_' + slot
           );
         }

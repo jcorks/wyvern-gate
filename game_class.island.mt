@@ -401,7 +401,8 @@
 
       },
       
-      defaultLoad::(worldID, levelHint, nameHint, tierHint, landmarksHint, sizeWHint, sizeHHint, possibleEventsHint, extraLandmarks, hasSpeciesBias) {
+      defaultLoad::(createEmpty, worldID, levelHint, nameHint, tierHint, landmarksHint, sizeWHint, sizeHHint, possibleEventsHint, extraLandmarks, hasSpeciesBias) {
+        when(createEmpty) empty;
         @:world = import(module:'game_singleton.world.mt');
 
         @:oldIsland = world.island;
