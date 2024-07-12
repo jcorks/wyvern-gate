@@ -33,7 +33,10 @@
     members : empty,
     karma : 5500,
     arts : [],
-    leader : 0
+    leader : 0,
+    guildRank : 0,
+    guildEXP : 0,
+    activeQuests : []
   },
 
   define:::(this, state) {   
@@ -71,21 +74,29 @@
         
       },
       
-      getItemAtAll ::(id) {
-        @key = this.inventory.items->filter(by:::(value) <- value.base.id == id);
-        when (key->size != 0) key[0];
+      getItem ::(condition, remove) {      
+        @:which = ::<= {
+          @key = this.inventory.items->filter(:condition);
+          when (key->size != 0) key[0];
 
-        // could be equipped
-        return {:::} {
-          foreach(this.members)::(i, member) {
-            foreach(Entity.EQUIP_SLOTS) ::(n, slot) {
-              @:wep = member.getEquipped(slot);
-              if (wep.base.id == id) ::<= {
-                send(message:wep);
+          // could be equipped
+          return {:::} {
+            foreach(this.members)::(i, member) {
+              foreach(Entity.EQUIP_SLOTS) ::(n, slot) {
+                @:wep = member.getEquipped(slot);
+                if (wep.base.id == id) ::<= {
+                  send(message:wep);
+                }
               }
             }
-          }
-        }        
+          }        
+        }
+        if (remove) ::<= {
+          if (which.equippedBy != empty)
+            which.equippedBy.unequipItem(item:which);
+          which.throwOut();
+        }
+        return which;
       },
       
       inventory : {
@@ -111,6 +122,9 @@
             }            
           }
         }
+      },
+      quests : {
+        get ::<- state.quests
       },
       
       isIncapacitated :: {
@@ -247,6 +261,7 @@
           }
         );
       },
+      
       
     
       members : {

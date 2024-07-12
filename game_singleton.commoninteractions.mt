@@ -440,6 +440,57 @@ return {
     )
   },
   person : {
+    fetchQuestStart : InteractionMenuEntry.new(
+      name: 'Need something?",
+      keepInteractionMenu : true,
+      filter ::(entity) <-
+        party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID) == -1
+      ,
+      onSelect::(entity) {
+        windowEvent.queueMessage(
+          speaker: entity.name,
+          text: '"Funny you should ask, yeah I need some help..."'
+        );
+        
+        if (entity.data.quest == empty)
+          entity.data.quest = 
+            Quest.new(
+              issuer : entity,
+              rank : Quest.RANK.NONE,
+              base : Quest.find(id:'base:fetch-quest-personal')
+            );
+        
+        window.queueAskBoolean(
+          renderable : {
+            render ::{
+              quest.renderPrompt();            
+            }
+          },
+          topWeight : 1,
+          prompt: 'Accept quest?',
+          onChoice::(which) {
+            party.quests->push(:entity.data.quest);
+          }
+        );
+      },
+    ),
+
+    fetchQuestEnd : InteractionMenuEntry.new(
+      name: 'About that item...",
+      keepInteractionMenu : true,
+      filter ::(entity) <-
+        party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID) != -1
+      ,
+      onSelect::(entity) {
+        @:quest = party.quests[party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID)];
+
+        when(!quest.isComplete)
+          windowEvent.queueMessage("
+        
+      },
+    ),
+  
+  
     barter : InteractionMenuEntry.new(
       name: 'Barter',
       keepInteractionMenu : true,

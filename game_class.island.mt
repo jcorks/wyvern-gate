@@ -597,19 +597,14 @@
         }  
       },
       
-      newLandmark ::(base, x, y, floorHint) {
-        @landmark = Landmark.new(
-          base:base,
-          parent:state.map,
-          x: x,
-          y: y,
-          floorHint:floorHint
-        );      
-        
-        if (x != empty && y != empty) ::<= {
-          state.map.setItem(data:landmark, x:landmark.x, y:landmark.y, symbol:landmark.base.symbol, name:landmark.base.legendName);
-        }
-        return landmark;
+      addLandmark ::(:landmark) {
+        state.map.setItem(
+          data:landmark, 
+          x:landmark.x, 
+          y:landmark.y, 
+          symbol:landmark.symbol, 
+          name:landmark.legendName
+        );
       },
       
       addEvent::(event) {

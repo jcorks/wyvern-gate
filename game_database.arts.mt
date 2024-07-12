@@ -57,6 +57,7 @@
   FIRE : 8,
   ICE : 16,
   THUNDER : 32,
+  
   SUPPORT : 128,
   LIGHT : 256,
   DARK : 512,
@@ -261,7 +262,7 @@ Arts.newEntry(
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : 0,
-    rarity : RARITY.COMMON,
+    rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : false,

@@ -342,6 +342,9 @@
           if (state.time == TIME.MORNING)
             this.scenario.onNewDay();
 
+          foreach(this.party.quests) ::(k, v) {
+            v.nextHour();
+          }
         }
           
         if (state.time > 13) ::<={
@@ -403,7 +406,7 @@
               speciesHint: 'base:rabbit',
               professionHint: 'base:summoner',
               personalityHint: 'base:caring',
-              levelHint: 5,
+              levelHint: 20,
               adventurousHint: true,
               innateEffects : [
                 'base:seasoned-adventurer'
@@ -454,7 +457,16 @@
             );
             fausCloak.maxOut();
 
-
+            ent.supportArts = [
+              'base:cancel',
+              'base:cancel',
+              'base:pebble',
+              'base:quick-sheild',
+              'base:bloods-summoning',
+              'base:banish',
+              'base:banish',
+              'base:banish'
+            ];
             
             
             ent.equip(item:fausWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);

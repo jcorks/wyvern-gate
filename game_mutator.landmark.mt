@@ -613,6 +613,45 @@ Landmark.database.newEntry(
     
   }
 )
+
+
+Landmark.database.newEntry(
+  data: {
+    name: 'Forest',
+    id: 'base:forest-generic',
+    legendName: 'Forest',
+    symbol : 'T',
+    rarity : 40,        
+    peaceful: true,
+    isUnique : true,
+    landmarkType : TYPE.DUNGEON,
+    pointOfNoReturn : false,
+    ephemeral : false,
+    dungeonForceEntrance: true,
+    minLocations : 3,
+    maxLocations : 5,
+    guarded : false,
+    canSave : true,
+    possibleLocations : [
+    ],
+    requiredLocations : [
+    ],
+    startingEvents : [
+    ],
+    mapHint: {
+      roomSize: 60,
+      wallCharacter: 'Y',
+      roomAreaSize: 7,
+      roomAreaSizeLarge: 14,
+      emptyAreaCount: 25,
+      outOfBoundsCharacter: '~'
+    },
+    onCreate ::(landmark, island){},
+    onVisit ::(landmark, island) {
+    }
+    
+  }
+)
 /*
 Landmark.database.newEntry(
   data: {
@@ -711,7 +750,9 @@ Landmark.database.newEntry(
     modData : empty,
     events : empty,
     mapEntityController : empty,
-    overrideTitle : ''
+    overrideTitle : '',
+    symbol : '',
+    legendName : ''
   },
   
   database : Database.new(
@@ -899,6 +940,8 @@ Landmark.database.newEntry(
         state.stepsSinceLast = 0;
         state.modData = {};
         state.events = [];
+        state.symbol = base.symbol;
+        state.legendName = base.legendName;
 
         state.base = base;
         state.x = if (x != empty) x else 0;
@@ -1037,12 +1080,28 @@ Landmark.database.newEntry(
           (' - ' + world.timeString)
         ;      
       },
+      
+      symbol : {
+        get ::<- state.symbol,
+        set ::(value) <- state.symbol = value
+      },
+      
+      legendName : {
+        get ::<- state.legendName,
+        set ::(value) <- state.legendName = value
+      },
 
       step :: {
 
         world.stepTime(isStep:true); 
         this.updateTitle();
         state.mapEntityController.step();
+
+        foreach(world.party.quests) ::(k, v) {
+          v.step(landmark:this, island:this.island);
+        }
+
+
         when(state.base.landmarkType == TYPE.STRUCTURE) ::<= {
           if (this.peaceful == false) ::<= {
             if (state.stepsSinceLast >= 14 && Number.random() > 0.7) ::<= {
@@ -1058,7 +1117,6 @@ Landmark.database.newEntry(
           event.step();
         }
         state.stepsSinceLast += 1;                
-
         
       },
       

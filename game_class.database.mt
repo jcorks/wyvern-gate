@@ -156,6 +156,38 @@
           )
         );
       },
+      
+      dumpCSV ::(titles, fieldFormatters, filename, sort, filter) {
+        @:csv = [titles];
+        
+        @items = items_->values;
+        
+        if (filter)
+          items = items->filter(:filter);
+        
+        if (sort != empty)
+          items->sort(:sort);
+        
+        foreach(items) ::(k, item) {
+          @:row = [];
+          foreach(titles) ::(i, title) {
+            row->push(:fieldFormatters[title](item));
+          }
+          csv->push(:row);
+        }
+        
+        @:strings = [];
+        foreach(csv) ::(k, row) {
+          foreach(row) ::(i, cell) {
+            strings->push(:'"'+cell+'"');
+            strings->push(:',');
+          }
+          strings->push(:'\n');
+        };
+        
+        @:Filesystem = import(:'Matte.System.Filesystem');
+        Filesystem.writeString(path:filename, string:String.combine(:strings));
+      },
 
       
       getAll :: {

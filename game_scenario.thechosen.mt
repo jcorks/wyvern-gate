@@ -674,6 +674,112 @@ return {
     
     ///////////////////
     /*
+    @:Arts = import(:'game_database.arts.mt');
+    @:dump ::(filter, filename) {
+      Arts.dumpCSV(
+        filter,
+        filename,
+        sort::(a, b) {
+          when (a.kind < b.kind) -1
+          when (a.kind > b.kind) 1
+          
+          when(a.name < b.name) -1;
+          when(a.name > b.name) 1;
+        },
+      
+        titles : [
+          'Name', 'ID', 'Kind', 'Traits', 'Rarity',  'Target mode', 'Can Block?', 'AI Usage Hint', 'Once per battle?', 'Description'
+        ],
+        
+        fieldFormatters : {
+          ('Once per battle?') ::(item) <-
+            if (item.oncePerBattle) 'yes' else 'no',
+          ('Description') ::(item) <- item.description,
+          ('Rarity')::(item) <- 
+            match(item.rarity) {
+              (Arts.RARITY.COMMON): 'Common',
+              (Arts.RARITY.UNCOMMON): 'Uncommon',
+              (Arts.RARITY.RARE): 'Rare',
+              (Arts.RARITY.EPIC): 'Epic'
+            },
+            
+          ('Can Block?')::(item) <-
+            if (item.canBlock) 'yes' else 'no',
+          
+          ('AI Usage Hint') ::(item) <- 
+            match(item.usageHintAI) {
+              (Arts.USAGE_HINT.OFFENSIVE): 'Offensive',
+              (Arts.USAGE_HINT.HEAL): 'Heal',
+              (Arts.USAGE_HINT.BUFF): 'Buff',
+              (Arts.USAGE_HINT.DEBUFF): 'Debuff',
+              (Arts.USAGE_HINT.DONTUSE): 'Don\'t use'
+            },
+            
+          ('Target mode') ::(item) <- 
+            match(item.targetMode) {
+              (Arts.TARGET_MODE.ONE): 'One',
+              (Arts.TARGET_MODE.ONEPART): 'One (body part)',
+              (Arts.TARGET_MODE.ALLALLY): 'All ally',
+              (Arts.TARGET_MODE.RANDOM): 'Random',
+              (Arts.TARGET_MODE.NONE): 'None',
+              (Arts.TARGET_MODE.ALLENEMY): 'All enemy',
+              (Arts.TARGET_MODE.ALL): 'Everyone'
+            },
+        
+        
+          ('Name') :: (item) <- item.name,
+          ('ID') ::(item) <- item.id,
+          ('Kind') ::(item) <-
+            match(item.kind) {
+              (Arts.KIND.ABILITY): 'Ability',
+              (Arts.KIND.REACTION): 'Reaction',
+              (Arts.KIND.EFFECT): 'Effect',
+              (Arts.KIND.FIELD): 'Field'
+            },
+            
+          ('Traits') ::(item) {
+            @:traits = [];
+            @trait = item.traits;
+            {:::} {
+              @iter = 0;
+              forever ::{
+                when(iter > 12) send();
+                
+                if (trait & (1 << iter)) ::<= {
+                  traits->push(:match(iter) {
+                    (0): 'Physical',
+                    (1): 'Magic',
+                    (2): 'Heal',
+                    (3): 'Fire',
+                    (4): 'Ice',
+                    (5): 'Thunder',
+                    (7): 'Support',
+                    (8): 'Light',
+                    (9): 'Dark',
+                    (10): 'Poison',
+                    (11): 'Special',
+                    (12): 'Costless'
+                  });
+                  traits->push(:',');
+                }
+                iter += 1;
+              }
+            }
+            
+            return String.combine(:traits);
+          }
+        }
+      );
+    }
+    
+    dump(filename: 'arts_core.csv', filter::(value) <- (value.traits & Arts.TRAITS.SUPPORT) == 0)
+    dump(filename: 'arts_supports.csv', filter::(value) <- (value.traits & Arts.TRAITS.SUPPORT) > 0)
+    */
+    ///////////////////
+    
+    
+    ///////////////////
+    /*
     for(0, 4) ::(i) {
       @:world = import(module:'game_singleton.world.mt');
       world.party.queueCollectSupportArt();    
@@ -2544,7 +2650,7 @@ return {
                 windowEvent.queueMessage(text: 'It looks like they dropped something heavy during the fight...');
                 breakpoint();
                 @key;
-                if (itemName != empty && world.party.getItemAtAll(id:itemName) == empty) ::<= {
+                if (itemName != empty && world.party.getItem(condition::(value) <- value.base.id == itemName) == empty) ::<= {
                   windowEvent.queueMessage(text: '.. is that...?');              
                   key = Item.new(base:Item.database.find(id:itemName));
                 } else ::<= {
@@ -2693,7 +2799,7 @@ return {
           ::(location, landmark, doNext) {
             location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
             @:world = import(module:'game_singleton.world.mt');
-            @key = world.party.getItemAtAll(id:'thechosen:wyvern-key-of-fire');
+            @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-fire');
             // you can technically throw it out or Literally Throw It.
             when(key == empty) ::<= {
               windowEvent.queueMessage(
@@ -2875,7 +2981,7 @@ return {
           ['Kaedjaal', 'Zaashael kaaluh-lo zohppuh-zodjii shiirr kohggaelaarr...'], 
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
-            @key = world.party.getItemAtAll(id:'thechosen:wyvern-key-of-fire');
+            @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-fire');
 
             @:canvas = import(module:'game_singleton.canvas.mt');
             windowEvent.queueMessage(
@@ -2964,7 +3070,7 @@ return {
           ::(location, landmark, doNext) {
             location.ownedBy.name = 'Kaedjaal, Wyvern of Ice';
             @:world = import(module:'game_singleton.world.mt');
-            @key = world.party.getItemAtAll(id:'thechosen:wyvern-key-of-ice');
+            @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-ice');
 
             // you can technically throw it out or Literally Throw It.
             when(key == empty) ::<= {
@@ -3090,7 +3196,7 @@ return {
           ['Ziikkaettaal', 'I\'ll take you back to your world.'],           
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
-            @key = world.party.getItemAtAll(id:'thechosen:wyvern-key-of-ice');
+            @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-ice');
 
             @:canvas = import(module:'game_singleton.canvas.mt');
             windowEvent.queueMessage(
@@ -3201,7 +3307,7 @@ return {
           ::(location, landmark, doNext) {
             location.ownedBy.name = 'Juhriikaal, Wyvern of Thunder';
             @:world = import(module:'game_singleton.world.mt');
-            @key = world.party.getItemAtAll(id:'thechosen:wyvern-key-of-thunder');
+            @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-thunder');
 
             // you can technically throw it out or Literally Throw It.
             when(key == empty) ::<= {
@@ -3448,7 +3554,7 @@ return {
           ['Juhriikaal', 'Allow me to return you to the land that the Key of Thunder leads to.'],           
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
-            @key = world.party.getItemAtAll(id:'thechosen:wyvern-key-of-thunder');
+            @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-thunder');
 
             @:canvas = import(module:'game_singleton.canvas.mt');
             windowEvent.queueMessage(
@@ -3671,7 +3777,7 @@ return {
           ::(location, landmark, doNext) {
             location.ownedBy.name = 'Shaarraeziil';
             @:world = import(module:'game_singleton.world.mt');
-            @key = world.party.getItemAtAll(id:'thechosen:wyvern-key-of-light');
+            @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-light');
 
             // you can technically throw it out or Literally Throw It.
             when(key == empty) ::<= {
@@ -3753,7 +3859,7 @@ return {
           ['Shaarraeziil', 'For now, I will take you back.'],
           ::(location, landmark, doNext){
             @:world = import(module:'game_singleton.world.mt');
-            @key = world.party.getItemAtAll(id:'thechosen:wyvern-key-of-light');
+            @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-light');
 
 
 
