@@ -84,7 +84,7 @@
             foreach(this.members)::(i, member) {
               foreach(Entity.EQUIP_SLOTS) ::(n, slot) {
                 @:wep = member.getEquipped(slot);
-                if (wep.base.id == id) ::<= {
+                if (condition(:wep)) ::<= {
                   send(message:wep);
                 }
               }

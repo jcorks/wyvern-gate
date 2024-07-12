@@ -3557,11 +3557,10 @@ return {
             @:Landmark = import(module:'game_mutator.landmark.mt');
             
 
-            location.targetLandmark = 
-              location.landmark.island.newLandmark(
-                base:Landmark.database.find(id:'base:treasure-room')
-              )
-            ;
+            location.targetLandmark = Landmark.new(
+              base:Landmark.database.find(id:'base:treasure-room')
+            )
+
             location.targetLandmark.loadContent();
             location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
           }
@@ -3963,7 +3962,7 @@ return {
             @:instance = import(module:'game_singleton.instance.mt');
             @:Landmark = import(module:'game_mutator.landmark.mt');
 
-            @:d = world.island.newLandmark(
+            @:d = Landmark.new(
               base:Landmark.database.find(id:'thetrader:fortune-wyvern-dimension')
             );
             instance.visitLandmark(landmark:d);       

@@ -19,12 +19,10 @@
    
       @:Landmark = import(module:'game_mutator.landmark.mt');
       
-      location.targetLandmark = 
-        location.landmark.island.newLandmark(
-          base:Landmark.database.find(id:location.landmark.base.id),
-          floorHint:location.landmark.floor+1
-        )
-      ;
+      location.targetLandmark = Landmark.new(
+        base:Landmark.database.find(id:location.landmark.base.id),
+        floorHint:location.landmark.floor+1
+      )
       
       location.targetLandmark.name = 'Shrine ('+location.targetLandmark.floor+'F)';
     }

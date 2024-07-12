@@ -674,6 +674,62 @@ return {
     
     ///////////////////
     /*
+    @:Effect = import(:'game_database.effect.mt');
+    @:dump ::(filter, filename) {
+      Effect.dumpCSV(
+        filter,
+        filename,
+      
+        titles : [
+          'Name', 'ID', 'Battle only?', 'Flags', 'Stackable?', 'Addt. block points', 'HP', 'AP', 'ATK', 'DEF', 'INT', 'SPD', 'LUK', 'DEX', 'Description'
+        ],
+        
+        fieldFormatters : {
+          ('Name') ::(item) <- item.name,
+          ('ID') ::(item) <- item.id,
+          ('Battle only?') ::(item) <- if (item.battleOnly) 'yes' else 'no',
+          ('Flags') ::(item) {
+            @:traits = [];
+            @trait = item.flags;
+            {:::} {
+              @iter = 0;
+              forever ::{
+                when(iter > 12) send();
+                
+                if (trait & (1 << iter)) ::<= {
+                  traits->push(:match(iter) {
+                    (0): 'Ailment',
+                    (1): 'Buff',
+                    (2): 'Debuff'
+                  });
+                  traits->push(:',');
+                }
+                iter += 1;
+              }
+            }
+            return String.combine(:traits);
+          },
+          ('Stackable?') ::(item) <- if (item.stackable) 'yes' else 'no',
+          ('Addt. block points') ::(item) <- if (item.blockPoints == 0) '--' else ''+item.blockPoints,
+          ('HP') ::(item) <- if (item.stats.HP == 0) '--' else '%' + item.stats.HP,
+          ('AP') ::(item) <- if (item.stats.AP == 0) '--' else '%' + item.stats.AP,
+          ('ATK') ::(item) <- if (item.stats.ATK == 0) '--' else '%' + item.stats.ATK,
+          ('DEF') ::(item) <- if (item.stats.DEF == 0) '--' else '%' + item.stats.DEF,
+          ('INT') ::(item) <- if (item.stats.INT == 0) '--' else '%' + item.stats.INT,
+          ('SPD') ::(item) <- if (item.stats.SPD == 0) '--' else '%' + item.stats.SPD,
+          ('LUK') ::(item) <- if (item.stats.LUK == 0) '--' else '%' + item.stats.LUK,
+          ('DEX') ::(item) <- if (item.stats.DEX == 0) '--' else '%' + item.stats.DEX,
+          ('Description') ::(item) <- item.description
+        }
+      );
+    }
+    
+    dump(filename: 'effects.csv', filter::(value) <- true)
+    */
+
+
+
+    /*
     @:Arts = import(:'game_database.arts.mt');
     @:dump ::(filter, filename) {
       Arts.dumpCSV(
@@ -1057,11 +1113,9 @@ return {
               @:Landmark = import(module:'game_mutator.landmark.mt');
               
 
-              location.targetLandmark = 
-                location.landmark.island.newLandmark(
-                  base:Landmark.database.find(id:'base:treasure-room')
-                )
-              ;
+              location.targetLandmark = Landmark.new(
+                base:Landmark.database.find(id:'base:treasure-room')
+              )
               location.targetLandmark.loadContent();
               location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
             }
@@ -3845,10 +3899,11 @@ return {
                 }
                 @:instance = import(module:'game_singleton.instance.mt');
                 @:world = import(module:'game_singleton.world.mt');
+                @:landmark = Landmark.new(
+                  base : Landmark.database.find(id:'thechosen:dark-lair-entrance')
+                );
                 instance.visitLandmark(
-                  landmark: world.island.newLandmark(
-                    base : Landmark.database.find(id:'thechosen:dark-lair-entrance')
-                  )
+                  landmark
                 );
               }
             );
@@ -4312,7 +4367,7 @@ return {
                 };
                 @base = if (which != empty) Landmark.database.find(id:which)
                 if (base) ::<= {
-                  @:d = location.landmark.island.newLandmark(
+                  @:d = Landmark.new(
                     base
                   );
                   instance.visitLandmark(landmark:d);            

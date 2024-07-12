@@ -597,7 +597,7 @@
         }  
       },
       
-      addLandmark ::(:landmark) {
+      addLandmark ::(landmark) {
         state.map.setItem(
           data:landmark, 
           x:landmark.x, 

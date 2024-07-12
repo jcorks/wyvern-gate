@@ -1462,22 +1462,18 @@ Interaction.newEntry(
         if (location.landmark.floor > 5 && Number.random() > 0.5 - (0.2*(location.landmark.floor - 5))) ::<= {
           @:Landmark = import(module:'game_mutator.landmark.mt');
           
-          location.targetLandmark = 
-            location.landmark.island.newLandmark(
-              base:Landmark.database.find(id:'base:shrine-lost-floor')
-            )
-          ;
+          location.targetLandmark = Landmark.new(
+            base:Landmark.database.find(id:'base:shrine-lost-floor')
+          );
           location.targetLandmark.loadContent();
 
         } else ::<= {
           @:Landmark = import(module:'game_mutator.landmark.mt');
           
-          location.targetLandmark = 
-            location.landmark.island.newLandmark(
-              base:Landmark.database.find(id:location.landmark.base.id),
-              floorHint:location.landmark.floor+1
-            )
-          ;
+          location.targetLandmark = Landmark.new(
+            base:Landmark.database.find(id:location.landmark.base.id),
+            floorHint:location.landmark.floor+1
+          )
           location.targetLandmark.loadContent();
           
           location.targetLandmark.name = 'Shrine ('+location.targetLandmark.floor+'F)';
@@ -1525,11 +1521,9 @@ Interaction.newEntry(
         @:Landmark = import(module:'game_mutator.landmark.mt');
         
 
-        location.targetLandmark = 
-          location.landmark.island.newLandmark(
-            base:Landmark.database.find(id:'base:treasure-room')
-          )
-        ;
+        location.targetLandmark = Landmark.new(
+          base:Landmark.database.find(id:'base:treasure-room')
+        )
         location.targetLandmark.loadContent();
         location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
       }

@@ -45,6 +45,18 @@
   WINTER : 3
 }
 
+// assume walking speed is about 5km/hr
+// each "step" is about 2m 
+// each "turn" is about 1/4km (125 steps raw, but assume theres some waiting time, so lets say 60)
+// each "hour" is about 20 turns
+// each "day" is exactly 14 hours 
+// each "year" is 100 days 
+
+@:STEPS_PER_TURN = 60;
+@:TURNS_PER_HOUR = 20;
+@:HOURS_PER_DAY  = 14;
+@:DAYS_PER_YEAR  = 100;
+
 
 @:ACCOLADE_LIST = {
 
@@ -330,13 +342,13 @@
           state.step += 1;
         }
         
-        if (state.step > 15) ::<={
+        if (state.step >= STEPS_PER_TURN) ::<={
           state.turn += 1;
           state.step = 0;
         }
           
           
-        if (state.turn > 10) ::<={
+        if (state.turn >= TURNS_PER_HOUR) ::<={
           state.turn = 0;
           state.time += 1;
           if (state.time == TIME.MORNING)
@@ -347,13 +359,13 @@
           }
         }
           
-        if (state.time > 13) ::<={
+        if (state.time >= HOURS_PER_DAY) ::<={
           state.time = 0;
           state.day += 1;
           this.accoladeIncrement(name:'daysTaken');
         }
         
-        if (state.day > 99) ::<={
+        if (state.day >= DAYS_PER_YEAR) ::<={
           state.day = 0;
           state.year += 1;
         }        

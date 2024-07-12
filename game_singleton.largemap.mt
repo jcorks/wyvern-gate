@@ -184,11 +184,14 @@
 
 
       addLandmark::(map, island, base) { 
-        return island.newLandmark(
+        @:landmark = Landmark.new(
+          island,
           base,
           x:random.integer(from:BUFFER_SPACE + (0.2*(map.width  - BUFFER_SPACE*2))->floor, to:(map.width  - BUFFER_SPACE)-(0.2*(map.width  - BUFFER_SPACE*2))->floor),
           y:random.integer(from:BUFFER_SPACE + (0.2*(map.height - BUFFER_SPACE*2))->floor, to:(map.height - BUFFER_SPACE)-(0.2*(map.height - BUFFER_SPACE*2))->floor)
         );
+        island.addLandmark(:landmark);
+        return landmark;
       },
       
       getAPosition ::(map) {

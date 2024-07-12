@@ -920,13 +920,7 @@ Landmark.database.newEntry(
     }
 
     this.interface =  {
-      initialize ::(parent) {
-        @island = if (parent->type == Map.type)
-          parent.parent // immediate parent is map
-        else // only other case is its a location, due to targetLandmark
-          parent.landmark.island
-          // loc  map   landm   map   island
-        ;
+      initialize ::(parent, island) {
         @:Island = import(module:'game_class.island.mt');
         
         island_ = island;
@@ -1185,7 +1179,8 @@ Landmark.database.newEntry(
         }
       },
       island : {
-        get ::<- island_
+        get ::<- island_,
+        set ::(value) <- island_ = value
       },
       
       movePointerToRandomArea ::{

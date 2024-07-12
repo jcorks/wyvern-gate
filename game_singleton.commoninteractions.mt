@@ -441,16 +441,19 @@ return {
   },
   person : {
     fetchQuestStart : InteractionMenuEntry.new(
-      name: 'Need something?",
+      name: 'Need something?',
       keepInteractionMenu : true,
-      filter ::(entity) <-
-        party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID) == -1
-      ,
+      filter ::(entity) {
+        @:world = import(module:'game_singleton.world.mt');
+        @:party = world.party;
+        return party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID) == -1
+      },
       onSelect::(entity) {
         windowEvent.queueMessage(
           speaker: entity.name,
           text: '"Funny you should ask, yeah I need some help..."'
         );
+        @:Quest = import(:'game_mutator.quest.mt');
         
         if (entity.data.quest == empty)
           entity.data.quest = 
@@ -460,34 +463,37 @@ return {
               base : Quest.find(id:'base:fetch-quest-personal')
             );
         
-        window.queueAskBoolean(
+        windowEvent.queueAskBoolean(
           renderable : {
             render ::{
-              quest.renderPrompt();            
+              entity.data.quest.renderPrompt();            
             }
           },
           topWeight : 1,
           prompt: 'Accept quest?',
           onChoice::(which) {
+            @:world = import(module:'game_singleton.world.mt');
+            @:party = world.party;
             party.quests->push(:entity.data.quest);
           }
         );
-      },
+      }
     ),
 
     fetchQuestEnd : InteractionMenuEntry.new(
-      name: 'About that item...",
+      name: 'About that item...',
       keepInteractionMenu : true,
-      filter ::(entity) <-
-        party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID) != -1
-      ,
-      onSelect::(entity) {
-        @:quest = party.quests[party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID)];
-
-        when(!quest.isComplete)
-          windowEvent.queueMessage("
-        
+      filter ::(entity) {
+        @:world = import(module:'game_singleton.world.mt');
+        @:party = world.party;
+        return party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID) != -1
       },
+      onSelect::(entity) {
+        //@:quest = party.quests[party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID)];
+
+        // todo: turn in quest
+        
+      }
     ),
   
   

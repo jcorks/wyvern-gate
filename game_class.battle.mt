@@ -437,6 +437,9 @@
         turnPoppable->remove(key:0);
         entityTurn = ent;
 
+        @:world = import(module:'game_singleton.world.mt');
+        world.stepTime();
+
         windowEvent.queueMessage(
           text: 'It is now ' + ent.name + '\'s turn.'
         );
