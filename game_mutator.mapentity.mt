@@ -548,7 +548,7 @@ MapEntity.Task.database.newEntry(
 
       @:siren = mapEntity.entities[0];
 
-      when (siren.modData.thesnakesiren_heardsong == true) ::<= {
+      when (siren.data.thesnakesiren_heardsong == true) ::<= {
         map.movePointerToward(
           x: item.x,
           y: item.y
@@ -562,7 +562,7 @@ MapEntity.Task.database.newEntry(
       ) > THESNAKESIREN_SONG_DISTANCE) empty;
 
 
-      when (siren.modData.thesnakesiren_heardsong == false) empty;    
+      when (siren.data.thesnakesiren_heardsong == false) empty;    
     
     
       windowEvent.queueMessage(
@@ -576,10 +576,10 @@ MapEntity.Task.database.newEntry(
             windowEvent.queueMessage(
               text: 'The party ignores the pleasant-yet-harrowing song.'
             );
-            siren.modData.thesnakesiren_heardsong = false;
+            siren.data.thesnakesiren_heardsong = false;
           }
           
-          siren.modData.thesnakesiren_heardsong = true;
+          siren.data.thesnakesiren_heardsong = true;
           windowEvent.queueMessage(
             text: 'The party takes a second to listen to the song.'
           );
@@ -590,7 +590,7 @@ MapEntity.Task.database.newEntry(
         }
       );
       // to prevent multi-steps
-      siren.modData.thesnakesiren_heardsong = false;
+      siren.data.thesnakesiren_heardsong = false;
 
     }
   }
@@ -831,10 +831,13 @@ MapEntity.Task.database.newEntry(
           if (!coversEntranceExit) ::<= {
             foreach(other.entities) ::(i, entity) {
               this.controller.landmark.addLocation(
-                x:otherItem.x,
-                y:otherItem.y,
-                ownedByHint: entity,
-                id: 'base:body'
+                location : Location.new(
+                  landmark: this.controller.landmark,
+                  x:otherItem.x,
+                  y:otherItem.y,
+                  ownedByHint: entity,
+                  base: Location.database.find(:'base:body')
+                )
               );
             }
           }

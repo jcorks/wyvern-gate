@@ -141,7 +141,7 @@
     // Whether the island experiences the normal set of possible events
     possibleEvents : empty,
 
-    modData : empty
+    data : empty
   },
   
   
@@ -607,6 +607,12 @@
         );
       },
       
+      removeLandmark ::(landmark) {
+        state.map.removeItem(
+          data:landmark
+        );
+      },
+      
       addEvent::(event) {
         state.events->push(value:event);
       },
@@ -673,6 +679,10 @@
       
       getLandmarkIndex ::(landmark => Landmark.type) {
         return state.map.getAllItemData()->findIndex(value:landmark);
+      },
+      
+      getAPosition :: {
+        return LargeMap.getAPosition(:state.map);
       },
       
       landmarks : {

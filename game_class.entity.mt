@@ -395,7 +395,7 @@
     inventory : empty,
     expNext : 1,
     level : 0,
-    modData : empty,
+    data : empty,
     deck : empty,
     supportArts : empty,
     innateEffects : empty
@@ -454,7 +454,7 @@
       state.personality = Personality.getRandom();
       state.favoritePlace = Location.database.getRandom();
       state.growth = StatSet.new();
-      state.adventurous = Number.random() <= 0.5;
+      state.adventurous = random.try(percentSuccess:25);
       state.equips = [
         empty, // handl
         empty, // handr
@@ -468,7 +468,7 @@
       
       state.expNext = 10;
       state.level = 0;
-      state.modData = {};
+      state.data = {};
 
 
 
@@ -1077,7 +1077,7 @@
         if (critChance > 25) critChance = 25;
         if (random.try(percentSuccess:critChance) || dmg.forceCrit) ::<={
           if (dmg.amount < 5) dmg.amount = 5;
-          dmg.amount *= (1.75 + (this.stats.LUK / 3));
+          dmg.amount *= 2.5;
           isCrit = true;
         }
 
@@ -1745,12 +1745,15 @@
     adventurous : {
       get :: {
         return _.state.adventurous;
+      },
+      set ::(value) {
+        _.state.adventurous = value;
       }
     },
       
     // per-entity data for mods
-    modData : {
-      get ::<- _.state.modData
+    data : {
+      get ::<- _.state.data
     },
       
     kill ::(silent, from) {
@@ -2067,7 +2070,7 @@
       @:abilitiesUsedBattle = _.abilitiesUsedBattle;
       
       when (abilitiesUsedBattle != empty && art.oncePerBattle && abilitiesUsedBattle[art.id] == true) windowEvent.queueMessage(
-        text: this.name + " tried to use " + art.name + ", but it worked the first time!"
+        text: this.name + " tried to use " + art.name + ", but already was used and could not be used!"
       );
       if (abilitiesUsedBattle) abilitiesUsedBattle[art.id] = true;
       
@@ -2318,11 +2321,21 @@
       @:priv = _;
       @:this = _.this;
       @:state = _.state;
+      @:abilitiesUsedBattle = _.abilitiesUsedBattle;
       @:deck = state.deck;
       @:world = import(module:'game_singleton.world.mt');
       
-      
-      @:confirm ::(card){
+      @:chooseReact::(card) {
+        when(card == empty)
+          onReact();
+
+        @:art = Arts.find(:card.id);
+        when (abilitiesUsedBattle != empty && art.oncePerBattle && abilitiesUsedBattle[card.id] == true) ::<= {
+          windowEvent.queueMessage(
+            text: this.name + " tried to use " + card.name + ", but already was used and could not be used again!"
+          ) 
+          onReact()
+        }
         @:rets = this.effectStack.emitEvent(
           name: 'onPreReact',
           card: card
@@ -2330,14 +2343,18 @@
         
         // event cancelled reaction.
         when (rets->findIndexCondition(::(value) <- value.returned == false) != -1) onReact();
-        
+
+
+        if (abilitiesUsedBattle) abilitiesUsedBattle[art.id] = true;
+
         onReact(:card);
 
         @:rets = this.effectStack.emitEvent(
           name: 'onPostReact',
           card: card
         );
-        
+
+      
       }
 
       if (world.party.leader == this) ::<= {
@@ -2356,7 +2373,7 @@
                 card,
                 backout
               ) {
-                onReact(:card)
+                chooseReact(:card)
                 backout();
               },
               
@@ -2371,8 +2388,9 @@
           source,
           battle:priv.battle
         );
+
         
-        onReact(:card);
+        chooseReact(:card);
       }
     },
     

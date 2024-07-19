@@ -56,30 +56,30 @@
   }
 
 
-  for(0, seedCount)::(i) {
+  for(0, height/2)::(i) {
     out[
-          0 + BUFFER_SPACE+
-      (width + BUFFER_SPACE*2) * ((Number.random() * height)->floor + BUFFER_SPACE)
+      0 + BUFFER_SPACE+
+      (width + BUFFER_SPACE*2) * (i*2 + BUFFER_SPACE)
     ] = symbolList[0];
   }
 
-  for(0, seedCount)::(i) {
+  for(0, height/2)::(i) {
     out[
           width + BUFFER_SPACE+
-      (width + BUFFER_SPACE*2) * ((Number.random() * height)->floor + BUFFER_SPACE)
+      (width + BUFFER_SPACE*2) * (i*2 + BUFFER_SPACE)
     ] = symbolList[0];
   }
 
-  for(0, seedCount)::(i) {
+  for(0, width/2)::(i) {
     out[
-          (Number.random()*width)->floor + BUFFER_SPACE+
+          i*2 + BUFFER_SPACE+
       (width + BUFFER_SPACE*2) * (0 + BUFFER_SPACE)
     ] = symbolList[0];
   }
 
-  for(0, seedCount)::(i) {
+  for(0, width/2)::(i) {
     out[
-          (Number.random()*width)->floor + BUFFER_SPACE + 
+          i*2 + BUFFER_SPACE + 
       (width + BUFFER_SPACE*2) * (height + BUFFER_SPACE)
     ] = symbolList[0];
   }
@@ -90,7 +90,7 @@
   @xIncr = 1;
   @yIncr = 1;
   
-  for(0, 4)::(i) {
+  for(0, 6)::(i) {
     for(0, height + BUFFER_SPACE*2) ::(y) {
       for(0, width + BUFFER_SPACE*2) ::(x) {
         //when(Number.random() < 0.4) empty;
@@ -107,7 +107,7 @@
   }
 
   // fill gaps
-  for(0, 2)::(i) {
+  for(0, 4)::(i) {
     for(0, height + BUFFER_SPACE*2) ::(y) {
       for(0, width + BUFFER_SPACE*2) ::(x) {
         //when(Number.random() < 0.4) empty;
@@ -141,6 +141,16 @@
 @:LargeMap = class(
   name: 'Wyvern.LargeMap',
   define:::(this) {
+    @:clearScenery::(map, x, y) {
+      @index = map.addScenerySymbol(character:' ');
+
+      for(x-2, x+3) ::(ix) {
+        for(y-2, y+3) ::(iy) {
+          map.setSceneryIndex(x:ix, y:iy, symbol:index);
+          map.clearScenery
+        }
+      }
+    }   
     
     this.interface = {
 
@@ -160,9 +170,9 @@
           }
         }
         
-        map.offsetX = 100;
-        map.offsetY = 100;
-        map.paged = true;
+        map.offsetX = 0;
+        map.offsetY = 0;
+        map.paged = false;
         map.drawLegend = true;
         
         @:table = generateTerrain(map, width:map.width - BUFFER_SPACE*2, height:map.height - BUFFER_SPACE*2);
@@ -184,12 +194,15 @@
 
 
       addLandmark::(map, island, base) { 
+        @:x = random.integer(from:BUFFER_SPACE + (0.2*(map.width  - BUFFER_SPACE*2))->floor, to:(map.width  - BUFFER_SPACE)-(0.2*(map.width  - BUFFER_SPACE*2))->floor);
+        @:y = random.integer(from:BUFFER_SPACE + (0.2*(map.height - BUFFER_SPACE*2))->floor, to:(map.height - BUFFER_SPACE)-(0.2*(map.height - BUFFER_SPACE*2))->floor);
         @:landmark = Landmark.new(
           island,
           base,
-          x:random.integer(from:BUFFER_SPACE + (0.2*(map.width  - BUFFER_SPACE*2))->floor, to:(map.width  - BUFFER_SPACE)-(0.2*(map.width  - BUFFER_SPACE*2))->floor),
-          y:random.integer(from:BUFFER_SPACE + (0.2*(map.height - BUFFER_SPACE*2))->floor, to:(map.height - BUFFER_SPACE)-(0.2*(map.height - BUFFER_SPACE*2))->floor)
+          x,
+          y
         );
+        clearScenery(map, x, y);
         island.addLandmark(:landmark);
         return landmark;
       },

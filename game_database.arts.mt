@@ -1827,12 +1827,13 @@ Arts.newEntry(
           if (user.attack(
             target: targets[0],
             amount: Arts.find(:'base:petrify').baseDamage(level, user),
-            damageType : Damage.TYPE.LIGHT,
+            damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
           ))
-            targets[0].addEffect(from:user, id: 'base:petrified', durationTurns: 2);  
+            if (random.flipCoin())
+                targets[0].addEffect(from:user, id: 'base:petrified', durationTurns: 2);  
         }
       )            
     }
@@ -1882,12 +1883,12 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : true,
     canBlock : false,
-    baseDamage::(level, user) <- 50,
+    baseDamage::(level, user) <- 15,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' activates the tripwire explosive right under ' + targets[0].name + '!'
       );
-      when(random.try(percentSuccess:70)) ::<= {
+      when(random.try(percentSuccess:30)) ::<= {
         windowEvent.queueMessage(
           text: targets[0].name + ' avoided the trap!'
         );     
@@ -1898,7 +1899,7 @@ Arts.newEntry(
         onEnter :: {
 
           targets[0].damage(attacker:user, damage:Damage.new(
-            amount:50,
+            amount:15,
             damageType:Damage.TYPE.FIRE,
             damageClass:Damage.CLASS.HP
           ),dodgeable: false);  
@@ -1924,7 +1925,7 @@ Arts.newEntry(
     shouldAIuse ::(user, enemies, allies) {},
     oncePerBattle : true,
     canBlock : false,
-    baseDamage::(level, user) <- 50,
+    baseDamage::(level, user) <- 15,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' activates a floor trap, revealing a spike pit under the enemies!'
@@ -1934,13 +1935,13 @@ Arts.newEntry(
         windowEvent.queueCustom(
           onEnter :: {
 
-            when(random.try(percentSuccess:70)) ::<= {
+            when(random.try(percentSuccess:30)) ::<= {
               windowEvent.queueMessage(
                 text: target.name + ' avoided the trap!'
               );                
             }
             target.damage(attacker:user, damage:Damage.new(
-              amount:50,
+              amount:15,
               damageType:Damage.TYPE.PHYS,
               damageClass:Damage.CLASS.HP
             ),dodgeable: false);   
@@ -3201,7 +3202,7 @@ Arts.newEntry(
     name: 'Unarm',
     id : 'base:unarm',
     targetMode : TARGET_MODE.ONE,
-    description: 'Disarms a target. Additional levels increases the success rate.',
+    description: 'Attempts to disarms a target. Base chance is 30%. Additional levels increases the success rate.',
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -3232,6 +3233,9 @@ Arts.newEntry(
           }
         )
         windowEvent.queueMessage(text:targets[0].name + ' lost grip of their ' + equipped.name + '!');
+      } else ::<= {
+        windowEvent.queueMessage(text:user.name + ' failed to disarm ' + targets[0].name + '!');
+      
       }
 
     }

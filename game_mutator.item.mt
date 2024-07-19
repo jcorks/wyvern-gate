@@ -2506,7 +2506,7 @@ Item.database.newEntry(data : {
     ATTRIBUTE.RAW_METAL
   ,
   onCreate ::(item, creationHint) {
-    item.modData.RAW_MATERIAL = 'base:copper';
+    item.data.RAW_MATERIAL = 'base:copper';
   }
 
 })    
@@ -2552,7 +2552,7 @@ Item.database.newEntry(data : {
     ATTRIBUTE.RAW_METAL
   ,
   onCreate ::(item, creationHint) {
-    item.modData.RAW_MATERIAL = 'base:iron';
+    item.data.RAW_MATERIAL = 'base:iron';
   }
 
 })   
@@ -2596,7 +2596,7 @@ Item.database.newEntry(data : {
     ATTRIBUTE.RAW_METAL
   ,
   onCreate ::(item, creationHint) {
-    item.modData.RAW_MATERIAL = 'base:steel';
+    item.data.RAW_MATERIAL = 'base:steel';
   }
 
 })    
@@ -2642,7 +2642,7 @@ Item.database.newEntry(data : {
     ATTRIBUTE.RAW_METAL
   ,
   onCreate ::(item, creationHint) {
-    item.modData.RAW_MATERIAL = 'base:mythril';
+    item.data.RAW_MATERIAL = 'base:mythril';
   }
 
 })   
@@ -2686,7 +2686,7 @@ Item.database.newEntry(data : {
     ATTRIBUTE.RAW_METAL
   ,
   onCreate ::(item, creationHint) {
-    item.modData.RAW_MATERIAL = 'base:quicksilver';
+    item.data.RAW_MATERIAL = 'base:quicksilver';
   }
 
 })   
@@ -2730,7 +2730,7 @@ Item.database.newEntry(data : {
     ATTRIBUTE.RAW_METAL
   ,
   onCreate ::(item, creationHint) {
-    item.modData.RAW_MATERIAL = 'base:adamantine';
+    item.data.RAW_MATERIAL = 'base:adamantine';
   }
 
 }) 
@@ -2775,7 +2775,7 @@ Item.database.newEntry(data : {
     ATTRIBUTE.RAW_METAL
   ,
   onCreate ::(item, creationHint) {
-    item.modData.RAW_MATERIAL = 'base:sunstone';
+    item.data.RAW_MATERIAL = 'base:sunstone';
   }
 
 }) 
@@ -2819,7 +2819,7 @@ Item.database.newEntry(data : {
     ATTRIBUTE.RAW_METAL
   ,
   onCreate ::(item, creationHint) {
-    item.modData.RAW_MATERIAL = 'base:moonstone';
+    item.data.RAW_MATERIAL = 'base:moonstone';
   }
 
 }) 
@@ -2863,7 +2863,7 @@ Item.database.newEntry(data : {
     ATTRIBUTE.RAW_METAL
   ,
   onCreate ::(item, creationHint) {
-    item.modData.RAW_MATERIAL = 'base:dragonglass';
+    item.data.RAW_MATERIAL = 'base:dragonglass';
   }
 
 }) 
@@ -3357,7 +3357,8 @@ Item.database.newEntry(data : {
     arts : empty,
     stats : empty,
     design : empty,
-    modData : empty
+    data : empty,
+    worldID : -1
   },
   
   database : Database.new(
@@ -3419,6 +3420,7 @@ Item.database.newEntry(data : {
       @:state = _.state;
       @:world = import(module:'game_singleton.world.mt');
 
+      state.worldID = world.getNextID();
       state.enchants = []; // ItemMod
       state.equipEffects = [];
       state.useEffects = [];
@@ -3438,7 +3440,7 @@ Item.database.newEntry(data : {
       state.price *= 1.05 * state.base.weight;
       state.improvementsLeft = random.integer(from:10, to:25);
       state.improvementsStart = state.improvementsLeft;
-      state.modData = {};
+      state.data = {};
       
       if (base.hasSize)   
         assignSize(*_);
@@ -3659,8 +3661,8 @@ Item.database.newEntry(data : {
       set ::(value)<- _.state.islandID = value
     },
       
-    modData : {
-      get ::<- _.state.modData
+    data : {
+      get ::<- _.state.data
     },
       
       
@@ -3789,6 +3791,10 @@ Item.database.newEntry(data : {
 
     canGainIntuition ::(silent) {
       return _.state.intuition < 20;
+    },
+    
+    worldID : {
+      get ::<- _.state.worldID
     },
       
     maxOut ::{

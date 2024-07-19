@@ -41,10 +41,13 @@ import(module:'game_mutator.landmark.mt');
 import(module:'game_mutator.landmarkevent.mt');
 import(module:'game_mutator.location.mt');
 import(module:'game_mutator.mapentity.mt');
+import(module:'game_mutator.quest.mt');
 import(module:'game_database.profession.mt');
 import(module:'game_mutator.scenario.mt');
 import(module:'game_function.trap.mt');
 import(module:'game_singleton.commoninteractions.mt');
+import(module:'game_function.questguild.mt');
+
 
 @:Database = import(module:'game_class.database.mt');
 
@@ -545,18 +548,20 @@ return empty;
         windowEvent.queueMessage(
           text: 'A game by Johnathan "Rasa" Corkery\n'+
               'https://github.com/jcorks/\n\n' + 
-              'Additional support : Adrian "Radscale" Hernik\n' +
-              'Playtesting    : Caleb Dron\n' +
-              '           Cane\n'
+              'Additional Arts Design : Baph @lovelyabomination\n' +
+              'Additional support     : Adrian "Radscale" Hernik\n' +
+              'Playtesting            : Baph @lovelyabomination\n' +
+              '                         Caleb Dron\n' +
+              '                         Cane\n'
         );
         
         windowEvent.queueMessage(
           text: 'Special thanks to:\n' +
-              'Meiyuu\n' +
-              'Drassy\n' +
-              'Nido\n' +
-              'Maztitos\n' +
-              'Dr. San'
+                'Meiyuu\n' +
+                'Drassy\n' +
+                'Nido\n' +
+                'Maztitos\n' +
+                'Dr. San'
         );
 
         windowEvent.queueMessage(

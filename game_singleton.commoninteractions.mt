@@ -19,7 +19,6 @@
 
 
 
-
 return {
   battle : {
     attack : InteractionMenuEntry.new(
@@ -324,6 +323,39 @@ return {
         (import(module:'game_function.partyoptions.mt'))();
       }
     ),
+
+    quests : InteractionMenuEntry.new(
+      name : 'Quests',
+      keepInteractionMenu : true,
+      filter::(island, landmark) {
+        @:world = import(module:'game_singleton.world.mt');
+        return world.party.quests->size > 0;      
+      },
+      onSelect::(island, landmark) {
+        @:world = import(module:'game_singleton.world.mt');
+        @:quests = world.party.quests;
+        @which;
+        windowEvent.queueChoices(
+          leftWeight: 1,
+          topWeight: 1,
+          prompt: 'Quests:',
+          canCancel: true,
+          choices : quests->map(::(value) <- value.name),
+          onHover ::(choice) {
+            which = choice;
+          },
+          renderable : {
+            render ::{
+              quests[which-1].renderPrompt(showCompleteness:true, leftWeight:0, topWeight: 0.5);
+            }
+          },
+          onChoice::(which) {
+          
+          }
+        );
+      }
+    ),
+
     
     inventory : InteractionMenuEntry.new(
       name : 'Inventory',
@@ -442,39 +474,55 @@ return {
   person : {
     fetchQuestStart : InteractionMenuEntry.new(
       name: 'Need something?',
-      keepInteractionMenu : true,
+      keepInteractionMenu : false,
       filter ::(entity) {
         @:world = import(module:'game_singleton.world.mt');
         @:party = world.party;
         return party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID) == -1
       },
       onSelect::(entity) {
+        when(entity.adventurous) ::<= {
+          windowEvent.queueMessage(
+            speaker: entity.name,
+            text: '"Nah. I\'m actually looking to go out and explore the world. Not much left that needs doing here."'
+          );
+        }
+      
         windowEvent.queueMessage(
           speaker: entity.name,
           text: '"Funny you should ask, yeah I need some help..."'
         );
         @:Quest = import(:'game_mutator.quest.mt');
         
-        if (entity.data.quest == empty)
-          entity.data.quest = 
+        @quest = entity.data.quest;
+        if (entity.data.quest == empty) ::<= {
+          quest = 
             Quest.new(
               issuer : entity,
               rank : Quest.RANK.NONE,
-              base : Quest.find(id:'base:fetch-quest-personal')
+              base : Quest.database.find(id:'base:fetch-quest-personal')
             );
+          entity.data.quest = quest;
+        }
         
         windowEvent.queueAskBoolean(
           renderable : {
             render ::{
-              entity.data.quest.renderPrompt();            
+              quest.renderPrompt();            
             }
           },
           topWeight : 1,
           prompt: 'Accept quest?',
           onChoice::(which) {
+            when (which == false) empty;
             @:world = import(module:'game_singleton.world.mt');
             @:party = world.party;
-            party.quests->push(:entity.data.quest);
+            party.quests->push(:quest);
+            entity.data.quest = empty;
+            quest.accept(
+              island: world.island,
+              issuer: entity
+            );
           }
         );
       }
@@ -482,17 +530,22 @@ return {
 
     fetchQuestEnd : InteractionMenuEntry.new(
       name: 'About that item...',
-      keepInteractionMenu : true,
+      keepInteractionMenu : false,
       filter ::(entity) {
         @:world = import(module:'game_singleton.world.mt');
         @:party = world.party;
         return party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID) != -1
       },
       onSelect::(entity) {
-        //@:quest = party.quests[party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID)];
-
-        // todo: turn in quest
-        
+        @:world = import(module:'game_singleton.world.mt');
+        @:quest = world.party.quests[world.party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID)];
+        when (quest.isComplete == false) 
+          windowEvent.queueMessage(
+            speaker: entity.name,
+            text: '"No luck finding the ' + quest.data.itemName + ' yet, eh? I know it was in that forest somewhere..."'
+          );
+        quest.turnIn(issuer:entity);
+        world.party.quests->remove(key:world.party.quests->findIndex(:quest));
       }
     ),
   

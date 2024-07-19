@@ -492,7 +492,7 @@
     hirees : empty,
     
     // Excess data for mods.
-    modData : empty,
+    data : empty,
     
     // world ID for the city where the shop resides 
     cityID : -1,
@@ -1201,7 +1201,7 @@
         this.haggle(
           displayName:name,
           id:name,
-          standardPrice: location.modData.trader.listPrice,
+          standardPrice: location.data.trader.listPrice,
           shopper: buyer,
           onDone ::(bought, price, accuracy) {
             when(!bought) windowEvent.queueMessage(
@@ -1214,11 +1214,11 @@
             );            
             
             state.propertiesForSale->remove(key:state.propertiesForSale->findIndex(value:id));
-            location.modData.trader.listPrice = price;
+            location.data.trader.listPrice = price;
             world.party.addGoldAnimated(
               amount:price,
               onDone ::{
-                if (price > location.modData.trader.boughtPrice)
+                if (price > location.data.trader.boughtPrice)
                   state.accolade_soldAPropertyProfit = true;
 
                 this.animateGainExp(
@@ -1668,9 +1668,9 @@
                 @:location = world.island.findLocation(id);
                 
                 if (location.base.category == Location.database.statics.CATEGORY.RESIDENTIAL) ::<= {
-                  rent += (location.modData.trader.boughtPrice * 0.07)->ceil;
-                  @current = location.modData.trader.listPrice;
-                  current += (((Number.random() - 0.5) * 0.05) * location.modData.trader.boughtPrice)->floor;
+                  rent += (location.data.trader.boughtPrice * 0.07)->ceil;
+                  @current = location.data.trader.listPrice;
+                  current += (((Number.random() - 0.5) * 0.05) * location.data.trader.boughtPrice)->floor;
 
                   if (state.recession > 0)
                     current *= 0.92;
@@ -1679,7 +1679,7 @@
 
                   if (current < 2000)
                     current = 2000;
-                  location.modData.trader.listPrice = current;
+                  location.data.trader.listPrice = current;
                 }
               }
               state.totalEarnedInvestments += rent;
@@ -1694,7 +1694,7 @@
                 @:location = world.island.findLocation(id);
                 when (location.base.category == Location.database.statics.CATEGORY.RESIDENTIAL) empty
                 
-                @profit = location.modData.trader.listPrice * 0.15;
+                @profit = location.data.trader.listPrice * 0.15;
                 profit = random.integer(from:(profit * 0.5)->floor, to:(profit * 1.5)->floor);
                 
                 if (state.recession > 0 && random.try(percentSuccess:65))
@@ -1703,8 +1703,8 @@
                   rent += profit;
 
 
-                @current = location.modData.trader.listPrice;
-                current += (((Number.random() - 0.5) * 0.15) * location.modData.trader.listPrice)->floor;
+                @current = location.data.trader.listPrice;
+                current += (((Number.random() - 0.5) * 0.15) * location.data.trader.listPrice)->floor;
 
                 if (state.recession > 0)
                   current *= 0.92;
@@ -1712,7 +1712,7 @@
 
                 if (current < 9000)
                   current = 9000;
-                location.modData.trader.listPrice = current;
+                location.data.trader.listPrice = current;
               }
               state.totalEarnedInvestments += rent;
               world.party.inventory.addGold(amount:rent);
@@ -1993,11 +1993,11 @@
       sellProperty ::(location) {
       
         windowEvent.queueMessage(
-          text: location.ownedBy.name + '\'s ' + location.base.name + ' is currently worth ' + g(g:location.modData.trader.listPrice) + '. Once put up for sale, it will no longer generate revenue.'
+          text: location.ownedBy.name + '\'s ' + location.base.name + ' is currently worth ' + g(g:location.data.trader.listPrice) + '. Once put up for sale, it will no longer generate revenue.'
         );
 
         windowEvent.queueAskBoolean(
-          prompt: 'Sell for ' + g(g:location.modData.trader.listPrice) + '?',
+          prompt: 'Sell for ' + g(g:location.data.trader.listPrice) + '?',
           onChoice::(which) {
             when(which == false) empty;
             
@@ -2009,7 +2009,7 @@
             state.propertiesForSale->push(value:location.worldID);
           
             windowEvent.queueMessage(
-              text: location.ownedBy.name + '\'s ' + location.base.name + ' is now up for sale for ' + g(g:location.modData.trader.listPrice) + '.'
+              text: location.ownedBy.name + '\'s ' + location.base.name + ' is now up for sale for ' + g(g:location.data.trader.listPrice) + '.'
             );
           }
         );
@@ -2032,10 +2032,10 @@
             @:worth = [];
             @:status = [];
             foreach(locations) ::(i, location) {
-              @:delta = location.modData.trader.listPrice - location.modData.trader.boughtPrice;
+              @:delta = location.data.trader.listPrice - location.data.trader.boughtPrice;
 
               names->push(value: location.ownedBy.name + '\'s ' + location.base.name);
-              worth->push(value:g(g:location.modData.trader.listPrice) + ' (' + (if(delta > 0) '+' else '') + g(g:delta) + ')');
+              worth->push(value:g(g:location.data.trader.listPrice) + ' (' + (if(delta > 0) '+' else '') + g(g:delta) + ')');
               status->push(value: if (state.propertiesForSale->findIndex(value:location.worldID) == -1) 'Owned' else 'For sale');
             }
             return [
@@ -3294,11 +3294,11 @@ return {
           );
 
         @:Location = import(module:'game_mutator.location.mt');
-        if (location.modData.trader == empty)
-          location.modData.trader = {};
+        if (location.data.trader == empty)
+          location.data.trader = {};
          
         // generate list price   
-        if (location.modData.trader.listPrice == empty) ::<= {
+        if (location.data.trader.listPrice == empty) ::<= {
           @basePrice = match(location.base.category) {
             // residential properties can be bought, and thee owners become 
             // tennants
@@ -3307,34 +3307,34 @@ return {
             (Location.database.statics.CATEGORY.UTILITY): random.pickArrayItem(list:[30000, 35000, 22000, 45000])
           }
           
-          location.modData.trader.listPrice = random.integer(from:(basePrice * 0.8)->floor, to:(basePrice * 1.2)->floor);
+          location.data.trader.listPrice = random.integer(from:(basePrice * 0.8)->floor, to:(basePrice * 1.2)->floor);
         }
 
         windowEvent.queueMessage(
-          text: location.ownedBy.name + '\'s ' + location.base.name + ' is available for purchase for ' + g(g:location.modData.trader.listPrice) + '.'
+          text: location.ownedBy.name + '\'s ' + location.base.name + ' is available for purchase for ' + g(g:location.data.trader.listPrice) + '.'
         );
         
-        when(world.party.inventory.gold < location.modData.trader.listPrice)
+        when(world.party.inventory.gold < location.data.trader.listPrice)
           windowEvent.queueMessage(
             text: 'The party cannot afford to buy this property.'
           );
 
         windowEvent.queueAskBoolean(
-          prompt: 'Buy property for ' + g(g:location.modData.trader.listPrice) + '?',
+          prompt: 'Buy property for ' + g(g:location.data.trader.listPrice) + '?',
           onChoice::(which) {
             when(which == false) empty;
             
             world.party.addGoldAnimated(
-              amount: -location.modData.trader.listPrice,
+              amount: -location.data.trader.listPrice,
               onDone ::{
 
-                location.modData.trader.boughtPrice = location.modData.trader.listPrice;
+                location.data.trader.boughtPrice = location.data.trader.listPrice;
 
                 
                 @:trader = world.scenario.data.trader;
                 trader.ownedProperties->push(value: location.worldID);
 
-                if (location.modData.trader.listPrice > 100000)
+                if (location.data.trader.listPrice > 100000)
                   trader.state.accolade_boughtBusinessOver100000G = true;
 
                 windowEvent.queueMessage(

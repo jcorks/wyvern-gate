@@ -347,6 +347,8 @@ Interaction.newEntry(
             );   
             
             @:talkee = location.landmark.island.newInhabitant();
+            talkee.adventurous = true;
+            
             // Here is the wild-west of stats. You could find someone stronger than normal here 
             // but its up in the air whether theyll join you.
             if (random.flipCoin())
@@ -911,113 +913,11 @@ Interaction.newEntry(
         windowEvent.queueMessage(text: 'The shop appears to be closed at this hour..');              
 
       
-      
-      @hoveredItem;
-      pickItem(
+      import(:'game_function.buyinventory.mt')(
         inventory:location.inventory,
-        canCancel: true,
-        leftWeight: 0.6,
-        topWeight: 0.5,
-        onGetPrompt:: <-  'Buy which? (current: ' + g(g:party.inventory.gold) + ')',
-        goldMultiplier: (0.5 / 5),
-        onHover ::(item) {
-          hoveredItem = item;
-        },
-        header : ['Item', 'Price'],
-        leftJustified : [true, false],
-        
-        renderable : {
-          render ::{
-            when(hoveredItem == empty) empty;
-            canvas.renderTextFrameGeneral(
-              title: 'Equip stats:',
-              lines: hoveredItem.stats.descriptionRate->split(token:'\n'),
-              leftWeight: 0,
-              topWeight: 0.5
-            )
-          }
-        },
-        
-        onPick::(item) {
-          when(item == empty) empty;
-          @price = (item.price * (0.5 / 5))->ceil;
-          
-          windowEvent.queueChoices(
-            prompt: item.name,
-            choices: ['Buy', 'Check', 'Compare Equipment'],
-            canCancel: true,
-            onChoice::(choice) {
-              when(choice == 0) empty;
-              
-              match(choice-1) {
-                // buy
-                (0)::<= {
-                  when(world.party.inventory.isFull) ::<= {
-                    windowEvent.queueMessage(text: 'The party\'s inventory is full.');
-                  }
-                    
-                  world.accoladeIncrement(name:'buyCount');
-                  if (price < 1) ::<= {
-                    windowEvent.queueMessage(
-                      speaker: location.ownedBy.name,
-                      text:'"You really want this? It\'s basically worthless, but I\'ll still sell it to you if you want."'
-                    )
-                    world.accoladeEnable(name:'boughtWorthlessItem');
-                    price = 1;
-                  }
-
-                  when (party.inventory.gold < price)
-                    windowEvent.queueMessage(text:'The party cannot afford this.');
-                  party.addGoldAnimated(
-                    amount:-price,
-                    onDone :: {
-                      location.inventory.remove(item);
-
-                      if (price > 2000) ::<= {
-                        world.accoladeEnable(name:'boughtItemOver2000G');
-                      }
-                      
-                      
-                      windowEvent.queueMessage(text: 'Bought ' + correctA(word:item.name));
-                      party.inventory.add(item);                
-                    }
-                  ) 
-                },
-                // check
-                (1)::<= {
-                  item.describe();
-                },
-                // compare 
-                (2)::<= {
-                  @:memberNames = [...party.members]->map(to:::(value) <- value.name);
-                  @:choice = windowEvent.queueChoices(
-                    prompt: 'Compare equipment for whom?',
-                    choices: memberNames,
-                    keep:true,
-                    canCancel: true,
-                    onChoice::(choice) {
-                      @:user = party.members[choice-1];
-                      @slot = user.getSlotsForItem(item)[0];
-                      @currentEquip = user.getEquipped(slot);
-                      
-                      currentEquip.equipMod.printDiffRate(
-                        prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
-                        other:item.equipMod
-                      );                                         
-                    }
-                  );
-                }  
-              }   
-            }
-          );
-        
-        
-        }
+        shopkeep: location.ownedBy
       );
-    },
-    
-
-    
+    }
   }
 )
 
@@ -1190,7 +1090,7 @@ Interaction.newEntry(
       @smith = empty;
 
       @:smithingDo ::(item, ingot) {
-        @:material = ingot.modData.RAW_MATERIAL;
+        @:material = ingot.data.RAW_MATERIAL;
 
         @:output = Item.new(
           base:Item.database.find(id:item),
@@ -1419,7 +1319,7 @@ Interaction.newEntry(
     id :  'base:warp-floor',
     keepInteractionMenu : false,
     onInteract ::(location, party) {
-      when(location.modData.warpPoint == empty)
+      when(location.data.warpPoint == empty)
         windowEvent.queueMessage(
           text: 'The warp column doesn\'t seem active.'
         );
@@ -1433,7 +1333,7 @@ Interaction.newEntry(
         text: 'The party was teleported elsewhere on the floor.'
       );
       
-      @:warp = [...location.landmark.locations]->filter(by::(value) <- value.worldID == location.modData.warpPoint)[0]
+      @:warp = [...location.landmark.locations]->filter(by::(value) <- value.worldID == location.data.warpPoint)[0]
       
       when(warp == empty)
         windowEvent.queueMessage(
@@ -1463,6 +1363,7 @@ Interaction.newEntry(
           @:Landmark = import(module:'game_mutator.landmark.mt');
           
           location.targetLandmark = Landmark.new(
+            island : location.landmark.island,
             base:Landmark.database.find(id:'base:shrine-lost-floor')
           );
           location.targetLandmark.loadContent();
@@ -1471,6 +1372,7 @@ Interaction.newEntry(
           @:Landmark = import(module:'game_mutator.landmark.mt');
           
           location.targetLandmark = Landmark.new(
+            island : location.landmark.island,
             base:Landmark.database.find(id:location.landmark.base.id),
             floorHint:location.landmark.floor+1
           )
@@ -2484,11 +2386,47 @@ Interaction.newEntry(
         world.party.inventory.add(item);
       }
       location.inventory.clear();
-
-
     }
   }
 ) 
+
+Interaction.newEntry(
+  data : {
+    name : 'Take',
+    id :  'base:take',
+    keepInteractionMenu : false,
+    onInteract ::(location, party) {
+      @:world = import(module:'game_singleton.world.mt');
+            
+      when(world.party.inventory.isFull) ::<= {
+        windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
+      }
+      
+      foreach(location.inventory.items)::(i, item) {
+        windowEvent.queueMessage(text:'The party found ' + correctA(word:item.name) + '.');
+      }
+      
+      foreach(location.inventory.items)::(i, item) {
+        world.party.inventory.add(item);
+      }
+      location.inventory.clear();
+      location.landmark.removeLocation(:location);
+    }
+  }
+) 
+
+
+Interaction.newEntry(
+  data : {
+    name : 'Quest Guild...',
+    id :  'base:quest-guild',
+    keepInteractionMenu : true,
+    onInteract ::(location, party) {
+      import(:'game_function.questguild.mt')(location, party);
+    }
+  }
+) 
+
 
 
 Interaction.newEntry(

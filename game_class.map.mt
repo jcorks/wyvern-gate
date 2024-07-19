@@ -100,8 +100,8 @@
     @_h = 0;
     @isOccupied = false;
     
-    mapSizeH = canvas.height - 6;
-    mapSizeW = canvas.width - 26;
+    mapSizeH = canvas.height;
+    mapSizeW = canvas.width;
 
     this.interface = {
       defaultLoad::(x, y, width, height) {
@@ -471,13 +471,7 @@
       
       @:left = canvas.width/2 - mapSizeW/2;
       @:top = canvas.height/2 - mapSizeH/2;
-      canvas.renderFrame(
-        left:left-1,
-        top:top-1,
-        width: mapSizeW+3,
-        height: mapSizeH+3           
-      
-      );
+
       
 
 
@@ -574,12 +568,7 @@
       //@:ticks = Time.getTicks();
       @:left = canvas.width/2 - mapSizeW/2;
       @:top = canvas.height/2 - mapSizeH/2;
-      canvas.renderFrame(
-        left:left-1,
-        top:top-1,
-        width: mapSizeW+3,
-        height: mapSizeH+3
-      );
+
 
       @:centerX = (mapSizeW / 2)->floor;
       @:centerY = (mapSizeH / 2)->floor;
@@ -1352,23 +1341,19 @@
             if (width < val->length)
               width = val->length;
           }
-          itemList->push(value:'');
-          itemList->push(value:'P (Party)');
-          if (width < 'P (Party)'->length)
-            width = 'P (Party)'->length;
           
           
           canvas.renderFrame(
-            top: 0,
+            top: 2,
             left: 0,
             width: width+4,
-            height: itemList->keycount+4
+            height: itemList->keycount+2
           );
           
-          canvas.movePen(x:0, y:0);
-          canvas.drawText(text:'Legend');
+          canvas.movePen(x:1, y:2);
+          canvas.drawText(text:'[Legend]');
           foreach(itemList)::(index, item) {
-            canvas.movePen(x:2, y:index+2);
+            canvas.movePen(x:2, y:index+3);
             canvas.drawText(text:item);
           }
             
@@ -1378,7 +1363,7 @@
 
         @:world = import(module:'game_singleton.world.mt');
         // render the time under the map.
-        canvas.movePen(x:left -1, y: 0);
+        canvas.movePen(x:0, y: 0);
         canvas.drawText(text:title);
         
       

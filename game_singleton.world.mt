@@ -169,7 +169,7 @@
     wish : empty,
     scenario : empty,
     accolades : empty,
-    modData : empty
+    data : empty
   },  
   
 
@@ -216,7 +216,7 @@
         state.day = (Number.random()*100)->floor;
         state.party = Party.new();
         state.accolades = {};
-        state.modData = {};
+        state.data = {};
       },    
       resetAll ::{
         state.saveName = '';
@@ -234,7 +234,7 @@
         state.wish = empty;
         state.scenario = empty;
         state.accolades = {};
-        state.modData = {};
+        state.data = {};
         battle = Battle.new();
         island = empty;
       },
@@ -407,9 +407,7 @@
         
         @:currentIsland = this.island;
         this.island = Island.new(
-          tierHint: 0,
-          levelHint : 6,
-          worldID : 0
+          createEmpty : true
         );
         
         state.npcs = {
@@ -675,8 +673,8 @@
             
       },
       
-      modData : {
-        get ::<- state.modData
+      data : {
+        get ::<- state.data
       },
       
       save ::{

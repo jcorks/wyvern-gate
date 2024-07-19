@@ -3,8 +3,13 @@
 @:State = import(module:'game_class.state.mt');
 @:class = import(module:'Matte.Core.Class');
 @:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
-
-
+@:Item = import(module:'game_mutator.item.mt');
+@:random = import(module:'game_singleton.random.mt');
+@:canvas = import(module:'game_singleton.canvas.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
+@:g = import(:'game_function.g.mt');
+@:Location = import(module:'game_mutator.location.mt');
+@:world = import(module:'game_singleton.world.mt');
 
 
 // Determines the difficulty of the mission
@@ -23,17 +28,20 @@
 @:TRAITS = {
   // if present, the quest has its reward replaced with ???
   HIDDEN_REWARD : 1,
-},
+  SPECIAL : 2,
+}
 
 @:reset ::{
 Quest.database.newEntry(
   data : {
     id : 'base:fetch-quest-personal',
+    traits : TRAITS.HIDDEN_REWARD |
+             TRAITS.SPECIAL,
     descriptions : [
-      'I was in the %0 and I lost my %1! Please help!',
-      'I was scared by some creatures in %0 and dropped my %1! Please retrieve it.',
-      'A while back, I dropped my %1 in %0. I\'d like you to get it back for me.',
-      'I need my %1! Please go to %0 to get it!'
+      'I was in the forest and I lost my %1! Please help!',
+      'I was scared by some creatures in the forest and dropped my %1! Please retrieve it.',
+      'A while back, I dropped my %1 in the forest. I\'d like you to get it back for me.',
+      'I need my %1! Please go to the forest to get it!'
     ],
     
     onCreate ::(issuer, quest) {
@@ -45,10 +53,13 @@ Quest.database.newEntry(
         rngEnchantHint:true, 
         forceEnchant:true
       )
+      
+      quest.description = quest.description->replace(key:'%1', with : quest.data.item.name);
     },
 
     onAccept ::(island, quest, issuer) {
-      @:pos = island.map.getAPosition();
+      @:Landmark = import(:'game_mutator.landmark.mt');
+      @:pos = island.getAPosition();
       @:landmark = Landmark.new(
         base: Landmark.database.find(:'base:forest-generic'),
         x : pos.x,
@@ -56,26 +67,61 @@ Quest.database.newEntry(
       );
       landmark.symbol = 'X';
       landmark.legendName = quest.name;
+      
+      @:loc = landmark.getRandomEmptyPosition();
+      
+      @:item = Location.new(
+        landmark: landmark,
+        xHint : loc.x,
+        yHint : loc.y,
+        base: Location.database.find(:'base:lost-item')
+      );
+      landmark.addLocation(location:item);
+      
+      item.inventory.add(:quest.data.item);
+      quest.data.itemID = quest.data.item.worldID; // only one copy of an item can exist when saving.
+      quest.data.landmarkID = landmark.worldID;
+      quest.data.itemName = quest.data.item.name;
+      quest.data.item = empty;
       island.addLandmark(:landmark);
+      
+      windowEvent.queueMessage(
+        speaker: issuer.name,
+        text : '"Thank you so much. Please come back when you\'ve found it!"'
+      );      
+
+      windowEvent.queueMessage(
+        text : 'The probable location was marked on the island map.'
+      );      
     },
     
-    step ::(quest, landmark, island) {
+    onStep ::(quest, landmark, island) {
     
     },
     
     onTurnIn ::(quest, issuer) {
       windowEvent.queueMessage(
         speaker: issuer.name,
-        text: '"Oh excellent! You found the ' + quest.data.item.name + '! Thank you so much!"'
+        text: '"Oh excellent! You found the ' + quest.data.itemName + '! Thank you so much!"'
       );
+
+      windowEvent.queueMessage(
+        text: 'The party handed over the ' + quest.data.itemName + '.'
+      );
+
+      world.party.getItem(condition::(value) <- value.worldID == quest.data.itemID, remove:true);
+
       windowEvent.queueMessage(
         speaker: issuer.name,
         text: '"Here, I would like you to have this."'
       );
 
+            
+      
+      world.island.removeLandmark(:world.island.landmarks->filter(::(value) <- value.worldID == quest.data.landmarkID)[0]);
     },
     
-    nextHour ::(quest) {
+    onNextHour ::(quest) {
     
     },
 
@@ -85,8 +131,10 @@ Quest.database.newEntry(
     // Whether the quest is complete and able to be taken back 
     // for the reward.
     isComplete ::(quest, party) {
-      party.inventory.getItem(condition:quest.data.item.worldID);
-    }
+      return party.getItem(condition::(value) <- value.worldID == quest.data.itemID) != empty;
+    },
+    
+    dependsOn : []
   }
 );
 }
@@ -95,21 +143,20 @@ Quest.database.newEntry(
 
 
 
-@:generateDefaultReward(state) {
+@:generateDefaultReward::(state) {
   match(state.rank) {
     (RANK.NONE): ::<= {
-      state.rewardG = random.integer(from:100, to:200);
+      state.rewardG = random.integer(from:20, to:70);
       state.rewardItems = [
         Item.new(
           base:Item.database.getRandomFiltered(
             filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                        && value.tier <= location.landmark.island.tier
           ),
           rngEnchantHint:true, 
           forceEnchant:true
         )
       ]
-    }
+    },
   
     (RANK.E): ::<= {
       state.rewardG = random.integer(from:20, to:70);
@@ -291,7 +338,7 @@ Quest.database.newEntry(
               filter:::(value) <- value.isUnique == false && value.canHaveEnchants
                           && value.tier > 3
             ),
-            qualityHint : 'base:masterwork'
+            qualityHint : 'base:masterwork',
             rngEnchantHint:true, 
             forceEnchant:true
           )
@@ -322,7 +369,7 @@ Quest.database.newEntry(
               filter:::(value) <- value.isUnique == false && value.canHaveEnchants
                           && value.tier > 3
             ),
-            qualityHint : 'base:masterwork'
+            qualityHint : 'base:masterwork',
             rngEnchantHint:true, 
             forceEnchant:true
           )
@@ -348,7 +395,7 @@ Quest.database.newEntry(
             filter:::(value) <- value.isUnique == false &&
               value.type == Item.TYPE.TRINKET
           ),
-          qualityHint : 'base:masterwork',
+          qualityHint : 'base:divine',
           rngEnchantHint:true, 
           forceEnchant:true
         )
@@ -361,6 +408,11 @@ Quest.database.newEntry(
 // controllers of landmarks.
 @:Quest = databaseItemMutatorClass.create(
   name : 'Wyvern.Quest',
+  statics : {
+    RANK : {
+      get ::<- RANK
+    }
+  },
   items : {
     // the world ID of the issuer of the quest
     issuerID : -1, 
@@ -429,6 +481,11 @@ Quest.database.newEntry(
       // Whether the quest is complete and able to be taken back 
       // for the reward.
       isComplete : Function,
+      
+      // the quest IDs that must be completed before this quest can be taken 
+      dependsOn : Object,
+      
+      
     },
     reset
   ),
@@ -446,6 +503,7 @@ Quest.database.newEntry(
         state.name = '????';
         state.issuerID = issuer.worldID;
         state.issuerName = issuer.name + ', the ' + issuer.species.name + (if(issuer.profession.id == 'base:none') '' else ' ' + issuer.profession.name)
+        state.description = random.pickArrayItem(:base.descriptions);
         generateDefaultReward(state);
         base.onCreate(quest:this, issuer);
       },      
@@ -459,13 +517,18 @@ Quest.database.newEntry(
       
       // creates the quest, returning the landmark 
       // for where the quest belongs
-      accept ::(island) {
-        @:landmark = base.onAccept(quest);
+      accept ::(island, issuer) {
+        @:landmark = state.base.onAccept(quest:this, island, issuer);
         return landmark;
       },
       
       data : {
-        get ::<- state.data;
+        get ::<- state.data
+      },
+      
+      name : {
+        get ::<- state.name,
+        set ::(value) <- state.name = value      
       },
       
       issuerID : {
@@ -477,7 +540,7 @@ Quest.database.newEntry(
       },
       
       step ::(landmark, island){
-        state.base.step(quest:this, landmark, island);
+        state.base.onStep(quest:this, landmark, island);
       },
       
       nextHour ::<- state.base.onNextHour(quest:this),
@@ -491,32 +554,60 @@ Quest.database.newEntry(
             '',
             'Reward:',
             '',
-            ...this.rewarditems->map(::(value) <- ' - ' + value.name),
-            ' - ' + g(:this.rewardG)
+            ...state.rewardItems->map(::(value) <- ' - ' + value.name),
+            ' - ' + g(:state.rewardG)
           ]
         );
-        
-        foreach(this.rewardItems) ::(k, item) {
+        @:world = import(module:'game_singleton.world.mt');
+        @:party = world.party;        
+        foreach(state.rewardItems) ::(k, item) {
           party.inventory.add(:item);
-        },
-        this.rewardItems = [];
-        party.addGoldAnimated(amount:this.reward);
+        }
+        state.rewardItems = [];
+        windowEvent.queueCustom(
+          onEnter::{
+            party.addGoldAnimated(amount:state.rewardG);
+          }
+        );
       },
       
-      generateDescription ::{
-        when (state.description != '') empty;
-        
-        state.description = random.pickArrayItem(state.base.descriptions)
+      description : {
+        get :: <- state.description,
+        set ::(value) <- state.description = value
       },
-            
-      defaultLoad ::(base) {
-        state.base = base;
-        state.data = base.startup(parent:this);
-      },
-
+      
+      renderPrompt::(showCompleteness, topWeight, leftWeight) {
+        if (topWeight == empty)
+            topWeight = 0;
+        canvas.renderTextFrameGeneral(
+          lines:canvas.refitLines(
+            input : [
+              'Quest  : ' + state.name,
+              'Issuer : ' + state.issuerName,
+              '',
+              state.description, 
+              '',
+              'Reward(s):',
+              ...(if (state.base.traits & TRAITS.HIDDEN_REWARD != 0) 
+                [' - ???']
+              else
+                state.rewardItems->map(::(value) <- ' - ' + value.name)
+              ),
+              if (state.rewardG) ' - ' + g(:state.rewardG) else '',
+              if (showCompleteness == true) 
+                'Status: ' + if (this.isComplete) 'Ready to turn in!' else 'In progress...' 
+              else  
+                ''
+            ],
+            maxWidth : canvas.width * 0.6
+          ),
+          topWeight,
+          leftWeight
+        );
+      }
     }
   }
 );
 
 
-return LandmarkEvent;
+return Quest;

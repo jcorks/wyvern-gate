@@ -143,6 +143,7 @@ Event.database.newEntry(
           }
 
           @:nicePerson = event.island.newInhabitant();
+          nicePerson.adventurous = true;
           nicePerson.interactPerson(
             party:event.party,
             onDone ::{

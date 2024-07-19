@@ -631,6 +631,7 @@ Location.database.newEntry(data:{
   ],
   interactions : [
     'base:drink:tavern',
+    'base:quest-guild',
     'base:examine'
   ],
   
@@ -949,18 +950,18 @@ Location.database.newEntry(data:{
   maxOccupants : 0,
   
   onFirstInteract ::(location) {
-    when(location.modData.warpPoint != empty) empty;
+    when(location.data.warpPoint != empty) empty;
     
     @:possibilities = [...location.landmark.locations]->filter(by::(value) <-
       value.base.id == 'base:warp-point' &&
-      value.modData.warpPoint == empty &&
+      value.data.warpPoint == empty &&
       value != location 
     );
     when(possibilities->size == 0) empty;
     
     @:other = possibilities[0];
-    other.modData.warpPoint = location.worldID;
-    location.modData.warpPoint = other.worldID;
+    other.data.warpPoint = location.worldID;
+    location.data.warpPoint = other.worldID;
   },
   onInteract ::(location) {
   },
@@ -1783,6 +1784,42 @@ Location.database.newEntry(data:{
   }
 })    
 
+Location.database.newEntry(data:{
+  name: 'Lost Item',
+  id: 'base:lost-item',
+  rarity: 1000000000000,
+  ownVerb : 'owned',
+  symbol: 'i',
+  category : CATEGORY.DUNGEON_SPECIAL,
+  minStructureSize : 1,
+  onePerLandmark : false,
+
+  descriptions: [
+    'A lost item.'
+  ],
+  interactions : [
+    'base:take'
+  ],
+  
+  aggressiveInteractions : [
+  ],
+
+
+  
+  minOccupants : 0,
+  maxOccupants : 0,
+  onFirstInteract::(location){},      
+  onInteract ::(location) {
+  },
+  
+  onCreate ::(location) {
+  },
+  
+  onTimeChange::(location, time) {
+  
+  }
+}) 
+
 }
 
 
@@ -1803,7 +1840,7 @@ Location.database.newEntry(data:{
     name : '',
     data : empty, // simple table
     visited : false,
-    modData : empty
+    data : empty
   },
   
   database : Database.new(
@@ -1881,12 +1918,12 @@ Location.database.newEntry(data:{
         state.occupants = []; // entities. non-owners can shift
         state.inventory = Inventory.new(size:30);
         state.data = {}; // simple table
-        state.modData = {};
+        state.data = {};
 
 
         state.base = base;
-        state.x = if (xHint == empty) (Number.random() * landmark_.width ) else xHint;  
-        state.y = if (yHint == empty) (Number.random() * landmark_.height) else yHint;
+        //state.x = if (xHint == empty) (Number.random() * landmark_.width ) else xHint;  
+        //state.y = if (yHint == empty) (Number.random() * landmark_.height) else yHint;
         if (ownedByHint != empty)
           this.ownedBy = ownedByHint;
              
@@ -1972,7 +2009,8 @@ Location.database.newEntry(data:{
       
       
       landmark : {
-        get ::<- landmark_
+        get ::<- landmark_,
+        set ::(value) <- landmark_ = value
       },
       
       peaceful : {
@@ -1983,14 +2021,14 @@ Location.database.newEntry(data:{
       },
       
       // per location mod data.
-      modData : {
-        get ::<- state.modData
+      data : {
+        get ::<- state.data
       },
       
       
       lockWithPressurePlate :: {
         @:pressurePlate = landmark_.addLocation(
-          id:'base:pressure-plate'
+          location: Location.new(landmark: landmark_, base:Location.database.find(:'base:pressure-plate'))
         );
         
         state.data.plateID = pressurePlate.worldID;
@@ -2001,7 +2039,7 @@ Location.database.newEntry(data:{
           // for every pressure plate, there is a trapped 
           // pressure plate.
           @:pressurePlateFake = landmark_.addLocation(
-            id:'base:pressure-plate'
+            location: Location.new(landmark: landmark_, base:Location.database.find(:'base:pressure-plate'))
           );
           pressurePlateFake.data.trapped = true;
         }

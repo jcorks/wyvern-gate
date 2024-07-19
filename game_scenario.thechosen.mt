@@ -20,6 +20,8 @@
 
 @:interactionsPerson = [
   commonInteractions.person.barter,
+  commonInteractions.person.fetchQuestStart,
+  commonInteractions.person.fetchQuestEnd,
 
   InteractionMenuEntry.new(
     name: 'Hire',
@@ -305,6 +307,7 @@ return {
     @:island = world.island;
 
 
+    /*
     for(0, 4) ::(i) {
       @:key = Item.new(
         base: Item.database.find(id:'base:wyvern-key')
@@ -321,7 +324,7 @@ return {
       key.name = 'Key of ' + name;
       party.inventory.add(:key);  
     }
-
+    */
 
     
     // debug
@@ -889,6 +892,7 @@ return {
   interactionsWalk : [
     commonInteractions.walk.check,
     commonInteractions.walk.party,
+    commonInteractions.walk.quests,
     commonInteractions.walk.inventory,
     commonInteractions.walk.wait
   ],
@@ -2169,9 +2173,11 @@ return {
           );
           
           @:l = landmark.addLocation(
-            id: 'thechosen:foreboding-entrance',
-            x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH/2 - 2,
-            y: CASTLE_MAIN_HEIGHT - 1,
+            location: Location.new(
+              base:Location.database.find(id: 'thechosen:foreboding-entrance'),
+              x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH/2 - 2,
+              y: CASTLE_MAIN_HEIGHT - 1
+            ),
             width: 4,
             height: 1
           );

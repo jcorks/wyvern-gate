@@ -144,7 +144,7 @@ Material.newEntry(
   data : {
     name : 'Mythril',
     id : 'base:mythril',
-    description : 'The mythril used makes it radiantly green',
+    description : 'The mythril used makes it radiantly green.',
     rarity : 70,
     tier : 2,
     statMod : StatSet.new(
@@ -160,7 +160,7 @@ Material.newEntry(
   data : {
     name : 'Adamantine',
     id : 'base:adamantine',
-    description : 'The adamantine used makes it earthly',
+    description : 'The adamantine used makes it earthly.',
     rarity : 90,
     tier : 3,
     statMod : StatSet.new(

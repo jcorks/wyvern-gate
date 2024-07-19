@@ -34,9 +34,12 @@
     karma : 5500,
     arts : [],
     leader : 0,
-    guildRank : 0,
+    guildRank : -1,
     guildEXP : 0,
-    activeQuests : []
+    guildEXPtoNext : 100,
+    guildTeamName : '',
+    activeQuests : [],
+    completedQuests : []
   },
 
   define:::(this, state) {   
@@ -124,7 +127,11 @@
         }
       },
       quests : {
-        get ::<- state.quests
+        get ::<- state.activeQuests
+      },
+      
+      questCompleted ::(id) {
+        state.completedQuests[id] = true;
       },
       
       isIncapacitated :: {
@@ -255,15 +262,40 @@
           skipAnimation : true
         )
         
-        windowEvent.queueCustom(
-          onEnter :: {
-            onDone();
-          }
-        );
+        if (onDone)
+          windowEvent.queueCustom(
+            onEnter :: {
+              onDone();
+            }
+          );
       },
       
+      guildRank : {
+        get ::<- state.guildRank,
+      },
       
-    
+      guildTeamName : {
+        get ::<- state.guildTeamName
+      },
+      
+      gainGuilExpAnimated ::(exp, onDone) {
+      
+      },
+      
+      guildEXPtoNext : {
+        get ::<- state.guildEXPtoNext
+      },
+      
+      guildEXP : {
+        get ::<- state.guildEXP
+      },
+      
+      setGuildTeamName ::(name) {
+        state.guildTeamName = name;
+        state.guildRank = 0;
+        state.guildEXP = 0;
+      },
+
       members : {
         get ::<- state.members
       },

@@ -639,11 +639,11 @@ Landmark.database.newEntry(
     startingEvents : [
     ],
     mapHint: {
-      roomSize: 60,
+      roomSize: 30,
       wallCharacter: 'Y',
       roomAreaSize: 7,
       roomAreaSizeLarge: 14,
-      emptyAreaCount: 25,
+      emptyAreaCount: 13,
       outOfBoundsCharacter: '~'
     },
     onCreate ::(landmark, island){},
@@ -747,7 +747,7 @@ Landmark.database.newEntry(
     floor : 0,
     map : empty,
     stepsSinceLast: 0,
-    modData : empty,
+    data : empty,
     events : empty,
     mapEntityController : empty,
     overrideTitle : '',
@@ -823,12 +823,12 @@ Landmark.database.newEntry(
       if (base.landmarkType == TYPE.DUNGEON) ::<= {
         state.map = DungeonMap.create(parent:this, mapHint: base.mapHint);
         if (base.dungeonForceEntrance) ::<= {
-          this.addLocation(id:'base:entrance');
+          this.addLocation(location:Location.new(landmark: this, base:Location.database.find(:'base:entrance')));
         }
       } else if (base.landmarkType == TYPE.STRUCTURE) ::<= {
         structureMapBuilder = StructureMap.new();//Map.new(mapHint: base.mapHint);
         structureMapBuilder.initialize(mapHint:base.mapHint, parent:this);
-        this.addLocation(id:'base:entrance');
+        this.addLocation(location:Location.new(landmark: this, base:Location.database.find(:'base:entrance')));
       } else ::<= {
         state.map = Map.new(parent:this);
       }
@@ -861,7 +861,7 @@ Landmark.database.newEntry(
 
       foreach(base.requiredLocations)::(i, loc) {
         this.addLocation(
-          id:loc
+          location:Location.new(landmark:this, base:Location.database.find(:loc))
         );
       
         mapIndex += 1;
@@ -871,7 +871,7 @@ Landmark.database.newEntry(
         when(possibleLocations->keycount == 0) empty;
         @:which = random.pickArrayItemWeighted(list:possibleLocations);
         this.addLocation(
-          id:which.id
+          location:Location.new(landmark:this, base:Location.database.find(:which.id))
         );
         if (Location.database.find(id:which.id).onePerLandmark) ::<= {
           possibleLocations->remove(key:possibleLocations->findIndex(value:which));
@@ -922,7 +922,8 @@ Landmark.database.newEntry(
     this.interface =  {
       initialize ::(parent, island) {
         @:Island = import(module:'game_class.island.mt');
-        
+        if (parent)
+            island = parent.parent; // parents of locations are always maps
         island_ = island;
       },
 
@@ -932,7 +933,7 @@ Landmark.database.newEntry(
         state.y = 0;
         state.floor = 0;
         state.stepsSinceLast = 0;
-        state.modData = {};
+        state.data = {};
         state.events = [];
         state.symbol = base.symbol;
         state.legendName = base.legendName;
@@ -1202,8 +1203,8 @@ Landmark.database.newEntry(
         }
       },
       
-      modData : {
-        get ::<- state.modData
+      data : {
+        get ::<- state.data
       },
 
 
@@ -1211,20 +1212,15 @@ Landmark.database.newEntry(
         state.map.removeItem(data:location);
       },
 
-      addLocation ::(id, ownedByHint, x, y, width, height) {
-      
-        @loc = Location.new(
-          base:Location.database.find(id),
-          landmark:this, ownedByHint,
-          xHint: x,
-          yHint: y
-        );
+      addLocation ::(location, width, height) {
+        location.landmark = this;
+        @:loc = location;
         
         @:defaultAdd ::{
           when (width == empty && height == empty)
             state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
-          for(x, width + x) ::(ix) {
-            for(y, height + y) ::(iy) {
+          for(loc.x, width + loc.x) ::(ix) {
+            for(loc.y, height + loc.y) ::(iy) {
               state.map.setItem(data:loc, x:ix, y:iy, symbol: loc.base.symbol, discovered:true, name:loc.name);            
             }
           }
@@ -1232,7 +1228,7 @@ Landmark.database.newEntry(
         }
 
         if (state.base.landmarkType == TYPE.DUNGEON) ::<= {
-          if (x == empty || y == empty)
+          if (loc.x == 0 && loc.y == 0)
             state.map.addToRandomEmptyArea(item:loc, symbol: loc.base.symbol, name:loc.name)
           else
             defaultAdd();
