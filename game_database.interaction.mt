@@ -2305,7 +2305,7 @@ Interaction.newEntry(
       if (isStatBased)
         windowEvent.queueMessage(
           speaker:location.data.enchant.name + ' - Enchant Stats',
-          text:location.data.enchant.base.equipMod.descriptionRate,
+          text:String.combine(:location.data.enchant.base.equipMod.descriptionRateLines->map(::(value) <- value + '\n')),
           pageAfter:canvas.height-4
         );
         

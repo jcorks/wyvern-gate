@@ -68,6 +68,7 @@ import(module:'game_function.questguild.mt');
 @:Scenario = import(module:'game_mutator.scenario.mt');
 
 import(module:'game_function.pickpartyitem.mt');
+import(module:'game_function.itemimprove.mt');
 
 
 /* make sure base loadable classes are available */

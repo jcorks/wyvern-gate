@@ -115,63 +115,16 @@
       ]);   
     },
     
+    getNthStat ::(n) <- NAMES[n],
+    getStatsInOrder ::<- NAMES,
+    
     diffRateToLines::(stats, other) {
       return canvas.columnsToLines(columns:[
-        [
-          'HP:',
-          'AP:',
-          'ATK:',
-          'DEF:',
-          'INT:',
-          'SPD:',
-          'LUK:',
-          'DEX:'
-        ],
-        
-        [
-          (if(stats.HP>0)'+'+stats.HP+'%' else if (stats.HP==0)'--' else ''+stats.HP+'%'),
-          (if(stats.AP>0)'+'+stats.AP+'%' else if (stats.AP==0)'--' else ''+stats.AP+'%'),
-          (if(stats.ATK>0)'+'+stats.ATK+'%' else if (stats.ATK==0)'--' else ''+stats.ATK+'%'),
-          (if(stats.DEF>0)'+'+stats.DEF+'%' else if (stats.DEF==0)'--' else ''+stats.DEF+'%'),
-          (if(stats.INT>0)'+'+stats.INT+'%' else if (stats.INT==0)'--' else ''+stats.INT+'%'),
-          (if(stats.SPD>0)'+'+stats.SPD+'%' else if (stats.SPD==0)'--' else ''+stats.SPD+'%'),
-          (if(stats.LUK>0)'+'+stats.LUK+'%' else if (stats.LUK==0)'--' else ''+stats.LUK+'%'),
-          (if(stats.DEX>0)'+'+stats.DEX+'%' else if (stats.DEX==0)'--' else ''+stats.DEX+'%')            
-        ],
-        
-        [
-          ' -> ',
-          ' -> ',
-          ' -> ',
-          ' -> ',
-          ' -> ',
-          ' -> ',
-          ' -> ',            
-          ' -> ',            
-        ],
-        
-        [
-          (if(other.HP>0)'+'+other.HP+'%' else if (other.HP==0)'--' else ''+other.HP+'%'),
-          (if(other.AP>0)'+'+other.AP+'%' else if (other.AP==0)'--' else ''+other.AP+'%'),
-          (if(other.ATK>0)'+'+other.ATK+'%' else if (other.ATK==0)'--' else ''+other.ATK+'%'),
-          (if(other.DEF>0)'+'+other.DEF+'%' else if (other.DEF==0)'--' else ''+other.DEF+'%'),
-          (if(other.INT>0)'+'+other.INT+'%' else if (other.INT==0)'--' else ''+other.INT+'%'),
-          (if(other.SPD>0)'+'+other.SPD+'%' else if (other.SPD==0)'--' else ''+other.SPD+'%'),
-          (if(other.LUK>0)'+'+other.LUK+'%' else if (other.LUK==0)'--' else ''+other.LUK+'%'),
-          (if(other.DEX>0)'+'+other.DEX+'%' else if (other.DEX==0)'--' else ''+other.DEX+'%')            
-        ],
-        
-        [
-          (if (other.HP - stats.HP  != 0) (if (other.HP > stats.HP) '(+' else '(') + (other.HP  - stats.HP)  + '%)' else ''),
-          (if (other.AP - stats.AP  != 0) (if (other.AP > stats.AP) '(+' else '(') + (other.AP  - stats.AP)  + '%)' else ''),
-          (if (other.ATK - stats.ATK  != 0) (if (other.ATK > stats.ATK) '(+' else '(') + (other.ATK  - stats.ATK)  + '%)' else ''),
-          (if (other.DEF - stats.DEF  != 0) (if (other.DEF > stats.DEF)'(+' else '(') + (other.DEF  - stats.DEF)  + '%)' else ''),
-          (if (other.INT - stats.INT  != 0) (if (other.INT > stats.INT)'(+' else '(') + (other.INT  - stats.INT)  + '%)' else ''),
-          (if (other.SPD - stats.SPD  != 0) (if (other.SPD > stats.SPD)'(+' else '(') + (other.SPD  - stats.SPD)  + '%)' else ''),
-          (if (other.LUK - stats.LUK  != 0) (if (other.LUK > stats.LUK)'(+' else '(') + (other.LUK  - stats.LUK)  + '%)' else ''),
-          (if (other.DEX - stats.DEX  != 0) (if (other.DEX > stats.DEX)'(+' else '(') + (other.DEX  - stats.DEX)  + '%)' else ''),
-
-        ]            
+        NAMES->map(::(value) <- value + ': '),
+        NAMES->map(::(value) <- if(stats[value]>0)'+'+stats[value]+'%' else if (stats[value]==0)'--' else ''+stats[value]+'%'),
+        NAMES->map(::(value) <- ' -> '),
+        NAMES->map(::(value) <- if(other[value]>0)'+'+other[value]+'%' else if (other[value]==0)'--' else ''+other[value]+'%'),
+        NAMES->map(::(value) <- if (other[value] - stats[value]  != 0) (if (other[value] > stats[value]) '(+' else '(') + (other[value]  - stats[value])  + '%)' else ''),          
       ]);    
     }
   },
@@ -363,33 +316,50 @@
     description : {
       get :: {
         @:state = _.state;
-        return 
-          'HP:  ' + displayHP(:state.HP) + '\n' +
-          'AP:  ' + state.AP + '\n' +
-          'ATK: ' + state.ATK + '\n' +
-          'DEF: ' + state.DEF + '\n' +
-          'INT: ' + state.INT + '\n' +
-          'SPD: ' + state.SPD + '\n' +
-          'LUK: ' + state.LUK + '\n' +
-          'DEX: ' + state.DEX + '\n'
-        ;
+        return canvas.columnsToLines(
+          columns : [
+            NAMES->map(::(value) <- value + ': '),
+            NAMES->map(::(value) <- state[value])
+            
+          ]
+        );
       }
     },
 
-    descriptionRate : {
+    descriptionRateLines : {
       get :: {
         @:state = _.state;
-        return 
-          'HP:  ' + (if(state.HP > 0) '+' + state.HP + '%\n' else if (state.HP == 0) '--\n' else ''+state.HP+ '%\n') +
-          'AP:  ' + (if(state.AP > 0) '+' + state.AP + '%\n' else if (state.AP == 0) '--\n' else ''+state.AP+ '%\n') +
-          'ATK: ' + (if(state.ATK > 0) '+' + state.ATK + '%\n' else if (state.ATK == 0) '--\n' else ''+state.ATK+ '%\n') +
-          'DEF: ' + (if(state.DEF > 0) '+' + state.DEF + '%\n' else if (state.DEF == 0) '--\n' else ''+state.DEF+ '%\n') +
-          'INT: ' + (if(state.INT > 0) '+' + state.INT + '%\n' else if (state.INT == 0) '--\n' else ''+state.INT+ '%\n') +
-          'SPD: ' + (if(state.SPD > 0) '+' + state.SPD + '%\n' else if (state.SPD == 0) '--\n' else ''+state.SPD+ '%\n') +
-          'LUK: ' + (if(state.LUK > 0) '+' + state.LUK + '%\n' else if (state.LUK == 0) '--\n' else ''+state.LUK+ '%\n') +
-          'DEX: ' + (if(state.DEX > 0) '+' + state.DEX + '%\n' else if (state.DEX == 0) '--\n' else ''+state.DEX+ '%\n')
-        ;
+        @:columns = [
+          NAMES->map(::(value) <- value + ': '),
+          NAMES->map(::(value) {
+            return (if(state[value] > 0) '+' + state[value] + '%\n' else if (state[value] == 0) '--' else ''+state[value]+ '%')
+          })
+        ];
+        return canvas.columnsToLines(columns);
       }
+    },
+    
+    descriptionRateLinesBase ::(baseMod) {
+      @:state = _.state;
+      @:columns = [
+        NAMES->map(::(value) <- value + ': '),
+        NAMES->map(::(value) {
+          return (if(state[value] > 0) '+' + state[value] + '%\n' else if (state[value] == 0) '--' else ''+state[value]+ '%')
+        }),
+        NAMES->map(::(value) <- 
+          if (baseMod[value] == 0) 
+            '' 
+          else
+            if (baseMod[value] > 0)
+              ' +' + baseMod[value] + ' base'
+            else
+              '' + baseMod[value] + ' base' 
+        )
+      ];
+      
+    
+      return canvas.columnsToLines(columns);
+    
     }
   }
 );

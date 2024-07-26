@@ -3201,6 +3201,9 @@ Item.database.newEntry(data : {
   default: ' (*)'     
 };
 
+@:expToNextLevel::(level) {
+  return 100 ** (1 + 0.104*level);
+}
 
 @:recalculateName = ::(state) {
   when (state.customPrefix != '')
@@ -3226,8 +3229,8 @@ Item.database.newEntry(data : {
   else
     baseName + enchantName;
 
-  if (state.improvementsLeft != state.improvementsStart) ::<= {
-    state.customName = state.customName +  '+'+(state.improvementsStart - state.improvementsLeft);
+  if (state.improvements > 0) ::<= {
+    state.customName = state.customName +  '+'+(state.improvements);
   }
 
 
@@ -3350,12 +3353,15 @@ Item.database.newEntry(data : {
     islandTierHint : 0,
     islandExtraLandmarks : empty,
     improvementsLeft : 0,
-    improvementsStart : 0,
+    improvements : 0,
+    improvementEXP : 0,
+    improvementEXPtoNext : 100,
     equipEffects : empty,
     useEffects : empty,
     intuition : 0,
     arts : empty,
     stats : empty,
+    statsBase : empty,
     design : empty,
     data : empty,
     worldID : -1
@@ -3425,6 +3431,7 @@ Item.database.newEntry(data : {
       state.equipEffects = [];
       state.useEffects = [];
       state.stats = StatSet.new();
+      state.statsBase = StatSet.new();
       state.arts = ::<= {
         when (artsHint) artsHint;
         @:out = [
@@ -3439,7 +3446,8 @@ Item.database.newEntry(data : {
       state.price = base.basePrice;
       state.price *= 1.05 * state.base.weight;
       state.improvementsLeft = random.integer(from:10, to:25);
-      state.improvementsStart = state.improvementsLeft;
+      state.improvements = 0;
+      state.improvementEXP = 0;
       state.data = {};
       
       if (base.hasSize)   
@@ -3460,13 +3468,13 @@ Item.database.newEntry(data : {
         if (random.try(percentSuccess:15)) ::<= {
           state.hasEmblem = true;
           state.stats.add(stats:StatSet.new(
-            ATK:10,
-            DEF:10,
-            SPD:10,
-            INT:10,
-            DEX:10          
+            ATK:25,
+            DEF:25,
+            SPD:25,
+            INT:25,
+            DEX:25          
           ));
-          state.price *= 1.05;
+          state.price *= 1.25;
         } else 
           state.hasEmblem = false;
         
@@ -3611,6 +3619,10 @@ Item.database.newEntry(data : {
       get ::<- _.state.stats
     },
     
+    equipModBase : {
+      get ::<- _.state.statsBase
+    },
+    
     container : {
       get :: {
         return _.container;
@@ -3717,12 +3729,48 @@ Item.database.newEntry(data : {
     },
     
     improvementsLeft : {
-      get::<- _.state.improvementsLeft,
-      set::(value) {
-        _.state.improvementsLeft = value;
-        recalculateName(*_);
-      }
+      get::<- _.state.improvementsLeft
     },
+
+    improvements : {
+      get::<- _.state.improvements,
+    },
+    
+    improvementEXP : {
+      get ::<- _.state.improvementEXP
+    },
+    
+    improvementEXPtoNext : {
+      get ::<- _.state.improvementEXPtoNext
+    },
+
+    improve ::(exp) {
+      breakpoint();
+      @:state = _.state;
+      @:chunk = if (_.state.improvementEXP + exp > _.state.improvementEXPtoNext) 
+        state.improvementEXPtoNext - _.state.improvementEXP
+      else 
+        exp;
+
+      state.improvementEXP += chunk;
+      exp -= chunk;
+      @leveled = false;
+      if (state.improvementEXPtoNext == state.improvementEXP) ::<= {
+        state.improvements += 1;
+        state.improvementsLeft -= 1;
+        if (state.improvementsLeft < 0)
+            state.improvementsLeft = 0;
+        state.improvementEXPtoNext = expToNextLevel(:state.improvements)->floor;
+        state.improvementEXP = 0;
+        leveled = true;
+      }
+      
+      if (leveled)
+        recalculateName(*_);
+      return exp;
+    },
+
+
       
     describe ::(by) {
       @:state = _.state;
@@ -3748,8 +3796,8 @@ Item.database.newEntry(data : {
             return out;
           } else '',
           
-          state.stats.descriptionRate,
-          
+          state.stats.descriptionRateLinesBase(:state.statsBase),          
+
           if (state.equipEffects->keycount != 0) ::<= {
             @out = '';
             when (state.equipEffects->keycount == 0) 'None.';

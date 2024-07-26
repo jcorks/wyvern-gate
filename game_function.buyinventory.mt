@@ -27,7 +27,7 @@ return ::(inventory, shopkeep) {
         when(hoveredItem == empty) empty;
         canvas.renderTextFrameGeneral(
           title: 'Equip stats:',
-          lines: hoveredItem.stats.descriptionRate->split(token:'\n'),
+          lines: hoveredItem.stats.descriptionRateLines,
           leftWeight: 0,
           topWeight: 0.5
         )

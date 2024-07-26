@@ -188,6 +188,7 @@ return ::(
     @:name = import(module:"game_function.name.mt");
     name(
       prompt: 'Item name:',
+      canCancel : true,
       onDone::(name) {
         choiceItem.name = name;
         if (windowEvent.canJumpToTag(name:'Item'))

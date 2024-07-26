@@ -856,8 +856,14 @@
       
       foreach(state.equips)::(index, equip) {
         when(equip == empty) empty;
+        state.stats.mod(stats:equip.equipModBase);
+      }
+
+      foreach(state.equips)::(index, equip) {
+        when(equip == empty) empty;
         state.stats.modRate(stats:equip.equipMod);
       }
+
       
       state.hp = (state.stats.HP * (oldHP / oldHPmax))->round
       state.ap = (state.stats.AP * (oldAP / oldAPmax))->round;
