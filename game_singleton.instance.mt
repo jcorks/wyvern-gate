@@ -122,7 +122,6 @@ return class(
   define:::(this) {
     @onSaveState;
     @onLoadState;
-    @landmark_;
     @settings;
     @onSaveSettings_;
     
@@ -857,10 +856,8 @@ return empty;
 
       
       visitLandmark ::(landmark => Landmark.type, where) {
-        if (landmark_ != empty && landmark_.base.ephemeral)
-          landmark_.unloadContent();
-        landmark_ = landmark;        
-        landmark.loadContent();
+
+        world.landmark = landmark;        
         if (where != empty) ::<= {
           where = where(landmark);
           if (where != empty)
@@ -1023,14 +1020,6 @@ return empty;
         return w;
       },
       
-      landmark : {
-        get ::{
-          when(windowEvent.canJumpToTag(name:'VisitLandmark')) landmark_;
-          landmark_ = empty;
-          return empty;
-        }
-        
-      },
       
       resetDatabase :: {
         Database.reset();
@@ -1045,7 +1034,6 @@ return empty;
       quitRun ::{
         world.resetAll();
         Database.reset();
-        landmark_ = empty;
         windowEvent.jumpToTag(name:'MainMenu');
       },
     }

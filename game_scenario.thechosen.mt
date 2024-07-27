@@ -116,10 +116,11 @@
           text:'"What are you doing??"'
         );
 
-        @:instance = import(module:'game_singleton.instance.mt');
-        instance.landmark.peaceful = false;
-        windowEvent.queueMessage(text:'The people here are now aware of your aggression.');
-
+        if (world.landmark != empty) ::<= {
+          world.landmark.peaceful = false;
+          windowEvent.queueMessage(text:'The people here are now aware of your aggression.');
+        }
+        
         world.battle.start(
           party,              
           allies: [whom],
@@ -1118,6 +1119,7 @@ return {
               
 
               location.targetLandmark = Landmark.new(
+                island : location.landmark.island,
                 base:Landmark.database.find(id:'base:treasure-room')
               )
               location.targetLandmark.loadContent();
@@ -1173,6 +1175,7 @@ return {
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
           {id: 'base:locked-chest', rarity: 11},
+          {id: 'base:enchantment-stand', rarity: 18},
 
 
           {id: 'base:healing-circle', rarity:20},
@@ -1183,7 +1186,6 @@ return {
 
         ],
         requiredLocations : [
-          'base:enchantment-stand',
           'base:stairs-down',
           'base:stairs-down'
         ],
@@ -1243,7 +1245,6 @@ return {
           {id: 'base:fancy-shop', rarity: 500},
         ],
         requiredLocations : [
-          'base:enchantment-stand',
           'base:stairs-down',
           'base:locked-chest'
           
@@ -1306,7 +1307,6 @@ return {
 
         ],
         requiredLocations : [
-          'base:enchantment-stand',
           'base:stairs-down',
           'base:locked-chest',
           'base:small-chest',
@@ -1375,7 +1375,6 @@ return {
 
         ],
         requiredLocations : [
-          'base:enchantment-stand',
           'base:stairs-down',
           'base:locked-chest',
           'base:small-chest',
@@ -2174,6 +2173,7 @@ return {
           
           @:l = landmark.addLocation(
             location: Location.new(
+              landmark: landmark,
               base:Location.database.find(id: 'thechosen:foreboding-entrance'),
               x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH/2 - 2,
               y: CASTLE_MAIN_HEIGHT - 1
@@ -3906,6 +3906,7 @@ return {
                 @:instance = import(module:'game_singleton.instance.mt');
                 @:world = import(module:'game_singleton.world.mt');
                 @:landmark = Landmark.new(
+                  island : location.landmark.island,
                   base : Landmark.database.find(id:'thechosen:dark-lair-entrance')
                 );
                 instance.visitLandmark(
@@ -4374,6 +4375,7 @@ return {
                 @base = if (which != empty) Landmark.database.find(id:which)
                 if (base) ::<= {
                   @:d = Landmark.new(
+                    island : location.landmark.island,
                     base
                   );
                   instance.visitLandmark(landmark:d);            

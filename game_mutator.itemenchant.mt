@@ -61,7 +61,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: 1000,
-    tier : 0,
+    tier : 10,
     
     triggerConditionEffects : [
       'base:trigger-itemart',
@@ -669,9 +669,35 @@ ItemEnchant.database.newEntry(
   }
 )
 
+ItemEnchant.database.newEntry(
+  data : {
+    name : 'Minor Aura',
+    id : 'base:minor-aura',
+    description : 'Enchanted with a simple aura that boosts all attributes slightly.',
+    equipMod : StatSet.new(
+      HP : 10,
+      AP : 10,
+      SPD: 10,
+      DEX: 10,
+      ATK: 10,
+      DEF: 10,
+      INT: 10
+    ),
+    priceMod: 140,
+    tier : 0,
+    levelMinimum : 1,
+    
+    triggerConditionEffects : [
+    ],
+    equipEffects : [
+    ],
+    
+    useEffects : [],
+    traits : 0
+  }
+)
 
-
-
+/*
 ItemEnchant.database.newEntry(
   data : {
     name : 'Inlet: Teal Crystal',
@@ -958,7 +984,7 @@ ItemEnchant.database.newEntry(
     traits : 0
   }
 )
-
+*/
 
 
 

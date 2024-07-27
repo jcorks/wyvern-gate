@@ -647,7 +647,7 @@
 
             @:instance = import(module:'game_singleton.instance.mt');
             @world = import(module:'game_singleton.world.mt');
-            @:currentLandmark = instance.landmark;
+            @:currentLandmark = world.landmark;
             if (currentLandmark != empty && currentLandmark.base.pointOfNoReturn == true) ::<= {
               windowEvent.queueMessage(
                 text: '"Oh huh. The courier is here... somehow."'
@@ -981,7 +981,7 @@
         }
 
 
-        @:currentLandmark = instance.landmark;
+        @:currentLandmark = world.landmark;
         when (currentLandmark != empty && currentLandmark.base.pointOfNoReturn == true) ::<= {
           windowEvent.queueMessage(
             speaker: party.members[0].name,

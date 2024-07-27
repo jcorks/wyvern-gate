@@ -20,6 +20,7 @@
       @:Landmark = import(module:'game_mutator.landmark.mt');
       
       location.targetLandmark = Landmark.new(
+        island : location.landmark.island,
         base:Landmark.database.find(id:location.landmark.base.id),
         floorHint:location.landmark.floor+1
       )

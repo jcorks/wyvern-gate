@@ -1424,6 +1424,7 @@ Interaction.newEntry(
         
 
         location.targetLandmark = Landmark.new(
+          island : location.landmark.island,
           base:Landmark.database.find(id:'base:treasure-room')
         )
         location.targetLandmark.loadContent();
@@ -2228,7 +2229,7 @@ Interaction.newEntry(
             @:Entity = import(module:'game_class.entity.mt');
             @:Damage = import(module:'game_class.damage.mt');
 
-            @:statue = Entity.new(island:location.landmark.island, levelHint: 5);
+            @:statue = location.landmark.island.newInhabitant();
             statue.name = 'the Wyvern Statue';
             @:landed = whom.damage(
               attacker: statue,

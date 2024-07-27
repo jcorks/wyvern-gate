@@ -254,6 +254,7 @@ Landmark.database.newEntry(
       {id: 'base:small-chest', rarity: 16},
       {id: 'base:locked-chest', rarity: 11},
       {id: 'base:magic-chest', rarity: 15},
+      {id: 'base:enchantment-stand', rarity: 20},
 
       {id: 'base:healing-circle', rarity:35},
 
@@ -262,7 +263,6 @@ Landmark.database.newEntry(
 
     ],
     requiredLocations : [
-      'base:enchantment-stand',
       'base:stairs-down',
       'base:stairs-down',
       'base:locked-chest',
@@ -322,7 +322,7 @@ Landmark.database.newEntry(
 //          {id: 'Stairs Down', rarity:1},
       {id: 'base:fountain', rarity:18},
       {id: 'base:potion-shop', rarity: 17},
-      {id: 'base:enchantment-stand', rarity: 11},
+      {id: 'base:enchantment-stand', rarity: 18},
       {id: 'base:wyvern-statue', rarity: 15},
       {id: 'base:small-chest', rarity: 16},
       {id: 'base:locked-chest', rarity: 11},
@@ -335,7 +335,6 @@ Landmark.database.newEntry(
 
     ],
     requiredLocations : [
-      'base:enchantment-stand',
       'base:stairs-down',
       'base:locked-chest',
       'base:small-chest',
@@ -923,7 +922,14 @@ Landmark.database.newEntry(
       initialize ::(parent, island) {
         @:Island = import(module:'game_class.island.mt');
         if (parent)
-            island = parent.parent; // parents of locations are always maps
+          island = parent.parent; // parents of locations are always maps
+
+        // backup: just take the current world's island
+        if (island == empty)  
+          island = import(:'game_singleton.world.mt').island;
+          
+        if (island == empty)
+          error(:'A landmark MUST be initialized with an island or parent.');
         island_ = island;
       },
 

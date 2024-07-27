@@ -162,6 +162,7 @@
     year : 1033,
     party : empty,
     currentIslandID : 0,
+    currentLandmarkID : 0,
     idPool : 1,
     story : empty,
     npcs : empty,
@@ -177,6 +178,7 @@
 
     @battle = Battle.new();
     @island = empty;
+    @landmark = empty;
 
     
     @:getDayString = ::{
@@ -295,6 +297,17 @@
       island : {
         get ::<- island,
         set ::(value) <- island = value
+      },
+      
+      landmark : {
+        get ::<- landmark,
+        set ::(value) {
+          landmark = value
+          if (landmark != empty && landmark.base.ephemeral)
+            landmark.unloadContent();
+          landmark.loadContent();
+          state.currentLandmarkID = landmark.worldID;
+        }
       },
       
       
@@ -766,8 +779,15 @@
         state.load(parent:this, serialized:serialized.world, loadFirst:['scenario']);
         
         island = Island.new(createEmpty:true);
-        breakpoint();
         island.load(:serialized.islands[state.currentIslandID]);
+        landmark = {:::} {        
+          foreach(island.landmarks) ::(k, v) {
+            if (v.worldID == state.currentLandmarkID)
+              send(:v);
+          } 
+          state.currentLandmarkID = -1;
+          return empty;
+        }
       }
     }
   }

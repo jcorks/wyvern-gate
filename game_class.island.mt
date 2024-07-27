@@ -163,7 +163,7 @@
     
       match(state.tier) {
         (0):::<= {
-          entity.capHP(max:11);
+          entity.capHP(max:9);
           entity.supportArts = [
             'base:pebble',
             'base:diversify',
@@ -179,7 +179,9 @@
 
         // tier 1: learn 1 to 2 skills
         (1):::<= {
-          entity.capHP(max:14);
+          for(0, 2) ::(i) {
+            entity.autoLevel();
+          }
           entity.supportArts = [
             'base:retaliate',
             'base:diversify',
@@ -197,7 +199,9 @@
 
         // tier 2: learn 1 to 2 skills and get equips
         (2):::<= {
-          entity.capHP(max:16);
+          for(0, 4) ::(i) {
+            entity.autoLevel();
+          }
           
           @:Item = import(module:'game_mutator.item.mt');
           // add a weapon
@@ -235,7 +239,9 @@
 
         // tier 3: learn 1 to 2 skills and get equips
         (3):::<= {
-          entity.capHP(max:20);
+          for(0, 6) ::(i) {
+            entity.autoLevel();
+          }
 
           
           @:Item = import(module:'game_mutator.item.mt');
@@ -274,6 +280,9 @@
         
         // tier 2: learn 1 to 2 skills and get equips
         default: ::<= {
+          for(0, 8) ::(i) {
+            entity.autoLevel();
+          }
 
           
           @:Item = import(module:'game_mutator.item.mt');

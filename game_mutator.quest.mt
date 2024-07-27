@@ -61,6 +61,7 @@ Quest.database.newEntry(
       @:Landmark = import(:'game_mutator.landmark.mt');
       @:pos = island.getAPosition();
       @:landmark = Landmark.new(
+        island : island,
         base: Landmark.database.find(:'base:forest-generic'),
         x : pos.x,
         y : pos.y

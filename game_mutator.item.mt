@@ -3525,7 +3525,7 @@ Item.database.newEntry(data : {
         }
 
         
-        if (rngEnchantHint != empty && (random.try(percentSuccess:60) || forceEnchant)) ::<= {
+        if (rngEnchantHint != empty && (random.try(percentSuccess:25) || forceEnchant)) ::<= {
           @enchantCount = random.integer(from:1, to:match(world.island.tier) {
             (6, 7, 8, 9, 10):  8,
             (3,4,5):  4,
@@ -3539,7 +3539,7 @@ Item.database.newEntry(data : {
           for(0, enchantCount)::(i) {
             @mod = ItemEnchant.new(
               base:
-              if (random.try(percentSuccess:15)) 
+              if (random.try(percentSuccess:25)) 
                 ItemEnchant.database.find(id:'base:art')
               else
                 ItemEnchant.database.getRandomFiltered(
@@ -3796,7 +3796,7 @@ Item.database.newEntry(data : {
             return out;
           } else '',
           
-          state.stats.descriptionRateLinesBase(:state.statsBase),          
+          String.combine(:state.stats.descriptionRateLinesBase(:state.statsBase)->map(::(value) <- value + '\n')),          
 
           if (state.equipEffects->keycount != 0) ::<= {
             @out = '';

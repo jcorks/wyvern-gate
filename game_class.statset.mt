@@ -47,8 +47,8 @@
         stats.HP != other.HP ||
         stats.AP != other.AP ||
         stats.ATK != other.ATK ||
-        stats.DEF != other.DEF ||
         stats.INT != other.INT ||
+        stats.DEF != other.DEF ||
         stats.SPD != other.SPD ||
         stats.LUK != other.LUK ||
         stats.DEX != other.DEX
@@ -57,23 +57,14 @@
     
     diffToLines ::(stats, other) {
       return canvas.columnsToLines(columns:[
-        [
-          'HP:',
-          'AP:',
-          'ATK:',
-          'DEF:',
-          'INT:',
-          'SPD:',
-          'LUK:',
-          'DEX:'
-        ],
+        NAMES->map(::(value) <- value + ': '),
         
         [
           ''+displayHP(:stats.HP),
           ''+stats.AP,
           ''+stats.ATK,
-          ''+stats.DEF,
           ''+stats.INT,
+          ''+stats.DEF,
           ''+stats.SPD,
           ''+stats.LUK,
           ''+stats.DEX            
@@ -94,8 +85,8 @@
           ''+displayHP(:other.HP),
           ''+other.AP,
           ''+other.ATK,
-          ''+other.DEF,
           ''+other.INT,
+          ''+other.DEF,
           ''+other.SPD,
           ''+other.LUK,
           ''+other.DEX            
@@ -105,8 +96,8 @@
           (if (other.HP - stats.HP  != 0) (if (other.HP > stats.HP) '(+' else '(') + (other.HP  - stats.HP)  + ')' else ''),
           (if (other.AP - stats.AP  != 0) (if (other.AP > stats.AP) '(+' else '(') + (other.AP  - stats.AP)  + ')' else ''),
           (if (other.ATK - stats.ATK  != 0) (if (other.ATK > stats.ATK) '(+' else '(') + (other.ATK  - stats.ATK)  + ')' else ''),
-          (if (other.DEF - stats.DEF  != 0) (if (other.DEF > stats.DEF)'(+' else '(') + (other.DEF  - stats.DEF)  + ')' else ''),
           (if (other.INT - stats.INT  != 0) (if (other.INT > stats.INT)'(+' else '(') + (other.INT  - stats.INT)  + ')' else ''),
+          (if (other.DEF - stats.DEF  != 0) (if (other.DEF > stats.DEF)'(+' else '(') + (other.DEF  - stats.DEF)  + ')' else ''),
           (if (other.SPD - stats.SPD  != 0) (if (other.SPD > stats.SPD)'(+' else '(') + (other.SPD  - stats.SPD)  + ')' else ''),
           (if (other.LUK - stats.LUK  != 0) (if (other.LUK > stats.LUK)'(+' else '(') + (other.LUK  - stats.LUK)  + ')' else ''),
           (if (other.DEX - stats.DEX  != 0) (if (other.DEX > stats.DEX)'(+' else '(') + (other.DEX  - stats.DEX)  + ')' else ''),
@@ -316,13 +307,13 @@
     description : {
       get :: {
         @:state = _.state;
-        return canvas.columnsToLines(
+        return String.combine(:canvas.columnsToLines(
           columns : [
             NAMES->map(::(value) <- value + ': '),
-            NAMES->map(::(value) <- state[value])
+            NAMES->map(::(value) <- ''+state[value])
             
           ]
-        );
+        )->map(::(value) <- value + '\n'));
       }
     },
 
@@ -332,7 +323,7 @@
         @:columns = [
           NAMES->map(::(value) <- value + ': '),
           NAMES->map(::(value) {
-            return (if(state[value] > 0) '+' + state[value] + '%\n' else if (state[value] == 0) '--' else ''+state[value]+ '%')
+            return (if(state[value] > 0) '+' + state[value] + '%' else if (state[value] == 0) '--' else ''+state[value]+ '%')
           })
         ];
         return canvas.columnsToLines(columns);
@@ -344,7 +335,7 @@
       @:columns = [
         NAMES->map(::(value) <- value + ': '),
         NAMES->map(::(value) {
-          return (if(state[value] > 0) '+' + state[value] + '%\n' else if (state[value] == 0) '--' else ''+state[value]+ '%')
+          return (if(state[value] > 0) '+' + state[value] + '%' else if (state[value] == 0) '--' else ''+state[value]+ '%')
         }),
         NAMES->map(::(value) <- 
           if (baseMod[value] == 0) 
