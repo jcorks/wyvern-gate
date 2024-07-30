@@ -29,11 +29,173 @@
   );
 }
 
+@:rerollQuests ::(location) {
+  if (location.data.quests == empty)
+    location.data.quests = [];
+  @:Quest = import(:'game_mutator.quest.mt');
+
+    
+  location.data.quests = random.scrambled(:location.data.quests);
+  location.data.quests->setSize(:location.data.quests->size / 2);
+  
+  for(location.data.quests->size, 18) ::(i) {
+    location.data.quests->push(value:
+      Quest.new(
+        issuer : location.data.guildmaster,
+        rank : random.integer(from:0, to:Quest.RANK.X),
+        base : Quest.database.getRandomFiltered(filter::(value) <- (value.traits & Quest.TRAITS.SPECIAL) == 0)
+      )
+    );
+  }
+
+  for(0, 2) ::(i) {
+    location.data.quests->push(value:
+      Quest.new(
+        issuer : location.data.guildmaster,
+        rank : 0,
+        base : Quest.database.getRandomFiltered(filter::(value) <- (value.traits & Quest.TRAITS.SPECIAL) == 0)
+      )
+    );
+  }
+  
+  location.data.quests = random.scrambled(:location.data.quests);
+
+
+}
+
+
 @:guildQuests::(location) {
-  windowEvent.queueMessage(
-    speaker : location.data.guildmaster.name,
-    text : '"Looks like there aren\'t any postings today."'
+  when (location.data.quests->size == 0)
+    windowEvent.queueMessage(
+      speaker : location.data.guildmaster.name,
+      text : '"Looks like there aren\'t any postings today. Come back tomorrow, I\'m sure there will be some then."'
+    );
+  @:world = import(module:'game_singleton.world.mt');
+  @quests = location.data.quests;
+  @which;
+  windowEvent.queueChoices(
+    leftWeight: 1,
+    topWeight: 1,
+    prompt: 'Quests:',
+    canCancel: true,
+    keep: true,
+    onGetChoices ::<- quests->map(::(value) <- value.name),
+    onHover ::(choice) {
+      which = choice;
+    },
+    renderable : {
+      render ::{
+        quests[which-1].renderPrompt(showCompleteness:false, leftWeight:0, topWeight: 0.5);
+      }
+    },
+    onChoice::(choice) {
+      @:quest = quests[choice-1];
+      
+      when (quest.rank > world.party.guildRank) 
+        windowEvent.queueMessage(
+          text: 'The party\'s rank is too low to accept this quest.'
+        );
+      
+      windowEvent.queueAskBoolean(
+        prompt: 'Accept ' + quest.name + '?',
+        onChoice::(which) {
+          when(which == false) empty;
+          
+          location.data.quests->remove(:
+            location.data.quests->findIndex(:quest)
+          );
+          
+          world.party.quests->push(:quest);
+          
+          windowEvent.queueMessage(
+            speaker: location.data.guildmaster.name,
+            
+            text: '"' + random.pickArrayItem(:[
+              'I figured you\'d take that one.',
+              'A fine quest.',
+              'No one has taken that one for a while.',
+              'A challenge fit for you, I\'m sure.'
+            
+            ]) + ' Come back to turn it in when it\'s complete for your reward."'
+          );
+          
+          quest.accept(island:world.island, issuer:location.data.guildmaster);
+        }
+      );
+    }
   );
+
+}
+
+
+
+
+
+
+@:turnInQuests::(location) {
+  @:world = import(module:'game_singleton.world.mt');
+  
+  when(world.party.quests->size == 0)
+    windowEvent.queueMessage(
+      text: 'The party has no active quests.'
+    )
+
+
+  @quests = world.party.quests->filter(::(value) <- value.isComplete);
+
+  when(quests->size == 0)
+    windowEvent.queueMessage(
+      text: 'No taken quests are currently complete.'
+    )
+
+  @which;
+  windowEvent.queueChoices(
+    leftWeight: 1,
+    topWeight: 1,
+    prompt: 'Quests to turn in:',
+    keep: true,
+    canCancel: true,
+    onGetChoices ::<- quests->map(::(value) <- value.name),
+    onHover ::(choice) {
+      which = choice;
+    },
+    renderable : {
+      render ::{
+        quests[which-1].renderPrompt(showCompleteness:true, leftWeight:0, topWeight: 0.5);
+      }
+    },
+    onChoice::(choice) {
+      @:quest = quests[choice-1];
+
+      
+      windowEvent.queueAskBoolean(
+        prompt: 'Turn in ' + quest.name + '?',
+        onChoice::(which) {
+          when(which == false) empty;
+          quest.turnIn(issuer:location.data.guildmaster);
+          location.data.guildNeedsRestock = true;
+          world.party.animateGainGuildEXP(
+            exp : [
+                35,
+                55,
+                90,
+                120,
+                170,
+                250,
+                340,
+                470,
+                600,
+                800,
+                1500,              
+            ][quest.rank],
+            onDone ::{}
+          );
+          
+        }
+      );
+    }
+  );
+
 }
 
 
@@ -112,8 +274,11 @@
   @:choices = [
     ::<- teamInfo(:party),
     ::<- guildShop(:location),
-    ::<- guildQuests(:location)
+    ::<- guildQuests(:location),
+    ::<- turnInQuests(:location)
   ];
+  
+  
   
   windowEvent.queueChoices(
     prompt: 'Guild menu',
@@ -122,7 +287,8 @@
     choices : [
       'Team info',
       'Guild Shop',
-      'Available quests'
+      'Available quests',
+      'Turn in quests',
     ],
     onChoice::(choice) {
       choices[choice-1]();
@@ -167,6 +333,7 @@
   
   if (location.data.askedJoin == empty) ::<= {
     location.data.askedJoin = true;
+    rerollQuests(location);
     windowEvent.queueMessage(
       speaker:gm.name,
       text: '"Oh...! it would seem that you have a bit of adventure in your spirit. How about joining the quest guild?"'
@@ -227,7 +394,6 @@
                 speaker:gm.name,
                 text: '"Allow me to officially introduce you to the guild, team ' + party.guildTeamName + '."'
               );          
-              
               mainMenu(location, party);
             }
           )

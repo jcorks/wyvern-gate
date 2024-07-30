@@ -348,6 +348,7 @@
           world.scenario.onDeath(entity);
         }
         @:group  = ent2group[entity];
+        entity.battleEnd();
         
         @index = group->findIndex(value:entity);
         if (index != -1) ::<= {

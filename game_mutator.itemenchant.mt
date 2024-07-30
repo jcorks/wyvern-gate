@@ -1612,7 +1612,6 @@ ItemEnchant.database.newEntry(
       },
       
       processEvent ::(*args) {
-        breakpoint();
         @:world = import(module:'game_singleton.world.mt');
         when(state.condition == empty) empty;
         if (state.condition.effectEvent == args.name) ::<= {

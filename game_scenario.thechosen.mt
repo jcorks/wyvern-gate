@@ -2792,7 +2792,7 @@ return {
         id : 'thechosen:scene_wyvernfire0',
         script: [
           //      "(comes   again    one  new)  Another new one comes..."
-          ['???',    'Juhrruhlo-rrohsharr  naan djaashaarr ...'],
+          ['???',    'Juhrruhlo-rrohsharr naan djaashaarr ...'],
           ['???',    'Zaaluh-shol, welcome... to my domain. You have done well to get here.'],
           ['???',    'You have been summoned, but not by me. My sibling is the one who calls for you.'],
           ['???',    'But to get to them, I must evaluate you to see if you are truly worthy of seeing the Wyvern of Light.'],
@@ -3038,7 +3038,7 @@ return {
           },
           ['Kaedjaal', 'Allow me to return you to the land that the Key of Fire leads to.'],           
                //  (world  wish[verb] travel[noun, pl] swift prosperous)   -> The World wishes travels swift and prosperous -> May your travels be swift and properous
-          ['Kaedjaal', 'Zaashael kaaluh-lo zohppuh-zodjii shiirr kohggaelaarr...'], 
+          ['Kaedjaal', 'Zaashael kaaluh-lo zohssuh-zodjii shiirr kohggaelaarr...'], 
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
             @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-fire');
@@ -3283,7 +3283,7 @@ return {
         id : 'thechosen:scene_wyvernthunder0',
         script: [
           ['???', '...'],
-          ['???', 'Ah, ppuh-sho-zaaluh naan. Excellent.'],
+          ['???', 'Ah, ssuh-sho-zaaluh naan. Excellent.'],
           ['???', 'As we wait, we begin to wonder if someone will show with enough shiikohl to surpass us.'],
           ['???', 'Yet as time passes, more of you come. Some quite formiddable too.'],
           ['???', 'What is it you seek? Is it just a wish, or something more? A test of your own growth?'],

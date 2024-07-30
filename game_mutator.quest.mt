@@ -25,6 +25,17 @@
   X  : 7
 }
 
+@:RANK2NAME = [
+  'E',
+  'D',
+  'C',
+  'B',
+  'A',
+  'S',
+  'SS',
+  'X'
+]
+
 @:TRAITS = {
   // if present, the quest has its reward replaced with ???
   HIDDEN_REWARD : 1,
@@ -138,6 +149,237 @@ Quest.database.newEntry(
     dependsOn : []
   }
 );
+
+
+
+
+Quest.database.newEntry(
+  data : {
+    id : 'base:bounty',
+    traits : 0,
+    descriptions : [
+      'The outlaw "%1" is hiding in a known location. Deal with them, dead or alive.',
+      'Help! "%1" has been terrorizing us! Please deal with them.',
+      '"%1" is responsible for various killings. We need justice!',
+      '"%1" knows no bounds to their treachery. Please bring them to justice.'
+    ],
+    
+    onCreate ::(issuer, quest) {
+      @:outlaw = world.island.newInhabitant();
+      @:badQualifiers = [
+        'Wicked',
+        'Unscrupulous',
+        'Terrible',
+        'Sly',
+        'Crooked',
+        'Ruthless',
+        'Sinister',
+        'Scandalous',
+        'Gnarled',
+        'Devious',
+        'Duplicitous',
+        'Wily',
+        'Insidious',
+        'Nasty',
+        'Vicious',
+        'Vile',
+        'Deplorable',
+        'Egregious',
+        'Heinous',
+        'Abhorrent',
+        'Atrocious',
+        'Vicious',
+        'Accursed',
+        'Horrendous',
+        'Dreadful',
+        'Horrid',
+        'Awful',
+        'Foul',
+        'Rotten',
+        'Beastly',
+        'Unnatural',
+        'Appaling',
+        'Hideous',
+        'Bad',
+        'Horrible',
+        'Detestable',
+        'Cruel',
+        'Gruesome',
+        'Wretched' // <- thanks Nido
+      ];
+      outlaw.name = outlaw.name + ' the ' + random.pickArrayItem(:badQualifiers);
+      @:henchman1 = world.island.newInhabitant();
+      henchman1.name = 'Lackey 1';
+
+      @:henchman2 = world.island.newInhabitant();
+      henchman2.name = 'Lackey 2';
+
+      for(0, quest.rank*2) ::(i) {
+        outlaw.autoLevel();
+      }
+
+      for(0, quest.rank) ::(i) {
+        henchman1.autoLevel();
+        henchman2.autoLevel();
+      }
+      
+      @:Item = import(module:'game_mutator.item.mt');
+      
+      @:Entity = import(module:'game_class.entity.mt');
+      
+      foreach([outlaw, henchman1, henchman2]) ::(k, entity) {
+        if (entity.getEquipped(:Entity.EQUIP_SLOTS.HAND_LR).base.id == 'base:none') ::<= {
+          // add a weapon
+          @:wep = Item.database.find(:'base:dagger')
+            
+          entity.equip(
+            slot:Entity.EQUIP_SLOTS.HAND_LR, 
+            item:Item.new(
+              base:wep
+            ), 
+            inventory:entity.inventory, 
+            silent:true
+          );
+        }
+      }
+
+      quest.setReward(g:(quest.rewardG * 5 / 50)->floor * 50);
+      
+
+    
+      quest.name = 'BOUNTY! (' + RANK2NAME[quest.rank] + ' Rank)';
+      quest.description = quest.description->replace(key:'%1', with :outlaw.name);
+      
+      quest.data.henchman1 = henchman1;
+      quest.data.henchman2 = henchman2;
+      quest.data.outlaw = outlaw;
+      
+    },
+
+    onAccept ::(island, quest, issuer) {
+      @:Landmark = import(:'game_mutator.landmark.mt');
+      @:pos = island.getAPosition();
+      @:landmark = Landmark.new(
+        island : island,
+        base: Landmark.database.find(:'base:forest-generic'),
+        x : pos.x,
+        y : pos.y
+      );
+      landmark.symbol = 'X';
+      landmark.legendName = quest.name;
+      
+      @:loc = landmark.getRandomEmptyPosition();
+      
+      @:item = Location.new(
+        landmark: landmark,
+        xHint : loc.x,
+        yHint : loc.y,
+        base: Location.database.find(:'base:small-chest')
+      );
+      landmark.addLocation(location:item);
+      
+      quest.data.landmarkID = landmark.worldID;
+      island.addLandmark(:landmark);  
+    },
+    
+    onStep ::(quest, landmark, island) {
+      when (landmark.worldID != quest.data.landmarkID ||
+          quest.data.outlaw.isIncapacitated()) empty
+
+      @:phrases = [
+        '"Well well well... Look who stumbled into our territory. Heh, gettem!"',
+        '"Look everyone, we got ourselves an intruder! Let\'s show em some hospitality..."',
+        '"Hey buddy, you look a little lost... Let\'s help em\' out gang!"'
+      ];
+      
+      windowEvent.queueMessage(
+        speaker: quest.data.outlaw.name,
+        text: random.pickArrayItem(:phrases)
+      );
+      
+      // funny interference sometimes
+      @bountyHunter = if(random.try(percentSuccess:10)) ::<= {
+        @:ent = world.island.newInhabitant();
+        for(0, quest.rank*2) ::(i) {
+          ent.autoLevel();
+        }
+
+        @:Item = import(module:'game_mutator.item.mt');
+        @:Entity = import(module:'game_class.entity.mt');
+        
+        ent.name = ' the ' + ent.species.name + ' Bounty Hunter';
+        if (ent.getEquipped(:Entity.EQUIP_SLOTS.HAND_LR).id == 'base:none') ::<= {
+          // add a weapon
+          @:wep = Item.database.getRandomFiltered(
+            filter:::(value) <-
+              value.isUnique == false &&
+              value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
+          );
+            
+          ent.equip(
+            slot:Entity.EQUIP_SLOTS.HAND_LR, 
+            item:Item.new(
+              base:wep
+            ), 
+            inventory:ent.inventory, 
+            silent:true
+          );
+        }
+
+        windowEvent.queueMessage(
+          speaker: ent.name,
+          text: '"Hey, hands off the merchandise! This bounty is mine, don\'t interfere!"'
+        );
+
+      } else empty;
+      
+      world.battle.start(
+        party: world.party,              
+        allies: world.party.members,
+        enemies: [
+          quest.data.outlaw,
+          quest.data.henchman1,
+          quest.data.henchman2            
+        ],
+        landmark: {},
+        onEnd::(result) {
+          @:instance = import(module:'game_singleton.instance.mt');
+          if (!world.battle.partyWon()) 
+            instance.gameOver(reason:'The party was wiped out.');
+        }
+      );
+      
+      if (bountyHunter) ::<= {
+        world.battle.join(group:[bountyHunter]);
+      }
+
+    },
+    
+    onTurnIn ::(quest, issuer) {
+      world.island.removeLandmark(:world.island.landmarks->filter(::(value) <- value.worldID == quest.data.landmarkID)[0]);
+    },
+    
+    onNextHour ::(quest) {
+    
+    },
+
+    // The scene to play when a landmark is entered.
+    onLandmarkEnter ::(quest, landmark) {
+
+    },
+  
+    // Whether the quest is complete and able to be taken back 
+    // for the reward.
+    isComplete ::(quest, party) {
+      return quest.data.outlaw.isIncapacitated();
+    },
+    
+    dependsOn : []
+  }
+);
+
+
+
 }
 
 
@@ -268,7 +510,7 @@ Quest.database.newEntry(
       state.rewardItems->push(:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false && value.type == Item.TYPE.RING
+            filter:::(value) <- value.isUnique == false && value.equipType == Item.database.statics.TYPE.RING
           ),
           rngEnchantHint:true, 
           forceEnchant:true
@@ -294,7 +536,7 @@ Quest.database.newEntry(
       state.rewardItems->push(:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false && value.type == Item.TYPE.TRINKET
+            filter:::(value) <- value.isUnique == false && value.equipType == Item.database.statics.TYPE.TRINKET
           ),
           rngEnchantHint:true, 
           forceEnchant:true
@@ -309,7 +551,7 @@ Quest.database.newEntry(
           Item.new(
             base:Item.database.getRandomFiltered(
               filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                          && value.tier > 3
+                          && value.tier >= 3
             ),
             rngEnchantHint:true, 
             forceEnchant:true
@@ -329,36 +571,7 @@ Quest.database.newEntry(
         )
       );      
     }, 
-    
-    (RANK.SS): ::<= {
-      state.rewardG = random.integer(from:2000, to:4000);
-      for(0, 1+Number.random()*3) ::(i) {
-        state.rewardItems->push(:
-          Item.new(
-            base:Item.database.getRandomFiltered(
-              filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                          && value.tier > 3
-            ),
-            qualityHint : 'base:masterwork',
-            rngEnchantHint:true, 
-            forceEnchant:true
-          )
-        );
-      }
-      
-      state.rewardItems->push(:
-        Item.new(
-          base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false &&
-              value.type == Item.TYPE.RING
-          ),
-          qualityHint : 'base:masterwork',
-          rngEnchantHint:true, 
-          forceEnchant:true
-        )
-      );      
-      
-    }, 
+
 
 
     (RANK.X): ::<= {
@@ -368,7 +581,7 @@ Quest.database.newEntry(
           Item.new(
             base:Item.database.getRandomFiltered(
               filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                          && value.tier > 3
+                          && value.tier >= 3
             ),
             qualityHint : 'base:masterwork',
             rngEnchantHint:true, 
@@ -381,7 +594,7 @@ Quest.database.newEntry(
         Item.new(
           base:Item.database.getRandomFiltered(
             filter:::(value) <- value.isUnique == false &&
-              value.type == Item.TYPE.RING
+              value.equipType == Item.database.statics.TYPE.RING
           ),
           qualityHint : 'base:masterwork',
           rngEnchantHint:true, 
@@ -394,7 +607,7 @@ Quest.database.newEntry(
         Item.new(
           base:Item.database.getRandomFiltered(
             filter:::(value) <- value.isUnique == false &&
-              value.type == Item.TYPE.TRINKET
+              value.equipType == Item.database.statics.TYPE.TRINKET
           ),
           qualityHint : 'base:divine',
           rngEnchantHint:true, 
@@ -412,6 +625,12 @@ Quest.database.newEntry(
   statics : {
     RANK : {
       get ::<- RANK
+    },
+    TRAITS : {
+      get ::<- TRAITS
+    },
+    RANK2NAME : {
+      get ::<- RANK2NAME
     }
   },
   items : {
@@ -502,6 +721,7 @@ Quest.database.newEntry(
         state.base = base;
         state.rank = rank;
         state.name = '????';
+        state.rewardItems = [];
         state.issuerID = issuer.worldID;
         state.issuerName = issuer.name + ', the ' + issuer.species.name + (if(issuer.profession.id == 'base:none') '' else ' ' + issuer.profession.name)
         state.description = random.pickArrayItem(:base.descriptions);
@@ -512,8 +732,12 @@ Quest.database.newEntry(
       
       
       setReward::(g, items) {
-        state.rewardG = if (g == empty) 0 else g;
-        state.rewardItems = [...items];
+        state.rewardG = if (g == empty) state.rewardG else g;
+        state.rewardItems = if (items) [...items] else state.rewardItems;
+      },
+      
+      rewardG : {
+        get ::<- state.rewardG
       },
       
       // creates the quest, returning the landmark 
@@ -540,8 +764,16 @@ Quest.database.newEntry(
         get ::<- state.base.isComplete(quest:this, party:import(:'game_singleton.world.mt').party)
       },
       
+      rank : {
+        get ::<- state.rank
+      },
+      
       step ::(landmark, island){
         state.base.onStep(quest:this, landmark, island);
+      },
+      
+      enterLandmark ::(landmark) {
+        state.base.onLandmarkEnter(quest:this, landmark:landmark);
       },
       
       nextHour ::<- state.base.onNextHour(quest:this),
@@ -585,6 +817,8 @@ Quest.database.newEntry(
             input : [
               'Quest  : ' + state.name,
               'Issuer : ' + state.issuerName,
+              if (state.rank < 0) '' else   
+                'Rank   : ' + RANK2NAME[state.rank],
               '',
               state.description, 
               '',

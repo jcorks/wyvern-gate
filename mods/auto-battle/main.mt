@@ -8,7 +8,6 @@ return {
   },
 
   onDatabaseStartup :: {
-    breakpoint();
     Scenario.database.newEntry(data:{
       name : 'Test Battle',
       

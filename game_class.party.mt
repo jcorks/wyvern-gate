@@ -271,16 +271,13 @@
       },
       
       guildRank : {
-        get ::<- state.guildRank,
+        get ::<- state.guildRank
       },
       
       guildTeamName : {
         get ::<- state.guildTeamName
       },
       
-      gainGuilExpAnimated ::(exp, onDone) {
-      
-      },
       
       guildEXPtoNext : {
         get ::<- state.guildEXPtoNext
@@ -289,6 +286,106 @@
       guildEXP : {
         get ::<- state.guildEXP
       },
+      
+      animateGainGuildEXP ::(exp, onDone) {
+        @:Quest = import(:'game_mutator.quest.mt');
+
+        @remainingForLevel = state.guildEXPtoNext - state.guildEXP;
+        windowEvent.queueDisplay(
+          lines : [
+            ' - Team ' + state.guildTeamName + ' - ',
+            '',
+            'Guild rank: ' + Quest.RANK2NAME[state.guildRank],
+            canvas.renderBarAsString(width:40, fillFraction: state.guildEXP / state.guildEXPtoNext),
+            'Exp to next rank: ' + remainingForLevel,
+            '                 +' + exp
+          ]
+        )
+        
+        
+        @:level = ::{
+          windowEvent.queueCustom(
+            onEnter ::{},
+            isAnimation: true,
+            /*onInput ::(input) {
+              match(input) {
+                (windowEvent.CURSOR_ACTIONS.CONFIRM,
+                 windowEvent.CURSOR_ACTIONS.CANCEL):
+                exp = 0
+              }
+            },*/
+            animationFrame ::{
+              @remainingForLevel = state.guildEXPtoNext - state.guildEXP;
+              canvas.renderTextFrameGeneral(
+                leftWeight: 0.5,
+                topWeight : 0.5,
+                lines : [
+                  ' - Team ' + state.guildTeamName + ' - ',
+                  '',
+                  'Guild rank: ' + Quest.RANK2NAME[state.guildRank],
+                  canvas.renderBarAsString(width:40, fillFraction: state.guildEXP / state.guildEXPtoNext),
+                  'Exp to next rank: ' + remainingForLevel,
+                  if (exp >= 0)
+                  '                 +' + exp
+                  else
+                  '                  ' + exp
+                ]
+              );
+              
+
+              
+              @newExp = if (exp < 0) (exp * 0.9)->ceil else (exp*0.9)->floor;
+              @add = exp - newExp;
+              
+              state.guildEXP += add;
+              exp = newExp;
+              
+              when (state.guildEXP >= state.guildEXPtoNext) ::<= {
+                state.guildRank += 1;
+                state.guildEXP = state.guildEXP - state.guildEXPtoNext;
+                state.guildEXPtoNext = (90 ** (1 + 0.31*state.guildRank))->floor;
+
+                windowEvent.queueDisplay(
+                  lines : [
+                    'Rank up!',
+                    'Congratulations! Team ' + state.guildTeamName + ' is now rank ' + Quest.RANK2NAME[state.guildRank]
+                  ]
+                );
+
+
+                level();
+                return canvas.ANIMATION_FINISHED;
+              }
+
+              when(exp->abs <= 0) ::<= {
+                windowEvent.queueDisplay(
+                  lines : [
+                    ' - Team ' + state.guildTeamName + ' - ',
+                    '',
+                    'Guild rank: ' + Quest.RANK2NAME[state.guildRank],
+                    canvas.renderBarAsString(width:40, fillFraction: state.guildEXP / state.guildEXPtoNext),
+                    'Exp to next rank: ' + remainingForLevel,
+                    ''
+                  ],
+                  skipAnimation: true
+                )
+                
+                windowEvent.queueCustom(
+                  onEnter :: {
+                    onDone();
+                  }
+                );
+                return canvas.ANIMATION_FINISHED
+              }
+            }
+          );
+        }
+        level();
+        
+
+      },  
+      
+      
       
       setGuildTeamName ::(name) {
         state.guildTeamName = name;

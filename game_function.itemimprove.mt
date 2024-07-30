@@ -70,6 +70,20 @@
 
 
 @:addExpAnimated::(item, other, exp, onDone) {
+  @remainingForLevel = item.improvementEXPtoNext - item.improvementEXP;
+  windowEvent.queueDisplay(
+    leftWeight: 0.5,
+    topWeight : 0.5,
+    lines : [
+      item.name,
+      '',
+      'Item level: ' + item.improvements,
+      canvas.renderBarAsString(width:40, fillFraction: item.improvementEXP / item.improvementEXPtoNext),
+      'Exp to next level: ' + remainingForLevel,
+      '                  +' + exp
+    ]
+  );
+
   windowEvent.queueCustom(
     onEnter ::{},
     isAnimation: true,
@@ -92,9 +106,9 @@
           canvas.renderBarAsString(width:40, fillFraction: item.improvementEXP / item.improvementEXPtoNext),
           'Exp to next level: ' + remainingForLevel,
           if (exp >= 0)
-          '          +' + exp
+          '                  +' + exp
           else
-          '           ' + exp
+          '                   ' + exp
         ]
       );
       
@@ -116,9 +130,9 @@
             canvas.renderBarAsString(width:40, fillFraction: 1),
             'Exp to next level: ' + remainingForLevel,
             if (exp >= 0)
-            '          +' + exp
+            '                  +' + exp
             else
-            '           ' + exp
+            '                   ' + exp
           ],
           skipAnimation: true
         )
@@ -147,9 +161,9 @@
             canvas.renderBarAsString(width:40, fillFraction: item.improvementEXP / item.improvementEXPtoNext),
             'Exp to next level: ' + remainingForLevel,
             if (exp >= 0)
-            '          +' + exp
+            '                  +' + exp
             else
-            '           ' + exp
+            '                  ' + exp
           ],
           skipAnimation: true
         )

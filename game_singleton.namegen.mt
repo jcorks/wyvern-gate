@@ -152,9 +152,9 @@
     
     // verbs. infinitive always ends in uh 
     // prefix with kaa- to negate a verb
-    zohppuh       to travel
+    zohssuh       to travel
     juhrruh       to come 
-    ppuh          to be
+    ssuh          to be
     kaaluh        to wish
     zaaluh        to choose
     zohkuh        to fight
@@ -184,7 +184,7 @@
     - the verb "to be" is special in that it can form modifiers to nouns by linking with other words. Those 
       attached to "to be" are also dashed together.
       For example, the word "Chosen" / "Chosen one" (as in somebody who is chosen) is literally the verb 'to be' conjugated in the past tense linked with the infinitive of "to choose" with the subject "one"
-      in other words: ppuh-sho-zaaluh naan
+      in other words: ssuh-sho-zaaluh naan
       which is distinctly different from "zaaluh-zol" which is the word for "choice" 
       (it is more common to just informally say "zaaluh-shol" (chosen (noun form))
   
@@ -202,7 +202,7 @@
     'k',
     'gg',
     'dj',
-    'pp',
+    'ss',
     'tt',
   ];
   return :: {

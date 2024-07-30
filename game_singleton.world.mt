@@ -302,11 +302,19 @@
       landmark : {
         get ::<- landmark,
         set ::(value) {
-          landmark = value
-          if (landmark != empty && landmark.base.ephemeral)
+          if (landmark != empty && landmark.base.ephemeral) 
             landmark.unloadContent();
-          landmark.loadContent();
-          state.currentLandmarkID = landmark.worldID;
+            
+          landmark = value
+          
+          if (landmark) ::<= {
+            landmark.loadContent();
+            state.currentLandmarkID = landmark.worldID;
+            foreach(this.party.quests) ::(k, quest) {
+              quest.enterLandmark(:landmark);
+            }
+          }
+
         }
       },
       

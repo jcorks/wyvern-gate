@@ -1072,7 +1072,7 @@
             'Selling level: ' + state.sellingLevel,
             canvas.renderBarAsString(width:40, fillFraction: state.sellingEXP / state.sellingEXPtoNext),
             'Exp to next level: ' + remainingForLevel,
-            '          +' + exp
+            '                  +' + exp
           ]
         )
         
@@ -1100,9 +1100,9 @@
                   canvas.renderBarAsString(width:40, fillFraction: state.sellingEXP / state.sellingEXPtoNext),
                   'Exp to next level: ' + remainingForLevel,
                   if (exp >= 0)
-                  '          +' + exp
+                  '                  +' + exp
                   else
-                  '           ' + exp
+                  '                   ' + exp
                 ]
               );
               

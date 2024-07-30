@@ -856,6 +856,7 @@ return empty;
 
       
       visitLandmark ::(landmark => Landmark.type, where) {
+        @:world = import(module:'game_singleton.world.mt');
 
         world.landmark = landmark;        
         if (where != empty) ::<= {
@@ -868,7 +869,6 @@ return empty;
         }
         @:windowEvent = import(module:'game_singleton.windowevent.mt');
         @:partyOptions = import(module:'game_function.partyoptions.mt');
-        @:world = import(module:'game_singleton.world.mt');
         @:Island = import(module:'game_class.island.mt');
         @:Event  = import(module:'game_mutator.event.mt');
 
