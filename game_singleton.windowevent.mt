@@ -289,6 +289,8 @@
       if (noCommit == empty)
         commitInput(level);
     }
+    
+    @:canResolveNext:: <- resolveQueues[resolveQueues->size-1].queue->size;
 
 
     @:commitInput_cursor ::(data => Object, input) {
@@ -606,6 +608,12 @@
       @:onMenu = data.onMenu;      
       @:canCancel = data.canCancel;
       when (requestAutoSkip) false;
+      
+      when(canResolveNext()) ::<= {
+        resolveNext();
+        return false;
+      }
+      
 
       when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
         if (data.onCancel) data.onCancel();

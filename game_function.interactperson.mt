@@ -82,6 +82,7 @@ return ::(this, party, location, onDone, overrideChat, skipIntro) {
     onChoice::(choice) {
       when(choice == 0) empty;
       interactions[choice-1].onSelect(
+        location,
         entity:this
       );
         

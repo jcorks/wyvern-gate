@@ -27,7 +27,7 @@
     name: 'Hire',
     keepInteractionMenu: true,
     filter ::(entity)<- true, // everyone can barter,
-    onSelect ::(entity) {
+    onSelect ::(entity, location) {
       @:this = entity;
       when(this.isIncapacitated())
         windowEvent.queueMessage(
@@ -100,7 +100,7 @@
     name: 'Aggress',
     keepInteractionMenu: true,
     filter ::(entity)<- true, // everyone can barter,
-    onSelect::(entity) {
+    onSelect::(entity, location) {
       @:this = entity;
       @whom;
 
@@ -116,8 +116,8 @@
           text:'"What are you doing??"'
         );
 
-        if (world.landmark != empty) ::<= {
-          world.landmark.peaceful = false;
+        if (location != empty) ::<= {
+          location.landmark.peaceful = false;
           windowEvent.queueMessage(text:'The people here are now aware of your aggression.');
         }
         

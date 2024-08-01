@@ -57,7 +57,7 @@
       
   stats.add(stats:StatSet.new(
     HP  : (if(random.flipCoin()) 1 else 0) + (stat(name:'HP')),
-    AP  : (if(random.flipCoin()) 2 else 0) + (stat(name:'AP')),
+    AP  : 0,
     ATK : stat(name:'ATK'),
     INT : stat(name:'INT'),
     DEF : stat(name:'DEF'),
@@ -434,7 +434,7 @@
       state.supportArts = [];
       state.stats = StatSet.new(
         HP:1,
-        AP:1,
+        AP:random.integer(from:8, to:14),
         ATK:1,
         DEX:1,
         INT:1,
@@ -1034,7 +1034,7 @@
       @:hasNoEffectStack = this.effectStack == empty;
     
       if (hasNoEffectStack) 
-        _.effectStack = EffectStack.new();
+        _.effectStack = EffectStack.new(parent:this);
         
       @:effectStack = _.effectStack;
       @:retval = ::<= {
@@ -1339,7 +1339,7 @@
       @:hasNoEffectStack = this.effectStack == empty;
       
       if (hasNoEffectStack)
-        _.effectStack = EffectStack.new();
+        _.effectStack = EffectStack.new(parent:this);
 
 
         
@@ -1639,7 +1639,7 @@
           );
           
           if (chooseStat == empty) ::<={ 
-            @choice = random.integer(from:0, to:7);
+            @choice = random.integer(from:2, to:7);
             state.stats.add(stats: StatSet.new(
               HP: if (choice == 0) statUp(level:state.level, growth:state.growth.HP) else 0,
               AP: if (choice == 1) statUp(level:state.level, growth:state.growth.AP) else 0,

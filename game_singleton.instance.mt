@@ -675,7 +675,7 @@ return empty;
           @hasVisitIsland;
           this.islandTravel();
           if (windowEvent.canJumpToTag(name:'VisitIsland'))
-            windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:true);
+            windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:if(atGate == empty)true else false);
           hasVisitIsland = true;
           when (restorePos == empty && atGate != empty) ::<= {
             @gate = island.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
@@ -695,6 +695,7 @@ return empty;
               landmark:gate,
               where: ::(landmark)<- gategate[0]
             );        
+            
             if (hasVisitIsland && onReady) ::<= {
               windowEvent.onResolveAll(onDone:onReady)
             } else

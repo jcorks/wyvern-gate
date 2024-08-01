@@ -340,7 +340,8 @@ return {
           topWeight: 1,
           prompt: 'Quests:',
           canCancel: true,
-          choices : quests->map(::(value) <- value.name),
+          keep : true,
+          onGetChoices ::<- quests->map(::(value) <- value.name),
           onHover ::(choice) {
             which = choice;
           },
@@ -349,8 +350,33 @@ return {
               quests[which-1].renderPrompt(showCompleteness:true, leftWeight:0, topWeight: 0.5);
             }
           },
-          onChoice::(which) {
+          onChoice::(choice) {
+            @:quest = quests[choice-1];
+            @:giveUp ::{
+              windowEvent.queueAskBoolean(
+                prompt: 'Give up on ' + quest.name + '?',
+                onChoice::(which) {
+                  when(which == false) empty;
+                  
+                  world.party.quests->remove(key:world.party.quests->findIndex(:quest));
+                  windowEvent.queueMessage(
+                    text: 'The quest ' + quest.name + ' was removed from the quest list.'
+                  );
+                }
+              );
+            };
           
+            @:choiceActions = [
+              ::<- quest.whereAmI(),
+              ::<- giveUp()
+            ]
+            windowEvent.queueChoices(
+              choices : [
+                'More details...',
+                'Give up'
+              ],
+              onChoice::(choice) <- choiceActions[choice-1]()
+            );
           }
         );
       }
@@ -480,8 +506,8 @@ return {
         @:party = world.party;
         return party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID) == -1
       },
-      onSelect::(entity) {
-        when(entity.adventurous) ::<= {
+      onSelect::(entity, location) {
+        when(entity.adventurous || location == empty) ::<= {
           windowEvent.queueMessage(
             speaker: entity.name,
             text: '"Nah. I\'m actually looking to go out and explore the world. Not much left that needs doing here."'
@@ -498,6 +524,7 @@ return {
         if (entity.data.quest == empty) ::<= {
           quest = 
             Quest.new(
+              landmark : location.landmark,
               issuer : entity,
               rank : Quest.RANK.NONE,
               base : Quest.database.find(id:'base:fetch-quest-personal')
@@ -536,7 +563,7 @@ return {
         @:party = world.party;
         return party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID) != -1
       },
-      onSelect::(entity) {
+      onSelect::(entity, location) {
         @:world = import(module:'game_singleton.world.mt');
         @:quest = world.party.quests[world.party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID)];
         when (quest.isComplete == false) 
@@ -554,7 +581,7 @@ return {
       name: 'Barter',
       keepInteractionMenu : true,
       filter ::(entity)<- true, // everyone can barter,
-      onSelect::(entity) {
+      onSelect::(entity, location) {
         @:this = entity;
         when(this.isIncapacitated())
           windowEvent.queueMessage(

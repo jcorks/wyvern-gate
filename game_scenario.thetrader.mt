@@ -2991,7 +2991,7 @@
     name: 'Hire with contract',
     keepInteractionMenu: true,
     filter ::(entity)<- true,
-    onSelect ::(entity) {
+    onSelect ::(entity, location) {
       @:this = entity;
       when(this.isIncapacitated())
         windowEvent.queueMessage(

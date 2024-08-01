@@ -41,6 +41,7 @@
   for(location.data.quests->size, 18) ::(i) {
     location.data.quests->push(value:
       Quest.new(
+        landmark : location.landmark,
         issuer : location.data.guildmaster,
         rank : random.integer(from:0, to:Quest.RANK.X),
         base : Quest.database.getRandomFiltered(filter::(value) <- (value.traits & Quest.TRAITS.SPECIAL) == 0)
@@ -51,6 +52,7 @@
   for(0, 2) ::(i) {
     location.data.quests->push(value:
       Quest.new(
+        landmark : location.landmark,
         issuer : location.data.guildmaster,
         rank : 0,
         base : Quest.database.getRandomFiltered(filter::(value) <- (value.traits & Quest.TRAITS.SPECIAL) == 0)
@@ -155,7 +157,11 @@
     prompt: 'Quests to turn in:',
     keep: true,
     canCancel: true,
-    onGetChoices ::<- quests->map(::(value) <- value.name),
+    onGetChoices :: {
+      quests = world.party.quests->filter(::(value) <- value.isComplete);
+      return quests->map(::(value) <- value.name)
+    },
+     
     onHover ::(choice) {
       which = choice;
     },
@@ -172,25 +178,37 @@
         prompt: 'Turn in ' + quest.name + '?',
         onChoice::(which) {
           when(which == false) empty;
+          when (quest.issuerID != location.data.guildmaster.worldID) ::<= {
+            windowEvent.queueMessage(
+              speaker : location.data.guildmaster.name,
+              text: '"Hmm, it looks like this is from a different quest guild. It\'s against policy to turn in a quest in a place other than where you got it, you see. Too many counterfeits, and it makes bookkeeping a mess."' 
+            );
+          }
           quest.turnIn(issuer:location.data.guildmaster);
-          location.data.guildNeedsRestock = true;
-          world.party.animateGainGuildEXP(
-            exp : [
-                35,
-                55,
-                90,
-                120,
-                170,
-                250,
-                340,
-                470,
-                600,
-                800,
-                1500,              
-            ][quest.rank],
-            onDone ::{}
+
+          windowEvent.queueCustom(
+            onEnter :: {
+              world.party.animateGainGuildEXP(
+                exp : [
+                    35,
+                    55,
+                    90,
+                    120,
+                    170,
+                    250,
+                    340,
+                    470,
+                    600,
+                    800,
+                    1500,              
+                ][quest.rank],
+                onDone ::{
+                  location.data.guildNeedsRestock = true;
+                  world.party.quests->remove(key:world.party.quests->findIndex(:quest));
+                }
+              );
+            }
           );
-          
         }
       );
     }
@@ -262,6 +280,7 @@
       text: '"We have new equipment in stock."'
     );
     rerollShop(inventory:location.data.guildInventory);           
+    location.data.guildNeedsRestock = false;
   }
   
   buySomethinWillYa(
@@ -311,6 +330,7 @@
       speaker:gm.name,
       text: '"Welcome to the quest guild. I am ' + gm.name + '."'
     );
+    rerollQuests(location);
   } else ::<= {
     windowEvent.queueMessage(
       speaker:location.data.guildmaster.name,
@@ -333,7 +353,6 @@
   
   if (location.data.askedJoin == empty) ::<= {
     location.data.askedJoin = true;
-    rerollQuests(location);
     windowEvent.queueMessage(
       speaker:gm.name,
       text: '"Oh...! it would seem that you have a bit of adventure in your spirit. How about joining the quest guild?"'

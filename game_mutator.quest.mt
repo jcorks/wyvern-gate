@@ -299,6 +299,11 @@ Quest.database.newEntry(
       
       // funny interference sometimes
       @bountyHunter = if(random.try(percentSuccess:10)) ::<= {
+        windowEvent.queueMessage(
+          speaker: quest.data.outlaw.name,
+          text: '"..Wait... huh? Who are YOU supposed to be?"'
+        );
+      
         @:ent = world.island.newInhabitant();
         for(0, quest.rank*2) ::(i) {
           ent.autoLevel();
@@ -307,8 +312,8 @@ Quest.database.newEntry(
         @:Item = import(module:'game_mutator.item.mt');
         @:Entity = import(module:'game_class.entity.mt');
         
-        ent.name = ' the ' + ent.species.name + ' Bounty Hunter';
-        if (ent.getEquipped(:Entity.EQUIP_SLOTS.HAND_LR).id == 'base:none') ::<= {
+        ent.name = 'the ' + ent.species.name + ' Bounty Hunter';
+        if (ent.getEquipped(:Entity.EQUIP_SLOTS.HAND_LR).base.id == 'base:none') ::<= {
           // add a weapon
           @:wep = Item.database.getRandomFiltered(
             filter:::(value) <-
@@ -330,7 +335,7 @@ Quest.database.newEntry(
           speaker: ent.name,
           text: '"Hey, hands off the merchandise! This bounty is mine, don\'t interfere!"'
         );
-
+        return ent;
       } else empty;
       
       world.battle.start(
@@ -650,6 +655,12 @@ Quest.database.newEntry(
     // The name of the issuer
     issuerName : '',
     
+    // the source landmark name
+    questSourceLandmarkName : '???',
+    
+    // the source island name
+    questSourceIslandName : '???',
+    
     // Where the quest leads.
     locationName : '',
     
@@ -716,12 +727,14 @@ Quest.database.newEntry(
       initialize ::(parent) {
       },
       
-      defaultLoad ::(base, issuer, rank) {
+      defaultLoad ::(base, issuer, landmark, rank) {
         state.data = {};
         state.base = base;
         state.rank = rank;
         state.name = '????';
         state.rewardItems = [];
+        state.questSourceLandmarkName = landmark.name;
+        state.questSourceIslandName = landmark.island.name;
         state.issuerID = issuer.worldID;
         state.issuerName = issuer.name + ', the ' + issuer.species.name + (if(issuer.profession.id == 'base:none') '' else ' ' + issuer.profession.name)
         state.description = random.pickArrayItem(:base.descriptions);
@@ -808,6 +821,14 @@ Quest.database.newEntry(
         get :: <- state.description,
         set ::(value) <- state.description = value
       },
+      
+      whereAmI :: {
+        windowEvent.queueMessage(
+          text :
+            'This quest was from ' + state.issuerName + '. It was acquired on the island ' + state.questSourceIslandName + ' within ' + state.questSourceLandmarkName + '.'
+        );
+      },
+      
       
       renderPrompt::(showCompleteness, topWeight, leftWeight) {
         if (topWeight == empty)
