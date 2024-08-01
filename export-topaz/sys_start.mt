@@ -158,7 +158,8 @@ return ::(terminal, arg, onDone) {
 
                 @enterNewLocation ::(action, path) {
                     @CWD = Topaz.Resources.getPath();
-                    Topaz.Resources.setPath(:path);
+                    if (Topaz.Resources.setPath(:path) == empty)
+                        error(:path + ' was not available or doesn\'t exist.')
                     @output;
                     {:::} {
                       output = action();
@@ -201,7 +202,7 @@ return ::(terminal, arg, onDone) {
                             )
                         } : {
                             onError::(message) {
-                                error(detail: 'Could not preload / compile ' + json.name + '/' + file + ':' + message.detail);
+                                error(detail: 'Could not preload / compile ' + json.name + '/' + file + ':' + message.summary);
                             }
                         }
                     }
@@ -235,16 +236,11 @@ return ::(terminal, arg, onDone) {
                         }
                     )
                 }
-                {:::} {
-                    @:path = Topaz.Filesystem.getPathFromString(path:Topaz.Resources.getPath() + '/' + MOD_DIR);
-                
-                    foreach(path.getChildren()) ::(k, file) {
-                        loadModJSON(file);
-                    }
-                } : {
-                    onError ::(message) {
-                        error(detail:message.detail);
-                    }
+                @:path = Topaz.Filesystem.getPathFromString(path:Topaz.Resources.getPath() + '/' + MOD_DIR);
+                if (path == empty)
+                    error(:'The /mods path does not exist. No mods can be loaded.');
+                foreach(path.getChildren()) ::(k, file) {
+                    loadModJSON(file);
                 }
                 return mods;              
             },

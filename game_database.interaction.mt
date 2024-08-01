@@ -329,11 +329,12 @@ Interaction.newEntry(
         );   
 
 
-        
+        /*
         foreach(party.members)::(index, member) {
           if (member.ap < member.stats.AP)
             member.healAP(amount:member.stats.AP * 0.1);
         }
+        */
 
 
 
@@ -450,7 +451,8 @@ Interaction.newEntry(
                         if (item.name->contains(key:'Wyvern Key of'))
                           world.accoladeEnable(name:'gotRidOfWyvernKey');    
                       }
-                      @:alreadyWon = world.accoladeEnabled(name:'wonGamblingGame');
+                      @:offerJoin = world.accoladeEnabled(name:'wonGamblingGame') &&
+                                    world.party.members->size < 3;
                       world.accoladeEnable(name:'wonGamblingGame');
                       
                       windowEvent.queueMessage(
@@ -458,7 +460,7 @@ Interaction.newEntry(
                         text: '"Ah, well done. A gamble is a gamble, after all."'                  
                       );
                       
-                      if (alreadyWon) 
+                      if (offerJoin) 
                         windowEvent.queueMessage(
                           speaker: 'Wandering Gamblist',
                           text: '"Alternatively, I can offer my services..."'                  
@@ -468,7 +470,7 @@ Interaction.newEntry(
                       windowEvent.queueChoices(
                         canCancel: false,
                         choices: 
-                          if (alreadyWon)
+                          if (offerJoin)
                             ['Get Prize', 'Join Party']
                           else 
                             ['Get Prize']

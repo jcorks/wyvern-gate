@@ -1470,6 +1470,10 @@
         if (damage.damageType == Damage.TYPE.LIGHT && Number.random() > 0.98)
           this.addEffect(from:attacker, id:'base:petrified',durationTurns:2);
         
+        if (this.effectStack == empty) ::<= {
+          @:Topaz = import(module:'Topaz');
+          Topaz.debug();
+        }
 
         this.effectStack.emitEvent(
           name : 'onPostDamage',
@@ -1795,7 +1799,9 @@
       @:state = _.state;
       @:this = _.this;
       
-      if (_.battle == empty)
+      @:hasEffectStack = _.effectStack != empty;
+
+      if (!hasEffectStack)
         _.effectStack = EffectStack.new(parent:this);
 
 
@@ -1834,9 +1840,9 @@
       );
       
       
-      if (_.battle == empty)
+      if (!hasEffectStack)
         this.effectStack.clear(all:true);
-      if (_.battle == empty)
+      if (!hasEffectStack)
         _.effectStack = empty;
 
     },

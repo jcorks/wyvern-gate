@@ -96,7 +96,7 @@ import(module:'game_class.island.mt');
 }
 @:JSON = import(module:'Matte.Core.JSON');
 @:GIT_COMMIT = import(module:'GIT_COMMIT');
-@:VERSION = '0.1.9a - ' + GIT_COMMIT;
+@:VERSION = '0.2.0 - ' + GIT_COMMIT;
 @world = import(module:'game_singleton.world.mt');
 import(module:'game_function.newrecord.mt');
 
@@ -287,9 +287,6 @@ return empty;
 
 
 
-        
-        @:mods = preloadMods();
-        loadMods(mods);
         
 
 
@@ -494,6 +491,20 @@ return empty;
         }
 
         windowEvent.clearAll();
+
+        @mods;
+        {:::} {
+          mods = preloadMods();
+        } : {
+          onError ::(message) {
+            windowEvent.queueMessage(
+              text: "Could not preload mods: " + message.summary
+            )
+            mods = {};
+          }
+        }
+        loadMods(mods);
+
         windowEvent.queueChoices(
           onGetChoices ::{
             return genChoices();
@@ -542,6 +553,9 @@ return empty;
             choiceActions[choice-1]();              
           }
         );
+
+
+
       },
 
       queueCredits :: {

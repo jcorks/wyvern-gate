@@ -568,7 +568,13 @@
             ent.equip(item:sylvRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);
             ent.equip(item:sylvAcc,  slot:Entity.EQUIP_SLOTS.TRINKET, silent:true);
 
-
+            ent.supportArts = [
+              'base:cancel',
+              'base:cancel',
+              'base:pebble',
+              'base:quick-sheild',
+              'base:bloods-summoning'
+            ];
 
 
             ent.name = 'Sylvia';
@@ -633,6 +639,14 @@
               silent: true
             );
 
+            ent.supportArts = [
+              'base:cancel',
+              'base:cancel',
+              'base:pebble',
+              'base:quick-sheild',
+              'base:bloods-summoning'
+            ];
+
             ent.name = 'Mei';
             return ent;
           },
@@ -678,7 +692,13 @@
             );
             skieCloak.maxOut();
 
-            
+            ent.supportArts = [
+              'base:cancel',
+              'base:cancel',
+              'base:pebble',
+              'base:quick-sheild',
+              'base:bloods-summoning'
+            ];            
             
             ent.equip(item:skieWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
             ent.equip(item:skieRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);

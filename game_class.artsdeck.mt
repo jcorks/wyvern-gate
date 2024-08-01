@@ -480,7 +480,7 @@
       levelUp::(levelIndex, discardIndex) {
         @:handCard = this.hand[levelIndex];
         @:discard = this.hand[discardIndex];
-        handCard.level += handCard.level;
+        handCard.level += discard.level;
         this.discardFromHand(:discard);
       
         emitEvent(event:EVENTS.LEVEL, card:handCard);

@@ -84,8 +84,8 @@ Quest.database.newEntry(
       
       @:item = Location.new(
         landmark: landmark,
-        xHint : loc.x,
-        yHint : loc.y,
+        x : loc.x,
+        y : loc.y,
         base: Location.database.find(:'base:lost-item')
       );
       landmark.addLocation(location:item);
@@ -272,8 +272,8 @@ Quest.database.newEntry(
       
       @:item = Location.new(
         landmark: landmark,
-        xHint : loc.x,
-        yHint : loc.y,
+        x : loc.x,
+        y : loc.y,
         base: Location.database.find(:'base:small-chest')
       );
       landmark.addLocation(location:item);

@@ -1920,7 +1920,7 @@ Location.database.newEntry(data:{
 
         landmark_ = landmark;   
       },
-      defaultLoad ::(base, xHint, yHint, ownedByHint) {
+      defaultLoad ::(base, x, y, ownedByHint) {
         state.worldID = world.getNextID();
         state.occupants = []; // entities. non-owners can shift
         state.inventory = Inventory.new(size:30);
@@ -1929,6 +1929,8 @@ Location.database.newEntry(data:{
 
 
         state.base = base;
+        state.x = if (x) x else 0;
+        state.y = if (x) y else 0;
         //state.x = if (xHint == empty) (Number.random() * landmark_.width ) else xHint;  
         //state.y = if (yHint == empty) (Number.random() * landmark_.height) else yHint;
         if (ownedByHint != empty)

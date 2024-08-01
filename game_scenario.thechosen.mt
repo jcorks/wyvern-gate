@@ -1706,10 +1706,6 @@ return {
         location.ownedBy.name = 'Wyvern of Ice';
         location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-ice');
         location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-ice');
-        location.ownedBy.clearAbilities();
-        foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
-          location.ownedBy.learnAbility(id:ability);
-        }
 
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
@@ -1797,10 +1793,6 @@ return {
         ];      
         location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-thunder');
         location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-thunder') 
-        location.ownedBy.clearAbilities();
-        foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
-          location.ownedBy.learnAbility(id:ability);
-        }
 
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
@@ -1890,10 +1882,6 @@ return {
         location.ownedBy.name = 'Wyvern of Light';
         location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-light');
         location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-light')
-        location.ownedBy.clearAbilities();
-        foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
-          location.ownedBy.learnAbility(id:ability);
-        }
 
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {

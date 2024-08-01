@@ -515,6 +515,8 @@ return ::(onFinish => Function) {
     name:'Ziikkaettaal',
     decider: ::<= {
       @:SCORE_HUNT_AI = [];
+
+
       
       SCORE_HUNT_AI[SCORE_TYPE.ONES] = {
         isReasonableToConsider::(rolls){
@@ -820,20 +822,20 @@ return ::(onFinish => Function) {
         
         
         
-        
+
         // next determine which to scratch if any
         @scratchType;
         if (scoreType == empty) ::<= {
-          if (typesAvail->findIndex(query::(value) <- value == SCORE_TYPE.ONES) != -1)
+          if (typesAvail->findIndexCondition(::(value) <- value == SCORE_TYPE.ONES) != -1)
             scratchType = SCORE_TYPE.ONES;
 
-          if (scratchType == empty && typesAvail->findIndex(query::(value) <- value == SCORE_TYPE.TWOS) != -1)
+          if (scratchType == empty && typesAvail->findIndexCondition(::(value) <- value == SCORE_TYPE.TWOS) != -1)
             scratchType = SCORE_TYPE.TWOS;
 
-          if (scratchType == empty && typesAvail->findIndex(query::(value) <- value == SCORE_TYPE.THREES) != -1)
+          if (scratchType == empty && typesAvail->findIndexCondition(::(value) <- value == SCORE_TYPE.THREES) != -1)
             scratchType = SCORE_TYPE.THREES;
             
-          if (scratchType == empty && typesAvail->findIndex(query::(value) <- value == SCORE_TYPE.FIVE_OF_A_KIND) != -1)
+          if (scratchType == empty && typesAvail->findIndexCondition(::(value) <- value == SCORE_TYPE.FIVE_OF_A_KIND) != -1)
             scratchType = SCORE_TYPE.FIVE_OF_A_KIND;
             
           if (scratchType == empty)
@@ -885,7 +887,7 @@ return ::(onFinish => Function) {
         if (scoreType != empty && eval->keycount > 0) ::<= {
           // if we have a potential score, we need to decide if its worth 
           // going for.
-          @block = eval[eval->findIndex(query:::(value) <- value.kind == scoreType)];
+          @block = eval[eval->findIndexCondition(::(value) <- value.kind == scoreType)];
           if (
             block.maxPotential == block.score
           )
