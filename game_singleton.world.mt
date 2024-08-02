@@ -492,7 +492,7 @@
               'base:cancel',
               'base:cancel',
               'base:pebble',
-              'base:quick-sheild',
+              'base:quick-shield',
               'base:bloods-summoning',
               'base:banish',
               'base:banish',
@@ -572,7 +572,7 @@
               'base:cancel',
               'base:cancel',
               'base:pebble',
-              'base:quick-sheild',
+              'base:quick-shield',
               'base:bloods-summoning'
             ];
 
@@ -643,7 +643,7 @@
               'base:cancel',
               'base:cancel',
               'base:pebble',
-              'base:quick-sheild',
+              'base:quick-shield',
               'base:bloods-summoning'
             ];
 
@@ -696,7 +696,7 @@
               'base:cancel',
               'base:cancel',
               'base:pebble',
-              'base:quick-sheild',
+              'base:quick-shield',
               'base:bloods-summoning'
             ];            
             
@@ -722,16 +722,20 @@
         State.startRootSerializeGuard();
         // first load
         @:instance = import(:'game_singleton.instance.mt');
-        @:save = instance.getSaveDataRaw();
+        @save = instance.getSaveDataRaw();
+        if (save == empty)
+          save = {};
       
         // then save the island and update the entry
         // the islands property is saved outside of the world.
-        @:islandSave = island.save();
-        
-        // update the island.
-        if (save.islands == empty)
-          save.islands = [];
-        save.islands[island.worldID] = islandSave;
+        if (island != empty) ::<= {
+          @:islandSave = island.save();
+          
+          // update the island.
+          if (save.islands == empty)
+            save.islands = [];
+          save.islands[island.worldID] = islandSave;
+        }
         save.world = state.save();
 
         // cleanup
@@ -742,7 +746,6 @@
       // makes the key's island the current island. If the key's island 
       // doesnt exist, it is made, saved, and set to the island
       loadIsland ::(key, skipSave) {
-        breakpoint();
         // first load existing save. The save has all the current islands 
         @:instance = import(:'game_singleton.instance.mt');
         @save = instance.getSaveDataRaw();

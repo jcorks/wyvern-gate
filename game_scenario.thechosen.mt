@@ -301,7 +301,7 @@ return {
       ],
       tierHint: 0  
     )
-    world.loadIsland(key:keyhome, skipSave:true);
+    world.loadIsland(key:keyhome);
 
     party = world.party;
     party.reset();
@@ -672,8 +672,36 @@ return {
   onNewDay ::(data){},
   
   onResume ::(data) {
+    @world = import(module:'game_singleton.world.mt');
+    @:story = import(module:'game_singleton.story.mt');
+    @:Scene = import(module:'game_database.scene.mt');            
     @:instance = import(module:'game_singleton.instance.mt');
+    // the changeling
+    when (world.party.members->size == 0) ::<= {
+      Scene.start(id:'thechosen:scene_intro_changeling', onDone::{        
+        @:changeling = world.island.newInhabitant(
+          professionHint : 'base:adventurer',
+          levelHint:story.levelHint*2 // the power of a changeling shouldnt be underestimated
+        );
+
+        changeling.name = '[   ]';
+        changeling.supportArts = [
+          'base:pebble',
+          'base:pebble',
+          'base:pebble',
+          'base:pebble',
+          'base:pebble'
+        ]
+        world.party.add(:changeling);
+        instance.savestate();
+        
+        instance.islandTravel();       
+      });  
+    }
+
+
     instance.islandTravel();       
+    
     
     
     ///////////////////
@@ -2659,6 +2687,24 @@ return {
 
     Scene.newEntry(
       data : {
+        id : 'thechosen:scene_intro_changeling',
+        script: [
+          ['???', '...You.. you are different.'],
+          ['???', 'It is as if you were not meant to be, yet you are here...'],
+          ['???', 'There is a great power within you.. I feel it. I can see it as clear as Sol.'],
+          ['???', 'Despite it all, you are here. And now, you are a Chosen.'],
+          ['???', '...Come... seek me, the Wyvern of Light...'],
+          ['???', 'If you seek me, I will grant you and anyone with you a wish...'],
+          ['???', 'But be warned: others will seek their own wish and will accept no others...'],
+          ['???', 'Come, Chosen: seek me and the Gate Keys among the Shrines...'],
+          ['???', '...I will await you, Chosen...'],
+        ]
+      }
+    )   
+
+
+    Scene.newEntry(
+      data : {
         id: 'thechosen:scene_keybattle0',
         script: [
           ::(location, landmark, doNext) {
@@ -2780,7 +2826,7 @@ return {
         id : 'thechosen:scene_wyvernfire0',
         script: [
           //      "(comes   again    one  new)  Another new one comes..."
-          ['???',    'Juhrruhlo-rrohsharr naan djaashaarr ...'],
+          ['???',    '"Juhrruhlo-rrohsharr naan djaashaarr ..."'],
           ['???',    'Zaaluh-shol, welcome... to my domain. You have done well to get here.'],
           ['???',    'You have been summoned, but not by me. My sibling is the one who calls for you.'],
           ['???',    'But to get to them, I must evaluate you to see if you are truly worthy of seeing the Wyvern of Light.'],
@@ -3196,7 +3242,7 @@ return {
                           windowEvent.queueMessage(
                             speaker: 'Ziikkaettaal',
                                //Curse     earth  you     -> **** you
-                            text: 'Kkiikkohluh zaashael kaajiin...'
+                            text: '"Kkiikkohluh zaashael kaajiin..."'
                           );                        
                           windowEvent.queueMessage(
                             speaker: 'Ziikkaettaal',
@@ -3753,7 +3799,18 @@ return {
                       else ::<= {
                         @:world = import(module:'game_singleton.world.mt');
                         world.accoladeEnable(name:'acceptedQuest');
-                        Scene.start(id:'thechosen:scene_wyvernlight0_quest', onDone::{}, location, landmark:location.landmark);
+                        
+                        windowEvent.queueMessage(
+                          speaker : 'The Game',
+                          text : '"Psst this hasn\'t been implemented yet! So we\'ll just pretend for now..."'
+                        );
+                        
+                        windowEvent.queueCustom(
+                          onEnter :: {
+                            Scene.start(id:'thechosen:scene_wyvernlight0_wish', onDone::{}, location, landmark:location.landmark)                          
+                          }
+                        );
+                        //Scene.start(id:'thechosen:scene_wyvernlight0_quest', onDone::{}, location, landmark:location.landmark);
                       }
                     }
                   );

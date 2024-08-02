@@ -174,7 +174,7 @@ instance.mainMenu(
         }
       );
     } : {
-      onError::(detail) {
+      onError::(message) {
         return empty;
       }
     }

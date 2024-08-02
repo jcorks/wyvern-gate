@@ -29,7 +29,7 @@
 @:Party = LoadableClass.create(
   name: 'Wyvern.Party',
   items : {
-    inventory : empty,
+    inventory : Inventory.new(size:40),
     members : empty,
     karma : 5500,
     arts : [],

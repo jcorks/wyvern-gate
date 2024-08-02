@@ -591,9 +591,6 @@ return empty;
       },
     
       startNew ::{
-        this.savestate(:{});
-
-
       
       
         
@@ -1026,7 +1023,7 @@ return empty;
       },
       
       savestate ::(saveOverride){
-        onSaveState(slot:world.saveName, data:if (saveOverride) saveOverride else world.save());          
+        onSaveState(slot:world.saveName, data:if (saveOverride) saveOverride else world.save());
       },
 
       save ::{  
