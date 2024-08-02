@@ -43,8 +43,10 @@ if (settings.fullscreen == true || settings.fullscreen == empty)
         value:true
     );
     
-if (settings.showConsole == true) 
+if (settings.showConsole == true) ::<= {
     Topaz.Console.enable(:true);
+    Topaz.Console.print(:'Hello! This is the debug console for Wyvern Gate. Errors will be listed here in full.')
+}
 
 
 

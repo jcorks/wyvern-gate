@@ -127,7 +127,6 @@ return class(
                 when (e.state == false)
                     e.time = 0;
 
-                Topaz.Console.print(message:e.time);
                
                 if (e.time == 0) 
                     onProgramKeyboard(input, value:1)
@@ -161,6 +160,7 @@ return class(
                     'edit',
                     'shutdown',
                     'fullscreen',
+                    'console',
                     'pad-config',
                     'pad-select'
                 ]
