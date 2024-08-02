@@ -29,12 +29,14 @@
     };
 
     const matteList = [
-        "game_class.battle.mt",
+        "game_class.artsdeck.mt",
         "game_class.battleai.mt",
+        "game_class.battle.mt",
         "game_class.damage.mt",
         "game_class.database.mt",
         "game_class.deck.mt",
         "game_class.die.mt",
+        "game_class.effectstack.mt",
         "game_class.entity.mt",
         "game_class.inventory.mt",
         "game_class.island.mt",
@@ -48,12 +50,12 @@
         "game_class.logtimer.mt",
         "game_class.map.mt",
         "game_class.party.mt",
-        "game_class.state.mt",
         "game_class.stateflags.mt",
+        "game_class.state.mt",
         "game_class.statset.mt",
         "game_class.structuremap.mt",
-        "game_database.ability.mt",
         "game_database.apparelmaterial.mt",
+        "game_database.arts.mt",
         "game_database.effect.mt",
         "game_database.interaction.mt",
         "game_database.itemcolor.mt",
@@ -62,12 +64,16 @@
         "game_database.itemquality.mt",
         "game_database.material.mt",
         "game_database.personality.mt",
+        "game_database.profession.mt",
         "game_database.scene.mt",
         "game_database.species.mt",
         "game_function.battlemenu.mt",
+        "game_function.buyinventory.mt",
         "game_function.choicescolumns.mt",
+        "game_function.choosemultiple.mt",
         "game_function.correcta.mt",
         "game_function.dice.mt",
+        "game_function.displayhp.mt",
         "game_function.distance.mt",
         "game_function.g.mt",
         "game_function.interactperson.mt",
@@ -77,20 +83,22 @@
         "game_function.name.mt",
         "game_function.newrecord.mt",
         "game_function.partyoptions.mt",
+        "game_function.pickart.mt",
         "game_function.pickitem.mt",
         "game_function.pickitemprices.mt",
         "game_function.pickpartyitem.mt",
+        "game_function.questguild.mt",
         "game_function.romannumerals.mt",
         "game_function.trap.mt",
         "game_mutator.entityquality.mt",
         "game_mutator.event.mt",
-        "game_mutator.item.mt",
         "game_mutator.itemenchant.mt",
-        "game_mutator.landmark.mt",
+        "game_mutator.item.mt",
         "game_mutator.landmarkevent.mt",
+        "game_mutator.landmark.mt",
         "game_mutator.location.mt",
         "game_mutator.mapentity.mt",
-        "game_mutator.profession.mt",
+        "game_mutator.quest.mt",
         "game_mutator.scenario.mt",
         "game_scenario.thechosen.mt",
         "game_scenario.thetrader.mt",
@@ -111,7 +119,7 @@
         "game_struct.battleaction.mt",
         "game_struct.interactionmenuentry.mt",
         "game_struct.mt",
-
+        
         'main.external.mt',
         'Matte.Core.Class',
         'Matte.Core',
@@ -161,7 +169,7 @@
         const slot = args[0];
         Worker.save(
             'wyvernslot'+slot,
-            args[1]
+            Matte.objectToJSON(args[1])
         );
         return matte.store.createEmpty();            
     });
@@ -193,7 +201,9 @@
 
       
     matte.setExternalFunction('external_onLoadState', ['a'], function(fn, args) {
-        return matte.store.createString(Worker.getSlot(args[0]));    
+        const s = Worker.getSlot(args[0]);
+        if (s == '' || !s) return matte.store.createEmpty();
+        return Matte.JSONtoObject(s);    
     });      
 
 
