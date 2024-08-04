@@ -173,8 +173,8 @@ EntityQuality.database.newEntry(
       '$0 with $1',
       '$0',
       '$0 with $1',
-      '$0 with an interesting pattern of $2',
-      '$0 with various patterns of $2',
+      '$0 with an interesting pattern that is $2',
+      '$0 with various patterns that are $2',
     ],
     
     
@@ -186,7 +186,7 @@ EntityQuality.database.newEntry(
       'light',
       'dark',
       'quite',
-      'seemingly'
+      'especially'
     ],
     trait0qualifierChance: 0.20,
     trait0 : [

@@ -50,8 +50,8 @@
 
   for(0, seedCount)::(i) {
     out[
-                    (Number.random() * width)->floor + BUFFER_SPACE + 
-      (width + BUFFER_SPACE*2) * ((Number.random() * height)->floor + BUFFER_SPACE)
+                    (random.number() * width)->floor + BUFFER_SPACE + 
+      (width + BUFFER_SPACE*2) * ((random.number() * height)->floor + BUFFER_SPACE)
     ] = symbolList[random.integer(from:1, to:symbolList->keycount-1)]
   }
 
@@ -93,11 +93,11 @@
   for(0, 6)::(i) {
     for(0, height + BUFFER_SPACE*2) ::(y) {
       for(0, width + BUFFER_SPACE*2) ::(x) {
-        //when(Number.random() < 0.4) empty;
+        //when(random.number() < 0.4) empty;
         @:val = out[x + (width + BUFFER_SPACE*2) * y];
         when(val == empty) empty;
         
-        @:choice = (Number.random() * 4)->floor;
+        @:choice = (random.number() * 4)->floor;
         @newx = if (choice == 1) x+xIncr else if (choice == 2) x-xIncr else x;
         @newy = if (choice == 3) y+yIncr else if (choice == 0) y-yIncr else y;
         out[newx + (width + BUFFER_SPACE*2) * newy] = val;
@@ -110,7 +110,7 @@
   for(0, 4)::(i) {
     for(0, height + BUFFER_SPACE*2) ::(y) {
       for(0, width + BUFFER_SPACE*2) ::(x) {
-        //when(Number.random() < 0.4) empty;
+        //when(random.number() < 0.4) empty;
         @:val = out[x + (width + BUFFER_SPACE*2) * y];
         when(val != empty) empty;
         

@@ -64,7 +64,7 @@ Event.database.newEntry(
         
         
       }
-      return 14+(Number.random()*20)->floor; // number of timesteps active
+      return 14+(random.number()*20)->floor; // number of timesteps active
     },
     
     onEventUpdate ::(event) {
@@ -269,7 +269,7 @@ Event.database.newEntry(
     id : 'base:encounter:normal',
     rarity: 1000,    
     onEventStart ::(event) {
-      @chance = Number.random(); 
+      @chance = random.number(); 
       @:island = event.island;   
       @:party = event.party;
       

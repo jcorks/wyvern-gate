@@ -2710,7 +2710,7 @@ return {
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
             
-            @chance = Number.random(); 
+            @chance = random.number(); 
             @:island = landmark.island;   
             @:party = world.party;
             @enemies = [];

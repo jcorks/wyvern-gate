@@ -1105,7 +1105,7 @@ Landmark.database.newEntry(
 
         when(state.base.landmarkType == TYPE.STRUCTURE) ::<= {
           if (this.peaceful == false) ::<= {
-            if (state.stepsSinceLast >= 14 && Number.random() > 0.7) ::<= {
+            if (state.stepsSinceLast >= 14 && random.number() > 0.7) ::<= {
               @:Scene = import(module:'game_database.scene.mt');            
               Scene.start(id:'base:scene_guards0', onDone::{}, location:empty, landmark:this);
               state.stepsSinceLast = 0;

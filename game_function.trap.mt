@@ -67,7 +67,7 @@
   // basic damage trap
   ::(location, party, whom) {
     windowEvent.queueMessage(text:'A volley of arrows springs form the plate.'); 
-    if (Number.random() < 0.5) ::<= {
+    if (random.number() < 0.5) ::<= {
       windowEvent.queueMessage(text:whom.name + ' narrowly dodges the trap.');             
     } else ::<= {
       whom.damage(

@@ -40,7 +40,7 @@ Scene.newEntry(
       ['', 'Several guards approach you with haste'],
       ::(location, landmark, doNext) {
         @:world = import(module:'game_singleton.world.mt');
-        @chance = Number.random(); 
+        @chance = random.number(); 
         @:island = landmark.island;   
         @:party = world.party;
         
@@ -106,14 +106,14 @@ Scene.newEntry(
             
             
             default: match(true) {
-            (Number.random() > 0.9):
+            (random.number() > 0.9):
               [
                 island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.01)->floor),
                 island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.01)->floor),
                 island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.01)->floor)            
               ],
               
-            (Number.random() > 0.8):
+            (random.number() > 0.8):
               [
                 island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.10)->floor)
               ],

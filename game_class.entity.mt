@@ -49,9 +49,9 @@
       
   @:stat = ::(name) {
     @:base = growthPotential[name];
-    @val =  (0.5 * (Number.random()/2) * (base / 3))->floor
+    @val =  (0.5 * (random.number()/2) * (base / 3))->floor
     when (val < 1)
-      Number.random() * 2;
+      random.number() * 2;
     return val;
   }
       
@@ -73,7 +73,7 @@
 
   @:stat :: (potential, level) {
     when(potential <= 0) potential = 1;
-    return 1 + ((level**0.65) + (Number.random()*4))->floor;
+    return 1 + ((level**0.65) + (random.number()*4))->floor;
   }
   return stat(potential:growth,  level:level+1);
 
@@ -166,7 +166,7 @@
     when(frame > hp) 0.5;
     if (scale > 10) scale = 10;
     @shakeScale = scale / 15.0;
-    return 0.5 + (-shakeScale/2 + Number.random()*shakeScale)
+    return 0.5 + (-shakeScale/2 + random.number()*shakeScale)
   }
   
   @:maxHP = displayHP(:this.stats.HP);
@@ -221,7 +221,7 @@
   @:getShakeWeight ::{
     @shakeScale = 1 - frame / 15;
     when(shakeScale < 0) 0.5;
-    return 0.5 + (-shakeScale/2 + Number.random()*shakeScale)
+    return 0.5 + (-shakeScale/2 + random.number()*shakeScale)
   }
   
   windowEvent.queueCustom(
@@ -337,7 +337,7 @@
     DAMAGE_TARGET : {get::<- DAMAGE_TARGET},
     normalizedDamageTarget ::(blockPoints) {
       when(blockPoints == 1 || blockPoints == empty) ::<={
-        @:rate = Number.random();
+        @:rate = random.number();
         when (rate <= 0.25) DAMAGE_TARGET.HEAD;
         when (rate <  0.75) DAMAGE_TARGET.BODY;
         return DAMAGE_TARGET.LIMBS
@@ -525,7 +525,7 @@
         if (state.faveWeapon == empty)
           state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.database.statics.ATTRIBUTE.WEAPON) != 0)
       }
-      state.inventory.addGold(amount:(Number.random() * 100)->ceil);
+      state.inventory.addGold(amount:(random.number() * 100)->ceil);
       state.favoriteItem = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
 
 
@@ -536,7 +536,7 @@
 
       /*
       ::<={
-        [0, 1+(Number.random()*3)->floor]->for(do:::(i) {
+        [0, 1+(random.number()*3)->floor]->for(do:::(i) {
           @:item = Item.database.getRandomWeightedFiltered(
             filter:::(value) <- level >= value.levelMinimum &&
                       value.isUnique == false
@@ -1376,7 +1376,7 @@
         }
         
 
-        damage.amount *= 1 + (Number.random() - 0.5) * DAMAGE_RNG_SPREAD
+        damage.amount *= 1 + (random.number() - 0.5) * DAMAGE_RNG_SPREAD
         
         
 
@@ -1446,7 +1446,7 @@
         }
         @:world = import(module:'game_singleton.world.mt');
 
-        if (world.party != empty && world.party.isMember(entity:this) && state.hp != 0 && damage.amount > state.stats.HP * 0.2 && Number.random() > 0.7)
+        if (world.party != empty && world.party.isMember(entity:this) && state.hp != 0 && damage.amount > state.stats.HP * 0.2 && random.number() > 0.7)
           windowEvent.queueMessage(
             speaker: this.name,
             text: '"' + random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.HURT]) + '"'
@@ -1455,19 +1455,19 @@
 
         state.flags.add(flag:StateFlags.HURT);
         
-        if (damage.damageType == Damage.TYPE.FIRE && Number.random() > 0.98)
+        if (damage.damageType == Damage.TYPE.FIRE && random.number() > 0.98)
           this.addEffect(from:attacker, id:'base:burned',durationTurns:5);
-        if (damage.damageType == Damage.TYPE.ICE && Number.random() > 0.98)
+        if (damage.damageType == Damage.TYPE.ICE && random.number() > 0.98)
           this.addEffect(from:attacker, id:'base:frozen',durationTurns:2);
-        if (damage.damageType == Damage.TYPE.THUNDER && Number.random() > 0.98)
+        if (damage.damageType == Damage.TYPE.THUNDER && random.number() > 0.98)
           this.addEffect(from:attacker, id:'base:paralyzed',durationTurns:2);
-        if (damage.damageType == Damage.TYPE.PHYS && Number.random() > 0.99) 
+        if (damage.damageType == Damage.TYPE.PHYS && random.number() > 0.99) 
           this.addEffect(from:attacker, id:'base:bleeding',durationTurns:5);
-        if (damage.damageType == Damage.TYPE.POISON && Number.random() > 0.98) 
+        if (damage.damageType == Damage.TYPE.POISON && random.number() > 0.98) 
           this.addEffect(from:attacker, id:'base:poisoned',durationTurns:5);
-        if (damage.damageType == Damage.TYPE.DARK && Number.random() > 0.98)
+        if (damage.damageType == Damage.TYPE.DARK && random.number() > 0.98)
           this.addEffect(from:attacker, id:'base:blind',durationTurns:2);
-        if (damage.damageType == Damage.TYPE.LIGHT && Number.random() > 0.98)
+        if (damage.damageType == Damage.TYPE.LIGHT && random.number() > 0.98)
           this.addEffect(from:attacker, id:'base:petrified',durationTurns:2);
         
         if (this.effectStack == empty) ::<= {
@@ -1483,7 +1483,7 @@
 
 
         
-        if (world.party != empty && !alreadyKnockedOut && world.party.isMember(entity:this) && state.hp == 0 && Number.random() > 0.7 && world.party.members->size > 1) ::<= {
+        if (world.party != empty && !alreadyKnockedOut && world.party.isMember(entity:this) && state.hp == 0 && random.number() > 0.7 && world.party.members->size > 1) ::<= {
           windowEvent.queueMessage(
             speaker: this.name,
             text: '"' + random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.DEATH]) + '"'
@@ -2458,7 +2458,7 @@
         qualities = [];
         foreach(state.species.qualities)::(i, qual) {
           @:q = EntityQuality.database.find(id:qual);
-          if (q.appearanceChance == 1 || Number.random() < q.appearanceChance)
+          if (q.appearanceChance == 1 || random.number() < q.appearanceChance)
             qualities->push(value:EntityQuality.new(base:q));
         }
       }
@@ -2524,7 +2524,7 @@
         forever ::{
           when(quals->keycount == 0) send();
           
-          @single = if (quals->keycount >= 2) (Number.random() < 0.5) else true;
+          @single = if (quals->keycount >= 2) (random.number() < 0.5) else true;
           
           if (!single) ::<= {
             @qual0 = quals->pop;

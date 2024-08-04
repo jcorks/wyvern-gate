@@ -339,7 +339,7 @@ Interaction.newEntry(
 
 
         
-        @:chance = Number.random();
+        @:chance = random.number();
         match(true) {
           // normal
           (chance < 0.7)::<= {
@@ -661,7 +661,7 @@ Interaction.newEntry(
       @:Entity = import(module:'game_class.entity.mt');
 
       if (location.data.charges == empty)
-        location.data.charges = 5+Number.random()*10;
+        location.data.charges = 5+random.number()*10;
 
 
 
@@ -680,7 +680,7 @@ Interaction.newEntry(
       @:mining ::(miner) {
         windowEvent.queueMessage(text:'*clank clank*');
 
-        if (Number.random() > 0.9) ::<= {
+        if (random.number() > 0.9) ::<= {
           windowEvent.queueMessage(speaker:miner.name, text:'Oh...?');
 
           @:item = Item.new(base:Item.database.find(id:'base:ore'));
@@ -1361,7 +1361,7 @@ Interaction.newEntry(
       breakpoint();
       if (location.targetLandmark == empty) ::<={
       
-        if (location.landmark.floor > 5 && Number.random() > 0.5 - (0.2*(location.landmark.floor - 5))) ::<= {
+        if (location.landmark.floor > 5 && random.number() > 0.5 - (0.2*(location.landmark.floor - 5))) ::<= {
           @:Landmark = import(module:'game_mutator.landmark.mt');
           
           location.targetLandmark = Landmark.new(
@@ -1873,10 +1873,10 @@ Interaction.newEntry(
                           }
                         },
                         onTurn ::{
-                          if (Number.random() < 0.7) ::<= {
+                          if (random.number() < 0.7) ::<= {
                             windowEvent.queueMessage(text:random.pickArrayItem(list:[
                               '"YEAH, tear them limb from limb!"',
-                              'The croud jeers at team ' + (if (Number.random() < 0.5) teamA.name else teamB.name) + '.',  
+                              'The croud jeers at team ' + (if (random.number() < 0.5) teamA.name else teamB.name) + '.',  
                               'The croud goes silent.',
                               'The croud goes wild in an uproar.',
                               'The crowd murmurs restlessly.',
@@ -2005,7 +2005,7 @@ Interaction.newEntry(
       location.inventory.clear();
 
     
-      @:amount = (20 + Number.random()*75)->floor;
+      @:amount = (20 + random.number()*75)->floor;
       windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
       world.party.addGoldAnimated(amount, onDone::{});  
 

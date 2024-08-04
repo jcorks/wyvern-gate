@@ -1178,7 +1178,7 @@ Arts.newEntry(
               targetPart:Entity.DAMAGE_TARGET.LIMBS,
               targetDefendPart:targetDefendParts[i]
             ) == true)
-              if (Number.random() > 0.5)
+              if (random.number() > 0.5)
                 enemy.addEffect(from:user, id: 'base:stunned', durationTurns: 1);  
           }
         );
@@ -1383,7 +1383,7 @@ Arts.newEntry(
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
           ) == true)          
-            if (Number.random() < 0.9)
+            if (random.number() < 0.9)
               targets[0].addEffect(from:user, id: 'base:frozen', durationTurns: 1);            
         }
       );        
@@ -2067,7 +2067,7 @@ Arts.newEntry(
         text: user.name + ' gives a snack to ' + targets[0].name + '!'
       );
         
-      @:chance = Number.random();
+      @:chance = random.number();
       match(true) {
         (chance > 0.9) ::<= {    
           windowEvent.queueMessage(text: 'The snack tastes fruity!');
@@ -4244,7 +4244,7 @@ Arts.newEntry(
 
       windowEvent.queueMessage(text:targets[0].name + ' listens intently!');
       targets[0].addEffect(
-        from:user, id: 'base:convinced', durationTurns: 1+(Number.random()*3)->floor 
+        from:user, id: 'base:convinced', durationTurns: 1+(random.number()*3)->floor 
       )
     }
   }

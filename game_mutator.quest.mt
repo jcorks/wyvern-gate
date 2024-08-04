@@ -483,7 +483,7 @@ Quest.database.newEntry(
     
     (RANK.B): ::<= {
       state.rewardG = random.integer(from:300, to:500);
-      for(0, 1+Number.random()*3) ::(i) {
+      for(0, 1+random.number()*3) ::(i) {
         state.rewardItems->push(:
           Item.new(
             base:Item.database.getRandomFiltered(
@@ -499,7 +499,7 @@ Quest.database.newEntry(
 
     (RANK.A): ::<= {
       state.rewardG = random.integer(from:500, to:700);
-      for(0, 1+Number.random()*3) ::(i) {
+      for(0, 1+random.number()*3) ::(i) {
         state.rewardItems->push(:
           Item.new(
             base:Item.database.getRandomFiltered(
@@ -525,7 +525,7 @@ Quest.database.newEntry(
 
     (RANK.S): ::<= {
       state.rewardG = random.integer(from:700, to:1000);
-      for(0, 1+Number.random()*3) ::(i) {
+      for(0, 1+random.number()*3) ::(i) {
         state.rewardItems->push(:
           Item.new(
             base:Item.database.getRandomFiltered(
@@ -551,7 +551,7 @@ Quest.database.newEntry(
 
     (RANK.SS): ::<= {
       state.rewardG = random.integer(from:1100, to:1400);
-      for(0, 1+Number.random()*3) ::(i) {
+      for(0, 1+random.number()*3) ::(i) {
         state.rewardItems->push(:
           Item.new(
             base:Item.database.getRandomFiltered(
@@ -581,7 +581,7 @@ Quest.database.newEntry(
 
     (RANK.X): ::<= {
       state.rewardG = random.integer(from:5000, to:10000);
-      for(0, 1+Number.random()*4) ::(i) {
+      for(0, 1+random.number()*4) ::(i) {
         state.rewardItems->push(:
           Item.new(
             base:Item.database.getRandomFiltered(

@@ -38,6 +38,7 @@ return class(
         // default a seed state as recommended by 
         // the original publication.
         init ::{
+          index = 0;
           state = [
             0x30b72d97,
             0x2027d4ad,
@@ -105,20 +106,38 @@ return class(
           
           index = 0;
         },
+        
+        save :: {
+          return {
+            a : [...a],
+            state : [...state],
+            index : index
+          }
+        },
+        
+        load ::(value) {
+          a = value.a;
+          state = value.state;
+          index = value.index;
+        },
+        
         // seeds the RNG with a string.
         seed::(string) {
           interface.init();
           @offset = 0;
+          @sum = 0;
           for(0, string->length)::(i) {
             offset = (offset + (string->charCodeAt(index:i) << (2*(i%8)))) % 0xffffffff;     
+            sum += string->charCodeAt(index:i);
           }
-          
           
           for(0, state->keycount)::(ind) {      
             state[ind] += offset;
           }
           
-          interface.twist();
+          for(0, sum) ::(i) {
+            interface.next();
+          }
         }
       }
       
@@ -132,8 +151,28 @@ return class(
 
   
     this.interface = {
+      seed ::(string) {
+        tt800.init();
+        tt800.seed(string);
+      },
+    
       integer::(from, to) {
         return from + (tt800.next() * ((to+1)-from))->floor;
+      },
+      
+      seedRandom::() {
+        tt800.init();
+        tt800.seed(string:'' + Number.random() + '' + Number.random() + '' + Number.random());
+      },
+      
+      number :: <- tt800.next(),
+      
+      save :: {
+        return tt800.save();
+      },
+      
+      load ::(state) {
+        tt800.load(:state);
       },
       
       float:: {

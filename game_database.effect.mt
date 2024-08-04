@@ -197,7 +197,7 @@ Effect.newEntry(
           when(diff > 1) 0.85; 
           return 0.45 + (0.85 - 0.45) * ((1-diff)**0.9);
         }
-        if (Number.random() > hitrate(
+        if (random.number() > hitrate(
           this:   holder.stats.DEX,
           attacker: attacker.stats.DEX
         ))
@@ -548,7 +548,7 @@ Effect.newEntry(
 
       onPreDamage ::(from, item, holder, attacker, damage) {
         when (holder == attacker) empty;
-        when(Number.random() > .5) empty;
+        when(random.number() > .5) empty;
 
         windowEvent.queueMessage(
           text: holder.name + ' evades!'
@@ -660,7 +660,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + '\'s shield of light fades away.');
       },        
       onPreAttacked ::(from, item, holder, attacker, damage) {
-        when (Number.random() < 0.3) ::<= {
+        when (random.number() < 0.3) ::<= {
           windowEvent.queueMessage(text:holder.name + '\'s shield of light blocks the attack!');
           damage.amount = 0;
           return EffectStack.CANCEL_PROPOGATION;  
@@ -1551,7 +1551,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
-        if (Number.random() > 0.5) ::<= {
+        if (random.number() > 0.5) ::<= {
           windowEvent.queueMessage(
             text: "The " + item.name + ' broke.'
           );
@@ -1580,7 +1580,7 @@ Effect.newEntry(
         
         windowEvent.queueCustom(
           onEnter::{
-            if (Number.random() > 0.8) ::<= {
+            if (random.number() > 0.8) ::<= {
               holder.inventory.add(item);
               windowEvent.queueMessage(
                 text: holder.name + ' caught the flung ' + item.name + '!!'
@@ -1656,7 +1656,7 @@ Effect.newEntry(
     events : {
       onAffliction ::(from, item, holder) {
         @:world = import(module:'game_singleton.world.mt');
-        @:amount = (50 + Number.random()*400)->floor;          
+        @:amount = (50 + random.number()*400)->floor;          
         windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
         world.party.addGoldAnimated(
           amount:amount,
@@ -1685,7 +1685,7 @@ Effect.newEntry(
         @:world = import(module:'game_singleton.world.mt');
         
         
-        when(Number.random() > 0.7) empty;
+        when(random.number() > 0.7) empty;
         when(from.isIncapacitated()) empty;
         when(!world.party.isMember(entity:holder)) empty;
 
@@ -1718,12 +1718,12 @@ Effect.newEntry(
         @:world = import(module:'game_singleton.world.mt');
         
         
-        when(Number.random() > 0.7) empty;
+        when(random.number() > 0.7) empty;
         when(holder.isIncapacitated()) empty;
         when(!world.party.isMember(entity:holder)) empty;
 
 
-        @:amt = (Number.random() * 20)->ceil;
+        @:amt = (random.number() * 20)->ceil;
         windowEvent.queueMessage(
           text: '' + holder.name + ' happened to notice an additional ' + g(g:amt) + ' dropped on the ground.'
         );
@@ -1753,7 +1753,7 @@ Effect.newEntry(
         when(holder.isIncapacitated()) empty;
         when(!world.party.isMember(entity:holder)) empty;
                   
-        when(Number.random() < 0.5) empty;          
+        when(random.number() < 0.5) empty;          
 
         @:amt = 1;
         windowEvent.queueMessage(
@@ -1917,7 +1917,7 @@ Effect.newEntry(
       },        
       
       onNextTurn ::(from, item, holder, turnIndex, turnCount) {
-        if (Number.random() < 0.4) ::<= {
+        if (random.number() < 0.4) ::<= {
           windowEvent.queueMessage(text:'The triproot trips ' + holder.name + '!');
           holder.addEffect(from:holder, id:'base:stunned', durationTurns:1);                        
         }
@@ -2485,7 +2485,7 @@ Effect.newEntry(
     events : {
 
       onPreDamage ::(from, item, holder, attacker, damage) {
-        if (Number.random() > 0.8 && damage.damageType == Damage.TYPE.PHYS) ::<= {
+        if (random.number() > 0.8 && damage.damageType == Damage.TYPE.PHYS) ::<= {
           @:Entity = import(module:'game_class.entity.mt');
         
           windowEvent.queueMessage(text:holder.name + " parries the blow, but their non-combat weapon breaks in the process!");
@@ -2633,7 +2633,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
-        if (Number.random() > 0.7) ::<={
+        if (random.number() > 0.7) ::<={
           windowEvent.queueMessage(
             text: "The " + item.name + ' is used in its entirety.'
           );
@@ -2918,7 +2918,7 @@ Effect.newEntry(
       },        
 
       onPreAttackOther ::(from, item, holder, to, damage) {
-        when (Number.random() > 0.5) empty;
+        when (random.number() > 0.5) empty;
         windowEvent.queueMessage(text:holder.name + " missed in their blindness!");
         damage.amount = 0;
       }
@@ -2948,7 +2948,7 @@ Effect.newEntry(
       },        
       
       onNextTurn ::(from, item, holder, turnIndex, turnCount) {
-        when(Number.random() > 0.5) empty;
+        when(random.number() > 0.5) empty;
         windowEvent.queueMessage(text:holder.name + " was hurt by burns!");
         holder.damage(
           attacker:holder,

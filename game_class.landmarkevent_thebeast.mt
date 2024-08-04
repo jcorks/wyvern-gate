@@ -124,7 +124,7 @@
         @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'thebeast');
       
         // add additional entities out of spawn points (stairs)
-        //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && Number.random() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
+        //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && random.number() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
         if (entities->keycount < 1 && state.hasBeast) ::<= {
           addEntity();
           state.hasBeast = false;

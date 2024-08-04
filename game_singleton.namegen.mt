@@ -15,7 +15,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-@:Random = import(module:'game_singleton.random.mt');
+@:random = import(module:'game_singleton.random.mt');
 @:class = import(module:'Matte.Core.Class');
 
 
@@ -29,7 +29,7 @@
     't'
   ];
   return :: {
-    return Random.pickArrayItem(list);
+    return random.pickArrayItem(list);
   }
 }
 
@@ -45,7 +45,7 @@
     'z'
   ];
   return :: {
-    return Random.pickArrayItem(list);
+    return random.pickArrayItem(list);
   }
 }
 @:vowel = ::<= {
@@ -61,7 +61,7 @@
   ];
   
   return ::{
-    return Random.pickArrayItem(list);
+    return random.pickArrayItem(list);
   }
 }
 
@@ -206,7 +206,7 @@
     'tt',
   ];
   return :: {
-    return Random.pickArrayItem(list);
+    return random.pickArrayItem(list);
   }
 }
 
@@ -221,7 +221,7 @@
     'sh'
   ];
   return :: {
-    return Random.pickArrayItem(list);
+    return random.pickArrayItem(list);
   }
 }
 @:dragonish_vowel = ::<= {
@@ -236,7 +236,7 @@
   ];
   
   return ::{
-    return Random.pickArrayItem(list);
+    return random.pickArrayItem(list);
   }
 }
 
@@ -280,7 +280,7 @@ return class(
   
     this.interface = {
       person :: {
-        @:val = Number.random();
+        @:val = random.number();
         return capitalize(
           name:
           match(true) {
@@ -309,7 +309,7 @@ return class(
           'Sky'
         ];
 
-        @:val = Number.random();
+        @:val = random.number();
         return (match(true) {
             (val < 0.2): this.person() + 'lor',
             (val < 0.4): this.person() + 'shor',
@@ -318,12 +318,12 @@ return class(
             default:
             this.person() + 'mir'
           })
-        + (if(Number.random() > 0.8) '' else ' ' + Random.pickArrayItem(list:features));
+        + (if(random.number() > 0.8) '' else ' ' + random.pickArrayItem(list:features));
       
       },
       
       place :: {
-        @:val = Number.random();
+        @:val = random.number();
         return match(true) {
             (val < 0.2): this.person() + 'neim',
             (val < 0.4): this.person() + 'mmin',
@@ -337,11 +337,11 @@ return class(
       },
       
       creature :: {
-        @:mod = if (Number.random() > 0.8) Random.pickArrayItem(list:creatureMod)+' ' else '';
-        @:first = Random.pickArrayItem(list:creatureBaseNames);
+        @:mod = if (random.number() > 0.8) random.pickArrayItem(list:creatureMod)+' ' else '';
+        @:first = random.pickArrayItem(list:creatureBaseNames);
         @second = {:::} { 
           forever ::{
-            @sec = Random.pickArrayItem(list:creatureBaseNames);
+            @sec = random.pickArrayItem(list:creatureBaseNames);
             when (sec != first) send(message:sec);
           }
         }

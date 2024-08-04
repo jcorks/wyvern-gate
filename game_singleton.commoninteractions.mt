@@ -235,9 +235,9 @@ return {
               windowEvent.queueMessage(text:'The party opens the chest...'); 
               @:Damage = import(module:'game_class.damage.mt');
               
-              when(Number.random() < 0.5) ::<= {
+              when(random.number() < 0.5) ::<= {
                 windowEvent.queueMessage(text:'A trap is triggered, and a volley of arrows springs form the chest!'); 
-                if (Number.random() < 0.5) ::<= {
+                if (random.number() < 0.5) ::<= {
                   windowEvent.queueMessage(text:opener.name + ' narrowly dodges the trap.');             
                 } else ::<= {
                   opener.damage(
@@ -253,7 +253,7 @@ return {
               } 
               
               
-              @:itemCount = (2+Number.random()*3)->floor;
+              @:itemCount = (2+random.number()*3)->floor;
               
               windowEvent.queueMessage(text:'The chest contained ' + itemCount + ' items!'); 
               

@@ -125,7 +125,7 @@
 
 
             (Arts.TARGET_MODE.RANDOM) :::<= {
-              if (Number.random() < 0.5) 
+              if (random.number() < 0.5) 
                 targets->push(value:Random.pickArrayItem(list:enemies))
               else 
                 targets->push(value:Random.pickArrayItem(list:allies))

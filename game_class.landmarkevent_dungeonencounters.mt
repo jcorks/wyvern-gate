@@ -151,7 +151,7 @@
             (   
               state.isBusy 
                 || 
-              (Number.random() < 0.1 / (state.encountersOnFloor*(10 / (island_.tier+1))+1))
+              (random.number() < 0.1 / (state.encountersOnFloor*(10 / (island_.tier+1))+1))
             )
           ) ::<= {
           

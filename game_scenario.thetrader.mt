@@ -353,7 +353,7 @@
                     if (random.flipCoin()) ::<= {
                       other = instance.island.newInhabitant()
                       other.anonymize();
-                    } else if (Number.random() > 0.02) ::<= {
+                    } else if (random.number() > 0.02) ::<= {
                       other = instance.island.newHostileCreature()
                       other.nickname = correctA(word:other.name);
                       breakpoint();
@@ -1403,20 +1403,20 @@
               match(shopkeeper.mood) {
                 (0, 1): ::<= {
                   if (random.flipCoin())
-                    price *= 1 - (Number.random() * 0.3)
+                    price *= 1 - (random.number() * 0.3)
                 },
                 
                 (2): ::<= {
                   if (random.flipCoin())
-                    price *= 1 + (Number.random() * 0.15)
+                    price *= 1 + (random.number() * 0.15)
                 },
 
                 (3): ::<= {
                   if (random.flipCoin())
-                    price *= 1 + (Number.random() * 0.6)
+                    price *= 1 + (random.number() * 0.6)
                 },
                 (4): ::<= {
-                  price *= 1.1 + (Number.random() * 0.8)
+                  price *= 1.1 + (random.number() * 0.8)
                 }
 
               }
@@ -1670,7 +1670,7 @@
                 if (location.base.category == Location.database.statics.CATEGORY.RESIDENTIAL) ::<= {
                   rent += (location.data.trader.boughtPrice * 0.07)->ceil;
                   @current = location.data.trader.listPrice;
-                  current += (((Number.random() - 0.5) * 0.05) * location.data.trader.boughtPrice)->floor;
+                  current += (((random.number() - 0.5) * 0.05) * location.data.trader.boughtPrice)->floor;
 
                   if (state.recession > 0)
                     current *= 0.92;
@@ -1704,7 +1704,7 @@
 
 
                 @current = location.data.trader.listPrice;
-                current += (((Number.random() - 0.5) * 0.15) * location.data.trader.listPrice)->floor;
+                current += (((random.number() - 0.5) * 0.15) * location.data.trader.listPrice)->floor;
 
                 if (state.recession > 0)
                   current *= 0.92;
@@ -2443,7 +2443,7 @@
             ('Calm'):       (standardPrice * 1.3)->floor,
             default: defaultCalculation()
           }
-          base *= 1+0.2*(Number.random() -.5); // still can vary a bit          
+          base *= 1+0.2*(random.number() -.5); // still can vary a bit          
           base *= 1.05; // people are generally reasonable
           
           // cheapskates or splurgers

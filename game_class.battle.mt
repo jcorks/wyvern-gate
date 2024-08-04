@@ -182,7 +182,7 @@
       {   
         func::{
           windowEvent.queueMessage(text: 'Jackpot! They dropped some gold!');
-          @:amount = (200 + Number.random()*300)->floor;
+          @:amount = (200 + random.number()*300)->floor;
           windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
           party.addGoldAnimated(
             amount:amount,

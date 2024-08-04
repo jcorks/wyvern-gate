@@ -340,7 +340,7 @@
     }
 
     @:addDefaultLandmarks::{
-      @locationCount = (1 + (Number.random()*2)->floor); 
+      @locationCount = (1 + (random.number()*2)->floor); 
       if (locationCount < 1) locationCount = 1;
       for(0, locationCount)::(i) {
         LargeMap.addLandmark(
@@ -418,7 +418,7 @@
         world.island = this;
  
         ::<= {
-          @factor = Number.random()*50 + 80;
+          @factor = random.number()*50 + 80;
           @sizeW  = (factor)->floor;
           @sizeH  = (factor*0.5)->floor;
           
@@ -430,7 +430,7 @@
             'base:weather:1',
             'base:camp-out'
           ];
-          state.encounterRate = Number.random();
+          state.encounterRate = random.number();
           state.sizeW  = if (sizeWHint != empty) sizeWHint else sizeW;
           state.sizeH  = if (sizeHHint != empty) sizeHHint else sizeH;
           state.stepsSinceLastEvent = 0;
@@ -468,8 +468,8 @@
       
         state.tier = tierHint;
 
-        state.levelMin = (levelHint - Number.random() * (levelHint * 0.4))->ceil;
-        state.levelMax = (levelHint + Number.random() * (levelHint * 0.4))->floor;
+        state.levelMin = (levelHint - random.number() * (levelHint * 0.4))->ceil;
+        state.levelMax = (levelHint + random.number() * (levelHint * 0.4))->floor;
         if (state.levelMin < 1) state.levelMin = 1;
         if (nameHint != empty)
           state.name = (nameHint) => String;
@@ -594,7 +594,7 @@
         // every step, an event can occur.
         //if (stepsSinceLastEvent > 200000) ::<= {
         if (state.stepsSinceLastEvent > 13) ::<= {
-          if (Number.random() > 13 - (state.stepsSinceLastEvent-5) / 5) ::<={
+          if (random.number() > 13 - (state.stepsSinceLastEvent-5) / 5) ::<={
             this.addEvent(
               event:Event.new(
                 base:Event.database.find(id:random.pickArrayItem(list:state.possibleEvents)),

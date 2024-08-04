@@ -85,7 +85,7 @@ import(module:'game_class.entity.mt');
 import(module:'game_class.island.mt');
 
 @:loading = import(module:'game_function.loading.mt');
-
+@:random = import(:'game_singleton.random.mt');
 
 
 
@@ -225,7 +225,7 @@ return class(
       'A',
       'B'
     ],
-    leftWeight : Number.random(),
+    leftWeight : random.number(),
     canCancel : true,
     onChoice::(choice) {
       when (choice == 1)
@@ -377,14 +377,64 @@ return empty;
                   },
                   onChoice::(choice) {
                     when(choice <= 0) empty;
-                    world.scenario = Scenario.new(base:choices[choice-1]);
+                    @:scenario = Scenario.new(base:choices[choice-1]);
 
                     @:startNewWorld = ::(name){
-                      world.saveName = name;            
-                      this.startNew();
+                      
+                      when (settings.unlockedSeeds) ::<= {
+                        @seed;
+                        windowEvent.queueChoices(
+                          prompt: 'World ' + name,
+                          keep: true,
+                          canCancel : false,
+                          jumpTag : 'SEEDSETTING',
+                          choices : [
+                            'Begin',
+                            'Set world seed...'
+                          ],
+                          
+                          onChoice::(choice) {
+                            when(choice-1 == 0) ::<= {
+                              windowEvent.jumpToTag(name:'SEEDSETTING', goBeforeTag:true);
+                              this.startNew(name, scenario, seed);
+                            }
+                            
+                            // choose seed.
+                            
+                            @:enterName = import(module:'game_function.name.mt');
+
+                            windowEvent.queueChoices(
+                              onGetPrompt::<- 'Current seed: ' + if (
+                                seed == empty) 'set to random.' else 
+                                '"' + seed + '"',
+                              
+                              choices : [
+                                'Enter seed',
+                                'Clear seed',
+                              ],
+                              canCancel: true,
+                              keep : true,
+                              onChoice::(choice) {
+                                when(choice-1 == 0) enterName(
+                                  prompt: 'Enter a seed.',
+                                  canCancel: true,
+                                  onDone::(name) {
+                                    seed = name;
+                                  }
+                                );
+                                
+                                when(choice-1 == 1) 
+                                  seed = empty;
+                              }
+                            );  
+
+                          }
+                        );
+                      }
+                      this.startNew(name, scenario);
                       //this.startInstance();              
                     }
-                    when(world.scenario.base.skipName) 
+                    when(scenario.base.skipName) 
                       startNewWorld(:'');
 
                     enterName(
@@ -590,22 +640,14 @@ return empty;
         world.scenario.onResume();
       },
     
-      startNew ::{
-      
-      
-        
-        
+      startNew ::(name, scenario, seed){
         loading(
           message: 'Creating world...',
           do ::{
-            world.scenario.base.onBegin(data:world.scenario.data);
+            this.savestate(saveOverride:{}, nameOverride:name); // overwrite any current iteration and dont use the data
+            world.start(name, scenario, seed);
           }
         )
-        
-
-        
-      
-        
       },
       
       gameOver ::(reason) {
@@ -632,6 +674,7 @@ return empty;
             );
 
             this.unlockScenarios();
+            this.unlockSeeds();
 
             
             windowEvent.queueCustom(
@@ -655,6 +698,17 @@ return empty;
           );
         }      
       },
+      
+      unlockSeeds :: {
+        if (settings.unlockedSeeds == false || settings.unlockedSeeds == empty) ::<= {
+          settings.unlockedSeeds = true;
+          onSaveSettings_(data:JSON.encode(object:settings));
+          
+          windowEvent.queueMessage(
+            text: "World RNG seeding is now unlocked. You can set seeds on world creation to recreate the conditions for a world. The RNG is used across all gameplay aspects of that world."
+          );
+        }      
+      },      
       
       visitCurrentIsland ::(restorePos, atGate, onReady) {      
         @:doVisit :: {
@@ -1022,9 +1076,12 @@ return empty;
         set ::(value) <- onLoadState = value
       },
       
-      savestate ::(saveOverride){
-        onSaveState(slot:world.saveName, data:if (saveOverride) saveOverride else world.save());
-      },
+      savestate ::(nameOverride, saveOverride) <-
+        onSaveState(
+          slot:if (nameOverride) nameOverride else world.saveName, 
+          data:if (saveOverride) saveOverride else world.save()
+        )
+      ,
 
       save ::{  
         @:State = import(module:'game_class.state.mt');
@@ -1035,7 +1092,6 @@ return empty;
       
       resetDatabase :: {
         Database.reset();
-        world.initializeNPCs();
         foreach(modMainOrdered) ::(i, modMain) {
           modMain.onDatabaseStartup();
         }

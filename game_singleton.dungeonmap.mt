@@ -52,16 +52,16 @@
   
 
   @:generateArea ::(item) {
-    @width  = if (Number.random() > 0.5) ROOM_AREA_SIZE else ROOM_AREA_SIZE_LARGE;
+    @width  = if (random.number() > 0.5) ROOM_AREA_SIZE else ROOM_AREA_SIZE_LARGE;
     @height = width;
-    width  *= 1 + Number.random() * 0.2;
-    height *= 1 + Number.random() * 0.2;
+    width  *= 1 + random.number() * 0.2;
+    height *= 1 + random.number() * 0.2;
   
     width = width->floor;
     height = height->floor;
   
-    @left = (item.x - width/2  + width  * (Number.random() * 0.4 - 0.2))->floor;
-    @top  = (item.y - height/2 + height * (Number.random() * 0.4 - 0.2))->floor;
+    @left = (item.x - width/2  + width  * (random.number() * 0.4 - 0.2))->floor;
+    @top  = (item.y - height/2 + height * (random.number() * 0.4 - 0.2))->floor;
     
 
 
@@ -171,11 +171,11 @@
       @:b = remaining->pop;        
 
       // find x / y path from a -> b
-      @ax = (a.x + (Number.random() - 0.5)*0.5 * a.width + a.width/2)->floor;
-      @ay = (a.y + (Number.random() - 0.5)*0.5 * a.height + a.height/2)->floor;
+      @ax = (a.x + (random.number() - 0.5)*0.5 * a.width + a.width/2)->floor;
+      @ay = (a.y + (random.number() - 0.5)*0.5 * a.height + a.height/2)->floor;
 
-      @bx = (b.x + (Number.random() - 0.5)*0.5 * b.width + b.width/2)->floor;
-      @by = (b.y + (Number.random() - 0.5)*0.5 * b.height + b.height/2)->floor;
+      @bx = (b.x + (random.number() - 0.5)*0.5 * b.width + b.width/2)->floor;
+      @by = (b.y + (random.number() - 0.5)*0.5 * b.height + b.height/2)->floor;
 
 
       if (ax < 0) ax = 0;
@@ -227,8 +227,8 @@
   @:generateLayout :: {
     /*[0, 200]->for(do:::(i) {
       enableWall(
-        x: (ROOM_SIZE * Number.random())->floor,
-        y: (ROOM_SIZE * Number.random())->floor
+        x: (ROOM_SIZE * random.number())->floor,
+        y: (ROOM_SIZE * random.number())->floor
       );
     });*/
         
@@ -237,8 +237,8 @@
     for(0, ROOM_EMPTY_AREA_COUNT)::(i) {
       generateArea(
         item:{
-          x:(Number.random()*ROOM_SIZE)->floor + GEN_OFFSET, 
-          y:(Number.random()*ROOM_SIZE)->floor + GEN_OFFSET
+          x:(random.number()*ROOM_SIZE)->floor + GEN_OFFSET, 
+          y:(random.number()*ROOM_SIZE)->floor + GEN_OFFSET
         }
       );        
     }

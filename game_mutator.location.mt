@@ -126,7 +126,7 @@ Location.database.newEntry(data:{
     location.ownedBy.normalizeStats();        
     @:story = import(module:'game_singleton.story.mt');
     
-    for(0, 2+(Number.random()*4)->ceil)::(i) {
+    for(0, 2+(random.number()*4)->ceil)::(i) {
       // no weight, as the value scales
       location.inventory.add(item:
         Item.new(
@@ -196,7 +196,7 @@ Location.database.newEntry(data:{
     location.ownedBy.normalizeStats();        
     @:story = import(module:'game_singleton.story.mt');
   
-    for(0, 2+(Number.random()*4)->ceil)::(i) {
+    for(0, 2+(random.number()*4)->ceil)::(i) {
       // no weight, as the value scales
       location.inventory.add(
         item:Item.new(
@@ -1931,8 +1931,8 @@ Location.database.newEntry(data:{
         state.base = base;
         state.x = if (x) x else 0;
         state.y = if (x) y else 0;
-        //state.x = if (xHint == empty) (Number.random() * landmark_.width ) else xHint;  
-        //state.y = if (yHint == empty) (Number.random() * landmark_.height) else yHint;
+        //state.x = if (xHint == empty) (random.number() * landmark_.width ) else xHint;  
+        //state.y = if (yHint == empty) (random.number() * landmark_.height) else yHint;
         if (ownedByHint != empty)
           this.ownedBy = ownedByHint;
              
