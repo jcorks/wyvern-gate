@@ -6221,6 +6221,587 @@ Arts.newEntry(
 )
 
 
+// ver 0.2.0 starting supports
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b169',
+    targetMode : TARGET_MODE.ONE,
+    description: "Removes all status ailments from the target. Only usable once per battle. Additional levels have no effect.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:which = random.scrambled(:allies)->filter(
+        ::(value) <- value.effectStack.getAllByFilter(
+          ::(value) <- (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
+        )->size > 0
+      );
+      when(which->size == 0) false;
+      
+      return [which[0]];
+    },
+    oncePerBattle : true,
+    canBlock : false,
+    kind : KIND.ABILITY,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
+      windowEvent.queueMessage(
+        text: targets[0].name + ' is covered in a soothing aura!'
+      );
+
+      @:filter = ::(value) <- (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
+      @:hasAny = targets[0].effectStack.getAllByFilter(:filter)->size > 0;
+      targets[0].effectStack.removeByFilter(:filter);
+      if (hasAny == false)  
+        windowEvent.queueMessage(
+          text : '... but nothing happened!'
+        )
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b170',
+    targetMode : TARGET_MODE.ONE,
+    description: "Removes all negative effects from the target. Only usable once per battle. Additional levels have no effect.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:which = random.scrambled(:allies)->filter(
+        ::(value) <- value.effectStack.getAllByFilter(
+          ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0) ||
+                       ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0)
+        )->size > 0
+      );
+      when(which->size == 0) false;
+      
+      return [which[0]];
+    },
+    oncePerBattle : true,
+    canBlock : false,
+    kind : KIND.ABILITY,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.EPIC,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
+
+      windowEvent.queueMessage(
+        text: targets[0].name + ' is covered in a soothing aura!'
+      );
+      @:filter = ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0) ||
+                              ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0)
+
+      @:hasAny = targets[0].effectStack.getAllByFilter(:filter)->size > 0;
+      targets[0].effectStack.removeByFilter(:filter);
+      if (hasAny == false)  
+        windowEvent.queueMessage(
+          text : '... but nothing happened!'
+        )
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b171',
+    targetMode : TARGET_MODE.ALLALLY,
+    description: "Removes all negative effects from allies and gives them all to the user.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:which = random.scrambled(:allies)->filter(
+        ::(value) <- value != user && value.effectStack.getAllByFilter(
+          ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0) ||
+                       ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0)
+        )->size > 0
+      );
+      when(which->size == 0) false;
+      return which;
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
+
+      windowEvent.queueMessage(
+        text: user.name + '\'s allies are covered in a mysterious light!'
+      );
+
+
+      @:condition = ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0) ||
+                                 ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0)
+      @toput = [];
+      foreach(targets) ::(k, v) {
+        when(v == user) empty;
+        toput = [...toput, v.effectStack.getAllByFilter(:condition)];
+        v.effectStack.removeByFilter(:condition);
+      }
+      
+      when (toput->size == 0) 
+        windowEvent.queueMessage(
+          text: '...but the light fizzled and nothing happened!'
+        );
+      
+      windowEvent.queueMessage(
+        text: 'The light converges on ' + user.name + '!'
+      );
+      
+      foreach(toput) ::(k, effectFull) {
+        user.effectStack.add(
+          id:effectFull.id,
+          holder:user,
+          duration: effectFull.duration,
+          overrideTurnCount : effectFull.turnCount,
+          from: effectFull.from,
+          item: effectFull.item
+        );
+      }
+
+
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b172',
+    targetMode : TARGET_MODE.ALLENEMY,
+    description: "Randomly steals one positive effect from a random enemy and gives it to the user.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:which = random.scrambled(:enemies)->filter(
+        ::(value) <- value != user && value.effectStack.getAllByFilter(
+          ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.BUFF) != 0)
+        )->size > 0
+      );
+      when(which->size == 0) false;
+      return which;
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
+      @:condition = ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.BUFF) != 0)
+
+      @:which = random.scrambled(:targets)->filter(
+        ::(value) <- value != user && value.effectStack.getAllByFilter(
+          :condition
+        )->size > 0
+      );
+                  
+      when(which->size == 0)
+        windowEvent.queueMessage(:'...but nothing happened!');
+                                 
+      @:victim = random.pickArrayItem(:which);
+      windowEvent.queueMessage(
+        text: victim.name + ' is covered in a mysterious light!'
+      );
+      
+      @:effectFull = random.scrambled(:victim.effectStack.getAllByFilter(:condition))[0];
+      victim.effectStack.removeByFilter(::(value) <- value == effectFull);
+      
+
+      
+      user.effectStack.add(
+        id:effectFull.id,
+        holder:user,
+        duration: effectFull.duration,
+        overrideTurnCount : effectFull.turnCount,
+        from: effectFull.from,
+        item: effectFull.item
+      );
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b173',
+    targetMode : TARGET_MODE.NONE,
+    description: "Replaces up to two effects with random ones.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {
+      when(user.getAllByFilter(
+          ::(value) <- true
+        )->size == 0) false;
+      return [user];
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:effects = random.scrambled(:user.effectStack.getAllByFilter(::(value)<-true));
+      @:Effect = import(module:'game_database.effect.mt');
+
+      when(effects->size == 0)
+        windowEvent.queueMessage(:'...but nothing happened!');
+ 
+
+      windowEvent.queueMessage(
+        text: user.name + ' is covered in a mysterious light!'
+      );
+
+  
+      if (effects->size > 2)
+          effects->setSize(:2);
+  
+      user.effectStack.removeByFilter(::(value) {
+        return {:::} {
+          foreach(effects) ::(k, v) {
+            if (v == value) send(:true);
+          }
+          return false;
+        }
+      });
+                  
+
+      foreach(effects) ::(k, v) {
+        @:newEffect = Effect.getRandomFiltered(::(value) <- (value.flags & Effect.FLAGS.SPECIAL) == 0);
+        user.effectStack.add(
+          id:newEffect.id,
+          holder:v.holder,
+          duration: v.duration,
+          overrideTurnCount : v.turnCount,
+          from: v.from,
+          item: v.item
+        );        
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b174',
+    targetMode : TARGET_MODE.ALL,
+    description: "Removes all negative effects from all combatants, then discard a card and draw a card. Additional levels have no effect.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:which = random.scrambled(:allies)->filter(
+        ::(value) <- value.effectStack.getAllByFilter(
+          ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0) ||
+                       ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0)
+        )->size > 0
+      );
+      when(which->size == 0) false;
+      
+      return [...allies, ...enemies];
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.ABILITY,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.EPIC,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
+      windowEvent.queueMessage(
+        text: 'Everyone is covered in a soothing aura!'
+      );
+      
+      @:filter = ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0) ||
+                              ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0)
+      
+      foreach(targets) ::(k, target) {
+        target.effectStack.removeByFilter(:filter);
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b175',
+    targetMode : TARGET_MODE.ALL,
+    description: "Removes all positive effects from all combatants.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:which = random.scrambled(:enemies)->filter(
+        ::(value) <- value.effectStack.getAllByFilter(
+          ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.BUFF) != 0)
+        )->size > 0
+      );
+      when(which->size == 0) false;
+      
+      return [...allies, ...enemies];
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.ABILITY,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.EPIC,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
+      windowEvent.queueMessage(
+        text: 'Everyone is covered in an ominous aura!'
+      );
+      
+      @:filter = ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.BUFF) != 0)      
+      foreach(targets) ::(k, target) {
+        target.effectStack.removeByFilter(:filter);
+      }
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b176',
+    targetMode : TARGET_MODE.ONE,
+    description: "Removes all effects from the user and randomly gives one of them to a target.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:which = user.effectStack.getAllByFilter(
+          ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0) ||
+                       ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0)
+        )->size > 0
+      when(which->size == 0) false;
+      
+      return [random.pickArrayItem(:which)];
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.EPIC,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
+      @:filter = ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0) ||
+                              ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0)
+     
+     
+     
+      @:v = user.effectStack.getAllByFilter(:filter)[0];
+      when (v == empty)
+        windowEvent.queueMessage(
+          text: '... but nothing happened!'
+        );
+      
+      windowEvent.queueMessage(
+        text: user.name + ' and ' + targets[0].name + ' are covered in an ominous aura!'
+      );
+      
+      user.effectStack.removeByFilter(filter);
+      targets[0].effectStack.add(
+        id:v.id,
+        holder:v.holder,
+        duration: v.duration,
+        overrideTurnCount : v.turnCount,
+        from: v.from,
+        item: v.item
+      );  
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b177',
+    targetMode : TARGET_MODE.ALL,
+    description: "Randomly redistributes all effects to all combatants.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+
+      when(
+        enemies->filter(
+          ::(value) <- value.effectStack.getAllByFilter(
+            ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.BUFF) != 0)
+          )->size > 0
+        )
+        ||
+        allies->filter(
+          ::(value) <- value.effectStack.getAllByFilter(
+            ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0) ||
+                         ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0)
+          )->size > 0
+        )
+      ) [...allies, ...enemies];
+
+      
+      return false;
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.ABILITY,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.EPIC,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
+      windowEvent.queueMessage(
+        text: 'Everyone is covered in a weird aura!'
+      );
+      
+      @toput = [];
+      foreach(targets) ::(k, v) {
+        toput = [...toput, ...v.effectStack.getAll()];
+        v.effectStack.removeByFilter(::(value) <- true);
+      }
+      
+      foreach(random.scrambled(:toput)) ::(k, v) {
+        @:target = random.pickArrayItem(:targets);
+        
+        target.effectStack.add(
+          id:v.id,
+          holder:v.holder,
+          duration: v.duration,
+          overrideTurnCount : v.turnCount,
+          from: v.from,
+          item: v.item
+        );  
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Tendril of Time',
+    id : 'base:b178',
+    targetMode : TARGET_MODE.NONE,
+    description: "Removes all effects from user and resets HP and AP to full. This Art is permanently removed from the user\'s deck upon use. Additional levels have no effect.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, enemies, allies) {
+      when(user.hp < user.stats.HP/2) [user];
+      return false;
+    },
+    oncePerBattle : true,
+    canBlock : false,
+    kind : KIND.ABILITY,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.EPIC,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.effectStack.removeByFilter(::(value) <- true);
+
+      user.heal(
+        amount:user.stats.HP - user.hp
+      );
+      
+      user.healAP(
+        amount: user.stats.AP - user.ap 
+      );
+      
+      
+      @toput = [];
+      foreach(targets) ::(k, v) {
+        toput = [...toput, ...v.effectStack.getAll()];
+      }
+      
+      // technically removes ALL instances, but the others 
+      // wouldnt be usable anyway
+      user.artsDeck.purge(:'base:b178');
+      
+      // just remove ONE
+      @index = user.supportArts->findIndex(:'base:b178');
+
+      // if it came from someone else's deck, theyre in luck.
+      when(index == -1) empty;
+      
+      user.supportArts->remove(:index);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b179',
+    targetMode : TARGET_MODE.ONE,
+    description: "Randomly steals up to two random effects from a target and gives it to the user.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:which = random.scrambled(:enemies)->filter(
+        ::(value) <- value != user && value.effectStack.getAllByFilter(
+          ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.BUFF) != 0)
+        )->size > 0
+      );
+      when(which->size == 0) false;
+      return [which[0]];
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:effectStackSize = targets[0].effectStack.getAll()->size;
+      when(effectStackSize == 0)
+        windowEvent.queueMessage(:'...but nothing happened!');
+                                 
+      windowEvent.queueMessage(
+        text: targets[0].name + ' is covered in a mysterious light!'
+      );
+      
+      for(0, if (effectStackSize == 1) 1 else 2) ::(i) {
+        @:effectFull = random.scrambled(:targets[0].effectStack.getAll())[0];
+        targets[0].effectStack.removeByFilter(::(value) <- value == effectFull);
+        
+        user.effectStack.add(
+          id:effectFull.id,
+          holder:user,
+          duration: effectFull.duration,
+          overrideTurnCount : effectFull.turnCount,
+          from: effectFull.from,
+          item: effectFull.item
+        );
+      }
+    }
+  }
+)
+
+
 };
 
 Arts = class(

@@ -291,6 +291,12 @@
         set ::(value) <- state.hand = value
       },
       
+      purge ::(id) {
+        state.hand = state.hand->filter(::(value) <- value.id != id);
+        state.discard = state.discard->filter(::(value) <- value != id);
+        state.deck = state.deck->filter(::(value) <- value != id);
+      },
+      
       discardRandom ::{
         @:card = random.pickArrayItem(list:state.hand);
         when (card == empty) empty;

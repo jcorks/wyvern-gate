@@ -33,6 +33,12 @@
   'DEX'
 ]
 
+@:filterStat::(stats, stat) <-
+  if(stat == 'HP' || stat == 'AP') 
+    displayHP(:stats[stat])
+  else 
+    ''+stats[stat]
+;
 
 @:StatSet = LoadableClass.createLight(
   name : 'Wyvern.Entity.StatSet',
@@ -43,66 +49,28 @@
     },
     
     isDifferent::(stats, other) {
-      return 
-        stats.HP != other.HP ||
-        stats.AP != other.AP ||
-        stats.ATK != other.ATK ||
-        stats.INT != other.INT ||
-        stats.DEF != other.DEF ||
-        stats.SPD != other.SPD ||
-        stats.LUK != other.LUK ||
-        stats.DEX != other.DEX
-      ;
+      return {:::} {
+        foreach(NAMES) ::(k, v) {
+          if (stats[v] != other[v])
+            send(:true);
+        }
+        return false;
+      }
     },
     
     diffToLines ::(stats, other) {
       return canvas.columnsToLines(columns:[
         NAMES->map(::(value) <- value + ': '),
-        
-        [
-          ''+displayHP(:stats.HP),
-          ''+stats.AP,
-          ''+stats.ATK,
-          ''+stats.INT,
-          ''+stats.DEF,
-          ''+stats.SPD,
-          ''+stats.LUK,
-          ''+stats.DEX            
-        ],
-        
-        [
-          ' -> ',
-          ' -> ',
-          ' -> ',
-          ' -> ',
-          ' -> ',
-          ' -> ',
-          ' -> ',            
-          ' -> ',            
-        ],
-        
-        [
-          ''+displayHP(:other.HP),
-          ''+other.AP,
-          ''+other.ATK,
-          ''+other.INT,
-          ''+other.DEF,
-          ''+other.SPD,
-          ''+other.LUK,
-          ''+other.DEX            
-        ],
-        
-        [
-          (if (other.HP - stats.HP  != 0) (if (other.HP > stats.HP) '(+' else '(') + (other.HP  - stats.HP)  + ')' else ''),
-          (if (other.AP - stats.AP  != 0) (if (other.AP > stats.AP) '(+' else '(') + (other.AP  - stats.AP)  + ')' else ''),
-          (if (other.ATK - stats.ATK  != 0) (if (other.ATK > stats.ATK) '(+' else '(') + (other.ATK  - stats.ATK)  + ')' else ''),
-          (if (other.INT - stats.INT  != 0) (if (other.INT > stats.INT)'(+' else '(') + (other.INT  - stats.INT)  + ')' else ''),
-          (if (other.DEF - stats.DEF  != 0) (if (other.DEF > stats.DEF)'(+' else '(') + (other.DEF  - stats.DEF)  + ')' else ''),
-          (if (other.SPD - stats.SPD  != 0) (if (other.SPD > stats.SPD)'(+' else '(') + (other.SPD  - stats.SPD)  + ')' else ''),
-          (if (other.LUK - stats.LUK  != 0) (if (other.LUK > stats.LUK)'(+' else '(') + (other.LUK  - stats.LUK)  + ')' else ''),
-          (if (other.DEX - stats.DEX  != 0) (if (other.DEX > stats.DEX)'(+' else '(') + (other.DEX  - stats.DEX)  + ')' else ''),
-
-        ]            
+        NAMES->map(::(value) <- filterStat(stats, stat:value)),
+        NAMES->map(::(value) <- ' -> '),
+        NAMES->map(::(value) <- filterStat(stats:other, stat:value)),        
+        NAMES->map(::(value) <- (
+          if (other[value] - stats[value]  != 0) 
+            (if (other[value] > stats[value]) 
+              '(+' else '(') + (other[value]  - stats[value])  + ')' 
+            else ''
+          )
+        )
       ]);   
     },
     
@@ -157,15 +125,13 @@
     isEmpty : {
       get :: {
         @:state = _.state;
-        return
-        state.HP ==0 &&
-        state.AP ==0 &&
-        state.ATK ==0 &&
-        state.INT ==0 &&
-        state.DEF ==0 &&
-        state.LUK ==0 &&
-        state.SPD ==0 &&
-        state.DEX ==0          
+        return {:::} {
+          foreach(NAMES) ::(k, v) {
+            if (state[v] != 0)
+              send(:false);
+          }
+          return true;
+        }
       }
     },
 
@@ -173,77 +139,49 @@
   
     mod ::(stats) {
       @:state = _.state;
-      state.HPmod  += stats.HP;
-      state.APmod  += stats.AP;
-      state.ATKmod += stats.ATK;
-      state.INTmod += stats.INT;
-      state.DEFmod += stats.DEF;
-      state.LUKmod += stats.LUK;
-      state.SPDmod += stats.SPD;
-      state.DEXmod += stats.DEX;      
+      foreach(NAMES) ::(k, v) {
+        state[v+'mod'] += stats[v];
+      }
     },
       
     modRate ::(stats) {
       @:state = _.state;
-      state.HPmod  += (state.HP*(stats.HP/100))->ceil;
-      state.APmod  += (state.AP*(stats.AP/100))->ceil;
-      state.ATKmod += (state.ATK*(stats.ATK/100))->ceil;
-      state.INTmod += (state.INT*(stats.INT/100))->ceil;
-      state.DEFmod += (state.DEF*(stats.DEF/100))->ceil;
-      state.LUKmod += (state.LUK*(stats.LUK/100))->ceil;
-      state.SPDmod += (state.SPD*(stats.SPD/100))->ceil;
-      state.DEXmod += (state.DEX*(stats.DEX/100))->ceil;  
-      
-          
-    
+      foreach(NAMES) ::(k, v) {
+        state[v+'mod'] += (state[v] * (stats[v]/100))->ceil;
+      }    
     },
       
     resetMod :: {
       @:state = _.state;
-      state.HPmod  = 0;
-      state.APmod  = 0;
-      state.ATKmod = 0;
-      state.INTmod = 0;
-      state.DEFmod = 0;
-      state.SPDmod = 0;
-      state.LUKmod = 0;
-      state.DEXmod = 0;
+      foreach(NAMES) ::(k, v) {
+        state[v+'mod'] = 0;
+      }
     },
       
     add ::(stats) {
       @:state = _.state;
-      state.HP  += stats.HP;
-      state.AP  += stats.AP;
-      state.ATK += stats.ATK;
-      state.INT += stats.INT;
-      state.DEF += stats.DEF;
-      state.LUK += stats.LUK;
-      state.SPD += stats.SPD;
-      state.DEX += stats.DEX;   
+      foreach(NAMES) ::(k, v) {
+        state[v] += stats[v];
+      }
     },
       
     subtract ::(stats) {
-      @:state = _.state;
-      state.HP  -= stats.HP;
-      state.AP  -= stats.AP;
-      state.ATK -= stats.ATK;
-      state.INT -= stats.INT;
-      state.DEF -= stats.DEF;
-      state.LUK -= stats.LUK;
-      state.SPD -= stats.SPD;
-      state.DEX -= stats.DEX;         
+      @:state = _.state;   
+      foreach(NAMES) ::(k, v) {
+        state[v] -= stats[v];
+      }
     },
     
     sum : {
-      get ::<-
-        _.state.HP +
-        _.state.AP +
-        _.state.ATK +
-        _.state.INT + 
-        _.state.DEF + 
-        _.state.LUK + 
-        _.state.SPD +
-        _.state.DEX
+      get ::{
+        @:state = _.state;
+        return NAMES->reduce(::(previous, value) <- 
+          if (previous == empty) 
+            state[value] 
+          else 
+            previous + state[value]
+        );
+      }
     },
       
     HP : {

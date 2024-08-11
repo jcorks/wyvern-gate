@@ -3206,9 +3206,12 @@ Item.database.newEntry(data : {
 }
 
 @:recalculateName = ::(state) {
-  when (state.customPrefix != '')
+  when (state.customPrefix != '') ::<= {
     state.customName = state.customPrefix + getEnchantTag(state);
-
+    if (state.improvements > 0) ::<= {
+      state.customName = state.customName +  '+'+(state.improvements);
+    }
+  }
 
   @baseName =
   if (state.base.isApparel && state.apparel)

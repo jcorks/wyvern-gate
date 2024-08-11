@@ -316,7 +316,7 @@
       
       getAll : getAll,
       
-      add::(id, duration => Number, holder, item, from) {
+      add::(id, duration => Number, holder, item, from, overrideTurnCount) {
         @effect = Effect.find(:id);
         
         // already added. Ignores innate effects.
@@ -352,6 +352,10 @@
         );
         
         state.effects = all;
+      },
+      
+      getAllByFilter::(filter) {
+        return state.effects->filter(:filter);
       },
 
       removeAllByID::(id) {

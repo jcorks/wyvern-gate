@@ -23,7 +23,8 @@
 @:FLAGS = {
   AILMENT : 1,
   BUFF : 2,
-  DEBUFF : 4
+  DEBUFF : 4,
+  SPECIAL : 8
 };
 
 
@@ -3063,7 +3064,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
-    flags : 0,
+    flags : FLAGS.SPECIAL,
     stats: StatSet.new(
     ),
     events : {
