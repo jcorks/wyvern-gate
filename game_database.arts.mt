@@ -5312,7 +5312,7 @@ Arts.newEntry(
     canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
-    rarity : RARITY.RARE,
+    rarity : RARITY.COMMON,
     baseDamage ::(level, user) <- 1,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
@@ -5560,7 +5560,7 @@ Arts.newEntry(
   data: {
     name: 'Blood\'s Seeking',
     id : 'base:bloods-seeking',
-    targetMode : TARGET_MODE.ONE,
+    targetMode : TARGET_MODE.NONE,
     description: "Sacrifice 2 HP. Search user\'s discard pile for an Art. Add the Art to the user\'s hand.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,

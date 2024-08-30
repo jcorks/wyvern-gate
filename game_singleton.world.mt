@@ -828,7 +828,8 @@
       load ::(serialized) {
         if (serialized.rng != empty)
           random.load(:serialized.rng);
-          
+        
+        breakpoint();
         state.load(parent:this, serialized:serialized.world, loadFirst:['scenario']);
         
         island = Island.new(createEmpty:true);

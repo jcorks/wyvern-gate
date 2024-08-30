@@ -123,6 +123,7 @@ Landmark.database.newEntry(
       'base:arena',
       'base:inn',
       'base:school',
+      'base:school',
       'base:blacksmith'      
     ],
     mapHint : {
@@ -504,7 +505,11 @@ Landmark.database.newEntry(
       {id:'base:arts-tecker', rarity:7},
       {id:'base:farm', rarity:4}
     ],
-    requiredLocations : [],
+    requiredLocations : [
+      'base:farm',
+      'base:home',
+      'base:school'    
+    ],
     startingEvents : [
     ],
     mapHint : {
@@ -542,7 +547,11 @@ Landmark.database.newEntry(
     ],
     startingEvents : [
     ],
-    requiredLocations : [],
+    requiredLocations : [
+      'base:farm',
+      'base:home',
+      'base:school'        
+    ],
     mapHint : {
       roomSize: 25,
       wallCharacter: ',',
@@ -736,6 +745,9 @@ Landmark.database.newEntry(
 
 @:Landmark = databaseItemMutatorClass.create(  
   name : 'Wyvern.Landmark',
+  statics : {
+    TYPE : {get ::<- TYPE}
+  },
   items : {
     worldID : 0,
     name : '',
@@ -756,9 +768,6 @@ Landmark.database.newEntry(
   
   database : Database.new(
     name : 'Wyvern.Landmark.Base',
-    statics : {
-      TYPE : TYPE
-    },
     attributes : {
       id : String,
       name: String,

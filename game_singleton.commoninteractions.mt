@@ -428,7 +428,7 @@ return {
       onSelect::(island, landmark) {
         @:Landmark = import(module:'game_mutator.landmark.mt');
         @:world = import(module:'game_singleton.world.mt');
-        when(landmark != empty && landmark.base.landmarkType == Landmark.database.statics.TYPE.DUNGEON) 
+        when(landmark != empty && landmark.base.landmarkType == Landmark.TYPE.DUNGEON) 
           windowEvent.queueChoices(
             prompt: 'Wait until...',
             choices : [
@@ -544,12 +544,10 @@ return {
             when (which == false) empty;
             @:world = import(module:'game_singleton.world.mt');
             @:party = world.party;
-            party.quests->push(:quest);
-            entity.data.quest = empty;
-            quest.accept(
-              island: world.island,
-              issuer: entity
-            );
+            
+            if (party.acceptQuest(issuer:entity, island:world.island, quest)) ::<= {
+              entity.data.quest = empty;            
+            }
           }
         );
       }

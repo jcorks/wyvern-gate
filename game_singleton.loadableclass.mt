@@ -134,15 +134,19 @@ return {
         @:state = StateType.new();
         
         define(this, state);
-        if (this.interface == empty)
-          this.interface = {};
-        @:interface = this.interface;
         
         
-        @:afterLoad = interface.afterLoad;
-        @:overrideSave = interface.save;
-        @:overrideLoad = interface.load;
-        @:initialize = interface.initialize;
+        @:keys = this->keys;
+        @isKey = {};
+        foreach(keys) ::(k, v) {
+          isKey[v] = true;
+        }
+        
+        
+        @:afterLoad = if (isKey.afterLoad) this.afterLoad else empty;
+        @:overrideSave = if (isKey.save) this.save else empty;
+        @:overrideLoad = if (isKey.load) this.load else empty;
+        @:initialize = if (isKey.initialize) this.initialize else empty;
         
         this.constructor = ::(*args) {
             
@@ -155,16 +159,18 @@ return {
             this.defaultLoad(*args);
         }
 
-        interface.afterLoad = empty;
+        this.interface = {
+          afterLoad : empty,
 
-        interface.load = if (overrideLoad) overrideLoad else ::(serialized) {
-          state.load(parent:this, serialized);
-          if (afterLoad != empty)
-            afterLoad();
-        }
+          load : if (overrideLoad) overrideLoad else ::(serialized) {
+            state.load(parent:this, serialized);
+            if (afterLoad != empty)
+              afterLoad();
+          },
 
-        interface.save = if (overrideSave) overrideSave else ::(serialized) {
-          return state.save();
+          save : if (overrideSave) overrideSave else ::(serialized) {
+            return state.save();
+          }
         }
 
       },

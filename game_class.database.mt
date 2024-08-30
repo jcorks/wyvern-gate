@@ -42,7 +42,6 @@
     @name_;
     @attributes_;
     @reset_;
-    @statics_;
     @:databaseNameGetter = {
       get ::<- name_
     };
@@ -51,7 +50,9 @@
       name_ = name;
       attributes_ = attributes;
       reset_ = reset;
-      statics_ = statics;
+      
+      if (statics != empty)
+        this.interface = statics;
     };
 
     @:interface = {
@@ -192,12 +193,10 @@
       
       getAll :: {
         return items_->values;
-      },
-      
-      statics : {
-        get ::<- statics_
       }
     }
+    
+    
     
     this.interface = interface;
   }

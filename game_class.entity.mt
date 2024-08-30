@@ -39,10 +39,12 @@
 @:EffectStack = import(:'game_class.effectstack.mt');
 @:BattleAction = import(:'game_struct.battleaction.mt');
 @:displayHP = import(:'game_function.displayhp.mt');
+@:animateBar = import(:'game_function.animatebar.mt');
 
 
 @:MIN_SUPPORT_COUNT = 5;
 @:DAMAGE_RNG_SPREAD = 0.3;
+@:PROF_EXP_PER_KNOCKOUT = 35;
 
 // returns EXP recommended for next level
 @:levelUp ::(level, stats => StatSet.type, growthPotential => StatSet.type, whichStat) {
@@ -90,21 +92,7 @@
 }
 
 
-@:outfitDeck ::(this, deck) {
-  @:world = import(module:'game_singleton.world.mt');
-  when(this.supportArts) ::<= {
-    foreach(this.supportArts)::(k, v) {
-      deck.addArt(id:v);
-    }
-  }
-    
- 
 
-
-  // profession is expected to pick up the slack
-  when ((this.species.traits & Species.TRAITS.SPECIAL) != 0) empty;
-
-}
 
 @:assembleDeck ::(this, state) {
   @:deck = ArtsDeck.new();
@@ -142,12 +130,19 @@
   }  
   
   // profession boosts
-  foreach(state.profession.arts) ::(k, v) {
+  foreach(state.equippedProfessionArts) ::(k, v) {
     deck.addArt(id:v);
   }
   
   
-  outfitDeck(deck, this);
+  @:world = import(module:'game_singleton.world.mt');
+  when(this.supportArts) ::<= {
+    foreach(this.supportArts)::(k, v) {
+      deck.addArt(id:v);
+    }
+  }
+    
+ 
   
 
   
@@ -270,6 +265,132 @@
 }
 
 
+@:levelUpProfession ::(this, state, profession) {
+  @set = state.professionProgress[profession.id];
+
+
+  @:level2exp ::(level) {
+    @:ct = profession.arts->size;
+    @:MAX_DEFEATS = 15;
+    @:averageSub = MAX_DEFEATS / ct;
+    // y = mx + b
+    // y - mx = b
+    // m = ((y1 - mx1)-y0) / (-x0)
+    // -x0m = y1 - mx1 - y0
+    // mx1 - x0m = y1 - y0
+    // x1 - x0 = (y1 - y0) / m
+    // x1 - x0 / y1 - y0 = 1 / m
+    // y1 - y0 / x1 - x0 = m
+    
+    @:m = (MAX_DEFEATS - 3) / (ct - 0);
+    @:b = MAX_DEFEATS - m*ct;
+    
+    return ((m*level + b)*PROF_EXP_PER_KNOCKOUT)->floor;
+  }
+
+  
+  if (set == empty) ::<= {
+    set = {
+      level : 0,
+      exp : 0,
+      expToNext : level2exp(:0)
+    }
+    state.professionProgress[profession.id] = set;
+  } else ::<= {
+    set.level += 1;
+    set.exp = 0;
+    set.expToNext = level2exp(:set.level);
+    state.professionArts->push(:profession.arts[set.level-1]);
+  }
+  
+}
+
+@:expUpProfession ::(this, state, profession, exp, silent, onDone) {
+  @set = state.professionProgress[profession.id];
+  if (set == empty) ::<= {
+    levelUpProfession(this, state, profession);
+    set = state.professionProgress[profession.id];
+  }
+  
+  if (silent == empty || silent == false) ::<= {
+    @:animateLevel::{
+      @curVal = exp;
+      @originalExpToNext = set.expToNext;
+      @originalExp = exp;      
+      @originalSetExp = set.exp;
+      
+      if (exp >= set.expToNext) ::<= {
+        exp -= set.expToNext;
+        set.exp += set.expToNext;
+        set.expToNext = 0;
+      } else ::<= {
+        set.expToNext -= exp;
+        set.exp += exp;
+        exp = 0;
+      }
+      
+      animateBar(
+        from: originalSetExp,
+        to:   set.exp,
+        max:  set.expToNext + set.exp,
+        
+        onGetPauseFinish ::<- true,
+        onFinish :: {
+          breakpoint();
+          if (set.expToNext == 0) ::<= {
+            levelUpProfession(this, state, profession);
+            windowEvent.queueDisplay(
+              lines: [
+                'Level Up!',
+                this.name + ', the ' + profession.name + ' is now Level ' + if (set.level >= profession.arts->size) 'MAX' else set.level,
+                '',
+                'Learned: ' + Arts.find(:profession.arts[set.level-1]).name
+              ]
+            )
+            
+            windowEvent.queueMessage(
+              text: 'To view this new art, visit the Arts menu for ' + this.name + ' in the party menu.'
+            );
+            
+            when (set.level >= profession.arts->size) 
+              if (onDone) onDone();
+            
+            animateLevel()
+          } else 
+            if (onDone) onDone();
+
+        },
+        onGetCaption       ::<- this.name + ', ' + profession.name + ': Level ' + if (set.level >= profession.arts->size) 'MAX' else set.level,
+        onGetSubcaption    ::<- if (set.level >= profession.arts->size) '' else 'Exp to next: ' + (originalExpToNext-(curVal-originalSetExp)) + ' EXP',
+        onGetSubsubcaption ::<- if (set.level >= profession.arts->size) '' else '            +' + (originalExp - (curVal-originalSetExp)),
+        onGetLeftWeight:: <- 0.5,
+        onGetTopWeight:: <- 0.5,
+        
+        onNewValue ::(value) {
+          curVal = value->round;
+        }
+      );
+    }
+    
+    animateLevel();
+  } else ::<= {
+    {:::} {
+      forever ::{
+        when(exp == 0) send();
+        if (set.level >= profession.arts->size) send();
+        
+        if (exp > set.expToNext) ::<= {
+          exp -= set.expToNext;
+          levelUpProfession(this, state, profession);
+        } else ::<= {
+          set.exp += exp
+          set.expToNext -= exp
+        }
+      }
+    }
+  }
+}
+
 
 @initializeEffectStackProper ::(this, state) {
   
@@ -333,6 +454,7 @@
 @:Entity = LoadableClass.createLight(
   name : 'Wyvern.Entity', 
   statics : {
+    PROF_EXP_PER_KNOCKOUT : {get::<- PROF_EXP_PER_KNOCKOUT},
     EQUIP_SLOTS : {get::<- EQUIP_SLOTS},
     DAMAGE_TARGET : {get::<- DAMAGE_TARGET},
     normalizedDamageTarget ::(blockPoints) {
@@ -398,7 +520,10 @@
     data : empty,
     deck : empty,
     supportArts : empty,
-    innateEffects : empty
+    equippedProfessionArts : empty,
+    professionArts : empty,
+    innateEffects : empty,
+    professionProgress : empty
   },
   
   private : {
@@ -431,7 +556,9 @@
       state.worldID = world.getNextID();
 
       // starting supports
-      state.supportArts = [];
+      state.supportArts = [
+        
+      ];
       state.stats = StatSet.new(
         HP:1,
         AP:random.integer(from:8, to:14),
@@ -444,7 +571,6 @@
       );
 
       @:Location = import(module:'game_mutator.location.mt');
-
 
       state.hp = 1;
       state.ap = 0;
@@ -490,6 +616,19 @@
         else 
           Profession.find(id:professionHint)
 
+      state.professionProgress = [];
+      state.professionArts = [];
+      state.equippedProfessionArts = [];
+
+      if (state.profession.traits & Profession.TRAITS.NON_COMBAT) ::<= {
+        for(0, 20) ::(i) {
+          this.autoLevelProfession();
+        }
+      } else 
+        this.autoLevelProfession();
+      
+
+      
 
 
       if (speciesHint != empty) ::<= {
@@ -520,10 +659,10 @@
         );
 
         if (state.faveWeapon == empty)
-          state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.database.statics.ATTRIBUTE.WEAPON) != 0 && value.tier <= island.tier)
+          state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0 && value.tier <= island.tier)
       } else ::<= {
         if (state.faveWeapon == empty)
-          state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.database.statics.ATTRIBUTE.WEAPON) != 0)
+          state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0)
       }
       state.inventory.addGold(amount:(random.number() * 100)->ceil);
       state.favoriteItem = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
@@ -661,9 +800,28 @@
       }
     },
     
-    editSupports ::{
+    editDeck ::{
       @:state = _.state;
       @:this = _.this;
+      @:pickArt = import(:'game_function.pickart.mt');
+      
+      @:calculateDeckSize:: <- 
+        [
+          ...this.supportArts, 
+          ...state.equippedProfessionArts,
+          ...(if (state.equips[EQUIP_SLOTS.HAND_LR]) 
+            [
+              state.equips[EQUIP_SLOTS.HAND_LR].arts[0],        
+              state.equips[EQUIP_SLOTS.HAND_LR].arts[1]
+            ]
+          else 
+            []
+          )
+        ]->reduce(::(previous, value) <-
+          (if (previous == empty) 0 else previous) + 
+          ArtsDeck.artIDtoCount(:value)
+        );
+      
       
       @:equipped::{
         when(this.supportArts->size == 0)
@@ -731,12 +889,11 @@
             list = [...world.party.arts]->map(::(value) <- value.id);
             return list;
           },
-          onChoice::(choice) {
-            @which = choice;
-            @id = list[which];
+          onChoice::(art, category) {
+            @id = art;
             when(id == empty) empty;
             
-            @:art = Arts.find(id);
+            art = Arts.find(id);
             
             windowEvent.queueChoices(
               prompt: art.name,
@@ -746,36 +903,128 @@
               canCancel: true,
               onChoice::(choice) {
                 @:world = import(module:'game_singleton.world.mt');
+                when(state.supportArts->findIndex(:id) != -1)
+                  windowEvent.queueMessage(
+                    text: 'Only one of each kind of Support Art can be equipped at a time.'
+                  );
+                
                 world.party.takeSupportArt(id:art.id);
                 state.supportArts->push(:art.id);
               }
             );
           }
         );
-
-
-      
       }
       
+      @:addProfessionArt ::{
+        
+
+        when (this.getUnequippedProfessionArts()->size == 0) 
+          windowEvent.queueMessage(
+            text: this.name + ' has no more equippable profession Arts available.'
+          );        
+        
+      
+        pickArt(
+          prompt: 'Profession Arts:',
+          onGetList ::<- this.getUnequippedProfessionArts(),
+          canCancel: true,
+          onChoice ::(art, category) {
+            state.equippedProfessionArts->push(:art);
+          }
+        );
+      }
       
 
-      windowEvent.queueChoices(
-        prompt: this.name + ': Support Arts',
-        leftWeight: 1,
-        topWeight : 1,
-        choices : [
-          'Equipped...',
-          'Trunk...',
-        ],
-        canCancel: true,
-        keep : true,
-        onChoice::(choice) {
-          match(choice) {
-            (1): equipped(),
-            (2): trunk()
-          }
-        }
-      );      
+
+      @:start ::{
+        pickArt(
+          keep:true,
+          prompt: this.name + ' Arts:', 
+          onCancel ::{
+            when(calculateDeckSize() < 25) ::<= {
+              windowEvent.queueMessage(
+                text: this.name + '\'s deck has too few cards. Each art gives cards to the Arts deck based on its rarity. A minimum threshold is required. Your deck has ' + calculateDeckSize() + ' out of the minimum of 25.'
+              );
+              
+              start();
+            }
+          },
+          onGetCategories ::{
+            @:categories = [];
+            @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
+            categories->push(:['Weapon:', if (hand != empty) [
+              hand.arts[0],        
+              hand.arts[1]
+            ] else [empty, empty]]);
+
+            categories->push(:['Profession:',::<= {
+              @:profArts = [...state.equippedProfessionArts];
+              for(profArts->size, 5) ::(i) {
+                profArts->push(:empty);
+              }
+              return profArts;
+            }]);
+
+            categories->push(:['Support:', [...this.supportArts]]);
+            categories->push(:[' Add support...', []]);
+
+            return categories;
+          },
+          onChoice::(art, category) {
+            when(category == ' Add support...') ::<= {
+              trunk();
+            }
+          
+            when(category == 'Support:') ::<= {
+              when (art == empty)
+                trunk();
+                
+              windowEvent.queueChoices(
+                choices: ['Unequip'],
+                canCancel: true,
+                leftWeight : 1,
+                topWeight : 1,
+                onChoice::(choice) {
+                  @:world = import(module:'game_singleton.world.mt');
+                  world.party.addSupportArt(id:art);
+                  state.supportArts->remove(:state.supportArts->findIndex(:art));
+                
+                }
+              )
+            }
+
+            when(category == 'Weapon:') 
+              windowEvent.queueMessage(
+                text: 'Weapon arts come directly from an equipped weapon. These are only viewable here.'
+              );
+
+            
+            when(category == 'Profession:') ::<= {
+              when(art == empty) ::<= {
+                addProfessionArt();
+              }
+              
+              windowEvent.queueChoices(
+                choices: ['Unequip'],
+                leftWeight: 1,
+                topWeight: 1,
+                canCancel: true,
+                keep: false,
+                onChoice::(which) {
+                  when(which == 0) empty;
+                  
+                  state.equippedProfessionArts->remove(:
+                    state.equippedProfessionArts->findIndex(:art)
+                  );
+                }
+              );
+            }
+          },
+          canCancel:true
+        );      
+      }
+      start();
     },
 
     viewDeckArts ::(prompt) {
@@ -786,17 +1035,17 @@
 
       @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
       if (hand != empty) ::<= {
-        categories['Weapon'] = [
+        categories->push(:['Weapon:',[
           hand.arts[0],        
           hand.arts[1]
-        ]
+        ]])
       }  
 
       // profession boosts
-      categories['Profession'] = [...state.profession.arts];
+      categories->push(:['Profession:', [...state.equippedProfessionArts]]);
 
       if (this.supportArts) ::<= {
-        categories['Support'] = [...this.supportArts];
+        categories->push(:['Support:', [...this.supportArts]]);;
       }
 
       
@@ -948,6 +1197,15 @@
 
     favoriteItem : {
       get ::<- _.state.favoriteItem
+    },
+    
+    professions : {
+      get ::<- _.state.professionProgress->keys->map(::(value) <- Profession.find(:value))
+    },
+    
+    getProfessionProgress ::(profession) {
+      when(_.state.professionProgress[profession.id] == empty) empty;
+      return {..._.state.professionProgress[profession.id]};
     },
 
     profession : {
@@ -1353,7 +1611,7 @@
         // pretty nifty!
         /*
         when (dodgeable && 
-            (this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).base.attributes & Item.database.statics.ATTRIBUTE.SHIELD) && 
+            (this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).base.attributes & Item.ATTRIBUTE.SHIELD) && 
             random.try(percentSuccess:15)) ::<= {
           windowEvent.queueMessage(text:random.pickArrayItem(list:[
             this.name + ' defends against ' + from.name + '\'s attack with their shield!',         
@@ -1736,6 +1994,38 @@
     autoLevel :: {
       _.this.gainExp(amount:_.state.expNext);  
     },
+    
+    autoLevelProfession ::(profession){
+      @:state = _.state;
+      @:this = _.this;
+      levelUpProfession(this, state, profession:if (profession == empty) this.profession else profession);
+    },
+    
+    gainProfessionExp ::(profession, exp, silent, onDone) {
+      @:state = _.state;
+      @:this = _.this;
+      expUpProfession(
+        state,
+        this,
+        profession : if (profession == empty) this.profession else profession,
+        exp, 
+        silent,
+        onDone
+      );
+    },
+    
+    equipProfessionArt::(id) {
+      @:state = _.state;
+      state.equippedProfessionArts->push(:id);
+    },
+    
+    getUnequippedProfessionArts:: {
+      @:state = _.state;
+
+      return state.professionArts->filter(::(value) <-
+        (state.equippedProfessionArts->findIndex(:value) == -1)
+      )
+    },
       
     dropExp :: {
       @:state = _.state;
@@ -1943,7 +2233,7 @@
 
 
 
-      if (item.base.equipType == Item.database.statics.TYPE.TWOHANDED) ::<={
+      if (item.base.equipType == Item.TYPE.TWOHANDED) ::<={
         state.equips[EQUIP_SLOTS.HAND_LR] = item;
       } else ::<= {
         state.equips[slot] = item;
@@ -2017,12 +2307,12 @@
     // returns an array of equip slots that the item can fit in.
     getSlotsForItem ::(item => Item.type) {
       return match(item.base.equipType) {
-        (Item.database.statics.TYPE.HAND)   :  [EQUIP_SLOTS.HAND_LR],
-        (Item.database.statics.TYPE.ARMOR)  :  [EQUIP_SLOTS.ARMOR],
-        (Item.database.statics.TYPE.AMULET)   :  [EQUIP_SLOTS.AMULET],
-        (Item.database.statics.TYPE.RING)   :  [EQUIP_SLOTS.RING_L, EQUIP_SLOTS.RING_R],
-        (Item.database.statics.TYPE.TRINKET)  :  [EQUIP_SLOTS.TRINKET],
-        (Item.database.statics.TYPE.TWOHANDED):  [EQUIP_SLOTS.HAND_LR],
+        (Item.TYPE.HAND)   :  [EQUIP_SLOTS.HAND_LR],
+        (Item.TYPE.ARMOR)  :  [EQUIP_SLOTS.ARMOR],
+        (Item.TYPE.AMULET)   :  [EQUIP_SLOTS.AMULET],
+        (Item.TYPE.RING)   :  [EQUIP_SLOTS.RING_L, EQUIP_SLOTS.RING_R],
+        (Item.TYPE.TRINKET)  :  [EQUIP_SLOTS.TRINKET],
+        (Item.TYPE.TWOHANDED):  [EQUIP_SLOTS.HAND_LR],
         default: error(detail:'Item has an invalid equiptype?')    
       }
     },

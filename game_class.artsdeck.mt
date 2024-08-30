@@ -130,7 +130,7 @@
 }
 
 @selected = 0;
-@:renderHand ::(user, state, enabled){
+@:renderCards ::(user, cards, enabled){
   @index;
   if (enabled != empty) ::<= {
     index = enabled[selected]
@@ -141,12 +141,12 @@
   @x = (canvas.width / 3)->floor;
   @:y = canvas.height - (CARD_HEIGHT+1);
   
-  for(0, state.hand->size) ::(i) {
-    renderCard(x, y:y + (if (i == index) -1 else 0), handCard:state.hand[i]);
+  for(0, cards->size) ::(i) {
+    renderCard(x, y:y + (if (i == index) -1 else 0), handCard:cards[i]);
     x += CARD_WIDTH;
     
     if (i == index) ::<= {
-      renderArt(user, handCard:state.hand[i], topWeight:0.1);
+      renderArt(user, handCard:cards[i], topWeight:0.1);
     }
     
   }
@@ -169,6 +169,13 @@
   },
 
   statics : {
+    artIDtoCount::(id)<- match(Arts.find(:id).rarity) {
+      (Arts.RARITY.COMMON): 5,
+      (Arts.RARITY.UNCOMMON): 3,
+      (Arts.RARITY.RARE): 2,
+      (Arts.RARITY.EPIC): 1
+    },
+  
     EVENTS : {
       get ::<- EVENTS
     },
@@ -179,6 +186,35 @@
       c.id = id;
       return c;
     },
+    
+    viewCards ::(user, cards, onChoice) {
+      @bg;
+      windowEvent.queueCustom(
+        onEnter::{
+          bg = canvas.addBackground(::{
+            renderCards(user, cards);
+          });
+        }
+      );
+
+      windowEvent.queueChoices(
+        hideWindow : true,
+        keep : true,
+        choices : cards->map(::(value) <- value.id),
+        onHover::(choice) {
+          selected = choice-1;
+        },
+        onLeave ::{       
+          canvas.removeBackground(:bg);
+        },
+        canCancel:true,
+        
+        onChoice ::(choice) {          
+          if (onChoice)
+            onChoice(choice);
+        }        
+      );      
+    },    
     
     renderArt : renderArt
   },
@@ -221,12 +257,7 @@
       
       addArt::(id) {
         @:art = Arts.find(id);
-        for(0, match(art.rarity) {
-          (Arts.RARITY.COMMON): 5,
-          (Arts.RARITY.UNCOMMON): 3,
-          (Arts.RARITY.RARE): 2,
-          (Arts.RARITY.EPIC): 1
-        }) ::(i) {
+        for(0, ArtsDeck.artIDtoCount(id)) ::(i) {
           state.deck->push(value:id);
         }
       },
@@ -344,33 +375,10 @@
       
 
       
-      viewHand ::(user, prompt) {
-        @bg;
-        windowEvent.queueCustom(
-          onEnter::{
-            bg = canvas.addBackground(::{
-              renderHand(user, state);
-            });
-          }
-        );
-
-        windowEvent.queueChoices(
-          hideWindow : true,
-          keep : true,
-          choices : [...state.hand]->map(::(value) <- value.id),
-          onHover::(choice) {
-            selected = choice-1;
-          },
-          onLeave ::{       
-            canvas.removeBackground(:bg);
-          },
-          canCancel:true,
-          
-          onChoice ::(choice) {          
-            
-          }        
-        );
-      },      
+      viewHand ::(user) {
+        ArtsDeck.viewCards(user, cards:state.hand);
+      },     
+       
       containsReaction ::{
         return {:::} {
           foreach(state.hand) ::(k, card) {
@@ -508,7 +516,7 @@
         windowEvent.queueCustom(
           onEnter::{
             bg = canvas.addBackground(::{
-              renderHand(user, state, enabled);
+              renderCards(user, cards:state.hand, enabled);
             });
           }
         );

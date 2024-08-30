@@ -472,8 +472,12 @@
         return true;      
       }
         
-      when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
-        if (data.onCancel) data.onCancel();
+      when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= { 
+        @res;
+        if (data.onCancel) 
+          res = data.onCancel();
+        when (res == this.STOP_CANCEL) false;
+        
         data.keep = empty;
         return true;
       }
@@ -580,7 +584,10 @@
       }
         
       when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
-        if (data.onCancel) data.onCancel();
+        @res;
+        if (data.onCancel) 
+          res = data.onCancel();
+        when (res == this.STOP_CANCEL) false;
         data.keep = empty;
         return true;
       }
@@ -616,7 +623,10 @@
       
 
       when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
-        if (data.onCancel) data.onCancel();
+        @res;
+        if (data.onCancel) 
+          res = data.onCancel();
+        when (res == this.STOP_CANCEL) false;
         data.keep = empty;
         return true;
       }
@@ -848,7 +858,10 @@
       }
         
       if (canCancel && choice == CURSOR_ACTIONS.CANCEL) ::<= {
-        if (data.onCancel) data.onCancel();
+        @res;
+        if (data.onCancel) 
+          res = data.onCancel();
+        when (res == this.STOP_CANCEL) false;
         data.keep = empty;
         return true;
       }
@@ -986,6 +999,10 @@
       
       RENDER_AGAIN : {
         get ::<- 1
+      },
+      
+      STOP_CANCEL : {
+        get ::<- -1
       },
       
       clearAll ::{

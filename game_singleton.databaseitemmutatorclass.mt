@@ -122,16 +122,18 @@ return {
       define ::(this, state) {
         define(this, state);
 
-        @:defaultLoad = this.interface.defaultLoad;
-        this.interface.defaultLoad = ::(*args) {
-          state.base = args.base;
-          if (defaultLoad != empty)
-            defaultLoad(*args)
-        }
+        @:defaultLoad = this.defaultLoad;
+        this.interface = {
+          defaultLoad ::(*args) {
+            state.base = args.base;
+            if (defaultLoad != empty)
+              defaultLoad(*args)
+          },
 
-        this.interface.base = {
-          get ::<- state.base
-        }        
+          base : {
+            get ::<- state.base
+          }        
+        }
       }
     )
     return c;

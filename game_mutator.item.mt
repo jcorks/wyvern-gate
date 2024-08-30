@@ -2951,10 +2951,10 @@ Item.database.newEntry(data : {
 })
 
 Item.database.newEntry(data : {
-  name : "Skill Crystal",
-  id : 'base:skill-crystal',
+  name : "Arts Crystal",
+  id : 'base:arts-crystal',
   description: "Irridescent crystal that imparts knowledge when used.",
-  examine : 'Quite sought after, highly skilled mages usually produce them for the public',
+  examine : 'Quite sought after, highly skilled mages usually produce them for the public.',
   equipType: TYPE.HAND,
   rarity : 100,
   weight : 3,
@@ -3338,6 +3338,13 @@ Item.database.newEntry(data : {
 
 @:Item = databaseItemMutatorClass.createLight(
   name : 'Wyvern.Item',  
+  statics : {
+    TYPE : {get::<-TYPE},
+    ATTRIBUTE : {get::<-ATTRIBUTE},
+    USE_TARGET_HINT : {get::<-USE_TARGET_HINT}
+  },
+
+
   items : {
     base : empty,
     enchants : empty, // ItemMod
@@ -3372,11 +3379,6 @@ Item.database.newEntry(data : {
   
   database : Database.new(
     name: 'Wyvern.Item.Base',
-    statics : {
-      TYPE : TYPE,
-      ATTRIBUTE : ATTRIBUTE,
-      USE_TARGET_HINT : USE_TARGET_HINT
-    },
     
     attributes : {
       name : String,

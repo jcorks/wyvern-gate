@@ -101,30 +101,92 @@ return ::{
 
   
   @:viewArts::(member) {
-    @:choices = [];
-    @:choiceActions = [];
-    
-    
-    choices->push(:'View All');
-    choiceActions->push(::{
-      member.viewDeckArts(prompt: member.name + '\'s deck:');
-    });
-    
-    choices->push(:'Edit Supports...');
-    choiceActions->push(::{
-      member.editSupports();
-    });
-    
+    member.editDeck();
+  }
   
-    windowEvent.queueChoices(
-      prompt: 'Arts:',
-      leftWeight: 1,
-      topWeight: 1,
-      choices,
-      keep:true,
-      canCancel: true,
-      onChoice::(choice) {
-        choiceActions[choice-1]();
+  @:professionMenu ::(member) {
+    @:choicesColumns = import(module:'game_function.choicescolumns.mt');
+    choicesColumns(
+      onGetChoices::<- [
+        // equipped
+        member.professions->map(::(value) <- if (member.profession == value) '*' else ''),
+    
+        // name
+        member.professions->map(::(value) <- value.name),
+        
+        // progress
+        member.professions->map(::(value) {
+          @prof = member.getProfessionProgress(:value);
+          when(prof == empty) 
+            'Lvl 0';
+            
+          return 'Lvl ' + prof.level + ' ' + canvas.renderBarAsString(
+            width: 15,
+            fillFraction: prof.exp / (prof.expToNext + prof.exp)
+          );
+        })
+      ],
+      
+      leftJustified : [
+        true,
+        true,
+        true
+      ],
+      canCancel : true,
+      prompt: member.name + '\'s professions',
+      keep: true,
+      
+      onChoice ::(choice) {
+        @:prof = member.professions[choice-1];
+        windowEvent.queueChoices(
+          choices : [
+            'Info...',
+            'Set as profession'
+          ],
+          canCancel: true,
+          
+          onChoice ::(choice) {
+            // info
+            when(choice == 1) ::<= {
+              windowEvent.queueDisplay(
+                lines : canvas.columnsToLines(
+                  columns : [
+                    [
+                      'Profession: ',
+                      'Level: ',
+                      'Exp. to next level: '
+                    ],
+                    
+                    [
+                      prof.name,
+                      '' + member.getProfessionProgress(:prof).level + ' / ' + prof.arts->size,
+                      '' + member.getProfessionProgress(:prof).expToNext
+                    ]
+                  ],
+                  
+                  leftJustifieds : [
+                    true,
+                    true
+                  ]
+                )
+              );
+            
+            }
+          
+          
+            when (prof == member.profession) 
+              windowEvent.queueMessage(
+                text: member.name + '\'s current profession is already set to a ' + member.profession.name + '.'
+              );
+              
+              
+            member.profession = prof;
+            windowEvent.queueMessage(
+              text: member.name + ' is now a ' + member.profession.name + '.'
+            );
+
+          }
+        );  
       }
     );
   }
@@ -161,8 +223,9 @@ return ::{
         choices: [
           'Make Leader',
           'Describe',
-          'Arts...',
-          'Equip'
+          'Equip',
+          'Profession...',
+          'Arts...'
         ],
         prompt: names[whom],
         keep: true,
@@ -191,11 +254,9 @@ return ::{
             (2): member.describe(excludeStats:true),
 
 
-            (3): viewArts(:member),
-
 
             // Equip / unequip
-            (4):::<= {
+            (3):::<= {
               @Entity = import(module:'game_class.entity.mt');
 
               @slotToName::(slot) {
@@ -229,7 +290,7 @@ return ::{
                       @:item = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
                       if (i < Entity.EQUIP_SLOTS.HAND_LR) ::<= {   
                         str = str +  if (item.base.id == 'base:none') ('------') else item.name;
-                      } else if (item.base.equipType == Item.database.statics.TYPE.TWOHANDED) ::<= {
+                      } else if (item.base.equipType == Item.TYPE.TWOHANDED) ::<= {
                         str = str +  if (item.base.id == 'base:none') ('') else item.name;                          
                       }     
                     
@@ -423,7 +484,13 @@ return ::{
                   );
                 }
               );                   
-            }
+            },
+            
+            // profession 
+            (4): 
+              professionMenu(:member),
+
+            (5): viewArts(:member)            
           }
         }
       );            

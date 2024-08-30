@@ -25,6 +25,7 @@
 @:Arts = import(module:'game_database.arts.mt');
 @:g = import(module:'game_function.g.mt');
 
+@:MAX_QUEST_COUNT = 15
 
 @:Party = LoadableClass.create(
   name: 'Wyvern.Party',
@@ -130,12 +131,57 @@
         get ::<- state.activeQuests
       },
       
+      acceptQuest::(issuer, island, quest) {
+        when (state.quests->size >= MAX_QUEST_COUNT) ::<= {
+          windowEvent.queueMessage(
+            text:"The party has reached its active quest limit. Please either turn in or remove other quests before taking this one."
+          );
+          return false;
+        }
+        state.quests->push(:quest);
+        quest.accept(
+          island,
+          issuer
+        );
+        return true;
+      },
+      
       questCompleted ::(id) {
         state.completedQuests[id] = true;
       },
       
       isIncapacitated :: {
         return state.members->all(condition:::(value) <- value.isIncapacitated());
+      },
+      
+      gainProfessionExp::(exp, onDone) {
+        when(exp == 0)
+          windowEvent.queueCustom(
+            onLeave::{
+              onDone()
+            }
+          )
+          
+        @index = 0;
+        @:next :: {
+          when(index >= state.members->size) 
+            windowEvent.queueCustom(
+              onLeave::{
+                if (onDone)
+                  onDone()
+              }
+            )
+
+          state.members[index].gainProfessionExp(
+            exp,
+            onDone ::{
+              index += 1;
+              next();
+            }
+          );
+        }
+        
+        next()
       },
       
       queueCollectSupportArt::(
@@ -181,11 +227,11 @@
         );
 
         windowEvent.queueMessage(
-          text: 'The Arts were added to the Trunk. They are now available when editing a party member\'s Arts in the Party menu.'
+          text: 'The Arts were added to the Trunk. They are now available when editing any party member\'s Arts in the Party menu.'
         );      
       },
       
-      addSupportArt ::(id) {
+      addSupportArt ::(id => String) {
         @index = state.arts->findIndexCondition(::(value) <- value.id == id);
         when(index == -1) ::<={
           state.arts->push(:{

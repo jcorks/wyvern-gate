@@ -1980,7 +1980,7 @@ Effect.newEntry(
   data : {
     name : 'Learn Arts',
     id : 'base:learn-arts',
-    description: 'Grants the learning of Arts for use later.',
+    description: 'Grants the learning of support Arts for use later.',
     battleOnly : false,
     stackable: false,
     blockPoints : 0,
@@ -1989,9 +1989,33 @@ Effect.newEntry(
     ),
     events : {
       onAffliction ::(from, item, holder) {
+        @:Arts = import(:'game_database.arts.mt');
+        @:ArtsDeck = import(:'game_class.artsdeck.mt');
         @:world = import(module:'game_singleton.world.mt');
-        world.party.queueCollectSupportArt();
-      },
+
+        @ARTS_COUNT = 6;
+        @:arts = [];
+        for(0, ARTS_COUNT) ::(i) {
+          @:art = Arts.getRandomFiltered(::(value) <- 
+            (value.traits & Arts.TRAITS.SUPPORT) != 0 &&
+            ((value.traits & Arts.TRAITS.SPECIAL) == 0)         
+          );
+          arts->push(:art.id);
+          world.party.addSupportArt(:art.id);
+        }
+        
+        windowEvent.queueMessage(
+          text: 'New Arts have been revealed!'
+        );
+        
+        ArtsDeck.viewCards(
+          cards: arts->map(::(value) <- ArtsDeck.synthesizeHandCard(id:value))
+        );
+
+        windowEvent.queueMessage(
+          text: 'The Arts were added to the Trunk. They are now available when editing any party member\'s Arts in the Party menu.'
+        );      
+      }
     }
   }
 )

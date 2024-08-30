@@ -103,25 +103,25 @@
         onChoice::(which) {
           when(which == false) empty;
           
-          location.data.quests->remove(:
-            location.data.quests->findIndex(:quest)
-          );
           
-          world.party.quests->push(:quest);
-          
-          windowEvent.queueMessage(
-            speaker: location.data.guildmaster.name,
+          if (world.party.acceptQuest(quest, island:world.island, issuer:location.data.guildmaster)) ::<= {
+            location.data.quests->remove(:
+              location.data.quests->findIndex(:quest)
+            );
             
-            text: '"' + random.pickArrayItem(:[
-              'I figured you\'d take that one.',
-              'A fine quest.',
-              'No one has taken that one for a while.',
-              'A challenge fit for you, I\'m sure.'
-            
-            ]) + ' Come back to turn it in when it\'s complete for your reward."'
-          );
+            windowEvent.queueMessage(
+              speaker: location.data.guildmaster.name,
+              
+              text: '"' + random.pickArrayItem(:[
+                'I figured you\'d take that one.',
+                'A fine quest.',
+                'No one has taken that one for a while.',
+                'A challenge fit for you, I\'m sure.'
+              
+              ]) + ' Come back to turn it in when it\'s complete for your reward."'
+            );
+          }
           
-          quest.accept(island:world.island, issuer:location.data.guildmaster);
         }
       );
     }
@@ -229,9 +229,9 @@
                       && value.tier <= location.landmark.island.tier &&
                       value.hasQuality && value.hasMaterial &&
                       (
-                        ((value.attributes & Item.database.statics.ATTRIBUTE.WEAPON) != 0) ||
-                        ((value.attributes & Item.database.statics.ATTRIBUTE.SHIELD) != 0) ||
-                        (value.equipType == Item.database.statics.TYPE.ARMOR)
+                        ((value.attributes & Item.ATTRIBUTE.WEAPON) != 0) ||
+                        ((value.attributes & Item.ATTRIBUTE.SHIELD) != 0) ||
+                        (value.equipType == Item.TYPE.ARMOR)
                       )
                         
           ),

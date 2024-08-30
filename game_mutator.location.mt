@@ -386,10 +386,10 @@ Location.database.newEntry(data:{
 
 
     location.inventory.add(item:Item.new(base:Item.database.find(
-      id: 'base:skill-crystal'
+      id: 'base:arts-crystal'
     )));        
     location.inventory.add(item:Item.new(base:Item.database.find(
-      id: 'base:skill-crystal'
+      id: 'base:arts-crystal'
     )));        
     location.inventory.add(item:Item.new(base:Item.database.find(
       id: 'base:pickaxe'
@@ -765,7 +765,7 @@ Location.database.newEntry(data:{
     "A school.",
   ],
   interactions : [
-    'base:change-profession',
+    'base:learn-profession',
     'base:examine'
   ],
   
@@ -1842,12 +1842,13 @@ Location.database.newEntry(data:{
     visited : false,
     data : empty
   },
+  statics : {
+    CATEGORY : {get ::<- CATEGORY}
+  },
+
   
   database : Database.new(
     name: 'Wyvern.Location.Base',
-    statics : {
-      CATEGORY : CATEGORY    
-    },
     attributes : {
       id: String,
       name: String,

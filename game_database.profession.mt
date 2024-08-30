@@ -36,11 +36,17 @@
 
 
 */
+
+@:TRAITS = {
+  NON_COMBAT : 1
+}
+
 @:reset ::{
 Profession.newEntry(data:{
   name: 'Adventurer',
   id : 'base:adventurer',
   description : 'General, well-rounded profession. Learns abilities on-the-fly to stay alive.', 
+  traits : 0,
   weaponAffinity : 'base:shortsword',
   growth: StatSet.new(
     HP:  4,
@@ -74,6 +80,7 @@ Profession.newEntry(data:{
   name: 'Martial Artist',
   id : 'base:martial-artist',
   weaponAffinity: 'base:staff',
+  traits : 0,
   description : 'A fighter that uses various stances to bend to the flow of battle.', 
   growth: StatSet.new(
     HP:  6,
@@ -110,6 +117,7 @@ Profession.newEntry(data:{
   name: 'Field Mage',
   id : 'base:field-mage',
   description : 'A self-taught mage. Knows a variety of magicks.', 
+  traits : 0,
   weaponAffinity: 'base:wand',
   growth: StatSet.new(
     HP:  3,
@@ -145,6 +153,7 @@ Profession.newEntry(data:{
   name: 'Cleric',
   id : 'base:cleric',
   description : 'A self-taught healing mage. Knows a variety of magicks.', 
+  traits : 0,
   weaponAffinity: 'base:mage-staff',
   growth: StatSet.new(
     HP:  5,
@@ -177,6 +186,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Divine Lunist',
   id : 'base:divine-lunist',
+  traits : 0,
   weaponAffinity: 'base:tome',
   description : 'Blessed by the moon, their magicks are entwined with the night.', 
   growth: StatSet.new(
@@ -211,6 +221,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Divine Solist',
   id : 'base:divine-solist',
+  traits : 0,
   weaponAffinity: 'base:tome',
   description : 'Blessed by the sun, their magicks are entwined with daylight.', 
   growth: StatSet.new(
@@ -246,6 +257,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Blacksmith',
   id : 'base:blacksmith',
+  traits : TRAITS.NON_COMBAT,
   weaponAffinity: 'base:smithing-hammer',
   description : 'Skilled with metalworking, their skills are revered.', 
   growth: StatSet.new(
@@ -276,6 +288,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Trader',
   id : 'base:trader',
+  traits : TRAITS.NON_COMBAT,
   weaponAffinity: 'base:dagger',
   description : 'A silver tongue and a quick hand make this profession both lauded and loathed.', 
   growth: StatSet.new(
@@ -306,6 +319,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Warrior',
   id : 'base:warrior',
+  traits : 0,
   weaponAffinity: 'base:greatsword',
   description : "Excelling in raw strength and technique, users of this profession are fearsome.", 
   growth: StatSet.new(
@@ -339,6 +353,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Guard',
   id : 'base:guard',
+  traits : 0,
   weaponAffinity: 'base:halberd',
   description : "Standard profession excelling in defending others, for better or for worse.", 
   growth: StatSet.new(
@@ -373,6 +388,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Summoner',
   id : 'base:summoner',
+  traits : 0,
   weaponAffinity: 'base:tome',
   description : "Amagick-user who is able to temporarily materialize allies.", 
   growth: StatSet.new(
@@ -408,6 +424,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Arcanist',
   id : 'base:arcanist',
+  traits : 0,
   weaponAffinity: 'base:tome',
   description : "A scholar first, their large knowledge of the arcane yields interesting magicks for any situation.", 
   growth: StatSet.new(
@@ -441,6 +458,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Runologist',
   id : 'base:runologist',
+  traits : 0,
   weaponAffinity: 'base:tome',        
   description : "An arcanist scholar who focuses on runes.", 
   growth: StatSet.new(
@@ -477,6 +495,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Elementalist',
   id : 'base:elementalist',
+  traits : 0,
   weaponAffinity: 'base:shortsword',        
   description : "Capable of infusing magicks into normal objects for combat.", 
   growth: StatSet.new(
@@ -511,6 +530,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Farmer',
   id : 'base:farmer',
+  traits : TRAITS.NON_COMBAT,
   weaponAffinity: 'base:shovel',
   description : "Skilled individual who knows their way around the fields.", 
   growth: StatSet.new(
@@ -541,6 +561,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Alchemist',
   id : 'base:alchemist',
+  traits : 0,
   weaponAffinity: 'base:dagger',
   description : "Skilled at brewing potions for all sorts of purposes.", 
   growth: StatSet.new(
@@ -604,6 +625,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Ranger',
   id : 'base:ranger',
+  traits : 0,
   weaponAffinity: 'base:bow-and-quiver',
   description : "", 
   growth: StatSet.new(
@@ -712,6 +734,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Assassin',
   id : 'base:assassin',
+  traits : 0,
   weaponAffinity: 'base:dagger',        
   description : "Unparalleled in their ability to take down a target, this profession is respected for its abilities.", 
   growth: StatSet.new(
@@ -886,6 +909,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Keeper',
   id : 'base:keeper',
+  traits : 0,
   weaponAffinity: 'base:glaive',        
   description : "", 
   levelMinimum : 100,
@@ -914,6 +938,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Creature',
   id : 'base:creature',
+  traits : 0,
   weaponAffinity: 'base:shortsword',
   description : "", 
   levelMinimum : 100,
@@ -942,6 +967,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Fire Sprite',
   id : 'base:fire-sprite',
+  traits : 0,
   weaponAffinity: 'base:shortsword',
   description : "", 
   levelMinimum : 100,
@@ -971,6 +997,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Ice Elemental',
   id : 'base:ice-elemental',
+  traits : 0,
   weaponAffinity: 'base:shortsword',
   description : "", 
   levelMinimum : 100,
@@ -1001,6 +1028,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Thunder Spawn',
   id : 'base:thunder-spawn',
+  traits : 0,
   weaponAffinity: 'base:shortsword',
   description : "", 
   levelMinimum : 100,
@@ -1032,6 +1060,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Guiding Light',
   id : 'base:guiding-light',
+  traits : 0,
   weaponAffinity: 'base:shortsword',
   description : "", 
   levelMinimum : 100,
@@ -1066,6 +1095,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Wyvern Specter',
   id : 'base:wyvern-specter',
+  traits : 0,
   weaponAffinity: 'base:none',
   description : "", 
   levelMinimum : 100,
@@ -1100,6 +1130,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Beast',
   id: 'base:beast',
+  traits : 0,
   weaponAffinity: 'base:none',
   description : "", 
   levelMinimum : 100,
@@ -1134,6 +1165,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Wyvern',
   id: 'base:wyvern',
+  traits : 0,
   weaponAffinity: 'base:none',
   description : "", 
   levelMinimum : 100,
@@ -1173,6 +1205,7 @@ Profession.newEntry(data:{
   id : 'base:snake-siren',
   weaponAffinity: 'base:none',
   description : "", 
+  traits : 0,
   levelMinimum : 100,
 
   growth: StatSet.new(
@@ -1203,6 +1236,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Treasure Golem',
   id : 'base:treasure-golem',
+  traits : 0,
   weaponAffinity: 'base:none',
   description : "", 
   levelMinimum : 100,
@@ -1236,6 +1270,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Cave Bat',
   id : 'base:cave-bat',
+  traits : 0,
   weaponAffinity: 'base:none',
   description : "", 
   levelMinimum : 100,
@@ -1271,6 +1306,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Spirit',
   id : 'base:spirit',
+  traits : 0,
   weaponAffinity: 'base:none',
   description : "", 
   levelMinimum : 100,
@@ -1302,10 +1338,14 @@ Profession.newEntry(data:{
 }
 
 @:Profession = Database.new(
-  name : 'Wyvern.Profession.Base',   
+  name : 'Wyvern.Profession.Base',  
+  statics : {
+    TRAITS : {get ::<- TRAITS}
+  }, 
   attributes : {
     name : String,
     id : String,
+    traits : Number,
     description : String,
     growth : StatSet.type,
     minKarma : Number,

@@ -208,7 +208,7 @@
           @:wep = Item.database.getRandomFiltered(
             filter:::(value) <-
               value.isUnique == false &&
-              value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
+              value.attributes & Item.ATTRIBUTE.WEAPON
           );
             
           entity.equip(
@@ -249,7 +249,7 @@
           @:wep = Item.database.getRandomFiltered(
             filter:::(value) <-
               value.isUnique == false &&
-              value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
+              value.attributes & Item.ATTRIBUTE.WEAPON
           );
             
           entity.equip(
@@ -290,7 +290,7 @@
           @:wep = Item.database.getRandomFiltered(
             filter:::(value) <-
               value.isUnique == false &&
-              value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
+              value.attributes & Item.ATTRIBUTE.WEAPON
           );
             
           entity.equip(
@@ -307,7 +307,7 @@
           @:wep = Item.database.getRandomFiltered(
             filter:::(value) <-
               value.isUnique == false &&
-              value.equipType == Item.database.statics.TYPE.ARMOR
+              value.equipType == Item.TYPE.ARMOR
           );;
             
           entity.equip(

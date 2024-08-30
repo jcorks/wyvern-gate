@@ -318,7 +318,7 @@ Quest.database.newEntry(
           @:wep = Item.database.getRandomFiltered(
             filter:::(value) <-
               value.isUnique == false &&
-              value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
+              value.attributes & Item.ATTRIBUTE.WEAPON
           );
             
           ent.equip(
@@ -515,7 +515,7 @@ Quest.database.newEntry(
       state.rewardItems->push(:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false && value.equipType == Item.database.statics.TYPE.RING
+            filter:::(value) <- value.isUnique == false && value.equipType == Item.TYPE.RING
           ),
           rngEnchantHint:true, 
           forceEnchant:true
@@ -541,7 +541,7 @@ Quest.database.newEntry(
       state.rewardItems->push(:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false && value.equipType == Item.database.statics.TYPE.TRINKET
+            filter:::(value) <- value.isUnique == false && value.equipType == Item.TYPE.TRINKET
           ),
           rngEnchantHint:true, 
           forceEnchant:true
@@ -599,7 +599,7 @@ Quest.database.newEntry(
         Item.new(
           base:Item.database.getRandomFiltered(
             filter:::(value) <- value.isUnique == false &&
-              value.equipType == Item.database.statics.TYPE.RING
+              value.equipType == Item.TYPE.RING
           ),
           qualityHint : 'base:masterwork',
           rngEnchantHint:true, 
@@ -612,7 +612,7 @@ Quest.database.newEntry(
         Item.new(
           base:Item.database.getRandomFiltered(
             filter:::(value) <- value.isUnique == false &&
-              value.equipType == Item.database.statics.TYPE.TRINKET
+              value.equipType == Item.TYPE.TRINKET
           ),
           qualityHint : 'base:divine',
           rngEnchantHint:true, 

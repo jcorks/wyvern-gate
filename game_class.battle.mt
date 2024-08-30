@@ -784,12 +784,9 @@
             );
             
             party.queueCollectSupportArt();
-
-
-            windowEvent.queueCustom(
-              onEnter ::{},
-              onLeave ::{
-
+            party.gainProfessionExp(
+              exp:getEnemiesDefeated(ent:party.members[0])->size * Entity.PROF_EXP_PER_KNOCKOUT,
+              onDone::{
 
                 @:Entity = import(module:'game_class.entity.mt');
                 @hasWeapon = false;
@@ -851,11 +848,9 @@
                   landmark, 
                   party, 
                   finishEnd
-                );
-
+                );              
               }
             );
-
           } else ::<= {
             startEnd(
               message: 'The battle is lost.'

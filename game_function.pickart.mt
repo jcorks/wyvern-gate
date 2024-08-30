@@ -21,12 +21,14 @@
 @:ArtsDeck = import(:'game_class.artsdeck.mt');
 
 return ::(
+  renderable,
   categories,
   list,
   onChoice,
   onGetList,
   onGetCategories,
   canCancel,
+  onCancel,
   prompt,
   keep,
   onHover
@@ -34,6 +36,8 @@ return ::(
 
   @:choices = [];
   @:choiceActs = [];
+  @:choiceCategories = [];
+  
 
   @:typeToStr = [
     '//',
@@ -42,10 +46,16 @@ return ::(
     '**',
   ]
 
-  @:pushArt::(id){
-    @art = Arts.find(:id);
-    choices->push(:' ▆ - ' + typeToStr[(art.kind)]);
-    choiceActs->push(:id);
+  @:pushArt::(id, category){
+    choiceCategories->push(:category);
+    if (id == empty) ::<= {
+      choices->push(:' ▆ - [Empty]')
+      choiceActs->push(:empty);
+    } else ::<= {
+      @art = Arts.find(:id);
+      choices->push(:' ▆ - ' + typeToStr[(art.kind)]);
+      choiceActs->push(:id);
+    }
   }
   
   @:gather:: {
@@ -58,11 +68,13 @@ return ::(
     choices->setSize(:0);
     choiceActs->setSize(:0);
     if (categories) ::<= {
-      foreach(categories) ::(category, set) {
-        choices->push(:category + ':');
+      foreach(categories) ::(k, set) {
+        @:category = set[0];        
+        choices->push(:category);
         choiceActs->push();
-        foreach(set) ::(ind, id) {
-          pushArt(id);
+        choiceCategories->push(:category);
+        foreach(set[1]) ::(ind, id) {
+          pushArt(id, category);
         }
       }
     } else if (list) ::<= {
@@ -90,8 +102,12 @@ return ::(
     ,    
     keep,
     canCancel: canCancel,
+    onCancel : onCancel,
     renderable : {
       render::{
+        if (renderable)
+          renderable.render();
+        
         when(choiceActs[which] == empty) empty;
         ArtsDeck.renderArt(
           handCard: ArtsDeck.synthesizeHandCard(id:choiceActs[which]),
@@ -103,12 +119,18 @@ return ::(
     },
     onHover::(choice) {
       which = choice-1;
-      if (onHover) onHover(:which);
+      if (onHover) onHover(
+        art:choiceActs[which],
+        category:choiceCategories[which]
+      );
     },
     
     onChoice::(choice) {
       which = choice-1;
-      if (onChoice) onChoice(:which);
+      if (onChoice) onChoice(
+        art:choiceActs[which],
+        category:choiceCategories[which]
+      );
     }
   );
 }

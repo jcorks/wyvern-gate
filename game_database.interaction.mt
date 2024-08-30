@@ -741,7 +741,7 @@ Interaction.newEntry(
       party.inventory.remove(item:ores[0]);
       party.inventory.remove(item:ores[1]);
       
-      @:metal = Item.new(base:Item.database.getRandomWeightedFiltered(filter:::(value) <- value.attributes & Item.database.statics.ATTRIBUTE.RAW_METAL));            
+      @:metal = Item.new(base:Item.database.getRandomWeightedFiltered(filter:::(value) <- value.attributes & Item.ATTRIBUTE.RAW_METAL));            
       windowEvent.queueMessage(text: 'Smelted 2 ore chunks into ' + correctA(word:metal.name) + '!');
       party.inventory.add(item:metal);          
         
@@ -1083,7 +1083,7 @@ Interaction.newEntry(
     
       @:Entity = import(module:'game_class.entity.mt');
 
-      @:items = party.inventory.items->filter(by:::(value) <- value.base.attributes & Item.database.statics.ATTRIBUTE.RAW_METAL);
+      @:items = party.inventory.items->filter(by:::(value) <- value.base.attributes & Item.ATTRIBUTE.RAW_METAL);
       when(items->keycount == 0)
         windowEvent.queueMessage(text:'No suitable ingots or materials were found in the party inventory.');
 
@@ -1610,8 +1610,8 @@ Interaction.newEntry(
 
 Interaction.newEntry(
   data : {
-    name : 'Change Profession',
-    id :  'base:change-profession',
+    name : 'Learn Profession',
+    id :  'base:learn-profession',
     keepInteractionMenu : false,
     onInteract ::(location, party) {
       @:names = [];
@@ -1646,7 +1646,7 @@ Interaction.newEntry(
 
 
           windowEvent.queueMessage(
-            text: 'Changing ' + whom.name + "'s profession from " + whom.profession.name + ' to ' + location.ownedBy.profession.name + ' will cost ' + g(g:cost) + '.'
+            text: 'Teaching ' + whom.name + ' to be ' + correctA(:location.ownedBy.profession.name) + ' ' + location.ownedBy.profession.name + ' will cost ' + g(g:cost) + '.'
 
           );
 
@@ -1663,10 +1663,15 @@ Interaction.newEntry(
               party.addGoldAnimated(
                 amount:-cost,
                 onDone::{
-                  whom.profession = Profession.find(id: location.ownedBy.profession.id);
+                  @:profession = Profession.find(id: location.ownedBy.profession.id);
+                  whom.autoLevelProfession(:profession);
 
                   windowEvent.queueMessage(
-                    text: '' + whom.name + " is now " + correctA(word:whom.profession.name) + '.'
+                    text: '' + whom.name + " has learned how to be " + correctA(word:profession.name) + '.'
+                  );
+
+                  windowEvent.queueMessage(
+                    text: 'Their currently active profession can be changed in the Party menu'
                   );                
                 }
               );     
@@ -1690,7 +1695,7 @@ Interaction.newEntry(
           base:Item.database.getRandomFiltered(
             filter:::(value) <- (
               value.isUnique == false &&
-              value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
+              value.attributes & Item.ATTRIBUTE.WEAPON
             )
           )
         )          
@@ -2521,7 +2526,7 @@ Interaction.newEntry(
         
         windowEvent.queueMessage(speaker: 'Sylvia', text: '"Here! Thanks again."');
         item = Item.database.getRandomFiltered(filter:::(value) <- 
-          value.attributes & Item.database.statics.ATTRIBUTE.WEAPON &&
+          value.attributes & Item.ATTRIBUTE.WEAPON &&
           !value.isUnique
         );
         },
@@ -2536,9 +2541,9 @@ Interaction.newEntry(
         
         windowEvent.queueMessage(speaker: 'Sylvia', text: '"Here! Thanks again."');
         item = Item.database.getRandomFiltered(filter:::(value) <- 
-          (value.attributes & Item.database.statics.ATTRIBUTE.WEAPON ||
-           value.equipType == Item.database.statics.TYPE.RING ||
-           value.equipType == Item.database.statics.TYPE.TRINKET) &&
+          (value.attributes & Item.ATTRIBUTE.WEAPON ||
+           value.equipType == Item.TYPE.RING ||
+           value.equipType == Item.TYPE.TRINKET) &&
           value.isUnique
         );
         }            

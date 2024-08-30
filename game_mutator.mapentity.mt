@@ -100,8 +100,8 @@ MapEntity.Task.database.newEntry(
           radius: 2
         )) ::(i, item) {
           if (item.data->type == Location.type && (
-            item.data.base.category == Location.database.statics.CATEGORY.ENTRANCE ||
-            item.data.base.category == Location.database.statics.CATEGORY.EXIT
+            item.data.base.category == Location.CATEGORY.ENTRANCE ||
+            item.data.base.category == Location.CATEGORY.EXIT
           ))
             send(message:true);
         
@@ -818,8 +818,8 @@ MapEntity.Task.database.newEntry(
               radius: 2
             )) ::(i, item) {
               if (item.data->type == Location.type && (
-                item.data.base.category == Location.database.statics.CATEGORY.ENTRANCE ||
-                item.data.base.category == Location.database.statics.CATEGORY.EXIT
+                item.data.base.category == Location.CATEGORY.ENTRANCE ||
+                item.data.base.category == Location.CATEGORY.EXIT
               ))
                 send(message:true);
             

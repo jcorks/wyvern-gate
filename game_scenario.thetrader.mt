@@ -443,7 +443,7 @@
           @:current = state.member.getEquipped(slot);
           
           // ignore equipping hand things that arent weapons.
-          when(slot == Entity.EQUIP_SLOTS.HAND_LR && (item.base.attributes & Item.database.statics.ATTRIBUTE.WEAPON == 0))
+          when(slot == Entity.EQUIP_SLOTS.HAND_LR && (item.base.attributes & Item.ATTRIBUTE.WEAPON == 0))
             spoilsFiltered->push(value:item);
           
           // simply take
@@ -1667,7 +1667,7 @@
               foreach(state.ownedProperties) ::(i, id) {
                 @:location = world.island.findLocation(id);
                 
-                if (location.base.category == Location.database.statics.CATEGORY.RESIDENTIAL) ::<= {
+                if (location.base.category == Location.CATEGORY.RESIDENTIAL) ::<= {
                   rent += (location.data.trader.boughtPrice * 0.07)->ceil;
                   @current = location.data.trader.listPrice;
                   current += (((random.number() - 0.5) * 0.05) * location.data.trader.boughtPrice)->floor;
@@ -1692,7 +1692,7 @@
               rent = 0;
               foreach(state.ownedProperties) ::(i, id) {
                 @:location = world.island.findLocation(id);
-                when (location.base.category == Location.database.statics.CATEGORY.RESIDENTIAL) empty
+                when (location.base.category == Location.CATEGORY.RESIDENTIAL) empty
                 
                 @profit = location.data.trader.listPrice * 0.15;
                 profit = random.integer(from:(profit * 0.5)->floor, to:(profit * 1.5)->floor);
@@ -3271,9 +3271,9 @@ return {
           location.ownedBy != empty && 
           trader.ownedProperties->findIndex(value:location.worldID) == -1 &&
           (
-            location.base.category == Location.database.statics.CATEGORY.RESIDENTIAL ||
-            location.base.category == Location.database.statics.CATEGORY.UTILITY ||
-            location.base.category == Location.database.statics.CATEGORY.BUSINESS
+            location.base.category == Location.CATEGORY.RESIDENTIAL ||
+            location.base.category == Location.CATEGORY.UTILITY ||
+            location.base.category == Location.CATEGORY.BUSINESS
           )
         ;
       },
@@ -3302,9 +3302,9 @@ return {
           @basePrice = match(location.base.category) {
             // residential properties can be bought, and thee owners become 
             // tennants
-            (Location.database.statics.CATEGORY.RESIDENTIAL): random.pickArrayItem(list:[9000, 12000, 8000, 14000, 5000]),
-            (Location.database.statics.CATEGORY.BUSINESS): random.pickArrayItem(list:[100000, 120000, 89000, 160000]),
-            (Location.database.statics.CATEGORY.UTILITY): random.pickArrayItem(list:[30000, 35000, 22000, 45000])
+            (Location.CATEGORY.RESIDENTIAL): random.pickArrayItem(list:[9000, 12000, 8000, 14000, 5000]),
+            (Location.CATEGORY.BUSINESS): random.pickArrayItem(list:[100000, 120000, 89000, 160000]),
+            (Location.CATEGORY.UTILITY): random.pickArrayItem(list:[30000, 35000, 22000, 45000])
           }
           
           location.data.trader.listPrice = random.integer(from:(basePrice * 0.8)->floor, to:(basePrice * 1.2)->floor);
@@ -3341,7 +3341,7 @@ return {
                   text: 'Congratulations! You now own ' + location.ownedBy.name + '\'s ' + location.base.name + '.'
                 );
                 
-                if (location.base.category == Location.database.statics.CATEGORY.RESIDENTIAL)
+                if (location.base.category == Location.CATEGORY.RESIDENTIAL)
                   windowEvent.queueMessage(
                     text: 'This residence will pay you rent daily based on a percentage of the price you bought it at.'
                   )
@@ -3702,7 +3702,7 @@ return {
         maxLocations : 2,
         guarded : false,
         peaceful: true,
-        landmarkType : Landmark.database.statics.TYPE.DUNGEON,
+        landmarkType : Landmark.TYPE.DUNGEON,
         canSave : true,
         pointOfNoReturn : false,
         ephemeral : false,
@@ -3737,7 +3737,7 @@ return {
       name: 'Wyvern Throne of Fortune',
       rarity: 1,
       ownVerb : 'owned',
-      category : Location.database.statics.CATEGORY.DUNGEON_SPECIAL,
+      category : Location.CATEGORY.DUNGEON_SPECIAL,
       symbol: 'W',
       onePerLandmark : true,
       minStructureSize : 1,
@@ -3835,7 +3835,7 @@ return {
       id : 'thetrader:crate',
       description: 'A sizeable container full of raw material. Can be quite expensive.',
       examine : '',
-      equipType: Item.database.statics.TYPE.HAND,
+      equipType: Item.TYPE.HAND,
       rarity : 300,
       canBeColored : false,
       keyItem : false,
@@ -3852,7 +3852,7 @@ return {
       hasMaterial : true,
       isApparel : false,
       isUnique : false,
-      useTargetHint : Item.database.statics.USE_TARGET_HINT.ONE,
+      useTargetHint : Item.USE_TARGET_HINT.ONE,
 
       // fatigued
       equipMod : StatSet.new(
@@ -3866,8 +3866,8 @@ return {
 
       equipEffects : [],
       attributes : 
-        Item.database.statics.ATTRIBUTE.SHARP |
-        Item.database.statics.ATTRIBUTE.METAL
+        Item.ATTRIBUTE.SHARP |
+        Item.ATTRIBUTE.METAL
       ,
       onCreate ::(item, creationHint) {}
 
@@ -3879,7 +3879,7 @@ return {
       id : 'thetrader:shipment',
       description: 'A large container full of raw material. One person can barely lift it alone. Can be quite expensive.',
       examine : '',
-      equipType: Item.database.statics.TYPE.HAND,
+      equipType: Item.TYPE.HAND,
       rarity : 300,
       canBeColored : false,
       keyItem : false,
@@ -3896,7 +3896,7 @@ return {
       hasMaterial : true,
       isApparel : false,
       isUnique : false,
-      useTargetHint : Item.database.statics.USE_TARGET_HINT.ONE,
+      useTargetHint : Item.USE_TARGET_HINT.ONE,
 
       // fatigued
       equipMod : StatSet.new(
@@ -3910,8 +3910,8 @@ return {
 
       equipEffects : [],
       attributes : 
-        Item.database.statics.ATTRIBUTE.SHARP |
-        Item.database.statics.ATTRIBUTE.METAL
+        Item.ATTRIBUTE.SHARP |
+        Item.ATTRIBUTE.METAL
       ,
       onCreate ::(item, creationHint) {}
 
