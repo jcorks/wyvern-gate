@@ -131,6 +131,13 @@ return class(
 
     
     this.interface = {
+      reset ::{
+        savestates = [];
+        idStatePool = 0;
+        idStatePool_dead = [];
+        backgrounds = {};
+      },
+    
       resize ::(width, height) {
         CANVAS_HEIGHT = height;
         CANVAS_WIDTH = width;

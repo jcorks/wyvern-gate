@@ -1066,9 +1066,9 @@ Arts.newEntry(
       );
       
       if (random.try(percentSuccess:50+(level-1)*10)) ::<= {
-        @:instance = import(module:'game_singleton.instance.mt');
+        @:world = import(module:'game_singleton.world.mt');
       
-        @help = instance.island.newHostileCreature();
+        @help = world.island.newHostileCreature();
         @battle = user.battle;
         
         windowEvent.queueCustom(
@@ -5594,6 +5594,7 @@ Arts.newEntry(
             act: 'Add to hand.',
             onChoice::(id, backout) {
               backout();
+              when(id == empty) empty;
               user.deck.addHandCard(id); 
             }
           );           

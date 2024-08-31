@@ -96,7 +96,7 @@ import(module:'game_class.island.mt');
 }
 @:JSON = import(module:'Matte.Core.JSON');
 @:GIT_COMMIT = import(module:'GIT_COMMIT');
-@:VERSION = '0.2.0 - ' + GIT_COMMIT;
+@:VERSION = '0.2.1 - ' + GIT_COMMIT;
 @world = import(module:'game_singleton.world.mt');
 import(module:'game_function.newrecord.mt');
 
@@ -541,6 +541,7 @@ return empty;
         }
 
         windowEvent.clearAll();
+        canvas.reset();
 
         @mods;
         {:::} {

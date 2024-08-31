@@ -561,7 +561,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Alchemist',
   id : 'base:alchemist',
-  traits : 0,
+  traits : TRAITS.NON_COMBAT,
   weaponAffinity: 'base:dagger',
   description : "Skilled at brewing potions for all sorts of purposes.", 
   growth: StatSet.new(

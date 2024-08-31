@@ -95,7 +95,7 @@
 
 
 @:assembleDeck ::(this, state) {
-  @:deck = ArtsDeck.new();
+  @:deck = ArtsDeck.new(profession: this.profession.id);
   
   
   deck.subscribe(::(event, card) {
@@ -136,7 +136,7 @@
   
   
   @:world = import(module:'game_singleton.world.mt');
-  when(this.supportArts) ::<= {
+  if (this.supportArts) ::<= {
     foreach(this.supportArts)::(k, v) {
       deck.addArt(id:v);
     }
@@ -307,6 +307,11 @@
 
 @:expUpProfession ::(this, state, profession, exp, silent, onDone) {
   @set = state.professionProgress[profession.id];
+  if (set.level >= profession.arts->size)      
+    exp = 0;
+
+  when(exp == 0) empty;
+
   if (set == empty) ::<= {
     levelUpProfession(this, state, profession);
     set = state.professionProgress[profession.id];
@@ -318,6 +323,7 @@
       @originalExpToNext = set.expToNext;
       @originalExp = exp;      
       @originalSetExp = set.exp;
+      
       
       if (exp >= set.expToNext) ::<= {
         exp -= set.expToNext;
@@ -2868,10 +2874,10 @@
           '     Name:   ' + this.name + '\n\n' +
           '     HP:     ' + this.hp + ' / ' + this.stats.HP + '\n' + 
           '     AP:     ' + this.stats.AP + '\n\n' + 
-          '  species:   ' + state.species.name + '\n' +
-          ' profession: ' + this.profession.name + '\n' +
-          ' fave. wep.: ' + state.faveWeapon.name + '\n' +
-          'personality: ' + state.personality.name + '\n\n'
+          '  Species:   ' + state.species.name + '\n' +
+          ' Profession: ' + this.profession.name + '\n' +
+          ' Fave. wep.: ' + state.faveWeapon.name + '\n' +
+          'Personality: ' + state.personality.name + '\n\n'
           ,
           if (excludeStats != true)
             StatSet.diffToLines(

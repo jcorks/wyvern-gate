@@ -222,49 +222,52 @@
     inventory.clear();
     for(0, 15)::(i) {
       // no weight, as the value scales
-      inventory.add(item:
-        Item.new(
-          base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false 
-                      && value.tier <= location.landmark.island.tier &&
-                      value.hasQuality && value.hasMaterial &&
-                      (
-                        ((value.attributes & Item.ATTRIBUTE.WEAPON) != 0) ||
-                        ((value.attributes & Item.ATTRIBUTE.SHIELD) != 0) ||
-                        (value.equipType == Item.TYPE.ARMOR)
-                      )
-                        
-          ),
-          rngEnchantHint:true,
-          
-          
-          
-          qualityHint : random.pickArrayItem(:[
-            'base:robust',
-            'base:quality',
-            'base:light',
-            'base:reinforced',
-            'base:durable',
-            'base:standard',
-            'base:masterwork'
-          ]),
-          
-          materialHint : random.pickArrayItem(:[
-            'base:copper',
-            'base:steel',
-            'base:iron',
-            'base:crystal',
-            'base:tungsten',
-            'base:mythril',
-            'base:adamantine',
-            'base:quicksilver',
-            'base:dragonglass',
-            'base:composite',
-            'base:sunstone',
-            'base:moonstone'
-          ])
-        )
+      @:item = Item.new(
+        base:Item.database.getRandomFiltered(
+          filter:::(value) <- value.isUnique == false 
+                    && value.tier <= location.landmark.island.tier &&
+                    value.hasQuality && value.hasMaterial &&
+                    (
+                      ((value.attributes & Item.ATTRIBUTE.WEAPON) != 0) ||
+                      ((value.attributes & Item.ATTRIBUTE.SHIELD) != 0) ||
+                      (value.equipType == Item.TYPE.ARMOR)
+                    )
+                      
+        ),
+        rngEnchantHint:true,
+        
+        
+        
+        qualityHint : random.pickArrayItem(:[
+          'base:robust',
+          'base:quality',
+          'base:light',
+          'base:reinforced',
+          'base:durable',
+          'base:standard',
+          'base:masterwork'
+        ]),
+        
+        materialHint : random.pickArrayItem(:[
+          'base:copper',
+          'base:steel',
+          'base:iron',
+          'base:crystal',
+          'base:tungsten',
+          'base:mythril',
+          'base:adamantine',
+          'base:quicksilver',
+          'base:dragonglass',
+          'base:composite',
+          'base:sunstone',
+          'base:moonstone'
+        ])
       );
+        
+      // tag for later :3
+      item.data.fromGuild = true;
+
+      inventory.add(item);
     }   
   }
 

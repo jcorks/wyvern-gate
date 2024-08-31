@@ -2,6 +2,9 @@
 @:random = import(module:'game_singleton.random.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:Profession = import(:'game_database.profession.mt');
+
+
 
 @:HandCard = Object.newType(
   name: 'Wyvern.HandCard',
@@ -165,6 +168,7 @@
     deck : empty,
     hand : empty,
     discard : empty,
+    profession: '',
     handSize : 5
   },
 
@@ -226,7 +230,7 @@
       @:card = Object.instantiate(type:HandCard);
       card.id = id;
       card.owner = if (noDeck == true) empty else state;
-      card.level = 1;
+      card.level = if (Profession.find(:state.profession).arts->findIndex(:id) == -1) 1 else 2;
       state.hand->push(value:card);
       emitEvent(event:EVENTS.DRAW, card);
       return card;
@@ -239,10 +243,11 @@
     }
   
     this.interface = {
-      defaultLoad ::{
+      defaultLoad ::(profession => String) {
         state.deck = [];
         state.hand = [];
         state.discard = [];
+        state.profession = profession;
       },
       
       

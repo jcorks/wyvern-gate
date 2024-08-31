@@ -1164,6 +1164,13 @@
         entityTurn.deck.discardFromHand(card:action.card);
         windowEvent.onResolveAll(
           onDone :: {
+            when (active == false || entityTurn == empty || entityTurn.deck == empty) 
+              error(:'This shouldnt ever happen!!!! in-battle art usage was resolved outside of battle!!! Please fix thank you!!! Hint: make sure an earlier crash didnt occur during a battle. If it did, windowEvent.clearAll() probably wasnt called on game restart.' +
+                '\nBattle?          : ' + active +
+                '\nentityTurn?      : ' + (entityTurn != empty) + 
+                '\nentityTurn.deck? : ' + (entityTurn != empty && entityTurn.deck != empty)
+              );
+
             entityTurn.deck.revealArt(
               user:entityTurn,
               handCard:action.card,

@@ -1630,9 +1630,14 @@ Interaction.newEntry(
           when(choice == 0) empty;
           
           @:whom = party.members[choice-1];
-          @cost = ((whom.level + whom.stats.sum/30)*10)->ceil;
+          @cost = 
+            if ((whom.profession.traits & Profession.TRAITS.NON_COMBAT) != 0)
+              5*((whom.level + whom.stats.sum/30)*10)->ceil //<- real skills take a bit to teach
+            else
+              ((whom.level + whom.stats.sum/30)*10)->ceil
+            ;
 
-          when(whom.profession.id == location.ownedBy.profession.id)
+          when(whom.professions->findIndex(:location.ownedBy.profession) != -1)
             windowEvent.queueMessage(
               text: whom.name + ' is already ' + correctA(word:location.ownedBy.profession.name) + '.'
             );
@@ -1645,9 +1650,15 @@ Interaction.newEntry(
           );
 
 
+          if ((location.ownedBy.profession.traits & Profession.TRAITS.NON_COMBAT) != 0)
+            windowEvent.queueMessage(
+              text: 'Since ' + location.ownedBy.profession.name + ' is a non-combat profession, this school will teach ' + whom.name + ' all the profession Arts immediately. However, this will cost more to teach than other professions.'
+            );
+
+
+
           windowEvent.queueMessage(
             text: 'Teaching ' + whom.name + ' to be ' + correctA(:location.ownedBy.profession.name) + ' ' + location.ownedBy.profession.name + ' will cost ' + g(g:cost) + '.'
-
           );
 
           when(party.inventory.gold < cost)
@@ -1671,8 +1682,18 @@ Interaction.newEntry(
                   );
 
                   windowEvent.queueMessage(
-                    text: 'Their currently active profession can be changed in the Party menu'
+                    text: 'Their currently active profession can be changed in the Party menu.'
                   );                
+
+                  
+                  if ((location.ownedBy.profession.traits & Profession.TRAITS.NON_COMBAT) != 0) ::<= {
+                    for(0, profession.arts->size) ::(i) {
+                      whom.autoLevelProfession(:profession);                      
+                    }
+                    windowEvent.queueMessage(
+                      text: 'The school has taught ' + whom.name + ' all available Arts for this profession. They can be equipped at any time.'
+                    );                
+                  }
                 }
               );     
             }

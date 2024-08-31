@@ -456,10 +456,10 @@ Location.database.newEntry(data:{
 
 
     location.inventory.add(item:Item.new(base:Item.database.find(
-      id: 'base:skill-crystal'
+      id: 'base:arts-crystal'
     )));        
     location.inventory.add(item:Item.new(base:Item.database.find(
-      id: 'base:skill-crystal'
+      id: 'base:arts-crystal'
     )));        
   },
   onInteract ::(location) {
