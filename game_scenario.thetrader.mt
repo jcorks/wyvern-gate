@@ -3117,7 +3117,7 @@ return {
     );
     keyhome.name = 'Wyvern Key: Home';
     
-    @:Island = import(module:'game_class.island.mt');
+    @:Island = import(module:'game_mutator.island.mt');
     keyhome.addIslandEntry(island:Island.new(
       nameHint:namegen.island(), 
       levelHint:story.levelHint,

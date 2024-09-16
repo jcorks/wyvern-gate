@@ -73,17 +73,14 @@
 
         foreach(attributes_) ::(key, typ) {
           @val = data[key];
-          when(val == empty)
-            error(detail:'Internal error: database item is missing property \"' + key + '\"');
-
           when(key->type != String)
             error(detail:'Internal error: database attribute property key isnt a string!');
             
           when(typ->type != Type)
             error(detail:'Internal error: database attribute property isnt a type!');
 
-          when(typ != val->type)
-            error(detail:'Internal error: database item property should be of type ' + attributes_[key] + ', but received item of type ' + val->type);
+          when(!val->isa(:typ))
+            error(detail:'Internal error: database item property \"' + key + '\" should be of type ' + attributes_[key] + ', but received item of type ' + val->type);
 
           
           if (typ == Function)

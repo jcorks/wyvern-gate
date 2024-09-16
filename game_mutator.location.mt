@@ -81,7 +81,7 @@ Location.database.newEntry(data:{
   },
   
         
-  onTimeChange ::(location, time) {
+  onIncrementTime ::(location, time) {
     // make everyone come home
     //if (time == WORLD.TIME.EVENING) ::<={
       
@@ -147,7 +147,7 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
   },
         
-  onTimeChange ::(location, time) {
+  onIncrementTime ::(location, time) {
     // make everyone come home
     //if (time == WORLD.TIME.EVENING) ::<={
       
@@ -218,7 +218,7 @@ Location.database.newEntry(data:{
   
   },
         
-  onTimeChange ::(location, time) {
+  onIncrementTime ::(location, time) {
     // make everyone come home
     //if (time == WORLD.TIME.EVENING) ::<={
       
@@ -266,7 +266,7 @@ Location.database.newEntry(data:{
   
   },
         
-  onTimeChange ::(location, time) {
+  onIncrementTime ::(location, time) {
 
   }
   
@@ -312,7 +312,7 @@ Location.database.newEntry(data:{
   
   },
         
-  onTimeChange ::(location, time) {
+  onIncrementTime ::(location, time) {
     // make everyone come home
     //if (time == WORLD.TIME.EVENING) ::<={
       
@@ -407,8 +407,32 @@ Location.database.newEntry(data:{
 
   },
   
-  onTimeChange::(location, time) {
-  
+  onIncrementTime::(location) {
+    @:world = import(module:'game_singleton.world.mt');
+    if (world.time == world.TIME.MIDNIGHT) ::<= {
+      @:items = random.scrambled(:location.inventory.items);
+      
+      foreach(items) ::(k, v) <- location.inventory.remove(:v)
+      
+      if (items->size > 1)
+        items->setSize(:(items->size/2)->floor);
+      
+      for(items->size, 30 + (location.ownedBy.level / 4)->ceil)::(i) {
+        // no weight, as the value scales
+        location.inventory.add(item:
+          Item.new(
+            base:Item.database.getRandomFiltered(
+              filter:::(value) <- value.isUnique == false &&
+                        location.ownedBy.level >= value.levelMinimum
+                        && value.tier <= location.landmark.island.tier
+            ),
+            rngEnchantHint:true
+          )
+        );
+      }
+      
+     
+    }
   }
 })
 
@@ -471,7 +495,7 @@ Location.database.newEntry(data:{
 
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })
@@ -542,7 +566,7 @@ Location.database.newEntry(data:{
 
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })
@@ -610,7 +634,7 @@ Location.database.newEntry(data:{
 
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })    
@@ -656,7 +680,7 @@ Location.database.newEntry(data:{
 
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })
@@ -701,7 +725,7 @@ Location.database.newEntry(data:{
 
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })
@@ -746,7 +770,7 @@ Location.database.newEntry(data:{
 
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })
@@ -789,7 +813,7 @@ Location.database.newEntry(data:{
     location.ownedBy.normalizeStats();        
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })
@@ -829,7 +853,7 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })
@@ -869,7 +893,7 @@ Location.database.newEntry(data:{
     location.contested = true;
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })
@@ -919,7 +943,7 @@ Location.database.newEntry(data:{
     */
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })
@@ -969,7 +993,7 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })
@@ -1007,7 +1031,7 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })    
@@ -1053,7 +1077,7 @@ Location.database.newEntry(data:{
     location.contested = true;
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })     
@@ -1103,7 +1127,7 @@ Location.database.newEntry(data:{
     );
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 }) 
@@ -1140,7 +1164,7 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 }) 
@@ -1196,7 +1220,7 @@ Location.database.newEntry(data:{
     }
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 }) 
@@ -1235,7 +1259,7 @@ Location.database.newEntry(data:{
     location.data.pressed = false;
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 }) 
@@ -1277,7 +1301,7 @@ Location.database.newEntry(data:{
 
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 
@@ -1317,7 +1341,7 @@ Location.database.newEntry(data:{
     location.data.used = false;
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 
@@ -1360,7 +1384,7 @@ Location.database.newEntry(data:{
 
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 
@@ -1404,7 +1428,7 @@ Location.database.newEntry(data:{
     )
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 
@@ -1490,7 +1514,7 @@ Location.database.newEntry(data:{
     location.data.peaceful = true;
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 
@@ -1575,7 +1599,7 @@ Location.database.newEntry(data:{
     location.data.peaceful = true;
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 
@@ -1670,7 +1694,7 @@ Location.database.newEntry(data:{
     location.data.peaceful = true;
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 
@@ -1739,7 +1763,7 @@ Location.database.newEntry(data:{
 
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })
@@ -1779,7 +1803,7 @@ Location.database.newEntry(data:{
     location.ownedBy.inventory.clear();
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 })    
@@ -1815,7 +1839,7 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
   },
   
-  onTimeChange::(location, time) {
+  onIncrementTime::(location, time) {
   
   }
 }) 
@@ -1884,8 +1908,8 @@ Location.database.newEntry(data:{
       
       // when the location is created
       onCreate : Function,
-      // called by the world when the time of day changes
-      onTimeChange : Function,
+      // called by the world when the time of day changes, hourly
+      onIncrementTime : Function,
       // the type of location it is
       category : Number,
       
@@ -2035,6 +2059,9 @@ Location.database.newEntry(data:{
         get ::<- state.data
       },
       
+      incrementTime :: {
+        state.base.onIncrementTime(location:this);
+      },
       
       lockWithPressurePlate :: {
         @:pressurePlate = landmark_.addLocation(

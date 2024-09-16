@@ -37,7 +37,6 @@ Scene.newEntry(
   data : {
     id: 'base:scene_guards0',
     script: [
-      ['', 'Several guards approach you with haste'],
       ::(location, landmark, doNext) {
         @:world = import(module:'game_singleton.world.mt');
         @chance = random.number(); 
@@ -127,6 +126,9 @@ Scene.newEntry(
           
         when(enemies == empty) 0;
 
+        windowEvent.queueMessage(
+          text:'Several guards approach you with haste.'
+        );
 
         
         world.battle.start(

@@ -28,7 +28,10 @@
 @:Profession = import(module:'game_database.profession.mt');
 @:Event = import(module:'game_mutator.event.mt');
 @:State = import(module:'game_class.state.mt');
-@:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
+@:Database = import(module:'game_class.database.mt');
+@:correctA = import(module:'game_function.correcta.mt');
+
 
 @:CLIMATE = {
   WARM : 0,
@@ -59,14 +62,125 @@
   'f'
 ];
 
+@:TRAITS = {
+  // Diverse islands ignore the species predisposition.
+  // An inhabitant can be any non-special species.
+  DIVERSE : 1,
+  
+  SPECIAL : 2,
+}
 
-// todo: database.
+
+@:reset = :: {
+
+Island.database.newEntry(
+  data : {
+    id : 'base:none',
+    requiredLandmarks : [
+      'base:wyvern-gate',
+    ],
+    possibleLandmarks : [
+      
+    ],
+    minAdditionalLandmarkCount : 0,
+    maxAdditionalLandmarkCount : 0,
+    minSize : 40,//80,
+    maxSize : 40, //130,
+    events : [
+      
+    ],
+    possibleSceneryCharacters : [
+      '╿', '.', '`', '^', '░'
+    ],
+    traits : TRAITS.SPECIAL,
+    
+    overrideSpecies : empty,
+    overrideNativeCreatures : empty,
+    overridePossibleEvents : empty,
+    overrideClimate : empty,  
+  }
+)
 
 
-@:Island = LoadableClass.create(
-  name: 'Wyvern.Island',
+Island.database.newEntry(
+  data : {
+    id : 'base:starting-island',
+    requiredLandmarks : [
+      'base:city',
+      'base:town',
+      'base:wyvern-gate',
+    ],
+    possibleLandmarks : [
+      
+    ],
+    minAdditionalLandmarkCount : 0,
+    maxAdditionalLandmarkCount : 0,
+    minSize : 40,//80,
+    maxSize : 60, //130,
+    events : [
+      
+    ],
+    possibleSceneryCharacters : [
+      '╿', '.', '`', '^', '░'
+    ],
+    traits : 0,
+    
+    overrideSpecies : empty,
+    overrideNativeCreatures : empty,
+    overridePossibleEvents : empty,
+    overrideClimate : empty,  
+  }
+)
+
+
+Island.database.newEntry(
+  data : {
+    id : 'base:normal-island',
+    requiredLandmarks : [
+      'base:wyvern-gate'
+    ],
+    possibleLandmarks : [
+      'base:city',
+      'base:town',
+      'base:forest',
+      'base:villa',
+      'base:mine',
+      'base:mine',
+      'base:mine',
+      'base:mine',
+      'base:village',
+      'base:lost-shrine'
+    ],
+    minAdditionalLandmarkCount : 1,
+    maxAdditionalLandmarkCount : 3,
+    minSize : 50,//80,
+    maxSize : 130, //130,
+    events : [
+      
+    ],
+    possibleSceneryCharacters : [
+      '╿', '.', '`', '^', '░',
+      ')', '(', ']', ']', '/',
+      '+', '~', '=', '|', '>',
+      '<', '*', '%', '-', '_'
+    ],    
+    traits : 0,
+    overrideSpecies : empty,
+    overrideNativeCreatures : empty,
+    overridePossibleEvents : empty,
+    overrideClimate : empty,  
+  }
+)
+
+
+}
+
+
+@:Island = databaseItemMutatorClass.create(  
+  name : 'Wyvern.Island',
   statics : {
     CLIMATE : {get::<-CLIMATE},
+    TRAITS : {get::<-TRAITS},
     
     climateToString::(climate) {
       return match(climate) {
@@ -94,6 +208,9 @@
   
   items : {
     name : '',
+
+    // the base of the island
+    base : empty,
 
     // minimum level of encountered individuals
     levelMin : 0,
@@ -143,6 +260,28 @@
 
     data : empty
   },
+  
+  database : Database.new(
+    name : 'Wyvern.Island.Base',
+    attributes : {
+      id : String,
+      requiredLandmarks : Object,
+      possibleLandmarks : Object,
+      minAdditionalLandmarkCount : Number,
+      maxAdditionalLandmarkCount : Number,
+      minSize : Number,
+      maxSize : Number,
+      events : Object,
+      possibleSceneryCharacters : Object,
+      
+      overrideSpecies : Nullable,
+      overrideNativeCreatures : Nullable,
+      overridePossibleEvents : Nullable,
+      overrideClimate : Nullable,
+      traits : Number
+    },
+    reset
+  ),
   
   
   define:::(this, state) {
@@ -339,48 +478,6 @@
       }    
     }
 
-    @:addDefaultLandmarks::{
-      @locationCount = (1 + (random.number()*2)->floor); 
-      if (locationCount < 1) locationCount = 1;
-      for(0, locationCount)::(i) {
-        LargeMap.addLandmark(
-          map:state.map,
-          base:Landmark.database.getRandomWeightedFiltered(
-            filter:::(value) <- value.isUnique == false
-          ),
-          island:this
-        )
-      }
-      
-      // guaranteed gate
-      LargeMap.addLandmark(
-        map:state.map,
-        base:Landmark.database.find(id:'base:wyvern-gate'),
-        island:this
-      )
-      
-          
-
-      
-      LargeMap.addLandmark(
-        map:state.map,
-        base:Landmark.database.find(id:'base:town'),
-        island:this
-      )
-
-
-
-
-
-
-      LargeMap.addLandmark(
-        map:state.map,
-        base:Landmark.database.find(id:'base:city'),
-        island:this
-      )
-
-    
-    }
 
     
     this.interface = {
@@ -410,7 +507,7 @@
 
       },
       
-      defaultLoad::(createEmpty, worldID, levelHint, nameHint, tierHint, landmarksHint, sizeWHint, sizeHHint, possibleEventsHint, extraLandmarks, hasSpeciesBias) {
+      defaultLoad::(base, createEmpty, worldID, levelHint, nameHint, tierHint, possibleEventsHint, extraLandmarks, hasSpeciesBias) {
         when(createEmpty) empty;
         @:world = import(module:'game_singleton.world.mt');
 
@@ -422,6 +519,7 @@
           @sizeW  = (factor)->floor;
           @sizeH  = (factor*0.5)->floor;
           
+          state.base = base;
           state.name = NameGen.island();
           state.levelMin = 0;
           state.levelMax = 0;
@@ -431,10 +529,10 @@
             'base:camp-out'
           ];
           state.encounterRate = random.number();
-          state.sizeW  = if (sizeWHint != empty) sizeWHint else sizeW;
-          state.sizeH  = if (sizeHHint != empty) sizeHHint else sizeH;
+          state.sizeW  = sizeW;
+          state.sizeH  = sizeH;
           state.stepsSinceLastEvent = 0;
-          state.map = LargeMap.create(parent:this, sizeW, sizeH);
+          state.map = LargeMap.create(parent:this, sizeW, sizeH, symbols:base.possibleSceneryCharacters);
           state.map.title = '';
           state.worldID = worldID;
           state.climate = random.integer(
@@ -479,17 +577,24 @@
         
     
 
-        if (landmarksHint == empty)
-          addDefaultLandmarks()
-        else ::<= {
-          foreach(landmarksHint) ::(i, landmarkName) {
-            LargeMap.addLandmark(
-              map:state.map,
-              base:Landmark.database.find(id:landmarkName),
-              island:this
-            )          
-          }
+
+        foreach(base.requiredLandmarks) ::(i, landmarkName) {
+          LargeMap.addLandmark(
+            map:state.map,
+            base:Landmark.database.find(id:landmarkName),
+            island:this
+          )          
         }
+
+        for(0, random.integer(from:base.minAdditionalLandmarkCount, to:base.maxAdditionalLandmarkCount)) ::(i) {
+          @:landmarkName = random.pickArrayItem(:base.possibleLandmarks);
+          LargeMap.addLandmark(
+            map:state.map,
+            base:Landmark.database.find(id:landmarkName),
+            island:this
+          )          
+        }
+
 
         if (extraLandmarks != empty) ::<= {
           foreach(extraLandmarks) ::(i, landmarkName) {
@@ -524,19 +629,12 @@
       
       description : {
         get :: {
-          @out = 'A ' + Island.climateToString(climate:state.climate) + ' island, ' + state.name + ' is mostly populated by people of ' + Species.find(:state.species[0].species).name + ' and ' + Species.find(:state.species[1].species).name + ' descent. ';//The island is known for its ' + professions[0].profession.name + 's and ' + professions[1].profession.name + 's.\n';
-          //out = out + this.class.describeEncounterRate(rate:encounterRate) + '\n';
-          //out = out + '(Level range: ' + levelMin + ' - ' + levelMax + ')' + '\n\n';
-          /*
-          out = out + 'It has ' + significantLandmarks->keycount + ' landmark(s): \n';
-
-          foreach(significantLandmarks)::(index, landmark) {
-            if (landmark.discovered)
-              out = out + landmark.description + '\n'
-            else
-              out = out + 'An undiscovered ' + landmark.base.name + '\n';
+          @:climate = Island.climateToString(climate:state.climate);
+          @out = state.name + ' is '+ correctA(:climate) + ' ' + climate + ' island.';
+          if ((state.base.traits & Island.TRAITS.DIVERSE) != 0) ::<= {
+            out = out + 'The island is mostly populated by people of ' + Species.find(:state.species[0].species).name + ' and ' + Species.find(:state.species[1].species).name + ' descent. ';          
           }
-          */
+          
           return out;
         }
       },
@@ -561,17 +659,23 @@
         get:: <- state.map
       },
       
+      
+      // represents the passage of time
       incrementTime:: {
         @:world = import(module:'game_singleton.world.mt');
-        world.stepTime(); 
+
         foreach(state.events)::(index, event) {
-          event.stepTime();
+          event.incrementTime();
         }
         foreach(state.events)::(index, event) {
           if (event.expired) ::<= {
             event.base.onEventEnd(event);          
             state.events->remove(key:state.events->findIndex(value:event));
           }
+        }
+        
+        foreach(state.landmarks) ::(i, v) {
+          v.incrementTime();
         }
       },
       
@@ -586,14 +690,21 @@
         }
       },
       
-      takeStep :: {      
+      // represents a physical step in island space (not in a landmark)
+      step :: {      
         state.stepsSinceLastEvent += 1;    
+
+        foreach(state.events)::(index, event) {
+          event.step();
+        }
+
+
         
         when(state.possibleEvents->size == 0) empty;
       
         // every step, an event can occur.
         //if (stepsSinceLastEvent > 200000) ::<= {
-        if (state.stepsSinceLastEvent > 13) ::<= {
+        if (state.stepsSinceLastEvent > 20) ::<= {
           if (random.number() > 13 - (state.stepsSinceLastEvent-5) / 5) ::<={
             this.addEvent(
               event:Event.new(
@@ -632,7 +743,7 @@
                   
       newInhabitant ::(professionHint, levelHint, speciesHint) {
         @species = 
-          if (random.try(percentSuccess:30))
+          if (((state.base.traits & TRAITS.DIVERSE) == 0) && random.try(percentSuccess:95))
             random.pickArrayItemWeighted(list:state.species).species
           else
             Species.getRandomFiltered(

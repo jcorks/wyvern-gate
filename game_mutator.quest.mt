@@ -133,7 +133,7 @@ Quest.database.newEntry(
       world.island.removeLandmark(:world.island.landmarks->filter(::(value) <- value.worldID == quest.data.landmarkID)[0]);
     },
     
-    onNextHour ::(quest) {
+    onIncrementTime ::(quest, landmark, island) {
     
     },
 
@@ -364,7 +364,7 @@ Quest.database.newEntry(
       world.island.removeLandmark(:world.island.landmarks->filter(::(value) <- value.worldID == quest.data.landmarkID)[0]);
     },
     
-    onNextHour ::(quest) {
+    onIncrementTime ::(quest, landmark, island) {
     
     },
 
@@ -704,7 +704,7 @@ Quest.database.newEntry(
       onStep : Function,
       
       // when a new hour passes,
-      onNextHour : Function,
+      onIncrementTime : Function,
       
       // The action to do when a landmark is entered.
       onLandmarkEnter : Function,
@@ -783,6 +783,10 @@ Quest.database.newEntry(
       
       step ::(landmark, island){
         state.base.onStep(quest:this, landmark, island);
+      },
+
+      incrementTime ::(landmark, island){
+        state.base.onIncrementTime(quest:this, landmark, island);
       },
       
       enterLandmark ::(landmark) {

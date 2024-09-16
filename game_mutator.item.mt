@@ -3178,7 +3178,7 @@ Item.database.newEntry(data : {
 @:Material = import(module:'game_database.material.mt');
 @:ApparelMaterial = import(module:'game_database.apparelmaterial.mt');
 @:Arts = import(module:'game_database.arts.mt');
-@:Island = import(module:'game_class.island.mt');
+@:Island = import(module:'game_mutator.island.mt');
 @:world = import(module:'game_singleton.world.mt');
 */
 
@@ -3361,6 +3361,7 @@ Item.database.newEntry(data : {
     islandLevelHint : 0,
     islandNameHint : '',
     islandTierHint : 0,
+    islandIDhint : '',
     islandExtraLandmarks : empty,
     improvementsLeft : 0,
     improvements : 0,
@@ -3656,20 +3657,25 @@ Item.database.newEntry(data : {
     },
       
       
-    setIslandGenAttributes ::(levelHint => Number, nameHint => String, tierHint => Number, extraLandmarks) {
+    setIslandGenAttributes ::(levelHint => Number, nameHint => String, tierHint => Number, extraLandmarks, idHint) {
       @:state = _.state;
       state.islandLevelHint = levelHint;
       state.islandNameHint = nameHint;
       state.islandTierHint = tierHint;
       state.islandExtraLandmarks = extraLandmarks;
+      state.islandIDhint = if (idHint == empty) 'base:normal-island' else idHint;
     },
     
     islandGenAttributes : {
-      get ::<- {
-        levelHint: _.state.islandLevelHint,
-        nameHint: _.state.islandNameHint,
-        tierHint: _.state.islandTierHint,
-        extraLandmarks: _.state.islandExtraLandmarks        
+      get ::{ 
+        @:Island = import(:'game_mutator.island.mt');
+        return {
+          levelHint: _.state.islandLevelHint,
+          nameHint: _.state.islandNameHint,
+          tierHint: _.state.islandTierHint,
+          extraLandmarks: _.state.islandExtraLandmarks,
+          base : Island.database.find(:_.state.islandIDhint)
+        }
       }
     },
     

@@ -296,9 +296,7 @@ return {
     keyhome.setIslandGenAttributes(
       nameHint:namegen.island(), 
       levelHint:story.levelHint,
-      extraLandmarks : [
-        'thechosen:shrine-of-fire'
-      ],
+      idHint: 'base:starting-island',
       tierHint: 0  
     )
     world.loadIsland(key:keyhome);
@@ -307,6 +305,8 @@ return {
     party.reset();
     @:island = world.island;
 
+    keyhome.name = "Key: Home";
+    party.inventory.add(:keyhome);
 
     /*
     for(0, 4) ::(i) {
@@ -354,7 +354,6 @@ return {
       
       chosenProfs[prof] = true;
       @:p0 = island.newInhabitant(
-        speciesHint: Species.getRandomFiltered(filter::(value) <- (value.traits & Species.TRAITS.SPECIAL) == 0).id,
         levelHint:story.levelHint-1,
         professionHint: prof
       );
@@ -1253,8 +1252,14 @@ return {
             windowEvent.queueMessage(
               text:"This place seems to shift before you..."
             );
-        }
+        },
+        onIncrementTime ::(landmark) {
         
+        },
+        
+        onStep ::(landmark) {
+        
+        }
       }
     )
 
@@ -1313,6 +1318,13 @@ return {
             windowEvent.queueMessage(
               text:"This place seems to shift before you..."
             );
+        
+        },
+        onIncrementTime ::(landmark) {
+        
+        },
+        
+        onStep ::(landmark) {
         
         }
         
@@ -1380,6 +1392,13 @@ return {
             windowEvent.queueMessage(
               text:"This place seems to shift before you..."
             );
+        
+        },
+        onIncrementTime ::(landmark) {
+        
+        },
+        
+        onStep ::(landmark) {
         
         }
         
@@ -1449,6 +1468,13 @@ return {
               text:"This place seems to shift before you..."
             );
         
+        },
+        onIncrementTime ::(landmark) {
+        
+        },
+        
+        onStep ::(landmark) {
+        
         }
         
       }
@@ -1490,7 +1516,14 @@ return {
           
         },
         onCreate ::(landmark, island){},
-        onVisit ::(landmark, island) {}
+        onVisit ::(landmark, island) {},
+        onIncrementTime ::(landmark) {
+        
+        },
+        
+        onStep ::(landmark) {
+        
+        }
         
       }
     )    
@@ -1531,7 +1564,14 @@ return {
           
         },
         onCreate ::(landmark, island){},
-        onVisit ::(landmark, island) {}
+        onVisit ::(landmark, island) {},
+        onIncrementTime ::(landmark) {
+        
+        },
+        
+        onStep ::(landmark) {
+        
+        }
         
       }
     ) 
@@ -1571,7 +1611,14 @@ return {
           
         },
         onCreate ::(landmark, island){},
-        onVisit ::(landmark, island) {}
+        onVisit ::(landmark, island) {},
+        onIncrementTime ::(landmark) {
+        
+        },
+        
+        onStep ::(landmark) {
+        
+        }
         
       }
     ) 
@@ -1612,7 +1659,14 @@ return {
           
         },
         onCreate ::(landmark, island){},
-        onVisit ::(landmark, island) {}
+        onVisit ::(landmark, island) {},
+        onIncrementTime ::(landmark) {
+        
+        },
+        
+        onStep ::(landmark) {
+        
+        }
         
       }
     ) 
@@ -1704,7 +1758,7 @@ return {
 
       },
       
-      onTimeChange::(location, time) {
+      onIncrementTime::(location, time) {
       
       }
     })
@@ -1789,7 +1843,7 @@ return {
 
       },
       
-      onTimeChange::(location, time) {
+      onIncrementTime::(location, time) {
       
       }
     })
@@ -1878,7 +1932,7 @@ return {
 
       },
       
-      onTimeChange::(location, time) {
+      onIncrementTime::(location, time) {
       
       }
     })
@@ -1967,7 +2021,7 @@ return {
 
       },
       
-      onTimeChange::(location, time) {
+      onIncrementTime::(location, time) {
       
       }
     })
@@ -2017,7 +2071,7 @@ return {
         */
       },
       
-      onTimeChange::(location, time) {
+      onIncrementTime::(location, time) {
       
       }
     })
@@ -2061,7 +2115,7 @@ return {
         */
       },
       
-      onTimeChange::(location, time) {
+      onIncrementTime::(location, time) {
       
       }
     })
@@ -2120,6 +2174,13 @@ return {
             windowEvent.queueMessage(
               text:"This place seems to shift before you..."
             );
+        },
+        onIncrementTime ::(landmark) {
+        
+        },
+        
+        onStep ::(landmark) {
+        
         }
       }
     )
@@ -2351,7 +2412,14 @@ return {
 
         
         },
-        onVisit ::(landmark, island) {}        
+        onVisit ::(landmark, island) {},       
+        onIncrementTime ::(landmark) {
+        
+        },
+        
+        onStep ::(landmark) {
+        
+        }
       }
     );
     
@@ -4142,6 +4210,132 @@ return {
         ]
       }
     )
+    
+    @:Island = import(module:'game_mutator.island.mt');
+    Island.database.newEntry(
+      data : {
+        id : 'thechosen:island-of-fire',
+        requiredLandmarks : [
+          'thechosen:wyvern-shrine-of-fire',
+          'base:wyvern-gate',
+        ],
+        possibleLandmarks : [
+          
+        ],
+        minAdditionalLandmarkCount : 0,
+        maxAdditionalLandmarkCount : 0,
+        minSize : 30,//80,
+        maxSize : 40, //130,
+        events : [
+          
+        ],
+        possibleSceneryCharacters : [
+          '░', '░', '░', '░'
+        ],
+        
+        traits : Island.TRAITS.DIVERSE,
+        
+        overrideSpecies : empty,
+        overrideNativeCreatures : empty,
+        overridePossibleEvents : empty,
+        overrideClimate : empty,  
+      }
+    )    
+    
+    @:Island = import(module:'game_mutator.island.mt');
+    Island.database.newEntry(
+      data : {
+        id : 'thechosen:island-of-ice',
+        requiredLandmarks : [
+          'thechosen:wyvern-shrine-of-ice',
+          'base:wyvern-gate',
+        ],
+        possibleLandmarks : [
+          
+        ],
+        minAdditionalLandmarkCount : 0,
+        maxAdditionalLandmarkCount : 0,
+        minSize : 30,//80,
+        maxSize : 40, //130,
+        events : [
+          
+        ],
+        possibleSceneryCharacters : [
+          '_', '-', '~', '-'
+        ],
+        
+        traits : Island.TRAITS.DIVERSE,
+        
+        overrideSpecies : empty,
+        overrideNativeCreatures : empty,
+        overridePossibleEvents : empty,
+        overrideClimate : empty,  
+      }
+    )    
+
+
+    @:Island = import(module:'game_mutator.island.mt');
+    Island.database.newEntry(
+      data : {
+        id : 'thechosen:island-of-thunder',
+        requiredLandmarks : [
+          'thechosen:wyvern-shrine-of-thunder',
+          'base:wyvern-gate',
+        ],
+        possibleLandmarks : [
+          
+        ],
+        minAdditionalLandmarkCount : 0,
+        maxAdditionalLandmarkCount : 0,
+        minSize : 30,//80,
+        maxSize : 40, //130,
+        events : [
+          
+        ],
+        possibleSceneryCharacters : [
+          '░', '░', '░', '░'
+        ],
+        
+        traits : Island.TRAITS.DIVERSE,
+        
+        overrideSpecies : empty,
+        overrideNativeCreatures : empty,
+        overridePossibleEvents : empty,
+        overrideClimate : empty,  
+      }
+    )
+
+    @:Island = import(module:'game_mutator.island.mt');
+    Island.database.newEntry(
+      data : {
+        id : 'thechosen:island-of-light',
+        requiredLandmarks : [
+          'thechosen:wyvern-shrine-of-light',
+          'base:wyvern-gate',
+        ],
+        possibleLandmarks : [
+          
+        ],
+        minAdditionalLandmarkCount : 0,
+        maxAdditionalLandmarkCount : 0,
+        minSize : 30,//80,
+        maxSize : 40, //130,
+        events : [
+          
+        ],
+        possibleSceneryCharacters : [
+          '^', '^', '^', '^'
+        ],
+        
+        traits : Island.TRAITS.DIVERSE,
+        
+        overrideSpecies : empty,
+        overrideNativeCreatures : empty,
+        overridePossibleEvents : empty,
+        overrideClimate : empty,  
+      }
+    )    
+    
 
     @:Species = import(module:'game_database.species.mt');
 

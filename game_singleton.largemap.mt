@@ -36,14 +36,17 @@
 
 
 
-@:generateTerrain::(map, width, height) {
+@:generateTerrain::(map, width, height, symbols) {
+  if (symbols->size < 5) 
+    error(:'Symbol list for terrain must have at least 5 characters');
+
   @:symbolList = [
     map.addScenerySymbol(character:' '),
-    map.addScenerySymbol(character:'╿'),
-    map.addScenerySymbol(character:'.'),
-    map.addScenerySymbol(character:'`'),
-    map.addScenerySymbol(character:'^'),
-    map.addScenerySymbol(character:'░')
+    ...(
+      random.scrambled(:symbols)
+        ->subset(from:0, to:3)
+          ->map(::(value) <- map.addScenerySymbol(character:value))
+    )
   ];
   @:out = [];
   @:seedCount = ((width*height)**0.5) / 2.5
@@ -154,7 +157,7 @@
     
     this.interface = {
 
-      create::(parent, sizeW, sizeH) {        
+      create::(parent, sizeW, sizeH, symbols) {        
         @:map = Map.new(parent);
         map.width = sizeW + BUFFER_SPACE*2;
         map.height = sizeH + BUFFER_SPACE*2;
@@ -175,7 +178,7 @@
         map.paged = false;
         map.drawLegend = true;
         
-        @:table = generateTerrain(map, width:map.width - BUFFER_SPACE*2, height:map.height - BUFFER_SPACE*2);
+        @:table = generateTerrain(map, width:map.width - BUFFER_SPACE*2, height:map.height - BUFFER_SPACE*2, symbols);
 
         for(0, map.height) ::(y) {
           for(0, map.width) ::(x) {

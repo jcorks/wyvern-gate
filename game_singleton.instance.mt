@@ -59,7 +59,7 @@ import(module:'game_function.questguild.mt');
 @:Battle = import(module:'game_class.battle.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:Landmark = import(module:'game_mutator.landmark.mt');
-@:Island = import(module:'game_class.island.mt');
+@:Island = import(module:'game_mutator.island.mt');
 @:Event  = import(module:'game_mutator.event.mt');
 @:Interaction = import(module:'game_database.interaction.mt');
 @:Item = import(module:'game_mutator.item.mt');
@@ -82,7 +82,7 @@ import(module:'game_class.stateflags.mt');
 
 
 import(module:'game_class.entity.mt');
-import(module:'game_class.island.mt');
+import(module:'game_mutator.island.mt');
 
 @:loading = import(module:'game_function.loading.mt');
 @:random = import(:'game_singleton.random.mt');
@@ -820,8 +820,8 @@ return empty;
                 y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  4 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -4 else 0
               );
               island.map.title = world.timeString + '           ';
-              island.incrementTime();
-              island.takeStep();
+              world.incrementTime();
+              island.step();
               
               // cancel if we've arrived somewhere
               underFoot = island.map.getNamedItemsUnderPointerRadius(radius:5);
@@ -936,7 +936,7 @@ return empty;
         }
         @:windowEvent = import(module:'game_singleton.windowevent.mt');
         @:partyOptions = import(module:'game_function.partyoptions.mt');
-        @:Island = import(module:'game_class.island.mt');
+        @:Island = import(module:'game_mutator.island.mt');
         @:Event  = import(module:'game_mutator.event.mt');
 
         @:party = world.party;
@@ -1044,6 +1044,7 @@ return empty;
               x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
               y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
             )) empty;
+            world.incrementTime();
             landmark.step();
             stepCount += 1;
 

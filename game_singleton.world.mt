@@ -16,7 +16,7 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:class = import(module:'Matte.Core.Class');
-@:Island = import(module:'game_class.island.mt');
+@:Island = import(module:'game_mutator.island.mt');
 @:Party = import(module:'game_class.party.mt');
 @:Battle = import(module:'game_class.battle.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
@@ -195,6 +195,7 @@
       
       @:currentIsland = this.island;
       this.island = Island.new(
+        base : Island.database.find(:'base:none'),
         createEmpty : true
       );
       
@@ -654,7 +655,7 @@
         get ::<- state.wish
       },
       
-      stepTime ::(isStep) {
+      incrementTime ::(isStep) {
         if (isStep == empty) ::<= {
           state.turn += 1;
           state.step = 0
@@ -668,15 +669,13 @@
         }
           
           
+        @newHour = false;
         if (state.turn >= TURNS_PER_HOUR) ::<={
           state.turn = 0;
           state.time += 1;
           if (state.time == TIME.MORNING)
             this.scenario.onNewDay();
-
-          foreach(this.party.quests) ::(k, v) {
-            v.nextHour();
-          }
+          newHour = true;
         }
           
         if (state.time >= HOURS_PER_DAY) ::<={
@@ -690,6 +689,13 @@
           state.year += 1;
         }        
         
+        if (newHour && island != empty) ::<= {      
+          foreach(this.party.quests) ::(k, v) {
+            v.incrementTime(landmark:this, island:this.island);
+          }
+
+          island.incrementTime();
+        }
       },
       
       accoladeIncrement ::(name) {
@@ -812,7 +818,7 @@
         if (alreadyLoaded != empty)
           island = alreadyLoaded 
         else ::<= {
-          island = Island.new(createEmpty:true);
+          island = Island.new(base:Island.database.find(:'base:none'), createEmpty:true);
           island.load(serialized:which);
         }
         
@@ -832,7 +838,7 @@
         breakpoint();
         state.load(parent:this, serialized:serialized.world, loadFirst:['scenario']);
         
-        island = Island.new(createEmpty:true);
+        island = Island.new(base:Island.database.find(:'base:none'), createEmpty:true);
         island.load(:serialized.islands[state.currentIslandID]);
         landmark = {:::} {        
           foreach(island.landmarks) ::(k, v) {

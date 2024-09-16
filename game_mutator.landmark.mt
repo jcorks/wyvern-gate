@@ -85,6 +85,8 @@ Landmark.database.newEntry(
       scatterRate: 0.3
     },
     onCreate ::(landmark, island){},
+    onIncrementTime ::(landmark, island){},
+    onStep ::(landmark, island) {},
     onVisit ::(landmark, island) {}
   }
 )
@@ -134,6 +136,8 @@ Landmark.database.newEntry(
       wallCharacter : '|'
     },
     onCreate ::(landmark, island){},
+    onIncrementTime ::(landmark, island){},
+    onStep ::(landmark, island) {},
     onVisit ::(landmark, island) {}
     
   }
@@ -176,6 +180,8 @@ Landmark.database.newEntry(
       emptyAreaCount: 5
     },
     onCreate ::(landmark, island){},
+    onIncrementTime ::(landmark, island){},
+    onStep ::(landmark, island) {},
     onVisit ::(landmark, island) {}
     
   }
@@ -215,6 +221,8 @@ Landmark.database.newEntry(
       emptyAreaCount: 30
     },
     onCreate ::(landmark, island){},
+    onIncrementTime ::(landmark, island){},
+    onStep ::(landmark, island) {},
     onVisit ::(landmark, island) {}
     
   }
@@ -277,6 +285,8 @@ Landmark.database.newEntry(
     },
     onCreate ::(landmark, island){
     },
+    onIncrementTime ::(landmark, island){},
+    onStep ::(landmark, island) {},
     onVisit ::(landmark, island) {
       if (landmark.floor == 0)
         windowEvent.queueMessage(
@@ -346,6 +356,8 @@ Landmark.database.newEntry(
     mapHint:{
       layoutType: DungeonMap.LAYOUT_DELTA
     },
+    onIncrementTime ::(landmark, island){},
+    onStep ::(landmark, island) {},
     onCreate ::(landmark, island){
     },
     onVisit ::(landmark, island) {}
@@ -381,6 +393,8 @@ Landmark.database.newEntry(
       'base:small-chest'
     ],
     mapHint:{},
+    onIncrementTime ::(landmark, island){},
+    onStep ::(landmark, island) {},
     onCreate ::(landmark, island){
     },
     
@@ -428,6 +442,8 @@ Landmark.database.newEntry(
       emptyAreaCount: 2
     },
     onCreate ::(landmark, island){},
+    onIncrementTime ::(landmark, island){},
+    onStep ::(landmark, island) {},
     onVisit ::(landmark, island) {
       windowEvent.queueMessage(text:'The party enters the pit full of treasure.');
      
@@ -476,6 +492,8 @@ Landmark.database.newEntry(
       emptyAreaCount: 7
     },
     onCreate ::(landmark, island){},
+    onIncrementTime ::(landmark, island){},
+    onStep ::(landmark, island) {},
     onVisit ::(landmark, island) {}
     
   }
@@ -519,6 +537,8 @@ Landmark.database.newEntry(
       emptyAreaCount: 4
     },    
     onCreate ::(landmark, island){},
+    onIncrementTime ::(landmark, island){},
+    onStep ::(landmark, island) {},
     onVisit ::(landmark, island) {}
   }
 )
@@ -560,6 +580,8 @@ Landmark.database.newEntry(
       emptyAreaCount: 4
     },
     onCreate ::(landmark, island){},
+    onIncrementTime ::(landmark, island){},
+    onStep ::(landmark, island) {},
     onVisit ::(landmark, island) {}
   }
 )
@@ -613,6 +635,8 @@ Landmark.database.newEntry(
       outOfBoundsCharacter: '~'
     },
     onCreate ::(landmark, island){},
+    onIncrementTime ::(landmark, island){},
+    onStep ::(landmark, island) {},
     onVisit ::(landmark, island) {
       windowEvent.queueMessage(
         text:"This place seems to shift before you..."
@@ -655,6 +679,8 @@ Landmark.database.newEntry(
       outOfBoundsCharacter: '~'
     },
     onCreate ::(landmark, island){},
+    onIncrementTime ::(landmark, island){},
+    onStep ::(landmark, island) {},
     onVisit ::(landmark, island) {
     }
     
@@ -787,6 +813,8 @@ Landmark.database.newEntry(
       mapHint : Object,
       onCreate : Function,
       onVisit : Function,
+      onIncrementTime : Function,
+      onStep : Function,
       guarded : Boolean,
       pointOfNoReturn : Boolean,
       ephemeral : Boolean
@@ -929,7 +957,7 @@ Landmark.database.newEntry(
 
     this.interface =  {
       initialize ::(parent, island) {
-        @:Island = import(module:'game_class.island.mt');
+        @:Island = import(module:'game_mutator.island.mt');
         if (parent)
           island = parent.parent; // parents of locations are always maps
 
@@ -1101,20 +1129,39 @@ Landmark.database.newEntry(
         set ::(value) <- state.legendName = value
       },
 
-      step :: {
-
-        world.stepTime(isStep:true); 
+      incrementTime ::{
         this.updateTitle();
+        
+        state.base.incrementTime();
+        
+        foreach(this.locations) ::(k, v) {
+          v.incrementTime();
+        }
+
+        foreach(state.events) ::(k, event) {
+          event.incrementTime();
+        }
+      },
+
+
+      // represents a step made within the landmark.
+      step :: {
+        state.base.onStep(landmark:this, island:this.island);
         state.mapEntityController.step();
 
         foreach(world.party.quests) ::(k, v) {
           v.step(landmark:this, island:this.island);
         }
 
+        foreach(state.events) ::(k, event) {
+          event.step();
+        }
+
+
 
         when(state.base.landmarkType == TYPE.STRUCTURE) ::<= {
           if (this.peaceful == false) ::<= {
-            if (state.stepsSinceLast >= 14 && random.number() > 0.7) ::<= {
+            if (state.stepsSinceLast >= 30 && random.number() > 0.7) ::<= {
               @:Scene = import(module:'game_database.scene.mt');            
               Scene.start(id:'base:scene_guards0', onDone::{}, location:empty, landmark:this);
               state.stepsSinceLast = 0;

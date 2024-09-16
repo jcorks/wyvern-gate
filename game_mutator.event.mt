@@ -67,8 +67,12 @@ Event.database.newEntry(
       return 14+(random.number()*20)->floor; // number of timesteps active
     },
     
-    onEventUpdate ::(event) {
+    onIncrementTime ::(event) {
       
+    },
+    
+    onStep ::(event) {
+    
     },
     
     onEventEnd ::(event) {
@@ -148,7 +152,10 @@ Event.database.newEntry(
             party:event.party,
             onDone ::{
               if (!party.isMember(entity:nicePerson)) ::<= {
-                windowEvent.queueMessage(text:'You thank the person and continue on your way.');  
+                if (nicePerson.isIncapacitated())
+                  windowEvent.queueMessage(text:'You leave the body and walk away.')
+                else
+                  windowEvent.queueMessage(text:'You thank the person and continue on your way.')
               }
             }
           );
@@ -158,10 +165,15 @@ Event.database.newEntry(
       return 0; // number of timesteps active
     },
     
-    onEventUpdate ::(event) {
+    
+    onIncrementTime ::(event) {
       
     },
     
+    onStep ::(event) {
+    
+    },
+
     onEventEnd ::(event) {
 
     }
@@ -252,9 +264,15 @@ Event.database.newEntry(
       return 0;
     },
     
-    onEventUpdate ::(event) {
+    
+    onIncrementTime ::(event) {
       
     },
+    
+    onStep ::(event) {
+    
+    },
+
     
     onEventEnd ::(event) {
 
@@ -360,9 +378,15 @@ Event.database.newEntry(
       return 0; // number of timesteps active
     },
     
-    onEventUpdate ::(event) {
+    
+    onIncrementTime ::(event) {
       
     },
+    
+    onStep ::(event) {
+    
+    },
+
     
     onEventEnd ::(event) {
 
@@ -387,7 +411,8 @@ Event.database.newEntry(
       id : String,
       rarity: Number,
       onEventStart : Function,
-      onEventUpdate : Function,
+      onStep : Function,
+      onIncrementTime : Function,
       onEventEnd : Function
     },
     reset     
@@ -402,7 +427,7 @@ Event.database.newEntry(
       initialize ::(parent, base, currentTime, state) {
         @:world = import(module:'game_singleton.world.mt');
         
-        @:Island = import(module:'game_class.island.mt');
+        @:Island = import(module:'game_mutator.island.mt');
         @:Landmark = import(module:'game_mutator.landmark.mt');
         
         @landmark;
@@ -436,9 +461,13 @@ Event.database.newEntry(
         get :: <- state.timeLeft == 0
       },
       
-      stepTime :: {
-        state.base.onEventUpdate(event:this);
+      incrementTime :: {
+        state.base.onIncrementTime(event:this);
         if (state.timeLeft > 0) state.timeLeft -= 1;
+      },
+
+      step :: {
+        state.base.onStep(event:this);
       },
       
       duration : {

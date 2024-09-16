@@ -6021,7 +6021,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       foreach(targets[0].effectStack.getAll()) ::(k, inst) {
         targets[0].addEffect(
-          from:user, id:'base:paralyzed', durationTurns:2
+          from:user, id:inst.id, durationTurns:2
         );
       }
     }
@@ -6047,7 +6047,7 @@ Arts.newEntry(
       foreach(targets) ::(k, target) {
         foreach(target.effectStack.getAll()) ::(k, inst) {
           target.addEffect(
-            from:user, id:'base:paralyzed', durationTurns:2
+            from:user, id:inst.id, durationTurns:2
           );
         }
       }

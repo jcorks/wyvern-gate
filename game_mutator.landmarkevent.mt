@@ -21,8 +21,11 @@ LandmarkEvent.database.newEntry(
       return a;
     },
 
+    onIncrementTime ::(data, landmark) {
     
-    step ::(data, landmark) {
+    },
+    
+    onStep ::(data, landmark) {
       data.step();
     },
     
@@ -42,7 +45,12 @@ LandmarkEvent.database.newEntry(
       return a;
     },
     
-    step ::(data, landmark) {
+    onIncrementTime ::(data, landmark) {
+    
+    },
+    
+    
+    onStep ::(data, landmark) {
       data.step();
     },
     
@@ -61,8 +69,12 @@ LandmarkEvent.database.newEntry(
       return a;
     },
 
+    onIncrementTime ::(data, landmark) {
     
-    step ::(data, landmark) {
+    },
+
+    
+    onStep ::(data, landmark) {
       data.step();
     },
     
@@ -80,9 +92,12 @@ LandmarkEvent.database.newEntry(
       @:a = b.new(parent);
       return a;
     },
+    onIncrementTime ::(data, landmark) {
+    
+    },
 
     
-    step ::(data, landmark) {
+    onStep ::(data, landmark) {
       data.step();
     },
     
@@ -102,8 +117,12 @@ LandmarkEvent.database.newEntry(
       return a;
     },
 
+    onIncrementTime ::(data, landmark) {
     
-    step ::(data, landmark) {
+    },
+
+    
+    onStep ::(data, landmark) {
       data.step();
     },
     
@@ -123,8 +142,12 @@ LandmarkEvent.database.newEntry(
       return a;
     },
 
+
+    onIncrementTime ::(data, landmark) {
     
-    step ::(data, landmark) {
+    },
+    
+    onStep ::(data, landmark) {
       data.step();
     },
     
@@ -144,8 +167,12 @@ LandmarkEvent.database.newEntry(
       return a;
     },
 
+    onIncrementTime ::(data, landmark) {
     
-    step ::(data, landmark) {
+    },
+
+    
+    onStep ::(data, landmark) {
       data.step();
     },
     
@@ -171,7 +198,8 @@ LandmarkEvent.database.newEntry(
     attributes : {
       id : String,
       startup : Function,
-      step : Function,
+      onStep : Function,
+      onIncrementTime : Function,
       isActive : Function
     },
     reset
@@ -196,11 +224,19 @@ LandmarkEvent.database.newEntry(
       },
       
       step::{
-        state.base.step(
+        state.base.onStep(
           landmark:landmark_,
           data:state.data
         );
       },
+
+      incrementTime::{
+        state.base.onIncrementTime(
+          landmark:landmark_,
+          data:state.data
+        );
+      },
+
       
       isActive ::{
         return state.base.isActive(data:state.data);
