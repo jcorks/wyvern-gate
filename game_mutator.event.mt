@@ -150,6 +150,7 @@ Event.database.newEntry(
           nicePerson.adventurous = true;
           nicePerson.interactPerson(
             party:event.party,
+            skipIntro: true,
             onDone ::{
               if (!party.isMember(entity:nicePerson)) ::<= {
                 if (nicePerson.isIncapacitated())

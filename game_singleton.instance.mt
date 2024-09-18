@@ -792,8 +792,6 @@ return empty;
 
                   lines->push(value:arr.data.name);
 
-                  arr.data.discover();
-                  island.map.discover(data:arr.data);                      
                   //island.map.setPointer(
                   //  x: arr.x,
                   //  y: arr.y
@@ -816,8 +814,8 @@ return empty;
               // move by one unit in that direction
               // or ON it if its within one unit.
               island.map.movePointerFree(
-                x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 4 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -4 else 0,
-                y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  4 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -4 else 0
+                x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 2 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -2 else 0,
+                y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  2 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -2 else 0
               );
               island.map.title = world.timeString + '           ';
               world.incrementTime();
@@ -825,6 +823,11 @@ return empty;
               
               // cancel if we've arrived somewhere
               underFoot = island.map.getNamedItemsUnderPointerRadius(radius:5);
+              
+              foreach(underFoot)::(i, arr) {
+                arr.data.discover();
+                island.map.discover(data:arr.data);                      
+              }
               
             }
           );
@@ -963,7 +966,7 @@ return empty;
               
               choiceActions = [];
               @:choices = [];
-              @locationAt = landmark.map.getNamedItemsUnderPointer();
+              @locationAt = landmark.map.getNamedItemsUnderPointerRadius(:3);
               if (locationAt != empty) ::<= {
                 foreach(locationAt)::(i, loc) {
                   choices->push(value:'Check ' + loc.name);
@@ -1025,7 +1028,6 @@ return empty;
               
               @:lines = [];
               foreach(nearby)::(index, arr) {
-
                 lines->push(value:arr.name);
               }
               canvas.renderTextFrameGeneral(
@@ -1058,14 +1060,10 @@ return empty;
             }
             
             // cancel if we've arrived somewhere
-            nearby = landmark.map.getNamedItemsUnderPointer();
-
-            if (nearby != empty && nearby->size > 0)
-              landmark.map.setPointer(
-                x: nearby[0].x,
-                y: nearby[0].y
-              );
-
+            nearby = landmark.map.getNamedItemsUnderPointerRadius(:3);
+            foreach(nearby)::(index, arr) {
+              landmark.map.discover(:arr.data);
+            }
           }        
         )
       },

@@ -193,6 +193,27 @@
     @neighbors = [];
     @aStarPQCompareTable;
 
+    @:drawTarget::(x, y) {
+      canvas.movePen(x:x-1, y:y-1);  
+      canvas.drawChar(:'┌');
+      canvas.movePen(x:x  , y:y-1);  
+      canvas.drawChar(:'─');
+      canvas.movePen(x:x+1, y:y-1);  
+      canvas.drawChar(:'┐');
+      canvas.movePen(x:x-1, y:y);  
+      canvas.drawChar(:'│');
+      canvas.movePen(x:x+1, y:y);  
+      canvas.drawChar(:'│');
+
+
+      canvas.movePen(x:x-1, y:y+1);  
+      canvas.drawChar(:'└');
+      canvas.movePen(x:x, y:y+1);  
+      canvas.drawChar(:'─');
+      canvas.movePen(x:x+1, y:y+1);  
+      canvas.drawChar(:'┘');
+    }
+
     
     @:isWalled ::(x, y) {
       @:id = x + y*width;
@@ -323,6 +344,7 @@
       if (in >= pq->keycount) empty; // not in 
       pq->remove(key:in);      
     }
+    
 
     
     
@@ -510,7 +532,8 @@
         canvas.drawText(text:data.symbol);
       });
       */
-      
+      @:targets = {};
+      @:importantItems = {};
       
       for(0, mapSizeH+1)::(y) {
         for(0, mapSizeW+1)::(x) {
@@ -539,7 +562,16 @@
 
           @:items = this.itemsAt(x:itemX, y:itemY);
           when(items != empty) ::<= {
-            canvas.drawChar(text:if (items[items->keycount-1].discovered) items[items->keycount-1].symbol else '?');
+            @:discovered = items[items->keycount-1].discovered;
+            
+            if (discovered == true)
+              targets->push(:{x:x, y:y});
+              
+            importantItems->push(:{
+              ch:if (discovered == false) '?' else items[items->keycount-1].symbol,
+              x: x,
+              y: y
+            });
           }
 
           when (symbol != empty) ::<= {
@@ -551,7 +583,14 @@
         }        
       }        
               
+      foreach(targets) ::(k, v) {
+        drawTarget(*v);
+        canvas.drawChar(text:v.ch);
+      }
 
+      foreach(importantItems) ::(k, v) {
+        canvas.movePen(x:left + v.x, y:top + v.y);  
+      }
       
   
       canvas.movePen(
@@ -620,7 +659,8 @@
               obscured[itemX][itemY] = false;
         });
       }); 
-      */       
+      */  
+      @:targets = {};     
       for(0, mapSizeH+1)::(y) {
         for(0, mapSizeW+1)::(x) {
           @itemX = ((x + pointer.x - mapSizeW/2))->floor;
@@ -659,9 +699,13 @@
           }
 
           when(items != empty && items->keycount > 0) ::<= {
-            canvas.drawChar(text:if (items[0].discovered) items[0].symbol else '?');
-          }          
-
+            @:discovered = items[items->keycount-1].discovered;
+            
+            if (discovered == true)
+              targets->push(:{x:x, y:y});
+              
+            canvas.drawChar(text:if (discovered == false) '?' else items[items->keycount-1].symbol);
+          }
 
           when (symbol != empty) ::<= {
             canvas.drawChar(text:symbol);
@@ -669,6 +713,9 @@
         }       
       }       
       
+      foreach(targets) ::(k, v) {
+        drawTarget(*v);
+      }
       
       // TODO: walls
       
@@ -710,7 +757,7 @@
         [ 0, 2],
         [ 0, -2],
       ];
-      return ::(area, item, symbol, name) {
+      return ::(area, item, symbol, name, discovered) {
         area.occupy()
         {:::} {        
           @iter = 0;
@@ -730,7 +777,7 @@
             item.x = location.x;
             item.y = location.y;
 
-            this.setItem(data:item, x:location.x, y:location.y, symbol, discovered:true, name);
+            this.setItem(data:item, x:location.x, y:location.y, symbol, discovered, name);
 
 
 
@@ -1037,7 +1084,9 @@
       
       discover ::(data){
         @:item = retrieveItem(data);
-        item.discovered = true;      
+        // ignore discovered == empty, which says "no discovery"
+        if (item.discovered == false)
+          item.discovered = true;      
       },
       
       movePointerToward::(x, y) {
@@ -1197,18 +1246,18 @@
       getItemsUnderPointerRadius ::(radius) <- this.getItemsWithinRadius(x:pointer.x, y:pointer.y, radius),
       
       getItemsWithinRadius ::(x, y, radius) {
-        @out = [];
+        @out = {};
         for(x - (radius / 2)->floor, x + (radius / 2)->ceil)::(xa) {
           for(y - (radius / 2)->floor, y + (radius / 2)->ceil)::(ya) {
             @:at = this.itemsAt(x:xa, y:ya);
             when(at == empty) empty;
             foreach(at)::(key, value) {
-              out->push(value);
+              out[value.data] = value;
             }
           }
         }
         
-        return out;         
+        return out->values;         
       },
 
       getNamedItemsUnderPointer :: {
@@ -1279,16 +1328,17 @@
       
       'isWalled' : ::(x, y) <- isWalled(x, y),
       
-      addToRandomArea ::(item, symbol, name) {
+      addToRandomArea ::(item, symbol, name, discovered) {
         return putArea(
           area: random.pickArrayItem(list:areas),
           item,
           symbol,
-          name
+          name,
+          discovered
         );
       },
       
-      addToRandomEmptyArea ::(item, symbol, name) {
+      addToRandomEmptyArea ::(item, symbol, name, discovered) {
         @areasEmpty = [...areas]->filter(by::(value) <- value.isOccupied == false);
         when (areasEmpty->keycount == 0)
           this.addToRandomArea(item, symbol, name)
@@ -1297,7 +1347,8 @@
           area: random.pickArrayItem(list:areasEmpty),
           item,
           symbol,
-          name
+          name,
+          discovered
         );
       },
       

@@ -123,7 +123,7 @@ Island.database.newEntry(
     possibleSceneryCharacters : [
       '╿', '.', '`', '^', '░'
     ],
-    traits : 0,
+    traits : TRAITS.SPECIAL,
     
     overrideSpecies : empty,
     overrideNativeCreatures : empty,
@@ -569,7 +569,7 @@ Island.database.newEntry(
         state.levelMin = (levelHint - random.number() * (levelHint * 0.4))->ceil;
         state.levelMax = (levelHint + random.number() * (levelHint * 0.4))->floor;
         if (state.levelMin < 1) state.levelMin = 1;
-        if (nameHint != empty)
+        if (nameHint != empty || nameHint == '')
           state.name = (nameHint) => String;
 
         @rarity = 1;
@@ -674,7 +674,7 @@ Island.database.newEntry(
           }
         }
         
-        foreach(state.landmarks) ::(i, v) {
+        foreach(this.landmarks) ::(i, v) {
           v.incrementTime();
         }
       },
@@ -718,12 +718,14 @@ Island.database.newEntry(
       },
       
       addLandmark ::(landmark) {
+      
         state.map.setItem(
           data:landmark, 
           x:landmark.x, 
           y:landmark.y, 
           symbol:landmark.symbol, 
-          name:landmark.legendName
+          name:landmark.legendName,
+          discovered:false
         );
       },
       

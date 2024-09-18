@@ -326,50 +326,24 @@ Location.database.newEntry(data:{
 
 
 
+::<= {
+  @:restockShop::(location) {
+    when(location.ownedBy == empty) empty;
 
-Location.database.newEntry(data:{
-  name: 'Shop',
-  id: 'base:shop',
-  rarity: 100,
-  ownVerb : 'run',
-  category : CATEGORY.BUSINESS,
-  symbol: '$',
-  onePerLandmark : false,
-  minStructureSize : 1,
-
-  descriptions: [
-    "A modest trading shop. Relatively small.",
-    "Extravagant shop with many wild trinkets."
-  ],
-  interactions : [
-    'base:buy:shop',
-    'base:sell:shop',
-    'base:bag:shop',
-    'base:talk',
-    'base:examine'
-  ],
-  
-  aggressiveInteractions : [
-    'base:steal',
-    'base:vandalize',      
-  ],
+    @:addMissing ::(id) {
+      if (location.inventory.items->findIndexCondition(::(value) <- value.base.id == id) == -1)
+        location.inventory.add(item:Item.new(base:Item.database.find(
+          id
+        )));        
+    }
 
 
-  
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract ::(location) {
-    @:Profession = import(module:'game_database.profession.mt');
-    location.ownedBy = location.landmark.island.newInhabitant();      
-    location.ownedBy.profession = Profession.find(id:'base:trader');
-    location.ownedBy.normalizeStats();        
-    location.name = 'Shop';
-    location.inventory.maxItems = 50;
-
-    @:nameGen = import(module:'game_singleton.namegen.mt');
-    @:story = import(module:'game_singleton.story.mt');
-
-    for(0, 30 + (location.ownedBy.level / 4)->ceil)::(i) {
+    addMissing(:'base:arts-crystal');
+    addMissing(:'base:pickaxe');
+    addMissing(:'base:smithing-hammer');
+    addMissing(:'base:wyvern-key');
+    
+    for(location.inventory.items->size, 30 + (location.ownedBy.level / 4)->ceil)::(i) {
       // no weight, as the value scales
       location.inventory.add(item:
         Item.new(
@@ -381,61 +355,78 @@ Location.database.newEntry(data:{
           rngEnchantHint:true
         )
       );
-    }
-
-
-
-    location.inventory.add(item:Item.new(base:Item.database.find(
-      id: 'base:arts-crystal'
-    )));        
-    location.inventory.add(item:Item.new(base:Item.database.find(
-      id: 'base:arts-crystal'
-    )));        
-    location.inventory.add(item:Item.new(base:Item.database.find(
-      id: 'base:pickaxe'
-    )));        
-    location.inventory.add(item:Item.new(base:Item.database.find(
-      id: 'base:smithing-hammer'
-    )));        
-  },
-  onInteract ::(location) {
-    return true;
-
-  },      
-  
-  onCreate ::(location) {
-
-  },
-  
-  onIncrementTime::(location) {
-    @:world = import(module:'game_singleton.world.mt');
-    if (world.time == world.TIME.MIDNIGHT) ::<= {
-      @:items = random.scrambled(:location.inventory.items);
-      
-      foreach(items) ::(k, v) <- location.inventory.remove(:v)
-      
-      if (items->size > 1)
-        items->setSize(:(items->size/2)->floor);
-      
-      for(items->size, 30 + (location.ownedBy.level / 4)->ceil)::(i) {
-        // no weight, as the value scales
-        location.inventory.add(item:
-          Item.new(
-            base:Item.database.getRandomFiltered(
-              filter:::(value) <- value.isUnique == false &&
-                        location.ownedBy.level >= value.levelMinimum
-                        && value.tier <= location.landmark.island.tier
-            ),
-            rngEnchantHint:true
-          )
-        );
-      }
-      
-     
-    }
+    }  
   }
-})
+  Location.database.newEntry(data:{
+    name: 'Shop',
+    id: 'base:shop',
+    rarity: 100,
+    ownVerb : 'run',
+    category : CATEGORY.BUSINESS,
+    symbol: '$',
+    onePerLandmark : false,
+    minStructureSize : 1,
 
+    descriptions: [
+      "A modest trading shop. Relatively small.",
+      "Extravagant shop with many wild trinkets."
+    ],
+    interactions : [
+      'base:buy:shop',
+      'base:sell:shop',
+      'base:bag:shop',
+      'base:talk',
+      'base:examine'
+    ],
+    
+    aggressiveInteractions : [
+      'base:steal',
+      'base:vandalize',      
+    ],
+
+
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {
+      @:Profession = import(module:'game_database.profession.mt');
+      location.ownedBy = location.landmark.island.newInhabitant();      
+      location.ownedBy.profession = Profession.find(id:'base:trader');
+      location.ownedBy.normalizeStats();        
+      location.name = 'Shop';
+      location.inventory.maxItems = 50;
+
+      @:nameGen = import(module:'game_singleton.namegen.mt');
+      @:story = import(module:'game_singleton.story.mt');
+
+      restockShop(location);
+    },
+    onInteract ::(location) {
+      return true;
+
+    },      
+    
+    onCreate ::(location) {
+
+    },
+    
+    onIncrementTime::(location) {
+      @:world = import(module:'game_singleton.world.mt');
+      if (world.time == world.TIME.MIDNIGHT) ::<= {
+        @:items = random.scrambled(:location.inventory.items);
+        
+        foreach(items) ::(k, v) <- location.inventory.remove(:v)
+        
+        if (items->size > 1)
+          items->setSize(:(items->size/2)->floor);
+        
+        restockShop(location);
+        
+       
+      }
+    }
+  })
+}
 Location.database.newEntry(data:{
   name: 'Arts Tecker',
   id: 'base:arts-tecker',

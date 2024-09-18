@@ -125,8 +125,8 @@
       
       
       
-      _map.setItem(data:location, x:left + 2, y: top + 4, symbol: ' ', discovered:true, name:location.name);
-      _map.setItem(data:location, x:left + 3, y: top + 4, symbol: ' ', discovered:true, name:location.name);
+      _map.setItem(data:location, x:left + 2, y: top + 4, symbol: ' ', name:location.name);
+      _map.setItem(data:location, x:left + 3, y: top + 4, symbol: ' ', name:location.name);
         
 
     }  
@@ -294,7 +294,7 @@
         // North       
         (NORTH):::<={
           for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING+1)::(i) {
-            _map.setItem(data:location, x:left+i,   y:top-ZONE_CONTENT_PADDING+1, symbol: '#', discovered:true, name:location.name);
+            _map.setItem(data:location, x:left+i,   y:top-ZONE_CONTENT_PADDING+1, symbol: '#', name:location.name);
             _map.setSceneryIndex(x:left+i,   y:top-ZONE_CONTENT_PADDING+1, symbol:index);
           }
         
@@ -304,7 +304,7 @@
         // East       
         (EAST):::<={
           for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING+1)::(i) {
-            _map.setItem(data:location, x:left+ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING-1, y:top+i, symbol: '#', discovered:true, name:location.name);
+            _map.setItem(data:location, x:left+ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING-1, y:top+i, symbol: '#', name:location.name);
             _map.setSceneryIndex(x:left+ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING-1, y:top+i, symbol:index);
           }
 
@@ -315,7 +315,7 @@
         // West       
         (WEST):::<={
           for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING+1)::(i) {
-            _map.setItem(data:location, x:left-ZONE_CONTENT_PADDING+1, y:top+i, symbol: '#', discovered:true, name:location.name);
+            _map.setItem(data:location, x:left-ZONE_CONTENT_PADDING+1, y:top+i, symbol: '#', name:location.name);
             _map.setSceneryIndex(x:left-ZONE_CONTENT_PADDING+1, y:top+i, symbol:index);
           }
         },
@@ -325,7 +325,7 @@
         // South
         (SOUTH):::<={
           for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING+1)::(i) {
-            _map.setItem(data:location, x:left+i,   y:top+ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING-1, symbol: '#', discovered:true, name:location.name);
+            _map.setItem(data:location, x:left+i,   y:top+ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING-1, symbol: '#', name:location.name);
             _map.setSceneryIndex(x:left+i,   y:top+ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING-1, symbol:index);
           }
 
@@ -376,8 +376,8 @@
         _map.clearScenery(x:left + 2, y: top + 4);
         _map.clearScenery(x:left + 3, y: top + 4);
 
-        _map.setItem(data:location, x:left + 2, y: top + 4, symbol: ' ', discovered:true, name:location.name);
-        _map.setItem(data:location, x:left + 3, y: top + 4, symbol: ' ', discovered:true, name:location.name);
+        _map.setItem(data:location, x:left + 2, y: top + 4, symbol: ' ', name:location.name);
+        _map.setItem(data:location, x:left + 3, y: top + 4, symbol: ' ', name:location.name);
         
 
         if (symbol != empty) ::<= {
@@ -393,8 +393,8 @@
         _map.clearScenery(x:left + 8, y: top + 4);
         _map.clearScenery(x:left + 9, y: top + 4);
         
-        _map.setItem(data:location, x:left + 8, y: top + 4, symbol: ' ', discovered:true, name:location.name);
-        _map.setItem(data:location, x:left + 9, y: top + 4, symbol: ' ', discovered:true, name:location.name);
+        _map.setItem(data:location, x:left + 8, y: top + 4, symbol: ' ', name:location.name);
+        _map.setItem(data:location, x:left + 9, y: top + 4, symbol: ' ', name:location.name);
         
 
         if (symbol != empty) ::<= {
@@ -438,8 +438,8 @@
       _map.clearScenery(x:left + 2, y: top + 7);
       _map.clearScenery(x:left + 3, y: top + 7);
       
-      _map.setItem(data:location, x:left + 2, y: top + 7, symbol: ' ', discovered:true, name:location.name);
-      _map.setItem(data:location, x:left + 3, y: top + 7, symbol: ' ', discovered:true, name:location.name);
+      _map.setItem(data:location, x:left + 2, y: top + 7, symbol: ' ', name:location.name);
+      _map.setItem(data:location, x:left + 3, y: top + 7, symbol: ' ', name:location.name);
 
       
       if (symbol != empty) ::<= {

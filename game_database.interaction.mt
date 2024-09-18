@@ -359,6 +359,7 @@ Interaction.newEntry(
             talkee.interactPerson(
               party,
               location,
+              skipIntro: true,
               onDone::{
                 windowEvent.queueMessage(text:'You finish your drink.');                
               }

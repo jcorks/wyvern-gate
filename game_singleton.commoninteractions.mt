@@ -500,7 +500,7 @@ return {
   person : {
     fetchQuestStart : InteractionMenuEntry.new(
       name: 'Need something?',
-      keepInteractionMenu : false,
+      keepInteractionMenu : true,
       filter ::(entity) {
         @:world = import(module:'game_singleton.world.mt');
         @:party = world.party;

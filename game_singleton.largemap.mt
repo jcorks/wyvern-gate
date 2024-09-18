@@ -147,8 +147,8 @@
     @:clearScenery::(map, x, y) {
       @index = map.addScenerySymbol(character:' ');
 
-      for(x-2, x+3) ::(ix) {
-        for(y-2, y+3) ::(iy) {
+      for(x-1, x+2) ::(ix) {
+        for(y-1, y+2) ::(iy) {
           map.setSceneryIndex(x:ix, y:iy, symbol:index);
           map.clearScenery
         }

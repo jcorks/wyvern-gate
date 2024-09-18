@@ -3121,50 +3121,132 @@ Item.database.newEntry(data : {
 
 
   
+::<= {
+  // The keys have qualifiers not normal for 
+  // average objects to highlight their power.
+  @:keyQualifiers = [
+    'Mysterious',
+    'Sentimental',
+    'Lucid',
+    'Impressive',
+    'Foolish',
+    'Placid',
+    'Superb',
+    'Remarkable',
+    'Sordid',
+    'Rusty',
+    'Remarkable',
+    'Rough',
+    'Wise',
+    'Faint',
+    'Feeble',
+    'Ethereal',
+    'Romantic',
+    'Belligerent',
+    'Ancient',
+    'Wakeful',
+    'Tawdry',
+    'Gruesome',
+    'Shivering',
+    'Obeisant',
+    'Cheerful',
+    'Curious',
+    'Sincere',
+    'Truthful',
+    'Wealthy',
+    'Righteous',
+    'Recondite',
+    'Faded',
+    'Mellow',
+    'Evanescent',
+    'Nascent',
+    'Vague',
+    'Honorable',
+    'Placid',
+    'Elated',
+    'Shivering',
+    'Miscreant',
+    'Abstract',
+    'Wily',
+    'Witty',
+    'Inquisitive',
+    'Ill-fated',
+    'Acrid',
+    'Simple',
+    'Overwrought',
+    'Abrupt',
+    'Hypnotic',
+    'Languid',
+    'Bashful',
+    'Knowledgeable',
+    'Illustrious',
+    'Perpetual',
+    'Puzzling',
+    'Vacuous',
+    'Boorish',
+    'Direful',
+    'Steady',
+    'Cynical',
+    'Chivalrous',
+    'Imminent',
+    'Ceaseless',
+    'Careless',
+    'Ubiquitous',
+    'Unending',
+    'Relentless'
+  ];
+  Item.database.newEntry(data : {
+    name : "Wyvern Key",
+    id : 'base:wyvern-key',
+    description: 'A key to another island. The key is huge, dense, and requires 2 hands to wield. In fact, it is so large and sturdy that it could even be wielded as a weapon in dire circumstances.',
+    examine : '',
+    equipType: TYPE.TWOHANDED,
+    rarity : 100,
+    weight : 10,
+    canBeColored : true,
+    basePrice: 1000,
+    keyItem : false,
+    hasSize : false,
+    tier: 0,
+    levelMinimum : 1000000000,
+    canHaveEnchants : false,
+    canHaveTriggerEnchants : false,
+    enchantLimit : 0,
+    hasQuality : false,
+    hasMaterial : false,
+    isApparel : false,  isUnique : true,
+    useTargetHint : USE_TARGET_HINT.ONE,
+    possibleArts : [
+    ],
 
-Item.database.newEntry(data : {
-  name : "Wyvern Key",
-  id : 'base:wyvern-key',
-  description: 'A key to another island.',
-  examine : '',
-  equipType: TYPE.TWOHANDED,
-  rarity : 100,
-  weight : 10,
-  canBeColored : false,
-  basePrice: 1000,
-  keyItem : false,
-  hasSize : false,
-  tier: 0,
-  levelMinimum : 1000000000,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
-  enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : true,
-  useTargetHint : USE_TARGET_HINT.ONE,
-  possibleArts : [
-  ],
-
-  // fatigued
-  blockPoints : 2,
-  equipMod : StatSet.new(
-    ATK: 15,
-    SPD: -5,
-    DEX: -5
-  ),
-  useEffects : [
-  ],
-  equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP  |
-    ATTRIBUTE.METAL
-  ,
-  onCreate ::(item, user, creationHint) {   
-  }
-  
-})  
-
+    // fatigued
+    blockPoints : 2,
+    equipMod : StatSet.new(
+      ATK: 15,
+      SPD: -5,
+      DEX: -5
+    ),
+    useEffects : [
+    ],
+    equipEffects : [],
+    attributes : 
+      ATTRIBUTE.SHARP  |
+      ATTRIBUTE.METAL
+    ,
+    onCreate ::(item, user, creationHint) {
+      @:capitalize = import(:'game_function.capitalize.mt');
+      item.name = random.pickArrayItem(:keyQualifiers) + ' Key (' + capitalize(:item.color.name) + ')';
+      @:world = import(module:'game_singleton.world.mt');
+      @:Island = import(:'game_mutator.island.mt');
+      breakpoint();
+      item.setIslandGenAttributes(
+        levelHint : if (world != empty && world.island != empty) (world.island.levelMax + 1)*1.2 else 1,
+        tierHint : if (world != empty && world.island != empty) world.island.tier + 1 else 0,
+        idHint : Island.database.getRandom().id
+      );
+    }
+  })  
+}
 
 
 }
@@ -3310,7 +3392,7 @@ Item.database.newEntry(data : {
           'the Arts "' + Arts.find(id:state.arts[0]).name + '" and "' + Arts.find(id:state.arts[1]).name + '" become available in battle. '
       )
     ),
-    if (state.size == empty) '' else 'It is ' + sizeToString(state) + '. ',
+    if (state.size == -1) '' else 'It is ' + sizeToString(state) + '. ',
     if (state.hasEmblem) (
       if (base.isApparel) 
         'The maker\'s emblem is sewn on it. '
@@ -3354,7 +3436,7 @@ Item.database.newEntry(data : {
     customPrefix : '',
     customName : '',
     hasEmblem : false,
-    size : 0,
+    size : -1,
     price : 0,
     color : empty,
     islandID : 0,
@@ -3657,10 +3739,11 @@ Item.database.newEntry(data : {
     },
       
       
-    setIslandGenAttributes ::(levelHint => Number, nameHint => String, tierHint => Number, extraLandmarks, idHint) {
+    setIslandGenAttributes ::(levelHint => Number, nameHint, tierHint => Number, extraLandmarks, idHint) {
       @:state = _.state;
       state.islandLevelHint = levelHint;
-      state.islandNameHint = nameHint;
+      if (nameHint)
+        state.islandNameHint = nameHint;
       state.islandTierHint = tierHint;
       state.islandExtraLandmarks = extraLandmarks;
       state.islandIDhint = if (idHint == empty) 'base:normal-island' else idHint;
@@ -3698,6 +3781,9 @@ Item.database.newEntry(data : {
       _.container.remove(item:_.this);
     },
       
+    color : {
+      get ::<- _.state.color
+    },
       
     price : {
       get ::<-_.state.price,

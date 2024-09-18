@@ -1132,7 +1132,7 @@ Landmark.database.newEntry(
       incrementTime ::{
         this.updateTitle();
         
-        state.base.incrementTime();
+        state.base.onIncrementTime();
         
         foreach(this.locations) ::(k, v) {
           v.incrementTime();
@@ -1275,15 +1275,16 @@ Landmark.database.newEntry(
       },
 
       addLocation ::(location, width, height) {
+        breakpoint();
         location.landmark = this;
         @:loc = location;
         
-        @:defaultAdd ::{
+        @:defaultAdd ::(discovered){
           when (width == empty && height == empty)
-            state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered:true, name:loc.name);
+            state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered, name:loc.name);
           for(loc.x, width + loc.x) ::(ix) {
             for(loc.y, height + loc.y) ::(iy) {
-              state.map.setItem(data:loc, x:ix, y:iy, symbol: loc.base.symbol, discovered:true, name:loc.name);            
+              state.map.setItem(data:loc, x:ix, y:iy, symbol: loc.base.symbol, discovered, name:loc.name);            
             }
           }
                 
@@ -1291,15 +1292,15 @@ Landmark.database.newEntry(
 
         if (state.base.landmarkType == TYPE.DUNGEON) ::<= {
           if (loc.x == 0 && loc.y == 0)
-            state.map.addToRandomEmptyArea(item:loc, symbol: loc.base.symbol, name:loc.name)
+            state.map.addToRandomEmptyArea(item:loc, symbol: loc.base.symbol, name:loc.name, discovered:false)
           else
-            defaultAdd();
+            defaultAdd(discovered:false);
           
         } else if (state.base.landmarkType == TYPE.STRUCTURE) ::<= {
           if (structureMapBuilder != empty)
             structureMapBuilder.addLocation(location:loc)
           else  
-            defaultAdd();
+            defaultAdd(discovered:false);
 
         } else 
           defaultAdd();
