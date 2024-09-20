@@ -585,11 +585,11 @@
               
       foreach(targets) ::(k, v) {
         drawTarget(*v);
-        canvas.drawChar(text:v.ch);
       }
 
       foreach(importantItems) ::(k, v) {
         canvas.movePen(x:left + v.x, y:top + v.y);  
+        canvas.drawChar(text:v.ch);
       }
       
   
@@ -660,7 +660,8 @@
         });
       }); 
       */  
-      @:targets = {};     
+      @:targets = {};   
+      @:importantItems = {};  
       for(0, mapSizeH+1)::(y) {
         for(0, mapSizeW+1)::(x) {
           @itemX = ((x + pointer.x - mapSizeW/2))->floor;
@@ -704,7 +705,11 @@
             if (discovered == true)
               targets->push(:{x:x, y:y});
               
-            canvas.drawChar(text:if (discovered == false) '?' else items[items->keycount-1].symbol);
+            importantItems->push(:{
+              ch:if (discovered == false) '?' else items[items->keycount-1].symbol,
+              x: x,
+              y: y
+            });
           }
 
           when (symbol != empty) ::<= {
@@ -716,6 +721,13 @@
       foreach(targets) ::(k, v) {
         drawTarget(*v);
       }
+
+      foreach(importantItems) ::(k, v) {
+        breakpoint();
+        canvas.movePen(x:v.x, y:v.y);  
+        canvas.drawChar(text:v.ch);
+      }
+
       
       // TODO: walls
       

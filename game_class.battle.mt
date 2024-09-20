@@ -439,7 +439,7 @@
         entityTurn = ent;
 
         @:world = import(module:'game_singleton.world.mt');
-        world.stepTime();
+        world.incrementTime();
 
         windowEvent.queueMessage(
           text: 'It is now ' + ent.name + '\'s turn.'

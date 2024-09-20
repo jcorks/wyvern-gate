@@ -607,7 +607,7 @@ Location.database.newEntry(data:{
             filter::(value) <- (
               value.isUnique == false && 
               location.ownedBy.level >= value.levelMinimum &&
-              value.attributes & Item.database.statics.ATTRIBUTE.METAL
+              value.attributes & Item.ATTRIBUTE.METAL
             )
           )
         )

@@ -1109,7 +1109,8 @@ Landmark.database.newEntry(
       updateTitle ::(override)  {
         if (override) 
           state.overrideTitle = override;
-          
+
+        when (this.map == empty) empty;          
         when (state.overrideTitle != '')
           this.map.title = state.overrideTitle;
         
@@ -1186,7 +1187,7 @@ Landmark.database.newEntry(
         {:::} {
           forever ::{
             when(world.time != until) send()
-            world.stepTime();
+            world.incrementTime();
           }
         }
         
@@ -1194,7 +1195,7 @@ Landmark.database.newEntry(
         {:::} {
           forever ::{
             when(world.time == until) send()
-            world.stepTime();
+            world.incrementTime();
           }
         }
         this.map.title = this.name + 
@@ -1303,7 +1304,7 @@ Landmark.database.newEntry(
             defaultAdd(discovered:false);
 
         } else 
-          defaultAdd();
+          defaultAdd(discovered:false);
 
         return loc;      
  

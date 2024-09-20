@@ -153,7 +153,7 @@ Island.database.newEntry(
     ],
     minAdditionalLandmarkCount : 1,
     maxAdditionalLandmarkCount : 3,
-    minSize : 50,//80,
+    minSize : 30,//80,
     maxSize : 130, //130,
     events : [
       

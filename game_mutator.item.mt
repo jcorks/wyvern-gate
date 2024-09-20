@@ -3242,7 +3242,7 @@ Item.database.newEntry(data : {
       item.setIslandGenAttributes(
         levelHint : if (world != empty && world.island != empty) (world.island.levelMax + 1)*1.2 else 1,
         tierHint : if (world != empty && world.island != empty) world.island.tier + 1 else 0,
-        idHint : Island.database.getRandom().id
+        idHint : Island.database.getRandomFiltered(::(value) <- (value.traits & Island.TRAITS.SPECIAL) == 0).id
       );
     }
   })  
@@ -3443,7 +3443,7 @@ Item.database.newEntry(data : {
     islandLevelHint : 0,
     islandNameHint : '',
     islandTierHint : 0,
-    islandIDhint : '',
+    islandIDhint : 'base:normal-island',
     islandExtraLandmarks : empty,
     improvementsLeft : 0,
     improvements : 0,
@@ -3739,14 +3739,21 @@ Item.database.newEntry(data : {
     },
       
       
-    setIslandGenAttributes ::(levelHint => Number, nameHint, tierHint => Number, extraLandmarks, idHint) {
+    setIslandGenAttributes ::(levelHint, nameHint, tierHint, extraLandmarks, idHint) {
       @:state = _.state;
-      state.islandLevelHint = levelHint;
+      if (levelHint)  
+        state.islandLevelHint = levelHint;
       if (nameHint)
         state.islandNameHint = nameHint;
-      state.islandTierHint = tierHint;
-      state.islandExtraLandmarks = extraLandmarks;
-      state.islandIDhint = if (idHint == empty) 'base:normal-island' else idHint;
+        
+      if (tierHint != empty)
+        state.islandTierHint = tierHint;
+        
+      if (extraLandmarks != empty)
+        state.islandExtraLandmarks = extraLandmarks;
+        
+      if (idHint != empty)
+        state.islandIDhint = idHint;
     },
     
     islandGenAttributes : {

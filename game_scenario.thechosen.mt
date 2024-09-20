@@ -308,6 +308,14 @@ return {
     keyhome.name = "Key: Home";
     party.inventory.add(:keyhome);
 
+
+        @:keyother = Item.new(
+          base: Item.database.find(id:'base:wyvern-key')
+        );
+        party.inventory.add(:keyother);
+
+
+
     /*
     for(0, 4) ::(i) {
       @:key = Item.new(
@@ -1937,7 +1945,6 @@ return {
       }
     })
 
-    breakpoint();
     Location.database.newEntry(data:{
       name: 'Wyvern Throne of Light',
       id: 'thechosen:throne-light',
@@ -4230,10 +4237,10 @@ return {
           
         ],
         possibleSceneryCharacters : [
-          '░', '░', '░', '░'
+          '░', '░', '░', '░', '░'
         ],
         
-        traits : Island.TRAITS.DIVERSE,
+        traits : Island.TRAITS.DIVERSE | Island.TRAITS.SPECIAL,
         
         overrideSpecies : empty,
         overrideNativeCreatures : empty,
@@ -4261,10 +4268,10 @@ return {
           
         ],
         possibleSceneryCharacters : [
-          '_', '-', '~', '-'
+          '_', '-', '~', '-', '-'
         ],
         
-        traits : Island.TRAITS.DIVERSE,
+        traits : Island.TRAITS.DIVERSE | Island.TRAITS.SPECIAL,
         
         overrideSpecies : empty,
         overrideNativeCreatures : empty,
@@ -4293,10 +4300,10 @@ return {
           
         ],
         possibleSceneryCharacters : [
-          '░', '░', '░', '░'
+          '░', '░', '░', '░', '░'
         ],
         
-        traits : Island.TRAITS.DIVERSE,
+        traits : Island.TRAITS.DIVERSE | Island.TRAITS.SPECIAL,
         
         overrideSpecies : empty,
         overrideNativeCreatures : empty,
@@ -4324,10 +4331,10 @@ return {
           
         ],
         possibleSceneryCharacters : [
-          '^', '^', '^', '^'
+          '^', '^', '^', '^', '^'
         ],
         
-        traits : Island.TRAITS.DIVERSE,
+        traits : Island.TRAITS.DIVERSE | Island.TRAITS.SPECIAL,
         
         overrideSpecies : empty,
         overrideNativeCreatures : empty,
