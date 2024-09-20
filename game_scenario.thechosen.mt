@@ -309,10 +309,10 @@ return {
     party.inventory.add(:keyhome);
 
 
-        @:keyother = Item.new(
-          base: Item.database.find(id:'base:wyvern-key')
-        );
-        party.inventory.add(:keyother);
+    @:keyother = Item.new(
+      base: Item.database.find(id:'thechosen:wyvern-key-of-fire')
+    );
+    party.inventory.add(:keyother);
 
 
 
@@ -2558,12 +2558,10 @@ return {
         }
         breakpoint();
         item.setIslandGenAttributes(
-          levelHint:  story.levelHint,//user.level => Number,
-          nameHint:   nameGen.island(),
-          tierHint : 1,
-          extraLandmarks : [
-            'thechosen:shrine-of-ice'
-          ]
+          levelHint:  story.levelHint,
+          nameHint:   'Island of Fire',
+          tierHint : 0,
+          idHint : 'thechosen:island-of-fire'
         );
         
         item.price = 1;
@@ -2623,11 +2621,9 @@ return {
 
         item.setIslandGenAttributes(
           levelHint:  story.levelHint+1,
-          nameHint:   nameGen.island(),
-          tierHint : 2,
-          extraLandmarks : [
-            'thechosen:shrine-of-thunder'
-          ]
+          nameHint:   'Island of Ice',
+          tierHint : 1,
+          idHint : 'thechosen:island-of-ice'
         );
         
         item.price = 1;
@@ -2687,11 +2683,9 @@ return {
 
         item.setIslandGenAttributes(
           levelHint:  story.levelHint+2,
-          nameHint:   nameGen.island(),
-          tierHint : 3,
-          extraLandmarks : [
-            'thechosen:shrine-of-light'
-          ]
+          nameHint:   'Island of Thunder',
+          tierHint : 2,
+          idHint : 'thechosen:island-of-thunder'
         );
         
         item.price = 1;
@@ -2751,12 +2745,9 @@ return {
 
         item.setIslandGenAttributes(
           levelHint:  story.levelHint+3,
-          nameHint:   nameGen.island(),
-          tierHint : 4,
-          extraLandmarks : [
-            'base:lost-shrine'
-          ]
-
+          nameHint:   'Island of Light',
+          tierHint : 3,
+          idHint : 'thechosen:island-of-light'
         );
         
         item.price = 1;
@@ -2780,7 +2771,7 @@ return {
           ['???', '...Selected to seek me, the Wyvern of Light...'],
           ['???', 'If you seek me, I will grant you and anyone with you a wish...'],
           ['???', 'But be warned: others will seek their own wish and will accept no others...'],
-          ['???', 'Come, Chosen: seek me and the Gate Keys among the Shrines...'],
+          ['???', 'Come, Chosen: take this Key and seek me among the islands in the sky...'],
           ['???', '...I will await you, Chosen...'],
         ]
       }
@@ -2797,7 +2788,7 @@ return {
           ['???', '...Come... seek me, the Wyvern of Light...'],
           ['???', 'If you seek me, I will grant you and anyone with you a wish...'],
           ['???', 'But be warned: others will seek their own wish and will accept no others...'],
-          ['???', 'Come, Chosen: seek me and the Gate Keys among the Shrines...'],
+          ['???', 'Come, Chosen: take this Key and seek me among the islands in the sky...'],
           ['???', '...I will await you, Chosen...'],
         ]
       }
@@ -2829,69 +2820,15 @@ return {
             windowEvent.queueMessage(
               speaker: '???',
               text: random.pickArrayItem(list:[
-                'Well, well, well. Look who else is after the key. It\'s ours!',
-                'Get out of here, the key is ours!',
-                'Wait, no! The key is ours! Get out of here!',
-                'We will fight for that key to the death!',
-                'The key is ours! We are the real Chosen!'
+                'Well, well, well. Look who else is going to the Wyvern. Get \'em!',
+                'Get out of here, the wish is ours!',
+                'Wait, no! The wish is ours! Get out of here!',
+                'We will fight for that wish to the death!',
+                'The wish is ours! We are the real Chosen!'
               ])
             );
             
             
-            @:getKey ::{
-              @:Story = import(module:'game_singleton.story.mt');
-              
-              @:foundMessage ::(itemName){
-                windowEvent.queueMessage(text: 'It looks like they dropped something heavy during the fight...');
-                breakpoint();
-                @key;
-                if (itemName != empty && world.party.getItem(condition::(value) <- value.base.id == itemName) == empty) ::<= {
-                  windowEvent.queueMessage(text: '.. is that...?');              
-                  key = Item.new(base:Item.database.find(id:itemName));
-                } else ::<= {
-                  windowEvent.queueMessage(text: '.. huh...? This is just a normal key to another island...');              
-
-                  key = Item.new(base:Item.database.find(id:'base:wyvern-key'));
-                  @:namegen = import(module:'game_singleton.namegen.mt');
-                  @:name = namegen.island();
-                  key.setIslandGenAttributes(
-                    levelHint: world.island.levelMax + 1 + (world.island.levelMax * 1.2)->ceil,
-                    nameHint: name,
-                    tierHint: world.island.tier + 1,
-                    extraLandmarks : [
-                      'base:lost-shrine',
-                    ]
-                  ); 
-                  key.name = 'Key to ' + name  + ' '+romanNum(value:world.island.tier + 1);
-                  itemName = key.name;
-                } 
-                party.inventory.add(item:key);                     
-
-
-                  
-                windowEvent.queueMessage(text: 'The party obtained the ' + key.name + '!');              
-              }
-
-
-              match(island.tier) {
-                (0):::<= { 
-                  foundMessage(itemName:'thechosen:wyvern-key-of-fire');
-                },
-                (1):::<= {
-                  foundMessage(itemName:'thechosen:wyvern-key-of-ice');
-                },
-                (2):::<= {
-                  foundMessage(itemName:'thechosen:wyvern-key-of-thunder');
-                },
-                (3):::<= {
-                  foundMessage(itemName:'thechosen:wyvern-key-of-light');
-                },
-                default: ::<={
-                  foundMessage();
-                }
-              }   
-           
-            }
 
             
             @:battleStart = ::{
@@ -2906,7 +2843,7 @@ return {
                 },
                 onEnd ::(result) {
                   when(world.battle.partyWon()) ::<= { 
-                    getKey();
+                    
                   };
                     
                   @:instance = import(module:'game_singleton.instance.mt');
@@ -4223,7 +4160,7 @@ return {
       data : {
         id : 'thechosen:island-of-fire',
         requiredLandmarks : [
-          'thechosen:wyvern-shrine-of-fire',
+          'thechosen:shrine-of-fire',
           'base:wyvern-gate',
         ],
         possibleLandmarks : [
@@ -4254,7 +4191,7 @@ return {
       data : {
         id : 'thechosen:island-of-ice',
         requiredLandmarks : [
-          'thechosen:wyvern-shrine-of-ice',
+          'thechosen:shrine-of-ice',
           'base:wyvern-gate',
         ],
         possibleLandmarks : [
@@ -4286,7 +4223,7 @@ return {
       data : {
         id : 'thechosen:island-of-thunder',
         requiredLandmarks : [
-          'thechosen:wyvern-shrine-of-thunder',
+          'thechosen:shrine-of-thunder',
           'base:wyvern-gate',
         ],
         possibleLandmarks : [
@@ -4317,7 +4254,7 @@ return {
       data : {
         id : 'thechosen:island-of-light',
         requiredLandmarks : [
-          'thechosen:wyvern-shrine-of-light',
+          'thechosen:shrine-of-light',
           'base:wyvern-gate',
         ],
         possibleLandmarks : [
@@ -4600,77 +4537,6 @@ return {
       passives : [
       ]
     }) 
-
-
-    // override base gate to grant special permission to the wyvern dimensions
-    Interaction.newEntry(
-      data : {
-        name : 'Enter Gate',
-        id :  'base:enter-gate',
-        keepInteractionMenu : false,
-        onInteract ::(location, party) {
-
-          @:keys = [];
-          @:keynames = [];
-          foreach(party.inventory.items)::(index, item) {
-            if (item.base.name->contains(key:'Key')) ::<= {
-              keys->push(value: item);
-              keynames->push(value: item.name);
-            }
-              
-          }
-          when(keys->keycount == 0)
-            windowEvent.queueMessage(text:'Entering a gate requires a key. The party has none.');
-            
-          
-            
-          windowEvent.queueChoices(
-            prompt: 'Enter with which?',
-            choices: keynames,
-            canCancel: true,
-            onChoice:::(choice) {
-              when(choice == 0) empty;
-              canvas.clear();
-              windowEvent.queueMessage(text:'As the key is pushed in, the gate gently whirrs and glows with a blinding light...');
-              windowEvent.queueMessage(text:'As you enter, you feel the world around you fade.', renderable:{render::{canvas.blackout();}});
-              windowEvent.queueMessage(text:'...', renderable:{render::{canvas.blackout();}});
-              
-              windowEvent.queueCustom( 
-                onEnter::{
-                @:Event = import(module:'game_mutator.event.mt');
-                @:Landmark = import(module:'game_mutator.landmark.mt');
-                @:world = import(module:'game_singleton.world.mt');
-                @:instance = import(module:'game_singleton.instance.mt');
-
-                @:which = match(keys[choice-1].name) {
-                  ('Wyvern Key of Fire'):  'thechosen:fire-wyvern-dimension',
-                  ('Wyvern Key of Ice'):   'thechosen:ice-wyvern-dimension',
-                  ('Wyvern Key of Thunder'): 'thechosen:thunder-wyvern-dimension',
-                  ('Wyvern Key of Light'):   'thechosen:light-wyvern-dimension'
-                };
-                @base = if (which != empty) Landmark.database.find(id:which)
-                if (base) ::<= {
-                  @:d = Landmark.new(
-                    island : location.landmark.island,
-                    base
-                  );
-                  instance.visitLandmark(landmark:d);            
-                } else ::<= {
-                  @:key = keys[choice-1];
-                  world.loadIsland(key);
-                  instance.visitCurrentIsland(
-                    atGate:true
-                  );
-                }
-              });
-            }
-          );
-        },
-      }
-    )
-
-
-        
   }    
   
 }

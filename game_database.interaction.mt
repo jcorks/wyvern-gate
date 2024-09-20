@@ -1304,9 +1304,9 @@ Interaction.newEntry(
 
 
             @:key = keys[choice-1];
-            world.loadIsland(:key);
+            world.loadIsland(key);
             breakpoint();
-            instance.visitIsland(
+            instance.visitCurrentIsland(
               atGate:true
             );
           });
