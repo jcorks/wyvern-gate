@@ -145,9 +145,6 @@ Island.database.newEntry(
       'base:forest',
       'base:villa',
       'base:mine',
-      'base:mine',
-      'base:mine',
-      'base:mine',
       'base:village',
       'base:lost-shrine'
     ],

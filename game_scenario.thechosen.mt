@@ -1156,6 +1156,56 @@ return {
   databaseOverrides ::{
     @:Interaction = import(module:'game_database.interaction.mt');
     
+    
+        
+    Interaction.newEntry(
+      data : {
+        name : 'Next Floor',
+        id :  'thechosen:next-floor',
+        keepInteractionMenu : false,
+        onInteract ::(location, party) {
+          breakpoint();
+          if (location.targetLandmark == empty) ::<={
+          
+            if (location.landmark.floor > 5 && random.number() > 0.5 - (0.2*(location.landmark.floor - 5))) ::<= {
+              @:Landmark = import(module:'game_mutator.landmark.mt');
+              
+              
+              
+              location.targetLandmark = Landmark.new(
+                island : location.landmark.island,
+                base:Landmark.database.find(id:'thechosen:shrine-lost-floor')
+              );
+              location.targetLandmark.loadContent();
+
+            } else ::<= {
+              @:Landmark = import(module:'game_mutator.landmark.mt');
+              
+              location.targetLandmark = Landmark.new(
+                island : location.landmark.island,
+                base:Landmark.database.find(id:location.landmark.base.id),
+                floorHint:location.landmark.floor+1
+              )
+              location.targetLandmark.loadContent();
+              
+              location.targetLandmark.name = 'Shrine ('+location.targetLandmark.floor+'F)';
+            }
+
+            location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();      
+          }
+
+          canvas.clear();
+          windowEvent.queueMessage(text:'The party travels to the next floor.', renderable:{render::{canvas.blackout();}});
+          
+          
+          @:instance = import(module:'game_singleton.instance.mt');
+          instance.visitLandmark(landmark:location.targetLandmark, where::(landmark) <- location.targetLandmarkEntry);
+        },
+      }
+    )  
+    
+    
+    
     // replace with key.
     Interaction.newEntry(
       data : {
@@ -1205,6 +1255,49 @@ return {
 
     Landmark.database.newEntry(
       data: {
+        name: 'Shrine: Lost Floor',
+        id: 'thechosen:shrine-lost-floor',
+        symbol : 'M',
+        legendName: 'Shrine',
+        rarity : 100000,    
+        isUnique : true,
+        minLocations : 2,
+        maxLocations : 2,
+        peaceful: true,
+        guarded : false,
+        landmarkType : TYPE.DUNGEON,
+        canSave : false,
+        pointOfNoReturn : true,
+        ephemeral : true,
+        dungeonForceEntrance: false,
+        startingEvents : [
+        ],
+        possibleLocations : [
+          {id: 'base:small-chest', rarity:3},
+        ],
+        requiredLocations : [
+          'thechosen:final-stairs',
+          'base:small-chest'
+        ],
+        mapHint:{},
+        onIncrementTime ::(landmark, island){},
+        onStep ::(landmark, island) {},
+        onCreate ::(landmark, island){
+        },
+        
+        onVisit ::(landmark, island) {
+          @:canvas = import(module:'game_singleton.canvas.mt');
+          @:windowEvent = import(module:'game_singleton.windowevent.mt');
+          windowEvent.queueMessage(text:'It seems this area has been long forgotten...', renderable:{render::<-canvas.blackout()});
+        }
+        
+      }
+    ) 
+
+
+
+    Landmark.database.newEntry(
+      data: {
         name : 'Shrine of Fire',
         id : 'thechosen:shrine-of-fire',
         legendName: 'Shrine',
@@ -1247,8 +1340,8 @@ return {
 
         ],
         requiredLocations : [
-          'base:stairs-down',
-          'base:stairs-down'
+          'thechosen:stairs-down',
+          'thechosen:stairs-down'
         ],
         mapHint:{
           layoutType: DungeonMap.LAYOUT_ALPHA
@@ -1312,7 +1405,7 @@ return {
           {id: 'base:fancy-shop', rarity: 500},
         ],
         requiredLocations : [
-          'base:stairs-down',
+          'thechosen:stairs-down',
           'base:locked-chest'
           
         ],
@@ -1381,7 +1474,7 @@ return {
 
         ],
         requiredLocations : [
-          'base:stairs-down',
+          'thechosen:stairs-down',
           'base:locked-chest',
           'base:small-chest',
 
@@ -1456,7 +1549,7 @@ return {
 
         ],
         requiredLocations : [
-          'base:stairs-down',
+          'thechosen:stairs-down',
           'base:locked-chest',
           'base:small-chest',
           
@@ -1764,6 +1857,53 @@ return {
 
 
 
+      },
+      
+      onIncrementTime::(location, time) {
+      
+      }
+    })
+
+    Location.database.newEntry(data:{
+      name: 'Stairs Down',
+      id: 'thechosen:stairs-down',
+      rarity: 1000000000000,
+      ownVerb : '',
+      symbol: '\\',
+      category : CATEGORY.EXIT,
+      onePerLandmark : false,
+      minStructureSize : 1,
+
+      descriptions: [
+        "Decrepit stairs",
+      ],
+      interactions : [
+        'thechosen:next-floor',
+      ],
+      
+      aggressiveInteractions : [
+      ],
+
+
+      
+      minOccupants : 0,
+      maxOccupants : 0,
+      
+      onFirstInteract ::(location) {},
+      onInteract ::(location) {
+        @open = location.isUnlockedWithPlate();
+        if (!open)  
+          windowEvent.queueMessage(text: 'The entry to the stairway is locked. Perhaps some lever or plate nearby can unlock it.');
+        return open;      
+      },
+      
+      onCreate ::(location) {
+        /*
+        if (location.landmark.island.tier > 1) 
+          if (random.flipCoin()) ::<= {
+            location.lockWithPressurePlate();
+          }
+        */
       },
       
       onIncrementTime::(location, time) {

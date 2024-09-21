@@ -1055,12 +1055,6 @@ Location.database.newEntry(data:{
   onFirstInteract ::(location) {},
   onInteract ::(location) {
     @:world = import(module:'game_singleton.world.mt');
-    when (world.party.inventory.slotsLeft < 1) ::<= {
-      windowEvent.queueMessage(
-        text:'You get the feeling that you should have at least one inventory slot open before continuing. Your inventory is currently full.'
-      );
-      return false;
-    }
     return true;
   },
   
