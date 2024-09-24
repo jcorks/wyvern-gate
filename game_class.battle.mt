@@ -439,7 +439,9 @@
         entityTurn = ent;
 
         @:world = import(module:'game_singleton.world.mt');
-        world.incrementTime();
+        for(0, 6) ::{
+          world.incrementTime(isStep:true);
+        }
 
         windowEvent.queueMessage(
           text: 'It is now ' + ent.name + '\'s turn.'
@@ -1082,55 +1084,55 @@
 
             reactor.react(
               source: entityTurn,
-              onReact::(card) {
-              when(card == empty)
-                tryNext();
+              onReact::(action) {
+                when(action == empty)
+                  tryNext();
+                  
+                  
+                reactor.deck.discardFromHand(:action.card);
+                @art = Arts.find(:action.card.id);
                 
                 
-              reactor.deck.discardFromHand(:card);
-              @art = Arts.find(:card.id);
-              
-              
-              windowEvent.queueMessage(
-                text: reactor.name + ' reacts with the Art ' + art.name + '!'
-              );
-      
-              reactor.ap -= AP_COST;
-              
-              
-              @cancel = art.onAction(
-                level: 1,
-                user: reactor,
-                targets : [entityTurn],
-                targetDefendParts: [0],
-                targetParts : [Entity.normalizedDamageTarget()],
-                turnIndex: 0
-              );
-              
-              when(reactor.isIncapacitated())
-                windowEvent.queueCustom(
-                  onEnter ::{
-                    endTurn();
-                  }
+                windowEvent.queueMessage(
+                  text: reactor.name + ' reacts with the Art ' + art.name + '!'
                 );
+        
+                reactor.ap -= AP_COST;
+                
+                
+                @cancel = art.onAction(
+                  level: 1,
+                  user: reactor,
+                  targets : action.targets,
+                  targetDefendParts: [0],
+                  targetParts : action.targetParts,
+                  turnIndex: 0
+                );
+                
+                when(reactor.isIncapacitated())
+                  windowEvent.queueCustom(
+                    onEnter ::{
+                      endTurn();
+                    }
+                  );
 
-              
-              when(cancel) ::<= {
-                windowEvent.queueMessage(text: reactor.name + '\'s ' + art.name + ' cancelled ' + entityTurn.name + '\'s Art!');
+                
+                when(cancel) ::<= {
+                  windowEvent.queueMessage(text: reactor.name + '\'s ' + art.name + ' cancelled ' + entityTurn.name + '\'s Art!');
+                  windowEvent.queueCustom(
+                    onEnter :: {
+                      onReject();
+                    }
+                  )
+                }
+                  
                 windowEvent.queueCustom(
                   onEnter :: {
-                    onReject();
+                    tryNext();                
                   }
-                )
+                );
               }
-                
-              windowEvent.queueCustom(
-                onEnter :: {
-                  tryNext();                
-                }
-              );
-              
-            })
+            )
           }
           
           tryNext();
@@ -1164,12 +1166,9 @@
         entityTurn.deck.discardFromHand(card:action.card);
         windowEvent.onResolveAll(
           onDone :: {
+            // entityTurn.deck was likely BLASTED due to death
             when (active == false || entityTurn == empty || entityTurn.deck == empty) 
-              error(:'This shouldnt ever happen!!!! in-battle art usage was resolved outside of battle!!! Please fix thank you!!! Hint: make sure an earlier crash didnt occur during a battle. If it did, windowEvent.clearAll() probably wasnt called on game restart.' +
-                '\nBattle?          : ' + active +
-                '\nentityTurn?      : ' + (entityTurn != empty) + 
-                '\nentityTurn.deck? : ' + (entityTurn != empty && entityTurn.deck != empty)
-              );
+              empty;
 
             entityTurn.deck.revealArt(
               user:entityTurn,

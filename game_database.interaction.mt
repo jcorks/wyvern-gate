@@ -806,6 +806,12 @@ Interaction.newEntry(
         onPick::(item) {
           when(item == empty) empty;
 
+
+          when ((item.base.attributes & Item.ATTRIBUTE.KEY_ITEM) != 0)
+            windowEvent.queueMessage(
+              text:'You feel unable to give this away.'
+            )
+
           @price = (item.price * ((0.5 / 5)*0.5))->ceil;
           if (price < 1) ::<= {
             windowEvent.queueMessage(

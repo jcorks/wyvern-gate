@@ -1979,6 +1979,53 @@ Effect.newEntry(
 Effect.newEntry(
   data : {
     name : 'Learn Arts',
+    id : 'base:learn-arts-perfect',
+    description: 'Grants the learning of support Arts for use later.',
+    battleOnly : false,
+    stackable: false,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(
+    ),
+    events : {
+      onAffliction ::(from, item, holder) {
+        @:Arts = import(:'game_database.arts.mt');
+        @:ArtsDeck = import(:'game_class.artsdeck.mt');
+        @:world = import(module:'game_singleton.world.mt');
+
+        @ARTS_COUNT = 4;
+        @:arts = [];
+        for(0, ARTS_COUNT) ::(i) {
+          @:art = Arts.getRandomFiltered(::(value) <- 
+            (value.traits & Arts.TRAITS.SUPPORT) != 0 &&
+            ((value.traits & Arts.TRAITS.SPECIAL) == 0) &&
+            (value.rarity >= Arts.RARITY.RARE)
+          );
+          arts->push(:art.id);
+          world.party.addSupportArt(:art.id);
+        }
+        
+        windowEvent.queueMessage(
+          text: 'New Arts have been revealed!'
+        );
+        
+        ArtsDeck.viewCards(
+          cards: arts->map(::(value) <- ArtsDeck.synthesizeHandCard(id:value))
+        );
+
+        windowEvent.queueMessage(
+          text: 'The Arts were added to the Trunk. They are now available when editing any party member\'s Arts in the Party menu.'
+        );      
+      }
+    }
+  }
+)
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Learn Arts',
     id : 'base:learn-arts',
     description: 'Grants the learning of support Arts for use later.',
     battleOnly : false,
@@ -1998,7 +2045,8 @@ Effect.newEntry(
         for(0, ARTS_COUNT) ::(i) {
           @:art = Arts.getRandomFiltered(::(value) <- 
             (value.traits & Arts.TRAITS.SUPPORT) != 0 &&
-            ((value.traits & Arts.TRAITS.SPECIAL) == 0)         
+            ((value.traits & Arts.TRAITS.SPECIAL) == 0) &&
+            (value.rarity < Arts.RARITY.EPIC)
           );
           arts->push(:art.id);
           world.party.addSupportArt(:art.id);
@@ -3378,9 +3426,15 @@ Effect.newEntry(
     ),
     events : {
       onAffliction ::(from, item, holder, to) {
-        if ([...holder.effectStack.getAll()]->filter(::(value) <- value.id == 'base:banish')->size >= 10) ::<= {
+        @:stackCount = [...holder.effectStack.getAll()]->filter(::(value) <- value.id == 'base:banish')->size;
+        windowEvent.queueMessage(
+          text: holder.name + ' has acquired ' + stackCount + ' stack(s) of Banish!'
+        );
+
+
+        if (stackCount >= 10) ::<= {
           windowEvent.queueMessage(
-            text: holder.name + ' has acquired 10 or more stacks of Banish!'
+            text: holder.name + ' has been banished!'
           );
           
           holder.battle.evict(:holder);
@@ -3395,7 +3449,9 @@ Effect.newEntry(
 @:Effect = Database.new(
   name: "Wyvern.Effect",
   statics : {
-    FLAGS : FLAGS
+    FLAGS : {
+      get ::<- FLAGS
+    }
   },
   attributes : {
     name : String,

@@ -503,6 +503,9 @@
     // world ID for the shop that is owned by the player.
     shopID : -1,
     
+    // world ID for the island where the shop owned by the player resides.
+    islandID : -1,
+    
     // Current popular items (base names)
     popular : empty,
     
@@ -614,6 +617,7 @@
         state.propertiesForSale = [];
         state.cityID = city.worldID;
         state.shopID = shop.worldID;
+        state.islandID = city.island.worldID;
         @world = import(module:'game_singleton.world.mt');
         state.startingG = world.party.inventory.gold;
         state.shopInventory = Inventory.new();
@@ -988,6 +992,12 @@
             text: '"What a terrible day to be stuck here. Guess I won\'t open shop today."'
           );
         }
+
+
+        windowEvent.queueMessage(
+          text: 'You travel back to your shop.'
+        );
+
         
         @:doStart :: {
           windowEvent.queueChoices(
@@ -1475,6 +1485,7 @@
           windowEvent.queueMessage(
             text: 'The day is over.'
           );
+
           
           @:hireesEnd ::(onDone) {
             if (state.hirees->size > 0 && [...state.hirees]->filter(by:::(value) <- value.role == ROLES.DISPATCHED)->size > 0) ::<= {
@@ -2255,8 +2266,24 @@
                       if (hiree.role == ROLES.IN_PARTY)
                         hiree.addToParty();
                     }
+                    @world = import(module:'game_singleton.world.mt');
 
-                    instance.islandTravel();      
+
+                    world.loadIslandID(id:state.islandID);
+                    instance.islandTravel();
+                    
+                    @:landmarks = world.island.landmarks;
+                    @:city = landmarks[landmarks->findIndexCondition(::(value) <- value.worldID == state.cityID)];
+                    
+                    @:locations = city.locations;
+                    @:shop = locations[locations->findIndexCondition(::(value) <- value.worldID == state.shopID)]
+
+                    breakpoint();
+                    instance.visitLandmark(
+                      landmark:city,
+                      where: ::(landmark)<- shop
+                    );        
+
                     windowEvent.jumpToTag(name:'day-start', goBeforeTag:true, doResolveNext:true);
                   }
                 )
@@ -2276,7 +2303,7 @@
             );
           
           pickItemStock(
-            prompt: ' Current shop stock:',
+            prompt: 'Current shop stock:',
             traderState : state,
             inventory: state.shopInventory,
             canCancel: true,
@@ -2328,7 +2355,7 @@
             );
           
           pickItemStock(
-            prompt: ' Current inventory:',
+            prompt: 'Current inventory:',
             traderState : state,
             inventory: world.party.inventory,
             canCancel: true,
@@ -2349,6 +2376,13 @@
                   when(choice == 0) empty;
                   match(choice) {                    
                     (1): ::<= {
+                    
+                      when ((item.base.attributes & Item.ATTRIBUTE.KEY_ITEM) != 0)
+                        windowEvent.queueMessage(
+                          text:'You feel unable to part with this.'
+                        )
+                    
+                    
                       when (state.shopInventory.isFull) ::<= {
                         windowEvent.queueMessage(
                           text: 
@@ -2582,16 +2616,10 @@
       finishDay ::(landmark, island) {
         @world = import(module:'game_singleton.world.mt');
         if (world.time <= 3)
-          if (landmark)
-            landmark.wait(until:4) // late morning
-          else 
-            world.island.wait(until:4)            
+          world.wait(until:4)            
         
 
-        if (landmark)
-          landmark.wait(until:3) // late morning
-        else 
-          world.island.wait(until:3)       
+        world.wait(until:3)       
       },
 
       startShopDay :: {
@@ -2773,7 +2801,7 @@
               {:::} {
                 forever ::{
                   when(world.time == hour)
-                    world.stepTime();
+                    world.incrementTime();
                   send();
                 }
               }   
@@ -3108,37 +3136,29 @@ return {
     {:::} {
       forever ::{
         if (world.time == world.TIME.MORNING) send();
-        world.stepTime();
+        world.incrementTime();
       }
     }
   
     @:keyhome = Item.new(
-      base: Item.database.find(id:'base:wyvern-key')
+      base: Item.database.find(id:'thetrader:wyvern-key')
     );
-    keyhome.name = 'Wyvern Key: Home';
+    keyhome.name = 'Key: Home';
     
     @:Island = import(module:'game_mutator.island.mt');
-    keyhome.addIslandEntry(island:Island.new(
+    keyhome.setIslandGenAttributes(
       nameHint:namegen.island(), 
       levelHint:story.levelHint,
-      tierHint: 0,
-      landmarksHint: [
-        'base:city',
-        'base:city',
-        'base:town',
-        'base:mysterious-shrine',
-        'base:mine',
-        'base:mine',
-        'base:forest',
-        'base:wyvern-gate'
-      ]
-    ));
+      idHint: 'thetrader:starting-island',
+      tierHint: 0  
+    )
     world.loadIsland(key:keyhome, skipSave:true);
 
     party = world.party;
     party.reset();
     party.inventory.maxItems = 70;
     @:island = world.island;
+    party.inventory.add(:keyhome);
 
 
     
@@ -3180,8 +3200,8 @@ return {
     
     
     // setup shop
-    @:city = island.landmarks->filter(by::(value) <- value.base.id == 'base:city')[0];      
-    @:shop = city.locations->filter(by::(value) <- value.base.id == 'base:shop')[0];
+    @:city = island.landmarks->filter(by::(value) <- value.base.id == 'thetrader:city')[0];      
+    @:shop = city.locations->filter(by::(value) <- value.base.id == 'thetrader:shop')[0];
     shop.ownedBy = empty;
 
     data.trader = TraderState.new(
@@ -3194,6 +3214,19 @@ return {
         from:p0
       )
     );
+
+    @:basicArts = [
+      'base:pebble',
+      'base:brace',
+      'base:retaliate',
+      'base:reevaluate',
+      'base:agility',
+      'base:foresight',
+      'base:mind-games',
+      'base:wyvern-prayer'
+    ];
+
+    p0.supportArts = [...basicArts];
 
 
       
@@ -3687,7 +3720,161 @@ return {
   
   
   
+    @:Island = import(module:'game_mutator.island.mt');
+  
+
+    Island.database.newEntry(
+      data : {
+        id : 'thetrader:starting-island',
+        requiredLandmarks : [
+          'thetrader:city',
+          'base:town',
+          'base:wyvern-gate',
+          'thetrader:eternal-shrine'
+        ],
+        possibleLandmarks : [
+          
+        ],
+        minAdditionalLandmarkCount : 0,
+        maxAdditionalLandmarkCount : 0,
+        minSize : 40,//80,
+        maxSize : 60, //130,
+        events : [
+          
+        ],
+        possibleSceneryCharacters : [
+          '╿', '.', '`', '^', '░'
+        ],
+        traits : Island.TRAITS.SPECIAL,
+        
+        overrideSpecies : empty,
+        overrideNativeCreatures : empty,
+        overridePossibleEvents : empty,
+        overrideClimate : empty,  
+      }
+    )
+
+  
+  
     @:Landmark = import(module:'game_mutator.landmark.mt');
+
+
+    Landmark.database.newEntry(
+      data: {
+        name: 'City',
+        id: 'thetrader:city',
+        legendName : 'City',
+        symbol : '|',
+        rarity : 5,
+        minLocations : 12,
+        isUnique : false,
+        maxLocations : 17,
+        peaceful : true,
+        guarded : true,
+        landmarkType : Landmark.TYPE.STRUCTURE,
+        canSave : true,
+        pointOfNoReturn : false,
+        ephemeral : false,
+        dungeonForceEntrance: false,
+        startingEvents : [],
+        possibleLocations : [
+          {id:'base:home', rarity: 1},
+          //{id:'inn', rarity: 3},
+          //{id:'guild', rarity: 25}
+          //{id:'tavern', rarity: 100}
+          //{id:'school', rarity: 7}
+        ],
+        requiredLocations : [
+          'base:shop',
+          'thetrader:shop',
+          'base:shop',
+          'base:arts-tecker',
+          'base:tavern',
+          'base:arena',
+          'base:inn',
+          'base:school',
+          'base:school',
+          'base:blacksmith'      
+        ],
+        mapHint : {
+          roomSize: 30,
+          roomAreaSize: 5,
+          roomAreaSizeLarge: 7,
+          emptyAreaCount: 18,
+          wallCharacter : '|'
+        },
+        onCreate ::(landmark, island){},
+        onIncrementTime ::(landmark, island){},
+        onStep ::(landmark, island) {},
+        onVisit ::(landmark, island) {}
+        
+      }
+    )
+
+    @:DungeonMap = import(module:'game_singleton.dungeonmap.mt');
+
+    Landmark.database.newEntry(
+      data: {
+        name: 'Eternal Shrine',
+        id: 'thetrader:eternal-shrine',
+        symbol : 'M',
+        legendName: 'Shrine',
+        rarity : 100000,    
+        isUnique : true,
+        minLocations : 2,
+        maxLocations : 4,
+        peaceful: false,
+        guarded : false,
+        landmarkType : Landmark.TYPE.DUNGEON,
+        canSave : false,
+        pointOfNoReturn : true,
+        ephemeral : true,
+        dungeonForceEntrance: false,
+        startingEvents : [
+          'base:dungeon-encounters',
+          'base:item-specter',
+          'base:the-beast',
+          'base:the-mirror',
+          'base:treasure-golem',
+          'base:cave-bat'
+        ],
+        possibleLocations : [
+    //          {id: 'Stairs Down', rarity:1},
+          {id: 'base:fountain', rarity:18},
+          {id: 'base:potion-shop', rarity: 17},
+          {id: 'base:enchantment-stand', rarity: 18},
+          {id: 'base:wyvern-statue', rarity: 15},
+          {id: 'base:small-chest', rarity: 16},
+          {id: 'base:locked-chest', rarity: 11},
+          {id: 'base:magic-chest', rarity: 15},
+
+          {id: 'base:healing-circle', rarity:35},
+
+          {id: 'base:clothing-shop', rarity: 100},
+          {id: 'base:fancy-shop', rarity: 50}
+
+        ],
+        requiredLocations : [
+          'base:stairs-down',
+          'base:locked-chest',
+          'base:small-chest',
+          'base:small-chest',
+          'base:warp-point',
+          'base:warp-point'
+        ],
+        mapHint:{
+          layoutType: DungeonMap.LAYOUT_DELTA
+        },
+        onIncrementTime ::(landmark, island){},
+        onStep ::(landmark, island) {},
+        onCreate ::(landmark, island){
+        },
+        onVisit ::(landmark, island) {
+        }
+        
+      }
+    )
+
 
 
     Landmark.database.newEntry(
@@ -3724,7 +3911,9 @@ return {
           outOfBoundsCharacter: '$'
         },
         onCreate ::(landmark, island){},
-        onVisit ::(landmark, island) {}
+        onVisit ::(landmark, island) {},
+        onIncrementTime::(landmark) {},
+        onStep::(landmark) {}
         
       }
     )
@@ -3823,11 +4012,97 @@ return {
         location.ownedBy.healAP(amount:9999, silent:true); 
       },
       
-      onTimeChange::(location, time) {
+      onIncrementTime::(location, time) {
       
       }
     })
   
+
+    Location.database.newEntry(data:{
+      name: 'Your Shop',
+      id: 'thetrader:shop',
+      rarity: 100,
+      ownVerb : 'run',
+      category : Location.CATEGORY.BUSINESS,
+      symbol: '$',
+      onePerLandmark : false,
+      minStructureSize : 1,
+
+      descriptions: [
+        "Your trading shop. It has served you well over the years.",
+      ],
+      interactions : [
+        'base:examine'
+      ],
+      
+      aggressiveInteractions : [
+      ],
+
+
+      
+      minOccupants : 0,
+      maxOccupants : 0,
+      onFirstInteract ::(location) {
+
+      },
+      onInteract ::(location) {
+
+      },      
+      
+      onCreate ::(location) {
+
+      },
+      
+      onIncrementTime::(location) {
+
+      }
+    })
+  
+  
+  
+
+    Item.database.newEntry(data : {
+      name : "Wyvern Key",
+      id : 'thetrader:wyvern-key',
+      description: 'A key to your home where your shop is. The key is huge, dense, and requires 2 hands to wield. In fact, it is so large and sturdy that it could even be wielded as a weapon in dire circumstances.',
+      examine : '',
+      equipType: Item.TYPE.TWOHANDED,
+      rarity : 100,
+      weight : 10,
+      canBeColored : true,
+      basePrice: 1000,
+      keyItem : false,
+      hasSize : false,
+      tier: 0,
+      levelMinimum : 1000000000,
+      canHaveEnchants : false,
+      canHaveTriggerEnchants : false,
+      enchantLimit : 0,
+      hasQuality : false,
+      hasMaterial : false,
+      isApparel : false,  isUnique : true,
+      useTargetHint : Item.USE_TARGET_HINT.ONE,
+      possibleArts : [
+      ],
+
+      // fatigued
+      blockPoints : 2,
+      equipMod : StatSet.new(
+        ATK: 15,
+        SPD: -5,
+        DEX: -5
+      ),
+      useEffects : [
+      ],
+      equipEffects : [],
+      attributes : 
+        Item.ATTRIBUTE.SHARP  |
+        Item.ATTRIBUTE.METAL  |
+        Item.ATTRIBUTE.KEY_ITEM
+      ,
+      onCreate ::(item, user, creationHint) {
+      }
+    });
   
   
     Item.database.newEntry(data : {

@@ -119,6 +119,10 @@ return ::{
           @prof = member.getProfessionProgress(:value);
           when(prof == empty) 
             'Lvl 0';
+
+
+          when(prof.level >= member.profession.arts->size)
+            'Lvl MAX';
             
           return 'Lvl ' + prof.level + ' ' + canvas.renderBarAsString(
             width: 15,
@@ -159,7 +163,7 @@ return ::{
                     
                     [
                       prof.name,
-                      '' + member.getProfessionProgress(:prof).level + ' / ' + prof.arts->size,
+                      '' + (if (member.getProfessionProgress(:prof).level >= prof.arts->size) 'MAX' else member.getProfessionProgress(:prof).level + ' / ' + prof.arts->size),
                       '' + member.getProfessionProgress(:prof).expToNext
                     ]
                   ],

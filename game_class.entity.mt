@@ -300,7 +300,9 @@
     set.level += 1;
     set.exp = 0;
     set.expToNext = level2exp(:set.level);
-    state.professionArts->push(:profession.arts[set.level-1]);
+    @:nextArt = profession.arts[set.level-1];
+    if (nextArt)
+      state.professionArts->push(:nextArt);
   }
   
 }
@@ -627,7 +629,7 @@
       state.equippedProfessionArts = [];
 
       if (state.profession.traits & Profession.TRAITS.NON_COMBAT) ::<= {
-        for(0, 20) ::(i) {
+        for(0, 21) ::(i) {
           this.autoLevelProfession();
         }
       } else 
@@ -1284,10 +1286,12 @@
       amount => Number,
       damageType => Number,
       damageClass => Number,
-      target => Object,
+      target,
       targetPart,
       targetDefendPart
     ){
+      when(target == empty) empty;
+    
       @:this = _.this;
       @:state = _.state;
     
@@ -2025,6 +2029,16 @@
       state.equippedProfessionArts->push(:id);
     },
     
+    removeAllProfessionArts ::{
+      @:state = _.state;
+      state.professionArts = [];
+    },
+    
+    equipAllProfessionArts:: {
+      @:state = _.state;
+      state.equippedProfessionArts = [...state.professionArts];
+    },
+    
     getUnequippedProfessionArts:: {
       @:state = _.state;
 
@@ -2633,9 +2647,10 @@
       @:deck = state.deck;
       @:world = import(module:'game_singleton.world.mt');
       
-      @:chooseReact::(card) {
-        when(card == empty)
+      @:chooseReact::(action) {
+        when(action == empty)
           onReact();
+        @:card = action.card;
 
         @:art = Arts.find(:card.id);
         when (abilitiesUsedBattle != empty && art.oncePerBattle && abilitiesUsedBattle[card.id] == true) ::<= {
@@ -2655,7 +2670,7 @@
 
         if (abilitiesUsedBattle) abilitiesUsedBattle[art.id] = true;
 
-        onReact(:card);
+        onReact(:action);
 
         @:rets = this.effectStack.emitEvent(
           name: 'onPostReact',
@@ -2681,7 +2696,13 @@
                 card,
                 backout
               ) {
-                chooseReact(:card)
+                this.playerUseArt(
+                  card, 
+                  commitAction::(action) {
+                    chooseReact(:action)                    
+                  }
+                );
+              
                 backout();
               },
               
@@ -2692,13 +2713,15 @@
           }
         )
       } else ::<= {
-        @card = state.battleAI.chooseReaction(
+        state.battleAI.chooseReaction(
           source,
-          battle:priv.battle
+          battle:priv.battle,
+          onCommit ::(action) {
+            chooseReact(
+              action
+            );
+          }
         );
-
-        
-        chooseReact(:card);
       }
     },
     

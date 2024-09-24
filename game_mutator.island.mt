@@ -304,6 +304,7 @@ Island.database.newEntry(
             'base:pebble',
             'base:diversify',
             'base:brace',
+            'base:agility',
             'base:mind-games',
             Arts.getRandomFiltered(::(value) <- 
               ((value.traits & Arts.TRAITS.SPECIAL) == 0)
@@ -311,32 +312,39 @@ Island.database.newEntry(
               ((value.traits & Arts.TRAITS.SUPPORT) != 0)
             ).id
           ]
+          entity.autoLevelProfession(:entity.profession);
         }, // tier zero has no mods 
 
         // tier 1: learn 1 to 2 skills
         (1):::<= {
-          for(0, 2) ::(i) {
+          for(0, 1) ::(i) {
             entity.autoLevel();
+            entity.autoLevelProfession(:entity.profession);
           }
           entity.supportArts = [
-            'base:retaliate',
             'base:diversify',
-            'base:brace',  
             'base:mind-games',
             'base:crossed-wires',
             Arts.getRandomFiltered(::(value) <- 
               ((value.traits & Arts.TRAITS.SPECIAL) == 0)
               &&
               ((value.traits & Arts.TRAITS.SUPPORT) != 0)
+            ).id,
+            Arts.getRandomFiltered(::(value) <- 
+              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
+              &&
+              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
             ).id
           ]
+
         },
         
 
         // tier 2: learn 1 to 2 skills and get equips
         (2):::<= {
-          for(0, 4) ::(i) {
+          for(0, 2) ::(i) {
             entity.autoLevel();
+            entity.autoLevelProfession(:entity.profession);
           }
           
           @:Item = import(module:'game_mutator.item.mt');
@@ -358,25 +366,28 @@ Island.database.newEntry(
           
           
           entity.supportArts = [
-            'base:retaliate',
             'base:diversify',
             'base:mind-games',
-            'base:recycle',    
-            'base:cancel',
-            Arts.getRandomFiltered(::(value) <- 
+            'base:recycle'
+          ]
+
+          for(0, 4)::(i) {
+            entity.supportArts->push(:Arts.getRandomFiltered(::(value) <- 
               ((value.traits & Arts.TRAITS.SPECIAL) == 0)
               &&
               ((value.traits & Arts.TRAITS.SUPPORT) != 0)
-            ).id
-          ]
+            ).id)          
+          }
+
         },
         
 
 
         // tier 3: learn 1 to 2 skills and get equips
         (3):::<= {
-          for(0, 6) ::(i) {
+          for(0, 4) ::(i) {
             entity.autoLevel();
+            entity.autoLevelProfession(:entity.profession);
           }
 
           
@@ -398,12 +409,8 @@ Island.database.newEntry(
           );
           
           entity.supportArts = [
-            'base:pebble',
             'base:retaliate',
-            'base:diversify',
-            'base:mind-games',
             'base:crossed-wires',
-            'base:recycle',      
             'base:cancel',
             Arts.getRandomFiltered(::(value) <- 
               ((value.traits & Arts.TRAITS.SPECIAL) == 0)
@@ -411,6 +418,14 @@ Island.database.newEntry(
               ((value.traits & Arts.TRAITS.SUPPORT) != 0)
             ).id                      
           ]
+
+          for(0, 4)::(i) {
+            entity.supportArts->push(:Arts.getRandomFiltered(::(value) <- 
+              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
+              &&
+              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
+            ).id)          
+          }
         },
         
         
@@ -418,6 +433,7 @@ Island.database.newEntry(
         default: ::<= {
           for(0, 8) ::(i) {
             entity.autoLevel();
+            entity.autoLevelProfession(:entity.profession);
           }
 
           
@@ -456,11 +472,10 @@ Island.database.newEntry(
           );
 
           entity.supportArts = [
-            'base:pebble',
             'base:diversify',
             'base:cancel'
           ]
-          for(0, 4)::(i) {
+          for(0, 6)::(i) {
             entity.supportArts->push(:Arts.getRandomFiltered(::(value) <- 
               ((value.traits & Arts.TRAITS.SPECIAL) == 0)
               &&
@@ -472,7 +487,9 @@ Island.database.newEntry(
         }       
         
         
-      }    
+      }  
+      
+      entity.equipAllProfessionArts();  
     }
 
 
@@ -487,22 +504,6 @@ Island.database.newEntry(
       
       },
 
-      wait::(until) {     
-        @:world = import(module:'game_singleton.world.mt');
-        {:::} {
-          forever ::{
-            when(world.time != until) send()
-            this.incrementTime();
-          }
-        }
-        {:::} {
-          forever ::{
-            when(world.time == until) send()
-            this.incrementTime();
-          }
-        }
-
-      },
       
       defaultLoad::(base, createEmpty, worldID, levelHint, nameHint, tierHint, possibleEventsHint, extraLandmarks, hasSpeciesBias) {
         when(createEmpty) empty;

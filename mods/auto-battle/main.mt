@@ -23,9 +23,13 @@ return {
         @:Species = import(module:'game_database.species.mt');
         @:Profession = import(module:'game_database.profession.mt');
     
-    
-        @:island = world.createIsland().island;
-        world.island = island;
+
+        @:keyhome = Item.new(
+          base: Item.database.find(id:'base:wyvern-key')
+        );
+
+        world.loadIsland(key:keyhome, skipSave:true); 
+        @:island = world.island;   
     
         @:getNPC::(data) {
           @:ent = Entity.new(

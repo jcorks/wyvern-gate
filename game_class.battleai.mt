@@ -30,26 +30,20 @@
     @user_;
     @:Entity = import(module:'game_class.entity.mt');        
 
-    @:defaultAttack = ::(battle){
-      user_.deck.discardFromHand(card:random.pickArrayItem(list:user_.deck.hand));
+    @:defaultAttack = ::(onCommit, battle){
       @:enemies = battle.getEnemies(:user_);
 
-      windowEvent.onResolveAll(
-        onDone:: {
+      onCommit(:BattleAction.new(
+        card: ArtsDeck.synthesizeHandCard(id:'base:attack'),
 
-          battle.entityCommitAction(action:BattleAction.new(
-            card: ArtsDeck.synthesizeHandCard(id:'base:attack'),
-
-            targets: [
-              Random.pickArrayItem(list:enemies)
-            ],
-            targetParts : [
-              Entity.normalizedDamageTarget()
-            ],
-            extraData: {}            
-          ));       
-        }
-      );
+        targets: [
+          Random.pickArrayItem(list:enemies)
+        ],
+        targetParts : [
+          Entity.normalizedDamageTarget()
+        ],
+        extraData: {}            
+      ));
     }
 
     
@@ -65,34 +59,52 @@
         user_ = user;
       },
       
-      chooseReaction::(source, battle) {
-        @:enemies = battle.getEnemies(:user_);
-        @:allies = battle.getAllies(:user_);
-        
-        @hand = user_.deck.hand->filter(
-          ::(value) <- Arts.find(id:value.id).usageHintAI != Arts.USAGE_HINT.DONTUSE &&
-                 Arts.find(id:value.id).kind == Arts.KIND.REACTION
-        );
-        
-        when(hand->size == 0) empty;
-        when (random.try(percentSuccess:40)) empty;
-        
-        @:sourceIsEnemy = enemies->findIndex(:source) != -1;
-        hand = random.scrambled(:hand);
+      chooseReaction::(source, battle, onCommit) {
+        breakpoint();
 
-        when(sourceIsEnemy) hand[0];
+        @:cardI = ::<= {
+          @:enemies = battle.getEnemies(:user_);
+          @:allies = battle.getAllies(:user_);
+
+
         
-        return {:::} {
-          foreach(hand) ::(k, v) {
-            @art = Arts.find(id:v.id);
-            if (art.usageHintAI != Arts.USAGE_HINT.DEBUFF &&
-              art.usageHintAI != Arts.USAGE_HINT.OFFENSIVE)
-              send(:v);
-          } 
+          @hand = [...user_.deck.hand]->map(to::(value) <- {
+              card:value, 
+              overrideTargets:(Arts.find(id:value.id).shouldAIuse(
+                  user:user_,
+                  enemies,
+                  allies
+              ))
+          });
+
+          
+          @hand = hand->filter(
+            ::(value) <- Arts.find(id:value.card.id).usageHintAI != Arts.USAGE_HINT.DONTUSE &&
+                         Arts.find(id:value.card.id).kind == Arts.KIND.REACTION
+          );
+          
+          when(hand->size == 0) empty;
+          when (random.try(percentSuccess:40)) empty;
+          
+          return random.pickArrayItem(:hand);
         }
+
+        when(cardI == empty)
+          onCommit();
+          
+  
+        this.commitTargettedAction(
+          card:cardI.card,
+          battle,
+          condition : if (Arts.find(id:cardI.card.id).usageHintAI == Arts.USAGE_HINT.HEAL) ::<= {
+            ::(value) <- value.hp < value.stats.HP
+          },
+          overrideTargets: cardI.overrideTargets,
+          onCommit
+        );
       },
 
-      commitTargettedAction::(battle, card, condition, overrideTargets) {
+      commitTargettedAction::(battle, onCommit, card, condition, overrideTargets) {
         @:enemies = battle.getEnemies(:user_);
         @:allies = battle.getAllies(:user_);
         @:art = Arts.find(id:card.id);
@@ -141,19 +153,19 @@
           targets = [...targets]->filter(:condition);
         
         when (targets->size == 0 && art.targetMode != Arts.TARGET_MODE.NONE)
-          defaultAttack(battle);
+          defaultAttack(battle, onCommit);
         
         foreach(targets) ::(index, t) {
           targetParts[index] = Entity.normalizedDamageTarget();
         }
         windowEvent.onResolveAll(
           onDone:: {
-            battle.entityCommitAction(action:BattleAction.new(
+            onCommit(:BattleAction.new(
               card,
               targets: targets,
               targetParts : targetParts,
               extraData: {}            
-            ));   
+            ));  
           }
         );      
       },
@@ -172,7 +184,10 @@
             card: ArtsDeck.synthesizeHandCard(id:'base:wait'),
             targets: [],
             targetParts : [],
-            extraData: {}            
+            extraData: {},            
+            onCommit ::(action) {
+              battle.entityCommitAction(action); 
+            }
           ));
       
         
@@ -202,7 +217,10 @@
             this.commitTargettedAction(
               battle,
               card:v,
-              overrideTargets:if (full.overrideTargets->type != Boolean) full.overrideTargets
+              overrideTargets:if (full.overrideTargets->type != Boolean) full.overrideTargets,
+              onCommit ::(action) {
+                battle.entityCommitAction(action); 
+              }
             );
             projectedAP -= 2;
             hand->remove(key:hand->findIndex(value:full));
@@ -211,12 +229,24 @@
 
 
         when(hand->keycount == 0)
-          defaultAttack(battle);
+          defaultAttack(
+            battle,
+            onCommit ::(action) {
+              battle.entityCommitAction(action); 
+            }
+          ); 
+         
       
           
         @c = Random.pickArrayItem(list:hand->filter(by::(value) <- Arts.find(id:value.card.id).kind == Arts.KIND.ABILITY));
         when (c == empty)
-          defaultAttack(battle);
+          defaultAttack(
+            battle,
+            onCommit ::(action) {
+              battle.entityCommitAction(action); 
+            }
+          ); 
+         
 
         @:ability = Arts.find(id:c.card.id);
         
@@ -229,11 +259,22 @@
         
         when (party != empty && [...enemies]->filter(::(value) <- party.isMember(:value))->size > 0 &&
             random.try(percentSuccess:80 - (tier * 30)))
-            defaultAttack(battle);
+            defaultAttack(
+              battle,
+              onCommit ::(action) {
+                battle.entityCommitAction(action); 
+              }
+            ); 
+           
 
         // need enough to use an art
         when (projectedAP < 2)
-            defaultAttack(battle); 
+            defaultAttack(
+              battle,
+              onCommit ::(action) {
+                battle.entityCommitAction(action); 
+              }
+            ); 
            
         @condition;
         
@@ -241,7 +282,15 @@
           condition = ::(value) <- value.hp < value.stats.HP
         }
         
-        this.commitTargettedAction(card:c.card, battle, condition, overrideTargets:c.overrideTargets);
+        this.commitTargettedAction(
+          card:c.card, 
+          battle, 
+          condition, 
+          overrideTargets:c.overrideTargets,
+          onCommit ::(action) {
+            battle.entityCommitAction(action); 
+          }
+        );
       }
     }   
   }  

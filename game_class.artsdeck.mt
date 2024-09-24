@@ -192,6 +192,11 @@
     },
     
     viewCards ::(user, cards, onChoice) {
+      when(cards->size == 0)
+        windowEvent.queueMessage(
+          text: user.name + ' has no Arts in their hand.'
+        );
+    
       @bg;
       windowEvent.queueCustom(
         onEnter::{

@@ -440,7 +440,7 @@ return {
             onChoice ::(choice) {
               when(choice == 0) empty;
               
-              landmark.wait(:if(choice == 1) world.TIME.LATE_MORNING else world.TIME.LATE_EVENING);
+              world.wait(:if(choice == 1) world.TIME.LATE_MORNING else world.TIME.LATE_EVENING);
                 
               windowEvent.queueMessage(
                 text: 'The party waits for some time to pass...',
@@ -479,10 +479,7 @@ return {
             when(choice == 0) empty;
             
             @:until = choice-1;
-            if (landmark)
-              landmark.wait(until)
-            else 
-              island.wait(until)
+            world.wait(until)
               
             windowEvent.queueMessage(
               text: 'The party waits...',

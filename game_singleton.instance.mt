@@ -712,53 +712,49 @@ return empty;
       },      
       
       visitCurrentIsland ::(restorePos, atGate, onReady) {      
-        @:doVisit :: {
-          @:island = world.island;
-          
-          // check if we're AT a location.
-          island.map.title = "(Map of " + island.name + ')';
+        @:island = world.island;
+        
+        // check if we're AT a location.
+        island.map.title = "(Map of " + island.name + ')';
 
-          if (restorePos == empty) ::<= {
-            if (atGate == empty) ::<= {
-              @somewhere = LargeMap.getAPosition(map:island.map);
-            }
+        if (restorePos == empty) ::<= {
+          if (atGate == empty) ::<= {
+            @somewhere = LargeMap.getAPosition(map:island.map);
           }
-
-          @hasVisitIsland;
-          this.islandTravel();
-          if (windowEvent.canJumpToTag(name:'VisitIsland'))
-            windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:if(atGate == empty)true else false);
-          hasVisitIsland = true;
-          when (restorePos == empty && atGate != empty) ::<= {
-            @gate = island.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
-            when(gate->size == 0) empty;
-            
-            gate = gate[0];
-            island.map.setPointer(
-              x: gate.x,
-              y: gate.y
-            );         
-            
-            
-            @gategate = gate.locations->filter(by:::(value) <- value.base.id == 'base:gate');
-            when(gategate->size == 0) empty;
-            
-            this.visitLandmark(
-              landmark:gate,
-              where: ::(landmark)<- gategate[0]
-            );        
-            
-            if (hasVisitIsland && onReady) ::<= {
-              windowEvent.onResolveAll(onDone:onReady)
-            } else
-              if (onReady)
-                onReady();
-          }
-          if (onReady)
-            onReady();
         }
 
-        doVisit();        
+        @hasVisitIsland;
+        this.islandTravel();
+        if (windowEvent.canJumpToTag(name:'VisitIsland'))
+          windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:if(atGate == empty)true else false);
+        hasVisitIsland = true;
+        when (restorePos == empty && atGate != empty) ::<= {
+          @gate = island.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
+          when(gate->size == 0) empty;
+          
+          gate = gate[0];
+          island.map.setPointer(
+            x: gate.x,
+            y: gate.y
+          );         
+          
+          
+          @gategate = gate.locations->filter(by:::(value) <- value.base.id == 'base:gate');
+          when(gategate->size == 0) empty;
+          
+          this.visitLandmark(
+            landmark:gate,
+            where: ::(landmark)<- gategate[0]
+          );        
+          
+          if (hasVisitIsland && onReady) ::<= {
+            windowEvent.onResolveAll(onDone:onReady)
+          } else
+            if (onReady)
+              onReady();
+        }
+        if (onReady)
+          onReady();
       },  
 
       islandTravel ::{
@@ -769,6 +765,7 @@ return empty;
         
         @enteredChoices = false;
         @underFoot;
+        @steps = 0;
         @islandTravel = ::{
           windowEvent.queueCursorMove(
             leftWeight: 1,
@@ -817,8 +814,11 @@ return empty;
                 x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 2 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -2 else 0,
                 y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  2 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -2 else 0
               );
-              island.map.title = world.timeString + '           ';
-              world.incrementTime();
+              island.map.title = island.name + ' : ' + world.timeString + '           ';
+              steps += 1;
+              
+              if (steps%2 == 0)
+                world.incrementTime();
               island.step();
               
               // cancel if we've arrived somewhere
@@ -927,6 +927,8 @@ return empty;
       
       visitLandmark ::(landmark => Landmark.type, where) {
         @:world = import(module:'game_singleton.world.mt');
+        when (landmark.base.onVisit(landmark, island:landmark.island) == false) empty;
+
 
         world.landmark = landmark;        
         if (where != empty) ::<= {
@@ -945,7 +947,6 @@ return empty;
         @:party = world.party;
         
         landmark.updateTitle();
-        landmark.base.onVisit(landmark, island:landmark.island);
         @:island = world.island;
 
 
@@ -1046,7 +1047,7 @@ return empty;
               x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
               y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
             )) empty;
-            world.incrementTime();
+            world.incrementTime(isStep:true);
             landmark.step();
             stepCount += 1;
 
@@ -1076,12 +1077,14 @@ return empty;
         set ::(value) <- onLoadState = value
       },
       
-      savestate ::(nameOverride, saveOverride) <-
+      savestate ::(nameOverride, saveOverride) {
+        when((world.saveName == empty || world.saveName == '') && 
+             (nameOverride == empty   || nameOverride == '')) empty;
         onSaveState(
           slot:if (nameOverride) nameOverride else world.saveName, 
           data:if (saveOverride) saveOverride else world.save()
         )
-      ,
+      },
 
       save ::{  
         @:State = import(module:'game_class.state.mt');

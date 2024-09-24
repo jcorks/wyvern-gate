@@ -151,9 +151,9 @@ Landmark.database.newEntry(
     legendName: 'Mine',
     symbol : 'O',
     rarity : 5,
-    minLocations : 3,
+    minLocations : 10,
     isUnique : false,
-    maxLocations : 6,
+    maxLocations : 15,
     peaceful : true,
     guarded : false,
     landmarkType : TYPE.DUNGEON,
@@ -177,7 +177,7 @@ Landmark.database.newEntry(
       roomSize: 15,
       roomAreaSize: 5,
       roomAreaSizeLarge: 10,
-      emptyAreaCount: 5
+      emptyAreaCount: 15
     },
     onCreate ::(landmark, island){},
     onIncrementTime ::(landmark, island){},
@@ -360,7 +360,12 @@ Landmark.database.newEntry(
     onStep ::(landmark, island) {},
     onCreate ::(landmark, island){
     },
-    onVisit ::(landmark, island) {}
+    onVisit ::(landmark, island) {
+      when (landmark.data.isCompleted == true) ::<= {
+        windowEvent.queueMessage(text:'The entrance looks to be covered in rubble. There\'s no way to enter it again.');
+        return false;
+      }
+    }
     
   }
 )
@@ -389,7 +394,7 @@ Landmark.database.newEntry(
     ],
     requiredLocations : [
       'base:treasure-pit',
-      'base:treasure-pit',
+      'base:small-chest',
       'base:small-chest'
     ],
     mapHint:{},
@@ -445,8 +450,11 @@ Landmark.database.newEntry(
     onIncrementTime ::(landmark, island){},
     onStep ::(landmark, island) {},
     onVisit ::(landmark, island) {
+      @:world = import(module:'game_singleton.world.mt');
       windowEvent.queueMessage(text:'The party enters the pit full of treasure.');
-     
+      foreach(world.island.landmarks) ::(k, v) {
+        v.data.isCompleted = true;
+      }
     }
     
     
@@ -1182,28 +1190,6 @@ Landmark.database.newEntry(
         get ::<- state.mapEntityController
       },
       
-      wait ::(until) {
-        // if already that time, wait till no longer
-        {:::} {
-          forever ::{
-            when(world.time != until) send()
-            world.incrementTime();
-          }
-        }
-        
-        // then wait until the next time that time appears
-        {:::} {
-          forever ::{
-            when(world.time == until) send()
-            world.incrementTime();
-          }
-        }
-        this.map.title = this.name + 
-          if (state.base.landmarkType == TYPE.DUNGEON) ' - Unknown Time' else 
-          (' - ' + world.timeString)
-        ;
-      },
-      
       kind : {
         get :: {
           return state.base.name;
@@ -1276,7 +1262,6 @@ Landmark.database.newEntry(
       },
 
       addLocation ::(location, width, height) {
-        breakpoint();
         location.landmark = this;
         @:loc = location;
         

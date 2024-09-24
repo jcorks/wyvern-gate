@@ -272,7 +272,7 @@ return {
     @:keyhome = Item.new(
       base: Item.database.find(id:'base:wyvern-key')
     );
-    keyhome.name = 'Wyvern Key: Home';
+    keyhome.name = 'Key: Home';
     
   
     // Whether the initial box has been opened.
@@ -305,7 +305,6 @@ return {
     party.reset();
     @:island = world.island;
 
-    keyhome.name = "Key: Home";
     party.inventory.add(:keyhome);
 
 
@@ -517,10 +516,6 @@ return {
           Scene.start(id:'thechosen:scene_intro', onDone::{          
           //Scene.start(id:'thechosen:scene_wyvernlight1_quest', onDone ::{
             instance.visitCurrentIsland();            
-            windowEvent.queueMessage(
-              speaker: party.members[0].name,
-              text: '"I should probably open that box now..."'
-            );
           });    
         }
       )
@@ -707,12 +702,21 @@ return {
 
         changeling.name = '[   ]';
         changeling.supportArts = [
-          'base:pebble',
-          'base:pebble',
-          'base:pebble',
-          'base:pebble',
+          'base:cancel',
+          'base:retaliate',
+          'base:wyvern-prayer',
+          'base:quick-shield',
+          'base:diversify',
+          'base:bloods-summoning',
+          'base:shield-amplifier',
           'base:pebble'
         ]
+        
+        @:keyother = Item.new(
+          base: Item.database.find(id:'thechosen:wyvern-key-of-fire')
+        );
+        world.party.inventory.add(:keyother);
+
         world.party.add(:changeling);
         instance.savestate();
         
@@ -1157,6 +1161,68 @@ return {
     @:Interaction = import(module:'game_database.interaction.mt');
     
     
+
+    Interaction.newEntry(
+      data : {
+        name : 'Final Floor',
+        id :  'thechosen:final-stairs',
+        keepInteractionMenu : false,
+        onInteract ::(location, party) {
+          @:world = import(module:'game_singleton.world.mt');
+          @:Event = import(module:'game_mutator.event.mt');
+
+          if (location.contested == true) ::<= {
+
+
+            windowEvent.queueMessage(
+              text: 'This looks to be the last floor...'
+            );
+            
+            windowEvent.queueAskBoolean(
+              prompt: 'Proceed?',
+              onChoice::(which) {
+                when (which == false) empty;
+
+                Scene.start(
+                  id: 'thechosen:scene_prewyvernbattle0',
+                  onDone::{},
+                  location:location,
+                  landmark:location.landmark
+                );
+                location.contested = false;
+              }
+            );
+                
+          } else ::<= {
+
+            if (location.targetLandmark == empty) ::<={
+              @:Landmark = import(module:'game_mutator.landmark.mt');
+             
+              @:id = location.landmark.island.base.id;
+             
+              location.targetLandmark = Landmark.new(
+                island : location.landmark.island,
+                base: Landmark.database.find(id:
+                  match(id) {
+                    ('thechosen:island-of-fire'):    'thechosen:fire-wyvern-dimension',
+                    ('thechosen:island-of-ice'):     'thechosen:ice-wyvern-dimension',
+                    ('thechosen:island-of-thunder'): 'thechosen:thunder-wyvern-dimension',
+                    ('thechosen:island-of-light'):   'thechosen:light-wyvern-dimension'
+                  }
+                )
+              )
+              location.targetLandmark.loadContent();
+              location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
+            }
+            @:instance = import(module:'game_singleton.instance.mt');
+
+            instance.visitLandmark(landmark:location.targetLandmark, where::(landmark)<-location.targetLandmarkEntry);
+            canvas.clear();
+          }
+        }
+      }
+    )
+
         
     Interaction.newEntry(
       data : {
@@ -1206,46 +1272,6 @@ return {
     
     
     
-    // replace with key.
-    Interaction.newEntry(
-      data : {
-        name : 'Explore Pit',
-        id : 'base:explore-pit',
-        keepInteractionMenu: false,
-        onInteract ::(location, party) {
-          @:world = import(module:'game_singleton.world.mt');
-          @:Event = import(module:'game_mutator.event.mt');
-          @:Scene = import(module:'game_database.scene.mt');            
-          if (location.contested == true) ::<= {
-            Scene.start(
-              id: 'thechosen:scene_keybattle0',
-              onDone::{},
-              location:location,
-              landmark:location.landmark
-            );
-            location.contested = false;
-          } else ::<= {
-            if (location.targetLandmark == empty) ::<={
-              @:Landmark = import(module:'game_mutator.landmark.mt');
-              
-
-              location.targetLandmark = Landmark.new(
-                island : location.landmark.island,
-                base:Landmark.database.find(id:'base:treasure-room')
-              )
-              location.targetLandmark.loadContent();
-              location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
-            }
-            @:instance = import(module:'game_singleton.instance.mt');
-
-            instance.visitLandmark(landmark:location.targetLandmark, where::(landmark)<-location.targetLandmarkEntry);
-
-
-            canvas.clear();
-          }
-        },
-      }
-    )  
     
     
     
@@ -1265,7 +1291,7 @@ return {
         maxLocations : 2,
         peaceful: true,
         guarded : false,
-        landmarkType : TYPE.DUNGEON,
+        landmarkType : Landmark.TYPE.DUNGEON,
         canSave : false,
         pointOfNoReturn : true,
         ephemeral : true,
@@ -1780,6 +1806,43 @@ return {
     @:Location = import(module:'game_mutator.location.mt');
     @:world = import(module:'game_singleton.world.mt');
 
+    Location.database.newEntry(data:{
+      name: 'Next Floor?',
+      id: 'thechosen:final-stairs',
+      rarity: 1000000000000,
+      ownVerb : '',
+      symbol: '/',
+      category : Location.CATEGORY.EXIT,
+      onePerLandmark : false,
+      minStructureSize : 1,
+
+      descriptions: [
+        "Significant-looking stairs.",
+      ],
+      interactions : [
+        'thechosen:final-stairs',
+      ],
+      
+      aggressiveInteractions : [
+      ],
+      
+      minOccupants : 0,
+      maxOccupants : 0,
+      
+      onFirstInteract ::(location) {},
+      onInteract ::(location) {
+        @:world = import(module:'game_singleton.world.mt');
+        return true;
+      },
+      
+      onCreate ::(location) {
+        location.contested = true;
+      },
+      
+      onIncrementTime::(location, time) {
+      
+      }
+    })   
 
 
     Location.database.newEntry(data:{
@@ -1825,12 +1888,22 @@ return {
         location.ownedBy = location.landmark.island.newInhabitant();
         location.ownedBy.supportArts = [
           'base:cancel',
-          'base:retaliate',
-          'base:bloods-shield',                  
+          'base:bloods-summoning',
+          'base:brace',
+          'base:reevaluate',
+          'base:foresight',
+          'base:mind-games',
+          'base:banishing-light'
         ];      
         location.ownedBy.name = 'Wyvern of Fire';
         location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-fire');
         location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-fire')         
+        location.ownedBy.removeAllProfessionArts();
+        for(0, location.ownedBy.profession.arts->size) ::(i) {
+          location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
+        }
+        location.ownedBy.equipAllProfessionArts();
+
 
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
           if (world.scenario.data.fireWyvernDefeated == false) ::<= {
@@ -1841,9 +1914,9 @@ return {
           }
         }
         location.ownedBy.stats.load(serialized:StatSet.new(
-          HP:   150,
+          HP:   120,
           AP:   999,
-          ATK:  12,
+          ATK:  6,
           INT:  5,
           DEF:  11,
           LUK:  8,
@@ -1870,7 +1943,7 @@ return {
       rarity: 1000000000000,
       ownVerb : '',
       symbol: '\\',
-      category : CATEGORY.EXIT,
+      category : Location.CATEGORY.EXIT,
       onePerLandmark : false,
       minStructureSize : 1,
 
@@ -1958,10 +2031,20 @@ return {
           'base:retaliate',
           'base:bloods-shield',                  
           'base:bloods-exaltation',                  
+          'base:bloods-summoning',
+          'base:reevaluate',
+          'base:foresight',
+          'base:mind-games',
+          'base:banishing-light'
         ];      
         location.ownedBy.name = 'Wyvern of Ice';
         location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-ice');
         location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-ice');
+        location.ownedBy.removeAllProfessionArts();
+        for(0, location.ownedBy.profession.arts->size) ::(i) {
+          location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
+        }
+        location.ownedBy.equipAllProfessionArts();
 
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
@@ -2046,9 +2129,17 @@ return {
           'base:bloods-shield',                  
           'base:bloods-exaltation',                  
           'base:bloods-ward',                  
+          'base:bloods-summoning',
+          'base:mind-games',
+          'base:banishing-light'
         ];      
         location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-thunder');
         location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-thunder') 
+        location.ownedBy.removeAllProfessionArts();
+        for(0, location.ownedBy.profession.arts->size) ::(i) {
+          location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
+        }
+        location.ownedBy.equipAllProfessionArts();
 
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
@@ -2137,6 +2228,11 @@ return {
         location.ownedBy.name = 'Wyvern of Light';
         location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-light');
         location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-light')
+        location.ownedBy.removeAllProfessionArts();
+        for(0, location.ownedBy.profession.arts->size) ::(i) {
+          location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
+        }
+        location.ownedBy.equipAllProfessionArts();
 
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {
@@ -2686,7 +2782,8 @@ return {
       ],
       attributes : 
         Item.ATTRIBUTE.SHARP |
-        Item.ATTRIBUTE.METAL
+        Item.ATTRIBUTE.METAL |
+        Item.ATTRIBUTE.KEY_ITEM
       ,
       onCreate ::(item, user, creationHint) {   
       
@@ -2748,7 +2845,8 @@ return {
       ],
       attributes : 
         Item.ATTRIBUTE.SHARP |
-        Item.ATTRIBUTE.METAL
+        Item.ATTRIBUTE.METAL |
+        Item.ATTRIBUTE.KEY_ITEM
       ,
       onCreate ::(item, user, creationHint) {   
       
@@ -2810,7 +2908,9 @@ return {
       ],
       attributes : 
         Item.ATTRIBUTE.SHARP |
-        Item.ATTRIBUTE.METAL
+        Item.ATTRIBUTE.METAL |
+        Item.ATTRIBUTE.KEY_ITEM
+
       ,
       onCreate ::(item, user, creationHint) {   
       
@@ -2872,7 +2972,8 @@ return {
       ],
       attributes : 
         Item.ATTRIBUTE.SHARP |
-        Item.ATTRIBUTE.METAL
+        Item.ATTRIBUTE.METAL |
+        Item.ATTRIBUTE.KEY_ITEM
       ,
       onCreate ::(item, user, creationHint) {   
       
@@ -2934,10 +3035,41 @@ return {
       }
     )   
 
+    @:perfectLearning ::{
+      @:Arts = import(:'game_database.arts.mt');
+      @:ArtsDeck = import(:'game_class.artsdeck.mt');
+      @:world = import(module:'game_singleton.world.mt');
+
+      @ARTS_COUNT = 4;
+      @:arts = [];
+      for(0, ARTS_COUNT) ::(i) {
+        @:art = Arts.getRandomFiltered(::(value) <- 
+          (value.traits & Arts.TRAITS.SUPPORT) != 0 &&
+          ((value.traits & Arts.TRAITS.SPECIAL) == 0) &&
+          (value.rarity >= Arts.RARITY.RARE)
+        );
+        arts->push(:art.id);
+        world.party.addSupportArt(:art.id);
+      }
+      
+      windowEvent.queueMessage(
+        text: 'New Arts have been revealed!'
+      );
+      
+      ArtsDeck.viewCards(
+        cards: arts->map(::(value) <- ArtsDeck.synthesizeHandCard(id:value))
+      );
+
+      windowEvent.queueMessage(
+        text: 'The Arts were added to the Trunk. They are now available when editing any party member\'s Arts in the Party menu.'
+      );        
+    }
+
+
 
     Scene.newEntry(
       data : {
-        id: 'thechosen:scene_keybattle0',
+        id: 'thechosen:scene_prewyvernbattle0',
         script: [
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
@@ -3063,61 +3195,41 @@ return {
           ['Kaedjaal', 'Ha ha ha, splendid! Chosen, that was excellent. You have shown how well you can handle yourself.'],
           ['Kaedjaal', 'However, be cautious: you are not the first to have triumphed over me.'],
           ['Kaedjaal', 'There are many with their own goals and ambitions, and some will be more skilled than you currently are.'],
-          ['Kaedjaal', 'Well, I hope you enjoyed this little visit. Come and see me any time.'],
-          ['Kaedjaal', 'Along with leading you to me, each of these keys leads to a different island using magic we Wyverns know...'],
-          ['Kaedjaal', 'I will use it to bring you to the next island where you may find the next shrine.'],
-          ['', 'The Wyvern Key of Fire glows.'],
-          ['Kaedjaal', 'May you find peace and prosperity in your heart. Remember: seek the shrine to find the Key.'],
+          ['Kaedjaal', 'The special Key which you have received... I will give you another where you may find the next shrine.'],
+          ['', 'The party received The Wyvern Key of Ice.'],     
+          ['Kaedjaal', 'Ah, one more thing. Let me impart some knowledge to you, as a prize for getting this far'],
+          ::(location, landmark, doNext) {
+            @:world = import(module:'game_singleton.world.mt');
+            windowEvent.queueMessage(
+              text: 'Kaedjaal gently taps ' + world.party.members[0].name + ' on the head.'
+            );
+            perfectLearning();
+            
+            windowEvent.queueCustom(
+              onLeave ::{
+                doNext();
+              }
+            );
+          },
+          ['Kaedjaal', 'I suppose it is now time to return you. '],
+          ['Kaedjaal', 'I hope you enjoyed this little visit. Come and see me any time.'],
+          ['', 'Kaedjaal glows.'],
+          ['Kaedjaal', 'May you find peace and prosperity in your heart. Remember: seek the shrines with this new Key. We\'ll be waiting.'],
           ::(location, landmark, doNext) {
             location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
             @:world = import(module:'game_singleton.world.mt');
-            @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-fire');
-            // you can technically throw it out or Literally Throw It.
-            when(key == empty) ::<= {
-              windowEvent.queueMessage(
-                speaker: 'Kaedjaal',
-                        //(Friend   of   Me)  My friend...
-                text: '... Oh. Uh. Rrohziil shaa jiin, I do not know how you have done this, but you seem to have misplaced your key to my domain.'
-              );
-              windowEvent.queueMessage(
-                speaker: 'Kaedjaal',
-                text: 'Well, here: I have a spare.'
-              );
-              
-              @:item = Item.new(
-                base:Item.database.find(id:'thechosen:wyvern-key-of-fire'
-                    )
-              );
-              windowEvent.queueMessage(text:'The party was given a ' + item.name + '.');
-              world.party.inventory.add(item);
-              key = item;
-
-              windowEvent.queueMessage(
-                speaker: 'Kaedjaal',
-                text: 'Rrohziil, Please keep it safe. It breaks my heart to give these away to Chosen who already should have one...'
-              );
-            }
-            @:canvas = import(module:'game_singleton.canvas.mt');
-
+            world.scenario.data.fireWyvernDefeated = true;
+            @:keyother = Item.new(
+              base: Item.database.find(id:'thechosen:wyvern-key-of-ice')
+            );
+            world.party.inventory.add(:keyother);
             windowEvent.queueMessage(
               renderable:{render::{canvas.blackout();}},
-              text: 'You are whisked away to a new island...'
+              text: 'You are teleported away...'
             );
-
-            
-            world.scenario.data.fireWyvernDefeated = true;
-            
             @:instance = import(module:'game_singleton.instance.mt');
-            windowEvent.queueCustom(
-              onEnter ::{
-                world.loadIsland(key);
-                instance.visitCurrentIsland(atGate:true, onReady:doNext);
-              }
-            );
+            windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});            
           }
-          
-          
-          
         ]
       }
     ) 
@@ -3248,27 +3360,33 @@ return {
             );
             
           },
-          ['Kaedjaal', 'Allow me to return you to the land that the Key of Fire leads to.'],           
-               //  (world  wish[verb] travel[noun, pl] swift prosperous)   -> The World wishes travels swift and prosperous -> May your travels be swift and properous
-          ['Kaedjaal', 'Zaashael kaaluh-lo zohssuh-zodjii shiirr kohggaelaarr...'], 
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
-            @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-fire');
-
-            @:canvas = import(module:'game_singleton.canvas.mt');
             windowEvent.queueMessage(
-              renderable:{render::{canvas.blackout();}},
-              text: 'You are whisked away to an island of Ice...'
+              speaker:'Kaedjaal', 
+              text:'Now, would you like me to teleport you back?'
             );
+            
+            windowEvent.queueAskBoolean(
+              prompt: 'Leave?',
+              onChoice::(which) {
+                windowEvent.queueMessage(
+                  text: 'Kaedjaal glows.'
+                );                
 
-            windowEvent.queueCustom(
-              onEnter ::{
-                @:instance = import(module:'game_singleton.instance.mt');
-                world.loadIsland(key);
-                instance.visitCurrentIsland(atGate:true);
-                doNext();    
+                windowEvent.queueMessage(
+                  speaker:'Kaedjaal', 
+                   //  (world  wish[verb] travel[noun, pl] swift prosperous)   -> The World wishes travels swift and prosperous -> May your travels be swift and properous
+                  text:'Zaashael kaaluh-lo zohssuh-zodjii shiirr kohggaelaarr...'
+                );                
+                windowEvent.queueMessage(
+                  renderable:{render::{canvas.blackout();}},
+                  text: 'You are teleported away...'
+                );
+
+                windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});            
               }
-            );        
+            );
           }
         ]
       }
@@ -3337,41 +3455,40 @@ return {
           ['Ziikkaettaal', 'I... I see. Kaedjaal was perhaps right to let you continue.'],
           ['Ziikkaettaal', 'It has been some time since I have let another Chosen pass.'],
           ['Ziikkaettaal', 'You have handled yourself well.'],
-          ['', 'The Wyvern Key of Ice glows.'],
-          ['Ziikkaettaal', 'May you find peace and prosperity in your heart. Remember: seek the shrine to find the Key.'],
+          ['Ziikkaettaal', 'The special Keys you have been receiving... I will give you another where you may find the next shrine.'],
+          ['', 'The party received The Wyvern Key of Thunder.'],          
+          ['Ziikkaettaal', 'Ah, of course. Maybe it is only fair to give you something in return for getting this far.'],
           ::(location, landmark, doNext) {
-            location.ownedBy.name = 'Kaedjaal, Wyvern of Ice';
             @:world = import(module:'game_singleton.world.mt');
-            @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-ice');
-
-            // you can technically throw it out or Literally Throw It.
-            when(key == empty) ::<= {
-              windowEvent.queueMessage(
-                speaker: 'Ziikkaettaal',
-                text: '*tells you off in dragonish*'
-              );
-              
-              @:item = Item.new(base:Item.database.find(id:'thechosen:wyvern-key-of-ice'));
-              windowEvent.queueMessage(text:'The party was given a ' + item.name + '.');
-              world.party.inventory.add(item);
-              key = item;
-
-              windowEvent.queueMessage(
-                speaker: 'Ziikkaettaal',
-                text: '*hisses*'
-              );
-            }
+            windowEvent.queueMessage(
+              text: 'Ziikkaettaal gently taps ' + world.party.members[0].name + ' on the head.'
+            );
+            perfectLearning();
             
-            world.scenario.data.iceWyvernDefeated = true;
-            
+            windowEvent.queueCustom(
+              onLeave ::{
+                doNext();
+              }
+            );
+          },
+          ['Ziikkaettaal', 'I suppose it is now time to return you. '],
+          ['', 'Ziikkaettaal glows.'],
+          ['Ziikkaettaal', 'Chosen, the road ahead is still dangerous. Remember: seek the shrines with this new Key. We\'ll be waiting.'],
+          ::(location, landmark, doNext) {
+            location.ownedBy.name = 'Ziikkaettaal, Wyvern of Ice';
+            @:world = import(module:'game_singleton.world.mt');
+            world.scenario.data.fireWyvernDefeated = true;
+            @:keyother = Item.new(
+              base: Item.database.find(id:'thechosen:wyvern-key-of-thunder')
+            );
+            world.party.inventory.add(:keyother);
+            windowEvent.queueMessage(
+              renderable:{render::{canvas.blackout();}},
+              text: 'You are teleported away...'
+            );
             @:instance = import(module:'game_singleton.instance.mt');
-
-            world.loadIsland(key);
-            instance.visitCurrentIsland(atGate:true, onReady:doNext);
+            windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});            
           }
-          
-          
-          
         ]
       }
     ) 
@@ -3465,25 +3582,28 @@ return {
             );
             
           },
-          ['Ziikkaettaal', 'I\'ll take you back to your world.'],           
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
-            @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-ice');
-
-            @:canvas = import(module:'game_singleton.canvas.mt');
             windowEvent.queueMessage(
-              renderable:{render::{canvas.blackout();}},
-              text: 'You are whisked away to an island of Thunder...'
+              speaker:'Ziikkaettaal', 
+              text:'Now, would you like me to teleport you back?'
             );
+            
+            windowEvent.queueAskBoolean(
+              prompt: 'Leave?',
+              onChoice::(which) {
+                windowEvent.queueMessage(
+                  text: 'Ziikkaettaal glows.'
+                );                
 
-            windowEvent.queueCustom(
-              onEnter ::{
-                @:instance = import(module:'game_singleton.instance.mt');
-                world.loadIsland(key);
-                instance.visitCurrentIsland(atGate:true);
-                doNext();    
+                windowEvent.queueMessage(
+                  renderable:{render::{canvas.blackout();}},
+                  text: 'You are teleported away...'
+                );
+
+                windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});            
               }
-            );        
+            );
           }
         ]
       }
@@ -3574,40 +3694,39 @@ return {
           },
           ['Juhriikaal', 'You\'ve got something special with you. The way you fight and prove yourself... You\'ve got potential.'],
           ['Juhriikaal', 'Ah... it\'s refreshing.'],
-          ['', 'The Wyvern Key of Thunder glows.'],
-          ['Juhriikaal', 'May you find peace and prosperity in your heart. Remember: seek the shrine to find the Key.'],
+          ['', 'The party received The Wyvern Key of Light.'],          
+          ['Juhriikaal', 'Take this. It\'s the Key to take you to your wish.'],
+          ['Juhriikaal', 'Ah yes! You might have been expecting this as well...'],
+          ::(location, landmark, doNext) {
+            @:world = import(module:'game_singleton.world.mt');
+            windowEvent.queueMessage(
+              text: 'Juhriikaal gently taps ' + world.party.members[0].name + ' on the head.'
+            );
+            perfectLearning();
+            
+            windowEvent.queueCustom(
+              onLeave ::{
+                doNext();
+              }
+            );
+          },
+          ['', 'Ziikkaettaal glows.'],
+          ['Juhriikaal', 'Until next time, Chosen. Remember: seek the shrines with this new Key. We\'ll be waiting.'],
           ::(location, landmark, doNext) {
             location.ownedBy.name = 'Juhriikaal, Wyvern of Thunder';
             @:world = import(module:'game_singleton.world.mt');
-            @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-thunder');
-
-            // you can technically throw it out or Literally Throw It.
-            when(key == empty) ::<= {
-              windowEvent.queueMessage(
-                speaker: 'Juhriikaal',
-                text: 'Uhm. Where\'s the thunder key..?'
-              );
-              
-              @:item = Item.new(base:Item.database.find(id:'thechosen:wyvern-key-of-thunder'));
-              windowEvent.queueMessage(text:'The party was given a ' + item.name + '.');
-              world.party.inventory.add(item);
-              key = item;
-
-              windowEvent.queueMessage(
-                speaker: 'Juhriikaal',
-                text: '...'
-              );
-            }
-            
-            world.scenario.data.thunderWyvernDefeated = true;
-            
+            world.scenario.data.fireWyvernDefeated = true;
+            @:keyother = Item.new(
+              base: Item.database.find(id:'thechosen:wyvern-key-of-light')
+            );
+            world.party.inventory.add(:keyother);
+            windowEvent.queueMessage(
+              renderable:{render::{canvas.blackout();}},
+              text: 'You are teleported away...'
+            );
             @:instance = import(module:'game_singleton.instance.mt');
-            world.loadIsland(key);
-            instance.visitCurrentIsland(atGate:true, onReady:doNext);
+            windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});            
           }
-          
-          
-          
         ]
       }
     ) 
@@ -3823,25 +3942,28 @@ return {
             );
             
           },
-          ['Juhriikaal', 'Allow me to return you to the land that the Key of Thunder leads to.'],           
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
-            @key = world.party.getItem(condition::(value) <- value.base.id == 'thechosen:wyvern-key-of-thunder');
-
-            @:canvas = import(module:'game_singleton.canvas.mt');
             windowEvent.queueMessage(
-              renderable:{render::{canvas.blackout();}},
-              text: 'You are whisked away to an island of Light...'
+              speaker:'Juhriikaal', 
+              text:'Now, would you like me to teleport you back?'
             );
+            
+            windowEvent.queueAskBoolean(
+              prompt: 'Leave?',
+              onChoice::(which) {
+                windowEvent.queueMessage(
+                  text: 'Juhriikaal glows.'
+                );                
 
-            windowEvent.queueCustom(
-              onEnter :: {
-                @:instance = import(module:'game_singleton.instance.mt');
-                world.loadIsland(key);
-                instance.visitCurrentIsland(atGate:true);
-                doNext();     
+                windowEvent.queueMessage(
+                  renderable:{render::{canvas.blackout();}},
+                  text: 'You are teleported away...'
+                );
+
+                windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});            
               }
-            );       
+            );
           }
         ]
       }
@@ -3942,7 +4064,7 @@ return {
           ['Shaarraeziil', 'Another wyvern, the Wyvern of Darkness... They threaten our domain, our way of life, and the mortal realm.'],
           ['Shaarraeziil', 'Me and my siblings... truthfully we haven\'t the power to stop them. We... are too weak.'],
           ['Shaarraeziil', 'But you... you have power. Power we cannot best.'],
-          ['Shaarraeziil', 'I have talked to my sibblings prior to your arrival... We all feel that you are capable of defeating the one of Darkness.'],
+          ['Shaarraeziil', 'I have talked to my siblings prior to your arrival... We all feel that you are capable of defeating the one of Darkness.'],
           ['Shaarraeziil', '... However.'],
           ['Shaarraeziil', 'It would be unfair to lay this burden upon you. You have proven yourself beyond all.'],
           ['Shaarraeziil', 'You may choose to take your wish, no questions asked. You have earned it.'],

@@ -209,6 +209,13 @@ return ::(
     windowEvent.queueAskBoolean(
       prompt:'Are you sure you wish to throw away the ' + choiceItem.name + '?',
       onChoice::(which) {
+        when ((choiceItem.base.attributes & Item.ATTRIBUTE.KEY_ITEM) != 0)
+          windowEvent.queueMessage(
+            text:'You feel unable to throw this away.'
+          )
+      
+      
+      
         when(which == false) empty;
         party.inventory.remove(item:choiceItem);
         

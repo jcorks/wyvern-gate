@@ -60,7 +60,8 @@
   METAL   : 16,
   FRAGILE   : 32,
   WEAPON  : 64,
-  RAW_METAL : 128
+  RAW_METAL : 128,
+  KEY_ITEM : 256
 }
 
 @:USE_TARGET_HINT = {
@@ -2949,6 +2950,49 @@ Item.database.newEntry(data : {
   onCreate ::(item, creationHint) {}
 
 })
+
+Item.database.newEntry(data : {
+  name : "Perfect Arts Crystal",
+  id : 'base:perfect-arts-crystal',
+  description: "Extremely rare irridescent crystal that imparts knowledge when used. The skills required to make this have been lost to time.",
+  examine : 'Not much else is known about these.',
+  equipType: TYPE.HAND,
+  rarity : 100,
+  weight : 3,
+  tier: 10,
+  canBeColored : false,
+  keyItem : false,
+  canHaveEnchants : false,
+  canHaveTriggerEnchants : false,
+  enchantLimit : 0,
+  hasSize : false,
+  hasQuality : false,
+  hasMaterial : false,
+  isApparel : false,  isUnique : false,
+  levelMinimum : 1,
+  useTargetHint : USE_TARGET_HINT.ONE,
+  basePrice: 3000,
+  possibleArts : [],
+
+  blockPoints : 1,
+  equipMod : StatSet.new(
+    ATK: 10, // well. its hard!
+    DEF: 2, // well. its hard!
+    SPD: -10,
+    DEX: -20
+  ),
+  useEffects : [
+    'base:learn-arts-perfect',
+    'base:consume-item'     
+  ],
+  equipEffects : [],
+  attributes : 
+    ATTRIBUTE.SHARP
+  ,
+  onCreate ::(item, creationHint) {}
+
+})
+
 
 Item.database.newEntry(data : {
   name : "Arts Crystal",

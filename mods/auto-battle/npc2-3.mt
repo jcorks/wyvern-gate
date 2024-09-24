@@ -6,6 +6,8 @@ return {
   giveArmor : false,
   arts : [
     'base:pebble',
-    'base:pebble'
+    'base:cancel',
+    'base:retaliate',
+    'base:quick-shield'
   ]
 }

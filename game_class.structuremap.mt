@@ -124,7 +124,8 @@
       
       
       
-      
+      location.x = left + 2;
+      location.y = top + 4;
       _map.setItem(data:location, x:left + 2, y: top + 4, symbol: ' ', name:location.name);
       _map.setItem(data:location, x:left + 3, y: top + 4, symbol: ' ', name:location.name);
         
@@ -376,6 +377,8 @@
         _map.clearScenery(x:left + 2, y: top + 4);
         _map.clearScenery(x:left + 3, y: top + 4);
 
+        location.x = left + 2;
+        location.y = top + 4;
         _map.setItem(data:location, x:left + 2, y: top + 4, symbol: ' ', name:location.name);
         _map.setItem(data:location, x:left + 3, y: top + 4, symbol: ' ', name:location.name);
         
@@ -393,6 +396,8 @@
         _map.clearScenery(x:left + 8, y: top + 4);
         _map.clearScenery(x:left + 9, y: top + 4);
         
+        location.x = left + 8;
+        location.y = top + 4;
         _map.setItem(data:location, x:left + 8, y: top + 4, symbol: ' ', name:location.name);
         _map.setItem(data:location, x:left + 9, y: top + 4, symbol: ' ', name:location.name);
         
@@ -438,6 +443,8 @@
       _map.clearScenery(x:left + 2, y: top + 7);
       _map.clearScenery(x:left + 3, y: top + 7);
       
+      location.x = left + 2;
+      location.y = top + 7;
       _map.setItem(data:location, x:left + 2, y: top + 7, symbol: ' ', name:location.name);
       _map.setItem(data:location, x:left + 3, y: top + 7, symbol: ' ', name:location.name);
 

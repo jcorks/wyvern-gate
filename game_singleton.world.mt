@@ -600,6 +600,22 @@
         set ::(value) <- island = value
       },
       
+      wait::(until) {     
+        {:::} {
+          forever ::{
+            when(this.time != until) send()
+            this.incrementTime();
+          }
+        }
+        {:::} {
+          forever ::{
+            when(this.time == until) send()
+            this.incrementTime();
+          }
+        }
+      },
+      
+      
       landmark : {
         get ::<- landmark,
         set ::(value) {
@@ -767,20 +783,15 @@
         return save;        
       },
 
-      // makes the key's island the current island. If the key's island 
-      // doesnt exist, it is made, saved, and set to the island
-      loadIsland ::(key, skipSave) {
+      loadIslandID ::(id, islandGenAttributes, skipSave) {
         // first load existing save. The save has all the current islands 
         @:instance = import(:'game_singleton.instance.mt');
+
         @save = instance.getSaveDataRaw();
         if (save == empty || save->keycount == 0) ::<= {
           save = this.save();
         }
         
-        // get ID if none exists
-        if (key.islandID == 0) ::<= {
-          key.islandID = this.getNextID();
-        }
 
         if (save.islands == empty)
           save.islands = [];
@@ -789,11 +800,11 @@
           save.islands[island.worldID] = island.save();
 
         // retrieve, creating if it doesnt exist
-        @which = save.islands[key.islandID];
+        @which = save.islands[id];
         @alreadyLoaded;
         if (which == empty) ::<= {
           @:newIsland = Island.new(
-            *{worldID : key.islandID, ...key.islandGenAttributes}
+            *{worldID : id, ...(if (islandGenAttributes) islandGenAttributes else {})}
           );
 
           alreadyLoaded = newIsland;
@@ -808,13 +819,13 @@
             y: gate.y
           );               
         
-          save.islands[key.islandID] = newIsland.save(); 
-          which = save.islands[key.islandID];
+          save.islands[id] = newIsland.save(); 
+          which = save.islands[id];
         }
         
 
 
-        state.currentIslandID = key.islandID;
+        state.currentIslandID = id;
         if (alreadyLoaded != empty)
           island = alreadyLoaded 
         else ::<= {
@@ -827,7 +838,18 @@
 
         // traveling always triggers a save.
         if (skipSave == empty || skipSave == false)
-          instance.savestate(saveOverride:save);
+          instance.savestate(saveOverride:save);      
+      },
+
+      // makes the key's island the current island. If the key's island 
+      // doesnt exist, it is made, saved, and set to the island
+      loadIsland ::(key, skipSave) {
+        // get ID if none exists
+        if (key.islandID == 0) ::<= {
+          key.islandID = this.getNextID();
+        }
+
+        this.loadIslandID(id:key.islandID, islandGenAttributes:key.islandGenAttributes);
       },
      
       

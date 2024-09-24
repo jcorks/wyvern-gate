@@ -1697,6 +1697,7 @@ Location.database.newEntry(data:{
   onePerLandmark : true,
 
   descriptions: [
+    'An extremely ornate, large chest. What\'s inside?'
   ],
   interactions : [
     'base:open-chest'
@@ -1736,6 +1737,12 @@ Location.database.newEntry(data:{
         ),
         qualityHint : 'base:masterwork',
         rngEnchantHint:true
+      )
+    );    
+
+    location.inventory.add(item:
+      Item.new(
+        base:Item.database.find(id:'perfect-arts-crystal')
       )
     );    
 

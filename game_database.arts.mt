@@ -5217,8 +5217,8 @@ Arts.newEntry(
   data: {
     name: 'Retaliate',
     id : 'base:retaliate',
-    targetMode : TARGET_MODE.NONE,
-    description: 'The user retaliates to an Art, damaging the enemy based on ATK. This damage is not blockable.',
+    targetMode : TARGET_MODE.ONE,
+    description: 'The user retaliates to an Art, damaging a target based on ATK. This damage is not blockable.',
     durationTurns: 0,
     kind : KIND.REACTION,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
@@ -5291,9 +5291,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' cancels ' + targets[0].name + '\'s Art!'
-      );
       return true;
     }
   }
@@ -5547,7 +5544,7 @@ Arts.newEntry(
             exact : true
           );            
           windowEvent.queueMessage(
-            text: user.name + ' cancels ' + targets[0].name + '\'s Art!'
+            text: user.name + ' cancels the Art!'
           );
         }
       )
@@ -6444,11 +6441,11 @@ Arts.newEntry(
     name: '@',
     id : 'base:b173',
     targetMode : TARGET_MODE.NONE,
-    description: "Replaces up to two effects with random ones.",
+    description: "Replaces up to two of the user\'s effects with random ones.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, enemies, allies) {
-      when(user.getAllByFilter(
+      when(user.effectStack.getAllByFilter(
           ::(value) <- true
         )->size == 0) false;
       return [user];
