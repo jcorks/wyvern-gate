@@ -23,6 +23,7 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:ArtsDeck = import(module:'game_class.artsdeck.mt');
 @:windowEvent = import(:'game_singleton.windowevent.mt');
+@:canvas = import(module:'game_singleton.canvas.mt');
 @:BattleAI = LoadableClass.create(
   name: 'Wyvern.BattleAI',
   items : [],
@@ -73,6 +74,7 @@
               overrideTargets:(Arts.find(id:value.id).shouldAIuse(
                   user:user_,
                   enemies,
+                  reactTo:source,
                   allies
               ))
           });
@@ -80,7 +82,8 @@
           
           @hand = hand->filter(
             ::(value) <- Arts.find(id:value.card.id).usageHintAI != Arts.USAGE_HINT.DONTUSE &&
-                         Arts.find(id:value.card.id).kind == Arts.KIND.REACTION
+                         Arts.find(id:value.card.id).kind == Arts.KIND.REACTION &&
+                        (!(value.overrideTargets->type == Boolean && value.overrideTargets == false))
           );
           
           when(hand->size == 0) empty;
@@ -90,7 +93,7 @@
         }
 
         when(cardI == empty)
-          onCommit();
+          onCommit();                   
           
   
         this.commitTargettedAction(
@@ -158,141 +161,152 @@
         foreach(targets) ::(index, t) {
           targetParts[index] = Entity.normalizedDamageTarget();
         }
-        windowEvent.onResolveAll(
-          onDone:: {
-            onCommit(:BattleAction.new(
-              card,
-              targets: targets,
-              targetParts : targetParts,
-              extraData: {}            
-            ));  
-          }
-        );      
+        onCommit(:BattleAction.new(
+          card,
+          targets: targets,
+          targetParts : targetParts,
+          extraData: {}            
+        ));  
       },
 
 
 
       
       takeTurn ::(battle){
-        @:enemies = battle.getEnemies(:user_);
-        @:allies = battle.getAllies(:user_);
+        @:acts = {};
+      
+        ::<= {
+          @:enemies = battle.getEnemies(:user_);
+          @:allies = battle.getAllies(:user_);
 
-        @:Entity = import(module:'game_class.entity.mt');        
-      
-        when(enemies->keycount == 0 || enemies->findIndexCondition(::(value) <- !value.isIncapacitated()) == -1)
-          battle.entityCommitAction(action:BattleAction.new(
-            card: ArtsDeck.synthesizeHandCard(id:'base:wait'),
-            targets: [],
-            targetParts : [],
-            extraData: {},            
-            onCommit ::(action) {
-              battle.entityCommitAction(action); 
-            }
-          ));
-      
+          @:Entity = import(module:'game_class.entity.mt');        
         
-        
-        @hand = [...user_.deck.hand]->map(to::(value) <- {
-            card:value, 
-            overrideTargets:(Arts.find(id:value.id).shouldAIuse(
-                user:user_,
-                enemies,
-                allies
+          when(enemies->keycount == 0 || enemies->findIndexCondition(::(value) <- !value.isIncapacitated()) == -1)
+            
+            acts->push(:BattleAction.new(
+              card: ArtsDeck.synthesizeHandCard(id:'base:wait'),
+              targets: [],
+              targetParts : [],
+              extraData: {}
             ))
-        });
-
-
-        hand = hand->filter(::(value) <- 
-            (Arts.find(id:value.card.id).usageHintAI != Arts.USAGE_HINT.DONTUSE) &&
-            (!(value.overrideTargets->type == Boolean && value.overrideTargets == false))
-        );
-                
         
-        @projectedAP = user_.ap; 
-        foreach(hand) ::(k, full) {
-          @v = full.card;
-          @art = Arts.find(id:v.id);
-          if (art.kind == Arts.KIND.EFFECT && random.flipCoin()) ::<= {
-            when (projectedAP < 2) empty;
-            this.commitTargettedAction(
-              battle,
-              card:v,
-              overrideTargets:if (full.overrideTargets->type != Boolean) full.overrideTargets,
-              onCommit ::(action) {
-                battle.entityCommitAction(action); 
-              }
-            );
-            projectedAP -= 2;
-            hand->remove(key:hand->findIndex(value:full));
-          }
-        }        
-
-
-        when(hand->keycount == 0)
-          defaultAttack(
-            battle,
-            onCommit ::(action) {
-              battle.entityCommitAction(action); 
-            }
-          ); 
-         
-      
           
-        @c = Random.pickArrayItem(list:hand->filter(by::(value) <- Arts.find(id:value.card.id).kind == Arts.KIND.ABILITY));
-        when (c == empty)
-          defaultAttack(
-            battle,
-            onCommit ::(action) {
-              battle.entityCommitAction(action); 
+          
+          @hand = [...user_.deck.hand]->map(to::(value) <- {
+              card:value, 
+              overrideTargets:(Arts.find(id:value.id).shouldAIuse(
+                  user:user_,
+                  enemies,
+                  allies
+              ))
+          });
+
+
+          hand = hand->filter(::(value) <- 
+              (Arts.find(id:value.card.id).usageHintAI != Arts.USAGE_HINT.DONTUSE) &&
+              (!(value.overrideTargets->type == Boolean && value.overrideTargets == false))
+          );
+                  
+          
+          @projectedAP = user_.ap; 
+          foreach(hand) ::(k, full) {
+            @v = full.card;
+            @art = Arts.find(id:v.id);
+            if (art.kind == Arts.KIND.EFFECT && random.flipCoin()) ::<= {
+              when (projectedAP < 2) empty;
+              this.commitTargettedAction(
+                battle,
+                card:v,
+                overrideTargets:if (full.overrideTargets->type != Boolean) full.overrideTargets,
+                onCommit ::(action) {
+                  acts->push(:action)
+                }
+              );
+              projectedAP -= 2;
+              hand->remove(key:hand->findIndex(value:full));
             }
-          ); 
-         
+          }        
 
-        @:ability = Arts.find(id:c.card.id);
-        
-        
-        @:world = import(module:'game_singleton.world.mt');
-        @:party = world.party;
-        
-        // discourage abilities until players get their bearings, please!
-        @:tier = world.island.tier;
-        
-        when (party != empty && [...enemies]->filter(::(value) <- party.isMember(:value))->size > 0 &&
-            random.try(percentSuccess:80 - (tier * 30)))
+
+          when(hand->keycount == 0)
             defaultAttack(
               battle,
               onCommit ::(action) {
-                battle.entityCommitAction(action); 
+                acts->push(:action)
+              }
+            ); 
+           
+        
+            
+          @c = Random.pickArrayItem(list:hand->filter(by::(value) <- Arts.find(id:value.card.id).kind == Arts.KIND.ABILITY));
+          when (c == empty)
+            defaultAttack(
+              battle,
+              onCommit ::(action) {
+                acts->push(:action)
               }
             ); 
            
 
-        // need enough to use an art
-        when (projectedAP < 2)
-            defaultAttack(
-              battle,
-              onCommit ::(action) {
-                battle.entityCommitAction(action); 
-              }
-            ); 
-           
-        @condition;
-        
-        if (ability.usageHintAI == Arts.USAGE_HINT.HEAL) ::<= {
-          condition = ::(value) <- value.hp < value.stats.HP
+          @:ability = Arts.find(id:c.card.id);
+          
+          
+          @:world = import(module:'game_singleton.world.mt');
+          @:party = world.party;
+          
+          // discourage abilities until players get their bearings, please!
+          @:tier = world.island.tier;
+          
+          when (party != empty && [...enemies]->filter(::(value) <- party.isMember(:value))->size > 0 &&
+              random.try(percentSuccess:80 - (tier * 30)))
+              defaultAttack(
+                battle,
+                onCommit ::(action) {
+                  acts->push(:action)
+                }
+              ); 
+             
+
+          // need enough to use an art
+          when (projectedAP < 2)
+              defaultAttack(
+                battle,
+                onCommit ::(action) {
+                  acts->push(:action)
+                }
+              ); 
+             
+          @condition;
+          
+          if (ability.usageHintAI == Arts.USAGE_HINT.HEAL) ::<= {
+            condition = ::(value) <- value.hp < value.stats.HP
+          }
+          
+          this.commitTargettedAction(
+            card:c.card, 
+            battle, 
+            condition, 
+            overrideTargets:c.overrideTargets,
+            onCommit ::(action) {
+              acts->push(:action)
+            }
+          );
         }
         
-        this.commitTargettedAction(
-          card:c.card, 
-          battle, 
-          condition, 
-          overrideTargets:c.overrideTargets,
-          onCommit ::(action) {
-            battle.entityCommitAction(action); 
+        windowEvent.queueCallback(
+          callback ::{
+
+            when(acts->size == 0) windowEvent.CALLBACK_DONE
+            @:act = acts[0]
+            acts->remove(:0)
+            battle.entityCommitAction(action:act);
+            
           }
         );
       }
-    }   
+    }
+
+       
   }  
 
 );

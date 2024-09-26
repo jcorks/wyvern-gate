@@ -1,10 +1,11 @@
 return {
-  name : 'NPC1-3',
+  name : 'A-3',
   profession : 'base:field-mage',
   level : 6, // default
   giveWeapon : false,
   giveArmor : false,
   arts : [
+    'base:pebble',  
     'base:pebble',
     'base:cancel',
     'base:retaliate',

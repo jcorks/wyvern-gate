@@ -1088,6 +1088,13 @@
                 when(action == empty)
                   tryNext();
                   
+                when(reactor.isIncapacitated())
+                  windowEvent.queueCustom(
+                    onEnter ::{
+                      tryNext();
+                    }
+                  );
+
                   
                 reactor.deck.discardFromHand(:action.card);
                 @art = Arts.find(:action.card.id);
@@ -1109,12 +1116,6 @@
                   turnIndex: 0
                 );
                 
-                when(reactor.isIncapacitated())
-                  windowEvent.queueCustom(
-                    onEnter ::{
-                      endTurn();
-                    }
-                  );
 
                 
                 when(cancel) ::<= {

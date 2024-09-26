@@ -24,6 +24,7 @@
 @:MAX_LINES_TEXTBOX = 10;
 @:MAX_COLUMNS = canvas.width - 4;
 @:FRAME_COUNT_RENDER_TEXT = 3;
+@:CALLBACK_DONE = {};
 
 @:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch) {
     canvas.renderTextFrameGeneral(
@@ -249,7 +250,8 @@
           (CHOICE_MODE.DISPLAY):        commitInput_display(data:val, input),
           (CHOICE_MODE.CURSOR_MOVE):    commitInput_cursorMove(data:val, input),
           (CHOICE_MODE.CUSTOM):         commitInput_custom(data:val, input),
-          (CHOICE_MODE.SLIDER):         commitInput_slider(data:val, input)
+          (CHOICE_MODE.SLIDER):         commitInput_slider(data:val, input),
+          (CHOICE_MODE.CALLBACK):       commitInput_callback(data:val, input)
         }    
         
         // event callbacks mightve bonked out 
@@ -700,6 +702,36 @@
       when(data.busy) false;
       return true;  
     }     
+    
+    
+    @:commitInput_callback ::(data => Object, input) {
+      
+      //if (canCancel) ::<= {
+      //  choicesModified->push(value:'(Cancel)');
+      //}
+      
+      if (data.rendered == empty) ::<= {
+        if (data.isAnimation == true) ::<= {
+          data.busy = true;
+          renderThisAnimation(data, frame ::{
+            @:output = data.animationFrame();
+            when(output != canvas.ANIMATION_FINISHED) empty;
+            data.busy = false;
+            return canvas.ANIMATION_FINISHED;
+          });
+        } else ::<= {
+          renderThis(data);
+        }
+      }
+      if (data.entered == empty) ::<= {
+        data.entered = true;
+      }
+      
+      @:ret = data.callback() == WindowEvent.CALLBACK_DONE
+      return ret;
+    }     
+    
+  
   
     @:commitInput_columnCursor ::(data => Object, input) {
     
@@ -989,7 +1021,8 @@
       CURSOR_MOVE: 4,
       DISPLAY: 5,
       CUSTOM: 6,
-      SLIDER : 7
+      SLIDER : 7,
+      CALLBACK : 8
     }
     
     
@@ -1202,6 +1235,38 @@
         return getResolveQueue()->size-1;
       },
       
+      
+      // An empty action that, when visited, will fire off 
+      // the given callback. If the callback returns windowEvent.CALLBACK_DONE, it will 
+      // cancel the action.
+      queueCallback::(
+        renderable, 
+        callback => Function,
+        jumpTag,
+        isAnimation, 
+        animationFrame
+      ) {
+        when(requestAutoSkip) ::<= {
+          {:::} {
+            forever ::{
+              if (callback() == false)
+                send();
+            }
+          };
+        }
+
+        pushResolveQueueTop(fns:[::{
+          choiceStackPush(value:{
+            mode: CHOICE_MODE.CALLBACK,
+            callback: callback,
+            renderable:renderable,
+            jumpTag: jumpTag,
+            isAnimation : isAnimation,
+            animationFrame : animationFrame
+          });
+        }]);        
+        return getResolveQueue()->size-1;
+      },      
       
       
 
@@ -1475,6 +1540,10 @@
       
       CURSOR_ACTIONS : {
         get::<- CURSOR_ACTIONS
+      },
+      
+      CALLBACK_DONE : {
+        get ::<- CALLBACK_DONE
       },
       
       forceExit ::(soft){

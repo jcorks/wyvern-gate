@@ -1,5 +1,5 @@
 return {
-  name : 'NPC2-2',
+  name : 'B-2',
   profession : 'base:field-mage',
   level : 6, // default
   giveWeapon : false,
