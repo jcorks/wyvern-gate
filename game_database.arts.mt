@@ -4858,6 +4858,29 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
+    name: 'Cycle',
+    id : 'base:cycle',
+    targetMode : TARGET_MODE.NONE,
+    description: 'Discard an Arts card. Draw an Arts card.',
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    oncePerBattle : false,
+    canBlock : false,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      user.discardArt();
+      user.drawArt(count:1);
+    }
+  }
+)  
+
+
+Arts.newEntry(
+  data: {
     name: 'Mind Games',
     id : 'base:mind-games',
     targetMode : TARGET_MODE.ONE,

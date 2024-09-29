@@ -295,17 +295,51 @@ Island.database.newEntry(
     @augmentTiered = ::(entity) {
       @:Arts = import(module:'game_database.arts.mt');
 
+      @:getSupportArts::(entity, professionLevel, additionalCount) {
+        // basic arts
+        entity.supportArts = [
+          'base:pebble',    //5
+          'base:cycle',     //5
+          'base:diversify', //3
+          'base:brace',     //3
+          'base:agility',   //3
+          'base:mind-games',//3
+        ];
+        
+        for(0, professionalLevel) ::(i) {
+          entity.autoLevelProfession(:entity.profession);
+        }
+        entity.equipAllProfessionArts();  
+        
+        
+
+
+        for(0, 
+        @:addCondition ::(value) <- arts->findIndex(value.id) == -1
+
+        
+
+      }
+
     
     
       match(state.tier) {
         (0):::<= {
           entity.capHP(max:9);
           entity.supportArts = [
-            'base:pebble',
-            'base:diversify',
-            'base:brace',
-            'base:agility',
-            'base:mind-games',
+            'base:pebble',    //5
+            'base:foresight', //5
+            'base:diversify', //3
+            'base:brace',     //3
+            'base:agility',   //3
+            'base:mind-games',//3
+            Arts.getRandomFiltered(::(value) <- 
+              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
+              &&
+              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
+              &&
+              ((value.traits
+            ).id,
             Arts.getRandomFiltered(::(value) <- 
               ((value.traits & Arts.TRAITS.SPECIAL) == 0)
               &&
@@ -319,9 +353,9 @@ Island.database.newEntry(
         (1):::<= {
           for(0, 1) ::(i) {
             entity.autoLevel();
-            entity.autoLevelProfession(:entity.profession);
           }
           entity.supportArts = [
+            'base:pebble',
             'base:diversify',
             'base:mind-games',
             'base:crossed-wires',
@@ -334,7 +368,13 @@ Island.database.newEntry(
               ((value.traits & Arts.TRAITS.SPECIAL) == 0)
               &&
               ((value.traits & Arts.TRAITS.SUPPORT) != 0)
+            ).id,
+            Arts.getRandomFiltered(::(value) <- 
+              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
+              &&
+              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
             ).id
+
           ]
 
         },
@@ -419,7 +459,7 @@ Island.database.newEntry(
             ).id                      
           ]
 
-          for(0, 4)::(i) {
+          for(0, 6)::(i) {
             entity.supportArts->push(:Arts.getRandomFiltered(::(value) <- 
               ((value.traits & Arts.TRAITS.SPECIAL) == 0)
               &&
