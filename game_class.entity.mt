@@ -786,6 +786,10 @@
       get ::<- _.state.supportArts,
       set ::(value) <- _.state.supportArts = value
     },
+    
+    professionArts : {
+      get ::<- [..._.state.professionArts]
+    },
       
     blockPoints : {
       get :: {
@@ -812,23 +816,6 @@
       @:state = _.state;
       @:this = _.this;
       @:pickArt = import(:'game_function.pickart.mt');
-      
-      @:calculateDeckSize:: <- 
-        [
-          ...this.supportArts, 
-          ...state.equippedProfessionArts,
-          ...(if (state.equips[EQUIP_SLOTS.HAND_LR]) 
-            [
-              state.equips[EQUIP_SLOTS.HAND_LR].arts[0],        
-              state.equips[EQUIP_SLOTS.HAND_LR].arts[1]
-            ]
-          else 
-            []
-          )
-        ]->reduce(::(previous, value) <-
-          (if (previous == empty) 0 else previous) + 
-          ArtsDeck.artIDtoCount(:value)
-        );
       
       
       @:equipped::{
@@ -950,9 +937,9 @@
           keep:true,
           prompt: this.name + ' Arts:', 
           onCancel ::{
-            when(calculateDeckSize() < 25) ::<= {
+            when(this.calculateDeckSize() < 25) ::<= {
               windowEvent.queueMessage(
-                text: this.name + '\'s deck has too few cards. Each art gives cards to the Arts deck based on its rarity. A minimum threshold is required. Your deck has ' + calculateDeckSize() + ' out of the minimum of 25.'
+                text: this.name + '\'s deck has too few cards. Each art gives cards to the Arts deck based on its rarity. A minimum threshold is required. Your deck has ' + this.calculateDeckSize() + ' out of the minimum of 25.'
               );
               
               start();
@@ -1074,6 +1061,28 @@
       _.this.recalculateStats(); 
       _.state.ap = 0;               
       _.state.shield = 0;
+    },
+    
+    calculateDeckSize ::{
+      @:state = _.state;
+      @:this = _.this;
+      @:pickArt = import(:'game_function.pickart.mt');
+      
+      return [
+          ...this.supportArts, 
+          ...state.equippedProfessionArts,
+          ...(if (state.equips[EQUIP_SLOTS.HAND_LR]) 
+            [
+              state.equips[EQUIP_SLOTS.HAND_LR].arts[0],        
+              state.equips[EQUIP_SLOTS.HAND_LR].arts[1]
+            ]
+          else 
+            []
+          )
+        ]->reduce(::(previous, value) <-
+          (if (previous == empty) 0 else previous) + 
+          ArtsDeck.artIDtoCount(:value)
+        );    
     },
 
       

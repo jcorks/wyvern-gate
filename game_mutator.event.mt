@@ -238,7 +238,7 @@ Event.database.newEntry(
             onLeave::{
               @:world = import(module:'game_singleton.world.mt');
               for(0, 5*3)::(i) {
-                world.stepTime();
+                world.incrementTime();
               }
       
               foreach(event.party.members)::(index, member) {

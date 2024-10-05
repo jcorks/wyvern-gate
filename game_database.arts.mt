@@ -5397,7 +5397,7 @@ Arts.newEntry(
   data: {
     name: 'Banishing Light',
     id : 'base:banishing-light',
-    targetMode : TARGET_MODE.ONEPART,
+    targetMode : TARGET_MODE.ONE,
     description: "The target receives the Banishing Light effect. Banishing Light: Next time the target would receive damage, the target receives 1/3rd the amount, rounded up, as Banish stacks. When a combatant acquires 10 stacks of Banish, they are evicted from battle.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
@@ -5938,10 +5938,10 @@ Arts.newEntry(
   data: {
     name: 'Enlarge',
     id : 'base:enlarge',
-    targetMode : TARGET_MODE.NONE,
+    targetMode : TARGET_MODE.ONE,
     description: "Adds the Enlarged effect, making the target have 50% more max HP and 50% more DEF for 2 turns.",
     durationTurns: 0,
-    usageHintAI : USAGE_HINT.OFFENSIVE,
+    usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,

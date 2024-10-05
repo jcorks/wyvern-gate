@@ -365,8 +365,6 @@ return {
         professionHint: prof
       );
       p0.normalizeStats();
-      p0.autoLevelProfession();
-      p0.equipProfessionArt(:p0.getUnequippedProfessionArts()[0]);
       choices->push(value:p0);
     }
 

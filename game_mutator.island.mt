@@ -295,8 +295,9 @@ Island.database.newEntry(
     @augmentTiered = ::(entity) {
       @:Arts = import(module:'game_database.arts.mt');
 
-      @:getSupportArts::(entity, professionLevel, additionalCount) {
-        // basic arts
+      // Assigns support arts for every entity.
+      @:assignSupportArts::(entity, professionLevel, removeBasicCount) {
+        // basic arts: 10 + 12 = 22
         entity.supportArts = [
           'base:pebble',    //5
           'base:cycle',     //5
@@ -306,19 +307,40 @@ Island.database.newEntry(
           'base:mind-games',//3
         ];
         
-        for(0, professionalLevel) ::(i) {
+        
+        entity.supportArts = random.scrambled(:entity.supportArts);
+        for(0, removeBasicCount) ::(i) {
+          entity.supportArts->pop;
+        }
+        
+        // for each professional art, a support art is replaced
+        for(0, professionLevel) ::(i) {
           entity.autoLevelProfession(:entity.profession);
         }
         entity.equipAllProfessionArts();  
-        
-        
-
-
-        for(0, 
-        @:addCondition ::(value) <- arts->findIndex(value.id) == -1
-
+        foreach(entity.professionArts) ::(k, v) {
+          entity.supportArts->pop;
+        }
         
 
+        // finally collect unique random support arts until 25 is reached
+        @:addCondition ::(value) <- entity.supportArts->findIndex(:value.id) == -1
+        {:::} {
+          forever ::{
+            if (entity.calculateDeckSize() >= 25) send();
+
+            entity.supportArts->push(:
+              Arts.getRandomFiltered(::(value) <- 
+                ((value.traits & Arts.TRAITS.SPECIAL) == 0)
+                &&
+                ((value.traits & Arts.TRAITS.SUPPORT) != 0)
+                &&
+                addCondition(:value)
+              ).id
+            );
+
+          }
+        }
       }
 
     
@@ -326,27 +348,11 @@ Island.database.newEntry(
       match(state.tier) {
         (0):::<= {
           entity.capHP(max:9);
-          entity.supportArts = [
-            'base:pebble',    //5
-            'base:foresight', //5
-            'base:diversify', //3
-            'base:brace',     //3
-            'base:agility',   //3
-            'base:mind-games',//3
-            Arts.getRandomFiltered(::(value) <- 
-              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
-              &&
-              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
-              &&
-              ((value.traits
-            ).id,
-            Arts.getRandomFiltered(::(value) <- 
-              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
-              &&
-              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
-            ).id
-          ]
-          entity.autoLevelProfession(:entity.profession);
+          assignSupportArts(
+            entity,
+            professionLevel : 1,
+            removeBasicCount : 0
+          );
         }, // tier zero has no mods 
 
         // tier 1: learn 1 to 2 skills
@@ -354,29 +360,11 @@ Island.database.newEntry(
           for(0, 1) ::(i) {
             entity.autoLevel();
           }
-          entity.supportArts = [
-            'base:pebble',
-            'base:diversify',
-            'base:mind-games',
-            'base:crossed-wires',
-            Arts.getRandomFiltered(::(value) <- 
-              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
-              &&
-              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
-            ).id,
-            Arts.getRandomFiltered(::(value) <- 
-              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
-              &&
-              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
-            ).id,
-            Arts.getRandomFiltered(::(value) <- 
-              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
-              &&
-              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
-            ).id
-
-          ]
-
+          assignSupportArts(
+            entity,
+            professionLevel : 1,
+            removeBasicCount : 1
+          );
         },
         
 
@@ -384,7 +372,6 @@ Island.database.newEntry(
         (2):::<= {
           for(0, 2) ::(i) {
             entity.autoLevel();
-            entity.autoLevelProfession(:entity.profession);
           }
           
           @:Item = import(module:'game_mutator.item.mt');
@@ -405,19 +392,12 @@ Island.database.newEntry(
           );
           
           
-          entity.supportArts = [
-            'base:diversify',
-            'base:mind-games',
-            'base:recycle'
-          ]
+          assignSupportArts(
+            entity,
+            professionLevel : 2,
+            removeBasicCount : 2
+          );
 
-          for(0, 4)::(i) {
-            entity.supportArts->push(:Arts.getRandomFiltered(::(value) <- 
-              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
-              &&
-              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
-            ).id)          
-          }
 
         },
         
@@ -427,7 +407,6 @@ Island.database.newEntry(
         (3):::<= {
           for(0, 4) ::(i) {
             entity.autoLevel();
-            entity.autoLevelProfession(:entity.profession);
           }
 
           
@@ -448,24 +427,12 @@ Island.database.newEntry(
             silent:true
           );
           
-          entity.supportArts = [
-            'base:retaliate',
-            'base:crossed-wires',
-            'base:cancel',
-            Arts.getRandomFiltered(::(value) <- 
-              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
-              &&
-              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
-            ).id                      
-          ]
+          assignSupportArts(
+            entity,
+            professionLevel : 4,
+            removeBasicCount : 3
+          );
 
-          for(0, 6)::(i) {
-            entity.supportArts->push(:Arts.getRandomFiltered(::(value) <- 
-              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
-              &&
-              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
-            ).id)          
-          }
         },
         
         
@@ -473,7 +440,6 @@ Island.database.newEntry(
         default: ::<= {
           for(0, 8) ::(i) {
             entity.autoLevel();
-            entity.autoLevelProfession(:entity.profession);
           }
 
           
@@ -511,19 +477,11 @@ Island.database.newEntry(
             silent:true
           );
 
-          entity.supportArts = [
-            'base:diversify',
-            'base:cancel'
-          ]
-          for(0, 6)::(i) {
-            entity.supportArts->push(:Arts.getRandomFiltered(::(value) <- 
-              ((value.traits & Arts.TRAITS.SPECIAL) == 0)
-              &&
-              ((value.traits & Arts.TRAITS.SUPPORT) != 0)
-            ).id)          
-          }
-
-
+          assignSupportArts(
+            entity,
+            professionLevel : 8,
+            removeBasicCount : 4
+          );
         }       
         
         
