@@ -296,6 +296,35 @@ Effect.newEntry(
   }
 )
 
+Effect.newEntry(
+  data : {
+    name : 'Wyvern\'s Aura',
+    id : 'base:the-beast',
+    description: 'The swiftness and power of the wyvern makes it particularly hard to hit.',
+    battleOnly : true,
+    stackable: false,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(
+    ),
+    events : {
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        when (!holder.isIncapacitated() && random.try(percentSuccess:15)) ::<= {
+          windowEvent.queueMessage(text:random.pickArrayItem(list:[
+            'You will have to try harder than that, Chosen!',
+            'Come at me; do not hold back, Chosen!',
+            'You disrespect me with such a weak attack, Chosen!',
+            'Nice try, but it is not enough!'
+          ]));
+          windowEvent.queueMessage(text:holder.name + ' deflected the attack!');
+          damage.amount = 0;
+          return EffectStack.CANCEL_PROPOGATION;
+        }
+      }
+    }
+  }
+)
+
 
 Effect.newEntry(
   data : {
@@ -706,7 +735,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
         windowEvent.queueMessage(text:'It casts Protect on ' + holder.name + '!');
         holder.addEffect(
-          attacker:from, id: 'base:protect', durationTurns: 3
+          from, id: 'base:protect', durationTurns: 3
         );            
       }
     }
@@ -728,7 +757,7 @@ Effect.newEntry(
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
         holder.addEffect(
-          attacker:from, id: 'base:evade', durationTurns: 1
+          from, id: 'base:evade', durationTurns: 1
         );            
       }
     }
@@ -3451,6 +3480,14 @@ Effect.newEntry(
   statics : {
     FLAGS : {
       get ::<- FLAGS
+    },
+    
+    FLAGS_TO_DOMINANT_SYMBOL ::(flag) {
+      when(flag & FLAGS.SPECIAL) '?';
+      when(flag & FLAGS.AILMENT) '!';
+      when(flag & FLAGS.BUFF)    '+';
+      when(flag & FLAGS.DEBUFF)  '-';
+      return '?'
     }
   },
   attributes : {

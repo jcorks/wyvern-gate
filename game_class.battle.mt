@@ -372,12 +372,10 @@
     }
     
     @:endTurn ::{
+      entityTurn.endTurn(battle:this);
       turnIndex+=1;
       checkRemove();  
       if (turnPoppable->keycount == 0) ::<= {    
-        foreach(turn)::(index, entity) {
-          entity.endTurn(battle:this);
-        }
 
 
         winningGroup = empty;
@@ -570,6 +568,7 @@
       
         
       @lines = [];
+      @:ent2line = {};
       
       foreach(groups) ::(k, group) {
         if (k != 0) ::<= {
@@ -583,6 +582,7 @@
                    
         }
         foreach(group)::(index, ally) {
+          ent2line[ally] = lines->size;
           if (Entity.isDisplayedHurt(entity:ally)) ::<= {
             lines->push(value:' ////////// ' + '  ' + ally.name);// + ' - Lv ' + ally.level);
             lines->push(value:'HP: ' + 'X  / X ' + '  AP: ' + 'X  / X');
@@ -623,6 +623,41 @@
       foreach(lines)::(index, line) {
         canvas.movePen(x:2, y:top+index+2);
         canvas.drawText(text:line);
+      }
+      
+      // grouping and display of effects
+      foreach(groups) ::(k, group) {
+        foreach(group)::(index, ally) {
+          @:Effect = import(module:'game_database.effect.mt');  
+          when (ally.effectStack == empty) empty;
+          when (ally.effectStack.getAll()->size == 0) empty;
+          @:pieces = [];
+          
+          @:categories = {
+            ('?'): 0,
+            ('+'): 0,
+            ('-'): 0,
+            ('!'): 0
+          };
+          
+          foreach(ally.effectStack.getAll()) ::(k, v) {
+            @:eff = Effect.find(:v.id);
+            
+            categories[Effect.FLAGS_TO_DOMINANT_SYMBOL(:eff.flags)] += 1;
+          }
+          
+          // to preserve order
+          foreach(['!', '+', '-', '?']) ::(k, v) {
+            when(categories[v] == 0) empty;
+            pieces->push(:
+              v + 'x' + (if (categories[v] > 9) '*' else categories[v]) + ' '
+            );
+          }
+          
+          canvas.movePen(x:width + 6, y:top+2+ent2line[ally]);
+          canvas.drawText(text:String.combine(:pieces));
+          
+        }
       }
       
     }

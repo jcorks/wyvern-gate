@@ -1883,7 +1883,10 @@ return {
         @:Story = import(module:'game_singleton.story.mt');
         @:Scene = import(module:'game_database.scene.mt');
         @:StatSet = import(module:'game_class.statset.mt');
-        location.ownedBy = location.landmark.island.newInhabitant();
+        location.ownedBy = location.landmark.island.newInhabitant(
+          speciesHint : 'thechosen:wyvern-of-fire',
+          professionHint: 'thechosen:wyvern-of-fire'
+        );
         location.ownedBy.supportArts = [
           'base:cancel',
           'base:bloods-summoning',
@@ -1894,8 +1897,6 @@ return {
           'base:banishing-light'
         ];      
         location.ownedBy.name = 'Wyvern of Fire';
-        location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-fire');
-        location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-fire')         
         location.ownedBy.removeAllProfessionArts();
         for(0, location.ownedBy.profession.arts->size) ::(i) {
           location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
@@ -2023,7 +2024,11 @@ return {
         @:Story = import(module:'game_singleton.story.mt');
         @:Scene = import(module:'game_database.scene.mt');
         @:StatSet = import(module:'game_class.statset.mt');
-        location.ownedBy = location.landmark.island.newInhabitant();
+        location.ownedBy = location.landmark.island.newInhabitant(
+          speciesHint : 'thechosen:wyvern-of-ice',
+          professionHint: 'thechosen:wyvern-of-ice'
+        );
+        
         location.ownedBy.supportArts = [
           'base:cancel',
           'base:retaliate',
@@ -2036,8 +2041,6 @@ return {
           'base:banishing-light'
         ];      
         location.ownedBy.name = 'Wyvern of Ice';
-        location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-ice');
-        location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-ice');
         location.ownedBy.removeAllProfessionArts();
         for(0, location.ownedBy.profession.arts->size) ::(i) {
           location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
@@ -2119,7 +2122,11 @@ return {
         @:Scene = import(module:'game_database.scene.mt');
         @:StatSet = import(module:'game_class.statset.mt');
         @:Entity = import(module:'game_class.entity.mt');
-        location.ownedBy = location.landmark.island.newInhabitant();
+        location.ownedBy = location.landmark.island.newInhabitant(
+          speciesHint : 'thechosen:wyvern-of-thunder',
+          professionHint: 'thechosen:wyvern-of-thunder'
+        );
+        
         location.ownedBy.name = 'Wyvern of Thunder';
         location.ownedBy.supportArts = [
           'base:cancel',
@@ -2131,8 +2138,6 @@ return {
           'base:mind-games',
           'base:banishing-light'
         ];      
-        location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-thunder');
-        location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-thunder') 
         location.ownedBy.removeAllProfessionArts();
         for(0, location.ownedBy.profession.arts->size) ::(i) {
           location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
@@ -2215,7 +2220,11 @@ return {
         @:Story = import(module:'game_singleton.story.mt');
         @:Scene = import(module:'game_database.scene.mt');
         @:StatSet = import(module:'game_class.statset.mt');
-        location.ownedBy = location.landmark.island.newInhabitant();
+        location.ownedBy = location.landmark.island.newInhabitant(
+          speciesHint : 'thechosen:wyvern-of-light',
+          professionHint: 'thechosen:wyvern-of-light'
+        );
+        
         location.ownedBy.supportArts = [
           'base:cancel',
           'base:retaliate',
@@ -2224,8 +2233,6 @@ return {
           'base:bloods-ward',                  
         ];      
         location.ownedBy.name = 'Wyvern of Light';
-        location.ownedBy.species = Species.find(id:'thechosen:wyvern-of-light');
-        location.ownedBy.profession = Profession.find(id:'thechosen:wyvern-of-light')
         location.ownedBy.removeAllProfessionArts();
         for(0, location.ownedBy.profession.arts->size) ::(i) {
           location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
@@ -4565,6 +4572,7 @@ return {
       
       traits : Species.TRAITS.SPECIAL,
       passives : [
+        'base:the-wyvern'
       ]
     })
 
@@ -4590,7 +4598,8 @@ return {
       
       traits : Species.TRAITS.SPECIAL,
       passives : [
-        'base:icy'
+        'base:icy',
+        'base:the-wyvern'
       ]
     })
 
@@ -4617,7 +4626,8 @@ return {
       
       traits : Species.TRAITS.SPECIAL,
       passives : [
-        'base:shock'
+        'base:shock',
+        'base:the-wyvern'
       ]
     })
 
@@ -4644,7 +4654,8 @@ return {
       
       traits : Species.TRAITS.SPECIAL,
       passives : [
-        'base:shimmering'
+        'base:shimmering',
+        'base:the-wyvern'
       ]
     })
 

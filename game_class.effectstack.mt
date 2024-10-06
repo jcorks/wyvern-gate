@@ -290,7 +290,9 @@
       addInnate::(id, item) {
         @:ref = {
           id : id,
-          item : item
+          item : item,
+          turnCount : 0,
+          duration : 999999999
         };
         state.innateEffects->push(:ref);
         this.emitEvent(name: 'onAffliction', filter::(value) <- ref == value);
@@ -463,6 +465,74 @@
         
 
       },
+      
+      
+      queueList ::(
+        canCancel,
+        keep,
+        onChoice,
+        prompt,
+        onCancel
+      ){
+        @:descriptiveList = import(:'game_function.descriptivelist.mt');
+        
+        
+        @:turnCount ::(effect) {
+          @:count = effect.duration - effect.turnCount;
+          when(count > 99) 'A long time'
+          return '' + count;
+        }
+        
+        @:listTraits ::(flags) {
+          @:out = [];
+          
+          if (flags & Effect.FLAGS.SPECIAL) out->push(:'Special');
+          if (flags & Effect.FLAGS.AILMENT) out->push(:'Status Ailment');
+          if (flags & Effect.FLAGS.BUFF)    out->push(:'Buff');
+          if (flags & Effect.FLAGS.DEBUFF)  out->push(:'Debuff');
+          
+          when(out->size == 0)
+            'None'
+          breakpoint();
+          return out->reduce(::(previous, value) <- 
+            if (previous == empty)
+              value
+            else 
+              previous + ', ' + value
+          )
+        }
+        
+        @:limit::(str) {
+          when (str->length > 18) 
+            str->substr(from:0, to:15) + '...'
+            
+          return str;
+        }
+        
+        @:items = this.getAll()->map(to::(value) { 
+          @:effect = Effect.find(:value.id);
+          @:symbol = Effect.FLAGS_TO_DOMINANT_SYMBOL(:effect.flags);
+          return [
+            limit(:'(' + symbol + ') ' + effect.name),
+            [
+              'Name:        ' + effect.name,
+              'Traits:      ' + listTraits(:effect.flags),
+              'Turns left:  ' + turnCount(:value), 
+              'Description: ' + effect.description
+            ]
+          ]
+        });
+        
+        descriptiveList(
+          items,
+          canCancel,
+          keep,
+          prompt,
+          listRatio: 0.4,
+          onChoice,
+          onCancel
+        );
+      },      
       
       clear::(all)  {
         @inSet = {};

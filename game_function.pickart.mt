@@ -67,6 +67,7 @@ return ::(
   
     choices->setSize(:0);
     choiceActs->setSize(:0);
+    choiceCategories->setSize(:0);
     if (categories) ::<= {
       foreach(categories) ::(k, set) {
         @:category = set[0];        

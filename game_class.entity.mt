@@ -963,10 +963,10 @@
 
             categories->push(:['Support:', [...this.supportArts]]);
             categories->push(:[' Add support...', []]);
-
             return categories;
           },
           onChoice::(art, category) {
+            breakpoint();
             when(category == ' Add support...') ::<= {
               trunk();
             }
@@ -1576,7 +1576,7 @@
           );
         
 
-        when(hpWas0 && target.hp == 0) ::<= {
+        when(target.isDead == false && hpWas0 && target.hp == 0) ::<= {
           this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
           target.flags.add(flag:StateFlags.DIED);
           target.kill(from:this);        
@@ -1605,7 +1605,7 @@
       @:this = _.this;
       @:state = _.state;
       
-      @:alreadyKnockedOut = this.hp == 0;
+      @:alreadyKnockedOut = this.hp == 0 || state.isDead;
       if (alreadyKnockedOut)
         dodgeable = false;
         
@@ -1622,7 +1622,6 @@
         
       @:retval = ::<= {
 
-        when(state.isDead) false;
         @originalAmount = damage.amount;
 
 
@@ -1639,19 +1638,7 @@
           return false;                              
         }*/
         
-        // flat 15% chance if is Wyvern! because hard
-        when(dodgeable && this.species.name->contains(key:'Wyvern of') && random.try(percentSuccess:15)) ::<= {
-          windowEvent.queueMessage(text:random.pickArrayItem(list:[
-            'You will have to try harder than that, Chosen!',
-            'Come at me; do not hold back, Chosen!',
-            'You disrespect me with such a weak attack, Chosen!',
-            'Nice try, but it is not enough!'
-          ]));
-          windowEvent.queueMessage(text:this.name + ' deflected the attack!');
-          this.flags.add(flag:StateFlags.DODGED_ATTACK);
-          return false;                                        
-        }
-        
+
 
         damage.amount *= 1 + (random.number() - 0.5) * DAMAGE_RNG_SPREAD
         
@@ -1713,7 +1700,7 @@
             @:oldHP = state.hp;
             state.hp -= damage.amount;
             if (state.hp < 0) state.hp = 0;
-            if (!alreadyKnockedOut)
+            if (state.isDead || !alreadyKnockedOut)
               animateDamage(this, from:oldHP, to:state.hp, caption: '' + this.name + ' received ' + damage.amount + ' '+damageTypeName() + 'damage');
           } else ::<= {
             state.ap -= damage.amount;
@@ -1747,10 +1734,6 @@
         if (damage.damageType == Damage.TYPE.LIGHT && random.number() > 0.98)
           this.addEffect(from:attacker, id:'base:petrified',durationTurns:2);
         
-        if (this.effectStack == empty) ::<= {
-          @:Topaz = import(module:'Topaz');
-          Topaz.debug();
-        }
 
         this.effectStack.emitEvent(
           name : 'onPostDamage',
@@ -2870,6 +2853,7 @@
       state.qualityDescription = out;
       return out;
     },
+   
       
     describe::(excludeStats)  {
       @:state = _.state;

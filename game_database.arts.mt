@@ -3175,7 +3175,7 @@ Arts.newEntry(
     name: 'Counter',
     id : 'base:counter',
     targetMode : TARGET_MODE.NONE,
-    description: 'If attacked, dodges and retaliates for 3 turns. Countering negates an attack\'s damage and redirects a portion of the damage back at the attacker.',
+    description: 'If attacked, dodges and retaliates for 3 turns. Countering negates an attack\'s damage and redirects a portion of the damage back at the attacker. The countering person is unable to act.',
     durationTurns: 0,
     kind : KIND.REACTION,
     rarity : RARITY.RARE,
@@ -5738,7 +5738,6 @@ Arts.newEntry(
       );
       sprite.name = 'the Cursed Light';
       
-      sprite.addEffect(from:user, id:'base:cursed-binding', durationTurns:10000);
       
       
       @:battle = user.battle;
@@ -5748,6 +5747,7 @@ Arts.newEntry(
             group: [sprite],
             sameGroupAs:user
           );
+          sprite.addEffect(from:user, id:'base:cursed-binding', durationTurns:10000);
         }
       )
 

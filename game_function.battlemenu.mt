@@ -33,6 +33,7 @@ return ::(
 ) {
   @:world = import(module:'game_singleton.world.mt');
 
+  breakpoint();
 
   @:commitAction ::(action => BattleAction->type) {
     if (Arts.find(id:action.card.id).kind == Arts.KIND.ABILITY) ::<= {
@@ -40,7 +41,6 @@ return ::(
       windowEvent.jumpToTag(name:'BattleMenu', goBeforeTag:true)
     } else ::<= {
       battle.entityCommitAction(action:action);  
-      breakpoint();
       windowEvent.jumpToTag(name:'BattleMenu', doResolveNext:true);         
     }
 

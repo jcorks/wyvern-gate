@@ -993,6 +993,7 @@ Species.newEntry(data:{
   
   traits : TRAITS.SPECIAL,
   passives : [
+    'base:the-wyvern'
   ]
 })
 

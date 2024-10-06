@@ -1,6 +1,10 @@
 @:Item = import(module:'game_mutator.item.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Scenario = import(module:'game_mutator.scenario.mt');
+@:commonInteractions = import(module:'game_singleton.commoninteractions.mt');
+@:Effect = import(module:'game_database.effect.mt');
+@:random = import(module:'game_singleton.random.mt');
+import(:'game_function.descriptivelist.mt');
 
 
 return { 
@@ -68,6 +72,7 @@ return {
               silent:true
             );          
           }
+          ent.data.sourceImport = data;
           
           
           if (data.giveArmor) ::<= {
@@ -84,12 +89,29 @@ return {
               ), 
               inventory:ent.inventory, 
               silent:true
-            );          
+            );    
+            
+      
           }
           
           foreach(data.arts) ::(k, v) {
             ent.supportArts->push(:v);
           }
+          
+          
+          if (data.additionalRandomArts->type == Number) ::<= {
+            @:Arts = import(module:'game_database.arts.mt');
+            for(0, data.additionalRandomArts) ::(i) {
+              ent.supportArts->push(:
+                Arts.getRandomFiltered(::(value) <- 
+                  ((value.traits & Arts.TRAITS.SPECIAL) == 0)
+                  &&
+                  ((value.traits & Arts.TRAITS.SUPPORT) != 0)
+                ).id
+              );
+            }
+          }
+
 
           if (data.name) 
             ent.name = data.name;
@@ -111,15 +133,41 @@ return {
           getNPC(:import(:'mod.example.rasa.auto-battle/npc2-3.mt'))
         ]
         
+        world.party.add(:teamA[0]);
+        @:a = teamA[0].stats.save();
+        a.SPD = 9999;
+        teamA[0].stats.load(:a);
         
+        world.party.leader = teamA[0];
+
+        
+        @:item = Item.new(base:Item.database.getRandom());
+        world.party.inventory.add(:item);
 
         world.battle.start(
-          party: import(:'game_class.party.mt').new(),
-          npcBattle : true,
+          party: world.party,
+          //npcBattle : true,
           allies: teamA,
           enemies : teamB,
           landmark: {},
           onStart :: {
+            foreach([...teamA, ...teamB]) ::(k, v) {
+              if (v.data.sourceImport.randomEffectCount->type == Number) ::<= {
+                for(0, v.data.sourceImport.randomEffectCount) ::(i) {
+                  @:effect = Effect.getRandom();
+                  v.effectStack.add(
+                    from: v,
+                    id: effect.id, 
+                    duration: if (random.flipCoin())
+                      1000
+                    else 
+                      random.integer(from:3, to:10),
+                    item : item
+                  );
+                }
+              }          
+            }
+          
           },
           onEnd ::(result) {          
             @:instance = import(module:'game_singleton.instance.mt');
@@ -156,7 +204,13 @@ return {
       
       // List of interactions available when controlling the party 
       // in a battle.
-      interactionsBattle : [],
+      interactionsBattle : [
+        commonInteractions.battle.attack,
+        commonInteractions.battle.arts,
+        commonInteractions.battle.check,
+        commonInteractions.battle.item,
+        commonInteractions.battle.wait
+      ],
       
       // List of general options available, such as quitting the game.
       interactionsOptions : [],

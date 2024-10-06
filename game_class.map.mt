@@ -723,7 +723,6 @@
       }
 
       foreach(importantItems) ::(k, v) {
-        breakpoint();
         canvas.movePen(x:v.x, y:v.y);  
         canvas.drawChar(text:v.ch);
       }

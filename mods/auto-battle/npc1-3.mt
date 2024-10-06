@@ -4,11 +4,9 @@ return {
   level : 6, // default
   giveWeapon : false,
   giveArmor : false,
+  randomEffectCount : 0,
   arts : [
-    'base:pebble',  
-    'base:pebble',
-    'base:cancel',
-    'base:retaliate',
-    'base:quick-shield'
+    'base:cursed-summoning',
+    'base:stun'
   ]
 }

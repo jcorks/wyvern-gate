@@ -86,49 +86,51 @@ return {
         @:allies  = battle.getAllies(entity:user);
         @:enemies = battle.getEnemies(entity:user);
 
+        @:combatants = [...allies, ...enemies];
+        @:names = combatants->map(::(value) <- value.name)
+                      
         windowEvent.queueChoices(
           topWeight: 1,
-          prompt: 'Check which?', 
           leftWeight: 1,
+          prompt:'Check whom?',
+          choices: names,
           keep: true,
           canCancel: true,
-          choices : [
-          'Allies',
-          'Discarded Arts'
-          ],
           onChoice::(choice) {
-          when(choice == 0) empty;
+            when (choice == 0) empty;
 
-          match(choice-1) {
-            (0): ::<={ // allies
-              @:names = [...allies]->map(to:::(value){return value.name;});
-              
-              choice = windowEvent.queueChoices(
-                topWeight: 1,
-                leftWeight: 1,
-                prompt:'Check which ally?',
-                choices: names,
-                keep: true,
-                canCancel: true,
-                onChoice::(choice) {
-                  when (choice == 0) empty;
+            @:whom = combatants[choice-1];
+            choice = windowEvent.queueChoices(
+              topWeight: 1,
+              leftWeight: 1,
+              prompt:'Check: ' + whom.name,
+              choices: [
+                'Effects',
+                'Describe',
+                'Discarded Arts'
+              ],
+              keep: true,
+              canCancel: true,
+              onChoice::(choice) {
+                when (choice == 0) empty;
 
-                  @:ally = allies[choice-1];
-                  ally.describe();              
-                }
-              );
-            },
-            
-            
-            (1): ::<= {
-              user.deck.chooseDiscard(
-                canCancel: true
-              );
-            }
-          
-          }          
+                when(choice == 1)
+                  whom.effectStack.queueList(
+                    canCancel : true,
+                    prompt: whom.name + ' - Effects'
+                  );              
+
+                when(choice == 2)
+                  whom.describe();              
+
+                when(choice == 3)
+                  whom.deck.chooseDiscardPlayer(
+                    canCancel: true
+                  );
+              }
+            );
           }
-        )
+        );
       }    
     ),
     
