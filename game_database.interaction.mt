@@ -677,7 +677,7 @@ Interaction.newEntry(
       
       @:minerNames = [...miners]->map(to:::(value) <- value.name);
       
-
+      // theres a funny exploit here, but im keeping it. Just call it your imagination
       @:mining ::(miner) {
         windowEvent.queueMessage(text:'*clank clank*');
 
@@ -1594,7 +1594,7 @@ Interaction.newEntry(
           @:world = import(module:'game_singleton.world.mt');
           {:::} {
             forever ::{
-              world.stepTime();
+              world.incrementTime();
               if (world.time == world.TIME.MORNING)
                 send();            
             }
@@ -2142,8 +2142,6 @@ Interaction.newEntry(
       foreach(world.party.members) ::(index, member) {
         if (member.hp < member.stats.HP/2)
           member.heal(amount: member.stats.HP * 0.1);
-        if (member.ap < member.stats.AP/2)
-          member.healAP(amount: member.stats.AP * 0.1);
       }
       
       

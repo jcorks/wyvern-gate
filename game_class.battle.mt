@@ -835,8 +835,14 @@
 
 
 
-                if (hasWeapon && random.try(percentSuccess:10)) ::<= {
-                  windowEvent.queueMessage(text:'The party feels their intuition with their weapons grow.');
+                if (hasWeapon && random.try(percentSuccess:50)) ::<= {
+                
+                  @:ally = random.pickArrayItem(:party_.members);
+                  @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
+                  when (wep.name == 'None') empty;
+                  when (!wep.canGainIntuition()) empty;
+                
+                  windowEvent.queueMessage(text:ally.name + '\'s feels the ' + wep.name + '\'s power grow.');
 
                   @:world = import(module:'game_singleton.world.mt')
                   world.accoladeIncrement(name:'intuitionGained');
@@ -850,33 +856,26 @@
                   };
 
 
-                  foreach(party_.members)::(index, ally) {   
-                    @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
-                    when (wep.name == 'None') empty;
-
-                    when (!wep.canGainIntuition())
-                      windowEvent.queueMessage(text:ally.name + ' has already reached peak intuition with their weapon.');
-                    ally.recalculateStats();
-                    @:oldAllyStats = StatSet.new();
-                    oldAllyStats.load(serialized:ally.stats.save());
-                    @:stats = wep.stats;               
-                    @:oldStats = StatSet.new();
-                    oldStats.add(stats);
-                    stats.add(stats:StatSet.new(
-                      HP: if (choice == 0) 7 else 0,
-                      AP: if (choice == 1) 7 else 0,
-                      ATK: if (choice == 2) 7 else 0,
-                      DEF: if (choice == 3) 7 else 0,
-                      INT: if (choice == 4) 7 else 0,
-                      LUK: if (choice == 5) 7 else 0,
-                      DEX: if (choice == 6) 7 else 0,
-                      SPD: if (choice == 7) 7 else 0
-                    ));
+                  ally.recalculateStats();
+                  @:oldAllyStats = StatSet.new();
+                  oldAllyStats.load(serialized:ally.stats.save());
+                  @:stats = wep.stats;               
+                  @:oldStats = StatSet.new();
+                  oldStats.add(stats);
+                  stats.add(stats:StatSet.new(
+                    HP: if (choice == 0) 7 else 0,
+                    AP: if (choice == 1) 7 else 0,
+                    ATK: if (choice == 2) 7 else 0,
+                    DEF: if (choice == 3) 7 else 0,
+                    INT: if (choice == 4) 7 else 0,
+                    LUK: if (choice == 5) 7 else 0,
+                    DEX: if (choice == 6) 7 else 0,
+                    SPD: if (choice == 7) 7 else 0
+                  ));
                     
-                    oldStats.printDiffRate(other:stats, prompt:wep.name);
-                    ally.recalculateStats();
-                    oldAllyStats.printDiff(other:ally.stats, prompt:ally.name);
-                  }
+                  oldStats.printDiffRate(other:stats, prompt:wep.name);
+                  ally.recalculateStats();
+                  oldAllyStats.printDiff(other:ally.stats, prompt:ally.name);
                 }
 
                 battleLoot(

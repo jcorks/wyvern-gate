@@ -6,6 +6,6 @@ return {
   giveArmor : false,
   randomEffectCount : 1,
   arts : [
-    'base:stun'
+    'base:banishing-light'
   ]
 }

@@ -1101,13 +1101,13 @@ return {
     ),
     
     Accolade.new(
-      message: "Smart fella.",
-      info: 'Gained intuition over 5 times.',
+      message: "I think it\'s vibrating...",
+      info: 'Unlocked additional power of weapons over 5 times.',
       condition::(world)<- world.accoladeCount(name:'intuitionGained') > 5
     ),
     
     Accolade.new(
-      message: "Thrifty spender!",
+      message: "I know exactly what I'm going to do with my 20 dollars...",
       info: 'Bought over 20 items.',
       condition::(world)<- world.accoladeCount(name:'buyCount') > 20
     ),

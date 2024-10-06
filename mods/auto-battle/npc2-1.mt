@@ -6,7 +6,6 @@ return {
   giveArmor : false,
   randomEffectCount : 0,
   arts : [
-    'base:cursed-summoning',
-    'base:stun'
+    'base:banishing-light'
   ]
 }

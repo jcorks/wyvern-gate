@@ -5545,7 +5545,7 @@ Arts.newEntry(
   data: {
     name: 'Blood\'s Ward',
     id : 'base:bloods-ward',
-    targetMode : TARGET_MODE.ONE,
+    targetMode : TARGET_MODE.NONE,
     description: "Sacrifice 1 HP. Cancel target Art.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,

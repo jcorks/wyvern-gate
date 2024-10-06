@@ -117,7 +117,7 @@ return {
                 when(choice == 1)
                   whom.effectStack.queueList(
                     canCancel : true,
-                    prompt: whom.name + ' - Effects'
+                    prompt: 'Current Effects'
                   );              
 
                 when(choice == 2)

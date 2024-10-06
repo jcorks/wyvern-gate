@@ -140,7 +140,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable : true,
     blockPoints: 0,
-    flags : FLAGS.BUFF,
+    flags : FLAGS.DEBUFF,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -159,8 +159,9 @@ Effect.newEntry(
         }
         damage.amount = 0;
         holder.removeEffectInstance(:
-          holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:banishing-light')[0]
+          (holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:banishing-light'))[0]
         )
+        breakpoint();
       }
     }
   }
@@ -299,7 +300,7 @@ Effect.newEntry(
 Effect.newEntry(
   data : {
     name : 'Wyvern\'s Aura',
-    id : 'base:the-beast',
+    id : 'base:the-wyvern',
     description: 'The swiftness and power of the wyvern makes it particularly hard to hit.',
     battleOnly : true,
     stackable: false,

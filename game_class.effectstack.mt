@@ -353,7 +353,7 @@
           }
         );
         
-        state.effects = all;
+        state.effects = state.effects->filter(::(value) <- allrev[value] != true);
       },
       
       getAllByFilter::(filter) {
