@@ -398,6 +398,8 @@ Effect.newEntry(
   }
 ) 
 
+
+
 Effect.newEntry(
   data : {
     name : 'Light Stance',
@@ -1076,6 +1078,30 @@ Effect.newEntry(
   }
 )  
 
+
+Effect.newEntry(
+  data : {
+    name : 'Minor Strength Boost',
+    id : 'base:minor-strength-boost',
+    description: 'ATK +70%',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(
+      ATK:25
+    ),
+    events : {
+      onAffliction ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + '\'s power is increased!');
+      },
+      onRemoveEffect ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + '\'s power boost fades!');
+      }
+    }
+  }
+)  
+
 Effect.newEntry(
   data : {
     name : 'Trigger Defense Boost',
@@ -1123,6 +1149,30 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
+    name : 'Minor Defense Boost',
+    id : 'base:minor-defense-boost',
+    description: 'DEF +25%',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(
+      DEF:25
+    ),
+    events : {
+      onAffliction ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + '\'s defense is increased!');
+      },
+      onRemoveEffect ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + '\'s defense boost fades!');
+      }
+    }
+  }
+)  
+
+
+Effect.newEntry(
+  data : {
     name : 'Trigger Mind Boost',
     id : 'base:trigger-mind-boost',
     description: 'Triggers a boost in mental acuity.',
@@ -1148,6 +1198,29 @@ Effect.newEntry(
     name : 'Mind Boost',
     id : 'base:mind-boost',
     description: 'INT +70%',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(
+      INT:70
+    ),
+    events : {
+      onAffliction ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + '\'s mental acuity is increased!');
+      },
+      onRemoveEffect ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + '\'s intelligence boost fades!');
+      }
+    }
+  }
+)  
+
+Effect.newEntry(
+  data : {
+    name : 'Mind Boost',
+    id : 'base:minor-mind-boost',
+    description: 'INT +25%',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -1209,7 +1282,29 @@ Effect.newEntry(
       }
     }
   }
-)  
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Minor Dex Boost',
+    id : 'base:minor-dex-boost',    
+    description: 'DEX +25%',
+    battleOnly : true,
+    stackable: false,
+    blockPoints : 0,
+    flags : 0,
+    stats: StatSet.new(DEX:25),
+    events : { 
+      onAffliction ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + '\'s dexterity is increased!');
+      },
+      onRemoveEffect ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + '\'s dexterity boost fades!');
+      }
+    }
+  }
+)   
 
 Effect.newEntry(
   data : {
@@ -1244,6 +1339,29 @@ Effect.newEntry(
     flags : FLAGS.BUFF,
     stats: StatSet.new(
       SPD:70
+    ),
+    events : {
+      onAffliction ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + '\'s speed is increased!');
+      },
+      onRemoveEffect ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + '\'s speed boost fades!');
+      }
+    }
+  }
+)  
+
+Effect.newEntry(
+  data : {
+    name : 'Minor Speed Boost',
+    id : 'base:minor-speed-boost',
+    description: 'SPD +70%',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(
+      SPD:25
     ),
     events : {
       onAffliction ::(from, item, holder) {

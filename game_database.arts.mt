@@ -6255,14 +6255,15 @@ Arts.newEntry(
     name: '@',
     id : 'base:b169',
     targetMode : TARGET_MODE.ONE,
-    description: "Removes all status ailments from the target. Only usable once per battle. Additional levels have no effect.",
+    description: "Removes all negative effects from the target. Only usable once per battle. Additional levels have no effect.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       @:Effect = import(module:'game_database.effect.mt');
       @:which = random.scrambled(:allies)->filter(
         ::(value) <- value.effectStack.getAllByFilter(
-          ::(value) <- (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
+          ::(value) <- (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0 ||
+                       (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0
         )->size > 0
       );
       when(which->size == 0) false;
@@ -6281,7 +6282,9 @@ Arts.newEntry(
         text: targets[0].name + ' is covered in a soothing aura!'
       );
 
-      @:filter = ::(value) <- (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
+      @:filter = ::(value) <- (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0 ||
+                              (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0
+
       @:hasAny = targets[0].effectStack.getAllByFilter(:filter)->size > 0;
       targets[0].effectStack.removeByFilter(:filter);
       if (hasAny == false)  
@@ -6315,7 +6318,7 @@ Arts.newEntry(
     oncePerBattle : true,
     canBlock : false,
     kind : KIND.ABILITY,
-    traits : TRAITS.SUPPORT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -6360,7 +6363,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
-    traits : TRAITS.SUPPORT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -6427,7 +6430,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
-    traits : TRAITS.SUPPORT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -6483,7 +6486,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
-    traits : TRAITS.SUPPORT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -6550,7 +6553,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.ABILITY,
-    traits : TRAITS.SUPPORT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -6591,7 +6594,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.ABILITY,
-    traits : TRAITS.SUPPORT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -6631,7 +6634,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
-    traits : TRAITS.SUPPORT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -6696,7 +6699,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.ABILITY,
-    traits : TRAITS.SUPPORT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -6743,7 +6746,7 @@ Arts.newEntry(
     oncePerBattle : true,
     canBlock : false,
     kind : KIND.ABILITY,
-    traits : TRAITS.SUPPORT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -6800,7 +6803,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
-    traits : TRAITS.SUPPORT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -6824,6 +6827,561 @@ Arts.newEntry(
           from: effectFull.from,
           item: effectFull.item
         );
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b180',
+    targetMode : TARGET_MODE.ALLALLY,
+    description: "Heals 1 HP for each effect that all the user\'s allies have.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      when(user.hp >= user.stats.HP) false;
+
+      // if has any effects, is good to use
+      return {:::} {
+        foreach(allies) ::(k, v) {
+          if (k.effectStack.getAll()->size > 0)
+            send(:true);
+        } 
+        return false;
+      }
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @tally = 0;
+      foreach(targets) ::(k, v) {
+        tally += k.effectStack.getAll()->size;
+      } 
+      
+      user.heal(amount:tally);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b181',
+    targetMode : TARGET_MODE.ONE,
+    description: "Replaces all negative effects on target with Banish stacks.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:able = enemies->filter(::(value) <- 
+        value.effectStack.getAll()->filter(::(value) <- 
+          (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
+          (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
+        )->size > 0
+          
+      return [able]
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
+        (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
+        (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
+      )]
+      
+      targets[0].removeEffects(:all);
+      
+      for(0, all->size) ::(i) {
+        targets[0].addEffect(from:user, id:'base:banish', durationTurns:10000);              
+      } 
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b182',
+    targetMode : TARGET_MODE.ONE,
+    description: "Replaces all positive effects on target with Banish stacks.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:able = enemies->filter(::(value) <- 
+        value.effectStack.getAll()->filter(::(value) <- 
+          (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
+          (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
+        )->size > 0
+          
+      return [able]
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
+        (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
+        (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
+      )]
+      
+      targets[0].removeEffects(:all);
+      
+      for(0, all->size) ::(i) {
+        targets[0].addEffect(from:user, id:'base:banish', durationTurns:10000);              
+      } 
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b183',
+    targetMode : TARGET_MODE.ONE,
+    description: "Replaces all positive effects on target with random ones. The durations of each effect are preserved.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:able = enemies->filter(::(value) <- 
+        value.effectStack.getAll()->filter(::(value) <- 
+          (Effect.find(:value.id).flags & Effect.FLAGS.BUFF)  != 0
+        )->size > 0
+          
+      return [able]
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
+        (Effect.find(:value.id).flags & Effect.FLAGS.BUFF)  != 0
+      )]
+      
+      targets[0].removeEffects(:all);
+      
+      foreach(all) ::(k, v) {
+        @:id = Effect.getRandomFiltered(::(value) <- (value.flags & Effect.FLAGS.SPECIAL) == 0);
+        targets[0].addEffect(from:user, id, durationTurns:
+          v.duration - v.turnCount
+        );              
+      } 
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b184',
+    targetMode : TARGET_MODE.ALL,
+    description: "Deals damage to each combatant based on their respective number of effects.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:groupToCount::(group) <- 
+        (group->map(::(value) <- 
+          value.effectStack.getAll()->size)
+        )->reduce(::(previous, next) <-
+          if (previous == empty)
+            next 
+          else 
+            next + previous
+        )
+        
+      // does it hurt them more than it hurts me? sure!
+      when (groupToCount(:enemies) >
+            groupToCount(:allies)))
+        [...allies, ...enemies];
+      
+      return false;
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.EPIC,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      foreach(targets) ::(k, v) {
+        @:amount = v.effectStack.getAll()->size;
+        when(amount == 0) empty;
+        
+        windowEvent.queueCustom(
+          onEnter ::{
+            v.damage(attacker:user, damage:Damage.new(
+              amount,
+              damageType:Damage.TYPE.PHYS,
+              damageClass:Damage.CLASS.HP
+            ),dodgeable: false, exact: true);     
+          }
+        );
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b185',
+    targetMode : TARGET_MODE.ALL,
+    description: "Removes all effects from each combatant. Each combatant gains a number of Banish stacks equal to the total number of those removed effects divided by the number of combatants, rounding up.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:groupToCount::(group) <- 
+        (group->map(::(value) <- 
+          value.effectStack.getAll()->size)
+        )->reduce(::(previous, next) <-
+          if (previous == empty)
+            next 
+          else 
+            next + previous
+        )
+        
+      // does it hurt them more than it hurts me? sure!
+      when (groupToCount(:enemies) >
+            groupToCount(:allies)))
+        [...allies, ...enemies];
+      
+      return false;
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.EPIC,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @total = 0;
+      foreach(targets) ::(k, v) {
+        @:amount = v.effectStack.getAll()->size;
+        when(amount == 0) empty;
+    
+        total += amount;
+        k.effectStack.removeByFilter(::(value) <- true);
+      }
+      
+      
+      total = (total / targets->size)->ceil;
+      foreach(targets) ::(k, v) {
+        for(0, total) ::(i) {
+          v.addEffect(from:user, id:'base:banish', durationTurns:10000);              
+        }
+      }
+      
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b186',
+    targetMode : TARGET_MODE.ONE,
+    description: "Removes all the user's Banish stacks and places them on a target.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      when (user.getAllByFilter(::(value) <- value.id == 'base:banish')->size == 0) 
+        false;
+          
+      return random.pickArrayItem(:enemies);
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @total = 0;
+      @oldBanish = user.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish');
+      when(oldBanish->size == 0) empty;  
+      k.effectStack.removeByFilter(::(value) <- value.id == 'base:banish');
+            
+      for(0, oldBanish->size) ::(i) {
+        targets[0].addEffect(from:user, id:'base:banish', durationTurns:10000);              
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b187',
+    targetMode : TARGET_MODE.ONE,
+    description: "Removes all stacks of the Poisoned effect from target. For each Poisoned stack removed this way, the target gains 2 HP and +25% DEX for 2 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      return {:::} {
+        foreach(allies) ::(k, v) {
+          when (v.getAllByFilter(::(value) <- value.id == 'base:poisoned')->size > 0) 
+            send(:[k]);
+        }      
+        
+        return false;
+      }
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @total = 0;
+      @oldPoison = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:poisoned');
+      when(oldPoison->size == 0) empty;
+      k.effectStack.removeByFilter(::(value) <- value.id == 'base:poisoned');
+            
+      targets[0].heal(amount:oldPoison->size * 2);
+            
+      for(0, oldPoison->size) ::(i) {
+        targets[0].addEffect(from:user, id:'base:minor-dex-boost', durationTurns:2);              
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b188',
+    targetMode : TARGET_MODE.ONE,
+    description: "Removes all stacks of the Burned effect from target. For each Burned stack removed this way, the target gains 2 HP and +25% DEF for 2 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      return {:::} {
+        foreach(allies) ::(k, v) {
+          when (v.getAllByFilter(::(value) <- value.id == 'base:burned')->size > 0) 
+            send(:[k]);
+        }      
+        
+        return false;
+      }
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @total = 0;
+      @oldBurn = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:burned');
+      when(oldBurn->size == 0) empty;
+      k.effectStack.removeByFilter(::(value) <- value.id == 'base:burned');
+            
+      targets[0].heal(amount:oldBurn->size * 2);
+            
+      for(0, oldBurn->size) ::(i) {
+        targets[0].addEffect(from:user, id:'base:minor-defense-boost', durationTurns:2);              
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b189',
+    targetMode : TARGET_MODE.ONE,
+    description: "Removes all stacks of the Paralyzed effect from target. For each Paralyzed stack removed this way, the target gains 2 AP and +25% INT for 2 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      return {:::} {
+        foreach(allies) ::(k, v) {
+          when (v.getAllByFilter(::(value) <- value.id == 'base:paralyzed')->size > 0) 
+            send(:[k]);
+        }      
+        
+        return false;
+      }
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @total = 0;
+      @oldParalyze = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:paralyzed');
+      when(oldParalyze->size == 0) empty;
+      k.effectStack.removeByFilter(::(value) <- value.id == 'base:paralyzed');
+            
+      targets[0].healAP(amount:oldParalyzed->size * 2);
+            
+      for(0, oldParalyze->size) ::(i) {
+        targets[0].addEffect(from:user, id:'base:minor-mind-boost', durationTurns:2);              
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b190',
+    targetMode : TARGET_MODE.ONE,
+    description: "Removes the Petrified effect from target. The target gains 2 HP and +25% ATK for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      return {:::} {
+        foreach(allies) ::(k, v) {
+          when (v.getAllByFilter(::(value) <- value.id == 'base:petrified')->size > 0) 
+            send(:[k]);
+        }      
+        
+        return false;
+      }
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @total = 0;
+      @oldPetr = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:petrified');
+      when(oldPetr->size == 0) empty;
+      k.effectStack.removeByFilter(::(value) <- value.id == 'base:petrified');
+            
+      targets[0].heal(amount:oldPetr->size * 2);
+            
+      for(0, oldPetr->size) ::(i) {
+        targets[0].addEffect(from:user, id:'base:minor-strength-boost', durationTurns:3);              
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b191',
+    targetMode : TARGET_MODE.ONE,
+    description: "Removes all negative effects from the target. For each effect removed this way, the target gains 2 AP and +25% SPD for 2 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      return {:::} {
+        foreach(allies) ::(k, v) {
+          when (v.getAllByFilter(::(value) <- 
+            (value.traits & Effect.TRAITS.AILMENT) != 0 ||
+            (value.traits & Effect.TRAITS.DEBUFF)  != 0
+          )->size > 0) 
+            send(:[k]);
+        }      
+        
+        return false;
+      }
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @total = 0;
+      @oldBad = targets[0].getAllByFilter(::(value) <- 
+        (value.traits & Effect.TRAITS.AILMENT) != 0 ||
+        (value.traits & Effect.TRAITS.DEBUFF)  != 0
+      );
+      when(oldBad->size == 0) empty;
+      k.effectStack.removeByFilter(::(value) <- 
+        (value.traits & Effect.TRAITS.AILMENT) != 0 ||
+        (value.traits & Effect.TRAITS.DEBUFF)  != 0      
+      );
+            
+      targets[0].healAP(amount:oldBad->size * 2);
+            
+      for(0, oldPetr->size) ::(i) {
+        targets[0].addEffect(from:user, id:'base:minor-speed-boost', durationTurns:2);              
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b192',
+    targetMode : TARGET_MODE.ONE,
+    description: "Matches the resonance of the user's spirit with another, mirroring their effects as the user's. All prior effects on the user are removed.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      return {:::} {
+        foreach([...enemies, ...allies]) ::(k, v) {
+          when (v.getAllByFilter(::(value) <- 
+            (value.traits & Effect.TRAITS.BUFF) != 0
+          )->size > 0) 
+            send(:[k]);
+        }      
+        
+        return false;
+      }
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @total = 0;
+      @oldBad = targets[0].getAllByFilter(::(value) <- 
+        (value.traits & Effect.TRAITS.BUFF) != 0
+      );
+      when(oldBad->size == 0) empty;
+      k.effectStack.removeByFilter(::(value) <- 
+        (value.traits & Effect.TRAITS.BUFF) != 0
+      );
+            
+      targets[0].healAP(amount:oldBad->size * 2);
+            
+      for(0, oldPetr->size) ::(i) {
+        targets[0].addEffect(from:user, id:'base:minor-speed-boost', durationTurns:2);              
       }
     }
   }
