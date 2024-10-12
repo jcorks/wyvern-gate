@@ -61,8 +61,6 @@
       },
       
       chooseReaction::(source, battle, onCommit) {
-        breakpoint();
-
         @:cardI = ::<= {
           @:enemies = battle.getEnemies(:user_);
           @:allies = battle.getAllies(:user_);

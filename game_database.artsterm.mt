@@ -27,7 +27,7 @@ ArtsTerm.newEntry(
   data : {
     name : 'Status Ailments',
     id : 'base:ailments',
-    detail : 'Status ailments include the effects Burned, Frozen, Paralyzed, Blind, Bleeding, Poisoned, and Petrified.'
+    description : 'Status ailments include the effects Burned, Frozen, Paralyzed, Blind, Bleeding, Poisoned, and Petrified.'
   }
 );
 
@@ -35,7 +35,7 @@ ArtsTerm.newEntry(
   data : {
     name : 'Ingredient',
     id : 'base:ingredient',
-    detail : 'An item gathered by Alchemists through Scavenging. Can be used to brew potions.'
+    description : 'An item gathered by Alchemists through Scavenging. Can be used to brew potions.'
   }
 );
 
@@ -48,7 +48,7 @@ ArtsTerm.newEntry(
   attributes : {
     name : String,
     id : String,
-    detail : String
+    description : String
   },
   reset
 );

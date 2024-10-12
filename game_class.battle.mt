@@ -338,7 +338,6 @@
 
     
     @:checkRemove :: {
-      breakpoint();
       // see if anyone died
       @removed = [];
       foreach(turn)::(index, entity) {          
@@ -417,7 +416,6 @@
           }          
         }     
       }
-      breakpoint();
       windowEvent.queueCustom(
         onEnter ::{
           windowEvent.jumpToTag(

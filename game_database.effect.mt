@@ -172,7 +172,7 @@ Effect.newEntry(
   data : {
     name : 'Agile',
     id: 'base:agile',
-    description: '+20 DEX. The holder may now dodge attacks. If the holder has more DEX than the attacker, the chance of dodging increases if the holder\'s DEX is greater than the attacker\'s.',
+    description: '+20% DEX. The holder may now dodge attacks. If the holder has more DEX than the attacker, the chance of dodging increases if the holder\'s DEX is greater than the attacker\'s.',
     battleOnly : true,
     stackable: true,
     blockPoints : 1,
@@ -2351,6 +2351,7 @@ Effect.newEntry(
       },
       
       onPreAttackOther ::(from, item, holder, to, damage) {
+        windowEvent.queueMessage(text: holder.name + '\'s desparation increased damage by 2.5 times!');
         damage.amount *= 2.5;
       },      
       
@@ -3088,7 +3089,7 @@ Effect.newEntry(
   data : {
     name : 'Poisoned',
     id : 'base:poisoned',
-    description: 'Damage every turn to holder.',
+    description: 'Holder takes damage equal to 5% total HP every turn.',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -3578,7 +3579,7 @@ Effect.newEntry(
       onAffliction ::(from, item, holder, to) {
         @:stackCount = [...holder.effectStack.getAll()]->filter(::(value) <- value.id == 'base:banish')->size;
         windowEvent.queueMessage(
-          text: holder.name + ' has acquired ' + stackCount + ' stack(s) of Banish!'
+          text: holder.name + ' has acquired a new stack of banish! (' + stackCount + ' stack(s) total)'
         );
 
 

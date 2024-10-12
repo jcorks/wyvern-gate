@@ -3282,7 +3282,6 @@ Item.database.newEntry(data : {
       item.name = random.pickArrayItem(:keyQualifiers) + ' Key (' + capitalize(:item.color.name) + ')';
       @:world = import(module:'game_singleton.world.mt');
       @:Island = import(:'game_mutator.island.mt');
-      breakpoint();
       item.setIslandGenAttributes(
         levelHint : if (world != empty && world.island != empty) (world.island.levelMax + 1)*1.2 else 1,
         tierHint : if (world != empty && world.island != empty) world.island.tier + 1 else 0,
@@ -3893,7 +3892,6 @@ Item.database.newEntry(data : {
     },
 
     improve ::(exp) {
-      breakpoint();
       @:state = _.state;
       @:chunk = if (_.state.improvementEXP + exp > _.state.improvementEXPtoNext) 
         state.improvementEXPtoNext - _.state.improvementEXP

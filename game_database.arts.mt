@@ -4868,7 +4868,6 @@ Arts.newEntry(
       }
       
       when(turnIndex == 2) ::<= {
-        breakpoint();
         when (targets[0].effectStack.getAll()->filter(by:::(value) <- value.id == 'base:wrapped')->size == 0) empty;
         
         windowEvent.queueMessage(
@@ -5451,7 +5450,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
-      breakpoint();
       when(allies->findIndex(:reactTo) != -1) false;
     },
     oncePerBattle : false,
@@ -5510,7 +5508,9 @@ Arts.newEntry(
     keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      when(user.hp == user.stats.HP) false;
+    },
     oncePerBattle : false,
     canBlock : true,
     kind : KIND.EFFECT,
@@ -6107,7 +6107,7 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      targets[0].addEffect(from:user, id:'base:enlarge', durationTurns:2);      
+      targets[0].addEffect(from:user, id:'base:enlarged', durationTurns:2);      
       
     }
   }
@@ -6610,7 +6610,7 @@ Arts.newEntry(
       );
                   
       when(which->size == 0)
-        windowEvent.queueMessage(:'...but nothing happened!');
+        windowEvent.queueMessage(text:'...but nothing happened!');
                                  
       @:victim = random.pickArrayItem(:which);
       windowEvent.queueMessage(
@@ -6661,8 +6661,8 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
 
       when(effects->size == 0)
-        windowEvent.queueMessage(:'...but nothing happened!');
- 
+        windowEvent.queueMessage(text:'...but nothing happened!');
+
 
       windowEvent.queueMessage(
         text: user.name + ' is covered in a mysterious light!'
@@ -6796,7 +6796,7 @@ Arts.newEntry(
       @:which = user.effectStack.getAllByFilter(
           ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0) ||
                        ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0)
-        )->size > 0
+        )
       when(which->size == 0) false;
       
       return [random.pickArrayItem(:which)];
@@ -6982,7 +6982,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:effectStackSize = targets[0].effectStack.getAll()->size;
       when(effectStackSize == 0)
-        windowEvent.queueMessage(:'...but nothing happened!');
+        windowEvent.queueMessage(text:'...but nothing happened!');
                                  
       windowEvent.queueMessage(
         text: targets[0].name + ' is covered in a mysterious light!'
@@ -7103,8 +7103,8 @@ Arts.newEntry(
           (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
           (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
         )->size > 0)
-          
-      return [able]
+      when(able->size == 0) empty;
+      return [able[0]];
     },
     oncePerBattle : false,
     canBlock : false,
@@ -7143,8 +7143,8 @@ Arts.newEntry(
         value.effectStack.getAll()->filter(::(value) <- 
           (Effect.find(:value.id).flags & Effect.FLAGS.BUFF)  != 0
         )->size > 0)
-          
-      return [able]
+      when(able->size == 0) empty;
+      return [able[0]];
     },
     oncePerBattle : false,
     canBlock : false,
@@ -7265,7 +7265,7 @@ Arts.newEntry(
         when(amount == 0) empty;
     
         total += amount;
-        k.effectStack.removeByFilter(::(value) <- true);
+        v.effectStack.removeByFilter(::(value) <- true);
       }
       
       
@@ -7292,7 +7292,9 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
-      when (user.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size == 0) 
+      when (user.effectStack.getAllByFilter(::(value) <- 
+          value.id == 'base:banish'
+      )->size == 0) 
         false;
           
       return [random.pickArrayItem(:enemies)];
@@ -7330,7 +7332,7 @@ Arts.newEntry(
       return {:::} {
         foreach(allies) ::(k, v) {
           when (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:poisoned')->size > 0) 
-            send(:[k]);
+            send(:[v]);
         }      
         
         return false;
@@ -7371,7 +7373,7 @@ Arts.newEntry(
       return {:::} {
         foreach(allies) ::(k, v) {
           when (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:burned')->size > 0) 
-            send(:[k]);
+            send(:[v]);
         }      
         
         return false;
@@ -7411,7 +7413,7 @@ Arts.newEntry(
       return {:::} {
         foreach(allies) ::(k, v) {
           when (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:paralyzed')->size > 0) 
-            send(:[k]);
+            send(:[v]);
         }      
         
         return false;
@@ -7452,7 +7454,7 @@ Arts.newEntry(
       return {:::} {
         foreach(allies) ::(k, v) {
           when (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:petrified')->size > 0) 
-            send(:[k]);
+            send(:[v]);
         }      
         
         return false;
@@ -7494,10 +7496,10 @@ Arts.newEntry(
       return {:::} {
         foreach(allies) ::(k, v) {
           when (v.effectStack.getAllByFilter(::(value) <- 
-            (value.traits & Effect.TRAITS.AILMENT) != 0 ||
-            (value.traits & Effect.TRAITS.DEBUFF)  != 0
+            (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0 ||
+            (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0
           )->size > 0) 
-            send(:[k]);
+            send(:[v]);
         }      
         
         return false;
@@ -7513,13 +7515,13 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @total = 0;
       @oldBad = targets[0].effectStack.getAllByFilter(::(value) <- 
-        (value.traits & Effect.TRAITS.AILMENT) != 0 ||
-        (value.traits & Effect.TRAITS.DEBUFF)  != 0
+        (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0 ||
+        (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0
       );
       when(oldBad->size == 0) empty;
       targets[0].effectStack.removeByFilter(::(value) <- 
-        (value.traits & Effect.TRAITS.AILMENT) != 0 ||
-        (value.traits & Effect.TRAITS.DEBUFF)  != 0      
+        (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0 ||
+        (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0      
       );
             
       targets[0].healAP(amount:oldBad->size * 2);
@@ -7546,9 +7548,9 @@ Arts.newEntry(
       return {:::} {
         foreach([...enemies, ...allies]) ::(k, v) {
           when (v.effectStack.getAllByFilter(::(value) <- 
-            (value.traits & Effect.TRAITS.BUFF) != 0
+            (Effect.find(:value.id).flags & Effect.FLAGS.BUFF) != 0
           )->size > 0) 
-            send(:[k]);
+            send(:[v]);
         }      
         
         return false;
@@ -7594,8 +7596,8 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       // only use it offensively when you dont have buffs
       when (user.effectStack.getAllByFilter(::(value) <- 
-        ((value.traits & Effect.TRAITS.DEBUFF) != 0) ||
-        ((value.traits & Effect.TRAITS.AILMENT) != 0)
+        ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0) ||
+        ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0)
       )->size == 0) false;
 
     },
@@ -7642,8 +7644,8 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       // only use it offensively when you dont have buffs
       when (user.effectStack.getAllByFilter(::(value) <- 
-        ((value.traits & Effect.TRAITS.DEBUFF) != 0) ||
-        ((value.traits & Effect.TRAITS.AILMENT) != 0)
+        ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0) ||
+        ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0)
       )->size == 0) false;
 
     },

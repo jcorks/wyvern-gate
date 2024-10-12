@@ -33,8 +33,6 @@ return ::(
 ) {
   @:world = import(module:'game_singleton.world.mt');
 
-  breakpoint();
-
   @:commitAction ::(action => BattleAction->type) {
     if (Arts.find(id:action.card.id).kind == Arts.KIND.ABILITY) ::<= {
       battle.entityCommitAction(action:action);  
