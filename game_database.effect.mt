@@ -50,7 +50,7 @@ Effect.newEntry(
   data : {
     name : 'Defend',
     id: 'base:defend',
-    description: 'Reduces damage by 40%',
+    description: 'Adds an additional block point. Reduces damage by 40%. When first getting this effect and HP is below 50%, gain 10% HP back.',
     battleOnly : true,
     stackable: false,
     blockPoints : 1,
@@ -82,7 +82,7 @@ Effect.newEntry(
   data : {
     name : 'Brace',
     id: 'base:brace',
-    description: 'Increased defense and grants an additional block point.',
+    description: '+50% DEF and grants an additional block point.',
     battleOnly : true,
     stackable: false,
     blockPoints : 1,
@@ -136,7 +136,7 @@ Effect.newEntry(
   data : {
     name : 'Banishing Light',
     id : 'base:banishing-light',
-    description: 'Next attack received is translated instead to Banish stacks. The count is equivalent to 1/3rd the damage, rounded up.',
+    description: 'Next attack received is translated instead to Banish stacks. The count is equivalent to 1/3rd the damage, rounded up. When an attack is translated in this way, the holder loses a stack of Banishing Light.',
     battleOnly : true,
     stackable : true,
     blockPoints: 0,
@@ -172,7 +172,7 @@ Effect.newEntry(
   data : {
     name : 'Agile',
     id: 'base:agile',
-    description: 'The holder may now dodge attacks. If the holder has more DEX than the attacker, the chance of dodging increases if the holder\'s DEX is greater than the attacker\'s.',
+    description: '+20 DEX. The holder may now dodge attacks. If the holder has more DEX than the attacker, the chance of dodging increases if the holder\'s DEX is greater than the attacker\'s.',
     battleOnly : true,
     stackable: true,
     blockPoints : 1,
@@ -227,7 +227,7 @@ Effect.newEntry(
   data : {
     name : 'Guard',
     id : 'base:guard',
-    description: 'Reduces damage by 90%',
+    description: 'Reduces incoming damage from attacks by 90%.',
     battleOnly : true,
     stackable: false,
     blockPoints : 1,
@@ -361,7 +361,7 @@ Effect.newEntry(
   data : {
     name : 'Defensive Stance',
     id : 'base:defensive-stance',
-    description: 'ATK -50%, DEF +200%, additional block point.',
+    description: 'ATK -50%, DEF +200%, gains an additional block point.',
     battleOnly : true,
     stackable: false,
     blockPoints : 1,
@@ -445,12 +445,12 @@ Effect.newEntry(
   data : {
     name : 'Meditative Stance',
     id : 'base:meditative-stance',
-    description: 'SPD -50%, INT +200%',
+    description: 'ATK -50%, INT +200%',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
     flags : 0,
-    stats: StatSet.new(SPD:-50, INT:200),
+    stats: StatSet.new(ATK:-50, INT:200),
     events : {
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(
@@ -486,7 +486,7 @@ Effect.newEntry(
   data : {
     name : 'Reflective Stance',
     id : 'base:reflective-stance',
-    description: 'Attack retaliation',
+    description: 'For incoming physical attacks, negate the damage and send half of the would-be damage back to the attacker.',
     battleOnly : true,
     stackable: false,
     stats: StatSet.new(),
@@ -501,6 +501,8 @@ Effect.newEntry(
 
       onPreDamage ::(from, item, holder, attacker, damage) {
         when (holder == attacker) empty;
+        when (damage.damageType != Damage.TYPE.PHYS) empty;
+        
         // handles the DBZ-style case pretty well!
         @:amount = (damage.amount / 2)->floor;
 
@@ -524,7 +526,7 @@ Effect.newEntry(
   data : {
     name : 'Counter',
     id : 'base:counter',
-    description: 'Dodges attacks and retaliates.',
+    description: 'Negates incoming attacks and redirects a portion of the would-be damage back at the attacker. The holder is unable to act while this is active.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -566,7 +568,7 @@ Effect.newEntry(
   data : {
     name : 'Evasive Stance',
     id : 'base:evasive-stance',
-    description: '%50 chance damage nullify when from others.',
+    description: '%50 chance damage nullify when from others. -1 AP for each successful dodge. If the user has no AP, this effect is ignored.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -581,10 +583,12 @@ Effect.newEntry(
 
       onPreDamage ::(from, item, holder, attacker, damage) {
         when (holder == attacker) empty;
+        when (holder.ap == 0) empty;
         when(random.number() > .5) empty;
 
+        holder.ap -= 1;
         windowEvent.queueMessage(
-          text: holder.name + ' evades!'
+          text: holder.name + ' evades at the cost of 1 AP!'
         );
 
         damage.amount = 0;
@@ -599,7 +603,7 @@ Effect.newEntry(
   data : {
     name : 'Sneaked',
     id : 'base:sneaked',
-    description: 'Guarantees next damage from user is x3',
+    description: 'Guarantees next damage from the one inflicting is 3 times more damage.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -771,7 +775,7 @@ Effect.newEntry(
   data : {
     name : 'Evade',
     id : 'base:evade',
-    description: 'Allows the user to evade all attacks.',
+    description: 'All incoming attacks are nullified.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -797,7 +801,7 @@ Effect.newEntry(
   data : {
     name : 'Cursed Binding',
     id : 'base:cursed-binding',
-    description: 'Attacking causes one damage to the caster/holder depending on the situation.',
+    description: 'The user attacking causes 1 damage to the original caster.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -1537,7 +1541,7 @@ Effect.newEntry(
   data : {
     name : 'Moonsong',
     id : 'base:moonsong',
-    description: 'Heals 1 HP every turn',
+    description: 'Heals 1 HP every turn.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -1561,7 +1565,7 @@ Effect.newEntry(
   data : {
     name : 'Sol Attunement',
     id : 'base:sol-attunement',
-    description: 'Heals 1 HP every turn',
+    description: 'Heals 1 HP every turn.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -1585,7 +1589,7 @@ Effect.newEntry(
   data : {
     name : 'Greater Moonsong',
     id : 'base:greater-moonsong',
-    description: 'Heals 2 HP every turn',
+    description: 'Heals 2 HP every turn.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -1609,7 +1613,7 @@ Effect.newEntry(
   data : {
     name : 'Greater Sol Attunement',
     id : 'base:greater-sol-attunement',
-    description: 'Heals 2 HP every turn',
+    description: 'Heals 2 HP every turn.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -1978,12 +1982,12 @@ Effect.newEntry(
   data : {
     name : 'Poisonroot Growing',
     id : 'base:poisonroot-growing',
-    description: 'Vines grow on target. SPD -10%',
+    description: 'Vines grow on holder. SPD -10%.',
     battleOnly : true,
     stackable: true,        
     stats: StatSet.new(SPD:-10),
     blockPoints : 0,
-    flags : FLAGS.AILMENT,
+    flags : FLAGS.DEBUFF,
     events : {
       
       onRemoveEffect ::(from, item, holder) {          
@@ -2002,7 +2006,7 @@ Effect.newEntry(
   data : {
     name : 'Poisonroot',
     id : 'base:poisonroot',
-    description: 'Every turn takes poison damage. SPD -10%',
+    description: 'Every turn, holder takes 1 to 4 poison damage. SPD -10%',
     battleOnly : true,
     stackable: true,
     stats: StatSet.new(SPD:-10),
@@ -2030,7 +2034,7 @@ Effect.newEntry(
   data : {
     name : 'Triproot Growing',
     id : 'base:triproot-growing',
-    description: 'Vines grow on target. SPD -10%',
+    description: 'Vines grow on holder. SPD -10%',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -2054,7 +2058,7 @@ Effect.newEntry(
   data : {
     name : 'Triproot',
     id : 'base:triproot',
-    description: 'Every turn 40% chance to trip. SPD -10%',
+    description: 'Every turn 40% chance to trip the holder, cancelling their turn. SPD -10%',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -2080,7 +2084,7 @@ Effect.newEntry(
   data : {
     name : 'Healroot Growing',
     id : 'base:healroot-growing',
-    description: 'Vines grow on target. SPD -10%',
+    description: 'Vines grow on holder. SPD -10%',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -2104,7 +2108,7 @@ Effect.newEntry(
   data : {
     name : 'Healroot',
     id : 'base:healroot',
-    description: 'Every turn heal 2 HP. SPD -10%',
+    description: 'Every turn heals the holder by 2 HP. SPD -10%',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -2220,14 +2224,12 @@ Effect.newEntry(
   data : {
     name : 'Defend Other',
     id : 'base:defend-other',
-    description: 'Takes hits for another.',
+    description: 'The original caster receives damage instead of the holder.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
     flags : FLAGS.BUFF,
-    stats: StatSet.new(
-      DEF: 100
-    ),
+    stats: StatSet.new(),
     events : {
       onRemoveEffect ::(from, item, holder) {
         windowEvent.queueMessage(text:from.name + ' resumes a normal stance!');
@@ -2246,8 +2248,8 @@ Effect.newEntry(
           attacker,
           damage: Damage.new(
             amount,
-            damageType : Damage.TYPE.NEUTRAL,
-            damageClass: Damage.CLASS.HP
+            damageType : damage.damageType,
+            damageClass: damage.damageClass
           ),dodgeable: false
         );          
         
@@ -2261,7 +2263,7 @@ Effect.newEntry(
   data : {
     name : 'Perfect Guard',
     id : 'base:perfect-guard',
-    description: 'All damage is nullified.',
+    description: 'All damage from others to the holder is nullified.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -2286,7 +2288,7 @@ Effect.newEntry(
   data : {
     name : 'Convinced',
     id : 'base:convinced',
-    description: 'Unable to act.',
+    description: 'The holder is unable to act.',
     battleOnly : true,
     stackable: false,
     stats: StatSet.new(),
@@ -2334,7 +2336,7 @@ Effect.newEntry(
   data : {
     name : 'Desparate',
     id : 'base:desparate',
-    description: 'The holder is is desparate. HP -50%, DEF -100%. Damage is x2.5.',
+    description: 'The holder is is desparate. HP -50%, DEF -100%. Attacks to others are 2.5 times more damaging.',
     battleOnly : true,
     stackable: false,
     stats: StatSet.new(
@@ -2388,7 +2390,7 @@ Effect.newEntry(
   data : {
     name : 'Grappled',
     id : 'base:grappled',
-    description: 'Unable to act.',
+    description: 'Unable to act. Unable to block.',
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
@@ -2410,7 +2412,7 @@ Effect.newEntry(
   data : {
     name : 'Ensnared',
     id : 'base:ensnared',
-    description: 'Unable to act.',
+    description: 'Unable to act. Unable to block.',
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
@@ -2432,7 +2434,7 @@ Effect.newEntry(
   data : {
     name : 'Grappling',
     id : 'base:grappling',
-    description: 'Unable to act.',
+    description: 'Unable to act. Unable to block.',
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
@@ -2451,7 +2453,7 @@ Effect.newEntry(
   data : {
     name : 'Ensnaring',
     id : 'base:ensnaring',
-    description: 'Unable to act.',
+    description: 'Unable to act. Unable to block.',
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
@@ -2490,7 +2492,7 @@ Effect.newEntry(
   data : {
     name : 'Stunned',
     id : 'base:stunned',
-    description: 'Unable to act.',
+    description: 'Unable to act. Unable to block.',
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
@@ -2633,8 +2635,8 @@ Effect.newEntry(
 )
 Effect.newEntry(
   data : {
-    name : 'Proceed with Caution',
-    id : 'base:proceed-with-caution',
+    name : 'Cautious',
+    id : 'base:cautious',
     description: 'DEF + 50%',
     battleOnly : true,
     stackable: false,
@@ -2762,7 +2764,7 @@ Effect.newEntry(
   data : {
     name : 'Flight',
     id : 'base:flight',
-    description: 'Dodges attacks.',
+    description: 'Causes all damaging attacks from others to miss.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -2826,7 +2828,7 @@ Effect.newEntry(
   data : {
     name : 'Dueled',
     id : 'base:dueled',
-    description: 'If attacked by user, 1.5x damage.',
+    description: 'If attacked by the original caster, the holder receives 1.5x damage.',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -2873,7 +2875,7 @@ Effect.newEntry(
   data : {
     name : 'Bleeding',
     id : 'base:bleeding',
-    description: 'Damage every turn to holder. ATK,DEF,SPD -20%.',
+    description: '-5% total HP every on holder. ATK,DEF,SPD -20%.',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -2940,7 +2942,7 @@ Effect.newEntry(
   data : {
     name : 'Poison Rune',
     id : 'base:poison-rune',
-    description: 'Damage every turn to holder.',
+    description: 'Deals 1 to 3 Poison damage every turn to holder.',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -3004,7 +3006,7 @@ Effect.newEntry(
   data : {
     name : 'Regeneration Rune',
     id : 'base:regeneration-rune',
-    description: 'Heals holder every turn.',
+    description: 'Heals holder every turn by 1 HP.',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -3032,7 +3034,7 @@ Effect.newEntry(
   data : {
     name : 'Shield Rune',
     id : 'base:shield-rune',
-    description: '+100% DEF while active.',
+    description: '+100% DEF',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -3088,7 +3090,7 @@ Effect.newEntry(
     id : 'base:poisoned',
     description: 'Damage every turn to holder.',
     battleOnly : true,
-    stackable: false,
+    stackable: true,
     blockPoints : 0,
     flags : FLAGS.AILMENT,
     stats: StatSet.new(),
@@ -3122,7 +3124,7 @@ Effect.newEntry(
   data : {
     name : 'Blind',
     id : 'base:blind',
-    description: '50% chance to miss attacks.',
+    description: '50% chance to miss attacks made by the user.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -3154,7 +3156,7 @@ Effect.newEntry(
     id : 'base:burned',
     description: '50% chance to get damage each turn.',
     battleOnly : true,
-    stackable: false,
+    stackable: true,
     blockPoints : 0,
     flags : FLAGS.AILMENT,
     stats: StatSet.new(),
@@ -3187,7 +3189,7 @@ Effect.newEntry(
   data : {
     name : 'Frozen',
     id : 'base:frozen',
-    description: 'Unable to act.',
+    description: 'Unable to act. Unable to block.',
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
@@ -3216,7 +3218,7 @@ Effect.newEntry(
   data : {
     name : 'Paralyzed',
     id : 'base:paralyzed',
-    description: 'SPD,ATK -100%',
+    description: 'SPD,ATK -100%. The holder is unable to act or block.',
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
@@ -3248,7 +3250,7 @@ Effect.newEntry(
   data : {
     name : 'Mesmerized',
     id : 'base:mesmerized',
-    description: 'SPD,DEF -100%',
+    description: 'SPD,DEF -100%. Unable to act, unable to block.',
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
@@ -3280,7 +3282,7 @@ Effect.newEntry(
   data : {
     name : 'Wrapped',
     id : 'base:wrapped',
-    description: 'Can\'t move.',
+    description: 'Can\'t act. Unable to block.',
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
@@ -3368,7 +3370,7 @@ Effect.newEntry(
   data : {
     name : 'Elemental Shield',
     id : 'base:elemental-shield',
-    description: 'Nullify most types of elemental damage.',
+    description: 'Completely nullifies fire, ice, and thunder damage types.',
     battleOnly : true,
     stats: StatSet.new(),
     stackable: false,
@@ -3397,7 +3399,7 @@ Effect.newEntry(
   data : {
     name : 'Burning',
     id : 'base:burning',
-    description: 'Gives fire damage and gives 50% ice resist',
+    description: 'Gives 1 to 4 additional fire damage per attack and reduces incoming ice damage by 50%',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -3425,7 +3427,7 @@ Effect.newEntry(
   data : {
     name : 'Icy',
     id : 'base:icy',
-    description: 'Gives ice damage and gives 50% fire resist',
+    description: 'Gives 1 to 4 additional ice damage per attack and reduces incoming fire damage by 50%',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -3453,7 +3455,7 @@ Effect.newEntry(
   data : {
     name : 'Shock',
     id : 'base:shock',
-    description: 'Gives thunder damage and gives 50% thunder resist',
+    description: 'Gives 1 to 4 additional thunder damage per attack and reduces incoming thunder damage by 50%',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -3480,7 +3482,7 @@ Effect.newEntry(
   data : {
     name : 'Toxic',
     id : 'base:toxic',
-    description: 'Gives poison damage and gives 50% poison resist',
+    description: 'Gives 1 to 4 additional poison damage per attack and reduces incoming poison damage by 50%',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -3509,7 +3511,7 @@ Effect.newEntry(
   data : {
     name : 'Shimmering',
     id : 'base:shimmering',
-    description: 'Gives light damage and gives 50% dark resist',
+    description: 'Gives 1 to 4 additional light damage per attack and reduces incoming dark damage by 50%',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -3535,7 +3537,7 @@ Effect.newEntry(
   data : {
     name : 'Dark',
     id : 'base:dark',
-    description: 'Gives dark damage and gives 50% light resist',
+    description: 'Gives 1 to 4 additional dark damage per attack and reduces incoming light damage by 50%',
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
@@ -3567,7 +3569,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.DEBUFF | FLAGS.AILMENT,
+    flags : FLAGS.DEBUFF,
     stats: StatSet.new(
       ATK: -15,
       SPD: -15

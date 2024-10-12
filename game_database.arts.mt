@@ -85,6 +85,7 @@ Arts.newEntry(
     name: 'Attack',
     id : 'base:attack',
     targetMode : TARGET_MODE.ONEPART,
+    keywords : [],
     description: "Damages a target based on the user's ATK.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
@@ -126,6 +127,7 @@ Arts.newEntry(
     id : 'base:headhunter',
     targetMode : TARGET_MODE.ONE,
     description: "Deals 1 HP. 5% chance to 1hit K.O. Each level increases the chance by 5%.",
+    keywords : [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -179,6 +181,7 @@ Arts.newEntry(
     id : 'base:precise-strike',
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target based on the user's ATK and DEX. Additional levels increase the damage by 10%.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -217,8 +220,9 @@ Arts.newEntry(
     name: 'Tranquilizer',
     id : 'base:tranquilizer',
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target based on the user's DEX with a 45% chance to paralyze. Additional levels increase the paralysis chance by 10%.",
+    description: "Damages a target based on the user's DEX with a 45% chance to inflict Paralyzed. Additional levels increase the paralysis chance by 10%.",
     durationTurns: 0,
+    keywords : ['base:paralyzed'],
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
@@ -260,6 +264,7 @@ Arts.newEntry(
     targetMode : TARGET_MODE.ALLALLY,
     description: "ATK,DEF,SPD +35% for each party member. Every 2 levels stacks the boost.",
     durationTurns: 0,
+    keywords : [],
     kind : KIND.ABILITY,
     traits : 0,
     rarity : RARITY.UNCOMMON,
@@ -297,6 +302,7 @@ Arts.newEntry(
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target based on the user's ATK, doing 100% more damage if the target was hit since their last turn. Additional levels increase the boost by 20%.",
     durationTurns: 0,
+    keywords : [],
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.COMMON,
@@ -345,7 +351,8 @@ Arts.newEntry(
     name: 'Doublestrike',
     id : 'base:doublestrike',
     targetMode : TARGET_MODE.ALLENEMY,
-    description: "Damages a target based on the user's strength. Additional levels increase the damage per hit.",
+    description: "Damages a target based on the user's ATK. Additional levels increase the damage per hit.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -400,7 +407,8 @@ Arts.newEntry(
     name: 'Triplestrike',
     id : 'base:triplestrike',
     targetMode : TARGET_MODE.ALLENEMY,
-    description: "Damages three targets based on the user's strength. Each level increases the amount of damage done.",
+    description: "Damages three targets based on the user's ATK. Each level increases the amount of damage done.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -469,7 +477,8 @@ Arts.newEntry(
     name: 'Focus Perception',
     id : 'base:focus-perception',    
     targetMode : TARGET_MODE.NONE,
-    description: "Causes the user to focus on their enemies, making attacks 25% more effective for 5 turns.",
+    description: "Grants the Focus Perception effect to the user for 5 turns.",
+    keywords : ['base:focus-perception'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -495,7 +504,8 @@ Arts.newEntry(
     name: 'Cheer',
     id : 'base:cheer',
     targetMode : TARGET_MODE.ALLALLY,
-    description: "Cheers, granting a 30% damage bonus to allies for 5 turns.",
+    description: "Grants the Cheered effect to allies for 5 turns.",
+    keywords : ['base:cheered'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.COMMON,
@@ -526,6 +536,7 @@ Arts.newEntry(
     targetMode : TARGET_MODE.NONE,
     description: "Puts all of the combatants into stasis until it is night time. Additional levels have no effect.",
     durationTurns: 0,
+    keywords : [],
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -561,6 +572,7 @@ Arts.newEntry(
     id : 'base:solar-blessing',
     targetMode : TARGET_MODE.NONE,
     description: "Puts all of the combatants into stasis until it is morning. Additional levels have no effect.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     rarity : RARITY.UNCOMMON,
@@ -597,6 +609,7 @@ Arts.newEntry(
     id : 'base:moonbeam',
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target with Fire based on the user's INT. If night time, the damage is boosted. Additional levels boost the damage further.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.FIRE,
@@ -644,6 +657,7 @@ Arts.newEntry(
     id : 'base:sunbeam',
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target with Fire based on the user's INT. If day time, the damage is boosted.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.FIRE,
@@ -692,6 +706,7 @@ Arts.newEntry(
     id : 'base:sunburst',
     targetMode : TARGET_MODE.ALLENEMY,
     description: "Damages all enemies with Fire based on the user's INT. If day time, the damage is boosted.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     rarity : RARITY.RARE,
@@ -741,6 +756,7 @@ Arts.newEntry(
     id : 'base:night-veil',
     targetMode : TARGET_MODE.ONE,
     description: "Increases DEF of target for 5 turns. If casted during night time, it's much more powerful.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.UNCOMMON,
@@ -786,6 +802,7 @@ Arts.newEntry(
     id : 'base:dayshroud',
     targetMode : TARGET_MODE.ONE,
     description: "Increases DEF of target for 5 turns. If casted during day time, it's much more powerful.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.UNCOMMON,
@@ -830,6 +847,7 @@ Arts.newEntry(
     id : 'base:call-of-the-night',
     targetMode : TARGET_MODE.ONE,
     description: "Increases ATK of target for 5 turns. If casted during night time, it's much more powerful.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.UNCOMMON,
@@ -875,7 +893,8 @@ Arts.newEntry(
     name: 'Lunacy',
     id : 'base:lunacy',
     targetMode : TARGET_MODE.ONE,
-    description: "Causes the target to go berserk and attack random enemies for their turns. DEF, ATK +70%. Only can be casted at night.",
+    description: "Inflicts the Lunacy effect on target. Only can be casted at night.",
+    keywords : ['base:lunacy'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.RARE,
@@ -916,7 +935,8 @@ Arts.newEntry(
     name: 'Moonsong',
     id : 'base:moonsong',
     targetMode : TARGET_MODE.ONE,
-    description: "Heals over time. If casted during night time, it's much more powerful.",
+    description: "Grants the Moonsong effect on a target. If casted during night time, it's much more powerful.",
+    keywords : ['base:moonsong', 'base:greater-moonsong'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.UNCOMMON,
@@ -961,7 +981,8 @@ Arts.newEntry(
     name: 'Sol Attunement',
     id : 'base:sol-attunement',
     targetMode : TARGET_MODE.ONE,
-    description: "Heals over time. If casted during day time, it's much more powerful.",
+    description: "Grants the Sol Attunement effect to a target. If casted during day time, it's much more powerful.",
+    keywords : ['base:sol-attunement', 'base:greater-sol-attunement'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.UNCOMMON,
@@ -1006,7 +1027,8 @@ Arts.newEntry(
     name: 'Ensnare',
     id : 'base:ensnare',
     targetMode : TARGET_MODE.ONE,
-    description: "Damages a target and immobilizes both the user and the target for 3 turns. 80% success rate. Damage done increases with additional levels.",
+    description: "Damages a target and Ensnares both the user and the target for 3 turns with an 80% success rate. Damage done increases with additional levels.",
+    keywords : ['base:ensnaring', 'base:ensnared'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     rarity : RARITY.UNCOMMON,
@@ -1051,6 +1073,7 @@ Arts.newEntry(
     id : 'base:call',
     targetMode : TARGET_MODE.NONE,
     description: "Calls a creature to come and join the fight. Additional levels increase chances of success.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : 0,
@@ -1099,6 +1122,7 @@ Arts.newEntry(
     id : 'base:tame',
     targetMode : TARGET_MODE.ONE,
     description: "Attempts to tame a creature, making it a party member if successful. Additional levels increase chances of success.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : 0,
@@ -1152,7 +1176,8 @@ Arts.newEntry(
     name: 'Leg Sweep',
     id : 'base:leg-sweep',
     targetMode : TARGET_MODE.ALLENEMY,
-    description: "Swings, aiming for all enemies legs in hopes of stunning them.",
+    description: "Swings, aiming for all enemies legs in hopes of stunning them for a turn.",
+    keywords : ['base:stunned'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -1194,6 +1219,7 @@ Arts.newEntry(
     id : 'base:big-swing',
     targetMode : TARGET_MODE.ALLENEMY,
     description: "Damages targets based on the user's strength. Additional levels increase the power.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -1232,7 +1258,8 @@ Arts.newEntry(
     name: 'Tackle',
     id : 'base:tackle',
     targetMode : TARGET_MODE.ONE,
-    description: "Damages a target based on the user's strength. Has a chance to immobolize the user and the target. Additional levels increase the power.",
+    description: "Damages a target based on the user's strength. Has a chance to Grapple the user and the target for a turn. Additional levels increase the power.",
+    keywords : ['base:grappling', 'base:grappled'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -1274,6 +1301,7 @@ Arts.newEntry(
     id : 'base:throw-item',
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target by throwing an item. The base damage is boosted by the weight of the item chosen. Additional levels increase the damage done.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     rarity : RARITY.UNCOMMON,
@@ -1317,7 +1345,8 @@ Arts.newEntry(
     name: 'Stun',
     id : 'base:stun',
     targetMode : TARGET_MODE.ONE,
-    description: "Damages a target based on the user's strength with a chance to stun. Further levels increase the stun chance.",
+    description: "Damages a target based on the user's strength with a chance to Stun for a turn. Further levels increase the stun chance.",
+    keywords : ['base:stunned'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -1357,7 +1386,8 @@ Arts.newEntry(
     name: 'Sheer Cold',
     id : 'base:sheer-cold',
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target with an ice attack. 90% chance to freeze. Additional levels increase its power.",
+    description: "Damages a target with an ice attack. 90% chance to Freeze. Additional levels increase its power.",
+    keywords : ['base:frozen'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.ICE,
@@ -1438,7 +1468,8 @@ Arts.newEntry(
     name: 'Flight',
     id : 'base:flight',
     targetMode : TARGET_MODE.ONE,
-    description: "Causes the target to fly, making all damage miss the target for a turn. The effect lasts an additional turn for each level.",
+    description: "Grants the Flight effect on a target for a turn. The effect lasts an additional turn for each level.",
+    keywords : ['base:flight'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC,
@@ -1465,7 +1496,8 @@ Arts.newEntry(
     name: 'Grapple',
     id : 'base:grapple',
     targetMode : TARGET_MODE.ONE,
-    description: "Immobilizes both the user and the target for 3 turns. 70% success rate. Each level increases the success rate by 5%",
+    description: "Immobilizes both the user and the target for 3 turns. 65% success rate. Each level increases the success rate by 10%",
+    keywords : ['base:grappled', 'base:grappling'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -1483,7 +1515,7 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
 
-          if (random.try(percentSuccess:65 + level*5)) ::<= {
+          if (random.try(percentSuccess:55 + level*10)) ::<= {
             targets[0].addEffect(from:user, id: 'base:grappled', durationTurns: 3);            
             user.addEffect(from:user, id: 'base:grappling', durationTurns: 3);            
           }
@@ -1501,6 +1533,7 @@ Arts.newEntry(
     id : 'base:combo-strike',
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages the same target twice at the same target and location. Additional levels increases the power.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -1550,7 +1583,8 @@ Arts.newEntry(
     name: 'Poison Rune',
     id : 'base:poison-rune',
     targetMode : TARGET_MODE.ONE,
-    description: "Places a poison rune on a target, which causes 1 to 3 damage to the target each turn.",
+    description: "Places a Poison Rune on a target. The rune lasts 10 turns.",
+    keywords : ['base:poison-rune'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
@@ -1577,7 +1611,8 @@ Arts.newEntry(
     name: 'Rune Release',
     id : 'base:rune-release',
     targetMode : TARGET_MODE.ONE,
-    description: "Release all runes.",
+    description: "Removes all Rune effects from a target.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
@@ -1600,7 +1635,7 @@ Arts.newEntry(
               'base:destruction-rune',
               'base:regeneration-rune',
               'base:cure-rune',
-              'base:Shield Rune'               
+              'base:shield-rune'               
             ]
           );
         }
@@ -1613,7 +1648,8 @@ Arts.newEntry(
     name: 'Destruction Rune',
     id : 'base:destruction-rune',
     targetMode : TARGET_MODE.ONE,
-    description: "Places a destruction rune on a target, which causes INT-based damaged upon release.",
+    description: "Places a Destruction Rune on a target. The rune lasts for 5 turns.",
+    keywords : ['base:destruction-rune'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
@@ -1642,7 +1678,8 @@ Arts.newEntry(
     name: 'Regeneration Rune',
     id : 'base:regeneration-rune',
     targetMode : TARGET_MODE.ONE,
-    description: "Places a regeneration rune on a target, which slightly heals a target by 1 HP every turn.",
+    description: "Places a Regeneration Rune on a target. The rune lasts for 10 turns.",
+    keywords : ['base:regeneration-rune'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.UNCOMMON,
@@ -1669,7 +1706,8 @@ Arts.newEntry(
     name: 'Shield Rune',
     id : 'base:shield-rune',
     targetMode : TARGET_MODE.ONE,
-    description: "Places a shield rune on a target, which gives +100% DEF while active.",
+    description: "Places a Shield Rune on a target. The rune lasts for 10 turns.",
+    keywords : ['base:shield-rune'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
@@ -1696,7 +1734,8 @@ Arts.newEntry(
     name: 'Cure Rune',
     id : 'base:cure-rune',
     targetMode : TARGET_MODE.ONE,
-    description: "Places a cure rune on a target, which heals the target when the rune is released by 3 HP.",
+    description: "Places a Cure Rune on a target. The rune lasts for 5 turns.",
+    keywords : ['base:cure-rune'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
@@ -1712,7 +1751,7 @@ Arts.newEntry(
       );
       windowEvent.queueCustom(
         onEnter :: {
-          targets[0].addEffect(from:user, id: 'base:cure-rune', durationTurns: 10);            
+          targets[0].addEffect(from:user, id: 'base:cure-rune', durationTurns: 5);            
         }
       )
     }
@@ -1725,6 +1764,7 @@ Arts.newEntry(
     id : 'base:multiply-runes',
     targetMode : TARGET_MODE.ONE,
     description: "Doubles all current runes on a target.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
@@ -1770,6 +1810,7 @@ Arts.newEntry(
     id : 'base:poison-attack',
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target based on the user's ATK with a poisoned weapon. Additional levels increase the damage done.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL | TRAITS.POISON,
@@ -1807,7 +1848,8 @@ Arts.newEntry(
     name: 'Petrify',
     id : 'base:petrify',
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target based on the user's ATK with special Light energy, causing petrification. Additional levels increase the power of the move.",
+    description: "Damages a target based on the user's ATK with special Light energy, causing the Petrified effect for 2 turns. Additional levels increase the power of the Art.",
+    keywords : ['base:petrified'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL | TRAITS.LIGHT,
@@ -1845,6 +1887,7 @@ Arts.newEntry(
     id : 'base:tripwire',
     targetMode : TARGET_MODE.ONE,
     description: "Activates a tripwire set up prior to battle, causing the target to be stunned for 3 turns. Only works once per battle.",
+    keywords : ['base:stunned'],
     durationTurns: 0,
     kind : KIND.REACTION,
     traits : TRAITS.PHYSICAL,
@@ -1875,6 +1918,7 @@ Arts.newEntry(
     id : 'base:trip-explosive',
     targetMode : TARGET_MODE.ONE,
     description: "Activates a tripwire-activated explosive set up prior to battle, causing the target to be damaged. Only works once per battle.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.REACTION,
     rarity : RARITY.RARE,
@@ -1916,7 +1960,8 @@ Arts.newEntry(
     name: 'Spike Pit',
     id : 'base:spike-pit',
     targetMode : TARGET_MODE.ALLENEMY,
-    description: "Activates a floor trap leading to a spike pit. Only works once per battle.",
+    description: "Activates a floor trap leading to a spike pit which damages and stuns for 2 turns. Only works once per battle.",
+    keywords : ['base:stunned'],
     durationTurns: 0,
     kind : KIND.REACTION,
     traits : TRAITS.PHYSICAL,
@@ -1958,7 +2003,8 @@ Arts.newEntry(
     name: 'Stab',
     id : 'base:stab',
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target based on the user's ATK and causes bleeding. Additional levels increases the power of the move.",
+    description: "Damages a target based on the user's ATK and causes Bleeding. Additional levels increases the power of the move.",
+    keywords : ['base:bleeding'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -1996,6 +2042,7 @@ Arts.newEntry(
     id : 'base:first-aid',
     targetMode : TARGET_MODE.ONE,
     description: "Heals a target by 3 HP. Additional levels increase the potency by 2 points.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.HEAL,
@@ -2025,6 +2072,7 @@ Arts.newEntry(
     id : 'base:mend',
     targetMode : TARGET_MODE.ONE,
     description: "Heals a target by 2 HP.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.HEAL,
@@ -2053,6 +2101,7 @@ Arts.newEntry(
     id : 'base:give-snack',
     targetMode : TARGET_MODE.ONE,
     description: "Either heals or recovers AP by a small amount.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.HEAL,
@@ -2113,6 +2162,7 @@ Arts.newEntry(
     id : 'base:summon-fire-sprite',
     targetMode : TARGET_MODE.NONE,
     description: 'Summons a fire sprite to fight on your side. Additional levels makes the summoning stronger. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC,
@@ -2169,6 +2219,7 @@ Arts.newEntry(
     id : 'base:summon-ice-elemental',
     targetMode : TARGET_MODE.NONE,
     description: 'Summons an ice elemental to fight on your side. Additional levels makes the summoning stronger. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC,
@@ -2222,6 +2273,7 @@ Arts.newEntry(
     id : 'base:summon-thunder-spawn',
     targetMode : TARGET_MODE.NONE,
     description: 'Summons a thunder spawn to fight on your side. Additional levels makes the summoning stronger. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC,
@@ -2275,6 +2327,7 @@ Arts.newEntry(
     id : 'base:summon-guiding-light',
     targetMode : TARGET_MODE.NONE,
     description: 'Summons a guiding light to fight on the user\'s side. Additional levels makes the summoning stronger. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC,
@@ -2327,6 +2380,7 @@ Arts.newEntry(
     id : 'base:unsummon',
     targetMode : TARGET_MODE.ALLENEMY,
     description: 'Magick that removes a summoned entity.',
+    keywords : [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
@@ -2372,6 +2426,7 @@ Arts.newEntry(
     id : 'base:fire',
     targetMode : TARGET_MODE.ONE,
     description: 'Magick that damages a target with fire based on INT. Additional levels increase its potency.',
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.FIRE,
@@ -2405,7 +2460,8 @@ Arts.newEntry(
     name: 'Backdraft',
     id : 'base:backdraft',
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Using great amount of heat, gives targets burns. Damage is based on INT. Additional levels increases the potency.',
+    description: 'Using great amount of heat, gives targets the Burned effect. Damage is based on INT. Additional levels increases the potency.',
+    keywords : ['base:burned'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.FIRE,
@@ -2446,6 +2502,7 @@ Arts.newEntry(
     id : 'base:flare',
     targetMode : TARGET_MODE.ONE,
     description: 'Magick that greatly damages a target with fire based on INT. Additional levels increase the destructive power.',
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.FIRE,
@@ -2480,6 +2537,7 @@ Arts.newEntry(
     id : 'base:dematerialize',
     targetMode : TARGET_MODE.ONE,
     description: 'Magick that unequips a target\'s equipment',
+    keywords : [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.RARE,
@@ -2537,7 +2595,8 @@ Arts.newEntry(
     name: 'Ice',
     id : 'base:ice',
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Magick that damages all enemies with Ice based on INT.',
+    description: 'Magick that damages all enemies with ice based on INT.',
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.ICE,
@@ -2573,7 +2632,8 @@ Arts.newEntry(
     name: 'Frozen Flame',
     id : 'base:frozen-flame',
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Magick that causes enemies to spontaneously combust in a cold, blue flame. Damage is based on INT, and it might freeze the targets. Additional levels increase damage.',
+    description: 'Magick that causes enemies to spontaneously combust in a cold, blue flame. Damage is based on INT with an additional chance to Freeze the hit targets. Additional levels increase damage.',
+    keywords : ['base:frozen'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.ICE,
@@ -2611,7 +2671,8 @@ Arts.newEntry(
     name: 'Telekinesis',
     id : 'base:telekinesis',
     targetMode : TARGET_MODE.ONE,
-    description: 'Magick that moves a target around, stunning them 50% of the time. Stunning chance increases with levels.',
+    description: 'Magick that moves a target around, stunning them 50% of the time for a turn. Stunning chance increases with levels.',
+    keywords : ['base:stunned'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC,
@@ -2647,6 +2708,7 @@ Arts.newEntry(
     id : 'base:explosion',
     targetMode : TARGET_MODE.ALLENEMY,
     description: 'Magick that damages all enemies with fire based on the user\'s INT. Additional levels increase the damage.',
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.FIRE,
@@ -2682,6 +2744,7 @@ Arts.newEntry(
     id : 'base:flash',
     targetMode : TARGET_MODE.ALLENEMY,
     description: 'Magick that blinds all enemies with a bright light. 50% chance to cause blindness, additional levels increase the chance.',
+    keywords : ['base:blind'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC,
@@ -2718,6 +2781,7 @@ Arts.newEntry(
     id : 'base:thunder',
     targetMode : TARGET_MODE.ALLENEMY,
     description: 'Magick that deals 4 random strikes based on INT. Each additional level deals an additional 2 strikes.',
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.THUNDER,
@@ -2755,6 +2819,7 @@ Arts.newEntry(
     id : 'base:wild-swing',
     targetMode : TARGET_MODE.ALLENEMY,
     description: 'Attack that deals 4 random strikes based on ATK. Additional levels increase the number of strikes.',
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -2793,6 +2858,7 @@ Arts.newEntry(
     id : 'base:cure',
     targetMode : TARGET_MODE.ONE,
     description: "Heals a target by 5 HP. Additional levels increase potency by 2 HP.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.HEAL,
@@ -2823,6 +2889,7 @@ Arts.newEntry(
     id : 'base:cleanse',
     targetMode : TARGET_MODE.ONE,
     description: "Removes all status ailments and some negative effects. Additional levels have no benefit.",
+    keywords : ['base:ailment'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.HEAL,
@@ -2853,7 +2920,8 @@ Arts.newEntry(
     name: 'Magic Mist',
     id : 'base:magic-mist',
     targetMode : TARGET_MODE.ALLENEMY,
-    description: "Removes ALL effects.",
+    description: "Removes all effects from all enemies.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC,
@@ -2884,7 +2952,8 @@ Arts.newEntry(
     name: 'Cure All',
     id : 'base:cure-all',
     targetMode : TARGET_MODE.ALLALLY,
-    description: "Heals all party members by a 3HP. Additional levels increase the effect by 2 points.",
+    description: "Heals all party members by a 3HP. Additional levels increase the effect by 2 HP.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.HEAL,
@@ -2916,7 +2985,8 @@ Arts.newEntry(
     name: 'Protect',
     id : 'base:protect',
     targetMode : TARGET_MODE.ONE,
-    description: "Increases DEF of target for 10 turns. It is stackable.",
+    description: "Grants the Protect effect to a target for 10 turns.",
+    keywords : ['base:protect'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
@@ -2944,7 +3014,8 @@ Arts.newEntry(
     name: 'Duel',
     id : 'base:duel',
     targetMode : TARGET_MODE.ONE,
-    description: "Chooses a target to have a duel, causing them to take bonus damage by the user.",
+    description: "Grants the Dueled effect to a target for the rest of battle.",
+    keywords : ['base:dueled'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -2972,7 +3043,8 @@ Arts.newEntry(
     name: 'Grace',
     id : 'base:grace',
     targetMode : TARGET_MODE.ONE,
-    description: "Grants the target the ability to avoid death once. Additional levels have no effect.",
+    description: "Grants the Grace effect to a target for the rest of battle. Additional levels have no effect.",
+    keywords : ['base:grace'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.HEAL | TRAITS.MAGIC,
@@ -3000,7 +3072,8 @@ Arts.newEntry(
     name: 'Phoenix Soul',
     id : 'base:phoenix-soul',
     targetMode : TARGET_MODE.ONE,
-    description: "Grants the target the ability to avoid death once if casted during daytime. Additional levels have no effect.",
+    description: "If used during day time, grants the Grace effect to a target. Additional levels have no effect.",
+    keywords : ['base:grace'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.HEAL,
@@ -3035,7 +3108,8 @@ Arts.newEntry(
     name: 'Protect All',
     id : 'base:protect-all',
     targetMode : TARGET_MODE.ALLALLY,
-    description: "Increases DEF of allies for 5 turns. This effect is stackable.",
+    description: "Grants the Protect effect to all allies for 5 turns.",
+    keywords : ['base:protect'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
@@ -3066,6 +3140,7 @@ Arts.newEntry(
     id : 'base:meditate',
     targetMode : TARGET_MODE.NONE,
     description: "Recovers users AP by a small amount.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.HEAL,
@@ -3095,6 +3170,7 @@ Arts.newEntry(
     id : 'base:soothe',
     targetMode : TARGET_MODE.ONE,
     description: "Relaxes a target, healing AP by a small amount.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.HEAL,
@@ -3126,6 +3202,7 @@ Arts.newEntry(
     id : 'base:steal',
     targetMode : TARGET_MODE.ONE,
     description: 'Steals an item from a target. Additional levels increase the stealing success rate.',
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -3175,7 +3252,8 @@ Arts.newEntry(
     name: 'Counter',
     id : 'base:counter',
     targetMode : TARGET_MODE.NONE,
-    description: 'If attacked, dodges and retaliates for 3 turns. Countering negates an attack\'s damage and redirects a portion of the damage back at the attacker. The countering person is unable to act.',
+    description: 'Grants the Counter effect to the holder for 3 turns.',
+    keywords : ['base:counter'],
     durationTurns: 0,
     kind : KIND.REACTION,
     rarity : RARITY.RARE,
@@ -3202,7 +3280,8 @@ Arts.newEntry(
     name: 'Unarm',
     id : 'base:unarm',
     targetMode : TARGET_MODE.ONE,
-    description: 'Attempts to disarms a target. Base chance is 30%. Additional levels increases the success rate.',
+    description: 'Attempts to disarm a target. Base chance is 30%. Additional levels increases the success rate.',
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -3248,7 +3327,8 @@ Arts.newEntry(
     name: 'Sneak',
     id : 'base:sneak',
     targetMode : TARGET_MODE.ONE,
-    description: 'Guarantees times 3 damage next time an offensive ability is used next turn',
+    description: 'Inflicts the Sneaked status on a target for 2 turns.',
+    keywords : ['base:sneaked'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.PHYSICAL,
@@ -3273,7 +3353,8 @@ Arts.newEntry(
     name: 'Mind Focus',
     id : 'base:mind-focus',
     targetMode : TARGET_MODE.NONE,
-    description: 'Increases user\'s INT by 100% for 5 turns. Stackable.',
+    description: 'Grants the Mind Focused status to the user for 5 turns.',
+    keywords : ['base:mind-focused'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -3301,7 +3382,8 @@ Arts.newEntry(
     name: 'Defend',
     id : 'base:defend',
     targetMode : TARGET_MODE.NONE,
-    description: 'Reduced damage for one turn and increases the number of block points by one. Additional stacks have no effect.',
+    description: 'Grants the Defend effect for one turn.',
+    keywords : ['base:defend'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -3327,7 +3409,8 @@ Arts.newEntry(
     name: 'Guard',
     id : 'base:guard',
     targetMode : TARGET_MODE.NONE,
-    description: 'Reduced damage for one turn.',
+    description: 'Grants the Guard effect for one turn.',
+    keywords : ['base:guard'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -3353,7 +3436,8 @@ Arts.newEntry(
     name: 'Proceed with Caution',
     id : 'base:proceed-with-caution',
     targetMode : TARGET_MODE.ALLALLY,
-    description: 'Defense is heightened for the team for 10 turns.',
+    description: 'Grants the Cautious effect to all allies for 10 turns.',
+    keywords : ['base:cautious'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -3366,7 +3450,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
-          user.addEffect(from:user, id: 'base:proceed-with-caution', durationTurns:10);
+          user.addEffect(from:user, id: 'base:cautious', durationTurns:10);
         }
       )
     }
@@ -3380,7 +3464,8 @@ Arts.newEntry(
     name: 'Defensive Stance',
     id : 'base:defensive-stance',
     targetMode : TARGET_MODE.NONE,
-    description: 'Stance that sacrifices offensive capabilities to boost defense.',
+    description: 'Removes all Stance effects. Grants the Defensive Stance effect for the rest of battle.',
+    keywords : ['base:defensive-stance'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -3396,7 +3481,7 @@ Arts.newEntry(
           @:Effect = import(module:'game_database.effect.mt');
           @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
           user.removeEffects(effectBases:stances);
-          user.addEffect(from:user, id: 'base:defensive-stance', durationTurns:1000);
+          user.addEffect(from:user, id: 'base:defensive-stance', durationTurns:1000000);
         }
       );
     }
@@ -3408,7 +3493,8 @@ Arts.newEntry(
     name: 'Offensive Stance',
     id : 'base:offensive-stance',
     targetMode : TARGET_MODE.NONE,
-    description: 'Stance that sacrifices defensive capabilities to boost offense.',
+    description: 'Removes all Stance effects. Grants the Offensive Stance effect for the rest of battle.',
+    keywords : ['base:offensive-stance'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -3425,7 +3511,7 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
           user.removeEffects(effectBases:stances);
-          user.addEffect(from:user, id: 'base:offensive-stance', durationTurns:1000);
+          user.addEffect(from:user, id: 'base:offensive-stance', durationTurns:1000000);
         }
       )
     }
@@ -3437,7 +3523,8 @@ Arts.newEntry(
     name: 'Light Stance',
     id : 'base:light-stance',
     targetMode : TARGET_MODE.NONE,
-    description: 'Stance that makes the user lighter on their feet at the cost of offense.',
+    description: 'Removes all Stance effects. Grants the Light Stance effect for the rest of battle.',
+    keywords : ['base:light-stance'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -3453,7 +3540,7 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
           user.removeEffects(effectBases:stances);
-          user.addEffect(from:user, id: 'base:light-stance', durationTurns:1000);
+          user.addEffect(from:user, id: 'base:light-stance', durationTurns:1000000);
         }
       )
     }
@@ -3465,7 +3552,8 @@ Arts.newEntry(
     name: 'Heavy Stance',
     id : 'base:heavy-stance',
     targetMode : TARGET_MODE.NONE,
-    description: 'Stance that makes the user sturdier at the cost of speed.',
+    description: 'Removes all Stance effects. Grants the Heavy Stance effect for the rest of battle.',
+    keywords : ['base:heavy-stance'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.UNCOMMON,
@@ -3481,7 +3569,7 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
           user.removeEffects(effectBases:stances);
-          user.addEffect(from:user, id: 'base:heavy-stance', durationTurns:1000);
+          user.addEffect(from:user, id: 'base:heavy-stance', durationTurns:1000000);
         }
       )
     }
@@ -3493,7 +3581,8 @@ Arts.newEntry(
     name: 'Meditative Stance',
     id : 'base:meditative-stance',
     targetMode : TARGET_MODE.NONE,
-    description: 'Stance that makes the user more mentally focused.',
+    description: 'Removes all Stance effects. Grants the Meditative Stance effect for the rest of battle.',
+    keywords : ['base:meditative-stance'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.UNCOMMON,
@@ -3509,7 +3598,7 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
           user.removeEffects(effectBases:stances);
-          user.addEffect(from:user, id: 'base:meditative-stance', durationTurns:1000);
+          user.addEffect(from:user, id: 'base:meditative-stance', durationTurns:1000000);
         }
       );
     }
@@ -3521,7 +3610,8 @@ Arts.newEntry(
     name: 'Striking Stance',
     id : 'base:striking-stance',
     targetMode : TARGET_MODE.NONE,
-    description: 'Stance that focuses offense above all.',
+    description: 'Removes all Stance effects. Grants the Striking Stance effect for the rest of battle.',
+    keywords : ['base:striking-stance'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -3537,7 +3627,7 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
           user.removeEffects(effectBases:stances);
-          user.addEffect(from:user, id: 'base:striking-stance', durationTurns:1000);
+          user.addEffect(from:user, id: 'base:striking-stance', durationTurns:1000000);
         }
       )
     }
@@ -3550,7 +3640,8 @@ Arts.newEntry(
     name: 'Reflective Stance',
     id : 'base:reflective-stance',
     targetMode : TARGET_MODE.NONE,
-    description: 'Stance that allows the user to reflect damage.',
+    description: 'Removes all Stance effects. Grants the Reflective Stance effect for the rest of battle.',
+    keywords : ['base:reflective-stance'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -3578,7 +3669,8 @@ Arts.newEntry(
     name: 'Evasive Stance',
     id : 'base:evasive-stance',
     targetMode : TARGET_MODE.NONE,
-    description: 'Stance that allows the user to dodge incoming attacks.',
+    description: 'Removes all Stance effects. Grants the Evasive Stance effect for the rest of battle.',
+    keywords : ['base:evasive-stance'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -3607,6 +3699,7 @@ Arts.newEntry(
     id : 'base:wait',
     targetMode : TARGET_MODE.NONE,
     description: 'Does nothing.',
+    keywords : [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -3629,7 +3722,8 @@ Arts.newEntry(
     name: 'Plant Poisonroot',
     id : 'base:plant-poisonroot',
     targetMode : TARGET_MODE.ONE,
-    description: "Plants a poisonroot seed on the target. Grows in 4 turns and causes poison damage every turn when grown.",
+    description: "Plants a poisonroot seed on the target. The poisonroot grows in 4 turns.",
+    keywords : ['base:poisonroot-growing', 'base:poisonroot'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.PHYSICAL,
@@ -3655,7 +3749,8 @@ Arts.newEntry(
     name: 'Plant Triproot',
     id : 'base:plant-triproot',
     targetMode : TARGET_MODE.ONE,
-    description: "Plants a triproot seed on the target. Grows in 4 turns and causes 40% chance to trip every turn when grown.",
+    description: "Plants a triproot seed on the target. The triproot grows in 4 turns.",
+    keywords : ['base:triproot-growing', 'base:triproot'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.PHYSICAL,
@@ -3681,7 +3776,8 @@ Arts.newEntry(
     name: 'Plant Healroot',
     id : 'base:plant-healroot',
     targetMode : TARGET_MODE.ONE,
-    description: "Plants a healroot seed on the target. Grows in 4 turns and heals 2 HP turn.",
+    description: "Plants a healroot seed on the target. The healroot grows in 4 turns.",
+    keywords : ['base:healroot-growing', 'base:healroot'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.PHYSICAL,
@@ -3709,6 +3805,7 @@ Arts.newEntry(
     id : 'base:green-thumb',
     targetMode : TARGET_MODE.ONE,
     description: "Any growing roots grow instantly on the target.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -3745,7 +3842,8 @@ Arts.newEntry(
     name: 'Fire Shift',
     id : 'base:fire-shift',
     targetMode : TARGET_MODE.NONE,
-    description: "Adds the Burning effect. Stackable.",
+    description: "Adds the Burning effect to the user for 4 turns.",
+    keywords : ['base:burning'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC | TRAITS.FIRE,
@@ -3772,11 +3870,12 @@ Arts.newEntry(
     name: 'Elemental Tag',
     id : 'base:elemental-tag',
     targetMode : TARGET_MODE.ONE,
-    description: "Adds weakness to elemental damage +100%. Stackable.",
+    description: "Inflicts the Elemental Tag status on target for 20 turns.",
+    keywords : ['base:elemental-tag'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
-    rarity : RARITY.UNCOMMON,
+    rarity : RARITY.RARE,
     usageHintAI: USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     oncePerBattle : false,
@@ -3799,7 +3898,8 @@ Arts.newEntry(
     name: 'Elemental Shield',
     id : 'base:elemental-shield',
     targetMode : TARGET_MODE.NONE,
-    description: "Nullifies most Thunder, Fire, and Ice damage for 5 turns.",
+    description: "Grants the Elemental Shield status on target for 5 turns.",
+    keywords : ['base:elemental-tag'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
@@ -3827,7 +3927,8 @@ Arts.newEntry(
     name: 'Ice Shift',
     id : 'base:ice-shift',
     targetMode : TARGET_MODE.NONE,
-    description: "Adds the Icy effect. Stackable.",
+    description: "Adds the Icy effect to the user for 4 turns.",
+    keywords : ['base:icy'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC | TRAITS.ICE,
@@ -3853,7 +3954,8 @@ Arts.newEntry(
     name: 'Thunder Shift',
     id : 'base:thunder-shift',
     targetMode : TARGET_MODE.NONE,
-    description: "Adds the Shock effect. Stackable.",
+    description: "Adds the Shock effect to the user for 4 turns.",
+    keywords : ['base:shock'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC | TRAITS.THUNDER,
@@ -3879,7 +3981,8 @@ Arts.newEntry(
     name: 'Tri Shift',
     id : 'base:tri-shift',
     targetMode : TARGET_MODE.NONE,
-    description: "Adds the Shock, Burning, and Icy effects. Stackable.",
+    description: "Adds the Shock, Burning, and Icy effects to the user.",
+    keywords : ['base:burning', 'base:icy', 'base:shock'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
@@ -3910,6 +4013,7 @@ Arts.newEntry(
     id : 'base:use-item',
     targetMode : TARGET_MODE.ONE,
     description: "Uses an item from the user's inventory.",
+    keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : 0,
@@ -3981,6 +4085,7 @@ Arts.newEntry(
     id : 'base:equip-item',
     targetMode : TARGET_MODE.ONE,
     description: "Equips an item from the user's inventory.",
+    keywords : [],
     durationTurns: 0,
     hpCost : 0,
     apCost : 0,
@@ -4009,7 +4114,8 @@ Arts.newEntry(
     name: 'Defend Other',
     id : 'base:defend-other',
     targetMode : TARGET_MODE.ONE,
-    description: "Defends another from getting attacked",
+    description: "Grants the Defend Other effect to a target for 4 turns.",
+    keywords : ['base:defend-other'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.PHYSICAL,
@@ -4036,7 +4142,8 @@ Arts.newEntry(
     name: 'Perfect Guard',
     id : 'base:perfect-guard',
     targetMode : TARGET_MODE.ONE,
-    description: "Nullifies damage for 3 turns. Additional levels have no effect.",
+    description: "Grants the Perfect Guard effect to a target for 3 turns. Additional levels have no effect.",
+    keywords : ['base:perfect-guard'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL,
@@ -4063,7 +4170,8 @@ Arts.newEntry(
     name: 'Sharpen',
     id : 'base:sharpen',
     targetMode : TARGET_MODE.ONE,
-    description: "Sharpens a weapon, increasing its damage for the battle.",
+    description: "Grants the Sharpen effect to a target if they have a weapon equipped.",
+    keywords : ['base:sharpen'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.PHYSICAL,
@@ -4104,7 +4212,8 @@ Arts.newEntry(
     name: 'Weaken Armor',
     id : 'base:weaken-armor',
     targetMode : TARGET_MODE.ONE,
-    description: "Weakens armor, decreasing its effectiveness for the battle.",
+    description: "Inflicts the Weaken Armor effect on a target if the target is wearing armor.",
+    keywords : ['base:weaken-armor'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.PHYSICAL,
@@ -4143,7 +4252,8 @@ Arts.newEntry(
     name: 'Dull Weapon',
     id : 'base:dull-weapon',
     targetMode : TARGET_MODE.ONE,
-    description: "Dull a weapon, decreasing its damage for next turn.",
+    description: "Inflicts the Dull Weapon effect on a target if the target is using a weapon.",
+    keywords : ['base:dull-weapon'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.PHYSICAL,
@@ -4184,7 +4294,8 @@ Arts.newEntry(
     name: 'Strengthen Armor',
     id : 'base:strengthen-armor',
     targetMode : TARGET_MODE.ONE,
-    description: "Strengthens armor, increasing its effectiveness for the battle",
+    description: "Grants the Strengthen Armor effect to a target if they have armor equipped.",
+    keywords : ['base:strengthen-armor'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.PHYSICAL,
@@ -4225,7 +4336,8 @@ Arts.newEntry(
     name: 'Convince',
     id : 'base:convince',
     targetMode : TARGET_MODE.ONE,
-    description: "Prevents a combatant from acting for a few turns if successful. Additional levels increase the success chance.",
+    description: "50% chance to inflict the Convinced status on the target for 1 to 3 turns. Additional levels increase the success chance by 10%.",
+    keywords : ['base:convinced'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : 0,
@@ -4256,6 +4368,7 @@ Arts.newEntry(
     id : 'base:pink-brew',
     targetMode : TARGET_MODE.NONE,
     description: 'Uses 2 Ingredients to make a pink potion.',
+    keywords: ['base:ingredient'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -4304,6 +4417,7 @@ Arts.newEntry(
     id : 'base:cyan-brew',
     targetMode : TARGET_MODE.NONE,
     description: 'Uses 2 Ingredients to make a cyan potion.',
+    keywords: ['base:ingredient'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -4357,6 +4471,7 @@ Arts.newEntry(
     id : 'base:green-brew',
     targetMode : TARGET_MODE.NONE,
     description: 'Uses 2 Ingredients to make a green potion.',
+    keywords: ['base:ingredient'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -4409,6 +4524,7 @@ Arts.newEntry(
     id : 'base:orange-brew',
     targetMode : TARGET_MODE.NONE,
     description: 'Uses 2 Ingredients to make an orange potion.',
+    keywords: ['base:ingredient'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -4461,6 +4577,7 @@ Arts.newEntry(
     id : 'base:purple-brew',
     targetMode : TARGET_MODE.NONE,
     description: 'Uses 2 Ingredients to make a purple potion.',
+    keywords: ['base:ingredient'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -4513,6 +4630,7 @@ Arts.newEntry(
     id : 'base:scavenge',
     targetMode : TARGET_MODE.NONE,
     description: 'Searches the area for an Ingredient to make potions.',
+    keywords: ['base:ingredient'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -4546,6 +4664,7 @@ Arts.newEntry(
     id : 'base:black-brew',
     targetMode : TARGET_MODE.NONE,
     description: 'Uses 2 Ingredients to make a black potion.',
+    keywords: ['base:ingredient'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
@@ -4598,6 +4717,7 @@ Arts.newEntry(
     id : 'base:bribe',
     targetMode : TARGET_MODE.ONE,
     description: "Pays a combatant to not fight any more. Additional levels decrease the required cost.",
+    keywords: ['base:bribed'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.RARE,
@@ -4678,6 +4798,7 @@ Arts.newEntry(
     id : 'base:sweet-song',
     targetMode : TARGET_MODE.ALLENEMY,
     description: 'Alluring song that captivates the listener.',
+    keywords: ['base:mesmerized'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : 0,
@@ -4715,6 +4836,7 @@ Arts.newEntry(
     id : 'base:wrap',
     targetMode : TARGET_MODE.ONE,
     description: 'Wraps around one enemy, followed by ????',
+    keywords: ['base:wrapped'],
     durationTurns: 2,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL | TRAITS.SPECIAL,
@@ -4793,6 +4915,7 @@ Arts.newEntry(
       id : 'base:swipe-kick',
       targetMode : TARGET_MODE.ONEPART,
       description: "Damages a target based on the user's ATK.",
+      keywords: [],
       durationTurns: 0,
       kind : KIND.ABILITY,
       traits : TRAITS.PHYSICAL,
@@ -4841,6 +4964,7 @@ Arts.newEntry(
     id : 'base:diversify',
     targetMode : TARGET_MODE.NONE,
     description: 'Draw 2 Arts cards.',
+    keywords: [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
@@ -4862,6 +4986,7 @@ Arts.newEntry(
     id : 'base:cycle',
     targetMode : TARGET_MODE.NONE,
     description: 'Discard an Arts card. Draw an Arts card.',
+    keywords: [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
@@ -4885,6 +5010,7 @@ Arts.newEntry(
     id : 'base:mind-games',
     targetMode : TARGET_MODE.ONE,
     description: 'Target discards an Art card.',
+    keywords: [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
@@ -4906,6 +5032,7 @@ Arts.newEntry(
     id : 'base:crossed-wires',
     targetMode : TARGET_MODE.ONE,
     description: 'Swap hands with a target.',
+    keywords: [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
@@ -4936,6 +5063,7 @@ Arts.newEntry(
     targetMode : TARGET_MODE.NONE,
     description: 'Discard an Arts card and draw an Arts card from the user\'s discard pile.',
     durationTurns: 0,
+    keywords: [],
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.UNCOMMON,
@@ -4957,6 +5085,7 @@ Arts.newEntry(
     id : 'base:reevaluate',
     targetMode : TARGET_MODE.NONE,
     description: 'Discards entire hand and draws 5 cards.',
+    keywords: [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
@@ -4982,6 +5111,7 @@ Arts.newEntry(
     id : 'base:catch-breath',
     targetMode : TARGET_MODE.NONE,
     description: 'Discards entire hand, gain 2 HP.',
+    keywords: [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
@@ -5008,6 +5138,7 @@ Arts.newEntry(
     id : 'base:makeshift-breather',
     targetMode : TARGET_MODE.NONE,
     description: 'Sacrifice item, gain 2 HP.',
+    keywords: [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
@@ -5042,6 +5173,7 @@ Arts.newEntry(
     id : 'base:makeshift-transmutation',
     targetMode : TARGET_MODE.NONE,
     description: 'Sacrifice item. Summons a small spirit to fight on your side.',
+    keywords: [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
@@ -5102,6 +5234,7 @@ Arts.newEntry(
     id : 'base:quick-shield',
     targetMode : TARGET_MODE.ONE,
     description: 'Sacrifice an item. The user heals 4 Shield HP. This counts as healing.',
+    keywords: [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
@@ -5136,7 +5269,8 @@ Arts.newEntry(
     name: 'Mutual Destruction',
     id : 'base:mutual-destruction',
     targetMode : TARGET_MODE.ONE,
-    description: '50% chance success rate. Target gains 10 Banish stacks. Random teammate gains 10 banish stacks. If a combatant has 10 Banish stacks, they are evicted from battle.',
+    description: '50% chance success rate. Target gains 10 Banish stacks. Random teammate gains 10 banish stacks.',
+    keywords: ['base:banish'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
@@ -5170,7 +5304,8 @@ Arts.newEntry(
     name: 'Brace',
     id : 'base:brace',
     targetMode : TARGET_MODE.NONE,
-    description: 'Discard an Arts card. User has an additional block point for 2 turns and gains 50% DEF.',
+    description: 'Discard an Arts card. User gains the Brace effect for 2 turns.',
+    keywords: ['base:brace'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
@@ -5192,7 +5327,8 @@ Arts.newEntry(
     name: 'Agility',
     id : 'base:agility',
     targetMode : TARGET_MODE.NONE,
-    description: 'Discard an Arts card. User is given the \'Agile\' status for 3 turns. While Agile, the user has a chance to dodge attacks. This chance is increased if the user\'s DEX is greater than the attacker\'s. This can be stacked.',
+    description: 'Discard an Arts card. User gains the Agile effect for 5 turns.',
+    keywords: ['base:agile'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.UNCOMMON,
@@ -5215,6 +5351,7 @@ Arts.newEntry(
     id : 'base:foresight',
     targetMode : TARGET_MODE.ONE,
     description: 'Discard an Arts card. View a target\'s Arts hand.',
+    keywords: [],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
@@ -5242,6 +5379,7 @@ Arts.newEntry(
     id : 'base:retaliate',
     targetMode : TARGET_MODE.ONE,
     description: 'The user attacks as a reflex to an Art, damaging a target based on ATK. This damage is not blockable.',
+    keywords: [],
     durationTurns: 0,
     kind : KIND.REACTION,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
@@ -5279,6 +5417,7 @@ Arts.newEntry(
     id : 'base:quick-shield',
     targetMode : TARGET_MODE.ONE,
     description: 'The user heals 2 Shield HP. This counts as healing.',
+    keywords: [],
     durationTurns: 0,
     kind : KIND.REACTION,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
@@ -5305,6 +5444,7 @@ Arts.newEntry(
     id : 'base:cancel',
     targetMode : TARGET_MODE.NONE,
     description: 'The user cancels an ability Art.',
+    keywords: [],
     durationTurns: 0,
     kind : KIND.REACTION,
     traits : TRAITS.SUPPORT,
@@ -5329,6 +5469,7 @@ Arts.newEntry(
     id : 'base:pebble',
     targetMode : TARGET_MODE.ONEPART,
     description: "Throws a pebble at a target, causing a small amount of damage.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -5366,6 +5507,7 @@ Arts.newEntry(
     id : 'base:shared-pain',
     targetMode : TARGET_MODE.ONEPART,
     description: "Deal a physical attack to target which has a base damage value equal to how much HP is missing from this character\'s current max HP.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -5398,7 +5540,8 @@ Arts.newEntry(
     name: 'Banishing Light',
     id : 'base:banishing-light',
     targetMode : TARGET_MODE.ONE,
-    description: "The target receives the Banishing Light effect. Banishing Light: Next time the target would receive damage, the target receives 1/3rd the amount, rounded up, as Banish stacks. When a combatant acquires 10 stacks of Banish, they are evicted from battle.",
+    description: "The target receives the Banishing Light effect for the duration of the battle..",
+    keywords: ['base:banishing-light', 'base:banish'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -5427,6 +5570,7 @@ Arts.newEntry(
     id : 'base:bloods-pain',
     targetMode : TARGET_MODE.ONEPART,
     description: "Sacrifice 2 HP. Deal damage to target based on ATK.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 2,
@@ -5472,6 +5616,7 @@ Arts.newEntry(
     id : 'base:bloods-shield',
     targetMode : TARGET_MODE.ONE,
     description: "Sacrifice 1 HP. Target receives 2 Shield HP. This counts as healing.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 1,
@@ -5510,6 +5655,7 @@ Arts.newEntry(
     id : 'base:bloods-exaltation',
     targetMode : TARGET_MODE.ONE,
     description: "Sacrifice 2 HP. Target does x2 damage on next attack.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 2,
@@ -5547,6 +5693,7 @@ Arts.newEntry(
     id : 'base:bloods-ward',
     targetMode : TARGET_MODE.NONE,
     description: "Sacrifice 1 HP. Cancel target Art.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -5589,6 +5736,7 @@ Arts.newEntry(
     id : 'base:bloods-seeking',
     targetMode : TARGET_MODE.NONE,
     description: "Sacrifice 2 HP. Search user\'s discard pile for an Art. Add the Art to the user\'s hand.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 2,
@@ -5637,6 +5785,7 @@ Arts.newEntry(
     id : 'base:bloods-sacrifice',
     targetMode : TARGET_MODE.ONE,
     description: "Sacrifice 2 HP. View target\'s hand and forces discarding of a card of the user\'s choosing.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 2,
@@ -5673,7 +5822,8 @@ Arts.newEntry(
     name: 'Blood\'s Wind',
     id : 'base:bloods-sacrifice',
     targetMode : TARGET_MODE.ONE,
-    description: "Sacrifice 2 HP. The target receives the Evade status, preventing all attack damage for 2 turns.",
+    description: "Sacrifice 2 HP. The target receives the Evade effect for 2 turns.",
+    keywords: ['base:evade'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 2,
@@ -5711,7 +5861,8 @@ Arts.newEntry(
     name: 'Cursed Summoning',
     id : 'base:cursed-summoning',
     targetMode : TARGET_MODE.NONE,
-    description: "Summons a very powerful Cursed Light to fight alongside the user. The Cursed Light has the effect Cursed Binding, where each time the Cursed Light damages an enemy, the original user receives 1 damage.",
+    description: "Summons a very powerful Cursed Light to fight alongside the user. The Cursed Light is inflicted with Cursed Binding for the remainder of battle.",
+    keywords: ['base:cursed-binding'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -5762,7 +5913,8 @@ Arts.newEntry(
     name: 'Cursed Binding',
     id : 'base:cursed-binding',
     targetMode : TARGET_MODE.ONE,
-    description: "Adds the effect Cursed Binding on a target for 10 turns, where each time the target attacks, the target receives 1 damage.",
+    description: "Adds the effect Cursed Binding on a target for 10 turns.",
+    keywords: ['base:cursed-binding'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -5786,6 +5938,7 @@ Arts.newEntry(
     id : 'base:bloods-summoning',
     targetMode : TARGET_MODE.NONE,
     description: "Sacrifice 2 HP. Summons a small spirit to fight on your side.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 2,
@@ -5851,7 +6004,8 @@ Arts.newEntry(
     name: 'Unexpected Swipe',
     id : 'base:unexpected-swipe',
     targetMode : TARGET_MODE.ONE,
-    description: "Add the Unbalanced effect on target, which reduces ATK by 90% for 2 turns. Draw an Arts card.",
+    description: "Add the Unbalanced effect on target for 2 turns. Draw an Arts card.",
+    keywords: ['base:unbalanced'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -5873,7 +6027,8 @@ Arts.newEntry(
     name: 'Desperation',
     id : 'base:desparation',
     targetMode : TARGET_MODE.NONE,
-    description: "Add the Desperate effect on user, which reduces max HP by 50% and DEF by 100% but makes all attacks x2.5 damage for 2 turns. Draw an Arts card.",
+    description: "Add the Desparate effect on user for 2 turns. Draw an Arts card.",
+    keywords: ['base:desparate'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -5897,6 +6052,7 @@ Arts.newEntry(
     id : 'base:bodyslam',
     targetMode : TARGET_MODE.ONE,
     description: "Deal damage to a target where the base damage is equal to the current HP and 1/3 the DEF of the user. The user is stunned after use for 1 turn.",
+    keywords: ['base:stunned'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -5939,7 +6095,8 @@ Arts.newEntry(
     name: 'Enlarge',
     id : 'base:enlarge',
     targetMode : TARGET_MODE.ONE,
-    description: "Adds the Enlarged effect, making the target have 50% more max HP and 50% more DEF for 2 turns.",
+    description: "Adds the Enlarged effect to a target for 2 turns.",
+    keywords: ['base:enlarged'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -5963,6 +6120,7 @@ Arts.newEntry(
     id : 'base:shield-amplifier',
     targetMode : TARGET_MODE.ONE,
     description: "Target\'s Shield HP is doubled. If the target has no Shield HP, the target receives 1 Shield HP.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -5987,7 +6145,8 @@ Arts.newEntry(
     name: 'Banish',
     id : 'base:banish',
     targetMode : TARGET_MODE.ONE,
-    description: "Add 2 Banish stacks to target. When a combatant has 10 Banish stacks, they are evicted from battle.",
+    description: "Add 2 Banish stacks to target.",
+    keywords: ['base:banish'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -6010,7 +6169,8 @@ Arts.newEntry(
     name: 'Bound Banish',
     id : 'base:banish',
     targetMode : TARGET_MODE.ONE,
-    description: "Paralyze user for 2 turns, preventing their action. Add 3 Banish stacks to target. When a combatant has 10 Banish stacks, they are evicted from battle.",
+    description: "Paralyze user for 2 turns, preventing their action. Add 3 Banish stacks to target.",
+    keywords: ['base:banish', 'base:paralyzed'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -6036,6 +6196,7 @@ Arts.newEntry(
     id : 'base:proliferate',
     targetMode : TARGET_MODE.ONE,
     description: "All effects on target are doubled. These new effects last for 2 turns.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -6061,6 +6222,7 @@ Arts.newEntry(
     id : 'base:proliferate',
     targetMode : TARGET_MODE.ALL,
     description: "All effects on all targets are doubled. These new effects last for 2 turns.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -6087,7 +6249,8 @@ Arts.newEntry(
     name: 'Banishing Aura',
     id : 'base:banishing-aura',
     targetMode : TARGET_MODE.ALL,
-    description: "Accumulate 3 Banish stacks on all combatants. When a combatant acquires 10 stacks of Banish, they are evicted from battle.",
+    description: "Accumulate 3 Banish stacks on all combatants.",
+    keywords: ['base:banish'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -6117,6 +6280,7 @@ Arts.newEntry(
     id : 'base:wyvern-prayer',
     targetMode : TARGET_MODE.ALL,
     description: "Prays for a miracle, causing a variety of potent effects. Reduces current AP by half if successful. Additional levels reduce the AP cost.",
+    keywords: [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
@@ -6255,15 +6419,15 @@ Arts.newEntry(
     name: '@',
     id : 'base:b169',
     targetMode : TARGET_MODE.ONE,
-    description: "Removes all negative effects from the target. Only usable once per battle. Additional levels have no effect.",
+    description: "Removes all status ailments from the target.",
+    keywords: ['base:ailments'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       @:Effect = import(module:'game_database.effect.mt');
       @:which = random.scrambled(:allies)->filter(
         ::(value) <- value.effectStack.getAllByFilter(
-          ::(value) <- (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0 ||
-                       (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0
+          ::(value) <- (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
         )->size > 0
       );
       when(which->size == 0) false;
@@ -6282,8 +6446,7 @@ Arts.newEntry(
         text: targets[0].name + ' is covered in a soothing aura!'
       );
 
-      @:filter = ::(value) <- (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0 ||
-                              (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0
+      @:filter = ::(value) <- (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
 
       @:hasAny = targets[0].effectStack.getAllByFilter(:filter)->size > 0;
       targets[0].effectStack.removeByFilter(:filter);
@@ -6300,7 +6463,8 @@ Arts.newEntry(
     name: '@',
     id : 'base:b170',
     targetMode : TARGET_MODE.ONE,
-    description: "Removes all negative effects from the target. Only usable once per battle. Additional levels have no effect.",
+    description: "Removes all ailments and negative effects from the target. Only usable once per battle. Additional levels have no effect.",
+    keywords: ['base:ailments'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -6346,7 +6510,8 @@ Arts.newEntry(
     name: '@',
     id : 'base:b171',
     targetMode : TARGET_MODE.ALLALLY,
-    description: "Removes all negative effects from allies and gives them all to the user.",
+    description: "Removes all ailments and negative effects from allies and gives them all to the user.",
+    keywords: ['base:ailments'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -6415,6 +6580,7 @@ Arts.newEntry(
     id : 'base:b172',
     targetMode : TARGET_MODE.ALLENEMY,
     description: "Randomly steals one positive effect from a random enemy and gives it to the user.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -6475,6 +6641,7 @@ Arts.newEntry(
     id : 'base:b173',
     targetMode : TARGET_MODE.NONE,
     description: "Replaces up to two of the user\'s effects with random ones.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -6535,7 +6702,8 @@ Arts.newEntry(
     name: '@',
     id : 'base:b174',
     targetMode : TARGET_MODE.ALL,
-    description: "Removes all negative effects from all combatants, then discard a card and draw a card. Additional levels have no effect.",
+    description: "Removes all ailments and negative effects from all combatants, then discard a card and draw a card. Additional levels have no effect.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -6578,6 +6746,7 @@ Arts.newEntry(
     id : 'base:b175',
     targetMode : TARGET_MODE.ALL,
     description: "Removes all positive effects from all combatants.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -6619,6 +6788,7 @@ Arts.newEntry(
     id : 'base:b176',
     targetMode : TARGET_MODE.ONE,
     description: "Removes all effects from the user and randomly gives one of them to a target.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -6673,6 +6843,7 @@ Arts.newEntry(
     id : 'base:b177',
     targetMode : TARGET_MODE.ALL,
     description: "Randomly redistributes all effects to all combatants.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -6737,6 +6908,7 @@ Arts.newEntry(
     id : 'base:b178',
     targetMode : TARGET_MODE.NONE,
     description: "Removes all effects from user and resets HP and AP to full. This Art is permanently removed from the user\'s deck upon use. Additional levels have no effect.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -6788,6 +6960,7 @@ Arts.newEntry(
     id : 'base:b179',
     targetMode : TARGET_MODE.ONE,
     description: "Randomly steals up to two random effects from a target and gives it to the user.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -6839,6 +7012,7 @@ Arts.newEntry(
     id : 'base:b180',
     targetMode : TARGET_MODE.ALLALLY,
     description: "Heals 1 HP for each effect that all the user\'s allies have.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -6877,6 +7051,7 @@ Arts.newEntry(
     id : 'base:b181',
     targetMode : TARGET_MODE.ONE,
     description: "Replaces all negative effects on target with Banish stacks.",
+    keywords: ['base:banish'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -6885,7 +7060,7 @@ Arts.newEntry(
         value.effectStack.getAll()->filter(::(value) <- 
           (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
           (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
-        )->size > 0
+        )->size > 0);
           
       return [able]
     },
@@ -6896,6 +7071,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
       @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
         (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
         (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
@@ -6917,6 +7093,7 @@ Arts.newEntry(
     id : 'base:b182',
     targetMode : TARGET_MODE.ONE,
     description: "Replaces all positive effects on target with Banish stacks.",
+    keywords: ['base:banish'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -6925,7 +7102,7 @@ Arts.newEntry(
         value.effectStack.getAll()->filter(::(value) <- 
           (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
           (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
-        )->size > 0
+        )->size > 0)
           
       return [able]
     },
@@ -6936,6 +7113,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
       @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
         (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
         (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
@@ -6956,6 +7134,7 @@ Arts.newEntry(
     id : 'base:b183',
     targetMode : TARGET_MODE.ONE,
     description: "Replaces all positive effects on target with random ones. The durations of each effect are preserved.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -6963,7 +7142,7 @@ Arts.newEntry(
       @:able = enemies->filter(::(value) <- 
         value.effectStack.getAll()->filter(::(value) <- 
           (Effect.find(:value.id).flags & Effect.FLAGS.BUFF)  != 0
-        )->size > 0
+        )->size > 0)
           
       return [able]
     },
@@ -6974,6 +7153,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
       @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
         (Effect.find(:value.id).flags & Effect.FLAGS.BUFF)  != 0
       )]
@@ -6997,6 +7177,7 @@ Arts.newEntry(
     id : 'base:b184',
     targetMode : TARGET_MODE.ALL,
     description: "Deals damage to each combatant based on their respective number of effects.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -7004,16 +7185,16 @@ Arts.newEntry(
       @:groupToCount::(group) <- 
         (group->map(::(value) <- 
           value.effectStack.getAll()->size)
-        )->reduce(::(previous, next) <-
+        )->reduce(::(previous, value) <-
           if (previous == empty)
-            next 
+            value
           else 
-            next + previous
+            value + previous
         )
         
       // does it hurt them more than it hurts me? sure!
       when (groupToCount(:enemies) >
-            groupToCount(:allies)))
+            groupToCount(:allies))
         [...allies, ...enemies];
       
       return false;
@@ -7049,6 +7230,7 @@ Arts.newEntry(
     id : 'base:b185',
     targetMode : TARGET_MODE.ALL,
     description: "Removes all effects from each combatant. Each combatant gains a number of Banish stacks equal to the total number of those removed effects divided by the number of combatants, rounding up.",
+    keywords: ['base:banish'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -7056,16 +7238,16 @@ Arts.newEntry(
       @:groupToCount::(group) <- 
         (group->map(::(value) <- 
           value.effectStack.getAll()->size)
-        )->reduce(::(previous, next) <-
+        )->reduce(::(previous, value) <-
           if (previous == empty)
-            next 
+            value 
           else 
-            next + previous
+            value + previous
         )
         
       // does it hurt them more than it hurts me? sure!
       when (groupToCount(:enemies) >
-            groupToCount(:allies)))
+            groupToCount(:allies))
         [...allies, ...enemies];
       
       return false;
@@ -7106,13 +7288,14 @@ Arts.newEntry(
     id : 'base:b186',
     targetMode : TARGET_MODE.ONE,
     description: "Removes all the user's Banish stacks and places them on a target.",
+    keywords: ['base:banish'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
-      when (user.getAllByFilter(::(value) <- value.id == 'base:banish')->size == 0) 
+      when (user.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size == 0) 
         false;
           
-      return random.pickArrayItem(:enemies);
+      return [random.pickArrayItem(:enemies)];
     },
     oncePerBattle : false,
     canBlock : false,
@@ -7124,7 +7307,7 @@ Arts.newEntry(
       @total = 0;
       @oldBanish = user.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish');
       when(oldBanish->size == 0) empty;  
-      k.effectStack.removeByFilter(::(value) <- value.id == 'base:banish');
+      user.effectStack.removeByFilter(::(value) <- value.id == 'base:banish');
             
       for(0, oldBanish->size) ::(i) {
         targets[0].addEffect(from:user, id:'base:banish', durationTurns:10000);              
@@ -7140,12 +7323,13 @@ Arts.newEntry(
     id : 'base:b187',
     targetMode : TARGET_MODE.ONE,
     description: "Removes all stacks of the Poisoned effect from target. For each Poisoned stack removed this way, the target gains 2 HP and +25% DEX for 2 turns.",
+    keywords: ['base:poisoned'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       return {:::} {
         foreach(allies) ::(k, v) {
-          when (v.getAllByFilter(::(value) <- value.id == 'base:poisoned')->size > 0) 
+          when (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:poisoned')->size > 0) 
             send(:[k]);
         }      
         
@@ -7162,7 +7346,7 @@ Arts.newEntry(
       @total = 0;
       @oldPoison = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:poisoned');
       when(oldPoison->size == 0) empty;
-      k.effectStack.removeByFilter(::(value) <- value.id == 'base:poisoned');
+      targets[0].effectStack.removeByFilter(::(value) <- value.id == 'base:poisoned');
             
       targets[0].heal(amount:oldPoison->size * 2);
             
@@ -7180,12 +7364,13 @@ Arts.newEntry(
     id : 'base:b188',
     targetMode : TARGET_MODE.ONE,
     description: "Removes all stacks of the Burned effect from target. For each Burned stack removed this way, the target gains 2 HP and +25% DEF for 2 turns.",
+    keywords: ['base:burned'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       return {:::} {
         foreach(allies) ::(k, v) {
-          when (v.getAllByFilter(::(value) <- value.id == 'base:burned')->size > 0) 
+          when (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:burned')->size > 0) 
             send(:[k]);
         }      
         
@@ -7202,7 +7387,7 @@ Arts.newEntry(
       @total = 0;
       @oldBurn = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:burned');
       when(oldBurn->size == 0) empty;
-      k.effectStack.removeByFilter(::(value) <- value.id == 'base:burned');
+      targets[0].effectStack.removeByFilter(::(value) <- value.id == 'base:burned');
             
       targets[0].heal(amount:oldBurn->size * 2);
             
@@ -7219,12 +7404,13 @@ Arts.newEntry(
     id : 'base:b189',
     targetMode : TARGET_MODE.ONE,
     description: "Removes all stacks of the Paralyzed effect from target. For each Paralyzed stack removed this way, the target gains 2 AP and +25% INT for 2 turns.",
+    keywords: ['base:paralyzed'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       return {:::} {
         foreach(allies) ::(k, v) {
-          when (v.getAllByFilter(::(value) <- value.id == 'base:paralyzed')->size > 0) 
+          when (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:paralyzed')->size > 0) 
             send(:[k]);
         }      
         
@@ -7241,9 +7427,9 @@ Arts.newEntry(
       @total = 0;
       @oldParalyze = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:paralyzed');
       when(oldParalyze->size == 0) empty;
-      k.effectStack.removeByFilter(::(value) <- value.id == 'base:paralyzed');
+      targets[0].effectStack.removeByFilter(::(value) <- value.id == 'base:paralyzed');
             
-      targets[0].healAP(amount:oldParalyzed->size * 2);
+      targets[0].healAP(amount:oldParalyze->size * 2);
             
       for(0, oldParalyze->size) ::(i) {
         targets[0].addEffect(from:user, id:'base:minor-mind-boost', durationTurns:2);              
@@ -7259,12 +7445,13 @@ Arts.newEntry(
     id : 'base:b190',
     targetMode : TARGET_MODE.ONE,
     description: "Removes the Petrified effect from target. The target gains 2 HP and +25% ATK for 3 turns.",
+    keywords: ['base:petrified'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       return {:::} {
         foreach(allies) ::(k, v) {
-          when (v.getAllByFilter(::(value) <- value.id == 'base:petrified')->size > 0) 
+          when (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:petrified')->size > 0) 
             send(:[k]);
         }      
         
@@ -7281,7 +7468,7 @@ Arts.newEntry(
       @total = 0;
       @oldPetr = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:petrified');
       when(oldPetr->size == 0) empty;
-      k.effectStack.removeByFilter(::(value) <- value.id == 'base:petrified');
+      targets[0].effectStack.removeByFilter(::(value) <- value.id == 'base:petrified');
             
       targets[0].heal(amount:oldPetr->size * 2);
             
@@ -7299,12 +7486,14 @@ Arts.newEntry(
     id : 'base:b191',
     targetMode : TARGET_MODE.ONE,
     description: "Removes all negative effects from the target. For each effect removed this way, the target gains 2 AP and +25% SPD for 2 turns.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
       return {:::} {
         foreach(allies) ::(k, v) {
-          when (v.getAllByFilter(::(value) <- 
+          when (v.effectStack.getAllByFilter(::(value) <- 
             (value.traits & Effect.TRAITS.AILMENT) != 0 ||
             (value.traits & Effect.TRAITS.DEBUFF)  != 0
           )->size > 0) 
@@ -7321,20 +7510,21 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
       @total = 0;
-      @oldBad = targets[0].getAllByFilter(::(value) <- 
+      @oldBad = targets[0].effectStack.getAllByFilter(::(value) <- 
         (value.traits & Effect.TRAITS.AILMENT) != 0 ||
         (value.traits & Effect.TRAITS.DEBUFF)  != 0
       );
       when(oldBad->size == 0) empty;
-      k.effectStack.removeByFilter(::(value) <- 
+      targets[0].effectStack.removeByFilter(::(value) <- 
         (value.traits & Effect.TRAITS.AILMENT) != 0 ||
         (value.traits & Effect.TRAITS.DEBUFF)  != 0      
       );
             
       targets[0].healAP(amount:oldBad->size * 2);
             
-      for(0, oldPetr->size) ::(i) {
+      for(0, oldBad->size) ::(i) {
         targets[0].addEffect(from:user, id:'base:minor-speed-boost', durationTurns:2);              
       }
     }
@@ -7347,13 +7537,15 @@ Arts.newEntry(
     name: '@',
     id : 'base:b192',
     targetMode : TARGET_MODE.ONE,
-    description: "Matches the resonance of the user's spirit with another, mirroring their effects as the user's. All prior effects on the user are removed.",
+    description: "Matches the resonance of the user's spirit with another, granting the target's effects to the user.",
+    keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
       return {:::} {
         foreach([...enemies, ...allies]) ::(k, v) {
-          when (v.getAllByFilter(::(value) <- 
+          when (v.effectStack.getAllByFilter(::(value) <- 
             (value.traits & Effect.TRAITS.BUFF) != 0
           )->size > 0) 
             send(:[k]);
@@ -7370,19 +7562,285 @@ Arts.newEntry(
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @total = 0;
-      @oldBad = targets[0].getAllByFilter(::(value) <- 
-        (value.traits & Effect.TRAITS.BUFF) != 0
+      @oldGood = targets[0].effectStack.getAllByFilter(::(value) <- 
+        true
       );
-      when(oldBad->size == 0) empty;
-      k.effectStack.removeByFilter(::(value) <- 
-        (value.traits & Effect.TRAITS.BUFF) != 0
-      );
+      when(oldGood->size == 0) empty;
             
-      targets[0].healAP(amount:oldBad->size * 2);
             
-      for(0, oldPetr->size) ::(i) {
-        targets[0].addEffect(from:user, id:'base:minor-speed-boost', durationTurns:2);              
+      foreach(oldGood) ::(k, v) {
+        user.addEffect(
+          from:targets[0], 
+          id:v.id, 
+          durationTurns: v.duration - v.turnCount,
+          item: v.id
+        );              
       }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b193',
+    targetMode : TARGET_MODE.ONE,
+    description: "Grapples a target and binds their spirits together, transferring the user\'s effects to the target. The grapple lasts for 1 turn.",
+    keywords: ['base:grappled', 'base:grappling'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      // only use it offensively when you dont have buffs
+      when (user.effectStack.getAllByFilter(::(value) <- 
+        ((value.traits & Effect.TRAITS.DEBUFF) != 0) ||
+        ((value.traits & Effect.TRAITS.AILMENT) != 0)
+      )->size == 0) false;
+
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.ABILITY,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC | TRAITS.PHYSICAL,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @total = 0;
+      @oldGood = user.effectStack.getAllByFilter(::(value) <- 
+        true
+      );
+      if (oldGood->size != 0) ::<= {
+        foreach(oldGood) ::(k, v) {
+          targets[0].addEffect(
+            from:user, 
+            id:v.id, 
+            durationTurns: v.duration - v.turnCount,
+            item: v.id
+          );              
+        }
+      }
+      
+      targets[0].addEffect(from:user, id: 'base:grappled', durationTurns: 1);            
+      user.addEffect(from:user, id: 'base:grappling', durationTurns: 1);            
+      
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b194',
+    targetMode : TARGET_MODE.ONE,
+    description: "Attacks an enemy. If the hit is successful, effects of the user and target are swapped.",
+    keywords: [],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      // only use it offensively when you dont have buffs
+      when (user.effectStack.getAllByFilter(::(value) <- 
+        ((value.traits & Effect.TRAITS.DEBUFF) != 0) ||
+        ((value.traits & Effect.TRAITS.AILMENT) != 0)
+      )->size == 0) false;
+
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.ABILITY,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC | TRAITS.PHYSICAL,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user) <- user.stats.ATK * (0.2) * level,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+
+
+      windowEvent.queueCustom(
+        onEnter :: {
+
+          if (user.attack(
+            target:targets[0],
+            amount:Arts.find(:'base:b194').baseDamage(level, user),
+            damageType : Damage.TYPE.PHYS,
+            damageClass: Damage.CLASS.HP,
+            targetPart:Entity.DAMAGE_TARGET.BODY,
+            targetDefendPart:targetDefendParts[0]
+          )) ::<= {
+            @effUser   = [...user.effectStack.getAll()]
+            @effTarget = [...targets[0].effectStack.getAll()]
+
+            targets[0].effectStack.removeByFilter(::(value) <- true);
+            user.effectStack.removeByFilter(::(value) <- true);
+
+
+            foreach(effUser) ::(k, v) {
+              targets[0].addEffect(
+                from:user, 
+                id:v.id, 
+                durationTurns: v.duration - v.turnCount,
+                item: v.id
+              );              
+            }
+            foreach(effTarget) ::(k, v) {
+              user.addEffect(
+                from:targets[0], 
+                id:v.id, 
+                durationTurns: v.duration - v.turnCount,
+                item: v.id
+              );              
+            }
+
+
+          }
+        }
+      );
+    }
+  }
+)
+
+
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b195',
+    targetMode : TARGET_MODE.ALLENEMY,
+    description: "Fiercesome attack that siphons poison from a user's blood to strike at foes. Removes a stack of Poisoned. Hits two random targets base on ATK and inflicts Poisoned for each stack removed.",
+    keywords: ['base:poisoned'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      // only use it offensively when you dont have buffs
+      when (user.effectStack.getAllByFilter(::(value) <- 
+        value.id == 'base:poisoned'
+      )->size == 0) false;
+
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user) <- user.stats.ATK * (0.35) * level,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @oldPois = user.effectStack.getAllByFilter(::(value) <- 
+        value.id == 'base:poisoned'
+      );
+      
+      when(oldPois->size == 0) empty;
+      
+      user.effectStack.removeByFilter(::(value) <-
+        value.id == 'base:poisoned'
+      );
+      
+      foreach(oldPois->size) ::(k, v) {
+        windowEvent.queueCustom(
+          onEnter :: {
+            @target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
+            user.attack(
+              target,
+              amount: Arts.find(:'base:b195').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP,
+              targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
+              targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
+            );
+            
+            target.addEffect(from:user, id:'base:poisoned',durationTurns:5);
+          }
+        );            
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b196',
+    targetMode : TARGET_MODE.ALLENEMY,
+    description: "Removes all of the user\'s stacks of the Burned effect. This causes an explosion that burns all enemies, dealing more damage per stack of burn removed. If the user does not have the Burned status, nothing happens.",
+    keywords: ['base:burned'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      // only use it offensively when you dont have buffs
+      when (user.effectStack.getAllByFilter(::(value) <- 
+        value.id == 'base:burned'
+      )->size == 0) false;
+
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user) <- 4 * user.effectStack.getAllByFilter(::(value) <- 
+        value.id == 'base:burned'
+      )->size * level,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @oldPois = user.effectStack.getAllByFilter(::(value) <- 
+        value.id == 'base:burned'
+      );
+      
+      when(oldPois->size == 0) empty;
+      
+      user.effectStack.removeByFilter(::(value) <-
+        value.id == 'base:burned'
+      );
+
+
+      
+      foreach(targets) ::(k, target) {
+        windowEvent.queueCustom(
+          onEnter :: {
+            user.attack(
+              target,
+              amount: Arts.find(:'base:b196').baseDamage(level, user),
+              damageType : Damage.TYPE.FIRE,
+              damageClass: Damage.CLASS.HP,
+              targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
+              targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
+            );
+          }
+        );            
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b197',
+    targetMode : TARGET_MODE.NONE,
+    description: "Tune into inner senses to give 2 stacks of the Agile effect and remove the Blind effect.",
+    keywords: ['base:agile', 'base:blind'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      // only use it offensively when you dont have buffs
+      when (user.effectStack.getAllByFilter(::(value) <- 
+        value.id == 'base:blind'
+      )->size == 0) false;
+
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.effectStack.removeByFilter(::(value) <-
+        value.id == 'base:blind'
+      );
+      user.addEffect(from:user, id:'base:agile',durationTurns:2);
+      user.addEffect(from:user, id:'base:agile',durationTurns:2);
     }
   }
 )
@@ -7426,6 +7884,11 @@ Arts = class(
   attributes : {
     name : String,
     id : String,
+    
+    // an array of keywords that will "hyperlink" when 
+    // the art is chosen graphically. Can either be 
+    // IDs of effects or IDs of ArtsTerms.
+    keywords : Object,
     description : String,
     targetMode : Number,
     usageHintAI : Number,

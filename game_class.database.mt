@@ -103,6 +103,9 @@
         when(item == empty) error(detail: 'Unknown database item ID ' + id);
         return item;
       },
+
+      findSoft ::(id) <- items_[id],
+
       
       getRandom :: {
         return Random.pickTableItem(table:items_);

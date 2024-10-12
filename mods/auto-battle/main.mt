@@ -72,6 +72,14 @@ return {
               silent:true
             );          
           }
+          
+          ent.equipAllProfessionArts();  
+          for(0, 10) ::(i) {
+            ent.autoLevelProfession(:ent.profession);
+          }
+          ent.supportArts = []; 
+          
+          
           ent.data.sourceImport = data;
           
           
@@ -99,14 +107,13 @@ return {
           }
           
           
-          if (data.additionalRandomArts->type == Number) ::<= {
+          if (data.randomAdditionalArtsCount->type == Number) ::<= {
             @:Arts = import(module:'game_database.arts.mt');
-            for(0, data.additionalRandomArts) ::(i) {
+            for(0, data.randomAdditionalArtsCount) ::(i) {
               ent.supportArts->push(:
                 Arts.getRandomFiltered(::(value) <- 
-                  ((value.traits & Arts.TRAITS.SPECIAL) == 0)
-                  &&
-                  ((value.traits & Arts.TRAITS.SUPPORT) != 0)
+                  ((value.traits & Arts.TRAITS.SPECIAL) == 0) &&
+                  ((value.traits & Arts.TRAITS.SUPPORT) != 0) 
                 ).id
               );
             }

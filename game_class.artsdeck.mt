@@ -3,7 +3,8 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:Profession = import(:'game_database.profession.mt');
-
+@:ArtsTerm = import(:'game_database.artsterm.mt');
+@:Effect = import(module:'game_database.effect.mt');
 
 
 @:HandCard = Object.newType(
@@ -108,27 +109,42 @@
     baseDamageMax = user.getArtMaxDamage(:handCard);
   }
 
+  @:lines = [
+    art.name,
+    " - Kind: " + match(art.kind) {
+      (Arts.KIND.ABILITY): "Ability (//)",
+      (Arts.KIND.EFFECT): "Effect (^^)",
+      (Arts.KIND.REACTION): "Reaction (!!)"
+    },
+    " - Rarity: " + getRarity(:art.rarity),
+    " - Traits: " + getTraits(:handCard),
+    if (art.kind == Arts.KIND.ABILITY)
+      "Lv. " + handCard.level 
+    else 
+      "",
+    '',
+    art.description,
+    if (user != empty && baseDamageMin != empty) 'Around: ' + baseDamageMin + ' - ' + baseDamageMax + " damage" else '',
+  ]
+  
+  foreach(art.keywords) ::(k, v)  {
+    // first check if its an effect 
+    @thing = Effect.findSoft(:v);
+    
+    when(thing) ::<= {
+      lines->push(:'[Effect: ' + thing.name + ']: ' + thing.description + (if (thing.stackable == false) ' This is unstackable.' else ''));
+    }
+
+    thing = ArtsTerm.find(id:v);
+    when(thing) ::<= {
+      lines->push(:'[' + thing.name + ']: ' + thing.description);
+    }
+  }
   canvas.renderTextFrameGeneral(
     topWeight,
     leftWeight,
     maxWidth,
-    lines : [
-      art.name,
-      " - Kind: " + match(art.kind) {
-        (Arts.KIND.ABILITY): "Ability (//)",
-        (Arts.KIND.EFFECT): "Effect (^^)",
-        (Arts.KIND.REACTION): "Reaction (!!)"
-      },
-      " - Rarity: " + getRarity(:art.rarity),
-      " - Traits: " + getTraits(:handCard),
-      if (art.kind == Arts.KIND.ABILITY)
-        "Lv. " + handCard.level 
-      else 
-        "",
-      '',
-      art.description,
-      if (user != empty && baseDamageMin != empty) 'Around: ' + baseDamageMin + ' - ' + baseDamageMax + " damage" else '',
-    ]
+    lines
   );
 }
 

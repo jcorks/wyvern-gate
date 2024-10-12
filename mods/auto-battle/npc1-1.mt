@@ -5,7 +5,7 @@ return {
   giveWeapon : false,
   giveArmor : false,
   randomEffectCount : 1,
+  randomAdditionalArtsCount : 7,
   arts : [
-    'base:banishing-light'
   ]
 }
