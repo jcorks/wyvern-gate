@@ -1385,7 +1385,7 @@ Effect.newEntry(
   data : {
     name : 'Night Veil',
     id : 'base:night-veil',
-    description: 'DEF +50%',
+    description: 'DEF +50%.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,

@@ -84,6 +84,8 @@ Arts.newEntry(
   data: {
     name: 'Attack',
     id : 'base:attack',
+    notifCommit : '$1 attacks $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
     keywords : [],
     description: "Damages a target based on the user's ATK.",
@@ -96,11 +98,7 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL | TRAITS.SPECIAL | TRAITS.COSTLESS,
     rarity : RARITY.COMMON,
     baseDamage ::(level, user) <- user.stats.ATK * (0.5) * level,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' attacks ' + targets[0].name + '!'
-      );
-      
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           user.attack(
@@ -125,6 +123,8 @@ Arts.newEntry(
   data: {
     name: 'Headhunter',
     id : 'base:headhunter',
+    notifCommit : '$1 attempts to defeat $2 in one attack!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Deals 1 HP. 5% chance to 1hit K.O. Each level increases the chance by 5%.",
     keywords : [],
@@ -138,9 +138,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) <- 1,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' attempts to defeat ' + targets[0].name + ' in one attack!'
-      );
       
       
       windowEvent.queueCustom(
@@ -179,6 +176,8 @@ Arts.newEntry(
   data: {
     name: 'Precise Strike',
     id : 'base:precise-strike',
+    notifCommit : '$1 takes aim at $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target based on the user's ATK and DEX. Additional levels increase the damage by 10%.",
     keywords : [],
@@ -192,11 +191,7 @@ Arts.newEntry(
     canBlock : true,
     traits : TRAITS.PHYSICAL,
     baseDamage ::(level, user) <- (user.stats.ATK * (0.2) + user.stats.DEX * (0.5)) * (1 + 0.1*(level-1)),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' takes aim at ' + targets[0].name + '!'
-      );
-      
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           user.attack(
@@ -219,6 +214,8 @@ Arts.newEntry(
   data: {
     name: 'Tranquilizer',
     id : 'base:tranquilizer',
+    notifCommit : '$1 attempts to tranquilize $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target based on the user's DEX with a 45% chance to inflict Paralyzed. Additional levels increase the paralysis chance by 10%.",
     durationTurns: 0,
@@ -231,11 +228,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : true,
     baseDamage ::(level, user) <- user.stats.DEX * (0.5),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' attempts to tranquilize ' + targets[0].name + '!'
-      );
-      
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           if (user.attack(
@@ -261,6 +254,8 @@ Arts.newEntry(
   data: {
     name: 'Coordination',
     id : 'base:coordination',
+    notifCommit : '$1 coordinates with others!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLALLY,
     description: "ATK,DEF,SPD +35% for each party member. Every 2 levels stacks the boost.",
     durationTurns: 0,
@@ -273,11 +268,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' coordinates with others!'
-      );
-      
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -299,6 +290,9 @@ Arts.newEntry(
   data: {
     name: 'Follow Up',
     id : 'base:follow-up',
+    notifCommit : '$1 attacks $2 as a follow-up!',
+    notifFail : Arts.NO_NOTIF,
+
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target based on the user's ATK, doing 100% more damage if the target was hit since their last turn. Additional levels increase the boost by 20%.",
     durationTurns: 0,
@@ -312,10 +306,6 @@ Arts.newEntry(
     canBlock : true,
     baseDamage ::(level, user)<- user.stats.ATK * (0.5 + 0.15 * level),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' attacks ' + targets[0].name + ' as a follow-up!'
-      );
-
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -350,6 +340,8 @@ Arts.newEntry(
   data: {
     name: 'Doublestrike',
     id : 'base:doublestrike',
+    notifCommit : '$1 attacks twice!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: "Damages a target based on the user's ATK. Additional levels increase the damage per hit.",
     keywords : [],
@@ -363,10 +355,6 @@ Arts.newEntry(
     canBlock : true,
     baseDamage::(level, user) <- user.stats.ATK * (0.4 + (level-1)*0.1),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' attacks twice!'
-      );
-
       windowEvent.queueCustom(
         onEnter :: {
           @target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
@@ -408,6 +396,8 @@ Arts.newEntry(
     id : 'base:triplestrike',
     targetMode : TARGET_MODE.ALLENEMY,
     description: "Damages three targets based on the user's ATK. Each level increases the amount of damage done.",
+    notifCommit : '$1 attacks three times!',
+    notifFail : Arts.NO_NOTIF,
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -419,10 +409,6 @@ Arts.newEntry(
     canBlock : true,
     baseDamage::(level, user) <- user.stats.ATK * (0.4 + (level-1)*0.07),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' attacks three times!'
-      );
-      
       
       windowEvent.queueCustom(
         onEnter :: {
@@ -476,6 +462,8 @@ Arts.newEntry(
   data: {
     name: 'Focus Perception',
     id : 'base:focus-perception',    
+    notifCommit : '$1 focuses their perception!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Grants the Focus Perception effect to the user for 5 turns.",
     keywords : ['base:focus-perception'],
@@ -489,7 +477,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:user.name + ' focuses their perception, increasing their ATK temporarily!');
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id: 'base:focus-perception', durationTurns: 5);            
@@ -503,6 +490,8 @@ Arts.newEntry(
   data: {
     name: 'Cheer',
     id : 'base:cheer',
+    notifCommit : '$1 cheers on their allies!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLALLY,
     description: "Grants the Cheered effect to allies for 5 turns.",
     keywords : ['base:cheered'],
@@ -516,7 +505,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:user.name + ' cheers for the party!');
       windowEvent.queueCustom(
         onEnter :: {
           foreach(user.battle.getAllies(:user))::(index, ally) {
@@ -533,6 +521,8 @@ Arts.newEntry(
   data: {
     name: 'Lunar Blessing',
     id : 'base:lunar-blessing',
+    notifCommit : '$1\'s Lunar Blessing made it night time!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Puts all of the combatants into stasis until it is night time. Additional levels have no effect.",
     durationTurns: 0,
@@ -546,7 +536,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:user.name + '\'s Lunar Blessing made it night time!');
 
       @:world = import(module:'game_singleton.world.mt');
       windowEvent.queueCustom(
@@ -570,6 +559,8 @@ Arts.newEntry(
   data: {
     name: 'Solar Blessing',
     id : 'base:solar-blessing',
+    notifCommit : '$1\'s Solar Blessing made it day time!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Puts all of the combatants into stasis until it is morning. Additional levels have no effect.",
     keywords : [],
@@ -583,7 +574,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:user.name + '\'s Solar Blessing made it day time!');
       @:world = import(module:'game_singleton.world.mt');
       windowEvent.queueCustom(
         onEnter :: {
@@ -607,6 +597,8 @@ Arts.newEntry(
   data: {
     name: 'Moonbeam',
     id : 'base:moonbeam',
+    notifCommit : '$1 fires a glowing beam of moonlight!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target with Fire based on the user's INT. If night time, the damage is boosted. Additional levels boost the damage further.",
     keywords : [],
@@ -623,9 +615,6 @@ Arts.newEntry(
       return user.stats.INT * (if (world.time >= world.TIME.EVENING) 1.4 else 0.8) * (1 + (level-1)*0.05);
     },
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' fires a glowing beam of moonlight!'
-      );    
       @:world = import(module:'game_singleton.world.mt');
       if (world.time >= world.TIME.EVENING) ::<= {
         windowEvent.queueMessage(
@@ -655,6 +644,8 @@ Arts.newEntry(
   data: {
     name: 'Sunbeam',
     id : 'base:sunbeam',
+    notifCommit : '$1 fires a glowing beam of sunlight!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target with Fire based on the user's INT. If day time, the damage is boosted.",
     keywords : [],
@@ -671,9 +662,6 @@ Arts.newEntry(
       return user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.4 else 0.8) * (1 + (level-1)*0.05);    
     },
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' fires a glowing beam of sunlight!'
-      );    
       @:world = import(module:'game_singleton.world.mt');
       if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
         windowEvent.queueMessage(
@@ -704,6 +692,8 @@ Arts.newEntry(
   data: {
     name: 'Sunburst',
     id : 'base:sunburst',
+    notifCommit : '$1 lets loose a burst of sunlight!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: "Damages all enemies with Fire based on the user's INT. If day time, the damage is boosted.",
     keywords : [],
@@ -720,9 +710,6 @@ Arts.newEntry(
       return user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.7 else 0.4) * (1 + (level-1)*.08);
     },
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' lets loose a burst of sunlight!'
-      );    
       @:world = import(module:'game_singleton.world.mt');
       if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
         windowEvent.queueMessage(
@@ -754,9 +741,11 @@ Arts.newEntry(
   data: {
     name: 'Night Veil',
     id : 'base:night-veil',
+    notifCommit : '$1 casts Night Veil on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Increases DEF of target for 5 turns. If casted during night time, it's much more powerful.",
-    keywords : [],
+    description: "Grants the Night Veil effect to a target for 5 turns. If casted during night time, it's much more powerful.",
+    keywords : ['base:night-veil', 'base:greater-night-veil'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.UNCOMMON,
@@ -766,11 +755,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Night Veil on ' + targets[0].name + '!'
-      );
-      
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:world = import(module:'game_singleton.world.mt');
       if (world.time >= world.TIME.EVENING) ::<= {
         windowEvent.queueMessage(
@@ -800,9 +785,11 @@ Arts.newEntry(
   data: {
     name: 'Dayshroud',
     id : 'base:dayshroud',
+    notifCommit : '$1 casts Dayshroud on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Increases DEF of target for 5 turns. If casted during day time, it's much more powerful.",
-    keywords : [],
+    description: "Grants the Dayshroud effect to a target for 5 turns. If casted during day time, it's much more powerful.",
+    keywords : ['base:dayshroud', 'base:greater-dayshroud'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.UNCOMMON,
@@ -813,9 +800,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Dayshroud on ' + targets[0].name + '!'
-      );
       
       @:world = import(module:'game_singleton.world.mt');
       if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
@@ -844,10 +828,12 @@ Arts.newEntry(
 Arts.newEntry(
   data: {
     name: 'Call of the Night',
+    notifCommit : '$1 casts Call of the Night on $2!',
+    notifFail : Arts.NO_NOTIF,
     id : 'base:call-of-the-night',
     targetMode : TARGET_MODE.ONE,
-    description: "Increases ATK of target for 5 turns. If casted during night time, it's much more powerful.",
-    keywords : [],
+    description: "Grants the Call of the Night effect to a target for 5 turns. If casted during night time, it's much more powerful.",
+    keywords : ['base:call-of-the-night', 'base:greater-call-of-the-night'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     rarity : RARITY.UNCOMMON,
@@ -892,6 +878,8 @@ Arts.newEntry(
   data: {
     name: 'Lunacy',
     id : 'base:lunacy',
+    notifCommit : '$1 casts Lunacy on $2!',
+    notifFail : '... But nothing happens!',
     targetMode : TARGET_MODE.ONE,
     description: "Inflicts the Lunacy effect on target. Only can be casted at night.",
     keywords : ['base:lunacy'],
@@ -905,27 +893,16 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Lunacy on ' + targets[0].name + '!'
-      );
-      
       @:world = import(module:'game_singleton.world.mt');
-      if (world.time >= world.TIME.EVENING) ::<= {
-        windowEvent.queueMessage(
-          text: targets[0].name + ' shimmers brightly!'
-        );                  
-        windowEvent.queueCustom(
-          onEnter :: {
-            targets[0].addEffect(from:user, id: 'base:lunacy', durationTurns: 7);
-          }
-        )
-
-      } else 
-        windowEvent.queueMessage(text:'....But nothing happens!');
-      ;
-      
-      
-
+      when (world.time < world.TIME.EVENING) Arts.FAIL;
+      windowEvent.queueMessage(
+        text: targets[0].name + ' shimmers brightly!'
+      );                  
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:lunacy', durationTurns: 7);
+        }
+      )
     }
   }
 )
@@ -934,6 +911,8 @@ Arts.newEntry(
   data: {
     name: 'Moonsong',
     id : 'base:moonsong',
+    notifCommit : '$1 casts Moonsong on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Grants the Moonsong effect on a target. If casted during night time, it's much more powerful.",
     keywords : ['base:moonsong', 'base:greater-moonsong'],
@@ -947,9 +926,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Moonsong on ' + targets[0].name + '!'
-      );
       
       @:world = import(module:'game_singleton.world.mt');
       if (world.time >= world.TIME.EVENING) ::<= {
@@ -980,6 +956,8 @@ Arts.newEntry(
   data: {
     name: 'Sol Attunement',
     id : 'base:sol-attunement',
+    notifCommit : '$1 casts Sol Attunement on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Grants the Sol Attunement effect to a target. If casted during day time, it's much more powerful.",
     keywords : ['base:sol-attunement', 'base:greater-sol-attunement'],
@@ -992,11 +970,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Sol Attunement on ' + targets[0].name + '!'
-      );
-      
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:world = import(module:'game_singleton.world.mt');
       if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
         windowEvent.queueMessage(
@@ -1026,6 +1000,8 @@ Arts.newEntry(
   data: {
     name: 'Ensnare',
     id : 'base:ensnare',
+    notifCommit : '$1 tries to ensnare $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Damages a target and Ensnares both the user and the target for 3 turns with an 80% success rate. Damage done increases with additional levels.",
     keywords : ['base:ensnaring', 'base:ensnared'],
@@ -1039,11 +1015,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' tries to ensnare ' + targets[0].name + '!'
-      );
-      
-      
       
       windowEvent.queueCustom(
         onEnter :: {
@@ -1071,6 +1042,8 @@ Arts.newEntry(
   data: {
     name: 'Call',
     id : 'base:call',
+    notifCommit : '$1 makes an eerie call!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.NONE,
     description: "Calls a creature to come and join the fight. Additional levels increase chances of success.",
     keywords : [],
@@ -1083,32 +1056,23 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' makes an eerie call!'
-      );
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      when (!random.try(percentSuccess:50+(level-1)*10)) Arts.FAIL;
       
-      if (random.try(percentSuccess:50+(level-1)*10)) ::<= {
-        @:world = import(module:'game_singleton.world.mt');
+      @:world = import(module:'game_singleton.world.mt');
+    
+      @help = world.island.newHostileCreature();
+      @battle = user.battle;
       
-        @help = world.island.newHostileCreature();
-        @battle = user.battle;
-        
-        windowEvent.queueCustom(
-          onEnter :: {
+      windowEvent.queueCustom(
+        onEnter :: {
 
-            battle.join(
-              group: [help],
-              sameGroupAs:user
-            );
-          }
-        )
-        
-      } else ::<= {
-        windowEvent.queueMessage(
-          text: '...but nothing happened!'
-        );            
-      }
+          battle.join(
+            group: [help],
+            sameGroupAs:user
+          );
+        }
+      )
                     
     }
   }
@@ -1120,6 +1084,8 @@ Arts.newEntry(
   data: {
     name: 'Tame',
     id : 'base:tame',
+    notifCommit : '$1 attempts to tame $2',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Attempts to tame a creature, making it a party member if successful. Additional levels increase chances of success.",
     keywords : [],
@@ -1133,9 +1099,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' attempts to tame ' + targets[0].name + '!'
-      );
 
       when(targets[0].species.name != 'Creature') ::<= {
         windowEvent.queueMessage(
@@ -1175,6 +1138,8 @@ Arts.newEntry(
   data: {
     name: 'Leg Sweep',
     id : 'base:leg-sweep',
+    notifCommit : '$1 tries to sweep everyone\'s legs!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: "Swings, aiming for all enemies legs in hopes of stunning them for a turn.",
     keywords : ['base:stunned'],
@@ -1188,9 +1153,6 @@ Arts.newEntry(
     canBlock : true,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' tries to sweep everyone\'s legs!'
-      );
       foreach((user.battle.getEnemies(:user)))::(i, enemy) {
         windowEvent.queueCustom(
           onEnter :: {
@@ -1217,6 +1179,8 @@ Arts.newEntry(
   data: {
     name: 'Big Swing',
     id : 'base:big-swing',
+    notifCommit : '$1 does a big swing!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: "Damages targets based on the user's strength. Additional levels increase the power.",
     keywords : [],
@@ -1230,9 +1194,6 @@ Arts.newEntry(
     canBlock : true,
     baseDamage ::(level, user) <- user.stats.ATK * (0.35) * (1 + (level-1)*.05),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' does a big swing!'
-      );    
       foreach(targets)::(index, target) {
         windowEvent.queueCustom(
           onEnter :: {
@@ -1257,6 +1218,8 @@ Arts.newEntry(
   data: {
     name: 'Tackle',
     id : 'base:tackle',
+    notifCommit : '$1 bashes $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Damages a target based on the user's strength. Has a chance to Grapple the user and the target for a turn. Additional levels increase the power.",
     keywords : ['base:grappling', 'base:grappled'],
@@ -1270,9 +1233,6 @@ Arts.newEntry(
     canBlock : true,
     baseDamage ::(level, user) <- user.stats.ATK * (0.7) * (1 + (level-1)*0.1),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' bashes ' + targets[0].name + '!'
-      );
 
       windowEvent.queueCustom(
         onEnter :: {
@@ -1299,6 +1259,8 @@ Arts.newEntry(
   data: {
     name: 'Throw Item',
     id : 'base:throw-item',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target by throwing an item. The base damage is boosted by the weight of the item chosen. Additional levels increase the damage done.",
     keywords : [],
@@ -1344,6 +1306,8 @@ Arts.newEntry(
   data: {
     name: 'Stun',
     id : 'base:stun',
+    notifCommit : '$1 tries to stun $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Damages a target based on the user's strength with a chance to Stun for a turn. Further levels increase the stun chance.",
     keywords : ['base:stunned'],
@@ -1357,10 +1321,6 @@ Arts.newEntry(
     canBlock : true,
     baseDamage::(level, user) <- user.stats.ATK * (0.3),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' tries to stun ' + targets[0].name + '!'
-      );
-
       windowEvent.queueCustom(
         onEnter :: {
           
@@ -1385,6 +1345,8 @@ Arts.newEntry(
   data: {
     name: 'Sheer Cold',
     id : 'base:sheer-cold',
+    notifCommit : 'A cold air emanates from $1!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target with an ice attack. 90% chance to Freeze. Additional levels increase its power.",
     keywords : ['base:frozen'],
@@ -1398,9 +1360,6 @@ Arts.newEntry(
     canBlock : true,
     baseDamage ::(level, user) <- user.stats.ATK * (0.4) * (1 + (level-1)*0.07),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: 'A cold air emminates from ' + user.name + '!'
-      );
 
       windowEvent.queueCustom(
         onEnter :: {
@@ -1467,6 +1426,8 @@ Arts.newEntry(
   data: {
     name: 'Flight',
     id : 'base:flight',
+    notifCommit : '$1 casts Flight on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Grants the Flight effect on a target for a turn. The effect lasts an additional turn for each level.",
     keywords : ['base:flight'],
@@ -1480,9 +1441,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Flight on ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:flight', durationTurns: level);
@@ -1495,6 +1453,8 @@ Arts.newEntry(
   data: {
     name: 'Grapple',
     id : 'base:grapple',
+    notifCommit : '$1 tries to grapple $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Immobilizes both the user and the target for 3 turns. 65% success rate. Each level increases the success rate by 10%",
     keywords : ['base:grappled', 'base:grappling'],
@@ -1508,9 +1468,6 @@ Arts.newEntry(
     canBlock : true,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' tries to grapple ' + targets[0].name + '!'
-      );
       
       windowEvent.queueCustom(
         onEnter :: {
@@ -1531,6 +1488,8 @@ Arts.newEntry(
   data: {
     name: 'Combo Strike',
     id : 'base:combo-strike',
+    notifCommit : '$1 does a combo strike $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages the same target twice at the same target and location. Additional levels increases the power.",
     keywords : [],
@@ -1544,9 +1503,6 @@ Arts.newEntry(
     canBlock : true,
     baseDamage ::(level, user) <- user.stats.ATK * (0.35) * (1 + (level-1)*0.05),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' does a combo strike on ' + targets[0].name + '!'
-      );
       
       windowEvent.queueCustom(
         onEnter :: {
@@ -1582,6 +1538,8 @@ Arts.newEntry(
   data: {
     name: 'Poison Rune',
     id : 'base:poison-rune',
+    notifCommit : '$1 casts Poison Rune on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Places a Poison Rune on a target. The rune lasts 10 turns.",
     keywords : ['base:poison-rune'],
@@ -1595,9 +1553,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Poison Rune on ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:poison-rune', durationTurns: 10);            
@@ -1610,6 +1565,8 @@ Arts.newEntry(
   data: {
     name: 'Rune Release',
     id : 'base:rune-release',
+    notifCommit : '$1 releases all the runes on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Removes all Rune effects from a target.",
     keywords : [],
@@ -1623,9 +1580,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' releases all the runes on ' + targets[0].name + '!'
-      );
 
       windowEvent.queueCustom(
         onEnter :: {
@@ -1647,6 +1601,8 @@ Arts.newEntry(
   data: {
     name: 'Destruction Rune',
     id : 'base:destruction-rune',
+    notifCommit : '$1 casts Destruction Rune on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Places a Destruction Rune on a target. The rune lasts for 5 turns.",
     keywords : ['base:destruction-rune'],
@@ -1660,9 +1616,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage::(level, user) <- user.stats.INT * (1.2),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Destruction Rune on ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:destruction-rune', durationTurns: 5);            
@@ -1677,6 +1630,8 @@ Arts.newEntry(
   data: {
     name: 'Regeneration Rune',
     id : 'base:regeneration-rune',
+    notifCommit : '$1 casts Regeneration Rune on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Places a Regeneration Rune on a target. The rune lasts for 10 turns.",
     keywords : ['base:regeneration-rune'],
@@ -1690,9 +1645,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Regeneration Rune on ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:regeneration-rune', durationTurns: 10);            
@@ -1705,6 +1657,8 @@ Arts.newEntry(
   data: {
     name: 'Shield Rune',
     id : 'base:shield-rune',
+    notifCommit : '$1 casts Shield Rune on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Places a Shield Rune on a target. The rune lasts for 10 turns.",
     keywords : ['base:shield-rune'],
@@ -1718,9 +1672,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Shield Rune on ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:shield-rune', durationTurns: 10);            
@@ -1733,6 +1684,8 @@ Arts.newEntry(
   data: {
     name: 'Cure Rune',
     id : 'base:cure-rune',
+    notifCommit : '$1 casts Cure Rune on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Places a Cure Rune on a target. The rune lasts for 5 turns.",
     keywords : ['base:cure-rune'],
@@ -1746,9 +1699,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Cure Rune on ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:cure-rune', durationTurns: 5);            
@@ -1762,6 +1712,8 @@ Arts.newEntry(
   data: {
     name: 'Multiply Runes',
     id : 'base:multiply-runes',
+    notifCommit : '$1 casts Multiply Runes on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Doubles all current runes on a target.",
     keywords : [],
@@ -1774,11 +1726,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Multiply Runes on ' + targets[0].name + '!'
-      );
-      
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:effects = targets[0].effectStack.getAll()->filter(by:::(value) <- 
         match(value.id) {
           (
@@ -1808,6 +1756,8 @@ Arts.newEntry(
   data: {
     name: 'Poison Attack',
     id : 'base:poison-attack',
+    notifCommit : '$1 prepares a poison attack against $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target based on the user's ATK with a poisoned weapon. Additional levels increase the damage done.",
     keywords : [],
@@ -1821,9 +1771,6 @@ Arts.newEntry(
     canBlock : true,
     baseDamage ::(level, user)<- user.stats.ATK * (0.3) * (1 + (level-1)*0.05),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' prepares a poison attack against ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -1847,6 +1794,8 @@ Arts.newEntry(
   data: {
     name: 'Petrify',
     id : 'base:petrify',
+    notifCommit : '$1 prepares a petrifying attack against $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target based on the user's ATK with special Light energy, causing the Petrified effect for 2 turns. Additional levels increase the power of the Art.",
     keywords : ['base:petrified'],
@@ -1860,9 +1809,6 @@ Arts.newEntry(
     canBlock : true,
     baseDamage::(level, user) <- user.stats.ATK * (0.3) * (1 + (level-1)*0.05),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' prepares a petrifying attack against ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -1885,6 +1831,8 @@ Arts.newEntry(
   data: {
     name: 'Tripwire',
     id : 'base:tripwire',
+    notifCommit : '$1 activates the tripwire right under $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Activates a tripwire set up prior to battle, causing the target to be stunned for 3 turns. Only works once per battle.",
     keywords : ['base:stunned'],
@@ -1898,9 +1846,6 @@ Arts.newEntry(
     oncePerBattle : true,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' activates the tripwire right under ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:stunned', durationTurns: 2);            
@@ -1916,6 +1861,8 @@ Arts.newEntry(
   data: {
     name: 'Trip Explosive',
     id : 'base:trip-explosive',
+    notifCommit : '$1 activates the tripwire explosive right under $2!',
+    notifFail : '$2 avoided the trap!',
     targetMode : TARGET_MODE.ONE,
     description: "Activates a tripwire-activated explosive set up prior to battle, causing the target to be damaged. Only works once per battle.",
     keywords : [],
@@ -1929,16 +1876,7 @@ Arts.newEntry(
     canBlock : false,
     baseDamage::(level, user) <- 15,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' activates the tripwire explosive right under ' + targets[0].name + '!'
-      );
-      when(random.try(percentSuccess:30)) ::<= {
-        windowEvent.queueMessage(
-          text: targets[0].name + ' avoided the trap!'
-        );     
-        return false;
-             
-      }
+      when(random.try(percentSuccess:30)) Arts.FAIL;
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -1949,7 +1887,6 @@ Arts.newEntry(
           ),dodgeable: false);  
         }
       );
-      return true;
     }
   }
 )
@@ -1959,6 +1896,8 @@ Arts.newEntry(
   data: {
     name: 'Spike Pit',
     id : 'base:spike-pit',
+    notifCommit : '$1 activates a floor trap, revealing a spike pit under their enemies!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: "Activates a floor trap leading to a spike pit which damages and stuns for 2 turns. Only works once per battle.",
     keywords : ['base:stunned'],
@@ -1972,9 +1911,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage::(level, user) <- 15,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' activates a floor trap, revealing a spike pit under the enemies!'
-      );
       
       foreach(targets)::(i, target) {
         windowEvent.queueCustom(
@@ -2002,6 +1938,8 @@ Arts.newEntry(
   data: {
     name: 'Stab',
     id : 'base:stab',
+    notifCommit : '$1 stabs $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
     description: "Damages a target based on the user's ATK and causes Bleeding. Additional levels increases the power of the move.",
     keywords : ['base:bleeding'],
@@ -2015,10 +1953,6 @@ Arts.newEntry(
     canBlock : true,
     baseDamage::(level, user) <- user.stats.ATK * (0.3) * (1 + (level-1)*0.07),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' stabs ' + targets[0].name + '!'
-      );
-
       windowEvent.queueCustom(
         onEnter :: {
           if (user.attack(
@@ -2040,6 +1974,8 @@ Arts.newEntry(
   data: {
     name: 'First Aid',
     id : 'base:first-aid',
+    notifCommit : '$1 does first aid $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Heals a target by 3 HP. Additional levels increase the potency by 2 points.",
     keywords : [],
@@ -2053,9 +1989,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' does first aid on ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].heal(amount:1 + level*2);
@@ -2070,6 +2003,8 @@ Arts.newEntry(
   data: {
     name: 'Mend',
     id : 'base:mend',
+    notifCommit : '$1 mends $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Heals a target by 2 HP.",
     keywords : [],
@@ -2083,9 +2018,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' mends ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].heal(amount:2);
@@ -2099,6 +2031,8 @@ Arts.newEntry(
   data: {
     name: 'Give Snack',
     id : 'base:give-snack',
+    notifCommit : '$1 gives a snack to $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Either heals or recovers AP by a small amount.",
     keywords : [],
@@ -2111,11 +2045,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' gives a snack to ' + targets[0].name + '!'
-      );
-        
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {        
       @:chance = random.number();
       match(true) {
         (chance > 0.9) ::<= {    
@@ -2160,6 +2090,8 @@ Arts.newEntry(
   data: {
     name: 'Summon: Fire Sprite',
     id : 'base:summon-fire-sprite',
+    notifCommit : '$1 summons a Fire Sprite!',
+    notifFail : '...but the summoning fizzled!',
     targetMode : TARGET_MODE.NONE,
     description: 'Summons a fire sprite to fight on your side. Additional levels makes the summoning stronger. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
     keywords : [],
@@ -2176,17 +2108,10 @@ Arts.newEntry(
       @:world = import(module:'game_singleton.world.mt');
       @:Species = import(module:'game_database.species.mt');
 
-      windowEvent.queueMessage(
-        text: user.name + ' summons a Fire Sprite!'
-      );
-
       // limit 2 summons at a time.
       when ([...user.battle.getAllies(:user)]->filter(
         ::(value) <- (value.species.traits & Species.TRAITS.SUMMON) != 0)->size >= 2
-      )
-        windowEvent.queueMessage(
-          text: '...but the summoning fizzled!'
-        );
+      ) Arts.FAIL
 
 
       @:Entity = import(module:'game_class.entity.mt');
@@ -2217,6 +2142,8 @@ Arts.newEntry(
   data: {
     name: 'Summon: Ice Elemental',
     id : 'base:summon-ice-elemental',
+    notifCommit : '$1 summons an Ice Elemental!',
+    notifFail : '...but the summoning fizzled!',
     targetMode : TARGET_MODE.NONE,
     description: 'Summons an ice elemental to fight on your side. Additional levels makes the summoning stronger. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
     keywords : [],
@@ -2231,15 +2158,9 @@ Arts.newEntry(
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
-      windowEvent.queueMessage(
-        text: user.name + ' summons an Ice Elemental!'
-      );
       when ([...user.battle.getAllies(:user)]->filter(
         ::(value) <- (value.species.traits & Species.TRAITS.SUMMON) != 0)->size >= 2
-      )
-        windowEvent.queueMessage(
-          text: '...but the summoning fizzled!'
-        );
+      ) Arts.FAIL;
 
 
       
@@ -2271,6 +2192,8 @@ Arts.newEntry(
   data: {
     name: 'Summon: Thunder Spawn',
     id : 'base:summon-thunder-spawn',
+    notifCommit : '$1 summons a Thunder Spawn!',
+    notifFail : '...but the summoning fizzled!',
     targetMode : TARGET_MODE.NONE,
     description: 'Summons a thunder spawn to fight on your side. Additional levels makes the summoning stronger. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
     keywords : [],
@@ -2285,15 +2208,9 @@ Arts.newEntry(
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
-      windowEvent.queueMessage(
-        text: user.name + ' summons a Thunder Spawn!'
-      );
       when ([...user.battle.getAllies(:user)]->filter(
         ::(value) <- (value.species.traits & Species.TRAITS.SUMMON) != 0)->size >= 2
-      )
-        windowEvent.queueMessage(
-          text: '...but the summoning fizzled!'
-        );
+      ) Arts.FAIL;
       
       @:Entity = import(module:'game_class.entity.mt');
       @:Species = import(module:'game_database.species.mt');
@@ -2325,6 +2242,8 @@ Arts.newEntry(
   data: {
     name: 'Summon: Guiding Light',
     id : 'base:summon-guiding-light',
+    notifCommit : '$1 summons a Guiding Light!',
+    notifFail : '...but the summoning fizzled!',
     targetMode : TARGET_MODE.NONE,
     description: 'Summons a guiding light to fight on the user\'s side. Additional levels makes the summoning stronger. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
     keywords : [],
@@ -2339,15 +2258,9 @@ Arts.newEntry(
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
-      windowEvent.queueMessage(
-        text: user.name + ' summons a Guiding Light!'
-      );
       when ([...user.battle.getAllies(:user)]->filter(
         ::(value) <- (value.species.traits & Species.TRAITS.SUMMON) != 0)->size >= 2
-      )
-        windowEvent.queueMessage(
-          text: '...but the summoning fizzled!'
-        );
+      ) Arts.FAIL;
       
       @:Entity = import(module:'game_class.entity.mt');
       @:Species = import(module:'game_database.species.mt');
@@ -2378,8 +2291,10 @@ Arts.newEntry(
   data: {
     name: 'Unsummon',
     id : 'base:unsummon',
+    notifCommit : '$1 casts Unsummon!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Magick that removes a summoned entity.',
+    description: 'Magick that removes all summoned enemies from battle.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.EFFECT,
@@ -2424,6 +2339,8 @@ Arts.newEntry(
   data: {
     name: 'Fire',
     id : 'base:fire',
+    notifCommit : '$1 casts Fire on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: 'Magick that damages a target with fire based on INT. Additional levels increase its potency.',
     keywords : [],
@@ -2437,9 +2354,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) <- user.stats.INT * (1.2) * (1 + (level-1)*0.15),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Fire on ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           user.attack(
@@ -2459,6 +2373,8 @@ Arts.newEntry(
   data: {
     name: 'Backdraft',
     id : 'base:backdraft',
+    notifCommit : '$1 generates a great amount of heat!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: 'Using great amount of heat, gives targets the Burned effect. Damage is based on INT. Additional levels increases the potency.',
     keywords : ['base:burned'],
@@ -2472,9 +2388,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) <- user.stats.INT * (0.6) * (1 + (level-1)*0.08),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' generates a great amount of heat!'
-      );
       
       foreach(targets)::(i, target) {
         windowEvent.queueCustom(
@@ -2500,6 +2413,8 @@ Arts.newEntry(
   data: {
     name: 'Flare',
     id : 'base:flare',
+    notifCommit : '$1 casts Flare on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: 'Magick that greatly damages a target with fire based on INT. Additional levels increase the destructive power.',
     keywords : [],
@@ -2513,9 +2428,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) <- user.stats.INT * (2.0) * (1 + (level-1) * 0.15),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Flare on ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           user.attack(
@@ -2535,6 +2447,8 @@ Arts.newEntry(
   data: {
     name: 'Dematerialize',
     id : 'base:dematerialize',
+    notifCommit : '$1 casts Dematerialize on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: 'Magick that unequips a target\'s equipment',
     keywords : [],
@@ -2556,9 +2470,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Dematerialize on ' + targets[0].name + '!'
-      );
       @:Entity = import(module:'game_class.entity.mt');
       @:Random = import(module:'game_singleton.random.mt');
       @:item = ::<= {
@@ -2594,6 +2505,8 @@ Arts.newEntry(
   data: {
     name: 'Ice',
     id : 'base:ice',
+    notifCommit : '$1 casts Ice!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: 'Magick that damages all enemies with ice based on INT.',
     keywords : [],
@@ -2607,9 +2520,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) <- user.stats.INT * (0.6 + (0.2)*(level-1)),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Ice!'
-      );
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
         windowEvent.queueCustom(
           onEnter :: {
@@ -2631,6 +2541,8 @@ Arts.newEntry(
   data: {
     name: 'Frozen Flame',
     id : 'base:frozen-flame',
+    notifCommit : '$1 casts Frozen Flame!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: 'Magick that causes enemies to spontaneously combust in a cold, blue flame. Damage is based on INT with an additional chance to Freeze the hit targets. Additional levels increase damage.',
     keywords : ['base:frozen'],
@@ -2644,9 +2556,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) <- user.stats.INT * (0.75) * (1 + (level-1)* 0.15),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Frozen Flame!'
-      );
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
         windowEvent.queueCustom(
           onEnter :: {
@@ -2670,6 +2579,8 @@ Arts.newEntry(
   data: {
     name: 'Telekinesis',
     id : 'base:telekinesis',
+    notifCommit : '$1 casts Telekinesis on $2!',
+    notifFail : '...But it missed!',
     targetMode : TARGET_MODE.ONE,
     description: 'Magick that moves a target around, stunning them 50% of the time for a turn. Stunning chance increases with levels.',
     keywords : ['base:stunned'],
@@ -2683,19 +2594,13 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Telekinesis!'
-      );
-      if (random.try(percentSuccess:40 + level*10))
-        windowEvent.queueCustom(
-          onEnter :: {
-            targets[0].addEffect(from:user, id: 'base:stunned', durationTurns: 1)             
-          }
-        )
-      else 
-        windowEvent.queueMessage(
-          text: '...but it missed!'
-        );
+      when (!random.try(percentSuccess:40 + level*10)) Arts.FAIL;
+
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:stunned', durationTurns: 1)             
+        }
+      )
 
     }
   }
@@ -2706,6 +2611,8 @@ Arts.newEntry(
   data: {
     name: 'Explosion',
     id : 'base:explosion',
+    notifCommit : '$1 casts Explosion!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: 'Magick that damages all enemies with fire based on the user\'s INT. Additional levels increase the damage.',
     keywords : [],
@@ -2719,9 +2626,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) <- user.stats.INT * (0.85) * (1 + (level-1)*0.1),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Explosion!'
-      );
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
         windowEvent.queueCustom(
           onEnter :: {
@@ -2742,6 +2646,8 @@ Arts.newEntry(
   data: {
     name: 'Flash',
     id : 'base:flash',
+    notifCommit : '$1 casts Flash!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: 'Magick that blinds all enemies with a bright light. 50% chance to cause blindness, additional levels increase the chance.',
     keywords : ['base:blind'],
@@ -2779,6 +2685,8 @@ Arts.newEntry(
   data: {
     name: 'Thunder',
     id : 'base:thunder',
+    notifCommit : '$1 casts Thunder!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: 'Magick that deals 4 random strikes based on INT. Each additional level deals an additional 2 strikes.',
     keywords : [],
@@ -2792,9 +2700,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) <- user.stats.INT * (0.45),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Thunder!'
-      );
       for(0, 4 + (level-1)*2)::(index) {
         @:target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
         windowEvent.queueCustom(
@@ -2817,6 +2722,8 @@ Arts.newEntry(
   data: {
     name: 'Wild Swing',
     id : 'base:wild-swing',
+    notifCommit : '$1 swings wildly!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: 'Attack that deals 4 random strikes based on ATK. Additional levels increase the number of strikes.',
     keywords : [],
@@ -2830,9 +2737,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage::(level, user) <- user.stats.ATK * (0.9),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' wildly swings!'
-      );
       for(0, 4 + (level-1)*2)::(index) {
         @:target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
         windowEvent.queueCustom(
@@ -2856,6 +2760,8 @@ Arts.newEntry(
   data: {
     name: 'Cure',
     id : 'base:cure',
+    notifCommit : '$1 casts Cure on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Heals a target by 5 HP. Additional levels increase potency by 2 HP.",
     keywords : [],
@@ -2869,9 +2775,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Cure on ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].heal(amount:3 + level*2);
@@ -2887,6 +2790,8 @@ Arts.newEntry(
   data: {
     name: 'Cleanse',
     id : 'base:cleanse',
+    notifCommit : '$1 casts Cleanse on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Removes all status ailments and some negative effects. Additional levels have no benefit.",
     keywords : ['base:ailment'],
@@ -2900,9 +2805,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Cleanse on ' + targets[0].name + '!'
-      );
       @:Effect = import(module:'game_database.effect.mt');
       windowEvent.queueCustom(
         onEnter :: {
@@ -2919,6 +2821,8 @@ Arts.newEntry(
   data: {
     name: 'Magic Mist',
     id : 'base:magic-mist',
+    notifCommit : '$1 casts Magic Mist!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: "Removes all effects from all enemies.",
     keywords : [],
@@ -2933,9 +2837,6 @@ Arts.newEntry(
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       foreach(targets)::(i, target) {
-        windowEvent.queueMessage(
-          text: user.name + ' casts Magic Mist on ' + target.name + '!'
-        );
         windowEvent.queueCustom(
           onEnter :: {
             user.resetEffects();
@@ -2951,6 +2852,8 @@ Arts.newEntry(
   data: {
     name: 'Cure All',
     id : 'base:cure-all',
+    notifCommit : '$1 casts Cure All!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLALLY,
     description: "Heals all party members by a 3HP. Additional levels increase the effect by 2 HP.",
     keywords : [],
@@ -2964,10 +2867,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Cure All!'
-      );
-
       foreach(targets)::(i, target) {
         windowEvent.queueCustom(
           onEnter :: {
@@ -2984,6 +2883,8 @@ Arts.newEntry(
   data: {
     name: 'Protect',
     id : 'base:protect',
+    notifCommit : '$1 casts Protect on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Grants the Protect effect to a target for 10 turns.",
     keywords : ['base:protect'],
@@ -2997,9 +2898,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Protect on ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:protect', durationTurns: 10);
@@ -3013,6 +2911,8 @@ Arts.newEntry(
   data: {
     name: 'Duel',
     id : 'base:duel',
+    notifCommit : '$1 challenges $2 to a duel!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Grants the Dueled effect to a target for the rest of battle.",
     keywords : ['base:dueled'],
@@ -3026,9 +2926,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' challenges ' + targets[0].name + ' to a duel!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:dueled', durationTurns: 1000000);
@@ -3042,6 +2939,8 @@ Arts.newEntry(
   data: {
     name: 'Grace',
     id : 'base:grace',
+    notifCommit : '$1 casts Grace on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Grants the Grace effect to a target for the rest of battle. Additional levels have no effect.",
     keywords : ['base:grace'],
@@ -3055,9 +2954,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Grace on ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:grace', durationTurns: 1000);
@@ -3071,6 +2967,8 @@ Arts.newEntry(
   data: {
     name: 'Phoenix Soul',
     id : 'base:phoenix-soul',
+    notifCommit : '$1 casts Phoenix Soul on $2!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
     description: "If used during day time, grants the Grace effect to a target. Additional levels have no effect.",
     keywords : ['base:grace'],
@@ -3084,21 +2982,14 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts Pheonix Soul on ' + targets[0].name + '!'
-      );
       @:world = import(module:'game_singleton.world.mt');
+      when (world.time < world.TIME.MORNING && world.time < world.TIME.EVENING) Arts.FAIL;
 
-      
-      if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING)
-        windowEvent.queueCustom(
-          onEnter :: {
-            targets[0].addEffect(from:user, id: 'base:grace', durationTurns: 1000)
-          }
-        )
-      else 
-        windowEvent.queueMessage(text:'... but nothing happened!');
-
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:grace', durationTurns: 1000)
+        }
+      )
     }
   }
 )      
@@ -3107,6 +2998,8 @@ Arts.newEntry(
   data: {
     name: 'Protect All',
     id : 'base:protect-all',
+    notifCommit : '$1 casts Protect All!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLALLY,
     description: "Grants the Protect effect to all allies for 5 turns.",
     keywords : ['base:protect'],
@@ -3138,6 +3031,8 @@ Arts.newEntry(
   data: {
     name: 'Meditate',
     id : 'base:meditate',
+    notifCommit : '$1 meditates!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Recovers users AP by a small amount.",
     keywords : [],
@@ -3151,9 +3046,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' meditates!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           user.healAP(amount:((user.stats.AP*0.2)->ceil));
@@ -3168,8 +3060,10 @@ Arts.newEntry(
   data: {
     name: 'Soothe',
     id : 'base:soothe',
+    notifCommit : '$1 casts Soothe on !',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Relaxes a target, healing AP by a small amount.",
+    description: "Relaxes a target, healing 4 AP. Additional levels increase this by 2.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -3187,7 +3081,7 @@ Arts.newEntry(
       
       windowEvent.queueCustom(
         onEnter :: {
-          user.healAP(amount:((user.stats.AP*0.22)->ceil));
+          user.healAP(amount:2 + 2*level));
         }
       );
     }
@@ -3200,6 +3094,8 @@ Arts.newEntry(
   data: {
     name: 'Steal',
     id : 'base:steal',
+    notifCommit : '$1 attempts to steal from $2',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: 'Steals an item from a target. Additional levels increase the stealing success rate.',
     keywords : [],
@@ -3214,11 +3110,7 @@ Arts.newEntry(
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
-
-      windowEvent.queueMessage(
-        text: user.name + ' attempted to steal from ' + targets[0].name + '!'
-      );
-      
+     
       when(targets[0].inventory.items->keycount == 0) 
         windowEvent.queueMessage(text:targets[0].name + ' has no items!');
         
@@ -3251,6 +3143,8 @@ Arts.newEntry(
   data: {
     name: 'Counter',
     id : 'base:counter',
+    notifCommit : '$1 gets ready to counter!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Grants the Counter effect to the holder for 3 turns.',
     keywords : ['base:counter'],
@@ -3279,6 +3173,8 @@ Arts.newEntry(
   data: {
     name: 'Unarm',
     id : 'base:unarm',
+    notifCommit : '$1 attempts to disarm $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: 'Attempts to disarm a target. Base chance is 30%. Additional levels increases the success rate.',
     keywords : [],
@@ -3294,9 +3190,6 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @:Entity = import(module:'game_class.entity.mt');
-      windowEvent.queueMessage(
-        text: user.name + ' attempted to disarm ' + targets[0].name + '!'
-      );
       
       @:equipped = targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR); 
       when(equipped.name == 'None') 
@@ -3326,6 +3219,8 @@ Arts.newEntry(
   data: {
     name: 'Sneak',
     id : 'base:sneak',
+    notifCommit : '$1 becomes one with the shadows!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: 'Inflicts the Sneaked status on a target for 2 turns.',
     keywords : ['base:sneaked'],
@@ -3352,6 +3247,8 @@ Arts.newEntry(
   data: {
     name: 'Mind Focus',
     id : 'base:mind-focus',
+    notifCommit : '$1 begins to focus!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Grants the Mind Focused status to the user for 5 turns.',
     keywords : ['base:mind-focused'],
@@ -3381,6 +3278,8 @@ Arts.newEntry(
   data: {
     name: 'Defend',
     id : 'base:defend',
+    notifCommit : '$1 gets ready to defend!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Grants the Defend effect for one turn.',
     keywords : ['base:defend'],
@@ -3408,6 +3307,8 @@ Arts.newEntry(
   data: {
     name: 'Guard',
     id : 'base:guard',
+    notifCommit : '$1 gets ready to guard themself!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Grants the Guard effect for one turn.',
     keywords : ['base:guard'],
@@ -3435,6 +3336,8 @@ Arts.newEntry(
   data: {
     name: 'Proceed with Caution',
     id : 'base:proceed-with-caution',
+    notifCommit : '$1 tells everyone to be wary!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLALLY,
     description: 'Grants the Cautious effect to all allies for 10 turns.',
     keywords : ['base:cautious'],
@@ -3448,11 +3351,13 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueCustom(
-        onEnter :: {
-          user.addEffect(from:user, id: 'base:cautious', durationTurns:10);
-        }
-      )
+      foreach(targets) ::(k, v) {
+        windowEvent.queueCustom(
+          onEnter :: {
+            v.addEffect(from:user, id: 'base:cautious', durationTurns:10);
+          }
+        )
+      }
     }
   }
 )
@@ -3464,6 +3369,8 @@ Arts.newEntry(
     name: 'Defensive Stance',
     id : 'base:defensive-stance',
     targetMode : TARGET_MODE.NONE,
+    notifCommit : '$1 changes stances!',
+    notifFail : Arts.NO_NOTIF,
     description: 'Removes all Stance effects. Grants the Defensive Stance effect for the rest of battle.',
     keywords : ['base:defensive-stance'],
     durationTurns: 0,
@@ -3493,6 +3400,8 @@ Arts.newEntry(
     name: 'Offensive Stance',
     id : 'base:offensive-stance',
     targetMode : TARGET_MODE.NONE,
+    notifCommit : '$1 changes stances!',
+    notifFail : Arts.NO_NOTIF,
     description: 'Removes all Stance effects. Grants the Offensive Stance effect for the rest of battle.',
     keywords : ['base:offensive-stance'],
     durationTurns: 0,
@@ -3522,6 +3431,8 @@ Arts.newEntry(
   data: {
     name: 'Light Stance',
     id : 'base:light-stance',
+    notifCommit : '$1 changes stances!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Removes all Stance effects. Grants the Light Stance effect for the rest of battle.',
     keywords : ['base:light-stance'],
@@ -3551,6 +3462,8 @@ Arts.newEntry(
   data: {
     name: 'Heavy Stance',
     id : 'base:heavy-stance',
+    notifCommit : '$1 changes stances!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Removes all Stance effects. Grants the Heavy Stance effect for the rest of battle.',
     keywords : ['base:heavy-stance'],
@@ -3580,6 +3493,8 @@ Arts.newEntry(
   data: {
     name: 'Meditative Stance',
     id : 'base:meditative-stance',
+    notifCommit : '$1 changes stances!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Removes all Stance effects. Grants the Meditative Stance effect for the rest of battle.',
     keywords : ['base:meditative-stance'],
@@ -3609,6 +3524,8 @@ Arts.newEntry(
   data: {
     name: 'Striking Stance',
     id : 'base:striking-stance',
+    notifCommit : '$1 changes stances!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Removes all Stance effects. Grants the Striking Stance effect for the rest of battle.',
     keywords : ['base:striking-stance'],
@@ -3639,6 +3556,8 @@ Arts.newEntry(
   data: {
     name: 'Reflective Stance',
     id : 'base:reflective-stance',
+    notifCommit : '$1 changes stances!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Removes all Stance effects. Grants the Reflective Stance effect for the rest of battle.',
     keywords : ['base:reflective-stance'],
@@ -3668,6 +3587,8 @@ Arts.newEntry(
   data: {
     name: 'Evasive Stance',
     id : 'base:evasive-stance',
+    notifCommit : '$1 changes stances!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Removes all Stance effects. Grants the Evasive Stance effect for the rest of battle.',
     keywords : ['base:evasive-stance'],
@@ -3697,6 +3618,8 @@ Arts.newEntry(
   data: {
     name: 'Wait',
     id : 'base:wait',
+    notifCommit : '$1 waits.',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Does nothing.',
     keywords : [],
@@ -3710,7 +3633,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:'' + user.name + ' waits.');
       user.healAP(amount:3);
     }
   }
@@ -3721,6 +3643,8 @@ Arts.newEntry(
   data: {
     name: 'Plant Poisonroot',
     id : 'base:plant-poisonroot',
+    notifCommit : '$2 was covered in poisonroot seeds!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Plants a poisonroot seed on the target. The poisonroot grows in 4 turns.",
     keywords : ['base:poisonroot-growing', 'base:poisonroot'],
@@ -3734,7 +3658,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:targets[0].name + ' was covered in poisonroot seeds!');
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id:'base:poisonroot-growing', durationTurns:2);              
@@ -3748,6 +3671,8 @@ Arts.newEntry(
   data: {
     name: 'Plant Triproot',
     id : 'base:plant-triproot',
+    notifCommit : '$2 was covered in triproot seeds!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Plants a triproot seed on the target. The triproot grows in 4 turns.",
     keywords : ['base:triproot-growing', 'base:triproot'],
@@ -3761,7 +3686,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:targets[0].name + ' was covered in triproot seeds!');
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id:'base:triproot-growing', durationTurns:2);              
@@ -3775,6 +3699,8 @@ Arts.newEntry(
   data: {
     name: 'Plant Healroot',
     id : 'base:plant-healroot',
+    notifCommit : '$2 was covered in healroot seeds!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Plants a healroot seed on the target. The healroot grows in 4 turns.",
     keywords : ['base:healroot-growing', 'base:healroot'],
@@ -3788,7 +3714,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:targets[0].name + ' was covered in healroot seeds!');
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id:'base:healroot-growing', durationTurns:2);              
@@ -3803,6 +3728,8 @@ Arts.newEntry(
   data: {
     name: 'Green Thumb',
     id : 'base:green-thumb',
+    notifCommit : '$1 attempts to magically grow seeds on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Any growing roots grow instantly on the target.",
     keywords : [],
@@ -3841,6 +3768,8 @@ Arts.newEntry(
   data: {
     name: 'Fire Shift',
     id : 'base:fire-shift',
+    notifCommit : '$1 becomes shrouded in flame!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Adds the Burning effect to the user for 4 turns.",
     keywords : ['base:burning'],
@@ -3854,7 +3783,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:user.name + ' becomes shrouded in flame!');
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id:'base:burning', durationTurns:4);              
@@ -3869,6 +3797,8 @@ Arts.newEntry(
   data: {
     name: 'Elemental Tag',
     id : 'base:elemental-tag',
+    notifCommit : '$1 casts Elemental Tag on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Inflicts the Elemental Tag status on target for 20 turns.",
     keywords : ['base:elemental-tag'],
@@ -3882,7 +3812,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:targets[0].name + ' becomes weak to elemental damage!');
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id:'base:elemental-tag', durationTurns:20);              
@@ -3897,6 +3826,8 @@ Arts.newEntry(
   data: {
     name: 'Elemental Shield',
     id : 'base:elemental-shield',
+    notifCommit : '$1 casts Elemental Shield!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Grants the Elemental Shield status on target for 5 turns.",
     keywords : ['base:elemental-tag'],
@@ -3910,7 +3841,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:user.name + ' becomes shielded to elemental damage!');
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id:'base:elemental-shield', durationTurns:5);              
@@ -3926,6 +3856,8 @@ Arts.newEntry(
   data: {
     name: 'Ice Shift',
     id : 'base:ice-shift',
+    notifCommit : '$1 becomes shrouded in an icy wind!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Adds the Icy effect to the user for 4 turns.",
     keywords : ['base:icy'],
@@ -3939,7 +3871,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:user.name + ' becomes shrouded in an icy wind!');
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id:'base:icy', durationTurns:4);              
@@ -3953,6 +3884,8 @@ Arts.newEntry(
   data: {
     name: 'Thunder Shift',
     id : 'base:thunder-shift',
+    notifCommit : '$1 becomes shrouded in electric arcs!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Adds the Shock effect to the user for 4 turns.",
     keywords : ['base:shock'],
@@ -3966,7 +3899,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:user.name + ' becomes shrouded in electric arcs!');
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id:'base:shock', durationTurns:4);              
@@ -3980,6 +3912,8 @@ Arts.newEntry(
   data: {
     name: 'Tri Shift',
     id : 'base:tri-shift',
+    notifCommit : '$1 becomes shrouded in light!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Adds the Shock, Burning, and Icy effects to the user.",
     keywords : ['base:burning', 'base:icy', 'base:shock'],
@@ -3993,7 +3927,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:user.name + ' becomes shrouded in light');
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -4011,6 +3944,8 @@ Arts.newEntry(
   data: {
     name: 'Use Item',
     id : 'base:use-item',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Uses an item from the user's inventory.",
     keywords : [],
@@ -4083,6 +4018,8 @@ Arts.newEntry(
   data: {
     name: 'Equip Item',
     id : 'base:equip-item',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Equips an item from the user's inventory.",
     keywords : [],
@@ -4113,6 +4050,8 @@ Arts.newEntry(
   data: {
     name: 'Defend Other',
     id : 'base:defend-other',
+    notifCommit : '$1 is prepared to defend $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Grants the Defend Other effect to a target for 4 turns.",
     keywords : ['base:defend-other'],
@@ -4141,6 +4080,8 @@ Arts.newEntry(
   data: {
     name: 'Perfect Guard',
     id : 'base:perfect-guard',
+    notifCommit : '$1 casts Perfect Guard on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Grants the Perfect Guard effect to a target for 3 turns. Additional levels have no effect.",
     keywords : ['base:perfect-guard'],
@@ -4169,6 +4110,8 @@ Arts.newEntry(
   data: {
     name: 'Sharpen',
     id : 'base:sharpen',
+    notifCommit : '$1 attempts to sharpen $2\'s weapon!',
+    notifFail : '$2 has no weapon to sharpen!',
     targetMode : TARGET_MODE.ONE,
     description: "Grants the Sharpen effect to a target if they have a weapon equipped.",
     keywords : ['base:sharpen'],
@@ -4190,10 +4133,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
       when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).base.name == 'None')
-        windowEvent.queueMessage(text:targets[0].name + ' has no weapon to sharpen!');          
-
-
-      windowEvent.queueMessage(text:user.name + ' sharpens ' + targets[0].name + '\'s weapon!');
+        Arts.FAIL;
 
       windowEvent.queueCustom(
         onEnter :: {
@@ -7853,7 +7793,9 @@ Arts.newEntry(
 Arts = class(
   inherits: [Database],
   define::(this) {
-    this.interface = {    
+    this.interface = {   
+      NO_NOTIF : {get ::<- '[[]]'}, 
+      FAIL : {get ::<- '[[]]'},
       TARGET_MODE : {get::<- TARGET_MODE},
       USAGE_HINT : {get::<- USAGE_HINT},
       KIND : {get::<- KIND},
@@ -7886,6 +7828,14 @@ Arts = class(
   attributes : {
     name : String,
     id : String,
+    
+    // String to display when committing the action 
+    // and when the action fails to occur.
+    //
+    // $1 is for the user's name 
+    // $2 is for the first target's name
+    notifCommit : String,
+    notifFail : String,
     
     // an array of keywords that will "hyperlink" when 
     // the art is chosen graphically. Can either be 
