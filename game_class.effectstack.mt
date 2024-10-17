@@ -318,8 +318,12 @@
       
       getAll : getAll,
       
-      add::(id, duration => Number, holder, item, from, overrideTurnCount) {
+      add::(id, duration => Number, item, from, overrideTurnCount) {
         @effect = Effect.find(:id);
+        @:Item = import(module:'game_mutator.item.mt');
+        
+        if (item == empty)
+          item = Item.NONE;
         
         // already added. Ignores innate effects.
         when (effect.stackable == false && state.effects->findIndexCondition(::(value) <- id == value.id) != -1) empty;
@@ -336,10 +340,19 @@
         state.effects->push(:r);
         
         this.emitEvent(name: 'onAffliction', filter::(value) <- r == value);
+
+        if (holder != empty) ::<= {
+          holder.notifyEffect(
+            isAdding: true,
+            effectIDs : [id]
+          );
+        }
+
       },
       
       removeByFilter::(filter) {
         @:all = [...state.effects]->filter(:filter);
+        when(all->size == 0) empty;
         
         @:allrev = {};
         foreach(all) ::(i, v) {
@@ -352,6 +365,15 @@
             return allrev[value] == true
           }
         );
+
+        if (holder != empty) ::<= {
+          holder.notifyEffect(
+            isAdding: true,
+            effectIDs : all->map(::(value) <- value.id)
+          );
+          
+          holder.checkStatChanged();
+        }
         
         state.effects = state.effects->filter(::(value) <- allrev[value] != true);
       },
@@ -455,15 +477,8 @@
             inSet[e] = true;
           }
         }
-        @:ret = this.emitEvent(
-          name: 'onRemoveEffect',
-          filter::(value) <- inSet[value] == true
-        );        
-        foreach(inSet) ::(i, e) {
-          state.effects->remove(:state.effects->findIndex(:i));        
-        }
         
-
+        this.removeByFilter(::(value) <- inSet[value] == true);        
       },
       
       

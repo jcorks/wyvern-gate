@@ -3578,10 +3578,6 @@ Effect.newEntry(
     events : {
       onAffliction ::(from, item, holder, to) {
         @:stackCount = [...holder.effectStack.getAll()]->filter(::(value) <- value.id == 'base:banish')->size;
-        windowEvent.queueMessage(
-          text: holder.name + ' has acquired a new stack of banish! (' + stackCount + ' stack(s) total)'
-        );
-
 
         if (stackCount >= 10) ::<= {
           windowEvent.queueMessage(

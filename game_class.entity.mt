@@ -71,6 +71,35 @@
   return (50 + (level*level * 0.1056) * 1000)->floor;
 }	
 
+
+@:notifyEffect ::(this, state, isAdding, effectIDs) {
+  @:alreadyPosted = {};
+  @:getSummary ::(id) {
+    when (alreadyPosted[id] == true) empty;
+    alreadyPosted[id] = true;
+    @:effect = Effect.find(id:id);
+    @:counts = this.effectStack.getAllByFilter(::(value) <- value.id == id)->size;
+    
+    @:base = effect.name + (if (counts > 1) "(x"+counts+")" else "");
+    when(effectIDs->findIndex(:id) == -1) "   " + base;
+
+    return (if (isAdding)"++ " else "-- ") + base + ": " + effect.description;
+  }
+  
+  
+  @:lines = [];
+  foreach(this.effectStack.getAll()) ::(k, v) {
+    @:line = getSummary(:v.id);
+    when(line == empty) empty;
+    lines->push(:line);
+  }
+  
+  windowEvent.queueDisplay(
+    prompt: this.name + ' - Effects Changed!',
+    lines: canvas.refitLines(input:lines)
+  );
+}
+
 @:statUp ::(level, growth => Number) {
 
   @:stat :: (potential, level) {
@@ -453,7 +482,7 @@
   LIMBS : 4
 };
 
-@none;
+@none = Item.NONE;
 @displayedHurt = {};
 
 
@@ -547,7 +576,7 @@
   
   interface : {
     initialize ::{
-      if (none == empty) none = Item.new(base:Item.database.find(id:'base:none'));
+      if (none == empty) none = Item.NONE;
       @:this = _.this;
       _.state.battleAI = BattleAI.new(user:this);        
     },
@@ -2111,6 +2140,7 @@
         id : id,
         durationTurns : durationTurns
       }
+      
 
       @:rets = this.effectStack.emitEvent(
         name: 'onPreAddEffect',
@@ -2131,6 +2161,7 @@
         duration: durationTurns,
         item
       );
+
       this.checkStatChanged();
 
 
@@ -2148,26 +2179,42 @@
         _.effectStack = empty;
 
     },
+    
+    notifyEffect::(isAdding, effectIDs) <-
+      notifyEffect(
+        this:_.this,
+        state:_.state,
+        isAdding,
+        effectIDs
+      )
+    ,
+        
       
+    removeEffectsByFilter::(filter => Function) {
+      @:state = _.state;
+      @:this = _.this;
+
+      @:ids = this.effectStack.getAll()->filter(:filter)->map(::(value) <- value.id);
+      this.effectStack.removeByFilter(:filter);
+    },
+
       
     removeEffects::(effectBases => Object) {
       @:state = _.state;
       @:this = _.this;
       
       @:table = {};
-      foreach(effectBases) ::(i, id) {
-        table[id] = true;
+      foreach(effectBases) ::(i, eff) {
+        table[eff.id] = true;
       }
-      
       this.effectStack.removeByFilter(::(value) <- table[value.id] == true);
-      this.checkStatChanged();
     },
 
     removeEffectInstance::(instance => Object) {
       @:state = _.state;
       @:this = _.this;
+
       this.effectStack.removeByFilter(::(value) <- value == instance);
-      this.checkStatChanged();
     },
     
     checkStatChanged::(instance) {
@@ -2387,12 +2434,33 @@
         text: this.name + " tried to use " + art.name + ", but already was used and could not be used!"
       );
       if (abilitiesUsedBattle) abilitiesUsedBattle[art.id] = true;
-      
-      return art.onAction(
+
+          
+      if (art.notifCommit != Arts.NO_NOTIF) ::<= {
+        @mess = art.notifCommit;
+        mess = mess->replace(key:'$1', with:this.name);
+        if (targets->size > 0)
+          mess = mess->replace(key:'$2', with:targets[0].name);
+        windowEvent.queueMessage(text: mess);
+      }
+     
+
+      @:ret = art.onAction(
         user:this,
         level,
         targets, turnIndex, targetDefendParts, targetParts, extraData      
       );      
+      
+
+      if (ret->type == String && ret == Arts.FAIL && art.notifFail != Arts.FAIL) ::<= {
+        @mess = art.notifFail;
+        mess = mess->replace(key:'$1', with:this.name);
+        if (targets->size > 0)
+          mess = mess->replace(key:'$2', with:targets[0].name);
+        windowEvent.queueMessage(text: mess);
+      }
+      
+      return ret;
     },
     
     playerUseArt ::(commitAction, onCancel, card) {

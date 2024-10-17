@@ -1071,7 +1071,8 @@
 
             if (art.durationTurns > 0 && useArtReturn != Arts.CANCEL_MULTITURN) ::<= {
               actions[entityTurn] = action;
-            }  
+            }
+
 
             windowEvent.queueCustom(
               onEnter ::{
@@ -1083,8 +1084,11 @@
       
         
         @:doAction ::{
+          
+          @:art = Arts.find(id:action.card.id);
+        
           @:ret = entityTurn.useArt(
-            art:Arts.find(id:action.card.id),
+            art,
             level: action.card.level,
             targets:action.targets,
             targetParts:action.targetParts,

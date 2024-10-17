@@ -3081,7 +3081,7 @@ Arts.newEntry(
       
       windowEvent.queueCustom(
         onEnter :: {
-          user.healAP(amount:2 + 2*level));
+          user.healAP(amount:2 + 2*level);
         }
       );
     }
@@ -4151,6 +4151,8 @@ Arts.newEntry(
   data: {
     name: 'Weaken Armor',
     id : 'base:weaken-armor',
+    notifCommit : '$1 attempts to weaken $2\'s armor!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Inflicts the Weaken Armor effect on a target if the target is wearing armor.",
     keywords : ['base:weaken-armor'],
@@ -4174,8 +4176,6 @@ Arts.newEntry(
       when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.ARMOR).base.name == 'None')
         windowEvent.queueMessage(text:targets[0].name + ' has no armor to weaken!');          
 
-
-      windowEvent.queueMessage(text:user.name + ' weakens ' + targets[0].name + '\'s armor!');
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(
@@ -4191,6 +4191,8 @@ Arts.newEntry(
   data: {
     name: 'Dull Weapon',
     id : 'base:dull-weapon',
+    notifCommit : '$1 attempts to dull $2\'s weapon!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Inflicts the Dull Weapon effect on a target if the target is using a weapon.",
     keywords : ['base:dull-weapon'],
@@ -4214,9 +4216,6 @@ Arts.newEntry(
       when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).base.name == 'None')
         windowEvent.queueMessage(text:targets[0].name + ' has no weapon to dull!');          
 
-
-      windowEvent.queueMessage(text:user.name + ' dulls ' + targets[0].name + '\'s weapon!');
-
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(
@@ -4233,6 +4232,8 @@ Arts.newEntry(
   data: {
     name: 'Strengthen Armor',
     id : 'base:strengthen-armor',
+    notifCommit : '$1 attempts to strengthen $2\'s armor!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Grants the Strengthen Armor effect to a target if they have armor equipped.",
     keywords : ['base:strengthen-armor'],
@@ -4257,8 +4258,6 @@ Arts.newEntry(
         windowEvent.queueMessage(text:targets[0].name + ' has no armor to strengthen!');          
 
 
-      windowEvent.queueMessage(text:user.name + ' strengthens ' + targets[0].name + '\'s armor!');
-
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(
@@ -4275,6 +4274,8 @@ Arts.newEntry(
   data: {
     name: 'Convince',
     id : 'base:convince',
+    notifCommit : '$1 tries to convince $2 to wait!',
+    notifFail : '$2 ignored $1!',
     targetMode : TARGET_MODE.ONE,
     description: "50% chance to inflict the Convinced status on the target for 1 to 3 turns. Additional levels increase the success chance by 10%.",
     keywords : ['base:convinced'],
@@ -4288,10 +4289,8 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text:user.name + ' tries to convince ' + targets[0].name + ' to wait!');
       
-      when(random.try(percentSuccess:50 - (level-1)*10))
-        windowEvent.queueMessage(text: targets[0].name + ' ignored ' + user.name + '!');
+      when(random.try(percentSuccess:50 - (level-1)*10)) Arts.FAIL;
 
 
       windowEvent.queueMessage(text:targets[0].name + ' listens intently!');
@@ -4306,6 +4305,8 @@ Arts.newEntry(
   data: {
     name: 'Pink Brew',
     id : 'base:pink-brew',
+    notifCommit : '$1 attempts to make a potion!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Uses 2 Ingredients to make a pink potion.',
     keywords: ['base:ingredient'],
@@ -4334,7 +4335,6 @@ Arts.newEntry(
         }
       }
       
-      windowEvent.queueMessage(text: user.name + ' tried to make a Pink Brew...');
       when(count < 2)
         windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
@@ -4355,6 +4355,8 @@ Arts.newEntry(
   data: {
     name: 'Cyan Brew',
     id : 'base:cyan-brew',
+    notifCommit : '$1 attempts to make a potion!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Uses 2 Ingredients to make a cyan potion.',
     keywords: ['base:ingredient'],
@@ -4383,7 +4385,6 @@ Arts.newEntry(
         }
       }
       
-      windowEvent.queueMessage(text: user.name + ' tried to make a Cyan Brew...');
       when(count < 2)
         windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
@@ -4409,6 +4410,8 @@ Arts.newEntry(
   data: {
     name: 'Green Brew',
     id : 'base:green-brew',
+    notifCommit : '$1 attempts to make a potion!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Uses 2 Ingredients to make a green potion.',
     keywords: ['base:ingredient'],
@@ -4437,7 +4440,6 @@ Arts.newEntry(
         }
       }
       
-      windowEvent.queueMessage(text: user.name + ' tried to make a Green Brew...');
       when(count < 2)
         windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
@@ -4462,6 +4464,8 @@ Arts.newEntry(
   data: {
     name: 'Orange Brew',
     id : 'base:orange-brew',
+    notifCommit : '$1 attempts to make a potion!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Uses 2 Ingredients to make an orange potion.',
     keywords: ['base:ingredient'],
@@ -4490,7 +4494,6 @@ Arts.newEntry(
         }
       }
       
-      windowEvent.queueMessage(text: user.name + ' tried to make an Orange Brew...');
       when(count < 2)
         windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
@@ -4515,6 +4518,8 @@ Arts.newEntry(
   data: {
     name: 'Purple Brew',
     id : 'base:purple-brew',
+    notifCommit : '$1 attempts to make a potion!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Uses 2 Ingredients to make a purple potion.',
     keywords: ['base:ingredient'],
@@ -4543,7 +4548,6 @@ Arts.newEntry(
         }
       }
       
-      windowEvent.queueMessage(text: user.name + ' tried to make a Purple Brew...');
       when(count < 2)
         windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
@@ -4568,6 +4572,8 @@ Arts.newEntry(
   data: {
     name: 'Scavenge',
     id : 'base:scavenge',
+    notifCommit : '$1 looked around and found an Ingredient!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Searches the area for an Ingredient to make potions.',
     keywords: ['base:ingredient'],
@@ -4581,7 +4587,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(text: user.name + ' looked around and found an Ingredient!');
       windowEvent.queueCustom(
         onEnter :: {
           @:world = import(module:'game_singleton.world.mt');
@@ -4602,6 +4607,8 @@ Arts.newEntry(
   data: {
     name: 'Black Brew',
     id : 'base:black-brew',
+    notifCommit : '$1 attempts to make a potion!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Uses 2 Ingredients to make a black potion.',
     keywords: ['base:ingredient'],
@@ -4630,7 +4637,6 @@ Arts.newEntry(
         }
       }
       
-      windowEvent.queueMessage(text: user.name + ' tried to make a Black Brew...');
       when(count < 2)
         windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
@@ -4655,6 +4661,8 @@ Arts.newEntry(
   data: {
     name: 'Bribe',
     id : 'base:bribe',
+    notifCommit : '$1 tries to bribe $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Pays a combatant to not fight any more. Additional levels decrease the required cost.",
     keywords: ['base:bribed'],
@@ -4675,7 +4683,6 @@ Arts.newEntry(
 
       @:world = import(module:'game_singleton.world.mt');
 
-      windowEvent.queueMessage(text: user.name + ' tries to bribe ' + targets[0].name + '!');
       
       match(true) {
         // party -> NPC
@@ -4736,6 +4743,8 @@ Arts.newEntry(
   data: {
     name: 'Sweet Song',
     id : 'base:sweet-song',
+    notifCommit : '$1 sings a haunting, sweet song!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: 'Alluring song that captivates the listener.',
     keywords: ['base:mesmerized'],
@@ -4749,9 +4758,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' sings a haunting, sweet song!'
-      );
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
         when(enemy.isIncapacitated()) empty;
         if (random.flipCoin())
@@ -4774,6 +4780,8 @@ Arts.newEntry(
   data: {
     name: 'Wrap',
     id : 'base:wrap',
+    notifCommit : '$1 tries to coil around $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: 'Wraps around one enemy, followed by ????',
     keywords: ['base:wrapped'],
@@ -4788,9 +4796,6 @@ Arts.newEntry(
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       when(turnIndex == 0) ::<= {
-        windowEvent.queueMessage(
-          text: user.name + ' tries to coil around ' + targets[0].name + '!'
-        );
 
         when(targets[0].isIncapacitated() == false && random.try(percentSuccess:25)) ::<= {
           windowEvent.queueMessage(
@@ -4852,6 +4857,8 @@ Arts.newEntry(
     data: {
       name: 'Swipe Kick',
       id : 'base:swipe-kick',
+      notifCommit : '$1 attacks $2!',
+      notifFail : Arts.NO_NOTIF,
       targetMode : TARGET_MODE.ONEPART,
       description: "Damages a target based on the user's ATK.",
       keywords: [],
@@ -4864,11 +4871,7 @@ Arts.newEntry(
       oncePerBattle : false,
       canBlock : true,
       baseDamage ::(level, user) {},
-      onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-        windowEvent.queueMessage(
-          text: user.name + ' attacks ' + targets[0].name + '!'
-        );
-        
+      onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {        
 
         windowEvent.queueCustom(
           onEnter :: {
@@ -4901,6 +4904,8 @@ Arts.newEntry(
   data: {
     name: 'Diversify',
     id : 'base:diversify',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Draw 2 Arts cards.',
     keywords: [],
@@ -4923,6 +4928,8 @@ Arts.newEntry(
   data: {
     name: 'Cycle',
     id : 'base:cycle',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Discard an Arts card. Draw an Arts card.',
     keywords: [],
@@ -4947,6 +4954,8 @@ Arts.newEntry(
   data: {
     name: 'Mind Games',
     id : 'base:mind-games',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: 'Target discards an Art card.',
     keywords: [],
@@ -4969,6 +4978,8 @@ Arts.newEntry(
   data: {
     name: 'Crossed Wires',
     id : 'base:crossed-wires',
+    notifCommit : '$1 swapped Arts with $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: 'Swap hands with a target.',
     keywords: [],
@@ -4985,10 +4996,6 @@ Arts.newEntry(
       @:oldHand = [...user.deck.hand]
       user.deck.hand = [...targets[0].deck.hand];
       targets[0].deck.hand = oldHand;
-      
-      windowEvent.queueMessage(
-        text: user.name + ' swapped Arts with ' + targets[0].name + '!'
-      );
     }
   }
 )   
@@ -4999,6 +5006,8 @@ Arts.newEntry(
   data: {
     name: 'Recycle',
     id : 'base:recycle',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Discard an Arts card and draw an Arts card from the user\'s discard pile.',
     durationTurns: 0,
@@ -5022,6 +5031,8 @@ Arts.newEntry(
   data: {
     name: 'Reevaluate',
     id : 'base:reevaluate',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Discards entire hand and draws 5 cards.',
     keywords: [],
@@ -5048,6 +5059,8 @@ Arts.newEntry(
   data: {
     name: 'Catch Breath',
     id : 'base:catch-breath',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Discards entire hand, gain 2 HP.',
     keywords: [],
@@ -5056,7 +5069,9 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.HEAL,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      when(user.hp == user.stats.HP) false;
+    },
     oncePerBattle : false,
     canBlock : false,
     baseDamage ::(level, user) {},
@@ -5076,6 +5091,8 @@ Arts.newEntry(
     name: 'Makeshift Breather',
     id : 'base:makeshift-breather',
     targetMode : TARGET_MODE.NONE,
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
     description: 'Sacrifice item, gain 2 HP.',
     keywords: [],
     durationTurns: 0,
@@ -5110,6 +5127,8 @@ Arts.newEntry(
   data: {
     name: 'Makeshift Transmutation',
     id : 'base:makeshift-transmutation',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Sacrifice item. Summons a small spirit to fight on your side.',
     keywords: [],
@@ -5171,6 +5190,8 @@ Arts.newEntry(
   data: {
     name: 'Makeshift Shield',
     id : 'base:quick-shield',
+    notifCommit : '$1 begins to glow!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: 'Sacrifice an item. The user heals 4 Shield HP. This counts as healing.',
     keywords: [],
@@ -5207,6 +5228,8 @@ Arts.newEntry(
   data: {
     name: 'Mutual Destruction',
     id : 'base:mutual-destruction',
+    notifCommit : '$1 costs a mysterious spell!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
     description: '50% chance success rate. Target gains 10 Banish stacks. Random teammate gains 10 banish stacks.',
     keywords: ['base:banish'],
@@ -5221,10 +5244,7 @@ Arts.newEntry(
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
-      when(random.flipCoin()) 
-        windowEvent.queueMessage(
-          text: '... but nothing happened!'
-        );
+      when(random.flipCoin()) Arts.FAIL;
 
       @:sacr = random.pickArrayItem(:user.battle.getAllies(:user));
 
@@ -5242,6 +5262,8 @@ Arts.newEntry(
   data: {
     name: 'Brace',
     id : 'base:brace',
+    notifCommit : '$1 started to brace for damage!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Discard an Arts card. User gains the Brace effect for 2 turns.',
     keywords: ['base:brace'],
@@ -5265,6 +5287,8 @@ Arts.newEntry(
   data: {
     name: 'Agility',
     id : 'base:agility',
+    notifCommit : '$1 increases their agility!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'Discard an Arts card. User gains the Agile effect for 5 turns.',
     keywords: ['base:agile'],
@@ -5288,6 +5312,8 @@ Arts.newEntry(
   data: {
     name: 'Foresight',
     id : 'base:foresight',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: 'Discard an Arts card. View a target\'s Arts hand.',
     keywords: [],
@@ -5316,6 +5342,8 @@ Arts.newEntry(
   data: {
     name: 'Attack Reflex',
     id : 'base:retaliate',
+    notifCommit : '$1 reflexively attacks $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: 'The user attacks as a reflex to an Art, damaging a target based on ATK. This damage is not blockable.',
     keywords: [],
@@ -5330,9 +5358,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) <- user.stats.ATK * (0.5),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' reflexively attacks ' + targets[0].name + '!'
-      );
       windowEvent.queueCustom(
         onEnter :: {
           user.attack(
@@ -5354,6 +5379,8 @@ Arts.newEntry(
   data: {
     name: 'Quick Shield',
     id : 'base:quick-shield',
+    notifCommit : '$1 casts a shield spell in response on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: 'The user heals 2 Shield HP. This counts as healing.',
     keywords: [],
@@ -5367,9 +5394,6 @@ Arts.newEntry(
     canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' casts a shield spell in response!'
-      );
       targets[0].heal(amount:2, isShield:true);           
       return false;
     }
@@ -5381,6 +5405,8 @@ Arts.newEntry(
   data: {
     name: 'Cancel',
     id : 'base:cancel',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: 'The user cancels an ability Art.',
     keywords: [],
@@ -5405,6 +5431,8 @@ Arts.newEntry(
   data: {
     name: 'Pebble',
     id : 'base:pebble',
+    notifCommit : '$1 suddenly throws a pebble at $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
     description: "Throws a pebble at a target, causing a small amount of damage.",
     keywords: [],
@@ -5418,9 +5446,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     baseDamage ::(level, user) <- 1,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' suddenly throws a pebble at ' + targets[0].name + '!'
-      );
       
       windowEvent.queueCustom(
         onEnter :: {
@@ -5443,6 +5468,8 @@ Arts.newEntry(
   data: {
     name: 'Shared Pain',
     id : 'base:shared-pain',
+    notifCommit : '$1 and $2 start to glow!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
     description: "Deal a physical attack to target which has a base damage value equal to how much HP is missing from this character\'s current max HP.",
     keywords: [],
@@ -5479,8 +5506,10 @@ Arts.newEntry(
   data: {
     name: 'Banishing Light',
     id : 'base:banishing-light',
+    notifCommit : '$1 casts Banishing Light on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "The target receives the Banishing Light effect for the duration of the battle..",
+    description: "The target receives the Banishing Light effect for the duration of the battle.",
     keywords: ['base:banishing-light', 'base:banish'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
@@ -5508,6 +5537,8 @@ Arts.newEntry(
   data: {
     name: 'Blood\'s Pain',
     id : 'base:bloods-pain',
+    notifCommit : '$1 casts Blood\'s Pain on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
     description: "Sacrifice 2 HP. Deal damage to target based on ATK.",
     keywords: [],
@@ -5555,6 +5586,8 @@ Arts.newEntry(
     name: 'Blood\'s Shield',
     id : 'base:bloods-shield',
     targetMode : TARGET_MODE.ONE,
+    notifCommit : '$1 casts Blood\'s Shield on $2!',
+    notifFail : Arts.NO_NOTIF,
     description: "Sacrifice 1 HP. Target receives 2 Shield HP. This counts as healing.",
     keywords: [],
     durationTurns: 0,
@@ -5593,6 +5626,8 @@ Arts.newEntry(
   data: {
     name: 'Blood\'s Exaltation',
     id : 'base:bloods-exaltation',
+    notifCommit : '$1 casts Blood\'s Exaltation on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Sacrifice 2 HP. Target does x2 damage on next attack.",
     keywords: [],
@@ -5631,6 +5666,8 @@ Arts.newEntry(
   data: {
     name: 'Blood\'s Ward',
     id : 'base:bloods-ward',
+    notifCommit : '$1 casts Blood\'s Ward!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Sacrifice 1 HP. Cancel target Art.",
     keywords: [],
@@ -5674,11 +5711,13 @@ Arts.newEntry(
   data: {
     name: 'Blood\'s Seeking',
     id : 'base:bloods-seeking',
+    notifCommit : '$1 casts Blood\'s Seeking!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Sacrifice 2 HP. Search user\'s discard pile for an Art. Add the Art to the user\'s hand.",
     keywords: [],
     durationTurns: 0,
-    usageHintAI : USAGE_HINT.BUFF,
+    usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 2,
     oncePerBattle : false,
     canBlock : false,
@@ -5702,7 +5741,7 @@ Arts.newEntry(
           );          
           
           windowEvent.queueMessage(
-            text : 'Pick a card from ' + user.name + ' discard to add to your hand.'
+            text : 'Pick a card from ' + user.name + '\s discard to add to your hand.'
           );  
 
           user.chooseDiscard(
@@ -5723,6 +5762,8 @@ Arts.newEntry(
   data: {
     name: 'Blood\'s Sacrifice',
     id : 'base:bloods-sacrifice',
+    notifCommit : '$1 casts Blood\'s Sacrifice on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Sacrifice 2 HP. View target\'s hand and forces discarding of a card of the user\'s choosing.",
     keywords: [],
@@ -5761,6 +5802,8 @@ Arts.newEntry(
   data: {
     name: 'Blood\'s Wind',
     id : 'base:bloods-sacrifice',
+    notifCommit : '$1 casts Blood\'s Wind on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Sacrifice 2 HP. The target receives the Evade effect for 2 turns.",
     keywords: ['base:evade'],
@@ -5800,6 +5843,8 @@ Arts.newEntry(
   data: {
     name: 'Cursed Summoning',
     id : 'base:cursed-summoning',
+    notifCommit : '$1 summons a Cursed Light!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Summons a very powerful Cursed Light to fight alongside the user. The Cursed Light is inflicted with Cursed Binding for the remainder of battle.",
     keywords: ['base:cursed-binding'],
@@ -5814,9 +5859,6 @@ Arts.newEntry(
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Species = import(module:'game_database.species.mt');
-      windowEvent.queueMessage(
-        text: user.name + ' summons a Cursed Light!'
-      );
 
       @:Entity = import(module:'game_class.entity.mt');
       @:Species = import(module:'game_database.species.mt');
@@ -5852,6 +5894,8 @@ Arts.newEntry(
   data: {
     name: 'Cursed Binding',
     id : 'base:cursed-binding',
+    notifCommit : '$1 casts Cursed Binding on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Adds the effect Cursed Binding on a target for 10 turns.",
     keywords: ['base:cursed-binding'],
@@ -5876,6 +5920,8 @@ Arts.newEntry(
   data: {
     name: 'Blood\'s Summoning',
     id : 'base:bloods-summoning',
+    notifCommit : '$1 casts Blood\'s Summoning!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Sacrifice 2 HP. Summons a small spirit to fight on your side.",
     keywords: [],
@@ -5943,6 +5989,8 @@ Arts.newEntry(
   data: {
     name: 'Unexpected Swipe',
     id : 'base:unexpected-swipe',
+    notifCommit : '$1 unexpectedly swipes at $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Add the Unbalanced effect on target for 2 turns. Draw an Arts card.",
     keywords: ['base:unbalanced'],
@@ -5966,6 +6014,8 @@ Arts.newEntry(
   data: {
     name: 'Desperation',
     id : 'base:desparation',
+    notifCommit : '$1 starts to become desparate!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Add the Desparate effect on user for 2 turns. Draw an Arts card.",
     keywords: ['base:desparate'],
@@ -5990,6 +6040,8 @@ Arts.newEntry(
   data: {
     name: 'Bodyslam',
     id : 'base:bodyslam',
+    notifCommit : '$1 body slams $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Deal damage to a target where the base damage is equal to the current HP and 1/3 the DEF of the user. The user is stunned after use for 1 turn.",
     keywords: ['base:stunned'],
@@ -6003,9 +6055,6 @@ Arts.newEntry(
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) <- user.stats.HP + user.stats.DEF/3,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      windowEvent.queueMessage(
-        text: user.name + ' bodyslams ' + targets[0].name + '!'
-      );
       
       windowEvent.queueCustom(
         onEnter :: {
@@ -6034,6 +6083,8 @@ Arts.newEntry(
   data: {
     name: 'Enlarge',
     id : 'base:enlarge',
+    notifCommit : '$1 casts Enlarge on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Adds the Enlarged effect to a target for 2 turns.",
     keywords: ['base:enlarged'],
@@ -6058,6 +6109,8 @@ Arts.newEntry(
   data: {
     name: 'Shield Amplifier',
     id : 'base:shield-amplifier',
+    notifCommit : '$1 casts Shield Amplifier on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Target\'s Shield HP is doubled. If the target has no Shield HP, the target receives 1 Shield HP.",
     keywords: [],
@@ -6084,6 +6137,8 @@ Arts.newEntry(
   data: {
     name: 'Banish',
     id : 'base:banish',
+    notifCommit : '$1 casts Banish on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Add 2 Banish stacks to target.",
     keywords: ['base:banish'],
@@ -6108,6 +6163,8 @@ Arts.newEntry(
   data: {
     name: 'Bound Banish',
     id : 'base:banish',
+    notifCommit : '$1 casts Bound Banish on $2!',
+    notifFail : Arts.NO_NOTIF,    
     targetMode : TARGET_MODE.ONE,
     description: "Paralyze user for 2 turns, preventing their action. Add 3 Banish stacks to target.",
     keywords: ['base:banish', 'base:paralyzed'],
@@ -6134,6 +6191,8 @@ Arts.newEntry(
   data: {
     name: 'Proliferate',
     id : 'base:proliferate',
+    notifCommit : '$1 casts Proliferate on $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "All effects on target are doubled. These new effects last for 2 turns.",
     keywords: [],
@@ -6160,6 +6219,8 @@ Arts.newEntry(
   data: {
     name: 'Proliferate All',
     id : 'base:proliferate',
+    notifCommit : '$1 casts Proliferate All!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALL,
     description: "All effects on all targets are doubled. These new effects last for 2 turns.",
     keywords: [],
@@ -6188,6 +6249,8 @@ Arts.newEntry(
   data: {
     name: 'Banishing Aura',
     id : 'base:banishing-aura',
+    notifCommit : '$1 casts Banishing Aura!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALL,
     description: "Accumulate 3 Banish stacks on all combatants.",
     keywords: ['base:banish'],
@@ -6218,6 +6281,8 @@ Arts.newEntry(
   data: {
     name: 'Wyvern Prayer',
     id : 'base:wyvern-prayer',
+    notifCommit : '$1 closes their eyes, lifts their arms, and prays to the Wyverns for a miracle!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALL,
     description: "Prays for a miracle, causing a variety of potent effects. Reduces current AP by half if successful. Additional levels reduce the AP cost.",
     keywords: [],
@@ -6230,11 +6295,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueMessage(
-        text: user.name + ' closes their eyes, lifts their arms, and prays to the Wyverns for guidance!'
-      );
-      
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       
       // only valid for non-wyvern battles. No cheating!
       when (targets->any(condition::(value) <-
@@ -6358,6 +6419,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b169',
+    notifCommit : '$2 is covered in a soothing aura!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Removes all status ailments from the target.",
     keywords: ['base:ailments'],
@@ -6382,14 +6445,11 @@ Arts.newEntry(
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
-      windowEvent.queueMessage(
-        text: targets[0].name + ' is covered in a soothing aura!'
-      );
 
       @:filter = ::(value) <- (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
 
       @:hasAny = targets[0].effectStack.getAllByFilter(:filter)->size > 0;
-      targets[0].effectStack.removeByFilter(:filter);
+      targets[0].removeEffectsByFilter(:filter);
       if (hasAny == false)  
         windowEvent.queueMessage(
           text : '... but nothing happened!'
@@ -6402,6 +6462,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b170',
+    notifCommit : '$2 is covered in a soothing aura!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Removes all ailments and negative effects from the target. Only usable once per battle. Additional levels have no effect.",
     keywords: ['base:ailments'],
@@ -6428,14 +6490,11 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
 
-      windowEvent.queueMessage(
-        text: targets[0].name + ' is covered in a soothing aura!'
-      );
       @:filter = ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0) ||
                               ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0)
 
       @:hasAny = targets[0].effectStack.getAllByFilter(:filter)->size > 0;
-      targets[0].effectStack.removeByFilter(:filter);
+      targets[0].removeEffectsByFilter(:filter);
       if (hasAny == false)  
         windowEvent.queueMessage(
           text : '... but nothing happened!'
@@ -6449,6 +6508,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b171',
+    notifCommit : '$1\'s allies are covered in a mysterious light!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLALLY,
     description: "Removes all ailments and negative effects from allies and gives them all to the user.",
     keywords: ['base:ailments'],
@@ -6474,10 +6535,6 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
 
-      windowEvent.queueMessage(
-        text: user.name + '\'s allies are covered in a mysterious light!'
-      );
-
 
       @:condition = ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0) ||
                                  ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0)
@@ -6485,7 +6542,7 @@ Arts.newEntry(
       foreach(targets) ::(k, v) {
         when(v == user) empty;
         toput = [...toput, v.effectStack.getAllByFilter(:condition)];
-        v.effectStack.removeByFilter(:condition);
+        v.removeEffectsByFilter(:condition);
       }
       
       when (toput->size == 0) 
@@ -6500,7 +6557,6 @@ Arts.newEntry(
       foreach(toput) ::(k, effectFull) {
         user.effectStack.add(
           id:effectFull.id,
-          holder:user,
           duration: effectFull.duration,
           overrideTurnCount : effectFull.turnCount,
           from: effectFull.from,
@@ -6518,6 +6574,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b172',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
     description: "Randomly steals one positive effect from a random enemy and gives it to the user.",
     keywords: [],
@@ -6558,13 +6616,12 @@ Arts.newEntry(
       );
       
       @:effectFull = random.scrambled(:victim.effectStack.getAllByFilter(:condition))[0];
-      victim.effectStack.removeByFilter(::(value) <- value == effectFull);
+      victim.removeEffectsByFilter(::(value) <- value == effectFull);
       
 
       
       user.effectStack.add(
         id:effectFull.id,
-        holder:user,
         duration: effectFull.duration,
         overrideTurnCount : effectFull.turnCount,
         from: effectFull.from,
@@ -6579,6 +6636,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b173',
+    notifCommit : '$1 is covered in a myserious light!',
+    notifFail : '... But nothing happened!',
     targetMode : TARGET_MODE.NONE,
     description: "Replaces up to two of the user\'s effects with random ones.",
     keywords: [],
@@ -6600,19 +6659,14 @@ Arts.newEntry(
       @:effects = random.scrambled(:user.effectStack.getAllByFilter(::(value)<-true));
       @:Effect = import(module:'game_database.effect.mt');
 
-      when(effects->size == 0)
-        windowEvent.queueMessage(text:'...but nothing happened!');
+      when(effects->size == 0) Arts.FAIL;
 
-
-      windowEvent.queueMessage(
-        text: user.name + ' is covered in a mysterious light!'
-      );
 
   
       if (effects->size > 2)
           effects->setSize(:2);
   
-      user.effectStack.removeByFilter(::(value) {
+      user.removeEffectsByFilter(::(value) {
         return {:::} {
           foreach(effects) ::(k, v) {
             if (v == value) send(:true);
@@ -6626,7 +6680,6 @@ Arts.newEntry(
         @:newEffect = Effect.getRandomFiltered(::(value) <- (value.flags & Effect.FLAGS.SPECIAL) == 0);
         user.effectStack.add(
           id:newEffect.id,
-          holder:v.holder,
           duration: v.duration,
           overrideTurnCount : v.turnCount,
           from: v.from,
@@ -6641,6 +6694,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b174',
+    notifCommit : 'Everyone is covered in soothing aura!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALL,
     description: "Removes all ailments and negative effects from all combatants, then discard a card and draw a card. Additional levels have no effect.",
     keywords: [],
@@ -6666,15 +6721,12 @@ Arts.newEntry(
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
-      windowEvent.queueMessage(
-        text: 'Everyone is covered in a soothing aura!'
-      );
       
       @:filter = ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0) ||
                               ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF) != 0)
       
       foreach(targets) ::(k, target) {
-        target.effectStack.removeByFilter(:filter);
+        target.removeEffectsByFilter(:filter);
       }
     }
   }
@@ -6684,6 +6736,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b175',
+    notifCommit : '$1 is covered in an ominous aura!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALL,
     description: "Removes all positive effects from all combatants.",
     keywords: [],
@@ -6708,13 +6762,10 @@ Arts.newEntry(
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
-      windowEvent.queueMessage(
-        text: 'Everyone is covered in an ominous aura!'
-      );
       
       @:filter = ::(value) <- ((Effect.find(:value.id).flags & Effect.FLAGS.BUFF) != 0)      
       foreach(targets) ::(k, target) {
-        target.effectStack.removeByFilter(:filter);
+        target.removeEffectsByFilter(:filter);
       }
     }
   }
@@ -6726,6 +6777,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b176',
+    notifCommit : '$1 and $2 are covered in a myserious light!',
+    notifFail : '... But nothing happened!',
     targetMode : TARGET_MODE.ONE,
     description: "Removes all effects from the user and randomly gives one of them to a target.",
     keywords: [],
@@ -6755,19 +6808,12 @@ Arts.newEntry(
      
      
       @:v = user.effectStack.getAllByFilter(:filter)[0];
-      when (v == empty)
-        windowEvent.queueMessage(
-          text: '... but nothing happened!'
-        );
+      when (v == empty) Arts.FAIL;
       
-      windowEvent.queueMessage(
-        text: user.name + ' and ' + targets[0].name + ' are covered in an ominous aura!'
-      );
       
-      user.effectStack.removeByFilter(filter);
+      user.removeEffectsByFilter(filter);
       targets[0].effectStack.add(
         id:v.id,
-        holder:v.holder,
         duration: v.duration,
         overrideTurnCount : v.turnCount,
         from: v.from,
@@ -6781,6 +6827,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b177',
+    notifCommit : 'Everyone is covered in a weird aura!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALL,
     description: "Randomly redistributes all effects to all combatants.",
     keywords: [],
@@ -6815,14 +6863,11 @@ Arts.newEntry(
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
-      windowEvent.queueMessage(
-        text: 'Everyone is covered in a weird aura!'
-      );
       
       @toput = [];
       foreach(targets) ::(k, v) {
         toput = [...toput, ...v.effectStack.getAll()];
-        v.effectStack.removeByFilter(::(value) <- true);
+        v.removeEffectsByFilter(::(value) <- true);
       }
       
       foreach(random.scrambled(:toput)) ::(k, v) {
@@ -6830,7 +6875,6 @@ Arts.newEntry(
         
         target.effectStack.add(
           id:v.id,
-          holder:v.holder,
           duration: v.duration,
           overrideTurnCount : v.turnCount,
           from: v.from,
@@ -6846,6 +6890,8 @@ Arts.newEntry(
   data: {
     name: 'Tendril of Time',
     id : 'base:b178',
+    notifCommit : '$1 is enveloped in eerie tendrils of light!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
     description: "Removes all effects from user and resets HP and AP to full. This Art is permanently removed from the user\'s deck upon use. Additional levels have no effect.",
     keywords: [],
@@ -6862,7 +6908,7 @@ Arts.newEntry(
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      user.effectStack.removeByFilter(::(value) <- true);
+      user.removeEffectsByFilter(::(value) <- true);
 
       user.heal(
         amount:user.stats.HP - user.hp
@@ -6898,6 +6944,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b179',
+    notifCommit : '$1 and $2 are covered in a mysterious light!',
+    notifFail : '... But nothing happened!',
     targetMode : TARGET_MODE.ONE,
     description: "Randomly steals up to two random effects from a target and gives it to the user.",
     keywords: [],
@@ -6921,20 +6969,15 @@ Arts.newEntry(
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:effectStackSize = targets[0].effectStack.getAll()->size;
-      when(effectStackSize == 0)
-        windowEvent.queueMessage(text:'...but nothing happened!');
+      when(effectStackSize == 0) Arts.FAIL;
                                  
-      windowEvent.queueMessage(
-        text: targets[0].name + ' is covered in a mysterious light!'
-      );
       
       for(0, if (effectStackSize == 1) 1 else 2) ::(i) {
         @:effectFull = random.scrambled(:targets[0].effectStack.getAll())[0];
-        targets[0].effectStack.removeByFilter(::(value) <- value == effectFull);
+        targets[0].removeEffectsByFilter(::(value) <- value == effectFull);
         
         user.effectStack.add(
           id:effectFull.id,
-          holder:user,
           duration: effectFull.duration,
           overrideTurnCount : effectFull.turnCount,
           from: effectFull.from,
@@ -6950,8 +6993,10 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b180',
+    notifCommit : 'Everyone is covered in a weird aura!',
+    notifFail : '... But nothing happened!',
     targetMode : TARGET_MODE.ALLALLY,
-    description: "Heals 1 HP for each effect that all the user\'s allies have.",
+    description: "Heals the user by 1 HP for each effect that all the user\'s allies have.",
     keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
@@ -6962,7 +7007,7 @@ Arts.newEntry(
       // if has any effects, is good to use
       return {:::} {
         foreach(allies) ::(k, v) {
-          if (k.effectStack.getAll()->size > 0)
+          if (v.effectStack.getAll()->size > 0)
             send(:true);
         } 
         return false;
@@ -6977,8 +7022,10 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @tally = 0;
       foreach(targets) ::(k, v) {
-        tally += k.effectStack.getAll()->size;
+        tally += v.effectStack.getAll()->size;
       } 
+      
+      when(tally == 0) Arts.FAIL;
       
       user.heal(amount:tally);
     }
@@ -6989,6 +7036,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b181',
+    notifCommit : 'A mystical light is cast on $2!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
     description: "Replaces all negative effects on target with Banish stacks.",
     keywords: ['base:banish'],
@@ -6998,8 +7047,8 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @:able = enemies->filter(::(value) <- 
         value.effectStack.getAll()->filter(::(value) <- 
-          (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
-          (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
+          ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0) ||
+          ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0)
         )->size > 0);
           
       return [able]
@@ -7013,9 +7062,11 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
-        (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
-        (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
+        ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0) ||
+        ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0)
       )]
+      
+      when(all->size == 0) Arts.FAIL;
       
       targets[0].removeEffects(:all);
       
@@ -7031,6 +7082,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b182',
+    notifCommit : 'A mystical light is cast on $2!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
     description: "Replaces all positive effects on target with Banish stacks.",
     keywords: ['base:banish'],
@@ -7040,8 +7093,8 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @:able = enemies->filter(::(value) <- 
         value.effectStack.getAll()->filter(::(value) <- 
-          (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
-          (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
+          ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0) ||
+          ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0)
         )->size > 0)
       when(able->size == 0) empty;
       return [able[0]];
@@ -7055,9 +7108,10 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
-        (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
-        (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
+        ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0) ||
+        ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0)
       )]
+      when(all->size == 0) Arts.FAIL;
       
       targets[0].removeEffects(:all);
       
@@ -7072,6 +7126,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b183',
+    notifCommit : 'A mystical light is cast on $2!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
     description: "Replaces all positive effects on target with random ones. The durations of each effect are preserved.",
     keywords: [],
@@ -7098,8 +7154,8 @@ Arts.newEntry(
         (Effect.find(:value.id).flags & Effect.FLAGS.BUFF)  != 0
       )]
       
-      targets[0].removeEffects(:all);
-      
+      when(all->size == 0) Arts.FAIL;
+            
       foreach(all) ::(k, v) {
         @:id = Effect.getRandomFiltered(::(value) <- (value.flags & Effect.FLAGS.SPECIAL) == 0);
         targets[0].addEffect(from:user, id, durationTurns:
@@ -7115,6 +7171,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b184',
+    notifCommit : 'A mystical light befalls everyone!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALL,
     description: "Deals damage to each combatant based on their respective number of effects.",
     keywords: [],
@@ -7168,6 +7226,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b185',
+    notifCommit : 'A mystical light befalls everyone!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALL,
     description: "Removes all effects from each combatant. Each combatant gains a number of Banish stacks equal to the total number of those removed effects divided by the number of combatants, rounding up.",
     keywords: ['base:banish'],
@@ -7205,7 +7265,7 @@ Arts.newEntry(
         when(amount == 0) empty;
     
         total += amount;
-        v.effectStack.removeByFilter(::(value) <- true);
+        v.removeEffectsByFilter(::(value) <- true);
       }
       
       
@@ -7226,6 +7286,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b186',
+    notifCommit : 'A mystical light is cast on $2!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
     description: "Removes all the user's Banish stacks and places them on a target.",
     keywords: ['base:banish'],
@@ -7248,8 +7310,8 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @total = 0;
       @oldBanish = user.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish');
-      when(oldBanish->size == 0) empty;  
-      user.effectStack.removeByFilter(::(value) <- value.id == 'base:banish');
+      when(oldBanish->size == 0) Arts.FAIL;  
+      user.removeEffectsByFilter(::(value) <- value.id == 'base:banish');
             
       for(0, oldBanish->size) ::(i) {
         targets[0].addEffect(from:user, id:'base:banish', durationTurns:10000);              
@@ -7263,6 +7325,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b187',
+    notifCommit : 'A mystical light is cast on $2!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
     description: "Removes all stacks of the Poisoned effect from target. For each Poisoned stack removed this way, the target gains 2 HP and +25% DEX for 2 turns.",
     keywords: ['base:poisoned'],
@@ -7287,8 +7351,8 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @total = 0;
       @oldPoison = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:poisoned');
-      when(oldPoison->size == 0) empty;
-      targets[0].effectStack.removeByFilter(::(value) <- value.id == 'base:poisoned');
+      when(oldPoison->size == 0) Arts.FAIL;
+      targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:poisoned');
             
       targets[0].heal(amount:oldPoison->size * 2);
             
@@ -7304,6 +7368,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b188',
+    notifCommit : 'A mystical light is cast on $2!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
     description: "Removes all stacks of the Burned effect from target. For each Burned stack removed this way, the target gains 2 HP and +25% DEF for 2 turns.",
     keywords: ['base:burned'],
@@ -7328,8 +7394,8 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @total = 0;
       @oldBurn = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:burned');
-      when(oldBurn->size == 0) empty;
-      targets[0].effectStack.removeByFilter(::(value) <- value.id == 'base:burned');
+      when(oldBurn->size == 0) Arts.FAIL;
+      targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:burned');
             
       targets[0].heal(amount:oldBurn->size * 2);
             
@@ -7344,6 +7410,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b189',
+    notifCommit : 'A mystical light is cast on $2!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
     description: "Removes all stacks of the Paralyzed effect from target. For each Paralyzed stack removed this way, the target gains 2 AP and +25% INT for 2 turns.",
     keywords: ['base:paralyzed'],
@@ -7368,8 +7436,8 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @total = 0;
       @oldParalyze = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:paralyzed');
-      when(oldParalyze->size == 0) empty;
-      targets[0].effectStack.removeByFilter(::(value) <- value.id == 'base:paralyzed');
+      when(oldParalyze->size == 0) Arts.FAIL;
+      targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:paralyzed');
             
       targets[0].healAP(amount:oldParalyze->size * 2);
             
@@ -7385,6 +7453,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b190',
+    notifCommit : 'A mystical light is cast on $2!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
     description: "Removes the Petrified effect from target. The target gains 2 HP and +25% ATK for 3 turns.",
     keywords: ['base:petrified'],
@@ -7409,8 +7479,8 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @total = 0;
       @oldPetr = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:petrified');
-      when(oldPetr->size == 0) empty;
-      targets[0].effectStack.removeByFilter(::(value) <- value.id == 'base:petrified');
+      when(oldPetr->size == 0) Arts.FAIL;
+      targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:petrified');
             
       targets[0].heal(amount:oldPetr->size * 2);
             
@@ -7426,6 +7496,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b191',
+    notifCommit : 'A soothing light is cast on $2!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
     description: "Removes all negative effects from the target. For each effect removed this way, the target gains 2 AP and +25% SPD for 2 turns.",
     keywords: [],
@@ -7458,8 +7530,8 @@ Arts.newEntry(
         (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0 ||
         (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0
       );
-      when(oldBad->size == 0) empty;
-      targets[0].effectStack.removeByFilter(::(value) <- 
+      when(oldBad->size == 0) Arts.FAIL;
+      targets[0].removeEffectsByFilter(::(value) <- 
         (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0 ||
         (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0      
       );
@@ -7478,6 +7550,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b192',
+    notifCommit : '$2 and $1 glow ominously!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
     description: "Matches the resonance of the user's spirit with another, granting the target's effects to the user.",
     keywords: [],
@@ -7507,7 +7581,7 @@ Arts.newEntry(
       @oldGood = targets[0].effectStack.getAllByFilter(::(value) <- 
         true
       );
-      when(oldGood->size == 0) empty;
+      when(oldGood->size == 0) Arts.FAIL;
             
             
       foreach(oldGood) ::(k, v) {
@@ -7527,6 +7601,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b193',
+    notifCommit : '$1 lunges at $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Grapples a target and binds their spirits together, transferring the user\'s effects to the target. The grapple lasts for 1 turn.",
     keywords: ['base:grappled', 'base:grappling'],
@@ -7575,6 +7651,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b194',
+    notifCommit : '$1 begins to glow as they attack $2!',
+    notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Attacks an enemy. If the hit is successful, effects of the user and target are swapped.",
     keywords: [],
@@ -7612,8 +7690,8 @@ Arts.newEntry(
             @effUser   = [...user.effectStack.getAll()]
             @effTarget = [...targets[0].effectStack.getAll()]
 
-            targets[0].effectStack.removeByFilter(::(value) <- true);
-            user.effectStack.removeByFilter(::(value) <- true);
+            targets[0].removeEffectsByFilter(::(value) <- true);
+            user.removeEffectsByFilter(::(value) <- true);
 
 
             foreach(effUser) ::(k, v) {
@@ -7648,6 +7726,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b195',
+    notifCommit : '$1 focuses their energy!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ALLENEMY,
     description: "Fiercesome attack that siphons poison from a user's blood to strike at foes. Removes a stack of Poisoned. Hits two random targets base on ATK and inflicts Poisoned for each stack removed.",
     keywords: ['base:poisoned'],
@@ -7671,9 +7751,9 @@ Arts.newEntry(
         value.id == 'base:poisoned'
       );
       
-      when(oldPois->size == 0) empty;
+      when(oldPois->size == 0) Arts.FAIL;
       
-      user.effectStack.removeByFilter(::(value) <-
+      user.removeEffectsByFilter(::(value) <-
         value.id == 'base:poisoned'
       );
       
@@ -7703,6 +7783,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b196',
+    notifCommit : 'A warmth emanates from $1!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ALLENEMY,
     description: "Removes all of the user\'s stacks of the Burned effect. This causes an explosion that burns all enemies, dealing more damage per stack of burn removed. If the user does not have the Burned status, nothing happens.",
     keywords: ['base:burned'],
@@ -7728,9 +7810,9 @@ Arts.newEntry(
         value.id == 'base:burned'
       );
       
-      when(oldPois->size == 0) empty;
+      when(oldPois->size == 0) Arts.FAIL;
       
-      user.effectStack.removeByFilter(::(value) <-
+      user.removeEffectsByFilter(::(value) <-
         value.id == 'base:burned'
       );
 
@@ -7759,6 +7841,8 @@ Arts.newEntry(
   data: {
     name: '@',
     id : 'base:b197',
+    notifCommit : '$1 focuses inward!',
+    notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.NONE,
     description: "Tune into inner senses to give 2 stacks of the Agile effect and remove the Blind effect.",
     keywords: ['base:agile', 'base:blind'],
@@ -7778,7 +7862,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      user.effectStack.removeByFilter(::(value) <-
+      user.removeEffectsByFilter(::(value) <-
         value.id == 'base:blind'
       );
       user.addEffect(from:user, id:'base:agile',durationTurns:2);

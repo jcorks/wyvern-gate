@@ -79,7 +79,7 @@
   BIG : 4
 }
 
-
+@none;
 
 
 
@@ -3291,6 +3291,7 @@ Item.database.newEntry(data : {
   })  
 }
 
+none = Item.new(base:Item.database.find(id:'base:none'))
 
 }
 
@@ -3466,7 +3467,8 @@ Item.database.newEntry(data : {
   statics : {
     TYPE : {get::<-TYPE},
     ATTRIBUTE : {get::<-ATTRIBUTE},
-    USE_TARGET_HINT : {get::<-USE_TARGET_HINT}
+    USE_TARGET_HINT : {get::<-USE_TARGET_HINT},
+    NONE : {get ::<- none}
   },
 
 
