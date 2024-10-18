@@ -341,7 +341,7 @@
         
         this.emitEvent(name: 'onAffliction', filter::(value) <- r == value);
 
-        if (holder != empty) ::<= {
+        if (holder != empty && holder.battle != empty) ::<= {
           holder.notifyEffect(
             isAdding: true,
             effectIDs : [id]
@@ -366,9 +366,9 @@
           }
         );
 
-        if (holder != empty) ::<= {
+        if (holder != empty && holder.battle != empty) ::<= {
           holder.notifyEffect(
-            isAdding: true,
+            isAdding: false,
             effectIDs : all->map(::(value) <- value.id)
           );
           

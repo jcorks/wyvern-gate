@@ -960,6 +960,7 @@ Interaction.newEntry(
 
       windowEvent.queueAskBoolean(
         prompt: 'Learn new Support Arts for 150G?',
+        canCancel : true,
         onChoice::(which) {
           when(which == false) empty;
           

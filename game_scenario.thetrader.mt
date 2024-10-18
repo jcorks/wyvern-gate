@@ -348,13 +348,13 @@
                 {
                   rarity: 3,
                   action::{
-                    @:instance = import(module:'game_singleton.instance.mt');                  
+                    @:world = import(module:'game_singleton.world.mt');                  
                     @other;
                     if (random.flipCoin()) ::<= {
-                      other = instance.island.newInhabitant()
+                      other = world.island.newInhabitant()
                       other.anonymize();
                     } else if (random.number() > 0.02) ::<= {
-                      other = instance.island.newHostileCreature()
+                      other = world.island.newHostileCreature()
                       other.nickname = correctA(word:other.name);
                       breakpoint();
                     } else ::<= {
@@ -814,8 +814,8 @@
       },
       
       isPropertyOwned ::(location) {
-        when(state.ownedProperties->findIndex(query::(value) <- value == location.worldID) != -1) true;
-        when(state.propertiesForSale->findIndex(query::(value) <- value == location.worldID) != -1) true;
+        when(state.ownedProperties->findIndexCondition(::(value) <- value == location.worldID) != -1) true;
+        when(state.propertiesForSale->findIndexCondition(::(value) <- value == location.worldID) != -1) true;
         return false;
       },
       
@@ -1946,7 +1946,7 @@
     
         world.party.remove(member:entity);
 
-        @hiree = state.hirees[state.hirees->findIndex(query::(value) <- value == entity)];
+        @hiree = state.hirees[state.hirees->findIndexCondition(::(value) <- value == entity)];
         state.hirees->remove(key:state.hirees->findIndex(value:hiree));
         windowEvent.queueMessage(
           text: entity.name + ' was removed from the hirees list.'
@@ -2260,17 +2260,16 @@
               (2): ::<= {
                 this.preflightCheckStart(
                   onDone :: {
+                    @world = import(module:'game_singleton.world.mt');
                     @:instance = import(module:'game_singleton.instance.mt');
+                    world.loadIslandID(id:state.islandID);
+                    instance.islandTravel();
 
                     foreach(state.hirees) ::(k, hiree) {
                       if (hiree.role == ROLES.IN_PARTY)
                         hiree.addToParty();
                     }
-                    @world = import(module:'game_singleton.world.mt');
 
-
-                    world.loadIslandID(id:state.islandID);
-                    instance.islandTravel();
                     
                     @:landmarks = world.island.landmarks;
                     @:city = landmarks[landmarks->findIndexCondition(::(value) <- value.worldID == state.cityID)];
@@ -3567,10 +3566,10 @@ return {
       'Days taken  : ' + trader.state.days + '\n' +
       'Final total : ' + g(g:world.party.inventory.gold) + '\n' +
       'Properties  : ' + (trader.state.ownedProperties->size + trader.state.propertiesForSale->size) + '\n' +
-      'Hirees    : ' + (trader.state.hirees->size) + '\n' +
+      'Hirees      : ' + (trader.state.hirees->size) + '\n' +
       ' - Earnings -\n' +
       'Investments : ' + g(g:trader.state.totalEarnedInvestments) + '\n' +
-      'Sales     : ' + g(g:trader.state.totalEarnedSales) + '\n'
+      'Sales       : ' + g(g:trader.state.totalEarnedSales) + '\n'
   },
   
   databaseOverrides ::{
@@ -3981,14 +3980,15 @@ return {
           item:key
         );
         
-        location.ownedBy = location.landmark.island.newInhabitant();
+        location.ownedBy = location.landmark.island.newInhabitant(
+          speciesHint : 'base:wyvern',
+          professionHint : 'base:wyvern'
+        );
         location.ownedBy.name = 'Wyvern of Fortune';
-        location.ownedBy.species = Species.find(id:'base:wyvern');
-        location.ownedBy.profession = Profession.find(id:'base:wyvern')
-        location.ownedBy.clearAbilities();
-        foreach(location.ownedBy.profession.gainSP(amount:10))::(i, ability) {
-          location.ownedBy.learnAbility(id:ability);
+        for(0, 20) ::(i) {
+          location.ownedBy.autoLevelProfession(:location.ownedBy.profession);
         }
+        location.ownedBy.equipAllProfessionArts();          
 
         
         location.ownedBy.overrideInteract = ::(party, location, onDone) {

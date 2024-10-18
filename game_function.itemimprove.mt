@@ -20,7 +20,6 @@
   windowEvent.queueChoices(
     prompt: 'Choose a stat to improve.',
     choices: [...statChoices]->map(to:::(value)<- value + ' (+' + item.equipModBase[value] + ')'),
-    canCancel: true,
     onChoice::(choice) {
       when(choice == 0) empty;
       @stat = statChoices[choice-1];

@@ -1352,7 +1352,7 @@
       addToRandomEmptyArea ::(item, symbol, name, discovered) {
         @areasEmpty = [...areas]->filter(by::(value) <- value.isOccupied == false);
         when (areasEmpty->keycount == 0)
-          this.addToRandomArea(item, symbol, name)
+          this.addToRandomArea(item, symbol, name, discovered)
 
         return putArea(
           area: random.pickArrayItem(list:areasEmpty),

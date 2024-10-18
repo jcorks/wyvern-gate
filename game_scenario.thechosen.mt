@@ -1148,10 +1148,10 @@ return {
   reportCard :: {
     @:world = import(module:'game_singleton.world.mt');
     return 
-      'Knockouts:      ' + world.accoladeCount(name:'knockouts') + '\n' +
-      'Murders:      ' + world.accoladeCount(name:'murders') + '\n' +
+      'Knockouts:          ' + world.accoladeCount(name:'knockouts') + '\n' +
+      'Murders:            ' + world.accoladeCount(name:'murders') + '\n' +
       'Party members lost: ' + world.accoladeCount(name:'deadPartyMembers') + '\n' +
-      'Chests opened:    ' + world.accoladeCount(name:'chestsOpened') + '\n';
+      'Chests opened:      ' + world.accoladeCount(name:'chestsOpened') + '\n';
     
   },
   
@@ -3672,13 +3672,13 @@ return {
                 island: landmark.island,
                 speciesHint: 'base:thunder-spawn',
                 professionHint: 'base:thunder-spawn',
-                levelHint:5
+                levelHint:7
               );
-              sprite.name = 'the Thunder Spawn';
-              
-              for(0, 10)::(i) {
-                sprite.learnNextAbility();
-              }      
+              for(0, 20) ::(i) {
+                sprite.autoLevelProfession(:sprite.profession);
+              }
+              sprite.equipAllProfessionArts();  
+              sprite.name = 'the Thunder Spawn';    
               return sprite;    
             };
             
@@ -4035,13 +4035,13 @@ return {
                 island: landmark.island,
                 speciesHint: 'base:guiding-light',
                 professionHint: 'base:guiding-light',
-                levelHint:5
+                levelHint:12
               );
+              for(0, 20) ::(i) {
+                sprite.autoLevelProfession(:sprite.profession);
+              }
+              sprite.equipAllProfessionArts();  
               sprite.name = 'the Guiding Light';
-              
-              for(0, 10)::(i) {
-                sprite.learnNextAbility();
-              }      
               return sprite;    
             };
             

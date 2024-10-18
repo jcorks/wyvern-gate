@@ -169,7 +169,7 @@
     story : empty,
     npcs : empty,
     finished : false,
-    wish : empty,
+    wish : "",
     scenario : empty,
     accolades : empty,
     data : empty
@@ -535,7 +535,7 @@
         state.story = empty;
         state.npcs = empty;
         state.finished = false;
-        state.wish = empty;
+        state.wish = "";
         state.scenario = empty;
         state.accolades = {};
         state.data = {};

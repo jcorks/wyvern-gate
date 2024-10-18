@@ -543,7 +543,7 @@ Arts.newEntry(
 
           {:::} {
             forever ::{
-              world.stepTime();
+              world.incrementTime();
               if (world.time == world.TIME.EVENING)
                 send();            
             }
@@ -580,7 +580,7 @@ Arts.newEntry(
 
           {:::} {
             forever ::{
-              world.stepTime();
+              world.incrementTime();
               if (world.time == world.TIME.MORNING)
                 send();            
             }
@@ -4667,7 +4667,7 @@ Arts.newEntry(
     description: "Pays a combatant to not fight any more. Additional levels decrease the required cost.",
     keywords: ['base:bribed'],
     durationTurns: 0,
-    kind : KIND.EFFECT,
+    kind : KIND.ABILITY,
     rarity : RARITY.RARE,
     traits : 0,
     usageHintAI: USAGE_HINT.DEBUFF,

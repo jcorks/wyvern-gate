@@ -20,11 +20,16 @@
     createEntity ::{
       @:Entity = import(module:'game_class.entity.mt');
       @world = import(module:'game_singleton.world.mt');
-      @:beast = world.island.newInhabitant();
+      @:beast = world.island.newInhabitant(
+        speciesHint : 'base:beast',
+        professionHint : 'base:snake-siren'
+      );
       beast.name = 'the Snake Siren';
-      beast.species = Species.find(id:'base:beast');
-      beast.profession = Profession.find(id:'base:snake-siren');         
       beast.supportArts = [];      
+      for(0, 20) ::(i) {
+        beast.autoLevelProfession(:beast.profession);
+      }
+      beast.equipAllProfessionArts();  
 
       beast.stats.load(serialized:StatSet.new(
         HP:   140,

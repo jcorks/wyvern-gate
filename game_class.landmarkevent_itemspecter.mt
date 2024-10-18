@@ -23,11 +23,16 @@
       @world = import(module:'game_singleton.world.mt');
 
 
-      @:specter = world.island.newInhabitant();
+      @:specter = world.island.newInhabitant(
+        speciesHint : 'base:wyvern-specter',
+        professionHint : 'base:wyvern-specter'
+      );
       specter.name = 'the Wyvern Specter';
-      specter.species = Species.find(id:'base:wyvern-specter');
-      specter.profession = Profession.find(id:'base:wyvern-specter');         
       specter.supportArts = [];      
+      for(0, 20) ::(i) {
+        specter.autoLevelProfession(:specter.profession);
+      }
+      specter.equipAllProfessionArts();  
 
       @:inv = Inventory.new();
       inv.add(item:Item.new(base:Item.database.find(id:'base:life-crystal'

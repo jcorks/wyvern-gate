@@ -43,11 +43,19 @@
       state.hasBeast = false;
 
 
-      @:beast = island_.newInhabitant();
+      @:beast = island_.newInhabitant(
+        professionHint : 'base:treasure-golem',
+        speciesHint : 'base:treasure-golem'
+      );
       beast.name = 'the Treasure Golem';
-      beast.species = Species.find(id:'base:treasure-golem');
-      beast.profession = Profession.find(id:'base:treasure-golem');         
       beast.supportArts = [];      
+      for(0, 20) ::(i) {
+        beast.autoLevelProfession(:beast.profession);
+      }
+      beast.equipAllProfessionArts();  
+
+
+
       @:inv = Inventory.new();
       inv.addGold(amount:900 + (random.number()*200)->floor);
       beast.forceDrop = inv;

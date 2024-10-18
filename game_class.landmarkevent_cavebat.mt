@@ -40,11 +40,16 @@
       
 
 
-      @:beast = island_.newInhabitant();
+      @:beast = island_.newInhabitant(
+        speciesHint : 'base:cave-bat',
+        professionHint : 'base:cave-bat'
+      );
       beast.name = 'Cave Bat';
-      beast.species = Species.find(id:'base:cave-bat');
-      beast.profession = Profession.find(id:'base:cave-bat');         
       beast.supportArts = [];      
+      for(0, 20) ::(i) {
+        beast.autoLevelProfession(:beast.profession);
+      }
+      beast.equipAllProfessionArts();  
 
       beast.stats.load(serialized:StatSet.new(
         HP:   7,

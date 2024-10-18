@@ -705,9 +705,7 @@
       state.favoriteItem = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
 
 
-      foreach(this.species.passives)::(index, passiveName) {
-        this.effectStack.addInnate(id:passiveName);
-      }
+
 
 
       /*
@@ -779,10 +777,13 @@
     battleStart ::(battle) {
       @:state = _.state;
       @:this = _.this;
-      _.battle = battle;
       _.requestsRemove = false;
       _.abilitiesUsedBattle = {}
       _.effectStack = EffectStack.new(parent:this);
+      foreach(this.species.passives)::(index, passiveName) {
+        this.effectStack.addInnate(id:passiveName);
+      }      
+      _.battle = battle;
       state.deck = assembleDeck(this, state);
       state.deck.shuffle();
       state.deck.redraw();
