@@ -622,6 +622,7 @@ return empty;
         
         windowEvent.queueMessage(
           text: 'Special thanks to:\n' +
+                'Citrus\n' + 
                 'Meiyuu\n' +
                 'Drassy\n' +
                 'Nido\n' +

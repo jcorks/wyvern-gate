@@ -153,7 +153,7 @@
 
   // add weapon
   @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
-  if (hand != empty) ::<= {
+  if (hand != empty && hand.arts->size >= 2) ::<= {
     deck.addArt(id:hand.arts[0]);
     deck.addArt(id:hand.arts[1]);
   }  
@@ -978,7 +978,7 @@
           onGetCategories ::{
             @:categories = [];
             @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
-            categories->push(:['Weapon:', if (hand != empty) [
+            categories->push(:['Weapon:', if (hand != empty && hand.arts->size >= 2) [
               hand.arts[0],        
               hand.arts[1]
             ] else [empty, empty]]);
@@ -1059,7 +1059,7 @@
       @:categories = {}
 
       @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
-      if (hand != empty) ::<= {
+      if (hand != empty && hand.arts->size >= 2) ::<= {
         categories->push(:['Weapon:',[
           hand.arts[0],        
           hand.arts[1]

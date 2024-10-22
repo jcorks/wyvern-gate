@@ -163,7 +163,7 @@ return ::{
                     
                     [
                       prof.name,
-                      '' + (if (member.getProfessionProgress(:prof).level >= prof.arts->size) 'MAX' else member.getProfessionProgress(:prof).level + ' / ' + prof.arts->size),
+                      '' + (if (member.getProfessionProgress(:prof).level >= prof.arts->size) 'MAX' else ''+member.getProfessionProgress(:prof).level + ' / ' + prof.arts->size),
                       '' + member.getProfessionProgress(:prof).expToNext
                     ]
                   ],
