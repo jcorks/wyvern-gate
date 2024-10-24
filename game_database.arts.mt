@@ -71,6 +71,8 @@
 
 
 
+
+
 @Arts;
 @:reset = ::{
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
@@ -80,6 +82,7 @@
 @:StateFlags = import(module:'game_class.stateflags.mt');
 @:g = import(module:'game_function.g.mt');
 @:Entity = import(module:'game_class.entity.mt');
+@:StatSet = import(module:'game_class.statset.mt');
 Arts.newEntry(
   data: {
     name: 'Attack',
@@ -5345,7 +5348,7 @@ Arts.newEntry(
     notifCommit : '$1 reflexively attacks $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: 'The user attacks as a reflex to an Art, damaging a target based on ATK. This damage is not blockable.',
+    description: 'The user attacks as a reflex to an Art, damaging a target. This damage is not blockable.',
     keywords: [],
     durationTurns: 0,
     kind : KIND.REACTION,
@@ -5356,13 +5359,13 @@ Arts.newEntry(
     },
     oncePerBattle : false,
     canBlock : false,
-    baseDamage ::(level, user) <- user.stats.ATK * (0.5),
+    baseDamage ::(level, user) <- 2,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:user.stats.ATK * (0.5),
+            amount:2,
             damageType : Damage.TYPE.PHYS,
             damageClass: Damage.CLASS.HP,
             targetPart:targetParts[0],
@@ -7870,6 +7873,494 @@ Arts.newEntry(
     }
   }
 )
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b198',
+    notifCommit : '$1 begins to glow!',
+    notifFail : '...But nothing happened!',
+    targetMode : TARGET_MODE.NONE,
+    description: "Manifests a magickal equipment of choice to replace the user\'s weapon whose stats increase with the user\'s INT. The current armament, if any, is unequipped.",
+    keywords: [],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.ABILITY,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:world = import(module:'game_singleton.world.mt');
+      @:equipped = user.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR); 
+      if (equipped.name != 'None') ::<= {
+        windowEvent.queueMessage(
+          text: user.name + ' unequipped their ' + equipped.name + '.'
+        );
+        user.unequipItem(
+          item:equipped, 
+          inventory:if (world.party.isMember(:user)) world.party.inventory else user.inventory
+        );        
+      }
+      
+      @:makeItem = ::(base) {
+        @:item = Item.new(
+          base,
+          materialHint : 'base:ethereal'
+        );
+        
+        item.stats.add(:
+          StatSet.new(
+            ATK : (user.stats.INT*7)->floor,
+            DEF : (user.stats.INT*6)->floor,
+            DEX : (user.stats.INT*5)->floor,
+            SPD : (user.stats.INT*7)->floor
+            // INT would be really funny because infinite growth would be so easy...
+            // while cool, i would prefer players to find OTHER ways 
+            // to home-grow infinite stat weapons
+          )
+        );
+        
+        windowEvent.queueMessage(
+          text: user.name + ' equipped the ' + item.name + '!'
+        );
+        
+        user.equip(:item);
+      }
+      
+      
+      if (world.party.leader == user) ::<= {
+        @:choices = Item.database.getAll()->filter(::(value) <- 
+          value.keyItem == false &&
+          ((value.attributes & Item.ATTRIBUTES.WEAPON) != 0) &&
+          ((value.attributes & Item.ATTRIBUTES.KEY_ITEM) == 0)
+        );
+        windowEvent.queueChoices(
+          prompt: 'Materialize which?',
+          choices: choices->map(::(value) <- value.name),
+          canCancel: false,
+          onChoice::(choice) {
+            makeItem(:choices[choice-1]);
+          }
+        );
+      
+      } else ::<= {
+        makeItem(:
+          random.pickArrayItem(:Item.database.getAll()->filter(::(value) <- 
+            value.keyItem == false &&
+            ((value.attributes & Item.ATTRIBUTES.WEAPON) != 0) &&
+            ((value.attributes & Item.ATTRIBUTES.KEY_ITEM) == 0)
+          ))
+        );
+      }
+
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b199',
+    notifCommit : '$1 takes a defensive stance!',
+    notifFail : '...But nothing happened!',
+    targetMode : TARGET_MODE.NONE,
+    description: "Grants the effect Redirect Momentum to the user for a turn. Draw an Arts card.",
+    keywords: ['base:redirect-momentum', 'base:stunned', 'base:grappled'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:redirect-momentum', durationTurns:1);
+      user.drawArt(count:1);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b200',
+    notifCommit : '$1 glows!',
+    notifFail : '...But nothing happened!',
+    targetMode : TARGET_MODE.ONE,
+    description: "Remove all stacks of Burned from a target. For each Burned removed this way, add a stack of Burning to the target for 3 turns.",
+    keywords: ['base:burned', 'base:burning'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:a = allies->filter(::(value) <- 
+        value.effectStack.getAllByFilter(::(value) <- 
+          value.id == 'base:burned'
+        )->size > 0
+      );
+
+      when(a->size == 0) false;
+      return [random.scrambled(:a)[0]];
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:size = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:burned')->size;
+      targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:burned');
+      for(0, size) ::(i) {
+        targets[0].addEffect(from:user, id:'base:burning', durationTurns:3);
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b201',
+    notifCommit : '$1 glows!',
+    notifFail : '...But nothing happened!',
+    targetMode : TARGET_MODE.ONE,
+    description: "Remove the Frozen effect from a target. If Frozen was removed, add 2 stack of Icy to the target for 3 turns.",
+    keywords: ['base:frozen', 'base:icy'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:a = allies->filter(::(value) <- 
+        value.effectStack.getAllByFilter(::(value) <- 
+          value.id == 'base:frozen'
+        )->size > 0
+      );
+
+      when(a->size == 0) false;
+      return [random.scrambled(:a)[0]];
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:size = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:frozen')->size;
+      targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:frozen');
+      for(0, size) ::(i) {
+        targets[0].addEffect(from:user, id:'base:icy', durationTurns:3);
+        targets[0].addEffect(from:user, id:'base:icy', durationTurns:3);
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b202',
+    notifCommit : '$1 glows!',
+    notifFail : '...But nothing happened!',
+    targetMode : TARGET_MODE.ONE,
+    description: "Remove the Paralyzed effect from a target. If Paralyzed was removed, add 2 stack of Shock to the target for 3 turns.",
+    keywords: ['base:paralyzed', 'base:shock'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:a = allies->filter(::(value) <- 
+        value.effectStack.getAllByFilter(::(value) <- 
+          value.id == 'base:paralyzed'
+        )->size > 0
+      );
+
+      when(a->size == 0) false;
+      return [random.scrambled(:a)[0]];
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:size = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:paralyzed')->size;
+      targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:paralyzed');
+      for(0, size) ::(i) {
+        targets[0].addEffect(from:user, id:'base:shock', durationTurns:3);
+        targets[0].addEffect(from:user, id:'base:shock', durationTurns:3);
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b202-2',
+    notifCommit : '$1 glows!',
+    notifFail : '...But nothing happened!',
+    targetMode : TARGET_MODE.ONE,
+    description: "Remove the Blind effect from a target. If Blind was removed, add 2 stack of Dark to the target for 3 turns.",
+    keywords: ['base:blind', 'base:dark'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:a = allies->filter(::(value) <- 
+        value.effectStack.getAllByFilter(::(value) <- 
+          value.id == 'base:blind'
+        )->size > 0
+      );
+
+      when(a->size == 0) false;
+      return [random.scrambled(:a)[0]];
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:size = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:blind')->size;
+      targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:blind');
+      for(0, size) ::(i) {
+        targets[0].addEffect(from:user, id:'base:dark', durationTurns:3);
+        targets[0].addEffect(from:user, id:'base:dark', durationTurns:3);
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b202-3',
+    notifCommit : '$1 glows!',
+    notifFail : '...But nothing happened!',
+    targetMode : TARGET_MODE.ONE,
+    description: "Remove the Petrified effect from a target. If Petrified was removed, add 2 stack of Shimmering to the target for 3 turns.",
+    keywords: ['base:petrified', 'base:shimmering'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:a = allies->filter(::(value) <- 
+        value.effectStack.getAllByFilter(::(value) <- 
+          value.id == 'base:petrified'
+        )->size > 0
+      );
+
+      when(a->size == 0) false;
+      return [random.scrambled(:a)[0]];
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:size = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:petrified')->size;
+      targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:petrified');
+      for(0, size) ::(i) {
+        targets[0].addEffect(from:user, id:'base:shimmering', durationTurns:3);
+        targets[0].addEffect(from:user, id:'base:shimmering', durationTurns:3);
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b203',
+    notifCommit : '$1 glows!',
+    notifFail : '...But nothing happened!',
+    targetMode : TARGET_MODE.ONE,
+    description: "Each status ailment on a target is replaced with an attack shift corresponding to it for 3 turns. If there is no corresponding attack shift, the effect remains.",
+    keywords: ['base:ailments', 'base:attack-shifts'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:a = allies->filter(::(value) <- 
+        value.effectStack.getAllByFilter(::(value) <- 
+          value.id == 'base:petrified' ||
+          value.id == 'base:burned' ||
+          value.id == 'base:blind' ||
+          value.id == 'base:poisoned' ||
+          value.id == 'base:frozen' ||
+          value.id == 'base:paralyzed' ||
+        )->size > 0
+      );
+
+      when(a->size == 0) false;
+      return [random.scrambled(:a)[0]];
+    },
+    oncePerBattle : false,
+    canBlock : false,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:convert = {
+        ("base:petrified"): "base:shimmering",
+        ("base:burned"): "base:burning",
+        ("base:blind"): "base:dark",
+        ("base:frozen"): "base:icy",
+        ("base:paralyzed"): "base:shock",
+        ("base:poisoned"): "base:toxic"
+      }
+      @:effects = targets[0].getAllByFilter(::(value) <- 
+        convert->keys->findIndex(:value.id) != -1
+      )->size;
+      foreach(effects) ::(k, value) {
+        targets[0].addEffect(from:user, id:convert[value.id], durationTurns:3);
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b205',
+    notifCommit : '$1 attacks $2!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONEPART,
+    keywords : [],
+    description: "Damages a target based on ATK. For each effect the target has, the damage is boosted by 25%.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.ABILITY,
+    traits : TRAITS.PHYSICAL,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) <- user.stats.ATK * (0.3) * level,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+
+      @:baseDamage = Arts.find(:'base:b205').baseDamage(level, user);
+      windowEvent.queueCustom(
+        onEnter :: {
+          user.attack(
+            target:targets[0],
+            amount:baseDamage * (1 + 0.25 * targets[0].effectStack.getAll()->size),
+            damageType : Damage.TYPE.PHYS,
+            damageClass: Damage.CLASS.HP,
+            targetPart:targetParts[0],
+            targetDefendPart:targetDefendParts[0]
+          );        
+        }
+      );      
+                  
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b206',
+    notifCommit : '$1 attacks $2! with a magical beam of light!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONEPART,
+    keywords : [],
+    description: "Damages a target based on INT. For each effect the target has, the damage is boosted by 25%.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.ABILITY,
+    traits : TRAITS.PHYSICAL,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) <- user.stats.INT * (0.3) * level,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+
+      @:baseDamage = Arts.find(:'base:b205').baseDamage(level, user);
+      windowEvent.queueCustom(
+        onEnter :: {
+          user.attack(
+            target:targets[0],
+            amount:baseDamage * (1 + 0.25 * targets[0].effectStack.getAll()->size),
+            damageType : Damage.TYPE.LIGHT,
+            damageClass: Damage.CLASS.HP,
+            targetPart:targetParts[0],
+            targetDefendPart:targetDefendParts[0]
+          );        
+        }
+      );      
+                  
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b207',
+    notifCommit : '$1 attacks $2! with fiery might!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:burned', 'base:burning'],
+    description: "Deals 2 base damage to target. For each stack of Burned or Burning already on the target, this attack deals 2 additional damage. Adds the Burned and Burning to target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:whom = enemies->filter(::(value) <-
+        value.id == 
+    
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.PHYSICAL | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) <- 2,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+
+      @:size = targets[0].effectStack.getAllByFilter(::(value) <- 
+        value.id == 'base:burned' ||
+        value.id == 'base:burning'
+      )->size;
+
+      windowEvent.queueCustom(
+        onEnter :: {
+          user.attack(
+            target:targets[0],
+            amount:2 + size*2,
+            damageType : Damage.TYPE.LIGHT,
+            damageClass: Damage.CLASS.HP,
+            targetPart:targetParts[0],
+            targetDefendPart:targetDefendParts[0]
+          );        
+          
+          targets[0].addEffect(durationTurns:3, from:user, id: 'base:burned');
+          targets[0].addEffect(durationTurns:3, from:user, id: 'base:burning');
+        }
+      );      
+                  
+    }
+  }
+)
+
+
+
 
 
 };

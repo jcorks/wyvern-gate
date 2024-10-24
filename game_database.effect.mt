@@ -883,6 +883,42 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
+    name : 'Trigger Status Ailment',
+    id : 'base:trigger-random-ailment',
+    description: '50% chance to give a random status ailment to the holder for 2 turns.',
+    battleOnly : true,
+    stackable: false,
+    blockPoints : 0,
+    flags : 0,
+    stats: StatSet.new(
+    ),
+    events : {
+      onAffliction ::(from, item, holder) {
+        if (random.try(percentSuccess:50)) ::<= {
+          windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
+          holder.addEffect(
+            durationTurns: 2,
+            from:holder,
+            id : random.pickArrayItem(:[
+              'base:burned',
+              'base:frozen',
+              'base:paralyzed',
+              'base:bleeding',
+              'base:poisoned',
+              'base:blind',
+              'base:petrified',
+            ])
+          );
+        }
+      }
+    }
+  }
+) 
+
+
+
+Effect.newEntry(
+  data : {
     name : 'Trigger Fatigue Chance',
     id : 'base:trigger-fatigue-chance',
     description: '10% chance to hurt for 1AP.',
@@ -3426,6 +3462,47 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
+    name : 'Scorching',
+    id : 'base:scorching',
+    description: 'Attacks have 20% chance to inflict a stack of Burn for 5 turns.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPostAttackOther ::(from, item, holder, to) {
+        if (random.try(percentSuccess:20))
+          to.addEffect(from, id:'base:burned',durationTurns:5);
+      }
+    }
+  }
+)    
+
+
+Effect.newEntry(
+  data : {
+    name : 'Sharp',
+    id : 'base:sharp',
+    description: 'Attacks have 20% chance to inflict a stack of Bleeding for 5 turns.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPostAttackOther ::(from, item, holder, to) {
+        if (random.try(percentSuccess:20))
+          to.addEffect(from, id:'base:bleeding',durationTurns:5);
+      }
+    }
+  }
+) 
+
+
+
+Effect.newEntry(
+  data : {
     name : 'Icy',
     id : 'base:icy',
     description: 'Gives 1 to 4 additional ice damage per attack and reduces incoming fire damage by 50%',
@@ -3454,6 +3531,30 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
+    name : 'Frozen',
+    id : 'base:frozen',
+    description: 'Attacks have 10% chance to inflict Frozen for 2 turns.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPostAttackOther ::(from, item, holder, to) {
+        if (random.try(percentSuccess:10))
+          to.addEffect(from, id:'base:frozen',durationTurns:2);
+      }
+    }
+  }
+)    
+
+
+
+
+
+
+Effect.newEntry(
+  data : {
     name : 'Shock',
     id : 'base:shock',
     description: 'Gives 1 to 4 additional thunder damage per attack and reduces incoming thunder damage by 50%',
@@ -3478,6 +3579,29 @@ Effect.newEntry(
     }
   }
 )
+
+Effect.newEntry(
+  data : {
+    name : 'Paralyzing',
+    id : 'base:paralyzing',
+    description: 'Attacks have 10% chance to inflict Paralyzed for 2 turns.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPostAttackOther ::(from, item, holder, to) {
+        if (random.try(percentSuccess:10))
+          to.addEffect(from, id:'base:paralyzed',durationTurns:2);
+      }
+    }
+  }
+)    
+
+
+
+
 
 Effect.newEntry(
   data : {
@@ -3510,6 +3634,27 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
+    name : 'Seeping',
+    id : 'base:seeping',
+    description: 'Attacks have 20% chance to inflict a stack of Poisoned for 5 turns.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPostAttackOther ::(from, item, holder, to) {
+        if (random.try(percentSuccess:20))
+          to.addEffect(from, id:'base:poisoned',durationTurns:5);
+      }
+    }
+  }
+)    
+
+
+
+Effect.newEntry(
+  data : {
     name : 'Shimmering',
     id : 'base:shimmering',
     description: 'Gives 1 to 4 additional light damage per attack and reduces incoming dark damage by 50%',
@@ -3534,6 +3679,27 @@ Effect.newEntry(
     }
   }
 )    
+
+Effect.newEntry(
+  data : {
+    name : 'Petrifying',
+    id : 'base:petrifying',
+    description: 'Attacks have 10% chance to inflict Petrified for 2 turns.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPostAttackOther ::(from, item, holder, to) {
+        if (random.try(percentSuccess:10))
+          to.addEffect(from, id:'base:petrified',durationTurns:2);
+      }
+    }
+  }
+)   
+
+
 Effect.newEntry(
   data : {
     name : 'Dark',
@@ -3564,6 +3730,26 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
+    name : 'Blinding',
+    id : 'base:blinding',
+    description: 'Attacks have 10% chance to inflict Blind for 3 turns.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPostAttackOther ::(from, item, holder, to) {
+        if (random.try(percentSuccess:10))
+          to.addEffect(from, id:'base:blind',durationTurns:3);
+      }
+    }
+  }
+)   
+
+
+Effect.newEntry(
+  data : {
     name : 'Banish',
     id : 'base:banish',
     description: '-15% ATK, -15% SPD. At 10 stacks, the holder is removed from battle.',
@@ -3590,6 +3776,50 @@ Effect.newEntry(
     }
   }
 ) 
+
+Effect.newEntry(
+  data : {
+    name : 'Redirect Momentum',
+    id : 'base:redirect-momentum',
+    description: 'If the holder is to be afflicted with Grappled, instead the holder inflicts 1/3 of the source\'s DEF in damage to the source of the Grappled effect and Stuns them for a turn.',
+    battleOnly : true,
+    stackable: false,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+
+      onAffliction ::(from, item, holder) {
+        windowEvent.queueMessage(
+          text: holder.name + ' is prepared for an attack!'
+        );
+      },
+      onPreAddEffect ::(from, holder, item, effectData) {
+        when(effectData.id == 'base:grappled' && from != holder) ::<= {
+          @dmg = from.DEF * 0.33;
+          when (dmg < 1) empty;
+
+          windowEvent.queueMessage(
+            text: holder.name + ' counters ' + from.name + '\'s grapple!'
+          );
+
+          holder.attack(
+            target:from,
+            amount: dmg,
+            damageType : Damage.TYPE.PHYS,
+            damageClass: Damage.CLASS.HP
+          );        
+          
+          holder.addEffect(from:holder, id:'base:stunned', durationTurns:1);
+        
+          return false;
+        }
+      }
+    }
+  }
+)
+
+
 
 }
 

@@ -3319,6 +3319,8 @@ return {
                         @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
                         item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:burning')));
                         item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:burning')));
+                        item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:scorching')));
+                        item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:scorching')));
 
 
                         windowEvent.queueMessage(text:'In exchange, the party was given ' + correctA(word:item.name) + '.');
@@ -3505,7 +3507,7 @@ return {
           ['Ziikkaettaal', 'You.. You have returned.'],
           ['Ziikkaettaal', 'Seeing as you have so much time on your hands, how about a little game.'],
           ['Ziikkaettaal', 'You see, I have a bit of a penchant for... gambling.'],
-          ['Ziikkaettaal', 'Wager against me. If you lose, you hand me 1000G. If you win, you get a weapon from my hoard.'],
+          ['Ziikkaettaal', 'Wager against me. If you lose, you hand me 500G. If you win, you get a weapon from my hoard.'],
           ['Ziikkaettaal', 'I assure you, my weapons are well worth it.'],
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
@@ -3516,7 +3518,7 @@ return {
               onChoice::(which) {
                 when(which == false) doNext();
                 
-                when (party.inventory.gold < 1000) ::<= {
+                when (party.inventory.gold < 500) ::<= {
                   windowEvent.queueMessage(
                     speaker: 'Ziikkaettaal',
                     text: 'You do not have enough to bet with me. Come back when you are... blessed with more riches.',
@@ -3560,6 +3562,9 @@ return {
                           );
                           @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
                           prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:icy')));
+                          prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:icy')));
+                          prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:frozen')));
+                          prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:frozen')));
 
                           party.inventory.add(item:prize);
                           windowEvent.queueMessage(text:'The party was given a ' + prize.name + '.',
@@ -3571,8 +3576,8 @@ return {
                             speaker: 'Ziikkaettaal',
                             text: 'Too bad! Maybe another time. Ha ha...'
                           );                
-                          party.inventory.subtractGold(amount:1000);
-                          windowEvent.queueMessage(text:'The party lost 1000G.',
+                          party.inventory.subtractGold(amount:500);
+                          windowEvent.queueMessage(text:'The party lost 500G.',
                             onLeave:doNext
                           );
                         }

@@ -123,6 +123,26 @@ Material.newEntry(
 )
 
 
+
+Material.newEntry(
+  data : {
+    name : 'Ethereal',
+    id : 'base:ethereal',
+    description : 'The magic used to create this makes it feel solid yet light.',
+    rarity : 100,
+    tier : 2,
+    statMod : StatSet.new(
+      DEF: 10,
+      ATK: 30,
+      INT: 35,
+      SPD: 15
+    ),
+    pricePercentMod: 800
+  }
+)
+
+
+
 Material.newEntry(
   data : {
     name : 'Tungsten',

@@ -439,7 +439,7 @@
   }
   
   foreach(this.profession.passives)::(index, passiveName) {
-    this.effectStack.addInnate(
+    this.effectStack.add(
       id:passiveName
     );
   }
@@ -448,7 +448,7 @@
   foreach(state.equips) ::(i, item) {
     when(item == empty) empty;
     foreach(item.equipEffects)::(index, effect) {
-      this.effectStack.addInnate(
+      this.effectStack.add(
         id:effect,
         item
       );
@@ -2321,8 +2321,9 @@
       
       if (_.effectStack) ::<= {
         foreach(item.equipEffects)::(index, effect) {
-          this.effectStack.addInnate(
+          this.effectStack.add(
             id:effect,
+            duration: 999999999
             item
           );
         }
@@ -2413,13 +2414,13 @@
       this.recalculateStats();
       return current;
     },
-    unequipItem ::(item => Item.type, silent) {
+    unequipItem ::(item => Item.type, silent, inventory) {
       @:state = _.state;
       @:this = _.this;
       @slotOut;
       foreach(state.equips)::(slot, equip) {
         if (equip == item) ::<= {
-          this.unequip(slot, silent);
+          this.unequip(slot, silent, inventory);
           slotOut = slot;
         }
       }

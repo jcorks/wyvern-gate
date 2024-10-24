@@ -144,6 +144,30 @@ ItemEnchant.database.newEntry(
   }
 )
 
+ItemEnchant.database.newEntry(
+  data : {
+    name : 'Chance to Inflict Ailment',
+    id : 'base:chance-to-inflict-ailment',
+    description : ', will $1 give the holder a random status ailment.',
+    equipMod : StatSet.new(
+    ),
+    levelMinimum : 1,
+    priceMod: -1000,
+    tier : 1,
+    
+    triggerConditionEffects : [
+      'base:trigger-random-ailment'
+    ],
+    
+    equipEffects : [
+    ],
+    
+    useEffects : [],
+    traits : 0
+  }
+)
+
+
 
 ItemEnchant.database.newEntry(
   data : {
@@ -393,6 +417,30 @@ ItemEnchant.database.newEntry(
 )
 */
 
+ItemEnchant.database.newEntry(
+  data : {
+    name : 'Sharp',
+    id : 'base:sharp',
+    description : 'Has a chance of causing bleed on a target when attacking.',
+    equipMod : StatSet.new(
+    ),
+    levelMinimum : 1,
+    priceMod: 200,
+    tier : 1,
+    
+    triggerConditionEffects : [
+    ],
+    
+    equipEffects : [
+      "base:sharp"
+    ],
+    
+    useEffects : [],
+    traits : 0
+  }
+)
+
+
 
 ItemEnchant.database.newEntry(
   data : {
@@ -419,6 +467,30 @@ ItemEnchant.database.newEntry(
 
 ItemEnchant.database.newEntry(
   data : {
+    name : 'Scorching',
+    id : 'base:scorching',
+    description : 'Has a chance of causing burns on a target when attacking.',
+    equipMod : StatSet.new(
+    ),
+    levelMinimum : 1,
+    priceMod: 200,
+    tier : 1,
+    
+    triggerConditionEffects : [
+    ],
+    
+    equipEffects : [
+      "base:scorching"
+    ],
+    
+    useEffects : [],
+    traits : 0
+  }
+)
+
+
+ItemEnchant.database.newEntry(
+  data : {
     name : 'Icy',
     id : 'base:icy',
     description : 'The material its made of is cold to the touch. Grants an ice aspect to attacks and gives fire resistance when used as armor.',
@@ -442,6 +514,30 @@ ItemEnchant.database.newEntry(
 
 ItemEnchant.database.newEntry(
   data : {
+    name : 'Frozen',
+    id : 'base:frozen',
+    description : 'Has a chance of freezing targets when attacking.',
+    equipMod : StatSet.new(
+    ),
+    levelMinimum : 1,
+    priceMod: 200,
+    tier : 1,
+    
+    triggerConditionEffects : [
+    ],
+    
+    equipEffects : [
+      "base:frozen"
+    ],
+    
+    useEffects : [],
+    traits : 0
+  }
+)
+
+
+ItemEnchant.database.newEntry(
+  data : {
     name : 'Shock',
     id : 'base:shock',
     description : 'The material its made of gently hums. Grants a thunder aspect to attacks and gives thunder resistance when used as armor.',
@@ -456,6 +552,30 @@ ItemEnchant.database.newEntry(
     
     equipEffects : [
       "base:shock"
+    ],
+    
+    useEffects : [],
+    traits : 0
+  }
+)
+
+
+ItemEnchant.database.newEntry(
+  data : {
+    name : 'Paralyzing',
+    id : 'base:paralyzing',
+    description : 'Has a chance of causing paralysis to targets when attacking.',
+    equipMod : StatSet.new(
+    ),
+    levelMinimum : 1,
+    priceMod: 200,
+    tier : 1,
+    
+    triggerConditionEffects : [
+    ],
+    
+    equipEffects : [
+      "base:paralyzing"
     ],
     
     useEffects : [],
@@ -488,6 +608,30 @@ ItemEnchant.database.newEntry(
 
 ItemEnchant.database.newEntry(
   data : {
+    name : 'Seeping',
+    id : 'base:seeping',
+    description : 'Has a chance of poisoning targets when attacking.',
+    equipMod : StatSet.new(
+    ),
+    levelMinimum : 1,
+    priceMod: 200,
+    tier : 1,
+    
+    triggerConditionEffects : [
+    ],
+    
+    equipEffects : [
+      "base:frozen"
+    ],
+    
+    useEffects : [],
+    traits : 0
+  }
+)
+
+
+ItemEnchant.database.newEntry(
+  data : {
     name : 'Shimmering',
     id : 'base:shimmering',
     description : 'The material its made of glows softly. Grants a light aspect to attacks and gives dark resistance when used as armor.',
@@ -502,6 +646,29 @@ ItemEnchant.database.newEntry(
     
     equipEffects : [
       "base:shimmering"
+    ],
+    
+    useEffects : [],
+    traits : 0
+  }
+)
+
+ItemEnchant.database.newEntry(
+  data : {
+    name : 'Petrifying',
+    id : 'base:petrifying',
+    description : 'Has a chance of causing petrification to targets when attacking.',
+    equipMod : StatSet.new(
+    ),
+    levelMinimum : 1,
+    priceMod: 200,
+    tier : 1,
+    
+    triggerConditionEffects : [
+    ],
+    
+    equipEffects : [
+      "base:petrifying"
     ],
     
     useEffects : [],
@@ -532,7 +699,28 @@ ItemEnchant.database.newEntry(
   }
 )
 
-
+ItemEnchant.database.newEntry(
+  data : {
+    name : 'Blinding',
+    id : 'base:blinding',
+    description : 'Has a chance of causing blindness to targets when attacking.',
+    equipMod : StatSet.new(
+    ),
+    levelMinimum : 1,
+    priceMod: 200,
+    tier : 1,
+    
+    triggerConditionEffects : [
+    ],
+    
+    equipEffects : [
+      "base:blinding"
+    ],
+    
+    useEffects : [],
+    traits : 0
+  }
+)
 
 ItemEnchant.database.newEntry(
   data : {

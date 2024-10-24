@@ -30,6 +30,15 @@ ArtsTerm.newEntry(
     description : 'Status ailments include the effects Burned, Frozen, Paralyzed, Blind, Bleeding, Poisoned, and Petrified.'
   }
 );
+ArtsTerm.newEntry(
+  data : {
+    name : 'Attack Shifts',
+    id : 'base:attack-shifts',
+    description : 'Attack shifts include the effects Burning, Icy, Shock, Dark, Toxic, and Shimmering, which deal additional damage of a corresponding type.'
+  }
+);
+
+
 
 ArtsTerm.newEntry(
   data : {
