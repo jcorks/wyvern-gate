@@ -221,7 +221,98 @@ var startGame = function(touch) {
     
 
     const body = document.getElementById("gameArea");
+
     fullscreenEnter(body);
+    
+
+    // resize canvas
+
+
+    
+    window.setTimeout(function() {
+    
+      const canvas = document.getElementById("canvas");
+      const gameArea = document.getElementById("gameArea");
+      var vw = gameArea.clientWidth;
+      var vh = gameArea.clientHeight;
+
+
+
+
+      const aspectRatioWH = (80 * 13) / (24 * 25.0);
+      const requiredHeight = vw * (1 / aspectRatioWH);
+      
+      // we dont have enough room. Fit it based on height
+      if (requiredHeight > vh) {
+          vw = vh * aspectRatioWH;
+      } else {
+          vh = requiredHeight;
+      }
+      
+
+
+
+      canvas.style.margin = "0 auto";
+      canvas.style.width = ""+vw+"px";
+      canvas.style.height = ""+vh+"px";
+
+
+      initializeTextRenderer();
+      
+      matteWorker = new Worker("worker.js");
+      
+      postMessageWorker({
+          command: 'deliverSaves',
+          saves: JSON.parse(JSON.stringify(window['localStorage']))
+      });
+
+
+
+
+      matteWorker.onmessage = function(e) {
+          const data = JSON.parse(e.data);
+      
+          switch(data.command) {
+            case 'lines':
+              const lines = data.data;
+              for(var i = 0; i < data.data.length; ++i) {
+                  TextRenderer.setLine(i, data.data[i]);
+              }
+              TextRenderer.requestDraw();
+              break;
+              
+            case 'save': {
+              var storage = window['localStorage'];
+              storage[data.name] = data.data;                
+
+              postMessageWorker({
+                  command: 'deliverSaves',
+                  saves: window['localStorage']
+              });
+              break;
+            } 
+            
+            case 'quit' : {          
+              exitGame();
+              const endMessage = document.getElementById("endMessage");
+              endMessage.style.display = 'block';
+              break;
+            }
+            
+            case 'error' : {
+              reportError(
+                  "git info: " + GIT_VERSION + "\n\n" +
+                  data.data
+              );
+              break;
+
+            }
+          }
+           
+      }      
+      
+    }, 2000);  
+    
     body.style.display = 'block';
     
     
@@ -230,57 +321,7 @@ var startGame = function(touch) {
     initMessage.style.display = 'none';
     
     
-    matteWorker = new Worker("worker.js");
-    
-    postMessageWorker({
-        command: 'deliverSaves',
-        saves: JSON.parse(JSON.stringify(window['localStorage']))
-    });
 
-
-
-
-    matteWorker.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-    
-        switch(data.command) {
-          case 'lines':
-            const lines = data.data;
-            for(var i = 0; i < data.data.length; ++i) {
-                TextRenderer.setLine(i, data.data[i]);
-            }
-            TextRenderer.requestDraw();
-            break;
-            
-          case 'save': {
-            var storage = window['localStorage'];
-            storage[data.name] = data.data;                
-
-            postMessageWorker({
-                command: 'deliverSaves',
-                saves: window['localStorage']
-            });
-            break;
-          } 
-          
-          case 'quit' : {          
-            exitGame();
-            const endMessage = document.getElementById("endMessage");
-            endMessage.style.display = 'block';
-            break;
-          }
-          
-          case 'error' : {
-            reportError(
-                "git info: " + GIT_VERSION + "\n\n" +
-                data.data
-            );
-            break;
-
-          }
-        }
-         
-    }
 
     const repeaterInput = function(element, input) {
         postMessageWorker(input);

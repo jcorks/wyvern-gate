@@ -3,8 +3,9 @@
 
 /// main text renderer for webGL
 
+var TextRenderer;
 
-const TextRenderer = (function() {
+var initializeTextRenderer = function() {
     const TEXT_RENDERER_WIDTH = 80;
     const TEXT_RENDERER_HEIGHT = 24;
 
@@ -593,7 +594,7 @@ const TextRenderer = (function() {
     }
 
 
-    return {
+    TextRenderer =  {
         setLine : function(line, text) {
             lines[line].setText(text)
         },
@@ -622,15 +623,18 @@ const TextRenderer = (function() {
             requestAnimationFrame(drawFrame);
         }
     }
-})();
-
-
-
-TextRenderer.setLine(0, 'Loading...');
-TextRenderer.requestDraw();
-
-document.fonts.ready.then(function() {
-    TextRenderer.dumpFont();
+    
+    TextRenderer.setLine(0, 'Loading...');
     TextRenderer.requestDraw();
-});
+
+    document.fonts.ready.then(function() {
+        TextRenderer.dumpFont();
+        TextRenderer.requestDraw();
+    });    
+    
+};
+
+
+
+
 
