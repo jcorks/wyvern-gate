@@ -7160,7 +7160,7 @@ Arts.newEntry(
       when(all->size == 0) Arts.FAIL;
             
       foreach(all) ::(k, v) {
-        @:id = Effect.getRandomFiltered(::(value) <- (value.flags & Effect.FLAGS.SPECIAL) == 0);
+        @:id = Effect.getRandomFiltered(::(value) <- (value.flags & Effect.FLAGS.SPECIAL) == 0).id;
         targets[0].addEffect(from:user, id, durationTurns:
           v.duration - v.turnCount
         );              
