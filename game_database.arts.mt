@@ -6430,7 +6430,7 @@ Arts.newEntry(
 // ver 0.2.0 starting supports
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b169',
     id : 'base:b169',
     notifCommit : '$2 is covered in a soothing aura!',
     notifFail : Arts.NO_NOTIF,
@@ -6473,7 +6473,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b170',
     id : 'base:b170',
     notifCommit : '$2 is covered in a soothing aura!',
     notifFail : Arts.NO_NOTIF,
@@ -6519,7 +6519,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b171',
     id : 'base:b171',
     notifCommit : '$1\'s allies are covered in a mysterious light!',
     notifFail : Arts.NO_NOTIF,
@@ -6585,7 +6585,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b172',
     id : 'base:b172',
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
@@ -6647,7 +6647,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b173',
     id : 'base:b173',
     notifCommit : '$1 is covered in a myserious light!',
     notifFail : '... But nothing happened!',
@@ -6705,7 +6705,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b174',
     id : 'base:b174',
     notifCommit : 'Everyone is covered in soothing aura!',
     notifFail : Arts.NO_NOTIF,
@@ -6747,7 +6747,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b175',
     id : 'base:b175',
     notifCommit : '$1 is covered in an ominous aura!',
     notifFail : Arts.NO_NOTIF,
@@ -6788,7 +6788,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b176',
     id : 'base:b176',
     notifCommit : '$1 and $2 are covered in a myserious light!',
     notifFail : '... But nothing happened!',
@@ -6838,7 +6838,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b177',
     id : 'base:b177',
     notifCommit : 'Everyone is covered in a weird aura!',
     notifFail : Arts.NO_NOTIF,
@@ -6955,7 +6955,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b179',
     id : 'base:b179',
     notifCommit : '$1 and $2 are covered in a mysterious light!',
     notifFail : '... But nothing happened!',
@@ -7004,7 +7004,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b180',
     id : 'base:b180',
     notifCommit : 'Everyone is covered in a weird aura!',
     notifFail : '... But nothing happened!',
@@ -7047,7 +7047,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b181',
     id : 'base:b181',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7093,7 +7093,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b182',
     id : 'base:b182',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7137,7 +7137,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b183',
     id : 'base:b183',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7182,7 +7182,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b184',
     id : 'base:b184',
     notifCommit : 'A mystical light befalls everyone!',
     notifFail : Arts.NO_NOTIF,
@@ -7237,7 +7237,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b185',
     id : 'base:b185',
     notifCommit : 'A mystical light befalls everyone!',
     notifFail : Arts.NO_NOTIF,
@@ -7297,7 +7297,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b186',
     id : 'base:b186',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7336,7 +7336,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b187',
     id : 'base:b187',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7379,7 +7379,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b188',
     id : 'base:b188',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7421,7 +7421,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b189',
     id : 'base:b189',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7464,7 +7464,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b190',
     id : 'base:b190',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7507,7 +7507,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b191',
     id : 'base:b191',
     notifCommit : 'A soothing light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7561,7 +7561,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b192',
     id : 'base:b192',
     notifCommit : '$2 and $1 glow ominously!',
     notifFail : '...But nothing happened!',
@@ -7612,7 +7612,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b193',
     id : 'base:b193',
     notifCommit : '$1 lunges at $2!',
     notifFail : Arts.NO_NOTIF,
@@ -7662,7 +7662,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b194',
     id : 'base:b194',
     notifCommit : '$1 begins to glow as they attack $2!',
     notifFail : Arts.NO_NOTIF,
@@ -7737,7 +7737,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b195',
     id : 'base:b195',
     notifCommit : '$1 focuses their energy!',
     notifFail : '...But nothing happened!',
@@ -7794,7 +7794,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b196',
     id : 'base:b196',
     notifCommit : 'A warmth emanates from $1!',
     notifFail : '...But nothing happened!',
@@ -7852,7 +7852,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b197',
     id : 'base:b197',
     notifCommit : '$1 focuses inward!',
     notifFail : '...But nothing happened!',
@@ -7886,7 +7886,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b198',
     id : 'base:b198',
     notifCommit : '$1 begins to glow!',
     notifFail : '...But nothing happened!',
@@ -7974,7 +7974,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b199',
     id : 'base:b199',
     notifCommit : '$1 takes a defensive stance!',
     notifFail : '...But nothing happened!',
@@ -8001,7 +8001,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b200',
     id : 'base:b200',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8039,7 +8039,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b201',
     id : 'base:b201',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8078,7 +8078,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b202',
     id : 'base:b202',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8192,7 +8192,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b203',
     id : 'base:b203',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8244,7 +8244,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b205',
     id : 'base:b205',
     notifCommit : '$1 attacks $2!',
     notifFail : Arts.NO_NOTIF,
@@ -8283,7 +8283,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b206',
     id : 'base:b206',
     notifCommit : '$1 attacks $2! with a magical beam of light!',
     notifFail : Arts.NO_NOTIF,
@@ -8322,7 +8322,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b207',
     id : 'base:b207',
     notifCommit : '$1 attacks $2! with fiery might!',
     notifFail : Arts.NO_NOTIF,
@@ -8376,7 +8376,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b208',
     id : 'base:b208',
     notifCommit : '$1 attacks $2! with cold might!',
     notifFail : Arts.NO_NOTIF,
@@ -8430,7 +8430,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b209',
     id : 'base:b209',
     notifCommit : '$1 attacks $2! with electrifying might!',
     notifFail : Arts.NO_NOTIF,
@@ -8483,7 +8483,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b210',
     id : 'base:b210',
     notifCommit : '$1 summons an explosion!',
     notifFail : Arts.NO_NOTIF,
@@ -8535,7 +8535,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b211',
     id : 'base:b211',
     notifCommit : 'A light engulfs everyone',
     notifFail : Arts.NO_NOTIF,
@@ -8565,7 +8565,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b214',
     id : 'base:b214',
     notifCommit : '$1 begins to glow!',
     notifFail : Arts.NO_NOTIF,
@@ -8590,7 +8590,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: '@b215',
     id : 'base:b215',
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
