@@ -75,6 +75,16 @@
 
 @Arts;
 @:reset = ::{
+
+@:ATTACK_SHIFTS = [
+  "base:shimmering",
+  "base:burning",
+  "base:dark",
+  "base:icy",
+  "base:shock",
+  "base:toxic"
+]
+
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Item = import(module:'game_mutator.item.mt');
 @:Damage = import(module:'game_class.damage.mt');
@@ -8199,7 +8209,7 @@ Arts.newEntry(
           value.id == 'base:blind' ||
           value.id == 'base:poisoned' ||
           value.id == 'base:frozen' ||
-          value.id == 'base:paralyzed' ||
+          value.id == 'base:paralyzed'
         )->size > 0
       );
 
@@ -8318,13 +8328,17 @@ Arts.newEntry(
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     keywords : ['base:burned', 'base:burning'],
-    description: "Deals 2 base damage to target. For each stack of Burned or Burning already on the target, this attack deals 2 additional damage. Adds the Burned and Burning to target for 3 turns.",
+    description: "Deals 2 base damage to target. For each stack of Burned or Burning already on the target, this attack deals 2 additional damage. Adds Burned and Burning to target for 3 turns.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       @:whom = enemies->filter(::(value) <-
-        value.id == 
-    
+        value.id == 'base:burned' ||
+        value.id == 'base:burning'
+      );
+      when(whom->size == 0) false;
+      
+      return [random.scrambled(:whom)[0]];
     },
     oncePerBattle : false,
     canBlock : true,
@@ -8344,7 +8358,7 @@ Arts.newEntry(
           user.attack(
             target:targets[0],
             amount:2 + size*2,
-            damageType : Damage.TYPE.LIGHT,
+            damageType : Damage.TYPE.FIRE,
             damageClass: Damage.CLASS.HP,
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
@@ -8360,6 +8374,314 @@ Arts.newEntry(
 )
 
 
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b208',
+    notifCommit : '$1 attacks $2! with cold might!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:frozen', 'base:icy'],
+    description: "Deals 2 base damage to target. For each stack of Icy or Frozen already on the target, this attack deals 2 additional damage. Adds Frozen and Icy to target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:whom = enemies->filter(::(value) <-
+        value.id == 'base:frozen' ||
+        value.id == 'base:icy'
+      );
+      when(whom->size == 0) false;
+      
+      return [random.scrambled(:whom)[0]];
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.PHYSICAL | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) <- 2,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+
+      @:size = targets[0].effectStack.getAllByFilter(::(value) <- 
+        value.id == 'base:icy' ||
+        value.id == 'base:frozen'
+      )->size;
+
+      windowEvent.queueCustom(
+        onEnter :: {
+          user.attack(
+            target:targets[0],
+            amount:2 + size*2,
+            damageType : Damage.TYPE.ICE,
+            damageClass: Damage.CLASS.HP,
+            targetPart:targetParts[0],
+            targetDefendPart:targetDefendParts[0]
+          );        
+          
+          targets[0].addEffect(durationTurns:3, from:user, id: 'base:icy');
+          targets[0].addEffect(durationTurns:3, from:user, id: 'base:frozen');
+        }
+      );      
+                  
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b209',
+    notifCommit : '$1 attacks $2! with electrifying might!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:paralyzed', 'base:shock'],
+    description: "Deals 2 base damage to target. For each stack of Shock or Paralyzed already on the target, this attack deals 2 additional damage. Adds Paralyzed and Shock to target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:whom = enemies->filter(::(value) <-
+        value.id == 'base:paralyzed' ||
+        value.id == 'base:shock'
+      );
+      when(whom->size == 0) false;
+      
+      return [random.scrambled(:whom)[0]];
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.PHYSICAL | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) <- 2,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+
+      @:size = targets[0].effectStack.getAllByFilter(::(value) <- 
+        value.id == 'base:shock' ||
+        value.id == 'base:paralyzed'
+      )->size;
+
+      windowEvent.queueCustom(
+        onEnter :: {
+          user.attack(
+            target:targets[0],
+            amount:2 + size*2,
+            damageType : Damage.TYPE.THUNDER,
+            damageClass: Damage.CLASS.HP,
+            targetPart:targetParts[0],
+            targetDefendPart:targetDefendParts[0]
+          );        
+          
+          targets[0].addEffect(durationTurns:3, from:user, id: 'base:shock');
+          targets[0].addEffect(durationTurns:3, from:user, id: 'base:paralyzed');
+        }
+      );      
+                  
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b210',
+    notifCommit : '$1 summons an explosion!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:attack-shifts'],
+    description: "Summons a fire explosion on a target, dealing damage based on the user's INT. This total damage is boosted by 20% for each attack shift on the user. Additional levels increase damage.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      when (user.effectStack.getAllByFilter(::(value) <-
+         ATTACK_SHIFTS->findIndex(:value.id) != -1
+      )->size == 0) false;
+      
+      return [random.pickArrayItem(:enemies)]
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.ABILITY,
+    traits : TRAITS.PHYSICAL | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {
+      @:baseDamage = user.stats.INT * (0.1 + 0.2*level)
+      @:count = user.effectStack.getAllByFilter(::(value) <-
+         ATTACK_SHIFTS->findIndex(:value.id) != -1
+      )->size;
+      
+      return baseDamage * (1 + 0.2 * count);
+    },
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+
+      @:baseDamage = Arts.find(:'base:b210').baseDamage(level, user);
+
+      windowEvent.queueCustom(
+        onEnter :: {
+          user.attack(
+            target:targets[0],
+            amount:baseDamage,
+            damageType : Damage.TYPE.FIRE,
+            damageClass: Damage.CLASS.HP,
+            targetPart:targetParts[0],
+            targetDefendPart:targetDefendParts[0]
+          );        
+        }
+      );      
+                  
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b211',
+    notifCommit : 'A light engulfs everyone',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALL,
+    keywords : ['base:attack-shifts'],
+    description: "Grants all fighters a random attack shift for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.PHYSICAL | TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      foreach(targets) ::(k, v) {
+        v.addEffect(durationTurns:3, from:user, id: random.pickArrayItem(:ATTACK_SHIFTS));
+      }
+    }
+  }
+)
+
+
+
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b214',
+    notifCommit : '$1 begins to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:shift-boost', 'base:attack-shifts'],
+    description: "Grants Shift Boost to a target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.PHYSICAL | TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(durationTurns:3, from:user, id: 'base:shift-boost');
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@',
+    id : 'base:b215',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:attack-shifts'],
+    description: "A 2-turn attack. First turn, the user charges their elemental power and are unable to act. On the second turn, a random set of attack shifts are converted into an attack, causing damage based on INT and +20% more damage for each stack. If this set of attack shifts is 3 or more, the target is knocked out entirely. The set of shifts are removed after the attack. If no shifts are present, nothing happens.",
+    durationTurns: 1,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      when(user.effectStack.getAllByFilter(::(value) <-
+        ATTACK_SHIFTS->findIndex(:value.id) != -1
+      )->size == 0) false;
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.ABILITY,
+    traits : TRAITS.PHYSICAL | TRAITS.MAGIC,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) <- user.stats.INT * (0.3 * level),
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+
+
+      when(turnIndex == 0) ::<= {
+        windowEvent.queueMessage(
+          text: user.name + ' focuses on channeling their power!'
+        );
+
+        when(user.effectStack.getAllByFilter(::(value) <-
+          ATTACK_SHIFTS->findIndex(:value.id) != -1
+        )->size == 0) ::<= {
+          windowEvent.queueMessage(
+            text: '...but ' + user.name + ' had no attack shifts to channel!'
+          );
+        
+          return Arts.CANCEL_MULTITURN;
+        }       
+        
+      }
+      
+      
+      // now to attack 
+      @:which = user.effectStack.getAllByFilter(::(value) <-
+        ATTACK_SHIFTS->findIndex(:value.id) != -1
+      );
+      
+      // could have lost it on previous turn
+      when(which->size == 0)
+        windowEvent.queueMessage(
+          text: user.name + ' had no attack shifts to channel into an attack!'
+        );
+        
+      @:theOne = random.pickArrayItem(:which).id;
+      @:theSet = user.effectStack.getAllByFilter(::(value) <- value.id == theOne);
+      
+      @:damageType = match(theOne) {
+        ('base:burning'): Damage.TYPE.FIRE,
+        ('base:icy'): Damage.TYPE.ICE,
+        ('base:shock'): Damage.TYPE.THUNDER,
+        ('base:shimmering'): Damage.TYPE.LIGHT,
+        ('base:dark'): Damage.TYPE.DARK,
+        ('base:poison'): Damage.TYPE.POISON
+      }
+      
+      
+      if (theSet->size >= 3) ::<= {
+        windowEvent.queueMessage(
+          text: user.name + ' unleashes all their power!'
+        );
+        
+        targets[0].damage(attacker:user, damage:Damage.new(
+          amount:999999,
+          damageType,
+          damageClass:Damage.CLASS.HP
+        ),dodgeable: false);         
+      } else ::<= {
+        user.attack(
+          target:targets[0],
+          amount:Arts.find(:'base:b215').baseDamage(level, user) * (1.0 + 0.2 * theSet->size),
+          damageType,
+          damageClass: Damage.CLASS.HP,
+          targetPart:targetParts[0],
+          targetDefendPart:targetDefendParts[0]
+        ); 
+      }
+      
+      user.effectStack.removeEffectsByFilter(::(value) <- 
+        theSet->findIndex(:value) != -1
+      );
+    }
+  }
+)
 
 
 

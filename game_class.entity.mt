@@ -2323,7 +2323,7 @@
         foreach(item.equipEffects)::(index, effect) {
           this.effectStack.add(
             id:effect,
-            duration: 999999999
+            duration: 999999999,
             item
           );
         }

@@ -3748,6 +3748,8 @@ Effect.newEntry(
 )   
 
 
+
+
 Effect.newEntry(
   data : {
     name : 'Banish',
@@ -3818,6 +3820,56 @@ Effect.newEntry(
     }
   }
 )
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Shift Boost',
+    id : 'base:shift-boost',
+    description: 'Attack shifts now increase the power of their respective damage type. The damage is boosted by 20% for each stack.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage) {
+        @:id = match(damage.type) {
+          (Damage.TYPE.FIRE) : 'base:burning',
+          (Damage.TYPE.ICE) : 'base:icy',
+          (Damage.TYPE.THUNDER) : 'base:shock',
+          (Damage.TYPE.LIGHT) : 'base:shimmering',
+          (Damage.TYPE.DARK) : 'base:dark',
+          (Damage.TYPE.POISON) : 'base:poison'
+        }
+        
+        when(id == empty) empty;
+        
+        @:size = from.effectStack.getAllByFilter(::(value) <- value.id == id)->size;
+        when(size == 0) empty;
+        
+        @damageTypeName ::{
+          return match(damage.damageType) {
+            (Damage.TYPE.FIRE): 'fire ',
+            (Damage.TYPE.ICE): 'ice ',
+            (Damage.TYPE.THUNDER): 'thunder ',
+            (Damage.TYPE.LIGHT): 'light ',
+            (Damage.TYPE.DARK): 'dark ',
+            (Damage.TYPE.PHYS): 'physical ',
+            (Damage.TYPE.POISON): 'poison ',
+            (Damage.TYPE.NEUTRAL): ''
+          }
+        }        
+        
+        windowEvent.queueMessage(
+          text: 'Shift Boost boosted the ' + damageTypeName(:damage.type) + 'damage by ' + size * 20 + '%!'
+        );
+        damage.amount *= 1 + 0.20 * size;      
+      }
+    }
+  }
+)   
 
 
 

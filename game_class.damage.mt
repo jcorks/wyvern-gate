@@ -21,12 +21,11 @@
   NEUTRAL  : 0,
    FIRE     : 1,
    THUNDER  : 2,
-   ICE    : 3,
+   ICE      : 3,
   LIGHT    : 4,
   DARK     : 5,
   PHYS     : 6,
   POISON   : 7
-
 }
 
 @:CLASS = {
