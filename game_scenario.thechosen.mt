@@ -151,9 +151,11 @@
               @hp = this.hp;
               whom.attack(
                 target:this,
-                amount:whom.stats.ATK * (0.5),
-                damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damage: Damage.new(
+                  amount:whom.stats.ATK * (0.5),
+                  damageType : Damage.TYPE.PHYS,
+                  damageClass: Damage.CLASS.HP
+                )
               );            
               
               when (hp > 0 && this.isIncapacitated()) ::<= {

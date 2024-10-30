@@ -27,7 +27,7 @@ ArtsTerm.newEntry(
   data : {
     name : 'Status Ailments',
     id : 'base:ailments',
-    description : 'Status ailments include the effects Burned, Frozen, Paralyzed, Blind, Bleeding, Poisoned, and Petrified.'
+    description : 'Status ailments include at least the effects Burned, Frozen, Paralyzed, Blind, Bleeding, Poisoned, and Petrified.'
   }
 );
 ArtsTerm.newEntry(
@@ -38,7 +38,37 @@ ArtsTerm.newEntry(
   }
 );
 
+ArtsTerm.newEntry(
+  data : {
+    name : 'Resistance Shifts',
+    id : 'base:resistance-shifts',
+    description : 'Resistance shifts, named "[element] Guard" (i.e. Fire Guard) provide 25% resistance to that type of damage.'
+  }
+);
 
+ArtsTerm.newEntry(
+  data : {
+    name : 'Cursed Shifts',
+    id : 'base:cursed-shifts',
+    description : 'Cursed shifts, named "[element] Curse" (i.e. Fire Curse) damage the holder every turn. This is removed if the holder gains a respective attack shift.'
+  }
+);
+
+ArtsTerm.newEntry(
+  data : {
+    name : 'Seeds',
+    id : 'base:seeds-effects',
+    description : 'Seeds are effects of something growing on the holder. This includes Poisonroot Growing, Triproot Growing, and Healroot Growing.'
+  }
+);
+
+ArtsTerm.newEntry(
+  data : {
+    name : 'Innate Effects',
+    id : 'base:innate',
+    description : 'Innate effects are not removable. They only dissapate once a battle has ended.'
+  }
+);
 
 ArtsTerm.newEntry(
   data : {

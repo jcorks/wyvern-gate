@@ -119,10 +119,9 @@
     " - Rarity: " + getRarity(:art.rarity),
     " - Traits: " + getTraits(:handCard),
     if (art.kind == Arts.KIND.ABILITY)
-      "Lv. " + handCard.level 
+      " - (Lv. " + handCard.level + ') - '
     else 
       "",
-    '',
     art.description,
     if (user != empty && baseDamageMin != empty) 'Around: ' + baseDamageMin + ' - ' + baseDamageMax + " damage" else '',
   ]
@@ -371,11 +370,9 @@
               act: 'Discard',
               canCancel: false,
               onChoice::(
-                card,
-                backout
+                card
               ) {
                 this.discardFromHand(card);
-                backout();
               }
             )
           }
@@ -438,7 +435,7 @@
           if (act)
             windowEvent.queueCustom(
               onEnter::{
-                onChoice(backout::{});
+                onChoice();
               }
             );
         }
@@ -455,66 +452,71 @@
         );  
         
 
-        windowEvent.pushResolveQueue();        
-        
-        @selected = 0;
-        windowEvent.queueChoices(
-          prompt: 'Discarded Arts',
-          leftWeight: 1,
-          topWeight: 1,
-          keep : true,
-          renderable : {
-            render ::{
-              breakpoint();
-              renderArt(
-                user,
-                handCard:
-                  ArtsDeck.synthesizeHandCard(id:list[selected], level:1), 
-                leftWeight:0.4, 
-                topWeight:0.5
-              );            
-            }
-          },
-          choices,
-          jumpTag : 'ARTSDISCARDCHOOSE',
-          onHover::(choice) {
-            selected = choice-1;
-          },
-          canCancel,
-          onCancel :: {
-            windowEvent.popResolveQueue();
-            if (onCancel)
-              onCancel();        
-          },
-          
-          onChoice ::(choice) {
-            when(act == empty) empty;
-
+        @out;
+        windowEvent.queueNestedResolve(
+          onLeave :: {
+            when (out == empty)
+              if (onCancel && canCancel)
+                onCancel()
+              else 
+                empty;
             
-
-            @:choices = [if (act) act else 'Use'];            
-            @:choiceActions = [
-              ::{
-                windowEvent.popResolveQueue();
-                onChoice(id:list[choice-1], backout ::{
-                  windowEvent.jumpToTag(
-                    name: 'ARTSDISCARDCHOOSE',
-                    goBeforeTag: true,
-                    doResolveNext: true
-                  );
-                });
-              }
-            ];
-
+            onChoice(id:out);
+          },
+        
+          onEnter :: {
+            @selected = 0;
             windowEvent.queueChoices(
+              prompt: 'Discarded Arts',
+              leftWeight: 1,
+              topWeight: 1,
+              keep : true,
+              renderable : {
+                render ::{
+                  renderArt(
+                    user,
+                    handCard:
+                      ArtsDeck.synthesizeHandCard(id:list[selected], level:1), 
+                    leftWeight:0.4, 
+                    topWeight:0.5
+                  );            
+                }
+              },
               choices,
-              canCancel: true,
+              jumpTag : 'ARTSDISCARDCHOOSE',
+              onHover::(choice) {
+                selected = choice-1;
+              },
+              canCancel,
+              
               onChoice ::(choice) {
-                choiceActions[choice-1]();
+                when(act == empty) empty;
+
+                
+
+                @:choices = [if (act) act else 'Use'];            
+                @:choiceActions = [
+                  ::{
+                    out = list[choice-1]
+                    windowEvent.jumpToTag(
+                      name: 'ARTSDISCARDCHOOSE',
+                      goBeforeTag: true,
+                      doResolveNext: true
+                    );                    
+                  }
+                ];
+
+                windowEvent.queueChoices(
+                  choices,
+                  canCancel: true,
+                  onChoice ::(choice) {
+                    choiceActions[choice-1]();
+                  }
+                );
               }
             );
           }
-        );
+        )
       },
       
       levelUp::(levelIndex, discardIndex) {
@@ -537,107 +539,107 @@
           ) enabled->push(:i);
         }
         
-        windowEvent.pushResolveQueue();        
         @bg;
-        windowEvent.queueCustom(
-          onEnter::{
+        @chosenCard;
+
+        windowEvent.queueNestedResolve(
+          onEnter ::{
             bg = canvas.addBackground(::{
               renderCards(user, cards:state.hand, enabled);
             });
-          }
-        );
-        windowEvent.queueChoices(
-          hideWindow : true,
-          keep : true,
-          onGetChoices ::<- [...enabled]->map(::(value)<- '' + value),
-          jumpTag : 'ARTSDECKCHOOSE',
-          onHover::(choice) {
-            selected = choice-1;
-          },
-          onLeave ::{       
-            canvas.removeBackground(:bg);
-          },
-          canCancel,
-          onCancel :: {
-            windowEvent.popResolveQueue();        
-            if (onCancel)
-              onCancel();        
-          },
-          
-          onChoice ::(choice) {
-            when(act == empty) empty;
+        
+            windowEvent.queueChoices(
+              hideWindow : true,
+              keep : true,
+              onGetChoices ::<- [...enabled]->map(::(value)<- '' + value),
+              jumpTag : 'ARTSDECKCHOOSE',
+              onHover::(choice) {
+                selected = choice-1;
+              },
+              onLeave ::{       
+                canvas.removeBackground(:bg);
+              },
+              canCancel,
+              
+              onChoice ::(choice) {
+                when(act == empty) empty;
 
-            @handCard 
-            if (enabled == empty)
-              handCard = state.hand[choice-1]
-            else
-              handCard = state.hand[enabled[choice-1]]
-            ;
-              
-              
-            @:choices = [if (act) act else 'Use'];            
-            @:choiceActions = [
-              ::{
-                windowEvent.popResolveQueue();        
-                onChoice(card:handCard, backout ::{
-                  windowEvent.jumpToTag(
-                    name: 'ARTSDECKCHOOSE',
-                    goBeforeTag: true,
-                    doResolveNext: true
-                  );
-                });
-              }
-            ];
-            
-            if (act == 'Use' && Arts.find(:handCard.id).kind == Arts.KIND.ABILITY) ::<= {
-              choices->push(:'Level up');
-              choiceActions->push(::{
-                // need at least 2 of the same kind
-                when([...state.hand]->filter(::(value) <- value.id == handCard.id)->size < 2) ::<= {
-                  windowEvent.queueMessage(
-                    text: 'Leveling Ability Arts requires more than 1 of the same Ability.'
-                  );
-                } 
+                @handCard 
+                if (enabled == empty)
+                  handCard = state.hand[choice-1]
+                else
+                  handCard = state.hand[enabled[choice-1]]
+                ;
+                  
+                  
+                @:choices = [if (act) act else 'Use'];            
+                @:choiceActions = [
+                  ::{
+                    chosenCard = handCard;
+                    windowEvent.jumpToTag(
+                      name: 'ARTSDECKCHOOSE',
+                      goBeforeTag: true,
+                      doResolveNext: true
+                    );
+                  }
+                ];
                 
-                windowEvent.queueMessage(
-                  text: 'Choose the ' + Arts.find(id:handCard.id).name + ' Art to combine with this one.'
-                );    
-                
-                @:choiceCards = [...state.hand]->filter(::(value) <- value.id == handCard.id && value != handCard);
-                @:choices = [...choiceCards]->map(::(value) {
-                  @:art = Arts.find(id:value.id);
-                  return art.name + ' - Lv.' + value.level;
-                });
-                
+                if (act == 'Use' && Arts.find(:handCard.id).kind == Arts.KIND.ABILITY) ::<= {
+                  choices->push(:'Level up');
+                  choiceActions->push(::{
+                    // need at least 2 of the same kind
+                    when([...state.hand]->filter(::(value) <- value.id == handCard.id)->size < 2) ::<= {
+                      windowEvent.queueMessage(
+                        text: 'Leveling Ability Arts requires more than 1 of the same Ability.'
+                      );
+                    } 
+                    
+                    windowEvent.queueMessage(
+                      text: 'Choose the ' + Arts.find(id:handCard.id).name + ' Art to combine with this one.'
+                    );    
+                    
+                    @:choiceCards = [...state.hand]->filter(::(value) <- value.id == handCard.id && value != handCard);
+                    @:choices = [...choiceCards]->map(::(value) {
+                      @:art = Arts.find(id:value.id);
+                      return art.name + ' - Lv.' + value.level;
+                    });
+                    
+                    windowEvent.queueChoices(
+                      choices,
+                      canCancel: true,
+                      onChoice::(choice) {    
+                        this.levelUp(
+                          levelIndex: this.hand->findIndex(:handCard),
+                          discardIndex: this.hand->findIndex(:choiceCards[choice-1])
+                        );
+
+                        windowEvent.queueMessage(
+                          text: 'The card was sacrificed to increase the ' + Arts.find(id:handCard.id).name + ' art to Lv. ' + handCard.level + '.'
+                        );
+                      }
+                    );
+                  });
+                }
                 windowEvent.queueChoices(
                   choices,
                   canCancel: true,
-                  onChoice::(choice) {    
-                    this.levelUp(
-                      levelIndex: this.hand->findIndex(:handCard),
-                      discardIndex: this.hand->findIndex(:choiceCards[choice-1])
-                    );
-
-                    windowEvent.queueMessage(
-                      text: 'The card was sacrificed to increase the ' + Arts.find(id:handCard.id).name + ' art to Lv. ' + handCard.level + '.'
-                    );
+                  onChoice ::(choice) {
+                    choiceActions[choice-1]();
                   }
                 );
-              });
-            }
-            windowEvent.queueChoices(
-              choices,
-              canCancel: true,
-              onChoice ::(choice) {
-                choiceActions[choice-1]();
               }
             );
+          },
+          
+          onLeave ::{
+            if (chosenCard != empty)
+              onChoice(:chosenCard)
+            else if (canCancel && onCancel != empty)
+              onCancel()
+              
+            canvas.removeBackground(:bg);
           }
-        );
-        
-        
-        
-        
+        )
       }
     }
   }

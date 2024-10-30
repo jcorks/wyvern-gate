@@ -1051,7 +1051,7 @@
         @:Entity = import(module:'game_class.entity.mt');
         @:world = import(module:'game_singleton.world.mt');
         @:targetDefendParts = [];
-        foreach(action.targets) ::(index, target) {
+        foreach(action.targets) ::(index, target) {        
           targetDefendParts[index] = if (target.blockPoints <= 0 || random.try(percentSuccess:35)) 0 else Entity.normalizedDamageTarget(blockPoints:target.blockPoints);
         }
         

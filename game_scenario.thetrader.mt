@@ -380,17 +380,21 @@
                           // give the benefit of the doubt, let our person attack first
                           state.member.attack(
                             target: other,
-                            amount:state.member.stats.ATK * (0.5) * moodBonus,
-                            damageType : Damage.TYPE.PHYS,
-                            damageClass: Damage.CLASS.HP
+                            damage: Damage.new(
+                              amount:state.member.stats.ATK * (0.5) * moodBonus,
+                              damageType : Damage.TYPE.PHYS,
+                              damageClass: Damage.CLASS.HP
+                            )
                           );                           
 
                           if (!other.isIncapacitated())
                             other.attack(
                               target: state.member,
-                              amount:other.stats.ATK * (0.5),
-                              damageType : Damage.TYPE.PHYS,
-                              damageClass: Damage.CLASS.HP
+                              damage: Damage.new(
+                                amount:other.stats.ATK * (0.5),
+                                damageType : Damage.TYPE.PHYS,
+                                damageClass: Damage.CLASS.HP
+                              )
                             );                           
                         }
                       }

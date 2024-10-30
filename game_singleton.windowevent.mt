@@ -138,6 +138,30 @@
       queue : {}
     });
     
+      
+    // Adds a resolve queue.
+    // when queueing window events, you may optionally 
+    // pass a "queueID" pointing to a resolve queue 
+    @:pushResolveQueue:: {
+      @:out = {
+        queue : [],
+        onResolveAll : []
+      };
+      resolveQueues->push(:out);
+    }
+    
+    // Deletes a resolve queue.
+    // All queued resolves are lost, so i wouldnt do this 
+    // unless youre sure you dont want the queued items here!
+    @:popResolveQueue :: {
+      resolveQueues->pop;
+      if (resolveQueues->size == 0)
+        resolveQueues->push(:{
+          onResolveAll : {},
+          queue : {}
+        });        
+    }    
+    
     @:getResolveQueue ::{
       return resolveQueues[resolveQueues->size-1].queue;
     }
@@ -698,10 +722,18 @@
       
       if (data.onInput != empty && input != empty)
         data.onInput(input);
+        
+      when(data.resolveStack == true) ::<= {
+        when(canResolveNext()) ::<= {
+          resolveNext();
+          return false;
+        }        
+        return true;
+      }
       
       when(data.busy) false;
       return true;  
-    }     
+    }
     
     
     @:commitInput_callback ::(data => Object, input) {
@@ -1234,6 +1266,57 @@
         }]);        
         return getResolveQueue()->size-1;
       },
+
+
+      // Queues a nested resolve queue. When entered, will push a new resolve queue, 
+      // which preserves existing queue items until this new resolve queue 
+      // fully resolves. This is analogous to "calling a function of queues", which 
+      // will all be processed until this queued item "returns".
+      queueNestedResolve::(
+        renderable, 
+        onEnter, 
+        onUpdate, 
+        onInput, 
+        jumpTag, 
+        onLeave, 
+        isAnimation, 
+        animationFrame
+        
+      ) {
+        @:onEnterReal::{
+          pushResolveQueue();
+          if (onEnter) onEnter();
+        }
+
+        @:onLeaveReal::{
+          popResolveQueue(); //< this is probably needed because the queue wont resolve until AFTER onLeave is called
+          if (onLeave) onLeave();
+        }
+
+      
+        when(requestAutoSkip) ::<= {
+          onEnterReal();
+          onLeaveReal();
+        }
+
+        pushResolveQueueTop(fns:[::{
+          choiceStackPush(value:{
+            mode: CHOICE_MODE.CUSTOM,
+            keep: false,
+            isNestedResolve: true,
+            renderable:renderable,
+            onEnter:onEnterReal,
+            onUpdate:onUpdate,
+            jumpTag: jumpTag,
+            onLeave: onLeaveReal,
+            isAnimation : isAnimation,
+            animationFrame : animationFrame,
+            onInput : onInput,
+            resolveStack : true
+          });
+        }]);        
+        return getResolveQueue()->size-1;
+      },
       
       
       // An empty action that, when visited, will fire off 
@@ -1494,30 +1577,7 @@
         }]);
         return getResolveQueue()->size-1;
       },  
-      
-      // Adds a resolve queue.
-      // when queueing window events, you may optionally 
-      // pass a "queueID" pointing to a resolve queue 
-      pushResolveQueue:: {
-        @:id = {}; // its unique!
-        @:out = {
-          queue : [],
-          onResolveAll : []
-        };
-        resolveQueues->push(:out);
-      },
-      
-      // Deletes a resolve queue.
-      // All queued resolves are lost, so i wouldnt do this 
-      // unless youre sure you dont want the queued items here!
-      popResolveQueue :: {
-        resolveQueues->pop;
-        if (resolveQueues->size == 0)
-          resolveQueues->push(:{
-            onResolveAll : {},
-            queue : {}
-          });        
-      },
+
             
       
       

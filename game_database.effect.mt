@@ -131,6 +131,96 @@ Effect.newEntry(
   }
 );
 
+Effect.newEntry(
+  data : {
+    name : 'Take Aim',
+    id : 'base:take-aim',
+    description: 'Next holder\'s attack bypasses target\'s DEF. After the next attack, this effect is removed.',
+    battleOnly : true,
+    stackable : false,
+    blockPoints: 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage) {
+        windowEvent.queueMessage(
+          text: holder.name + '\'s attack bypassed ' + to.name +'\'s DEF!'
+        );
+
+        damage.forceDEFbypass = true;
+        holder.removeEffectInstance(:
+          holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:take-aim')[0]
+        )
+      }
+    }
+  }
+);
+
+
+Effect.newEntry(
+  data : {
+    name : 'Splinter',
+    id : 'base:splinter',
+    description: 'Attacks by the holder now damage all other enemies for 20% of the original attack\'s damage.',
+    battleOnly : true,
+    stackable : true,
+    blockPoints: 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage) {
+        when(holder.battle == empty) empty;
+        
+        @:targets = holder.battle.getEnemies(:holder)->filter(::(value) <- value != to);
+        when (targets->size == 0) empty;
+
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Splinter caused splash damage!'
+        );
+
+        foreach(targets) ::(k, v) {
+          v.damage(attacker:holder, damage:Damage.new(
+            amount : damage.amount * 0.2,
+            damageType:damage.damageType,
+            damageClass:damage.damageClass
+          ),dodgeable: true);          
+        }
+      }
+    }
+  }
+);
+
+Effect.newEntry(
+  data : {
+    name : 'Mirrored',
+    id : 'base:mirrored',
+    description: 'Attacks by the holder now damage a random enemy for the same damage amount.',
+    battleOnly : true,
+    stackable : true,
+    blockPoints: 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPostAttackOther ::(from, item, holder, to, damage) {
+        when(holder.battle == empty) empty;
+        
+        @:target = random.pickArrayItem(:holder.battle.getEnemies(:holder));
+
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Mirrored caused an additional attack!'
+        );
+
+        target.damage(attacker:holder, damage:Damage.new(
+          amount : damage.amount,
+          damageType:damage.damageType,
+          damageClass:damage.damageClass
+        ),dodgeable: true);          
+      }
+    }
+  }
+);
+
+
 
 Effect.newEntry(
   data : {
@@ -533,7 +623,7 @@ Effect.newEntry(
     flags : FLAGS.BUFF,
     stats: StatSet.new(),
     events : {
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {        
+      onNextTurn ::(from, item, holder, duration) {        
         windowEvent.queueMessage(text:holder.name + ' is busy concentrating on countering enemy attacks!');
         return false;
       },
@@ -554,9 +644,11 @@ Effect.newEntry(
 
         holder.attack(
           target:attacker,
-          amount: dmg,
-          damageType : Damage.TYPE.PHYS,
-          damageClass: Damage.CLASS.HP
+          damage: Damage.new(
+            amount: dmg,
+            damageType : Damage.TYPE.PHYS,
+            damageClass: Damage.CLASS.HP
+          )
         );        
         return EffectStack.CANCEL_PROPOGATION;  
       }
@@ -801,7 +893,7 @@ Effect.newEntry(
   data : {
     name : 'Cursed Binding',
     id : 'base:cursed-binding',
-    description: 'The user attacking causes 1 damage to the original caster.',
+    description: 'The holder attacking causes 1 damage to the original caster.',
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
@@ -815,7 +907,7 @@ Effect.newEntry(
       onRemoveEffect ::(from, item, holder) {
         windowEvent.queueMessage(text:from.name + '\'s curse was lifted.');      
       },
-      onPostAttackOther ::(from, item, holder, to) {
+      onPostAttackOther ::(from, item, holder, damage, to) {
         windowEvent.queueMessage(text:from.name + ' was hurt from a curse!');
         from.damage(attacker:from, damage: Damage.new(
           amount: 1,
@@ -1496,13 +1588,15 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + '\'s Lunacy fades away.');
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         windowEvent.queueMessage(text:holder.name + ' attacks in a blind rage!');
         holder.attack(
           target:random.pickArrayItem(:holder.battle.getEnemies(:holder)),
-          amount:holder.stats.ATK * (0.5),
-          damageType : Damage.TYPE.PHYS,
-          damageClass: Damage.CLASS.HP
+          damage: Damage.new(
+            amount:holder.stats.ATK * (0.5),
+            damageType : Damage.TYPE.PHYS,
+            damageClass: Damage.CLASS.HP
+          )
         );           
         return false;
       }
@@ -1589,7 +1683,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + '\'s Moonsong fades.');
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         when(holder.hp == 0) empty;
         holder.heal(amount:1);
       }
@@ -1613,7 +1707,7 @@ Effect.newEntry(
       onRemoveEffect ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + '\'s Sol Attunement fades.');
       },        
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         when(holder.hp == 0) empty;
         holder.heal(amount:1);
       }
@@ -1637,7 +1731,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + '\'s Moonsong fades.');
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         when(holder.hp == 0) empty;
         holder.heal(amount:2);
       }
@@ -1662,7 +1756,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + '\'s Sol Attunement fades.');
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         when(holder.hp == 0) empty;
         holder.heal(amount:2);
       }
@@ -2030,7 +2124,7 @@ Effect.newEntry(
         holder.addEffect(from:holder, id:'base:poisonroot', durationTurns:30);              
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         windowEvent.queueMessage(text: 'The poisonroot continues to grow on ' + holder.name);    
       }
     }
@@ -2054,7 +2148,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:'The poisonroot vines dissipate from ' + holder.name + '.'); 
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         windowEvent.queueMessage(text:from.name + ' is strangled by the poisonroot!');          
         holder.damage(attacker:from, damage: Damage.new(
           amount: random.integer(from:1, to:4),
@@ -2081,7 +2175,7 @@ Effect.newEntry(
         holder.addEffect(from:holder, id:'base:triproot', durationTurns:30);              
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         windowEvent.queueMessage(text: 'The triproot continues to grow on ' + holder.name);    
       
       }
@@ -2105,7 +2199,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:'The triproot vines dissipate from ' + holder.name + '.'); 
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         if (random.number() < 0.4) ::<= {
           windowEvent.queueMessage(text:'The triproot trips ' + holder.name + '!');
           holder.addEffect(from:holder, id:'base:stunned', durationTurns:1);                        
@@ -2131,7 +2225,7 @@ Effect.newEntry(
         holder.addEffect(from:holder, id:'base:healroot', durationTurns:30);              
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         windowEvent.queueMessage(text: 'The healroot continues to grow on ' + holder.name);    
       
       }
@@ -2155,7 +2249,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:'The healroot vines dissipate from ' + holder.name + '.'); 
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         when(holder.hp == 0) empty;
         windowEvent.queueMessage(text:'The healroot soothe\'s ' + holder.name + '.');
         holder.heal(amount:2);
@@ -2331,11 +2425,12 @@ Effect.newEntry(
     blockPoints : 0,
     flags : 0,
     events : {
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {        
-        if (turnIndex >= turnCount)
-          windowEvent.queueMessage(text:holder.name + ' realizes ' + from.name + "'s argument was complete junk!")
-        else          
-          windowEvent.queueMessage(text:holder.name + ' thinks about ' + from.name + "'s argument!");
+      onRemoveEffect ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + ' realizes ' + from.name + "'s argument was complete junk!")
+      },
+    
+      onNextTurn ::(from, item, holder, duration) {        
+        windowEvent.queueMessage(text:holder.name + ' thinks about ' + from.name + "'s argument!");
         return false;
       }
     }
@@ -2366,6 +2461,52 @@ Effect.newEntry(
     }
   }
 )
+
+
+Effect.newEntry(
+  data : {
+    name : 'Dampen Multi-hit',
+    id : 'base:dampen-multi-hit',
+    description: 'All multi-hit attack damage from the holder are nullified.',
+    battleOnly : true,
+    stackable: false,
+    stats: StatSet.new(
+    ),
+    blockPoints : 0,
+    flags : Effect.FLAGS.DEBUFF,
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage) {
+        if (damage.isMultihit) ::<= {
+          windowEvent.queueMessage(text: holder.name + '\'s Dampen Multi-hit nullified the attack!');
+          damage.amount = 0;
+        }
+      }
+    }
+  }
+)
+
+Effect.newEntry(
+  data : {
+    name : 'Multi-hit Guard',
+    id : 'base:dampen-multi-hit',
+    description: 'All multi-hit attack damage targetting the holder are nullified.',
+    battleOnly : true,
+    stackable: false,
+    stats: StatSet.new(
+    ),
+    blockPoints : 0,
+    flags : Effect.FLAGS.BUFF,
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage) {
+        if (damage.isMultihit) ::<= {
+          windowEvent.queueMessage(text: holder.name + '\'s Multi-hit Guard nullified the attack!');
+          damage.amount = 0;
+        }
+      }
+    }
+  }
+)
+
 
 
 Effect.newEntry(
@@ -2434,11 +2575,11 @@ Effect.newEntry(
     stats: StatSet.new(),
     flags : FLAGS.DEBUFF,
     events : {
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {        
-        if (turnIndex >= turnCount)
-          windowEvent.queueMessage(text:holder.name + ' broke free from the grapple!')
-        else          
-          windowEvent.queueMessage(text:holder.name + ' is being grappled and is unable to move!');
+      onRemoveEffect ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + ' broke free from the grapple!')
+      },
+      onNextTurn ::(from, item, holder, duration) {        
+        windowEvent.queueMessage(text:holder.name + ' is being grappled and is unable to move!');
         return false;
       }
     }
@@ -2456,11 +2597,8 @@ Effect.newEntry(
     flags : FLAGS.DEBUFF,
     stats: StatSet.new(),
     events : {
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {        
-        if (turnIndex >= turnCount)
-          windowEvent.queueMessage(text:holder.name + ' broke free from the snare!')
-        else          
-          windowEvent.queueMessage(text:holder.name + ' is ensnared and is unable to move!');
+      onNextTurn ::(from, item, holder, duration) {        
+        windowEvent.queueMessage(text:holder.name + ' is ensnared and is unable to move!');
         return false;
       }
     }
@@ -2478,7 +2616,7 @@ Effect.newEntry(
     flags : 0,
     stats: StatSet.new(),
     events : {
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {        
+      onNextTurn ::(from, item, holder, duration) {        
         windowEvent.queueMessage(text:holder.name + ' is in the middle of grappling and cannot move!');
         return false;
       }
@@ -2497,7 +2635,7 @@ Effect.newEntry(
     flags : 0,
     stats: StatSet.new(),
     events : {
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {        
+      onNextTurn ::(from, item, holder, duration) {        
         windowEvent.queueMessage(text:holder.name + ' is busy keeping someone ensared and cannot move!');
         return false;
       }
@@ -2518,7 +2656,7 @@ Effect.newEntry(
     flags : 0,
     stats: StatSet.new(),
     events : {
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {        
+      onNextTurn ::(from, item, holder, duration) {        
         windowEvent.queueMessage(text:holder.name + ' was bribed and can no longer act!');
         return false;
       }
@@ -2536,7 +2674,7 @@ Effect.newEntry(
     flags : FLAGS.DEBUFF,
     stats: StatSet.new(),
     events : {
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {        
+      onNextTurn ::(from, item, holder, duration) {        
         windowEvent.queueMessage(text:holder.name + ' is still stunned!');
         return false;
       },
@@ -2932,7 +3070,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + " is no longer bleeding out.");
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         windowEvent.queueMessage(text:holder.name + " suffered from bleeding!");
         
         holder.damage(
@@ -2995,7 +3133,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:'The poison rune fades from ' + holder.name + '.');
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         windowEvent.queueMessage(text:holder.name + " was hurt by the poison rune!");
         
         holder.damage(
@@ -3031,9 +3169,11 @@ Effect.newEntry(
         windowEvent.queueMessage(text:'The destruction rune fades from ' + holder.name + '.');
         from.attack(
           target:holder,
-          amount:from.stats.INT * (1.2),
-          damageType : Damage.TYPE.FIRE,
-          damageClass: Damage.CLASS.HP
+          damage: Damage.new(
+            amount:from.stats.INT * (1.2),
+            damageType : Damage.TYPE.FIRE,
+            damageClass: Damage.CLASS.HP
+          )
         );
       }
     }
@@ -3059,7 +3199,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:'The regeneration rune fades from ' + holder.name + '.');
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         when(holder.hp == 0) empty;
         windowEvent.queueMessage(text:holder.name + " was healed by the regeneration rune.");
         holder.heal(amount:1);
@@ -3141,7 +3281,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + " is no longer poisoned.");
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         windowEvent.queueMessage(text:holder.name + " was hurt by the poison!");
         
         holder.damage(
@@ -3207,7 +3347,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + " is no longer burned.");
       },        
       
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {
+      onNextTurn ::(from, item, holder, duration) {
         when(random.number() > 0.5) empty;
         windowEvent.queueMessage(text:holder.name + " was hurt by burns!");
         holder.damage(
@@ -3233,7 +3373,7 @@ Effect.newEntry(
     flags : FLAGS.AILMENT,
     stats: StatSet.new(),
     events : {
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {        
+      onNextTurn ::(from, item, holder, duration) {        
         windowEvent.queueMessage(text:holder.name + ' is still frozen and unable to act!');
         return false;
       },
@@ -3265,7 +3405,7 @@ Effect.newEntry(
       ATK: -100
     ),
     events : {
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {        
+      onNextTurn ::(from, item, holder, duration) {        
         windowEvent.queueMessage(text:holder.name + ' is still paralyzed and unable to act!');
         return false;
       },
@@ -3297,7 +3437,7 @@ Effect.newEntry(
       DEF: -100
     ),
     events : {
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {        
+      onNextTurn ::(from, item, holder, duration) {        
         windowEvent.queueMessage(text:holder.name + ' is still mesmerized and unable to act!');
         return false;
       },
@@ -3327,7 +3467,7 @@ Effect.newEntry(
     stats: StatSet.new(
     ),
     events : {
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {        
+      onNextTurn ::(from, item, holder, duration) {        
         windowEvent.queueMessage(text:holder.name + ' is still wrapped and unable to act!');
         return false;
       },
@@ -3358,7 +3498,7 @@ Effect.newEntry(
       DEF: -50
     ),
     events : {
-      onNextTurn ::(from, item, holder, turnIndex, turnCount) {        
+      onNextTurn ::(from, item, holder, duration) {        
         windowEvent.queueMessage(text:holder.name + ' is still petrified and unable to act!');
         return false;
       },
@@ -3430,6 +3570,365 @@ Effect.newEntry(
     }
   }
 )
+
+Effect.newEntry(
+  data : {
+    name : 'Fire Guard',
+    id : 'base:fire-guard',
+    description: 'Reduces incoming fire damage by 25%',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        if (damage.damageType == Damage.TYPE.FIRE) ::<= {
+          damage.amount *= 0.25;
+        }
+      }
+    }
+  }
+)     
+
+
+Effect.newEntry(
+  data : {
+    name : 'Ice Guard',
+    id : 'base:ice-guard',
+    description: 'Reduces incoming ice damage by 25%',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        if (damage.damageType == Damage.TYPE.ICE) ::<= {
+          damage.amount *= 0.25;
+        }
+      }
+    }
+  }
+)     
+
+
+Effect.newEntry(
+  data : {
+    name : 'Thunder Guard',
+    id : 'base:thunder-guard',
+    description: 'Reduces incoming thunder damage by 25%',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        if (damage.damageType == Damage.TYPE.ICE) ::<= {
+          damage.amount *= 0.25;
+        }
+      }
+    }
+  }
+)     
+
+
+Effect.newEntry(
+  data : {
+    name : 'Dark Guard',
+    id : 'base:dark-guard',
+    description: 'Reduces incoming dark damage by 25%',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        if (damage.damageType == Damage.TYPE.DARK) ::<= {
+          damage.amount *= 0.25;
+        }
+      }
+    }
+  }
+)     
+
+Effect.newEntry(
+  data : {
+    name : 'Light Guard',
+    id : 'base:light-guard',
+    description: 'Reduces incoming light damage by 25%',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        if (damage.damageType == Damage.TYPE.LIGHT) ::<= {
+          damage.amount *= 0.25;
+        }
+      }
+    }
+  }
+)     
+
+Effect.newEntry(
+  data : {
+    name : 'Poison Guard',
+    id : 'base:poison-guard',
+    description: 'Reduces incoming poison damage by 25%',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        if (damage.damageType == Damage.TYPE.POISON) ::<= {
+          damage.amount *= 0.25;
+        }
+      }
+    }
+  }
+)     
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Fire Curse',
+    id : 'base:fire-curse',
+    description: 'Deals 1 to 2 fire damage to holder every turn. If the holder gains Burning, all instances of this are removed.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAddEffect ::(from, holder, item, effectData) {
+        if (effectData.id == 'base:burning') ::<= {
+          windowEvent.queueMessage(
+            text: 'Burning lifted the Fire Curse!'
+          );
+          
+          holder.removeEffectsByFilter(::(value) <- value.id == 'base:fire-curse');
+        }
+      },
+      onNextTurn ::(from, item, holder, duration) {     
+        windowEvent.queueMessage(
+          text: holder.name + ' is hurt by the Fire Curse!'
+        );  
+         
+        holder.damage(
+          attacker: holder,
+          damage: Damage.new(
+            amount:random.integer(from:1, to:2),
+            damageType : Damage.TYPE.FIRE,
+            damageClass: Damage.CLASS.HP
+          ),dodgeable: false 
+        );
+      }
+    }
+  }
+)     
+
+Effect.newEntry(
+  data : {
+    name : 'Ice Curse',
+    id : 'base:ice-curse',
+    description: 'Deals 1 to 2 fire damage to holder every turn. If the holder gains Icy, all instances of this are removed.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAddEffect ::(from, holder, item, effectData) {
+        if (effectData.id == 'base:icy') ::<= {
+          windowEvent.queueMessage(
+            text: 'Icy lifted the Ice Curse!'
+          );
+          
+          holder.removeEffectsByFilter(::(value) <- value.id == 'base:ice-curse');
+        }
+      },
+      onNextTurn ::(from, item, holder, duration) {     
+        windowEvent.queueMessage(
+          text: holder.name + ' is hurt by the Ice Curse!'
+        );  
+         
+        holder.damage(
+          attacker: holder,
+          damage: Damage.new(
+            amount:random.integer(from:1, to:2),
+            damageType : Damage.TYPE.ICE,
+            damageClass: Damage.CLASS.HP
+          ),dodgeable: false 
+        );
+      }
+    }
+  }
+)     
+
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Thunder Curse',
+    id : 'base:thunder-curse',
+    description: 'Deals 1 to 2 thunder damage to holder every turn. If the holder gains Shock, all instances of this are removed.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAddEffect ::(from, holder, item, effectData) {
+        if (effectData.id == 'base:shock') ::<= {
+          windowEvent.queueMessage(
+            text: 'Shock lifted the Thunder Curse!'
+          );
+          
+          holder.removeEffectsByFilter(::(value) <- value.id == 'base:thunder-curse');
+        }
+      },
+      onNextTurn ::(from, item, holder, duration) {     
+        windowEvent.queueMessage(
+          text: holder.name + ' is hurt by the Thunder Curse!'
+        );  
+         
+        holder.damage(
+          attacker: holder,
+          damage: Damage.new(
+            amount:random.integer(from:1, to:2),
+            damageType : Damage.TYPE.THUNDER,
+            damageClass: Damage.CLASS.HP
+          ),dodgeable: false 
+        );
+      }
+    }
+  }
+)     
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Dark Curse',
+    id : 'base:dark-curse',
+    description: 'Deals 1 to 2 dark damage to holder every turn. If the holder gains Dark, all instances of this are removed.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAddEffect ::(from, holder, item, effectData) {
+        if (effectData.id == 'base:dark') ::<= {
+          windowEvent.queueMessage(
+            text: 'Dark lifted the Dark Curse!'
+          );
+          
+          holder.removeEffectsByFilter(::(value) <- value.id == 'base:dark-curse');
+        }
+      },
+      onNextTurn ::(from, item, holder, duration) {     
+        windowEvent.queueMessage(
+          text: holder.name + ' is hurt by the Dark Curse!'
+        );  
+         
+        holder.damage(
+          attacker: holder,
+          damage: Damage.new(
+            amount:random.integer(from:1, to:2),
+            damageType : Damage.TYPE.DARK,
+            damageClass: Damage.CLASS.HP
+          ),dodgeable: false 
+        );
+      }
+    }
+  }
+)     
+
+Effect.newEntry(
+  data : {
+    name : 'Light Curse',
+    id : 'base:light-curse',
+    description: 'Deals 1 to 2 light damage to holder every turn. If the holder gains Shimmering, all instances of this are removed.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAddEffect ::(from, holder, item, effectData) {
+        if (effectData.id == 'base:shimmering') ::<= {
+          windowEvent.queueMessage(
+            text: 'Shimmering lifted the Light Curse!'
+          );
+          
+          holder.removeEffectsByFilter(::(value) <- value.id == 'base:light-curse');
+        }
+      },
+      onNextTurn ::(from, item, holder, duration) {     
+        windowEvent.queueMessage(
+          text: holder.name + ' is hurt by the Light Curse!'
+        );  
+         
+        holder.damage(
+          attacker: holder,
+          damage: Damage.new(
+            amount:random.integer(from:1, to:2),
+            damageType : Damage.TYPE.LIGHT,
+            damageClass: Damage.CLASS.HP
+          ),dodgeable: false 
+        );
+      }
+    }
+  }
+)     
+
+
+Effect.newEntry(
+  data : {
+    name : 'Poison Curse',
+    id : 'base:poison-curse',
+    description: 'Deals 1 to 2 poison damage to holder every turn. If the holder gains Toxic, all instances of this are removed.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAddEffect ::(from, holder, item, effectData) {
+        if (effectData.id == 'base:toxic') ::<= {
+          windowEvent.queueMessage(
+            text: 'Toxic lifted the Poison Curse!'
+          );
+          
+          holder.removeEffectsByFilter(::(value) <- value.id == 'base:poison-curse');
+        }
+      },
+      onNextTurn ::(from, item, holder, duration) {     
+        windowEvent.queueMessage(
+          text: holder.name + ' is hurt by the Poison Curse!'
+        );  
+         
+        holder.damage(
+          attacker: holder,
+          damage: Damage.new(
+            amount:random.integer(from:1, to:2),
+            damageType : Damage.TYPE.POISON,
+            damageClass: Damage.CLASS.HP
+          ),dodgeable: false 
+        );
+      }
+    }
+  }
+)    
 
 
 Effect.newEntry(
@@ -3531,7 +4030,7 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
-    name : 'Frozen',
+    name : 'Freezing',
     id : 'base:frozen',
     description: 'Attacks have 10% chance to inflict Frozen for 2 turns.',
     battleOnly : true,
@@ -3807,9 +4306,11 @@ Effect.newEntry(
 
           holder.attack(
             target:from,
-            amount: dmg,
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP
+            damage: Damage.new(
+              amount: dmg,
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            )
           );        
           
           holder.addEffect(from:holder, id:'base:stunned', durationTurns:1);
@@ -3871,6 +4372,66 @@ Effect.newEntry(
   }
 )   
 
+Effect.newEntry(
+  data : {
+    name : 'Clean Blessing',
+    id : 'base:clean-blessing',
+    description: 'Any time an effect is forcibly removed from the holder, a random positive effect is added for 3 turns.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onEffectRemoveForced ::(from, holder, item, effectData) {
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Clean Blessing granted a positive effect!'
+        );
+        
+        holder.addEffect(
+          id: Effect.getRandomFiltered(::(value) <- 
+            (value.traits & Effect.TRAITS.SPECIAL) == 0 &&
+            (value.traits & Effect.TRAITS.BUFF) != 0
+          ),
+          durationTurns: 3,
+          from:holder
+        );
+      }
+    }
+  }
+)    
+
+Effect.newEntry(
+  data : {
+    name : 'Clean Curse',
+    id : 'base:clean-curse',
+    description: 'Any time an effect is forcibly removed from the holder, a random negative effect is added for 3 turns.',
+    battleOnly : true,
+    stackable: true,
+    blockPoints : 0,
+    flags : FLAGS.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onEffectRemoveForced ::(from, holder, item, effectData) {
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Clean Curse inflicted a negative effect!'
+        );
+        
+        holder.addEffect(
+          id: Effect.getRandomFiltered(::(value) <- 
+            (value.traits & Effect.TRAITS.SPECIAL) == 0 &&
+            (
+              (value.traits & Effect.TRAITS.DEBUFF) != 0 ||
+              (value.traits & Effect.TRAITS.AILMENT) != 0
+            )
+          ),
+          durationTurns: 3,
+          from:holder
+        );
+      }
+    }
+  }
+)    
 
 
 }

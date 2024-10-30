@@ -68,6 +68,15 @@
   returns:  ignored
   args:
     
+  Event:    onEffectRemoveForced
+  About:    Called when an effect is forcibly removed, that is, not from reaching its duration 
+            and not from a battle ending.
+  returns:  false prevents removal of the effect
+  args:
+    - effectData 
+      - id: the effect being given 
+      - duration: the duration in turns
+
   
   
   Event:    onPreDamage
@@ -191,7 +200,7 @@
     - item: the item involved with the effect 
     - effectData 
       - id: the effect being given 
-      - durationTurns: the duration in turns
+      - duration: the duration in turns
 
 
   Event:    onPostAddEffect 
@@ -200,8 +209,8 @@
   args:
     - from: the entity giving the effect
     - item: the item involved with the effect
-    - effectID: the art id of the effect
-    - effectDurationTurns: the number of turns that the effect will be added for
+    - id: the art id of the effect
+    - duration: the number of turns that the effect will be added for
 
   Event:    onCritted 
   About:    called after getting critical hit 
@@ -287,11 +296,14 @@
         return state.save();
       },
       
-      addInnate::(id, item) {
+      addInnate::(id, item, from) {
+        @:Item = import(module:'game_mutator.item.mt');
+        if (item == empty) item = Item.NONE;
         @:ref = {
+          holder : holder,
+          from : from,
           id : id,
           item : item,
-          turnCount : 0,
           duration : 999999999
         };
         state.innateEffects->push(:ref);
@@ -318,12 +330,15 @@
       
       getAll : getAll,
       
-      add::(id, duration => Number, item, from, overrideTurnCount) {
+      add::(id, duration => Number, item, from) {
         @effect = Effect.find(:id);
         @:Item = import(module:'game_mutator.item.mt');
         
         if (item == empty)
           item = Item.NONE;
+        
+        if (from == empty)
+          from = holder;
         
         // already added. Ignores innate effects.
         when (effect.stackable == false && state.effects->findIndexCondition(::(value) <- id == value.id) != -1) empty;
@@ -333,7 +348,6 @@
           holder: holder,
           id : id,
           duration : duration,
-          turnCount : 0,
           from : from,
           item : item
         };
@@ -351,13 +365,34 @@
       },
       
       removeByFilter::(filter) {
-        @:all = [...state.effects]->filter(:filter);
+        @all = [...state.effects]->filter(:filter);
         when(all->size == 0) empty;
+
+        all = all->filter(::(value) <-
+          {:::} {
+            // forget to ask someone?
+            @:rets = this.emitEvent(
+              name : 'onEffectRemoveForced',
+              effectData : value
+            );
+            
+            foreach(rets) ::(k, ret) {
+              if (ret.returned == false)
+                send(:false);
+            }
+            return true;
+          }
+        );
+        
+        when (all->size == 0) empty;
+
         
         @:allrev = {};
         foreach(all) ::(i, v) {
           allrev[v] = true;
         }
+        
+
         
         this.emitEvent(
           name : 'onRemoveEffect',
@@ -434,13 +469,7 @@
             args.from = v.from;
             args.item = v.item;
             args.holder = holder;
-            if (v.turnCount != empty) ::<= {
-              args.turnCount = v.turnCount;
-              args.turnIndex = v.turnCount - v.duration;
-            } else ::<= {
-              args.turnCount = empty;
-              args.turnIndex = empty;
-            }
+            args.duration = v.duration;
             
             @:r = cb(*args);
             
@@ -493,7 +522,7 @@
         
         
         @:turnCount ::(effect) {
-          @:count = effect.duration - effect.turnCount;
+          @:count = effect.duration;
           when(count > 99) 'A long time'
           return '' + count;
         }

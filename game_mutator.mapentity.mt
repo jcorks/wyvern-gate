@@ -771,9 +771,11 @@ MapEntity.Task.database.newEntry(
               @target = random.pickArrayItem(list:enemies);
               ally.attack(
                 target,
-                amount:ally.stats.ATK * (0.5),
-                damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
+                damage: Damage.new(
+                  amount:ally.stats.ATK * (0.5),
+                  damageType : Damage.TYPE.PHYS,
+                  damageClass: Damage.CLASS.HP
+                )
               );     
             }
           }

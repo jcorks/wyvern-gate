@@ -147,6 +147,15 @@
 
           }
         } else ::<= {
+          if (overrideTargets->findIndexCondition(::(value) <- value->type != Entity.type) != -1) 
+          ::<= {
+            error(:'Hi. This error is happening because the AI decision for an Art returned an invalid value. It is likely that the Art ' + 
+              if (card == empty)
+                '... Actually hold on, there is apparently another error (card == empty?)'
+              else 
+                card.id + ' is the culprit. (overrideTargets is of type ' + String(:targets->type) + ')'
+            )
+          }        
           targets = overrideTargets;
         }
         
@@ -210,12 +219,24 @@
           foreach(hand) ::(k, full) {
             @v = full.card;
             @art = Arts.find(id:v.id);
+            
+            // objects with no size are equivalent to no override targets.
+            if (full.overrideTargets->type == Object &&
+              full.overrideTargets->size == 0) ::<= {
+              full.overrideTargets = empty;   
+            }
+            
+            // "true" is shorthand for "just choose a target please"
+            if (full.overrideTargets->type == Boolean) ::<= {
+              full.overrideTargets = empty;
+            }
+            
             if (art.kind == Arts.KIND.EFFECT && random.flipCoin()) ::<= {
               when (projectedAP < 2) empty;
               this.commitTargettedAction(
                 battle,
                 card:v,
-                overrideTargets:if (full.overrideTargets->type != Boolean) full.overrideTargets,
+                overrideTargets: full.overrideTargets,
                 onCommit ::(action) {
                   acts->push(:action)
                 }
@@ -297,6 +318,9 @@
             when(acts->size == 0) windowEvent.CALLBACK_DONE
             @:act = acts[0]
             acts->remove(:0)
+            
+
+            
             battle.entityCommitAction(action:act);
             
           }

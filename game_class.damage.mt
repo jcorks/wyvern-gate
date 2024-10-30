@@ -39,19 +39,24 @@
     damageClass : Number,
     amount : Number,
     damageType : Number,
-    forceCrit : Boolean
+    forceCrit : Boolean,
+    forceDEFbypass : Boolean,
+    isMultihit : Boolean
   }
 );
 
 @:Damage = {
   TYPE : TYPE,
   CLASS : CLASS,
-  new ::(amount, damageType, damageClass) {
+  type : type,
+  new ::(amount, damageType, damageClass, isMultihit) {
     @:out = Object.instantiate(type);
     out.damageClass = damageClass;
     out.damageType = damageType;
     out.amount = amount;
     out.forceCrit = false;
+    out.forceDEFbypass = false;
+    out.isMultihit = if (isMultihit == empty) false else isMultihit;
     return out;
   }
 }

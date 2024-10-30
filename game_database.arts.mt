@@ -63,7 +63,8 @@
   DARK : 512,
   POISON : 1024,
   SPECIAL : 2048,
-  COSTLESS : 4096
+  COSTLESS : 4096,
+  MULTIHIT : 8192
 }
 
 
@@ -77,13 +78,33 @@
 @:reset = ::{
 
 @:ATTACK_SHIFTS = [
-  "base:shimmering",
   "base:burning",
-  "base:dark",
   "base:icy",
   "base:shock",
+  "base:shimmering",
+  "base:dark",
   "base:toxic"
 ]
+
+@:CURSED_SHIFTS = [
+  "base:fire-curse",
+  "base:ice-curse",
+  "base:thunder-curse",
+  "base:light-curse",
+  "base:dark-curse",
+  "base:poison-curse"
+]
+
+@:AILMENTS = [
+  "base:burned",
+  "base:frozen",
+  "base:paralyzed",
+  "base:petrified",
+  "base:blind",
+  "base:poisoned"
+]
+
+
 
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Item = import(module:'game_mutator.item.mt');
@@ -116,9 +137,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:Arts.find(:'base:attack').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:Arts.find(:'base:attack').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );        
@@ -158,9 +181,11 @@ Arts.newEntry(
 
           if (user.attack(
             target:targets[0],
-            amount:1,
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:1,
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart: Entity.DAMAGE_TARGET.HEAD,
             targetDefendPart:targetDefendParts[0]
           ) == true)
@@ -209,9 +234,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:Arts.find(:'base:precise-strike').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:Arts.find(:'base:precise-strike').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );            
@@ -246,9 +273,11 @@ Arts.newEntry(
         onEnter :: {
           if (user.attack(
             target:targets[0],
-            amount:Arts.find(:'base:tranquilizer').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:Arts.find(:'base:tranquilizer').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
           ) == true)           
@@ -326,18 +355,22 @@ Arts.newEntry(
           if (targets[0].flags.has(flag:StateFlags.HURT)) 
             user.attack(
               target:targets[0],
-              amount:Arts.find(:'base:follow-up').baseDamage(level, user)*2,
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP,
+              damage: Damage.new(
+                amount:Arts.find(:'base:follow-up').baseDamage(level, user)*2,
+                damageType : Damage.TYPE.PHYS,
+                damageClass: Damage.CLASS.HP
+              ),
               targetPart:targetParts[0],
               targetDefendPart:targetDefendParts[0]
             )
           else
             user.attack(
               target:targets[0],
-              amount:Arts.find(:'base:follow-up').baseDamage(level, user),
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP,
+              damage: Damage.new(
+                amount:Arts.find(:'base:follow-up').baseDamage(level, user),
+                damageType : Damage.TYPE.PHYS,
+                damageClass: Damage.CLASS.HP
+              ),
               targetPart : targetParts[0],
               targetDefendPart:targetDefendParts[0]
             );
@@ -356,11 +389,11 @@ Arts.newEntry(
     notifCommit : '$1 attacks twice!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: "Damages a target based on the user's ATK. Additional levels increase the damage per hit.",
+    description: "Multi-hit attack that damages a target based on the user's ATK. Additional levels increase the damage per hit.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.MULTIHIT,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -373,9 +406,12 @@ Arts.newEntry(
           @target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
           user.attack(
             target,
-            amount: Arts.find(:'base:doublestrike').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount: Arts.find(:'base:doublestrike').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP,
+              isMultihit : true
+            ),
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
           );
@@ -388,9 +424,12 @@ Arts.newEntry(
           @target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
           user.attack(
             target,
-            amount:Arts.find(:'base:doublestrike').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:Arts.find(:'base:doublestrike').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP,
+              isMultihit : true
+            ),
             targetPart : targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
           );
@@ -408,13 +447,13 @@ Arts.newEntry(
     name: 'Triplestrike',
     id : 'base:triplestrike',
     targetMode : TARGET_MODE.ALLENEMY,
-    description: "Damages three targets based on the user's ATK. Each level increases the amount of damage done.",
+    description: "Multi-hit attack that damages three targets based on the user's ATK. Each level increases the amount of damage done.",
     notifCommit : '$1 attacks three times!',
     notifFail : Arts.NO_NOTIF,
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.MULTIHIT,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -429,9 +468,12 @@ Arts.newEntry(
           @target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
           user.attack(
             target,
-            amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP,
+              isMultihit : true
+            ),
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
           );
@@ -444,9 +486,12 @@ Arts.newEntry(
           @:target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
           user.attack(
             target,
-            amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP,
+              isMultihit : true
+            ),
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
           );
@@ -458,9 +503,12 @@ Arts.newEntry(
           @:target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
           user.attack(
             target,
-            amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP,
+              isMultihit : true
+            ),
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
           );
@@ -640,9 +688,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target: targets[0],
-            amount: Arts.find(:'base:moonbeam').baseDamage(user, level),
-            damageType : Damage.TYPE.FIRE,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount: Arts.find(:'base:moonbeam').baseDamage(user, level),
+              damageType : Damage.TYPE.FIRE,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );
@@ -687,9 +737,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target: targets[0],
-            amount:Arts.find(:'base:sunbeam').baseDamage(level, user),
-            damageType : Damage.TYPE.FIRE,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:Arts.find(:'base:sunbeam').baseDamage(level, user),
+              damageType : Damage.TYPE.FIRE,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart : targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );
@@ -738,9 +790,11 @@ Arts.newEntry(
 
             user.attack(
               target: enemy,
-              amount: Arts.find(:'base:sunburst').baseDamage(level, user),
-              damageType : Damage.TYPE.FIRE,
-              damageClass: Damage.CLASS.HP
+              damage: Damage.new(
+                amount: Arts.find(:'base:sunburst').baseDamage(level, user),
+                damageType : Damage.TYPE.FIRE,
+                damageClass: Damage.CLASS.HP
+              )
             );
           }
         )
@@ -1033,9 +1087,11 @@ Arts.newEntry(
         onEnter :: {
           if (user.attack(
             target:targets[0],
-            amount:user.stats.ATK * (0.3 + (level-1)*0.05),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:user.stats.ATK * (0.3 + (level-1)*0.05),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart: Entity.DAMAGE_TARGET.BODY,
             targetDefendPart:targetDefendParts[0]
           ) == true)            
@@ -1172,9 +1228,11 @@ Arts.newEntry(
 
             if (user.attack(
               target:enemy,
-              amount:user.stats.ATK * (0.3),
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP,
+              damage: Damage.new(
+                amount:user.stats.ATK * (0.3),
+                damageType : Damage.TYPE.PHYS,
+                damageClass: Damage.CLASS.HP
+              ),
               targetPart:Entity.DAMAGE_TARGET.LIMBS,
               targetDefendPart:targetDefendParts[i]
             ) == true)
@@ -1212,9 +1270,11 @@ Arts.newEntry(
           onEnter :: {
             user.attack(
               target,
-              amount:Arts.find(:'base:big-swing').baseDamage(level, user),
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP,
+              damage: Damage.new(
+                amount:Arts.find(:'base:big-swing').baseDamage(level, user),
+                damageType : Damage.TYPE.PHYS,
+                damageClass: Damage.CLASS.HP
+              ),
               targetPart: Entity.DAMAGE_TARGET.BODY,
               targetDefendPart:targetDefendParts[index]
             );
@@ -1252,9 +1312,11 @@ Arts.newEntry(
 
           user.attack(
             target:targets[0],
-            amount:Arts.find(:'base:tackle').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:Arts.find(:'base:tackle').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart: Entity.DAMAGE_TARGET.BODY,
             targetDefendPart:targetDefendParts[0]
           );
@@ -1301,9 +1363,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],              
-            amount:Arts.find(:'base:throw-item').baseDamage(level, user) * (item.base.weight * 4),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:Arts.find(:'base:throw-item').baseDamage(level, user) * (item.base.weight * 4),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );
@@ -1339,9 +1403,11 @@ Arts.newEntry(
           
           if (user.attack(
             target:targets[0],
-            amount:Arts.find(:'base:stun').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:Arts.find(:'base:stun').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart: Entity.DAMAGE_TARGET.BODY,
             targetDefendPart:targetDefendParts[0]
           ) == true)     
@@ -1361,11 +1427,11 @@ Arts.newEntry(
     notifCommit : 'A cold air emanates from $1!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target with an ice attack. 90% chance to Freeze. Additional levels increase its power.",
+    description: "Multi-hit attack that damages a target with an ice attack. 90% chance to Freeze. Additional levels increase its power.",
     keywords : ['base:frozen'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.MAGIC | TRAITS.ICE,
+    traits : TRAITS.MAGIC | TRAITS.ICE | TRAITS.MULTIHIT,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -1379,9 +1445,12 @@ Arts.newEntry(
 
           if (user.attack(
             target:targets[0],
-            amount:Arts.find(:'base:sheer-cold').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(          
+              amount:Arts.find(:'base:sheer-cold').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP,
+              isMultihit : true
+            ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
           ) == true)          
@@ -1504,11 +1573,11 @@ Arts.newEntry(
     notifCommit : '$1 does a combo strike $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages the same target twice at the same target and location. Additional levels increases the power.",
+    description: "Multi-hit attack that damages the same target twice at the same target and location. Additional levels increases the power.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.MULTIHIT,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -1522,9 +1591,12 @@ Arts.newEntry(
           
           user.attack(
             target: targets[0],
-            amount: Arts.find(:'base:combo-strike').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount: Arts.find(:'base:combo-strike').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP,
+              isMultihit : true
+            ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );
@@ -1535,9 +1607,12 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target: targets[0],
-            amount:Arts.find(:'base:combo-strike').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:Arts.find(:'base:combo-strike').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP,
+              isMultihit : true
+            ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );
@@ -1789,9 +1864,11 @@ Arts.newEntry(
 
           if (user.attack(
             target: targets[0],
-            amount: Arts.find(:'base:poison-attack').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount: Arts.find(:'base:poison-attack').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
           ))
@@ -1827,9 +1904,11 @@ Arts.newEntry(
 
           if (user.attack(
             target: targets[0],
-            amount: Arts.find(:'base:petrify').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount: Arts.find(:'base:petrify').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
           ))
@@ -1970,9 +2049,11 @@ Arts.newEntry(
         onEnter :: {
           if (user.attack(
             target: targets[0],
-            amount: Arts.find(:'base:stab').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount: Arts.find(:'base:stab').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
           ) == true)
@@ -2371,9 +2452,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:Arts.find(:'base:fire').baseDamage(level, user),
-            damageType : Damage.TYPE.FIRE,
-            damageClass: Damage.CLASS.HP
+            damage: Damage.new(
+              amount:Arts.find(:'base:fire').baseDamage(level, user),
+              damageType : Damage.TYPE.FIRE,
+              damageClass: Damage.CLASS.HP
+            )
           );
         }
       );
@@ -2407,9 +2490,11 @@ Arts.newEntry(
           onEnter :: {
             if (user.attack(
               target:target,
-              amount: Arts.find(:'base:backdraft').baseDamage(level, user),
-              damageType : Damage.TYPE.FIRE,
-              damageClass: Damage.CLASS.HP
+              damage: Damage.new(
+                amount: Arts.find(:'base:backdraft').baseDamage(level, user),
+                damageType : Damage.TYPE.FIRE,
+                damageClass: Damage.CLASS.HP
+              )
             ))
               targets[0].addEffect(from:user, id:'base:burned', durationTurns:5);
           }
@@ -2445,9 +2530,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount: Arts.find(:'base:flare').baseDamage(level, user),
-            damageType : Damage.TYPE.FIRE,
-            damageClass: Damage.CLASS.HP
+            damage: Damage.new(
+              amount: Arts.find(:'base:flare').baseDamage(level, user),
+              damageType : Damage.TYPE.FIRE,
+              damageClass: Damage.CLASS.HP
+            )
           );
         }
       )
@@ -2501,8 +2588,11 @@ Arts.newEntry(
 
       windowEvent.queueCustom(
         onEnter :: {
-      
+          @:world = import(module:'game_singleton.world.mt');      
           targets[0].unequipItem(item);
+          if (world.party.isMember(entity:targets[0]))
+            world.party.inventory.add(item);
+          
         }
       );
       windowEvent.queueMessage(
@@ -2521,11 +2611,11 @@ Arts.newEntry(
     notifCommit : '$1 casts Ice!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Magick that damages all enemies with ice based on INT.',
+    description: 'Multi-hit magick that damages all enemies with ice based on INT.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.MAGIC | TRAITS.ICE,
+    traits : TRAITS.MAGIC | TRAITS.ICE | TRAITS.MULTIHIT,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2539,9 +2629,12 @@ Arts.newEntry(
 
             user.attack(
               target:enemy,
-              amount: Arts.find(:'base:ice').baseDamage(level, user),
-              damageType : Damage.TYPE.ICE,
-              damageClass: Damage.CLASS.HP
+              damage: Damage.new(
+                amount: Arts.find(:'base:ice').baseDamage(level, user),
+                damageType : Damage.TYPE.ICE,
+                damageClass: Damage.CLASS.HP,
+                isMultihit : true
+              )
             );
           }
         )
@@ -2557,11 +2650,11 @@ Arts.newEntry(
     notifCommit : '$1 casts Frozen Flame!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Magick that causes enemies to spontaneously combust in a cold, blue flame. Damage is based on INT with an additional chance to Freeze the hit targets. Additional levels increase damage.',
+    description: 'Multi-hit magick that causes enemies to spontaneously combust in a cold, blue flame. Damage is based on INT with an additional chance to Freeze the hit targets. Additional levels increase damage.',
     keywords : ['base:frozen'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.MAGIC | TRAITS.ICE,
+    traits : TRAITS.MAGIC | TRAITS.ICE | TRAITS.MULTIHIT,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2574,9 +2667,12 @@ Arts.newEntry(
           onEnter :: {
             user.attack(
               target:enemy,
-              amount: Arts.find(:'base:frozen-flame').baseDamage(level, user),
-              damageType : Damage.TYPE.ICE,
-              damageClass: Damage.CLASS.HP
+              damage: Damage.new(
+                amount: Arts.find(:'base:frozen-flame').baseDamage(level, user),
+                damageType : Damage.TYPE.ICE,
+                damageClass: Damage.CLASS.HP,
+                isMultihit : true
+              )
             );
           }
         )
@@ -2627,11 +2723,11 @@ Arts.newEntry(
     notifCommit : '$1 casts Explosion!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Magick that damages all enemies with fire based on the user\'s INT. Additional levels increase the damage.',
+    description: 'Multi-hit magick that damages all enemies with fire based on the user\'s INT. Additional levels increase the damage.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.MAGIC | TRAITS.FIRE,
+    traits : TRAITS.MAGIC | TRAITS.FIRE | TRAITS.MULTIHIT,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2644,9 +2740,12 @@ Arts.newEntry(
           onEnter :: {
             user.attack(
               target:enemy,
-              amount:Arts.find(:'base:explosion').baseDamage(level, user),
-              damageType : Damage.TYPE.FIRE,
-              damageClass: Damage.CLASS.HP
+              damage: Damage.new(
+                amount:Arts.find(:'base:explosion').baseDamage(level, user),
+                damageType : Damage.TYPE.FIRE,
+                damageClass: Damage.CLASS.HP,
+                isMultihit : true
+              )
             );
           }
         )
@@ -2701,11 +2800,11 @@ Arts.newEntry(
     notifCommit : '$1 casts Thunder!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Magick that deals 4 random strikes based on INT. Each additional level deals an additional 2 strikes.',
+    description: 'Multi-hit magick that deals 4 random strikes based on INT. Each additional level deals an additional 2 strikes.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.MAGIC | TRAITS.THUNDER,
+    traits : TRAITS.MAGIC | TRAITS.THUNDER | TRAITS.MULTIHIT,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2719,9 +2818,12 @@ Arts.newEntry(
           onEnter :: {
             user.attack(
               target,
-              amount:Arts.find(:'base:thunder').baseDamage(level, user),
-              damageType : Damage.TYPE.THUNDER,
-              damageClass: Damage.CLASS.HP
+              damage: Damage.new(
+                amount:Arts.find(:'base:thunder').baseDamage(level, user),
+                damageType : Damage.TYPE.THUNDER,
+                damageClass: Damage.CLASS.HP,
+                isMultihit : true
+              )
             );
           }
         )
@@ -2738,11 +2840,11 @@ Arts.newEntry(
     notifCommit : '$1 swings wildly!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Attack that deals 4 random strikes based on ATK. Additional levels increase the number of strikes.',
+    description: 'Multi-hit attack that deals 4 random strikes based on ATK. Additional levels increase the number of strikes.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.MULTIHIT,
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2756,9 +2858,12 @@ Arts.newEntry(
           onEnter :: {
             user.attack(
               target,
-              amount:Arts.find(:'base:wild-swing').baseDamage(level, user),
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP,
+              damage: Damage.new(
+                amount:Arts.find(:'base:wild-swing').baseDamage(level, user),
+                damageType : Damage.TYPE.PHYS,
+                damageClass: Damage.CLASS.HP,
+                isMultihit : true
+              ),
               targetPart: Entity.normalizedDamageTarget(),
               targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
             );
@@ -4890,9 +4995,11 @@ Arts.newEntry(
           onEnter :: {
             user.attack(
               target:targets[0],
-              amount:user.stats.ATK * (0.5),
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP,
+              damage: Damage.new(
+                amount:user.stats.ATK * (0.5),
+                damageType : Damage.TYPE.PHYS,
+                damageClass: Damage.CLASS.HP
+              ),
               targetPart:targetParts[0],
               targetDefendPart:targetDefendParts[0]
             );            
@@ -5375,9 +5482,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:2,
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:2,
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );    
@@ -5464,9 +5573,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:1,
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:1,
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );            
@@ -5502,9 +5613,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:user.stats.HP - user.hp,
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:user.stats.HP - user.hp,
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );   
@@ -5582,9 +5695,11 @@ Arts.newEntry(
 
           user.attack(
             target:targets[0],
-            amount:user.stats.ATK * (0.3),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:user.stats.ATK * (0.3),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );            
@@ -5759,8 +5874,7 @@ Arts.newEntry(
 
           user.chooseDiscard(
             act: 'Add to hand.',
-            onChoice::(id, backout) {
-              backout();
+            onChoice::(id) {
               when(id == empty) empty;
               user.deck.addHandCard(id); 
             }
@@ -6073,9 +6187,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:Arts.find(:'base:bodyslam').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:Arts.find(:'base:bodyslam').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );        
@@ -6568,10 +6684,9 @@ Arts.newEntry(
       );
       
       foreach(toput) ::(k, effectFull) {
-        user.effectStack.add(
+        user.addEffect(
           id:effectFull.id,
-          duration: effectFull.duration,
-          overrideTurnCount : effectFull.turnCount,
+          durationTurns: effectFull.duration,
           from: effectFull.from,
           item: effectFull.item
         );
@@ -6633,10 +6748,9 @@ Arts.newEntry(
       
 
       
-      user.effectStack.add(
+      user.addEffect(
         id:effectFull.id,
-        duration: effectFull.duration,
-        overrideTurnCount : effectFull.turnCount,
+        durationTurns: effectFull.duration,
         from: effectFull.from,
         item: effectFull.item
       );
@@ -6691,10 +6805,9 @@ Arts.newEntry(
 
       foreach(effects) ::(k, v) {
         @:newEffect = Effect.getRandomFiltered(::(value) <- (value.flags & Effect.FLAGS.SPECIAL) == 0);
-        user.effectStack.add(
+        user.addEffect(
+          durationTurns: v.duration,
           id:newEffect.id,
-          duration: v.duration,
-          overrideTurnCount : v.turnCount,
           from: v.from,
           item: v.item
         );        
@@ -6825,10 +6938,9 @@ Arts.newEntry(
       
       
       user.removeEffectsByFilter(filter);
-      targets[0].effectStack.add(
+      targets[0].addEffect(
         id:v.id,
-        duration: v.duration,
-        overrideTurnCount : v.turnCount,
+        durationTurns: v.duration,
         from: v.from,
         item: v.item
       );  
@@ -6886,10 +6998,9 @@ Arts.newEntry(
       foreach(random.scrambled(:toput)) ::(k, v) {
         @:target = random.pickArrayItem(:targets);
         
-        target.effectStack.add(
+        target.addEffect(
           id:v.id,
-          duration: v.duration,
-          overrideTurnCount : v.turnCount,
+          durationTurns: v.duration,
           from: v.from,
           item: v.item
         );  
@@ -6989,10 +7100,9 @@ Arts.newEntry(
         @:effectFull = random.scrambled(:targets[0].effectStack.getAll())[0];
         targets[0].removeEffectsByFilter(::(value) <- value == effectFull);
         
-        user.effectStack.add(
+        user.addEffect(
           id:effectFull.id,
-          duration: effectFull.duration,
-          overrideTurnCount : effectFull.turnCount,
+          durationTurns: effectFull.duration,
           from: effectFull.from,
           item: effectFull.item
         );
@@ -7058,13 +7168,14 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       @:Effect = import(module:'game_database.effect.mt');
-      @:able = enemies->filter(::(value) <- 
+      @:able = random.scrambled(:enemies->filter(::(value) <- 
         value.effectStack.getAll()->filter(::(value) <- 
           ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0) ||
           ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0)
-        )->size > 0);
+        )->size > 0));
+      when(able->size == 0) false;
           
-      return [able]
+      return [able[0]]
     },
     oncePerBattle : false,
     canBlock : false,
@@ -7106,10 +7217,9 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @:able = enemies->filter(::(value) <- 
         value.effectStack.getAll()->filter(::(value) <- 
-          ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0) ||
-          ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0)
+          ((Effect.find(:value.id).flags & Effect.FLAGS.BUFF)  != 0)
         )->size > 0)
-      when(able->size == 0) empty;
+      when(able->size == 0) false;
       return [able[0]];
     },
     oncePerBattle : false,
@@ -7121,8 +7231,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
-        ((Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0) ||
-        ((Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0)
+          ((Effect.find(:value.id).flags & Effect.FLAGS.BUFF)  != 0)
       )]
       when(all->size == 0) Arts.FAIL;
       
@@ -7152,7 +7261,7 @@ Arts.newEntry(
         value.effectStack.getAll()->filter(::(value) <- 
           (Effect.find(:value.id).flags & Effect.FLAGS.BUFF)  != 0
         )->size > 0)
-      when(able->size == 0) empty;
+      when(able->size == 0) false;
       return [able[0]];
     },
     oncePerBattle : false,
@@ -7172,7 +7281,7 @@ Arts.newEntry(
       foreach(all) ::(k, v) {
         @:id = Effect.getRandomFiltered(::(value) <- (value.flags & Effect.FLAGS.SPECIAL) == 0).id;
         targets[0].addEffect(from:user, id, durationTurns:
-          v.duration - v.turnCount
+          v.duration
         );              
       } 
     }
@@ -7601,7 +7710,7 @@ Arts.newEntry(
         user.addEffect(
           from:targets[0], 
           id:v.id, 
-          durationTurns: v.duration - v.turnCount,
+          durationTurns: v.duration,
           item: v.id
         );              
       }
@@ -7646,7 +7755,7 @@ Arts.newEntry(
           targets[0].addEffect(
             from:user, 
             id:v.id, 
-            durationTurns: v.duration - v.turnCount,
+            durationTurns: v.duration,
             item: v.id
           );              
         }
@@ -7694,9 +7803,11 @@ Arts.newEntry(
 
           if (user.attack(
             target:targets[0],
-            amount:Arts.find(:'base:b194').baseDamage(level, user),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:Arts.find(:'base:b194').baseDamage(level, user),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:Entity.DAMAGE_TARGET.BODY,
             targetDefendPart:targetDefendParts[0]
           )) ::<= {
@@ -7711,7 +7822,7 @@ Arts.newEntry(
               targets[0].addEffect(
                 from:user, 
                 id:v.id, 
-                durationTurns: v.duration - v.turnCount,
+                durationTurns: v.duration,
                 item: v.id
               );              
             }
@@ -7719,7 +7830,7 @@ Arts.newEntry(
               user.addEffect(
                 from:targets[0], 
                 id:v.id, 
-                durationTurns: v.duration - v.turnCount,
+                durationTurns: v.duration,
                 item: v.id
               );              
             }
@@ -7756,7 +7867,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
-    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC | TRAITS.MULTIHIT,
     rarity : RARITY.RARE,
     baseDamage::(level, user) <- user.stats.ATK * (0.35) * level,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -7776,9 +7887,12 @@ Arts.newEntry(
             @target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
             user.attack(
               target,
-              amount: Arts.find(:'base:b195').baseDamage(level, user),
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP,
+              damage: Damage.new(
+                amount: Arts.find(:'base:b195').baseDamage(level, user),
+                damageType : Damage.TYPE.PHYS,
+                damageClass: Damage.CLASS.HP,
+                isMultihit : true
+              ),
               targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
               targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
             );
@@ -7799,7 +7913,7 @@ Arts.newEntry(
     notifCommit : 'A warmth emanates from $1!',
     notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ALLENEMY,
-    description: "Removes all of the user\'s stacks of the Burned effect. This causes an explosion that burns all enemies, dealing more damage per stack of burn removed. If the user does not have the Burned status, nothing happens.",
+    description: "Removes all of the user\'s stacks of the Burned effect. This causes an explosion that burns all enemies, dealing more damage per stack of Burned removed. If the user does not have the Burned status, nothing happens.",
     keywords: ['base:burned'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
@@ -7813,7 +7927,7 @@ Arts.newEntry(
     oncePerBattle : false,
     canBlock : false,
     kind : KIND.EFFECT,
-    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC | TRAITS.MULTIHIT,
     rarity : RARITY.RARE,
     baseDamage::(level, user) <- 4 * user.effectStack.getAllByFilter(::(value) <- 
         value.id == 'base:burned'
@@ -7836,9 +7950,12 @@ Arts.newEntry(
           onEnter :: {
             user.attack(
               target,
-              amount: Arts.find(:'base:b196').baseDamage(level, user),
-              damageType : Damage.TYPE.FIRE,
-              damageClass: Damage.CLASS.HP,
+              damage: Damage.new(
+                amount: Arts.find(:'base:b196').baseDamage(level, user),
+                damageType : Damage.TYPE.FIRE,
+                damageClass: Damage.CLASS.HP,
+                isMultihit : true
+              ),
               targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
               targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
             );
@@ -7910,10 +8027,11 @@ Arts.newEntry(
         windowEvent.queueMessage(
           text: user.name + ' unequipped their ' + equipped.name + '.'
         );
+        @:inventory = if (world.party.isMember(:user)) world.party.inventory else user.inventory
         user.unequipItem(
-          item:equipped, 
-          inventory:if (world.party.isMember(:user)) world.party.inventory else user.inventory
+          item:equipped
         );        
+        inventory.add(:equipped);
       }
       
       @:makeItem = ::(base) {
@@ -7938,15 +8056,15 @@ Arts.newEntry(
           text: user.name + ' equipped the ' + item.name + '!'
         );
         
-        user.equip(:item);
+        user.equip(item, slot:Entity.EQUIP_SLOTS.HAND_LR);
       }
       
       
       if (world.party.leader == user) ::<= {
         @:choices = Item.database.getAll()->filter(::(value) <- 
           value.keyItem == false &&
-          ((value.attributes & Item.ATTRIBUTES.WEAPON) != 0) &&
-          ((value.attributes & Item.ATTRIBUTES.KEY_ITEM) == 0)
+          ((value.attributes & Item.ATTRIBUTE.WEAPON) != 0) &&
+          ((value.attributes & Item.ATTRIBUTE.KEY_ITEM) == 0)
         );
         windowEvent.queueChoices(
           prompt: 'Materialize which?',
@@ -7961,8 +8079,8 @@ Arts.newEntry(
         makeItem(:
           random.pickArrayItem(:Item.database.getAll()->filter(::(value) <- 
             value.keyItem == false &&
-            ((value.attributes & Item.ATTRIBUTES.WEAPON) != 0) &&
-            ((value.attributes & Item.ATTRIBUTES.KEY_ITEM) == 0)
+            ((value.attributes & Item.ATTRIBUTE.WEAPON) != 0) &&
+            ((value.attributes & Item.ATTRIBUTE.KEY_ITEM) == 0)
           ))
         );
       }
@@ -8267,9 +8385,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:baseDamage * (1 + 0.25 * targets[0].effectStack.getAll()->size),
-            damageType : Damage.TYPE.PHYS,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:baseDamage * (1 + 0.25 * targets[0].effectStack.getAll()->size),
+              damageType : Damage.TYPE.PHYS,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );        
@@ -8306,9 +8426,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:baseDamage * (1 + 0.25 * targets[0].effectStack.getAll()->size),
-            damageType : Damage.TYPE.LIGHT,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:baseDamage * (1 + 0.25 * targets[0].effectStack.getAll()->size),
+              damageType : Damage.TYPE.LIGHT,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );        
@@ -8357,9 +8479,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:2 + size*2,
-            damageType : Damage.TYPE.FIRE,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:2 + size*2,
+              damageType : Damage.TYPE.FIRE,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );        
@@ -8411,9 +8535,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:2 + size*2,
-            damageType : Damage.TYPE.ICE,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:2 + size*2,
+              damageType : Damage.TYPE.ICE,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );        
@@ -8465,9 +8591,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:2 + size*2,
-            damageType : Damage.TYPE.THUNDER,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:2 + size*2,
+              damageType : Damage.TYPE.THUNDER,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );        
@@ -8520,9 +8648,11 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
-            amount:baseDamage,
-            damageType : Damage.TYPE.FIRE,
-            damageClass: Damage.CLASS.HP,
+            damage: Damage.new(
+              amount:baseDamage,
+              damageType : Damage.TYPE.FIRE,
+              damageClass: Damage.CLASS.HP
+            ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
           );        
@@ -8598,7 +8728,7 @@ Arts.newEntry(
     keywords : ['base:attack-shifts'],
     description: "A 2-turn attack. First turn, the user charges their elemental power and are unable to act. On the second turn, a random set of attack shifts are converted into an attack, causing damage based on INT and +20% more damage for each stack. If this set of attack shifts is 3 or more, the target is knocked out entirely. The set of shifts are removed after the attack. If no shifts are present, nothing happens.",
     durationTurns: 1,
-    usageHintAI : USAGE_HINT.BUFF,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       when(user.effectStack.getAllByFilter(::(value) <-
         ATTACK_SHIFTS->findIndex(:value.id) != -1
@@ -8668,15 +8798,77 @@ Arts.newEntry(
       } else ::<= {
         user.attack(
           target:targets[0],
-          amount:Arts.find(:'base:b215').baseDamage(level, user) * (1.0 + 0.2 * theSet->size),
-          damageType,
-          damageClass: Damage.CLASS.HP,
+          damage: Damage.new(
+            amount:Arts.find(:'base:b215').baseDamage(level, user) * (1.0 + 0.2 * theSet->size),
+            damageType,
+            damageClass: Damage.CLASS.HP
+          ),
           targetPart:targetParts[0],
           targetDefendPart:targetDefendParts[0]
         ); 
       }
       
-      user.effectStack.removeEffectsByFilter(::(value) <- 
+      user.removeEffectsByFilter(::(value) <- 
+        theSet->findIndex(:value) != -1
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@b216',
+    id : 'base:b216',
+    notifCommit : "$1 begins to glow!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALL,
+    keywords : ['base:attack-shifts', 'base:resistance-shifts', 'base:cursed-shifts'],
+    description: "Randomly selects a set of attack shifts to be removed from the user. For each shift removed this way, adds a respective resistance shift on all allies and adds a respective cursed shift on all enemies for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      when(user.effectStack.getAllByFilter(::(value) <-
+        ATTACK_SHIFTS->findIndex(:value.id) != -1
+      )->size == 0) false;
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.ABILITY,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:which = user.effectStack.getAllByFilter(::(value) <-
+        ATTACK_SHIFTS->findIndex(:value.id) != -1
+      );
+      
+      // could have lost it on previous turn
+      when(which->size == 0)
+        windowEvent.queueMessage(
+          text: user.name + ' had no attack shifts to channel!'
+        );
+        
+      @:theOne = random.pickArrayItem(:which).id;
+      @:theSet = user.effectStack.getAllByFilter(::(value) <- value.id == theOne);
+      
+      @:m = match(theOne) {
+        ('base:burning'):   ['base:fire-guard', 'base:fire-curse'],
+        ('base:icy'):       ['base:ice-guard', 'base:ice-curse'],
+        ('base:shock'):     ['base:thunder-guard', 'base:thunder-curse'],
+        ('base:shimmering'):['base:light-guard', 'base:light-curse'],
+        ('base:dark'):      ['base:dark-guard', 'base:dark-curse'],
+        ('base:poison'):    ['base:poison-guard', 'base:poison-curse']
+      }
+      
+      foreach(user.battle.getAllies(:user)) ::(k, ally) {
+        ally.addEffect(from:user, id:[0], durationTurns:3);
+      }
+
+      foreach(user.battle.getEnemies(:user)) ::(k, enm) {
+        enm.addEffect(from:user, id:[1], durationTurns:3);
+      }
+      
+      user.removeEffectsByFilter(::(value) <- 
         theSet->findIndex(:value) != -1
       );
     }
@@ -8684,6 +8876,813 @@ Arts.newEntry(
 )
 
 
+Arts.newEntry(
+  data: {
+    name: '@b217',
+    id : 'base:b217',
+    notifCommit : "$1 begins to glow!",
+    notifFail : "...but nothing happened!",
+    targetMode : TARGET_MODE.ALLALLY,
+    keywords : [],
+    description: "Grants each of the user's positive effects to each other ally. The durations of each effect are preserved.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      when(user.effectStack.getAllByFilter(::(value) <-
+        (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  == 0 &&
+        (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) == 0
+      )->size == 0) false;
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
+      @:which = user.effectStack.getAllByFilter(::(value) <-
+        (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  == 0 &&
+        (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) == 0
+      );
+      
+      when(which->size == 0) Arts.FAIL;
+
+      foreach(targets) ::(k, ally) {
+        when(ally == user) empty;
+        foreach(which) ::(k, v) {
+          ally.addEffect(
+            from:user, 
+            id:v.id, 
+            durationTurns: v.duration,
+            item: v.id
+          );              
+        }
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@b218',
+    id : 'base:b218',
+    notifCommit : "$1 begins to glow!",
+    notifFail : "...but nothing happened!",
+    targetMode : TARGET_MODE.ALLENEMY,
+    keywords : [],
+    description: "Grants each of the user's negative effects to each enemy. The durations of each effect are preserved.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      when(user.effectStack.getAllByFilter(::(value) <-
+        (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
+        (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
+      )->size == 0) false;
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
+      @:which = user.effectStack.getAllByFilter(::(value) <-
+        (Effect.find(:value.id).flags & Effect.FLAGS.DEBUFF)  != 0 ||
+        (Effect.find(:value.id).flags & Effect.FLAGS.AILMENT) != 0
+      );
+
+      when(which->size == 0) Arts.FAIL;
+
+      foreach(targets) ::(k, e) {
+        foreach(which) ::(k, v) {
+          e.addEffect(
+            from:user, 
+            id:v.id, 
+            durationTurns: v.duration,
+            item: v.id
+          );              
+        }
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@b219',
+    id : 'base:b219',
+    notifCommit : "$1 begins to glow!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:poisoned', 'base:burned'],
+    description: "Remove all stacks of Poisoned and Burned from target. Draw a card.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:which = allies.effectStack.getAllByFilter(::(value) <-
+        value.id == 'base:burned' ||
+        value.id == 'base:poisoned' 
+      )
+      
+      when(which->size == 0) false;
+      
+      return [random.pickArrayItem(:which)];
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].removeEffectsByFilter(::(value) <-
+        value.id == 'base:burned' ||
+        value.id == 'base:poisoned' 
+      );
+      
+      user.drawArt(count: 1);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@b220',
+    id : 'base:b220',
+    notifCommit : "$1 begins to glow!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:cursed-shifts', 'base:elemental-tag'],
+    description: "Remove Elemental Tag and cursed shifts from target. Draw a card.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:which = allies.effectStack.getAllByFilter(::(value) <-
+        value.id == 'base:elemental-tag' ||
+        CURSED_SHIFTS->findIndex(:value.id) != -1
+      )
+      
+      when(which->size == 0) false;
+      
+      return [random.pickArrayItem(:which)];
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].removeEffectsByFilter(::(value) <-
+        value.id == 'base:elemental-tag' ||
+        CURSED_SHIFTS->findIndex(:value.id) != -1
+      );
+      
+      user.drawArt(count: 1);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@b221',
+    id : 'base:b221',
+    notifCommit : "$1 begins to glow!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:seed-effects'],
+    description: "Remove all seed effects from target. Draw a card.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:which = allies.effectStack.getAllByFilter(::(value) <-
+        value.id == 'base:poisonroot-growing' ||
+        value.id == 'base:triproot-growing' ||
+        value.id == 'base:healroot-growing'
+      )
+      
+      when(which->size == 0) false;
+      
+      return [random.pickArrayItem(:which)];
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].removeEffectsByFilter(::(value) <-
+        value.id == 'base:poisonroot-growing' ||
+        value.id == 'base:triproot-growing' ||
+        value.id == 'base:healroot-growing'
+      );
+      
+      user.drawArt(count: 1);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@b222',
+    id : 'base:b222',
+    notifCommit : "$1 begins to glow!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:banish'],
+    description: "Remove all stacks of Banish from target. Draw a card.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:which = allies.effectStack.getAllByFilter(::(value) <-
+        value.id == 'base:banish'
+      )
+      
+      when(which->size == 0) false;
+      
+      return [random.pickArrayItem(:which)];
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].removeEffectsByFilter(::(value) <-
+        value.id == 'base:banish'
+      );
+      
+      user.drawArt(count: 1);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@b223',
+    id : 'base:b223',
+    notifCommit : "$1 begins to glow!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:stunned'],
+    description: "Remove then Stunned effect from target. Draw a card.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:which = allies.effectStack.getAllByFilter(::(value) <-
+        value.id == 'base:stunned'
+      )
+      
+      when(which->size == 0) false;
+      
+      return [random.pickArrayItem(:which)];
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].removeEffectsByFilter(::(value) <-
+        value.id == 'base:stunned'
+      );
+      
+      user.drawArt(count: 1);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@b224',
+    id : 'base:b224',
+    notifCommit : "$1 begins to glow!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:ailments'],
+    description: "Remove all ailments from target. Draw a card.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.HEAL,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:which = allies.effectStack.getAllByFilter(::(value) <-
+        AILMENTS->findIndex(:value.id) != -1
+      )
+      
+      when(which->size == 0) false;
+      
+      return [random.pickArrayItem(:which)];
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].removeEffectsByFilter(::(value) <-
+        AILMENTS->findIndex(:value.id) != -1
+      );
+      
+      user.drawArt(count: 1);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@b225',
+    id : 'base:b225',
+    notifCommit : "$1 begins to glow!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : [],
+    description: "Re-adds all given by target's equipment to the target.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:which = allies->filter(::(value) <-
+        {:::} {
+          foreach(Entity.EQUIP_SLOTS) ::(k, slot) {
+            @:eq = value.getEquipped(slot);
+            when(eq.equipEffects->size > 0) send(:true);
+          }
+        }
+      );
+      
+      
+      when(which->size == 0) false;
+      
+      return [random.pickArrayItem(:which)];
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      
+      foreach(Entity.EQUIP_SLOTS) ::(k, slot) {
+        @:eq = targets[0].getEquipped(slot);
+        foreach(eq.equipEffects) ::(k, eff) {
+          targets[0].addEffect(
+            from:user,
+            id: eff,
+            durationTurns : 9999999999,
+            item: eq
+          );  
+        }
+      }
+      user.drawArt(count: 1);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@b226',
+    id : 'base:b226',
+    notifCommit : "$1 begins to glow!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:clean-blessing'],
+    description: "Grants the Clean Blessing effect on target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(
+        from:user,
+        id: 'base:clean-blessing',
+        durationTurns : 3
+      );  
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@b227',
+    id : 'base:b227',
+    notifCommit : "$1 begins to glow!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:clean-curse'],
+    description: "Inflicts the Clean Curse effect on target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(
+        from:user,
+        id: 'base:clean-curse',
+        durationTurns : 3
+      );  
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: '@b228',
+    id : 'base:b228',
+    notifCommit : "$1 begins to glow!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:innate'],
+    description: "For each effect on target where the count of stacks of said effect is 3 or greater, the target gains an additional stack of it as an innate effect.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:whom = (allies)->filter(::(value) <-
+        {:::} {
+          foreach(value.effectStack.getAll()) ::(k, eff) {
+            if ((Effect.find(:eff.id).flags & Effect.FLAGS.BUFF) != 0)
+              send(:true);
+          }
+          
+          return false;
+        }
+      );
+      
+      when(whom->size == 0) false;
+      
+      return [random.pickArrayItem(:whom)];
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:table = {};
+      foreach(targets[0].effectStack.getAll()) ::(k, eff) {
+        if (table[eff.id] == empty)
+          table[eff.id] = 1 
+        else 
+          table[eff.id] += 1
+      }
+      
+      
+      foreach(table) ::(k, v) {
+        if (v >= 3)
+          targets[0].addEffect(
+            id: k,
+            from : user,
+            innate : true
+          )
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@b229',
+    id : 'base:b229',
+    notifCommit : "$1 takes aim!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:take-aim'],
+    description: "Grants the effect Take Aim on the user.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.PHYSICAL,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(id: 'base:take-aim', durationTurns: 9999999999, from:user);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Splinter',
+    id : 'base:b230',
+    notifCommit : "$1 begins to glow!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:splinter'],
+    description: "Grants the Splinter effect for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(
+        from:user,
+        id: 'base:splinter',
+        durationTurns: 3
+      );
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Split View',
+    id : 'base:b231',
+    notifCommit : "$1 begins to glow!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:mirrored'],
+    description: "Grants the Mirrored effect to the user for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(
+        from:user,
+        id: 'base:mirrored',
+        durationTurns: 3
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Scorching',
+    id : 'base:b232-1',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:scorching', 'base:burned'],
+    description: "Grants the Scorching effect to the user for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(
+        from:user,
+        id: 'base:scorching',
+        durationTurns: 3
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Freezing',
+    id : 'base:b232-2',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:freezing', 'base:frozen'],
+    description: "Grants the Freezing effect to the user for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(
+        from:user,
+        id: 'base:freezing',
+        durationTurns: 3
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Paralyzing',
+    id : 'base:b232-3',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:paralyzing', 'base:paralyzed'],
+    description: "Grants the Freezing effect to the user for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(
+        from:user,
+        id: 'base:paralyzing',
+        durationTurns: 3
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Petrifying',
+    id : 'base:b232-4',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:petrifying', 'base:petrified'],
+    description: "Grants the Petrifying effect to the user for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(
+        from:user,
+        id: 'base:petrifying',
+        durationTurns: 3
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Blinding',
+    id : 'base:b232-5',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:blinding', 'base:blind'],
+    description: "Grants the Blinding effect to the user for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(
+        from:user,
+        id: 'base:blinding',
+        durationTurns: 3
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Seeping',
+    id : 'base:b232-6',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:seeping', 'base:poisoned'],
+    description: "Grants the Seeping effect to the user for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(
+        from:user,
+        id: 'base:seeping',
+        durationTurns: 3
+      );
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@base:b233',
+    id : 'base:b233',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:dampen-multi-hit'],
+    description: "Inflicts the Dampen Multi-hit effect on a target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(
+        from:user,
+        id: 'base:dampen-multi-hit',
+        durationTurns: 3
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@base:b233',
+    id : 'base:b233',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:multi-hit-guard'],
+    description: "Grants the Multi-hit Guard effect on a target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(
+        from:user,
+        id: 'base:multi-hit-guard',
+        durationTurns: 3
+      );
+    }
+  }
+)
 
 };
 

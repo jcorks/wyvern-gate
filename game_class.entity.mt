@@ -440,7 +440,9 @@
   
   foreach(this.profession.passives)::(index, passiveName) {
     this.effectStack.add(
-      id:passiveName
+      id:passiveName,
+      from:this,
+      duration:999999999999
     );
   }
 
@@ -450,7 +452,9 @@
     foreach(item.equipEffects)::(index, effect) {
       this.effectStack.add(
         id:effect,
-        item
+        item,
+        from:this,
+        duration:999999999999
       );
     }
   }
@@ -1322,9 +1326,7 @@
       
       
     attack::(
-      amount => Number,
-      damageType => Number,
-      damageClass => Number,
+      damage => Damage.type,
       target,
       targetPart,
       targetDefendPart
@@ -1345,11 +1347,7 @@
         
       @:effectStack = _.effectStack;
       @:retval = ::<= {
-        @:dmg = Damage.new(
-          amount,
-          damageType,
-          damageClass
-        );
+        @:dmg = damage;
         
         @:damaged = [];
         // TODO: add weapon affinities if phys and equip weapon
@@ -1513,7 +1511,7 @@
 
         @isDexed = false;
         @isDefed = false;
-        if (!target.isIncapacitated() && random.try(percentSuccess:33)) ::<= {
+        if (!target.isIncapacitated() && random.try(percentSuccess:33) && dmg.forceDEFbypass != true) ::<= {
           if (this.stats.DEX > target.stats.DEF) ::<= {       
             windowEvent.queueMessage(
               text: target.name + ' tried to completely nullify the damage, but ' + this.name + ' went through ' + target.name + '\'s defenses thanks to their high DEX!'
@@ -2127,7 +2125,7 @@
       state.isDead = true;        
     },
     
-    addEffect::(from => Object, id => String, durationTurns => Number, item) {
+    addEffect::(from => Object, id => String, durationTurns => Number, item, innate) {
       @:state = _.state;
       @:this = _.this;
       
@@ -2139,7 +2137,7 @@
 
       @:effectData = {
         id : id,
-        durationTurns : durationTurns
+        duration : durationTurns
       }
       
 
@@ -2151,17 +2149,25 @@
       );
       
       id = effectData.id;
-      durationTurns = effectData.durationTurns;
+      durationTurns = effectData.duration;
       
       
       when(rets->findIndexCondition(::(value) <- value.returned == false) != -1) empty;
-        
-      this.effectStack.add(
-        from,
-        id,
-        duration: durationTurns,
-        item
-      );
+      
+      if (innate == true) ::<= {
+        this.effectStack.addInnate(
+          from,
+          id,
+          item
+        );      
+      } else ::<= {
+        this.effectStack.add(
+          from,
+          id,
+          duration: durationTurns,
+          item
+        );
+      }
 
       this.checkStatChanged();
 
@@ -2169,8 +2175,8 @@
       this.effectStack.emitEvent(
         name: 'onPostAddEffect',
         from,
-        effectID: id,
-        effectDurationTurns: durationTurns        
+        id: id,
+        duration: durationTurns        
       );
       
       
@@ -2378,7 +2384,7 @@
       }
     },
       
-    unequip ::(slot => Number, silent) {
+    unequip ::(slot => Number, silent, inventory) {
       @:state = _.state;
       @:this = _.this;
       @:current = state.equips[slot];
@@ -2396,6 +2402,8 @@
           );
         }
       }
+      if (inventory)
+        inventory.add(:current);
 
       /*
       if (effects != empty) ::<= {
@@ -2470,185 +2478,179 @@
       @:allies = battle.getAllies(entity:_.this);
       @:enemies = battle.getEnemies(entity:_.this);
 
+      @battleAction;
+      windowEvent.queueNestedResolve(
+        onEnter ::{
+          @:art = Arts.find(id:card.id);
+          @:level = card.level;
+          
+          @:Entity = import(module:'game_class.entity.mt');
 
-      windowEvent.pushResolveQueue();
-      @:art = Arts.find(id:card.id);
-      @:level = card.level;
-      
-      @:Entity = import(module:'game_class.entity.mt');
-
-      match(art.targetMode) {
-        (Arts.TARGET_MODE.ONE,
-         Arts.TARGET_MODE.ONEPART): ::<={
-          @:all = [
-            ...enemies,
-            ...allies
-          ];
-          
-          
-          @:allNames = [...all]->map(to:::(value)<- value.name);
-          
-          @:chooseOnePart ::(onDone) {
-            @:text = 
-            [
-              [
-                'The attack aims for the head.',
-                'While fairly difficult to hit, when it lands it will',
-                'critical hit. Otherwise, deals 1 damage.'
-              ],
-              [
-                'The attack aims for the body.',
-                'This is the easiest to hit, but provides no additional',
-                'effect.'
-              ],
-              [
-                'The attack aims for the limbs.',
-                'While slightly difficult to hit, when it lands it ',
-                'has a high chance to stun the target for a turn.'
-              ]
-            ];
-            
-            @hovered = 0;
-            windowEvent.queueChoices(
-              prompt: 'Use where?',
-              choices : [
-                'Aim for the head',
-                'Aim for the body',
-                'Aim for the limbs',
-              ],
-              canCancel: true,
-              topWeight: 0.2,
-              leftWeight: 0.5,
-              onHover ::(choice) {
-                hovered = choice-1;
-              },
-              renderable : {
-                render :: {
-                  canvas.renderTextFrameGeneral(
-                    topWeight: 0.7,
-                    leftWeight: 0.5,
-                    lines : text[hovered]
-                  );
-                }
-              },
-              onChoice::(choice) {
-                onDone(
-                  which:match(choice) {
-                    (1): Entity.DAMAGE_TARGET.HEAD,
-                    (2): Entity.DAMAGE_TARGET.BODY,
-                    (3): Entity.DAMAGE_TARGET.LIMBS
+          match(art.targetMode) {
+            (Arts.TARGET_MODE.ONE,
+             Arts.TARGET_MODE.ONEPART): ::<={
+              @:all = [
+                ...enemies,
+                ...allies
+              ];
+              
+              
+              @:allNames = [...all]->map(to:::(value)<- value.name);
+              
+              @:chooseOnePart ::(onDone) {
+                @:text = 
+                [
+                  [
+                    'The attack aims for the head.',
+                    'While fairly difficult to hit, when it lands it will',
+                    'critical hit. Otherwise, deals 1 damage.'
+                  ],
+                  [
+                    'The attack aims for the body.',
+                    'This is the easiest to hit, but provides no additional',
+                    'effect.'
+                  ],
+                  [
+                    'The attack aims for the limbs.',
+                    'While slightly difficult to hit, when it lands it ',
+                    'has a high chance to stun the target for a turn.'
+                  ]
+                ];
+                
+                @hovered = 0;
+                windowEvent.queueChoices(
+                  prompt: 'Use where?',
+                  choices : [
+                    'Aim for the head',
+                    'Aim for the body',
+                    'Aim for the limbs',
+                  ],
+                  canCancel: true,
+                  topWeight: 0.2,
+                  leftWeight: 0.5,
+                  onHover ::(choice) {
+                    hovered = choice-1;
+                  },
+                  renderable : {
+                    render :: {
+                      canvas.renderTextFrameGeneral(
+                        topWeight: 0.7,
+                        leftWeight: 0.5,
+                        lines : text[hovered]
+                      );
+                    }
+                  },
+                  onChoice::(choice) {
+                    onDone(
+                      which:match(choice) {
+                        (1): Entity.DAMAGE_TARGET.HEAD,
+                        (2): Entity.DAMAGE_TARGET.BODY,
+                        (3): Entity.DAMAGE_TARGET.LIMBS
+                      }
+                    );
                   }
                 );
               }
-            );
-          }
-          
-          windowEvent.queueChoices(
-            leftWeight: 1,
-            topWeight: 1,
-            prompt: 'Against whom?',
-            choices: allNames,
-            canCancel: true,
-            onCancel,
-            keep: true,
-            onChoice::(choice) {
-            when(choice == 0) empty;
-            
-            if (art.targetMode == Arts.TARGET_MODE.ONEPART) ::<= {
-              chooseOnePart(onDone::(which){
-                windowEvent.popResolveQueue();
-                commitAction(action:
-                  BattleAction.new(
-                    card,
-                    targets: [all[choice-1]],
-                    targetParts: [which],
-                    extraData: {}
-                  )                  
-                )
-              });
-            } else ::<= {
-              windowEvent.popResolveQueue();
-              commitAction(action:
+              
+              windowEvent.queueChoices(
+                leftWeight: 1,
+                topWeight: 1,
+                prompt: 'Against whom?',
+                choices: allNames,
+                canCancel: true,
+                onChoice::(choice) {
+                  when(choice == 0) empty;
+                  
+                  if (art.targetMode == Arts.TARGET_MODE.ONEPART) ::<= {
+                    chooseOnePart(onDone::(which){
+                      battleAction = BattleAction.new(
+                        card,
+                        targets: [all[choice-1]],
+                        targetParts: [which],
+                        extraData: {}
+                      )
+                    });
+                  } else ::<= {
+                    battleAction = BattleAction.new(
+                      card,
+                      targets: [all[choice-1]],
+                      targetParts: [Entity.normalizedDamageTarget()],
+                      extraData: {}
+                    )
+                  }
+                }
+              );
+              
+            },
+            (Arts.TARGET_MODE.ALLALLY): ::<={
+              battleAction=
                 BattleAction.new(
                   card,
-                  targets: [all[choice-1]],
-                  targetParts: [Entity.normalizedDamageTarget()],
+                  targets: allies,
+                  targetParts: [...allies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                  
                   extraData: {}
                 )
-              );
+                 
+            },
+            (Arts.TARGET_MODE.ALLENEMY): ::<={
+              
+              battleAction=
+                BattleAction.new(
+                  card,
+                  targets: enemies,
+                  targetParts: [...enemies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                  
+                  extraData: {}                
+                )
+            },
+
+            (Arts.TARGET_MODE.ALL): ::<={
+              battleAction=
+                BattleAction.new(
+                  card,
+                  targets: [...allies, ...enemies],
+                  targetParts: [...allies, ...enemies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                  
+                  extraData: {}                
+                )
+            },
+
+
+
+            (Arts.TARGET_MODE.NONE): ::<={
+              battleAction=
+                BattleAction.new(
+                  card,
+                  targets: [],
+                  targetParts : [],
+                  extraData: {}                
+                )
+            },
+
+            (Arts.TARGET_MODE.RANDOM): ::<={
+              @all = [];
+              foreach(allies)::(index, ally) {
+                all->push(value:ally);
+              }
+              foreach(enemies)::(index, enemy) {
+                all->push(value:enemy);
+              }
+
+              battleAction=
+                BattleAction.new(
+                  card,
+                  targets: random.pickArrayItem(list:all),
+                  extraData: {}                
+                )
             }
-            }
-          );
-          
+          }  
         },
-        (Arts.TARGET_MODE.ALLALLY): ::<={
-          windowEvent.popResolveQueue();
-          commitAction(action:
-            BattleAction.new(
-              card,
-              targets: allies,
-              targetParts: [...allies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                  
-              extraData: {}
-            )
-          );              
-        },
-        (Arts.TARGET_MODE.ALLENEMY): ::<={
-          windowEvent.popResolveQueue();
-          commitAction(action:
-            BattleAction.new(
-              card,
-              targets: enemies,
-              targetParts: [...enemies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                  
-              extraData: {}                
-            )
-          );
-        },
-
-        (Arts.TARGET_MODE.ALL): ::<={
-          windowEvent.popResolveQueue();
-          commitAction(action:
-            BattleAction.new(
-              card,
-              targets: [...allies, ...enemies],
-              targetParts: [...allies, ...enemies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                  
-              extraData: {}                
-            )
-          );
-        },
-
-
-
-        (Arts.TARGET_MODE.NONE): ::<={
-          windowEvent.popResolveQueue();
-          commitAction(action:
-            BattleAction.new(
-              card,
-              targets: [],
-              targetParts : [],
-              extraData: {}                
-            )
-          );
-        },
-
-        (Arts.TARGET_MODE.RANDOM): ::<={
-          @all = [];
-          foreach(allies)::(index, ally) {
-            all->push(value:ally);
-          }
-          foreach(enemies)::(index, enemy) {
-            all->push(value:enemy);
-          }
-
-          windowEvent.popResolveQueue();
-          commitAction(action:
-            BattleAction.new(
-              card,
-              targets: random.pickArrayItem(list:all),
-              extraData: {}                
-            )
-          );
+        
+        onLeave ::{
+          if (battleAction != empty)
+            commitAction(action:battleAction)
+          else if (onCancel)
+            onCancel();
         }
-      }  
+      )
     },
     
     
@@ -2666,7 +2668,7 @@
           onChoice
         )
         
-      onChoice(id:deck.chooseDiscardRandom(), backout::{});
+      onChoice(id:deck.chooseDiscardRandom());
     },
     
 
@@ -2755,8 +2757,7 @@
               canCancel: true,
               filter::(value) <- Arts.find(:value.id).kind == Arts.KIND.REACTION,
               onChoice::(
-                card,
-                backout
+                card
               ) {
                 this.playerUseArt(
                   card, 
@@ -2764,8 +2765,6 @@
                     chooseReact(:action)                    
                   }
                 );
-              
-                backout();
               },
               
               onCancel ::{

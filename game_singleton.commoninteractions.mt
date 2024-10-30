@@ -58,18 +58,14 @@ return {
           user,
           canCancel: true,
           act: 'Use',
-          onChoice::(card, backout) {
+          onChoice::(card) {
             when (Arts.find(:card.id).kind == Arts.KIND.REACTION)
               windowEvent.queueMessage(
                 text: 'Reaction Arts can only be used in response to other Arts. They cannot be played right now.'
               );
             user.playerUseArt(
               card,
-              onCancel ::{
-                backout();
-              },
               commitAction::(action){
-                backout();
                 commitAction(action);
               }
             );

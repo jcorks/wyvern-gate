@@ -3292,7 +3292,7 @@ Item.database.newEntry(data : {
 }
 
 none = Item.new(base:Item.database.find(id:'base:none'))
-
+none.name = '???';
 }
 
 /*

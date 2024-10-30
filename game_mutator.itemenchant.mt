@@ -514,8 +514,8 @@ ItemEnchant.database.newEntry(
 
 ItemEnchant.database.newEntry(
   data : {
-    name : 'Frozen',
-    id : 'base:frozen',
+    name : 'Freezing',
+    id : 'base:freezing',
     description : 'Has a chance of freezing targets when attacking.',
     equipMod : StatSet.new(
     ),
@@ -527,7 +527,7 @@ ItemEnchant.database.newEntry(
     ],
     
     equipEffects : [
-      "base:frozen"
+      "base:freezing"
     ],
     
     useEffects : [],
