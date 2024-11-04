@@ -1040,8 +1040,8 @@
                 topWeight: 1,
                 canCancel: true,
                 keep: false,
-                onChoice::(which) {
-                  when(which == 0) empty;
+                onChoice::(choice) {
+                  when(choice == 0) empty;
                   
                   state.equippedProfessionArts->remove(:
                     state.equippedProfessionArts->findIndex(:art)
@@ -2473,7 +2473,7 @@
       return ret;
     },
     
-    playerUseArt ::(commitAction, onCancel, card) {
+    playerUseArt ::(commitAction, onCancel, card, canCancel) {
       @:battle = _.battle;
       @:allies = battle.getAllies(entity:_.this);
       @:enemies = battle.getEnemies(entity:_.this);
@@ -2525,7 +2525,7 @@
                     'Aim for the body',
                     'Aim for the limbs',
                   ],
-                  canCancel: true,
+                  canCancel: if (canCancel == empty) true else canCancel,
                   topWeight: 0.2,
                   leftWeight: 0.5,
                   onHover ::(choice) {
@@ -2557,7 +2557,7 @@
                 topWeight: 1,
                 prompt: 'Against whom?',
                 choices: allNames,
-                canCancel: true,
+                canCancel: if (canCancel == empty) true else canCancel,
                 onChoice::(choice) {
                   when(choice == 0) empty;
                   

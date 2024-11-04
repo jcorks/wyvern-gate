@@ -50,7 +50,7 @@ return {
                 6
               else 
                 data.level,
-            professionHint: if (empty == empty) 
+            professionHint: if (data.profession == empty) 
                 Profession.getRandomFiltered(filter::(value)<-value.learnable).id 
               else 
                 data.profession
@@ -73,10 +73,10 @@ return {
             );          
           }
           
-          ent.equipAllProfessionArts();  
           for(0, 10) ::(i) {
             ent.autoLevelProfession(:ent.profession);
           }
+          ent.equipAllProfessionArts();  
           ent.supportArts = []; 
           
           

@@ -1934,7 +1934,9 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     canBlock : false,
     usageHintAI : USAGE_HINT.OFFENSIVE,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      breakpoint();
+    },
     oncePerBattle : true,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -1943,7 +1945,6 @@ Arts.newEntry(
           targets[0].addEffect(from:user, id: 'base:stunned', durationTurns: 2);            
         }
       );
-      return true;
     }
   }
 )
@@ -2001,7 +2002,7 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     oncePerBattle : true,
     canBlock : false,
-    baseDamage::(level, user) <- 15,
+    baseDamage::(level, user) <- 10,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       
       foreach(targets)::(i, target) {
@@ -2911,7 +2912,7 @@ Arts.newEntry(
     notifCommit : '$1 casts Cleanse on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Removes all status ailments and some negative effects. Additional levels have no benefit.",
+    description: "Removes all status ailments and most negative effects. Additional levels have no benefit.",
     keywords : ['base:ailment'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2926,8 +2927,10 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       windowEvent.queueCustom(
         onEnter :: {
-          targets[0].removeEffects(
-            effectBases: [...Effect.getAll()]->filter(by:::(value) <- value.flags & Effect.statics.FLAGS.AILMENT)
+          targets[0].removeEffectsByFilter(
+            ::(value) <- 
+              ((Arts.find(:value.id).flags & Effect.statics.FLAGS.AILMENT) != 0) ||
+              ((Arts.find(:value.id).flags & Effect.statics.FLAGS.DEBUFF) != 0)
           );
         }
       );
@@ -3264,7 +3267,7 @@ Arts.newEntry(
     notifCommit : '$1 gets ready to counter!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: 'Grants the Counter effect to the holder for 3 turns.',
+    description: 'Grants the Counter effect to the user for 3 turns.',
     keywords : ['base:counter'],
     durationTurns: 0,
     kind : KIND.REACTION,
@@ -5535,7 +5538,7 @@ Arts.newEntry(
     durationTurns: 0,
     kind : KIND.REACTION,
     traits : TRAITS.SUPPORT,
-    rarity : RARITY.UNCOMMON,
+    rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       when(allies->findIndex(:reactTo) != -1) false;
@@ -9657,8 +9660,8 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@base:b233',
-    id : 'base:b233',
+    name: '@base:b234',
+    id : 'base:b234',
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
@@ -9680,6 +9683,517 @@ Arts.newEntry(
         id: 'base:multi-hit-guard',
         durationTurns: 3
       );
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Telemarket Leyline',
+    id : 'base:b235',
+    notifCommit : "A whirlwind of power appears before $1!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    keywords : [],
+    description: "Summons an ethereal shopkeeper to purchase wares from.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:world = import(module:'game_singleton.world.mt');
+      @:Inventory = import(:'game_class.inventory.mt');
+
+      windowEvent.queueNestedResolve(
+        onEnter ::{
+          @:shopkeep = world.island.newInhabitant();
+          shopkeep.name = 'Ethereal Shopkeep';
+          
+          @:shopInventory = Inventory.new();
+          for(0, 35) ::(i) {
+            shopInventory.add(item:
+              Item.new(
+                base:Item.database.getRandomFiltered(
+                  filter:::(value) <- value.isUnique == false
+                ),
+                rngEnchantHint:true
+              )   
+            );       
+          }
+          
+          
+          @:buy = import(:'game_function.buyinventory.mt');
+          windowEvent.queueMessage(
+            speaker: shopkeep.name,
+            text: '"A fine day for buying, doncha think?"'
+          );
+          buy(
+            shopkeep,
+            inventory:shopInventory,
+            onDone ::{
+              windowEvent.queueMessage(
+                speaker: shopkeep.name,
+                text: '"Pleasure doin\' business with ya!"'
+              );
+            }
+          );
+        
+        }
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Critical Reaction',
+    id : 'base:b236',
+    notifCommit : "A whirlwind of power appears before $1!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:critical-reaction'],
+    description: "Grants the Critical Reaction effect to the user for 6 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:critical-reaction', durationTurns:6);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'First Strike',
+    id : 'base:b237',
+    notifCommit : "$1 is envolped in a swift wind!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:first-strike'],
+    description: "Grants the First Strike effect to the user for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:first-strike', durationTurns:3);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@b238',
+    id : 'base:b238',
+    notifCommit : "$1 glows!",
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    keywords : [],
+    description: "Immediately plays the next Art at the top of the user's deck for no AP cost.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.REACTION,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:world = import(module:'game_singleton.world.mt');
+      @:card = user.deck.draw();
+      user.deck.discardFromHand(:card);
+
+
+      user.deck.revealArt(
+        prompt: user.name + ' activated the next Art from their deck!',
+        user:user,
+        handCard: card
+      );
+      
+      // hacky! but fun. maybe functional
+      if (world.party.leader == user) ::<= {
+        user.playerUseArt(
+          card:card,
+          canCancel: false,
+          commitAction::(action) {            
+            user.battle.entityCommitAction(action, from:user);
+          }
+        );
+      } else ::<= {
+        user.battleAI.commitTargettedAction(
+          battle:user.battle,
+          card: card,
+          onCommit ::(action) {
+            user.battle.entityCommitAction(action, from:user);
+          }
+        );
+        
+      }
+
+
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@b239',
+    id : 'base:b239',
+    notifCommit : "$1 glows!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : [],
+    description: "Immediately plays the Art at the bottom of the user's discard pile for no AP cost.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.REACTION,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      when(user.deck.discardPile->size == 0) Arts.FAIL;
+      @:card = user.deck.discardPile[user.deck.discardPile->size-1];
+      @:world = import(module:'game_singleton.world.mt');
+      
+
+
+      user.deck.revealArt(
+        prompt: user.name + ' activated the Art from the bottom of their discard pile!',
+        user:user,
+        handCard: card
+      );
+      
+      // hacky! but fun. maybe functional
+      if (world.party.leader == user) ::<= {
+        user.playerUseArt(
+          card:card,
+          canCancel: false,
+          commitAction::(action) {            
+            user.battle.entityCommitAction(action, from:user);
+          }
+        );
+      } else ::<= {
+        user.battleAI.commitTargettedAction(
+          battle:user.battle,
+          card: card,
+          onCommit ::(action) {
+            user.battle.entityCommitAction(action, from:user);
+          }
+        );
+        
+      }
+
+
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Cascading Flash',
+    id : 'base:b240',
+    notifCommit : "$1 glows!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:cascading-flash'],
+    description: "Grants the Cascading Flash effect to the user for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.REACTION,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:cascading-flash', durationTurns:3);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@b241',
+    id : 'base:b241',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : [],
+    description: "View the next 3 Arts of the user's deck. Draw one and discard the rest.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.REACTION,
+    traits : 0,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:world = import(module:'game_singleton.world.mt');
+
+      @:cards = [
+        user.deck.draw(),
+        user.deck.draw(),
+        user.deck.draw()
+      ]
+
+      when(user != world.party.leader) ::<= {
+        windowEvent.queueMessage(
+          text: user.name + ' picks one of 3 Arts.'
+        );
+
+        @:keep = random.pickArrayItem(:cards);
+        foreach(cards) ::(k, v) {
+          when(v == keep) empty;
+          user.deck.discardFromHand(:v);
+        }
+
+      }
+      
+      windowEvent.queueNestedResolve(
+        onEnter :: {
+          windowEvent.queueMessage(
+            text: 'Of these 3 Arts, choose one to keep in your hand.'
+          );
+          user.deck.viewCards(
+            user, 
+            cards, 
+            canCancel:false, 
+            onChoice ::(choice) {
+              @:keep = cards[choice-1];
+              foreach(cards) ::(k, v) {
+                when(v == keep) empty;
+                user.deck.discardFromHand(:v);
+              }
+            }
+          );
+
+        }
+      );
+
+
+    }
+  }
+)
+
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Clairvoyance',
+    id : 'base:b242',
+    notifCommit : "$1 focuses!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:clairvoyance'],
+    description: "Grants the Clairvoyance effect to the user for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.REACTION,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:claivoyance', durationTurns:3);
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Scatterbrained',
+    id : 'base:b243',
+    notifCommit : "$1 focuses!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:scatterbrained'],
+    description: "Grants the Scatterbrained effect to the user for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.REACTION,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:scatterbrained', durationTurns:3);
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: '@b244',
+    id : 'base:b244',
+    notifCommit : '$1 attacks in a focused blast $2!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONEPART,
+    keywords : [],
+    description: "Deals fire damage to a target based on the user's INT. It deals one additonal damage for each effect the user\'s allies have.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.ABILITY,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) <- user.stats.INT * (0.5) * level,
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @effCount = 0;
+      foreach( user.battle.getAllies(:user)) ::(k, v) {
+        effCount += v.effectStack.getAll()->size;
+      }
+  
+      windowEvent.queueCustom(
+        onEnter :: {
+          user.attack(
+            target:targets[0],
+            damage: Damage.new(
+              amount:Arts.find(:'base:b244').baseDamage(level, user) + effCount,
+              damageType : Damage.TYPE.FIRE,
+              damageClass: Damage.CLASS.HP
+            ),
+            targetPart:targetParts[0],
+            targetDefendPart:targetDefendParts[0]
+          );        
+        }
+      );      
+                  
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Antimagic Trap',
+    id : 'base:antimagic-trap',
+    notifCommit : '$1 casts Antimagic Trap on $2!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "Removes all status ailments and most negative effects.",
+    keywords : ['base:ailment'],
+    durationTurns: 0,
+    kind : KIND.REACTION,
+    traits : TRAITS.MAGIC | TRAITS.HEAL,
+    rarity : RARITY.EPIC,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    oncePerBattle : false,
+    canBlock : false,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      @:Effect = import(module:'game_database.effect.mt');
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].removeEffectsByFilter(
+            ::(value) <- 
+              ((Arts.find(:value.id).flags & Effect.statics.FLAGS.AILMENT) != 0) ||
+              ((Arts.find(:value.id).flags & Effect.statics.FLAGS.DEBUFF) != 0)
+          );
+        }
+      );
+    }
+  }
+)   
+
+
+Arts.newEntry(
+  data: {
+    name: 'Light Guard',
+    id : 'base:b247',
+    notifCommit : "$1 casts Light Guard!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:light-guard'],
+    description: "Grants the Light Guard effect to the target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.COMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:light-guard', durationTurns:3);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Multi Guard',
+    id : 'base:b248',
+    notifCommit : "$1 casts Multi Guard!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:multi-guard'],
+    description: "Grants the Multi Guard effect to the target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:multi-guard', durationTurns:3);
     }
   }
 )

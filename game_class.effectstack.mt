@@ -361,6 +361,10 @@
             effectIDs : [id]
           );
         }
+        
+        if (duration == 0) ::<= {
+          this.removeByFilter(::(value) <- value == r);                
+        }
 
       },
       
@@ -577,6 +581,21 @@
           onCancel
         );
       },      
+      
+      // gets all combined traits from effects
+      traits : {
+        get ::{
+          @traits = 0;
+          foreach(state.effects) ::(i, v) {
+            traits |= Effect.find(:v.id).traits;
+          }
+          foreach(state.innateEffects) ::(i, v) {
+            traits |= Effect.find(:v.id).traits;
+          }
+          return traits;
+        }
+      },
+      
       
       clear::(all)  {
         @inSet = {};

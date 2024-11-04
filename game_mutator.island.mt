@@ -90,7 +90,7 @@ Island.database.newEntry(
       
     ],
     possibleSceneryCharacters : [
-      '╿', '.', '`', '^', '░'
+      '╿', '.', '`', '^', '▒'
     ],
     traits : TRAITS.SPECIAL,
     
@@ -118,10 +118,13 @@ Island.database.newEntry(
     minSize : 40,//80,
     maxSize : 60, //130,
     events : [
-      
+      'base:bbq',
+      'base:weather:1',
+      'base:camp-out',
+      'base:encounter:normal'      
     ],
     possibleSceneryCharacters : [
-      '╿', '.', '`', '^', '░'
+      '╿', '.', '`', '^', '▒'
     ],
     traits : TRAITS.SPECIAL,
     
@@ -153,10 +156,14 @@ Island.database.newEntry(
     minSize : 30,//80,
     maxSize : 130, //130,
     events : [
+      'base:bbq',
+      'base:weather:1',
+      'base:camp-out',
+      'base:encounter:normal'
       
     ],
     possibleSceneryCharacters : [
-      '╿', '.', '`', '^', '░',
+      '╿', '.', '`', '^', '▒',
       ')', '(', ']', ']', '/',
       '+', '~', '=', '|', '>',
       '<', '*', '%', '-', '_'
@@ -519,11 +526,7 @@ Island.database.newEntry(
           state.name = NameGen.island();
           state.levelMin = 0;
           state.levelMax = 0;
-          state.possibleEvents = if (possibleEventsHint) possibleEventsHint else [
-            'base:bbq',
-            'base:weather:1',
-            'base:camp-out'
-          ];
+          state.possibleEvents = if (possibleEventsHint) possibleEventsHint else [...base.events];
           state.encounterRate = random.number();
           state.sizeW  = sizeW;
           state.sizeH  = sizeH;
@@ -702,9 +705,12 @@ Island.database.newEntry(
         //if (stepsSinceLastEvent > 200000) ::<= {
         if (state.stepsSinceLastEvent > 20) ::<= {
           if (random.number() > 13 - (state.stepsSinceLastEvent-5) / 5) ::<={
+            breakpoint();
             this.addEvent(
               event:Event.new(
-                base:Event.database.find(id:random.pickArrayItem(list:state.possibleEvents)),
+                base:random.pickArrayItemWeighted(list:state.possibleEvents->map(
+                  ::(value) <- Event.database.find(:value)
+                )),
                 parent:this
               )
             );            

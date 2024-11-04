@@ -21,7 +21,7 @@
 @:g = import(module:'game_function.g.mt');
 
 
-return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, goldMultiplier, onHover, renderable, filter, header, leftJustified) {
+return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, goldMultiplier, onHover, renderable, filter, header, leftJustified, onCancel) {
   when(inventory.items->size == 0) ::<= {
     windowEvent.queueMessage(
       text: 'This inventory is empty.',
@@ -82,6 +82,7 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
     onChoice ::(choice) {
       when(choice == 0) onPick();
       onPick(item:items[choice-1]);
-    }
+    },
+    onCancel : if (onCancel) onCancel else empty
   );
 }

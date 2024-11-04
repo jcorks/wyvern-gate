@@ -20,50 +20,58 @@
 
 
 
-return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, onHover, renderable, filter, keep, pageAfter) {
+return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, onHover, renderable, filter, keep, pageAfter, onCancel) {
   @names = []
   @items = []
-  windowEvent.pushResolveQueue();
-  windowEvent.queueChoices(
-    onCancel ::{
-      windowEvent.popResolveQueue();    
+  @picked;
+  @cancelled = false;
+  windowEvent.queueNestedResolve(
+    onEnter :: {
+      windowEvent.queueChoices(
+        leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
+        topWeight:  if (topWeight == empty)  1 else topWeight => Number,
+        prompt: if (prompt == empty) 'Choose an item:' else prompt => String,
+        onGetPrompt: onGetPrompt,
+        canCancel: canCancel,
+        jumpTag: 'pickItem',
+        pageAfter: pageAfter,
+        onCancel::{cancelled = true;},
+        onHover : if (onHover)
+          ::(choice) {
+            when(choice == 0) empty;
+            onHover(item:inventory.items[choice-1])
+          }
+        else 
+          empty,
+        renderable : renderable,
+        onGetChoices ::{
+        
+          items = if (filter != empty)
+            inventory.items->filter(by:filter)
+          else  
+            [...inventory.items]
+          ;
+        
+          names = [...items]->map(to:::(value) {
+            return value.name;
+          });
+          when(names->keycount == 0) ::<={
+            windowEvent.queueMessage(text: "The inventory is empty.");
+          }
+          return names;
+        },
+        keep: if (keep == empty) true else keep,
+        onChoice ::(choice) {
+          when(choice == 0) empty;
+          picked = items[choice-1];
+          onPick(item:picked)
+        }
+      );
     },
-    leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
-    topWeight:  if (topWeight == empty)  1 else topWeight => Number,
-    prompt: if (prompt == empty) 'Choose an item:' else prompt => String,
-    onGetPrompt: onGetPrompt,
-    canCancel: canCancel,
-    jumpTag: 'pickItem',
-    pageAfter: pageAfter,
-    onHover : if (onHover)
-      ::(choice) {
-        when(choice == 0) empty;
-        onHover(item:inventory.items[choice-1])
-      }
-    else 
-      empty,
-    renderable : renderable,
-    onGetChoices ::{
     
-      items = if (filter != empty)
-        inventory.items->filter(by:filter)
-      else  
-        [...inventory.items]
-      ;
-    
-      names = [...items]->map(to:::(value) {
-        return value.name;
-      });
-      when(names->keycount == 0) ::<={
-        windowEvent.queueMessage(text: "The inventory is empty.");
-      }
-      return names;
-    },
-    keep: if (keep == empty) true else keep,
-    onChoice ::(choice) {
-      windowEvent.popResolveQueue();    
-      when(choice == 0) onPick();
-      onPick(item:items[choice-1]);
+    onLeave ::{
+      if (cancelled && onCancel) 
+        onCancel();
     }
-  );
+  )
 }

@@ -7,5 +7,12 @@ return {
   randomEffectCount : 0,
   randomAdditionalArtsCount : 7,
   arts : [
+    'base:b236',
+    'base:b236',
+    'base:b236',
+    'base:b236',
+    'base:b236',
+    'base:b236',
+    'base:b236'
   ]
 }

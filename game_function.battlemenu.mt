@@ -35,11 +35,11 @@ return ::(
 
   @:commitAction ::(action => BattleAction->type) {
     if (Arts.find(id:action.card.id).kind == Arts.KIND.ABILITY) ::<= {
-      battle.entityCommitAction(action:action);  
       windowEvent.jumpToTag(name:'BattleMenu', goBeforeTag:true)
-    } else ::<= {
       battle.entityCommitAction(action:action);  
+    } else ::<= {
       windowEvent.jumpToTag(name:'BattleMenu', doResolveNext:true);         
+      battle.entityCommitAction(action:action);  
     }
 
   }

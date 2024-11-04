@@ -37,7 +37,7 @@
 Event.database.newEntry(
   data: {
     id : 'base:weather:1',
-    rarity: 10,    
+    rarity: 3,    
     onEventStart ::(event) {
       // only one weather event at a time.
       when (event.island.events->any(condition::(value) <- value.base.name->contains(key:'Weather'))) 0;
@@ -94,7 +94,7 @@ Event.database.newEntry(
 Event.database.newEntry(
   data: {
     id : 'base:bbq',
-    rarity: 1, //5    
+    rarity: 100, //5    
     onEventStart ::(event) {
       @:party = event.party;
       windowEvent.queueMessage(speaker: '???', text:'"Hey!"');
@@ -111,7 +111,7 @@ Event.database.newEntry(
           windowEvent.queueMessage(text:'The party is given some food.');
 
           @StatSet = import(module:'game_class.statset.mt');
-          if (random.flipCoin()) ::<= {
+          if (random.try(percentSuccess:95)) ::<= {
             windowEvent.queueMessage(text:'The food is delicious.');
             foreach(event.party.members)::(index, member) {
               @oldStats = StatSet.new();
@@ -184,7 +184,7 @@ Event.database.newEntry(
 Event.database.newEntry(
   data: {
     id : 'base:camp-out',
-    rarity: 1, //5    
+    rarity: 300, //5    
     onEventStart ::(event) {
       @:party = event.party;
       
@@ -286,44 +286,20 @@ Event.database.newEntry(
 Event.database.newEntry(
   data: {
     id : 'base:encounter:normal',
-    rarity: 1000,    
+    rarity: 1,    
     onEventStart ::(event) {
+      @:world = import(module:'game_singleton.world.mt');
+      // safe time
+      when(world.time < world.TIME.LATE_EVENING) 0;
+
       @chance = random.number(); 
       @:island = event.island;   
       @:party = event.party;
       
-      @:world = import(module:'game_singleton.world.mt');
       windowEvent.queueMessage(
         text: 'A shadow emerges; the party is caught off-guard!'
       );          
       @enemies = 
-        if (world.time < world.TIME.EVENING) 
-          match(true) {
-            (chance < 0.8): [
-              island.newAggressor(),
-              island.newAggressor()            
-            ],
-            
-            (chance < 0.9):::<= {
-              @:only = island.newAggressor();                        
-              {:::} {
-                forever ::{
-                  only.autoLevel();
-                  if (only.level >= island.levelMax)
-                    send();                  
-                }
-              }
-              only.autoLevel();
-              return [only];
-            },
-            
-            default: [
-              island.newAggressor(),
-              island.newAggressor(),
-              island.newAggressor()            
-            ]
-          }
-        else 
           match(true) {
             (chance < 0.8): [
               island.newAggressor(),

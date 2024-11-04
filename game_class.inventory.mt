@@ -40,12 +40,6 @@
         state.items = [];
         state.gold = 0;
       },
-
-      afterLoad :: {
-        foreach(state.items) ::(k, item) {
-          item.container = this;
-        }
-      },
       
       add::(item) {
         when (item.base.id == 'base:none') false; // never accept None as a real item
@@ -112,7 +106,7 @@
       
       items : {
         get :: {
-          return state.items;
+          return [...state.items];
         }
       },
       

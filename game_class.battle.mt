@@ -507,11 +507,17 @@
           turn->push(value:ent);
         }
       }  
-
+      turn = random.scrambled(:turn);
+      @:Effect = import(module:'game_database.effect.mt');  
       turn->sort(
         comparator:::(a, b) {
-          return a.stats.SPD <
-               b.stats.SPD;
+          when ((a.effectStack.traits & Effect.TRAITS.ALWAYS_FIRST) != 0)
+            false
+          when ((b.effectStack.traits & Effect.TRAITS.ALWAYS_FIRST) != 0)
+            true
+
+        
+          return a.stats.SPD < b.stats.SPD;
         }
       );
       
@@ -1026,9 +1032,11 @@
         renderTurnOrder();
       },
       
-      entityCommitAction::(action) {
+      entityCommitAction::(action, from) {
+        @:entAct = if (from != empty) from else entityTurn;
+      
         // failsafe. not normally needed.
-        when (entityTurn.isIncapacitated())
+        when (entAct.isIncapacitated())
           endTurn();
         
         @:passesCheck ::{
@@ -1039,14 +1047,14 @@
           
         @:requiresAP = ((Arts.find(:action.card.id).traits & Arts.TRAITS.COSTLESS) == 0);
           
-        when (requiresAP && entityTurn.ap < AP_COST) ::<= {
+        when (requiresAP && entAct.ap < AP_COST) ::<= {
           @:art = Arts.find(:action.card.id);
           windowEvent.queueMessage(
-            text: entityTurn.name + ' tried to use the Art ' + art.name + ' but couldn\'t muster the mental strength!'
+            text: entAct.name + ' tried to use the Art ' + art.name + ' but couldn\'t muster the mental strength!'
           );
         }
         if (requiresAP)
-          entityTurn.ap -= AP_COST;
+          entAct.ap -= AP_COST;
           
         @:Entity = import(module:'game_class.entity.mt');
         @:world = import(module:'game_singleton.world.mt');
@@ -1064,13 +1072,13 @@
         @:finish ::(useArtReturn) {
 
           if (art.kind == Arts.KIND.ABILITY) ::<= {
-            entityTurn.flags.add(flag:StateFlags.WENT);
+            entAct.flags.add(flag:StateFlags.WENT);
             if (art.name != 'Wait' &&
               art.name != 'Use Item')
-              entityTurn.flags.add(flag:StateFlags.ABILITY);
+              entAct.flags.add(flag:StateFlags.ABILITY);
 
             if (art.durationTurns > 0 && useArtReturn != Arts.CANCEL_MULTITURN) ::<= {
-              actions[entityTurn] = action;
+              actions[entAct] = action;
             }
 
 
@@ -1087,7 +1095,7 @@
           
           @:art = Arts.find(id:action.card.id);
         
-          @:ret = entityTurn.useArt(
+          @:ret = entAct.useArt(
             art,
             level: action.card.level,
             targets:action.targets,
@@ -1115,11 +1123,11 @@
               onPass();
               
             @reactor = toReact->pop;
-            when(reactor == entityTurn || reactor.ap < AP_COST)
+            when(reactor == entAct || reactor.ap < AP_COST)
               tryNext();
 
             reactor.react(
-              source: entityTurn,
+              source: entAct,
               onReact::(action) {
                 when(action == empty)
                   tryNext();
@@ -1155,7 +1163,7 @@
 
                 
                 when(cancel) ::<= {
-                  windowEvent.queueMessage(text: reactor.name + '\'s ' + art.name + ' cancelled ' + entityTurn.name + '\'s Art!');
+                  windowEvent.queueMessage(text: reactor.name + '\'s ' + art.name + ' cancelled ' + entAct.name + '\'s Art!');
                   windowEvent.queueCustom(
                     onEnter :: {
                       onReject();
@@ -1186,7 +1194,7 @@
             }
             combatChooseDefend(
               targetPart: action.targetParts[action.targets->findIndex(value:next)],
-              attacker:entityTurn,
+              attacker:entAct,
               defender:next,
               onDone ::(which) {
                 @:index = action.targets->findIndex(value:next);
@@ -1200,17 +1208,17 @@
       
       
         action.turnIndex = 0;
-        entityTurn.deck.discardFromHand(card:action.card);
+        entAct.deck.discardFromHand(card:action.card);
         windowEvent.onResolveAll(
           onDone :: {
-            // entityTurn.deck was likely BLASTED due to death
-            when (active == false || entityTurn == empty || entityTurn.deck == empty) 
+            // entAct.deck was likely BLASTED due to death
+            when (active == false || entAct == empty || entAct.deck == empty) 
               empty;
 
-            entityTurn.deck.revealArt(
-              user:entityTurn,
+            entAct.deck.revealArt(
+              user:entAct,
               handCard:action.card,
-              prompt: entityTurn.name + ' uses the Art: ' + art.name + '!'
+              prompt: entAct.name + ' uses the Art: ' + art.name + '!'
             );
             
             windowEvent.queueCustom(
@@ -1220,7 +1228,7 @@
                   onPass::{
                     windowEvent.queueCustom(
                       onEnter ::{
-                        when (entityTurn.isIncapacitated())
+                        when (entAct.isIncapacitated())
                           endTurn();
                         chooseDefend(::{
                           doAction();

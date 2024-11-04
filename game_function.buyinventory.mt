@@ -5,7 +5,7 @@
 @:correctA = import(module:'game_function.correcta.mt');
 
 
-return ::(inventory, shopkeep) {
+return ::(inventory, shopkeep, onDone) {
   @:world = import(module:'game_singleton.world.mt');
   @:party = world.party;
   @hoveredItem;
@@ -33,6 +33,8 @@ return ::(inventory, shopkeep) {
         )
       }
     },
+    
+    onCancel : if (onDone) onDone else empty,
     
     onPick::(item) {
       when(item == empty) empty;

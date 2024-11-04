@@ -53,36 +53,36 @@
 
   for(0, seedCount)::(i) {
     out[
-                    (random.number() * width)->floor + BUFFER_SPACE + 
-      (width + BUFFER_SPACE*2) * ((random.number() * height)->floor + BUFFER_SPACE)
+                    random.integer(from:5, to:width-5) + BUFFER_SPACE + 
+      (width + BUFFER_SPACE*2) * (random.integer(from:5, to:height-5) + BUFFER_SPACE)
     ] = symbolList[random.integer(from:1, to:symbolList->keycount-1)]
   }
 
 
-  for(0, height/2)::(i) {
+  for(0, height)::(i) {
     out[
       0 + BUFFER_SPACE+
-      (width + BUFFER_SPACE*2) * (i*2 + BUFFER_SPACE)
+      (width + BUFFER_SPACE*2) * (i + BUFFER_SPACE)
     ] = symbolList[0];
   }
 
-  for(0, height/2)::(i) {
+  for(0, height)::(i) {
     out[
           width + BUFFER_SPACE+
-      (width + BUFFER_SPACE*2) * (i*2 + BUFFER_SPACE)
+      (width + BUFFER_SPACE*2) * (i + BUFFER_SPACE)
     ] = symbolList[0];
   }
 
-  for(0, width/2)::(i) {
+  for(0, width)::(i) {
     out[
-          i*2 + BUFFER_SPACE+
+          i + BUFFER_SPACE+
       (width + BUFFER_SPACE*2) * (0 + BUFFER_SPACE)
     ] = symbolList[0];
   }
 
-  for(0, width/2)::(i) {
+  for(0, width)::(i) {
     out[
-          i*2 + BUFFER_SPACE + 
+          i + BUFFER_SPACE + 
       (width + BUFFER_SPACE*2) * (height + BUFFER_SPACE)
     ] = symbolList[0];
   }
@@ -98,7 +98,7 @@
       for(0, width + BUFFER_SPACE*2) ::(x) {
         //when(random.number() < 0.4) empty;
         @:val = out[x + (width + BUFFER_SPACE*2) * y];
-        when(val == empty) empty;
+        when(val == empty || val == symbolList[0]) empty;
         
         @:choice = (random.number() * 4)->floor;
         @newx = if (choice == 1) x+xIncr else if (choice == 2) x-xIncr else x;
@@ -115,7 +115,7 @@
       for(0, width + BUFFER_SPACE*2) ::(x) {
         //when(random.number() < 0.4) empty;
         @:val = out[x + (width + BUFFER_SPACE*2) * y];
-        when(val != empty) empty;
+        when(val == empty || val == symbolList[0]) empty;
         
 
         @v;        
@@ -137,7 +137,64 @@
       }
     }
   }
+  
+  // just for border
+  for(0, 4)::(i) {
+    @:toAdd = [];
+    for(0, height + BUFFER_SPACE*2) ::(y) {
+      for(0, width + BUFFER_SPACE*2) ::(x) {
+        //when(random.number() < 0.4) empty;
+        @:val = out[x + (width + BUFFER_SPACE*2) * y];
+        when(val != symbolList[0]) empty;
+        
+        @:choice = random.integer(from:0, to:5);
+        when (choice == 5) empty;
+        @newx = if (choice == 1) x+xIncr else if (choice == 2) x-xIncr else x;
+        @newy = if (choice == 3) y+yIncr else if (choice == 0) y-yIncr else y;
+        toAdd->push(:{x:newx, y:newy, val:val});
+      }
+    }
+    
+    foreach(toAdd) ::(k, v) {
+      out[v.x + (width + BUFFER_SPACE*2) * v.y] = v.val;    
+    }
+  }
+  
+  
+  
+  /*
+  for(0, 1)::(i) {
+    @:toAdd = [];
+    for(0, height + BUFFER_SPACE*2) ::(y) {
+      for(0, width + BUFFER_SPACE*2) ::(x) {
+        //when(random.number() < 0.4) empty;
+        @:val = out[x + (width + BUFFER_SPACE*2) * y];
+        when(val != symbolList[0]) empty;
+        toAdd->push(:{
+          x: x,
+          y: y
+        });
+      }
+    }
+    
+    foreach(toAdd) ::(k, v) {
+      @:x = v.x;
+      @:y = v.y;
+      @:val = symbolList[0];        
+      out[x + (width + BUFFER_SPACE*2) * (y+1)] = val;
+      out[x + (width + BUFFER_SPACE*2) * (y-1)] = val;
 
+      out[x-1 + (width + BUFFER_SPACE*2) * y] = val;
+      out[x-1 + (width + BUFFER_SPACE*2) * (y+1)] = val;
+      out[x-1 + (width + BUFFER_SPACE*2) * (y-1)] = val;
+
+      out[x+1 + (width + BUFFER_SPACE*2) * y] = val;
+      out[x+1 + (width + BUFFER_SPACE*2) * (y+1)] = val;
+      out[x+1 + (width + BUFFER_SPACE*2) * (y-1)] = val;
+    }
+  } 
+  */
+  
   return out;
 }
 
@@ -191,6 +248,62 @@
             );
           }
         }
+        
+        @:land = map.addScenerySymbol(character:' ');
+        @:border = map.addScenerySymbol(character:'_')
+        @:spire = map.addScenerySymbol(character:'░');
+        @:spireEnd = map.addScenerySymbol(character:'▒');
+
+        // finally, border out bottoms and extend 
+        for(0, map.height) ::(y) {
+          for(0, map.width) ::(x) {
+            @:val = map.sceneryAt(x, y);
+            @:below = map.sceneryAt(x, y:y+1);
+            @:belowbelow = map.sceneryAt(x, y:y+2);
+
+
+            if (val != '▓' && val != '░' && val != '▒' && below == '▓') ::<= {
+              @iter = y;
+              if (belowbelow == '▓') ::<= {
+                map.setSceneryIndex(x, y:iter, symbol:border);
+              } else ::<= {
+                map.setSceneryIndex(x, y:iter, symbol:land);
+              }
+              iter += 1;
+              
+              @scale = 1 - 2*((((x - BUFFER_SPACE) / (map.width - 2*BUFFER_SPACE)) - 0.5)->abs)
+
+              //scale *= scale;
+              
+              @lenSecondary = 1 + random.integer(from:5, to:9) * scale * 0.5;
+              @len = random.integer(from:0, to: 2) + scale*3;
+              
+              
+              
+              {:::} {
+                for(0, len) ::(i) {
+                  @:next = map.sceneryAt(x, y:iter);
+                  if (next == '▓')
+                    map.setSceneryIndex(x, y:iter, symbol:spire)
+                  else
+                    send();
+                  iter += 1;
+                }
+                for(0, lenSecondary) ::(i) {
+                  @:next = map.sceneryAt(x, y:iter);
+                  if (next == '▓')
+                    map.setSceneryIndex(x, y:iter, symbol:spireEnd)
+                  else
+                    send();
+                  iter += 1;
+                }
+                
+              }
+            }
+          }
+        }        
+        
+        
         return map;
             
       },

@@ -3743,7 +3743,10 @@ return {
         minSize : 40,//80,
         maxSize : 60, //130,
         events : [
-          
+          'base:bbq',
+          'base:weather:1',
+          'base:camp-out',
+          'base:encounter:normal'      
         ],
         possibleSceneryCharacters : [
           '╿', '.', '`', '^', '░'

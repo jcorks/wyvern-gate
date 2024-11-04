@@ -2685,6 +2685,7 @@ return {
         blockPoints : 0,
         flags : 0,
         stats: StatSet.new(),
+        traits : 0,
         
         events : {
           onAffliction ::(user, item, holder) {
@@ -4448,7 +4449,7 @@ return {
           
         ],
         possibleSceneryCharacters : [
-          '░', '░', '░', '░', '░'
+          '▒', '▒', '▒', '▒', '▒'
         ],
         
         traits : Island.TRAITS.DIVERSE | Island.TRAITS.SPECIAL,
@@ -4511,7 +4512,7 @@ return {
           
         ],
         possibleSceneryCharacters : [
-          '░', '░', '░', '░', '░'
+          '▒', '▒', '▒', '▒', '▒'
         ],
         
         traits : Island.TRAITS.DIVERSE | Island.TRAITS.SPECIAL,

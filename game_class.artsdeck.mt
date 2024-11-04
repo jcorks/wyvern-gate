@@ -206,7 +206,7 @@
       return c;
     },
     
-    viewCards ::(user, cards, onChoice) {
+    viewCards ::(user, cards, onChoice, canCancel) {
       when(cards->size == 0)
         windowEvent.queueMessage(
           text: user.name + ' has no Arts in their hand.'
@@ -231,7 +231,7 @@
         onLeave ::{       
           canvas.removeBackground(:bg);
         },
-        canCancel:true,
+        canCancel:if (canCancel == empty) true else canCancel,
         
         onChoice ::(choice) {          
           if (onChoice)
@@ -309,7 +309,15 @@
           emitEvent(event:EVENTS.SHUFFLE);
         }
         when (state.deck->size == 0) empty;
-        addHandCard(id:state.deck->pop);      
+        return addHandCard(id:state.deck->pop);      
+      },
+      
+      peekTopCards ::(count => Number) {
+        @:out = [];
+        for(0, if (count > state.deck->size) state.deck->size else count) ::(i) {
+          out->push(:state.deck[state.deck->size-(1+i)]);
+        }
+        return out;
       },
       
       addHandCard::(id) {
@@ -347,6 +355,14 @@
         set ::(value) <- state.hand = value
       },
       
+      discardPile : {
+        get ::<- state.discard
+      },
+      
+      deckPile : {
+        get ::<- state.deck
+      },
+      
       purge ::(id) {
         state.hand = state.hand->filter(::(value) <- value.id != id);
         state.discard = state.discard->filter(::(value) <- value != id);
@@ -361,22 +377,27 @@
       },
       
       discardPlayer :: {
-        windowEvent.queueMessage(
-          text: 'Choose a card to discard.'
-        );
-        windowEvent.queueCustom(
-          onEnter :: {
-            this.chooseArtPlayer(
-              act: 'Discard',
-              canCancel: false,
-              onChoice::(
-                card
-              ) {
-                this.discardFromHand(card);
+        windowEvent.queueNestedResolve(
+          onEnter ::{
+          
+            windowEvent.queueMessage(
+              text: 'Choose a card to discard.'
+            );
+            windowEvent.queueCustom(
+              onEnter :: {
+                this.chooseArtPlayer(
+                  act: 'Discard',
+                  canCancel: false,
+                  onChoice::(
+                    card
+                  ) {
+                    this.discardFromHand(card);
+                  }
+                )
               }
-            )
+            );
           }
-        );
+        )
       },
       
       revealArt ::(user, handCard, prompt) {
