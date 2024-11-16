@@ -53,16 +53,37 @@
 }
   
 @:ATTRIBUTE = {
-  BLUNT   : 1,
-  SHARP   : 2,
-  FLAT    : 4,
-  SHIELD  : 8,
-  METAL   : 16,
-  FRAGILE   : 32,
-  WEAPON  : 64,
-  RAW_METAL : 128,
-  KEY_ITEM : 256
+  BLUNT         : 2 << 0,
+  SHARP         : 2 << 1,
+  FLAT          : 2 << 2,
+  SHIELD        : 2 << 3,
+  METAL         : 2 << 4,
+  FRAGILE       : 2 << 5,
+  WEAPON        : 2 << 6,
+  RAW_METAL     : 2 << 7,
+  KEY_ITEM      : 2 << 8,
+  STACKABLE     : 2 << 9,
+  HAS_QUALITY   : 2 << 10,
+  HAS_MATERIAL  : 2 << 11,
+  APPAREL       : 2 << 12,
+  CAN_HAVE_ENCHANTMENTS : 2 << 13, 
+  CAN_HAVE_TRIGGER_ENCHANTMENTS : 2 << 14, 
+  HAS_COLOR     : 2 << 15,
+  HAS_SIZE      : 2 << 16,
+  UNIQUE        : 2 << 17
 }
+
+/*
+    canHaveEnchants : false,
+    canHaveTriggerEnchants : false,
+    hasQuality : false,
+    hasMaterial : false,
+    isApparel : false,
+    canBeColored : false,
+    hasSize : false,
+    isUnique -> ATTRIBUTES.RARE
+    keyItem -> ATTRIBUTES.KEY_ITEM
+*/
 
 @:USE_TARGET_HINT = {
   ONE   : 0,  
@@ -104,25 +125,20 @@ Item.database.newEntry(
     examine : '',
     equipType : TYPE.HAND,
     equipMod : StatSet.new(),
-    isUnique : true,
     weight: 0,
     rarity: 100,
     levelMinimum : 1,
     tier: 0,
-    keyItem : false,
-    basePrice: 0,
-    canHaveEnchants : false,
-    canHaveTriggerEnchants : false,
     enchantLimit : 0,
-    hasQuality : false,
-    hasMaterial : false,
-    isApparel : false,
+    basePrice: 0,
+    enchantLimit : 0,
     useTargetHint : USE_TARGET_HINT.ONE,
     useEffects : [],
     equipEffects : [],
-    attributes : 0,
-    canBeColored : false,
-    hasSize : false,
+    attributes : 
+      ATTRIBUTE.UNIQUE,
+      ATTRIBUTE.KEY_ITEM,
+      ATTRIBUTE.STACKABLE
     blockPoints : 0,
     onCreate ::(item, creationHint) {},
     possibleArts : [],
@@ -138,21 +154,12 @@ Item.database.newEntry(data : {
   equipType: TYPE.TRINKET,
   rarity : 30000,
   basePrice : 1,
-  keyItem : false,
   weight : 0.1,
   levelMinimum : 1,
   tier: 0,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 0,
   blockPoints : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,
-  isUnique : true,
-  canBeColored : false,
   useTargetHint : USE_TARGET_HINT.ONE,
-  hasSize : false,
   onCreate ::(item, creationHint) {},
   possibleArts : [],
   
@@ -166,7 +173,12 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [
   ],
-  attributes : ATTRIBUTE.FRAGILE  
+  attributes : 
+    ATTRIBUTE.FRAGILE |
+    ATTRIBUTE.APPAREL |
+    ATTRIBUTE.UNIQUE |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS
 })
 
 Item.database.newEntry(data : {
@@ -177,20 +189,11 @@ Item.database.newEntry(data : {
   equipType: TYPE.AMULET,
   rarity : 30000,
   basePrice : 5000,
-  keyItem : false,
   weight : 2,
   levelMinimum : 1,
   tier: 0,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : true,
-  canBeColored : true,
   useTargetHint : USE_TARGET_HINT.ONE,
-  hasSize : false,
   onCreate ::(item, creationHint) {},
   possibleArts : [],
   
@@ -206,7 +209,15 @@ Item.database.newEntry(data : {
   equipEffects : [
     'base:auto-life',
   ],
-  attributes : ATTRIBUTE.FRAGILE  
+  attributes : 
+    ATTRIBUTE.FRAGILE  
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_COLOR |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.UNIQUE
+
 })
 
 
@@ -218,19 +229,10 @@ Item.database.newEntry(data : {
   equipType: TYPE.HAND,
   weight : 2,
   rarity : 100,
-  canBeColored : false,
-  keyItem : false,
   basePrice: 20,
   tier: 0,
   levelMinimum : 1,
-  hasSize : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  canHaveEnchants : false,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,
-  isUnique : false,    
   useTargetHint : USE_TARGET_HINT.ONE,
   blockPoints : 0,
   equipMod : StatSet.new(
@@ -245,7 +247,8 @@ Item.database.newEntry(data : {
   equipEffects : [
   ],
   attributes : 
-    ATTRIBUTE.FRAGILE
+    ATTRIBUTE.FRAGILE |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -262,18 +265,10 @@ Item.database.newEntry(data : {
   weight : 2,
   rarity : 100,
   canBeColored : false,
-  hasSize : false,
-  keyItem : false,
   tier: 0,
   basePrice: 100,
   levelMinimum : 1,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,
-  isUnique : false,    
   possibleArts : [],
   useTargetHint : USE_TARGET_HINT.ONE,
   blockPoints : 0,
@@ -289,7 +284,8 @@ Item.database.newEntry(data : {
   equipEffects : [
   ],
   attributes : 
-    ATTRIBUTE.FRAGILE
+    ATTRIBUTE.FRAGILE |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -304,19 +300,10 @@ Item.database.newEntry(data : {
   equipType: TYPE.HAND,
   weight : 2,
   rarity : 100,
-  canBeColored : false,
-  keyItem : false,
   basePrice: 20,
   tier: 0,
   levelMinimum : 1,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,
-  isUnique : false,    
-  hasSize : false,
   possibleArts : [],
   useTargetHint : USE_TARGET_HINT.ONE,
   blockPoints : 0,
@@ -331,7 +318,8 @@ Item.database.newEntry(data : {
   equipEffects : [
   ],
   attributes : 
-    ATTRIBUTE.FRAGILE
+    ATTRIBUTE.FRAGILE |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -346,19 +334,10 @@ Item.database.newEntry(data : {
   equipType: TYPE.HAND,
   weight : 2,
   rarity : 100,
-  canBeColored : false,
-  keyItem : false,
   basePrice: 20,
   levelMinimum : 1,
   tier: 0,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasSize : false,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,
-  isUnique : false,    
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [],
   blockPoints : 0,
@@ -373,7 +352,8 @@ Item.database.newEntry(data : {
   equipEffects : [
   ],
   attributes : 
-    ATTRIBUTE.FRAGILE
+    ATTRIBUTE.FRAGILE |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 })  
@@ -387,19 +367,10 @@ Item.database.newEntry(data : {
   equipType: TYPE.HAND,
   weight : 2,
   rarity : 100,
-  canBeColored : false,
-  keyItem : false,
   basePrice: 20,
   tier: 0,
   levelMinimum : 1,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,
-  hasSize : false,
-  isUnique : false,    
   possibleArts : [],
   useTargetHint : USE_TARGET_HINT.ONE,
   blockPoints : 0,
@@ -414,7 +385,8 @@ Item.database.newEntry(data : {
   equipEffects : [
   ],
   attributes : 
-    ATTRIBUTE.FRAGILE
+    ATTRIBUTE.FRAGILE |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -475,16 +447,8 @@ Item.database.newEntry(data : {
   rarity : 100,
   weight : 2,    
   basePrice: 20,
-  canBeColored : false,
   tier: 0,
-  keyItem : false,
   levelMinimum : 1,
-  hasSize : false,
-  hasMaterial : false,
-  isApparel : false,
-  isUnique : false,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
   hasQuality : false,
   possibleArts : [],
@@ -501,7 +465,8 @@ Item.database.newEntry(data : {
   equipEffects : [
   ],
   attributes : 
-    ATTRIBUTE.FRAGILE
+    ATTRIBUTE.FRAGILE |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -516,19 +481,10 @@ Item.database.newEntry(data : {
   equipType: TYPE.HAND,
   rarity : 100,
   basePrice: 10,    
-  canBeColored : false,
   tier: 0,
-  keyItem : false,
   weight : 4,
   levelMinimum : 1,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
-  hasSize : true,
   possibleArts : [
     'base:stab'
   ],
@@ -550,7 +506,10 @@ Item.database.newEntry(data : {
   ],
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL
+    ATTRIBUTE.METAL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.HAS_SIZE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -564,19 +523,10 @@ Item.database.newEntry(data : {
   equipType: TYPE.HAND,
   basePrice: 13,
   rarity : 100,
-  keyItem : false,
-  canBeColored : false,
   tier: 0,
   weight : 4,
-  hasSize : true,
   levelMinimum : 1,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
@@ -600,7 +550,10 @@ Item.database.newEntry(data : {
   ],
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL
+    ATTRIBUTE.METAL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.HAS_SIZE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -613,20 +566,11 @@ Item.database.newEntry(data : {
   examine : 'Quite sturdy and pointy, some people use these as weapons.',
   equipType: TYPE.TWOHANDED,
   rarity : 100,
-  keyItem : false,
   tier: 0,
   weight : 4,
-  canBeColored : false,
   basePrice: 20,
   levelMinimum : 1,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : true,
-  hasSize : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
@@ -652,7 +596,10 @@ Item.database.newEntry(data : {
 
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL
+    ATTRIBUTE.METAL |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_SIZE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -666,20 +613,11 @@ Item.database.newEntry(data : {
   examine : 'Quite sharp.',
   equipType: TYPE.HAND,
   rarity : 100,
-  canBeColored : false,
-  keyItem : false,
   tier: 0,
   weight : 4,
   basePrice: 17,
   levelMinimum : 1,
-  hasSize : true,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
@@ -702,7 +640,10 @@ Item.database.newEntry(data : {
 
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL
+    ATTRIBUTE.METAL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.HAS_SIZE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -715,20 +656,11 @@ Item.database.newEntry(data : {
   examine : 'Clubs and bludgeons seem primitive, but are quite effective.',
   equipType: TYPE.HAND,
   rarity : 300,
-  canBeColored : true,
-  keyItem : false,
   weight : 4,
   basePrice: 70,
   levelMinimum : 1,
   tier: 0,
-  hasSize : true,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
@@ -750,7 +682,14 @@ Item.database.newEntry(data : {
   equipEffects : [],
   attributes : 
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
+
   ,
   onCreate ::(item, creationHint) {}
 
@@ -763,20 +702,11 @@ Item.database.newEntry(data : {
   examine : 'Swords like these are quite common and are of adequate quality even if simple.',
   equipType: TYPE.HAND,
   rarity : 300,
-  canBeColored : true,
-  keyItem : false,
   weight : 4,
   basePrice: 90,
   levelMinimum : 1,
   tier: 0,
-  hasSize : true,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
@@ -800,7 +730,15 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.SHARP |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
+
+
   ,
   onCreate ::(item, creationHint) {}
 
@@ -814,20 +752,11 @@ Item.database.newEntry(data : {
   examine : 'Swords like these are quite common and are of adequate quality even if simple.',
   equipType: TYPE.TWOHANDED,
   rarity : 300,
-  canBeColored : true,
-  keyItem : false,
   weight : 4,
   basePrice: 110,
   levelMinimum : 1,
   tier: 0,
-  hasSize : true,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
@@ -849,7 +778,15 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.SHARP |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
+
+
   ,
   onCreate ::(item, creationHint) {}
 
@@ -863,20 +800,11 @@ Item.database.newEntry(data : {
   examine : 'Weapons with shields seem to block more than they let on.',
   equipType: TYPE.TWOHANDED,
   rarity : 400,
-  canBeColored : true,
-  keyItem : false,
   weight : 12,
   basePrice: 250,
   levelMinimum : 1,
   tier: 1,
-  hasSize : true,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 15,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
@@ -901,7 +829,15 @@ Item.database.newEntry(data : {
     ATTRIBUTE.SHARP  |
     ATTRIBUTE.METAL  |
     ATTRIBUTE.SHIELD |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
+
+    
   ,
   onCreate ::(item, creationHint) {}
 
@@ -915,20 +851,11 @@ Item.database.newEntry(data : {
   examine : 'Weapons with shields seem to block more than they let on.',
   equipType: TYPE.TWOHANDED,
   rarity : 400,
-  canBeColored : true,
-  keyItem : false,
   weight : 17,
   basePrice: 350,
   levelMinimum : 1,
   tier: 2,
-  hasSize : true,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 15,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
@@ -953,7 +880,15 @@ Item.database.newEntry(data : {
     ATTRIBUTE.BLUNT  |
     ATTRIBUTE.METAL  |
     ATTRIBUTE.SHIELD |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
+
+    
   ,
   onCreate ::(item, creationHint) {}
 
@@ -966,20 +901,11 @@ Item.database.newEntry(data : {
   examine : '.',
   equipType: TYPE.TWOHANDED,
   rarity : 300,
-  canBeColored : true,
-  keyItem : false,
   weight : 4,
   tier: 3,
   basePrice: 200,
   levelMinimum : 1,
-  hasSize : true,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stab',
@@ -1002,7 +928,15 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.SHARP |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
+
+
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1015,20 +949,11 @@ Item.database.newEntry(data : {
   examine : '.',
   equipType: TYPE.TWOHANDED,
   rarity : 300,
-  canBeColored : true,
-  keyItem : false,
   weight : 8,
   tier: 3,
   basePrice: 350,
   levelMinimum : 1,
-  hasSize : true,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stab',
@@ -1051,7 +976,15 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.SHARP |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
+
+
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1064,20 +997,11 @@ Item.database.newEntry(data : {
   examine : 'Swords like these are quite common and are of adequate quality even if simple.',
   equipType: TYPE.HAND,
   rarity : 300,
-  canBeColored : true,
-  keyItem : false,
   weight : 4,
   basePrice: 150,
   levelMinimum : 1,
   tier: 1,
-  hasSize : true,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stab',
@@ -1101,7 +1025,15 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.SHARP |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
+
+
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1115,20 +1047,11 @@ Item.database.newEntry(data : {
   examine : '',
   equipType: TYPE.HAND,
   rarity : 300,
-  canBeColored : true,
-  keyItem : false,
   weight : 4,
   basePrice: 150,
   levelMinimum : 1,
   tier: 1,
-  hasSize : true,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stab',
@@ -1151,7 +1074,15 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.SHARP |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
+
+
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1164,20 +1095,11 @@ Item.database.newEntry(data : {
   examine : 'Swords like these are quite common and are of adequate quality even if simple.',
   equipType: TYPE.HAND,
   rarity : 300,
-  canBeColored : true,
-  keyItem : false,
   weight : 4,
   basePrice: 150,
   levelMinimum : 1,
-  hasSize : true,
   tier: 2,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stab',
@@ -1201,7 +1123,13 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.SHARP |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1215,20 +1143,12 @@ Item.database.newEntry(data : {
   examine : 'Swords like these are quite common and are of adequate quality even if simple.',
   equipType: TYPE.HAND,
   rarity : 300,
-  canBeColored : true,
-  keyItem : false,
   weight : 4,
   basePrice: 120,
   hasSize : true,
   tier: 2,
   levelMinimum : 1,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stab',
@@ -1252,7 +1172,12 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.SHARP |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1266,20 +1191,11 @@ Item.database.newEntry(data : {
   examine : '',
   equipType: TYPE.TWOHANDED,
   rarity : 300,
-  keyItem : false,
   weight : 2,
-  hasSize : true,
-  canBeColored : true,
   basePrice: 76,
   levelMinimum : 1,
   tier: 0,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:doublestrike',
@@ -1302,7 +1218,13 @@ Item.database.newEntry(data : {
   equipEffects : [],
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.WEAPON      
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
+
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1316,20 +1238,11 @@ Item.database.newEntry(data : {
   examine : '',
   equipType: TYPE.TWOHANDED,
   rarity : 300,
-  keyItem : false,
   weight : 10,
-  hasSize : true,
-  canBeColored : true,
   basePrice: 76,
   levelMinimum : 1,
   tier: 3,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:precise-strike',
@@ -1350,7 +1263,13 @@ Item.database.newEntry(data : {
   equipEffects : [],
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.WEAPON      
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
+
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1365,17 +1284,8 @@ Item.database.newEntry(data : {
   rarity : 300,
   weight : 12,
   tier: 1,
-  hasSize : true,
-  keyItem : false,
-  canBeColored : true,
   basePrice: 87,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
@@ -1399,7 +1309,13 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.SHARP |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON  
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
+
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1413,18 +1329,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.HAND,
   rarity : 300,
   weight : 1,
-  hasSize : true,
   tier: 0,
-  canBeColored : true,
-  keyItem : false,
   basePrice: 35,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
 
@@ -1446,7 +1353,12 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.SHARP |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
 
   ,
   onCreate ::(item, creationHint) {}
@@ -1461,19 +1373,10 @@ Item.database.newEntry(data : {
   equipType: TYPE.TWOHANDED,
   rarity : 100,
   weight : 8,
-  canBeColored : false,
-  keyItem : false,
   basePrice: 30,
   tier: 0,
   levelMinimum : 1,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasSize : true,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stun'
@@ -1492,7 +1395,11 @@ Item.database.newEntry(data : {
   equipEffects : [],
   attributes : 
     ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL
+    ATTRIBUTE.METAL |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.HAS_COLOR
+
 
   ,
   onCreate ::(item, creationHint) {}
@@ -1508,19 +1415,10 @@ Item.database.newEntry(data : {
   equipType: TYPE.TWOHANDED,
   rarity : 100,
   weight : 8,
-  canBeColored : true,
-  keyItem : false,
   basePrice: 105,
-  hasSize : true,
   tier: 2,
   levelMinimum : 1,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stun',
@@ -1543,7 +1441,12 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.BLUNT |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1557,19 +1460,10 @@ Item.database.newEntry(data : {
   equipType: TYPE.TWOHANDED,
   rarity : 100,
   weight : 8,
-  canBeColored : true,
-  keyItem : false,
   basePrice: 105,
-  hasSize : true,
   tier: 0,
   levelMinimum : 1,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stun',
@@ -1592,7 +1486,12 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.BLUNT |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1606,19 +1505,10 @@ Item.database.newEntry(data : {
   equipType: TYPE.TWOHANDED,
   rarity : 100,
   weight : 8,
-  canBeColored : true,
-  keyItem : false,
   basePrice: 105,
-  hasSize : true,
   tier: 1,
   levelMinimum : 1,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stun',
@@ -1641,7 +1531,12 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.BLUNT |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1656,19 +1551,11 @@ Item.database.newEntry(data : {
   equipType: TYPE.TWOHANDED,
   rarity : 100,
   weight : 8,
-  canBeColored : true,
-  keyItem : false,
   basePrice: 40,
   levelMinimum : 1,
   hasSize : true,
   tier: 1,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stun',
@@ -1690,7 +1577,12 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.BLUNT |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1705,19 +1597,10 @@ Item.database.newEntry(data : {
   equipType: TYPE.TWOHANDED,
   rarity : 100,
   weight : 9,
-  hasSize : true,
-  canBeColored : true,
-  keyItem : false,
   basePrice: 100,
   levelMinimum : 1,
   tier: 1,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:fire',
@@ -1748,7 +1631,12 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.BLUNT |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR    
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1761,20 +1649,11 @@ Item.database.newEntry(data : {
   examine : '',
   equipType: TYPE.TWOHANDED,
   rarity : 100,
-  canBeColored : true,
   weight : 8,
-  keyItem : false,
   basePrice: 100,
   levelMinimum : 1,
-  hasSize : true,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
   tier: 2,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:fire',
@@ -1803,7 +1682,12 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.BLUNT |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1819,18 +1703,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.TWOHANDED,
   rarity : 350,
   weight : 10,
-  keyItem : false,
-  canBeColored : true,
   levelMinimum : 1,
-  hasSize : true,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
   basePrice: 200,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   tier: 2,
   possibleArts : [
@@ -1854,7 +1729,12 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.BLUNT |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1869,18 +1749,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.HAND,
   rarity : 350,
   weight : 1,
-  canBeColored : true,
-  keyItem : false,
   levelMinimum : 1,
   tier: 0,
-  hasSize : false,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 220,
   possibleArts : [
@@ -1904,7 +1775,12 @@ Item.database.newEntry(data : {
   attributes : 
     ATTRIBUTE.BLUNT |
     ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON
+    ATTRIBUTE.WEAPON |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
   
@@ -1918,18 +1794,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.ARMOR,
   rarity : 100,
   weight : 1,
-  canBeColored : true,
-  hasSize : false,
-  keyItem : false,
   levelMinimum : 1,
   tier: 0,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : false,
-  isApparel : true,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 100,
   possibleArts : [],
@@ -1943,7 +1810,13 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 0,
+  attributes : 
+    ATTRIBUTE.APPAREL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR  
+  
+  ,
   onCreate ::(item, creationHint) {}
   
 })
@@ -1957,18 +1830,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.ARMOR,
   rarity : 100,
   weight : 1,
-  hasSize : false,
-  canBeColored : true,
   tier: 0,
-  keyItem : false,
   levelMinimum : 1,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : false,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : false,
-  isApparel : true,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 100,
   possibleArts : [],
@@ -1982,7 +1846,12 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 0,
+  attributes : 
+    ATTRIBUTE.APPAREL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR  
+  ,
   onCreate ::(item, creationHint) {}
   
 })
@@ -1995,18 +1864,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.TRINKET,
   rarity : 100,
   weight : 1,
-  canBeColored : true,
-  hasSize : false,
-  keyItem : false,
   tier: 2,
   levelMinimum : 1,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : false,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : false,
-  isApparel : true,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 40,
   possibleArts : [],
@@ -2019,7 +1879,13 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 0,
+  attributes : 
+    ATTRIBUTE.APPAREL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR  
+  
+  ,
   onCreate ::(item, creationHint) {}
   
 })  
@@ -2033,18 +1899,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.TRINKET,
   rarity : 100,
   weight : 1,
-  canBeColored : true,
-  hasSize : false,
-  keyItem : false,
   levelMinimum : 1,
   tier: 2,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : false,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : false,
-  isApparel : true,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 40,
   possibleArts : [],
@@ -2057,7 +1914,12 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 0,
+  attributes : 
+    ATTRIBUTE.APPAREL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR    
+  ,
   onCreate ::(item, creationHint) {}
   
 })    
@@ -2069,18 +1931,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.RING,
   rarity : 300,
   weight : 1,
-  hasSize : true,
   tier: 2,
-  canBeColored : true,
-  keyItem : false,
   basePrice: 100,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : true,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
 
@@ -2097,7 +1950,13 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [],
   attributes : 
-    ATTRIBUTE.METAL
+    ATTRIBUTE.METAL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_SIZE |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR  
   ,
   onCreate ::(item, creationHint) {}
 
@@ -2111,18 +1970,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.TRINKET,
   rarity : 100,
   weight : 5,
-  hasSize : false,
-  canBeColored : true,
-  keyItem : false,
   levelMinimum : 1,
   tier: 2,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : false,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : false,
-  isApparel : true,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 105,
   possibleArts : [],
@@ -2135,7 +1985,12 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 0,
+  attributes : 
+    ATTRIBUTE.APPAREL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR    
+  ,
   onCreate ::(item, creationHint) {}
   
 })  
@@ -2149,18 +2004,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.TRINKET,
   rarity : 100,
   weight : 1,
-  hasSize : false,
-  canBeColored : true,
-  keyItem : false,
   levelMinimum : 1,
   tier: 2,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : false,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : false,
-  isApparel : true,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 55,
   possibleArts : [],
@@ -2174,7 +2020,13 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 0,
+  attributes : 
+    ATTRIBUTE.APPAREL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR    
+  
+  ,
   onCreate ::(item, creationHint) {}
   
 })   
@@ -2187,18 +2039,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.TRINKET,
   rarity : 100,
   weight : 1,
-  canBeColored : true,
-  hasSize : false,
-  keyItem : false,
   levelMinimum : 1,
   tier: 2,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : false,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : false,
-  isApparel : true,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 10,
   possibleArts : [],
@@ -2211,7 +2054,13 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 0,
+  attributes : 
+    ATTRIBUTE.APPAREL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR    
+  
+  ,
   onCreate ::(item, creationHint) {}
   
 })       
@@ -2224,18 +2073,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.TRINKET,
   rarity : 350,
   weight : 10,
-  hasSize : false,
-  canBeColored : true,
-  keyItem : false,
   tier: 3,
   levelMinimum : 1,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 200,
   possibleArts : [],
@@ -2250,7 +2090,10 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [],
   attributes : 
-    ATTRIBUTE.METAL
+    ATTRIBUTE.METAL |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_COLOR      
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2265,18 +2108,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.ARMOR,
   rarity : 350,
   weight : 1,
-  canBeColored : true,
   tier: 1,
-  hasSize : false,
-  keyItem : false,
   levelMinimum : 1,
-  canHaveEnchants : true,
-  canHaveTriggerEnchants : false,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : false,
-  isApparel : true,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 350,
   possibleArts : [],
@@ -2290,7 +2124,12 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 0,
+  attributes : 
+    ATTRIBUTE.APPAREL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR    
+  ,
   onCreate ::(item, creationHint) {}
   
 })  
@@ -2304,18 +2143,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.ARMOR,
   rarity : 350,
   weight : 1,
-  canBeColored : true,
-  keyItem : false,
-  hasSize : false,
   levelMinimum : 1,
   tier: 1,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 200,
   possibleArts : [],
@@ -2331,7 +2161,10 @@ Item.database.newEntry(data : {
   equipEffects : [],
   attributes : 
     ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL
+    ATTRIBUTE.METAL |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2345,18 +2178,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.ARMOR,
   rarity : 500,
   weight : 1,
-  canBeColored : true,
-  hasSize : false,
-  keyItem : false,
   levelMinimum : 1,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 10,
-  hasQuality : true,
   tier: 2,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 350,
   possibleArts : [],
@@ -2365,15 +2189,20 @@ Item.database.newEntry(data : {
   blockPoints : 0,
   equipMod : StatSet.new(
     DEF: 55,
-    ATK: 10,
-    SPD: -10
+    ATK: 20,
+    SPD: -40
   ),
   useEffects : [
   ],
   equipEffects : [],
   attributes : 
     ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL
+    ATTRIBUTE.METAL |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2387,18 +2216,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.ARMOR,
   rarity : 500,
   weight : 1,
-  canBeColored : true,
-  keyItem : false,
   levelMinimum : 1,
-  hasSize : false,
   tier: 3,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 10,
-  hasQuality : true,
-  hasMaterial : true,
-  isApparel : false,
-  isUnique : false,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 400,
   possibleArts : [],
@@ -2406,16 +2226,21 @@ Item.database.newEntry(data : {
   // fatigued
   blockPoints : 0,
   equipMod : StatSet.new(
-    DEF: 65,
-    ATK: 30,
-    SPD: -20
+    DEF: 75,
+    ATK: 40,
+    SPD: -65
   ),
   useEffects : [
   ],
   equipEffects : [],
   attributes : 
     ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL
+    ATTRIBUTE.METAL |
+    ATTRIBUTE.HAS_MATERIAL |
+    ATTRIBUTE.HAS_QUALITY |
+    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
+    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    ATTRIBUTE.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2475,18 +2300,10 @@ Item.database.newEntry(data : {
   examine : 'Pure copper ingot.',
   equipType: TYPE.TWOHANDED,
   rarity : 150,
-  hasSize : false,
   weight : 5,
   tier: 0,
-  canBeColored : false,
-  keyItem : false,
   basePrice: 10,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [],
@@ -2504,7 +2321,8 @@ Item.database.newEntry(data : {
   equipEffects : [],
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL
+    ATTRIBUTE.RAW_METAL |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:copper';
@@ -2521,18 +2339,10 @@ Item.database.newEntry(data : {
   examine : 'Pure iron ingot',
   equipType: TYPE.TWOHANDED,
   rarity : 200,
-  hasSize : false,
   weight : 5,
-  keyItem : false,
   tier: 0,
-  canBeColored : false,
   basePrice: 20,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [],
@@ -2550,7 +2360,8 @@ Item.database.newEntry(data : {
   equipEffects : [],
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL
+    ATTRIBUTE.RAW_METAL |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:iron';
@@ -2564,19 +2375,11 @@ Item.database.newEntry(data : {
   description: 'Steel Ingot',
   examine : 'Pure Steel ingot.',
   equipType: TYPE.TWOHANDED,
-  hasSize : false,
   rarity : 300,
   tier: 0,
-  canBeColored : false,
   weight : 5,
-  keyItem : false,
   basePrice: 30,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [],
@@ -2594,7 +2397,8 @@ Item.database.newEntry(data : {
   equipEffects : [],
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL
+    ATTRIBUTE.RAW_METAL |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:steel';
@@ -2610,19 +2414,11 @@ Item.database.newEntry(data : {
   description: 'Mythril Ingot',
   examine : 'Pure iron ingot',
   equipType: TYPE.TWOHANDED,
-  hasSize : false,
   rarity : 1000,
   tier: 1,
-  canBeColored : false,
   weight : 5,
-  keyItem : false,
   basePrice: 150,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [],
@@ -2640,7 +2436,8 @@ Item.database.newEntry(data : {
   equipEffects : [],
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL
+    ATTRIBUTE.RAW_METAL |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:mythril';
@@ -2656,17 +2453,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.TWOHANDED,
   rarity : 1550,
   tier: 1,
-  canBeColored : false,
-  hasSize : false,
   weight : 5,
-  keyItem : false,
   basePrice: 175,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [],
@@ -2684,7 +2473,8 @@ Item.database.newEntry(data : {
   equipEffects : [],
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL
+    ATTRIBUTE.RAW_METAL |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:quicksilver';
@@ -2700,17 +2490,9 @@ Item.database.newEntry(data : {
   equipType: TYPE.TWOHANDED,
   rarity : 2000,
   weight : 5,
-  canBeColored : false,
-  keyItem : false,
-  hasSize : false,
   basePrice: 300,
   tier: 2,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [],
@@ -2728,7 +2510,8 @@ Item.database.newEntry(data : {
   equipEffects : [],
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL
+    ATTRIBUTE.RAW_METAL |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:adamantine';
@@ -2744,18 +2527,10 @@ Item.database.newEntry(data : {
   examine : 'An alloy with mostly sunstone, it dully shines with a soft yellow gleam',
   equipType: TYPE.TWOHANDED,
   rarity : 300,
-  canBeColored : false,
   basePrice: 115,
-  keyItem : false,
-  hasSize : false,
   weight : 5,
   tier: 2,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [],
@@ -2773,7 +2548,8 @@ Item.database.newEntry(data : {
   equipEffects : [],
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL
+    ATTRIBUTE.RAW_METAL |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:sunstone';
@@ -2790,16 +2566,8 @@ Item.database.newEntry(data : {
   rarity : 300,
   weight : 5,
   tier: 2,
-  canBeColored : false,
-  keyItem : false,
-  hasSize : false,
   basePrice: 115,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [],
@@ -2817,7 +2585,8 @@ Item.database.newEntry(data : {
   equipEffects : [],
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL
+    ATTRIBUTE.RAW_METAL |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:moonstone';
@@ -2833,15 +2602,7 @@ Item.database.newEntry(data : {
   equipType: TYPE.TWOHANDED,
   rarity : 500,
   weight : 5,
-  canBeColored : false,
-  keyItem : false,
-  hasSize : false,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   basePrice: 250,
   tier: 2,
   levelMinimum : 1,
@@ -2861,7 +2622,8 @@ Item.database.newEntry(data : {
   equipEffects : [],
   attributes : 
     ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL
+    ATTRIBUTE.RAW_METAL |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:dragonglass';
@@ -2874,18 +2636,10 @@ Item.database.newEntry(data : {
   description: "Raw ore. It's hard to tell exactly what kind of metal it is.",
   examine : 'Could be smelted into...',
   equipType: TYPE.TWOHANDED,
-  hasSize : false,
   rarity : 100,
   weight : 5,
-  canBeColored : false,
-  keyItem : false,
   tier: 0,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   levelMinimum : 100000,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 5,
@@ -2903,7 +2657,9 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [],
   attributes : 
-    ATTRIBUTE.SHARP
+    ATTRIBUTE.SHARP |
+    ATTRIBUTE.STACKABLE |
+    ATTRIBUTE.UNIQUE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -2917,16 +2673,8 @@ Item.database.newEntry(data : {
   equipType: TYPE.HAND,
   rarity : 100,
   weight : 5,
-  hasSize : false,
-  canBeColored : false,
-  keyItem : false,
   tier: 0,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 1000,
@@ -2945,7 +2693,8 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [],
   attributes : 
-    ATTRIBUTE.SHARP
+    ATTRIBUTE.SHARP|
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -2960,15 +2709,7 @@ Item.database.newEntry(data : {
   rarity : 100,
   weight : 3,
   tier: 10,
-  canBeColored : false,
-  keyItem : false,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasSize : false,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 3000,
@@ -2987,7 +2728,9 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [],
   attributes : 
-    ATTRIBUTE.SHARP
+    ATTRIBUTE.SHARP |
+    ATTRIBUTE.STACKABLE |
+    ATTRIBUTE.UNIQUE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -3003,15 +2746,7 @@ Item.database.newEntry(data : {
   rarity : 100,
   weight : 3,
   tier: 0,
-  canBeColored : false,
-  keyItem : false,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasSize : false,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 600,
@@ -3030,7 +2765,9 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [],
   attributes : 
-    ATTRIBUTE.SHARP
+    ATTRIBUTE.SHARP |
+    ATTRIBUTE.STACKABLE |
+    ATTRIBUTE.UNIQUE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -3089,15 +2826,7 @@ Item.database.newEntry(data : {
   rarity : 3000,
   weight : 10,
   tier: 0,
-  hasSize : false,
-  keyItem : false,
-  canBeColored : false,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   levelMinimum : 10000000,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 175,
@@ -3116,7 +2845,8 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [],
   attributes : 
-    ATTRIBUTE.SHARP
+    ATTRIBUTE.SHARP |
+    ATTRIBUTE.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -3131,16 +2861,8 @@ Item.database.newEntry(data : {
   equipType: TYPE.TWOHANDED,
   rarity : 300000000,
   weight : 1,
-  hasSize : false,
-  keyItem : false,
   tier: 0,
-  canBeColored : false,
-  canHaveEnchants : false,
-  canHaveTriggerEnchants : false,
   enchantLimit : 0,
-  hasQuality : false,
-  hasMaterial : false,
-  isApparel : false,  isUnique : false,
   levelMinimum : 10000000,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 5,
@@ -3158,7 +2880,10 @@ Item.database.newEntry(data : {
     'base:break-item'
   ],
   equipEffects : [],
-  attributes : 0,
+  attributes :     
+    ATTRIBUTE.STACKABLE |
+    ATTRIBUTE.UNIQUE
+  ,
   onCreate ::(item, creationHint) {}
 
 }) 
@@ -3247,18 +2972,10 @@ Item.database.newEntry(data : {
     equipType: TYPE.TWOHANDED,
     rarity : 100,
     weight : 10,
-    canBeColored : true,
     basePrice: 1000,
-    keyItem : false,
-    hasSize : false,
     tier: 0,
     levelMinimum : 1000000000,
-    canHaveEnchants : false,
-    canHaveTriggerEnchants : false,
     enchantLimit : 0,
-    hasQuality : false,
-    hasMaterial : false,
-    isApparel : false,  isUnique : true,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleArts : [
     ],
@@ -3275,7 +2992,9 @@ Item.database.newEntry(data : {
     equipEffects : [],
     attributes : 
       ATTRIBUTE.SHARP  |
-      ATTRIBUTE.METAL
+      ATTRIBUTE.METAL |
+      ATTRIBUTE.UNIQUE |
+      ATTRIBUTE.HAS_COLOR
     ,
     onCreate ::(item, user, creationHint) {
       @:capitalize = import(:'game_function.capitalize.mt');
@@ -3518,22 +3237,12 @@ none.name = 'None';
       weight : Number,
       levelMinimum : Number,
       equipMod : StatSet.type,
-      canHaveEnchants: Boolean,
-      canHaveTriggerEnchants : Boolean,
       enchantLimit : Number,
-      hasQuality : Boolean,
-      hasMaterial : Boolean,
-      isApparel : Boolean,
-      isUnique : Boolean,
-      keyItem : Boolean,
-      useEffects : Object,
       equipEffects : Object,
       attributes : Number,
       useTargetHint : Number,
       onCreate : Function,
       basePrice : Number,
-      canBeColored: Boolean,
-      hasSize : Boolean,
       tier : Number,
       blockPoints : Number,
       possibleArts : Object
@@ -3992,6 +3701,8 @@ none.name = 'None';
     worldID : {
       get ::<- _.state.worldID
     },
+    
+    hasAttribute ::(attribute) <- (_.state.base.attributes & attribute) != 0,
       
     maxOut ::{
       _.state.intuition = 20;

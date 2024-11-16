@@ -132,13 +132,13 @@
       },
       
       acceptQuest::(issuer, island, quest) {
-        when (state.quests->size >= MAX_QUEST_COUNT) ::<= {
+        when (state.activeQuests->size >= MAX_QUEST_COUNT) ::<= {
           windowEvent.queueMessage(
-            text:"The party has reached its active quest limit. Please either turn in or remove other quests before taking this one."
+            text:"The party has too many active quests. Please either turn in or remove other quests before taking this one."
           );
           return false;
         }
-        state.quests->push(:quest);
+        state.activeQuests->push(:quest);
         quest.accept(
           island,
           issuer

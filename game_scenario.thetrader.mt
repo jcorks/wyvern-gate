@@ -4078,16 +4078,9 @@ return {
       weight : 10,
       canBeColored : true,
       basePrice: 1000,
-      keyItem : false,
-      hasSize : false,
       tier: 0,
       levelMinimum : 1000000000,
-      canHaveEnchants : false,
-      canHaveTriggerEnchants : false,
       enchantLimit : 0,
-      hasQuality : false,
-      hasMaterial : false,
-      isApparel : false,  isUnique : true,
       useTargetHint : Item.USE_TARGET_HINT.ONE,
       possibleArts : [
       ],
@@ -4105,7 +4098,9 @@ return {
       attributes : 
         Item.ATTRIBUTE.SHARP  |
         Item.ATTRIBUTE.METAL  |
-        Item.ATTRIBUTE.KEY_ITEM
+        Item.ATTRIBUTE.KEY_ITEM|
+        Item.ATTRIBUTE.UNIQUE
+
       ,
       onCreate ::(item, user, creationHint) {
       }
@@ -4119,21 +4114,12 @@ return {
       examine : '',
       equipType: Item.TYPE.HAND,
       rarity : 300,
-      canBeColored : false,
-      keyItem : false,
       weight : 50,
       basePrice: 250,
       levelMinimum : 1,
       tier: 2,
       blockPoints: 0,
-      hasSize : false,
-      canHaveEnchants : false,
-      canHaveTriggerEnchants : false,
       enchantLimit : 10,
-      hasQuality : false,
-      hasMaterial : true,
-      isApparel : false,
-      isUnique : false,
       useTargetHint : Item.USE_TARGET_HINT.ONE,
 
       // fatigued
@@ -4149,7 +4135,8 @@ return {
       equipEffects : [],
       attributes : 
         Item.ATTRIBUTE.SHARP |
-        Item.ATTRIBUTE.METAL
+        Item.ATTRIBUTE.METAL |
+        Item.ATTRIBUTE.HAS_MATERIAL
       ,
       onCreate ::(item, creationHint) {}
 
@@ -4163,21 +4150,12 @@ return {
       examine : '',
       equipType: Item.TYPE.HAND,
       rarity : 300,
-      canBeColored : false,
-      keyItem : false,
       weight : 250,
       basePrice: 150,
       levelMinimum : 1,
       tier: 2,
-      hasSize : false,
       blockPoints: 0,
-      canHaveEnchants : false,
-      canHaveTriggerEnchants : false,
       enchantLimit : 10,
-      hasQuality : false,
-      hasMaterial : true,
-      isApparel : false,
-      isUnique : false,
       useTargetHint : Item.USE_TARGET_HINT.ONE,
 
       // fatigued
@@ -4193,7 +4171,8 @@ return {
       equipEffects : [],
       attributes : 
         Item.ATTRIBUTE.SHARP |
-        Item.ATTRIBUTE.METAL
+        Item.ATTRIBUTE.METAL |
+        Item.ATTRIBUTE.HAS_MATERIAL
       ,
       onCreate ::(item, creationHint) {}
 

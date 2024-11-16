@@ -8065,7 +8065,6 @@ Arts.newEntry(
       
       if (world.party.leader == user) ::<= {
         @:choices = Item.database.getAll()->filter(::(value) <- 
-          value.keyItem == false &&
           ((value.attributes & Item.ATTRIBUTE.WEAPON) != 0) &&
           ((value.attributes & Item.ATTRIBUTE.KEY_ITEM) == 0)
         );
@@ -8081,7 +8080,6 @@ Arts.newEntry(
       } else ::<= {
         makeItem(:
           random.pickArrayItem(:Item.database.getAll()->filter(::(value) <- 
-            value.keyItem == false &&
             ((value.attributes & Item.ATTRIBUTE.WEAPON) != 0) &&
             ((value.attributes & Item.ATTRIBUTE.KEY_ITEM) == 0)
           ))

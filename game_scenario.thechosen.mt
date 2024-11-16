@@ -2715,18 +2715,10 @@ return {
       equipType: Item.TYPE.TWOHANDED,
       rarity : 100,
       weight : 10,
-      canBeColored : false,
       basePrice: 400,
-      keyItem : false,
-      hasSize : false,
       tier: 0,
       levelMinimum : 1000000000,
-      canHaveEnchants : false,
-      canHaveTriggerEnchants : false,
       enchantLimit : 0,
-      hasQuality : false,
-      hasMaterial : false,
-      isApparel : false,  isUnique : true,
       useTargetHint : Item.USE_TARGET_HINT.NONE,
       possibleArts : [
       ],
@@ -2744,7 +2736,9 @@ return {
       equipEffects : [],
       attributes : 
         Item.ATTRIBUTE.SHARP  |
-        Item.ATTRIBUTE.METAL
+        Item.ATTRIBUTE.METAL |
+        Item.ATTRIBUTE.UNIQUE |
+        Item.ATTRIBUTE.UNIQUE
       ,
       onCreate ::(item, user, creationHint) {   
 
@@ -2763,18 +2757,10 @@ return {
       equipType: Item.TYPE.TWOHANDED,
       rarity : 100,
       weight : 10,
-      hasSize : false,
-      canBeColored : false,
       basePrice: 1,
       tier: 0,
-      keyItem : false,
       levelMinimum : 1000000000,
-      canHaveEnchants : false,
-      canHaveTriggerEnchants : false,
       enchantLimit : 0,
-      hasQuality : false,
-      hasMaterial : false,
-      isApparel : false,  isUnique : true,
       useTargetHint : Item.USE_TARGET_HINT.ONE,
       possibleArts : [
         "base:fire" // for fun!
@@ -2795,7 +2781,8 @@ return {
       attributes : 
         Item.ATTRIBUTE.SHARP |
         Item.ATTRIBUTE.METAL |
-        Item.ATTRIBUTE.KEY_ITEM
+        Item.ATTRIBUTE.KEY_ITEM |
+        Item.ATTRIBUTE.UNIQUE
       ,
       onCreate ::(item, user, creationHint) {   
       
@@ -2825,19 +2812,12 @@ return {
       examine : '',
       equipType: Item.TYPE.TWOHANDED,
       rarity : 100,
-      hasSize : false,
       weight : 10,
-      canBeColored : false,
       basePrice: 1,
       tier: 0,
       keyItem : false,
       levelMinimum : 1000000000,
-      canHaveEnchants : false,
-      canHaveTriggerEnchants : false,
       enchantLimit : 0,
-      hasQuality : false,
-      hasMaterial : false,
-      isApparel : false,  isUnique : true,
       useTargetHint : Item.USE_TARGET_HINT.ONE,
       possibleArts : [
         "base:ice" // for fun!
@@ -2858,7 +2838,8 @@ return {
       attributes : 
         Item.ATTRIBUTE.SHARP |
         Item.ATTRIBUTE.METAL |
-        Item.ATTRIBUTE.KEY_ITEM
+        Item.ATTRIBUTE.KEY_ITEM |
+        Item.ATTRIBUTE.UNIQUE
       ,
       onCreate ::(item, user, creationHint) {   
       
@@ -2889,18 +2870,10 @@ return {
       equipType: Item.TYPE.TWOHANDED,
       rarity : 100,
       weight : 10,
-      canBeColored : false,
-      hasSize : false,
       basePrice: 1,
-      keyItem : false,
       tier: 0,
       levelMinimum : 1000000000,
-      canHaveEnchants : false,
-      canHaveTriggerEnchants : false,
       enchantLimit : 0,
-      hasQuality : false,
-      hasMaterial : false,
-      isApparel : false,  isUnique : true,
       useTargetHint : Item.USE_TARGET_HINT.ONE,
       possibleArts : [
         "base:thunder" // for fun!
@@ -2921,7 +2894,9 @@ return {
       attributes : 
         Item.ATTRIBUTE.SHARP |
         Item.ATTRIBUTE.METAL |
-        Item.ATTRIBUTE.KEY_ITEM
+        Item.ATTRIBUTE.KEY_ITEM |
+        Item.ATTRIBUTE.UNIQUE
+
 
       ,
       onCreate ::(item, user, creationHint) {   
@@ -2953,18 +2928,10 @@ return {
       equipType: Item.TYPE.TWOHANDED,
       rarity : 100,
       weight : 10,
-      hasSize : false,
-      canBeColored : false,
       basePrice: 1,
-      keyItem : false,
       tier: 0,
       levelMinimum : 1000000000,
-      canHaveEnchants : false,
-      canHaveTriggerEnchants : false,
       enchantLimit : 0,
-      hasQuality : false,
-      hasMaterial : false,
-      isApparel : false,  isUnique : true,
       useTargetHint : Item.USE_TARGET_HINT.ONE,
       possibleArts : [
         "base:explosion" // for fun!
@@ -2985,7 +2952,9 @@ return {
       attributes : 
         Item.ATTRIBUTE.SHARP |
         Item.ATTRIBUTE.METAL |
-        Item.ATTRIBUTE.KEY_ITEM
+        Item.ATTRIBUTE.KEY_ITEM|
+        Item.ATTRIBUTE.UNIQUE
+
       ,
       onCreate ::(item, user, creationHint) {   
       
