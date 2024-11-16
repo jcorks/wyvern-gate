@@ -725,7 +725,10 @@ return {
     }
 
 
-    instance.islandTravel();       
+    instance.islandTravel();
+    if (world.landmark) ::<= {
+      instance.landmarkTravel();
+    }       
     
     
     
@@ -959,6 +962,7 @@ return {
   ],
   interactionsOptions : [
     commonInteractions.options.save,
+    commonInteractions.options.quickSave,
     commonInteractions.options.system,
     commonInteractions.options.quit,
     
@@ -3122,9 +3126,7 @@ return {
                 onStart :: {
                 },
                 onEnd ::(result) {
-                  when(world.battle.partyWon()) ::<= { 
-                    
-                  };
+                  when(world.battle.partyWon()) empty;
                     
                   @:instance = import(module:'game_singleton.instance.mt');
                   instance.gameOver(reason:'The party was wiped out.');

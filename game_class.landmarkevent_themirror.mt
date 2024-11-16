@@ -14,7 +14,7 @@
 
 
 @:TheBeast = LoadableClass.create(
-  name: 'Wyvern.LandmarkEvent.DungeonEncounters',
+  name: 'Wyvern.LandmarkEvent.TheMirror',
   items : {
     hasBeast : false,
     encountersOnFloor : 0

@@ -138,6 +138,10 @@ instance.mainMenu(
     enterNewLocation(
       path: './',
       action::(filesystem) {
+        when (data->type == String && data == '') 
+          filesystem.remove(path: 'save_' + slot);
+        
+        breakpoint();
         filesystem.writeJSON(
           path: 'save_' + slot,
           object: data

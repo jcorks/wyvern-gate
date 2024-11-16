@@ -198,6 +198,29 @@ return {
         );
       }
     ),
+
+    quickSave : InteractionMenuEntry.new(
+      name : 'Quick Save',
+      filter ::(island, landmark) <- true,
+      keepInteractionMenu : true,
+      onSelect::(island, landmark) {
+        @:instance = import(module:'game_singleton.instance.mt');
+        @:loading = import(module:'game_function.loading.mt');
+        loading(
+          message : 'Quick saving...',
+          do::{
+            instance.quicksave();
+            @:world = import(module:'game_singleton.world.mt');
+            windowEvent.queueMessage(text:'Successfully saved. Look for the quick save in the file list when loading.');            
+            windowEvent.queueCustom(
+                onEnter ::<- instance.quitRun()
+            );
+          }
+        );
+      }
+    ),
+
+
     
     system : InteractionMenuEntry.new(
       name: 'System',

@@ -12,7 +12,7 @@
 
 
 @:TheBeast = LoadableClass.create(
-  name: 'Wyvern.LandmarkEvent.DungeonEncounters',
+  name: 'Wyvern.LandmarkEvent.CaveBat',
   items : {
     encountersOnFloor : 0,
     hasBeast : false

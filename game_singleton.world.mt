@@ -22,6 +22,7 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:State = import(module:'game_class.state.mt');
 @:random = import(:'game_singleton.random.mt');
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
 
 @:TIME = {
   DAWN : 0,
@@ -166,6 +167,7 @@
     currentIslandID : 0,
     currentLandmarkID : 0,
     idPool : 1,
+    disgruntled : false,
     story : empty,
     npcs : empty,
     finished : false,
@@ -539,8 +541,8 @@
         state.scenario = empty;
         state.accolades = {};
         state.data = {};
-        state.currentIslandID = 0
-        state.currentLandmarkID = 0
+        state.currentIslandID = -1
+        state.currentLandmarkID = -1
         state.idPool = 1
         battle = Battle.new();
         island = empty;
@@ -623,7 +625,7 @@
             landmark.unloadContent();
             
           landmark = value
-          
+          state.currentLandmarkID = -1;
           if (landmark) ::<= {
             landmark.loadContent();
             state.currentLandmarkID = landmark.worldID;
@@ -694,6 +696,7 @@
           newHour = true;
         }
           
+          
         if (state.time >= HOURS_PER_DAY) ::<={
           state.time = 0;
           state.day += 1;
@@ -704,6 +707,17 @@
           state.day = 0;
           state.year += 1;
         }        
+
+        if (newHour && state.time == TIME.EVENING) ::<= {
+          @:instance = import(:'game_singleton.instance.mt');
+          if (instance.y) ::<= {
+            breakpoint();
+            windowEvent.queueMessage(
+              text: '"What a horrible night to have a curse."'
+            );  
+          }
+        }
+
         
         if (newHour && island != empty) ::<= {      
           foreach(this.party.quests) ::(k, v) {
@@ -735,6 +749,13 @@
         initializeNPCs();
         this.scenario.base.onBegin(data:this.scenario.data);
       
+      },
+      
+      disgruntled : {
+        get ::<- state.disgruntled,
+        set ::(value) {
+          state.disgruntled = true;
+        }
       },
       
       accoladeCount ::(name) => Number { 
@@ -774,12 +795,29 @@
           if (save.islands == empty)
             save.islands = [];
           save.islands[island.worldID] = islandSave;
-        }
+        }        
         save.world = state.save();
         save.rng = random.save();
 
+        // check to see if the current landmark is part of the current island. 
+        // If it isnt, save it separately.
+        breakpoint();
+        if (state.currentLandmarkID != -1 && ({:::} {
+            foreach(island.landmarks) ::(k, v) {
+              if (v.worldID == state.currentLandmarkID)
+                send(:false);
+            }
+            return true;
+        })) ::<= {
+          save.orphanedLandmark = this.landmark.save();
+        } else ::<= {
+          // just in case it was there before.
+          save->remove(key:'orphanedLandmark');
+        }
+
         // cleanup
         State.endRootSerializeGuard();
+        State.weightEmplace(:save);
         return save;        
       },
 
@@ -854,6 +892,13 @@
      
       
       load ::(serialized) {
+        breakpoint();
+
+        if (!State.weightCheck(:serialized)) ::<= {
+          @:instance = import(:'game_singleton.instance.mt');
+          instance.x = true;
+        }
+      
         if (serialized.rng != empty)
           random.load(:serialized.rng);
         
@@ -861,11 +906,20 @@
         
         island = Island.new(base:Island.database.find(:'base:none'), createEmpty:true);
         island.load(:serialized.islands[state.currentIslandID]);
-        landmark = {:::} {        
+        landmark = {:::} {  
+          breakpoint();    
           foreach(island.landmarks) ::(k, v) {
             if (v.worldID == state.currentLandmarkID)
               send(:v);
           } 
+          
+          // orphanedLandmark
+          when (state.currentLandmarkID != -1 && serialized.orphanedLandmark) ::<= {
+            @:Landmark = import(module:'game_mutator.landmark.mt');
+            @:l = Landmark.new(parent: island.map, state:serialized.orphanedLandmark);
+            return l;
+          }
+          
           state.currentLandmarkID = -1;
           return empty;
         }

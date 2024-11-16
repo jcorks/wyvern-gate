@@ -345,7 +345,13 @@ Event.database.newEntry(
         landmark: {},
         loot : true,
         onEnd::(result){
-        
+          when(world.battle.partyWon()) empty;
+          windowEvent.queueCustom(
+            onEnter::{
+              @:instance = import(module:'game_singleton.instance.mt');
+              instance.gameOver(reason:'The party was wiped out.');
+            }
+          );        
         }
       );
     

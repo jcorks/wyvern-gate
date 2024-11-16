@@ -984,6 +984,7 @@ import(module:'game_class.landmarkevent_cavebat.mt');
 import(module:'game_class.landmarkevent_dungeonencounters.mt');
 import(module:'game_class.landmarkevent_itemspecter.mt');
 import(module:'game_class.landmarkevent_themirror.mt');
+import(module:'game_class.landmarkevent_treasuregolem.mt');
 import(module:'game_class.landmarkevent_thesnakesiren.mt');
 
 

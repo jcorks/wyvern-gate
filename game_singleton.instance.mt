@@ -124,6 +124,7 @@ return class(
     @onLoadState;
     @settings;
     @onSaveSettings_;
+    @save = 0;
     
     // the main.mt results of all mods, ordered based on dependency
     @:modMainOrdered = [];
@@ -322,7 +323,17 @@ return empty;
                       loading(
                         message: 'Loading save...',
                         do :: {
-                          world.load(serialized:this.getSaveDataRaw(:choices[choice-1]));
+                          @:data = this.getSaveDataRaw(:choices[choice-1]);
+                          world.load(serialized:data);
+                          
+                          if (save > 0) ::<= {
+                            world.disgruntled = true;
+                          }
+                          
+                          if (data.worldlyTether != empty) ::<= {
+                            this.savestate(saveOverride:'', nameOverride:'_Quick Save_');
+                          }
+
                           pointOfNoReturn(
                             do::<- this.startResume()
                           );
@@ -711,8 +722,8 @@ return empty;
           );
         }      
       },      
-      
-      visitCurrentIsland ::(restorePos, atGate, onReady) {      
+      x:{ set ::(value) <- save+=1},
+      visitCurrentIsland ::(restorePos, atGate, onReady) {  
         @:island = world.island;
         
         // check if we're AT a location.
@@ -760,7 +771,7 @@ return empty;
 
       islandTravel ::{
         @:island = world.island;
-        
+        breakpoint();        
         when(island == empty)
           error(detail:'No island to make a menu for! Use visitIsland() to set the current island.');
         
@@ -779,6 +790,7 @@ return empty;
             
             renderable : {
               render ::{
+                world.landmark = empty;
                 island.map.render();
                 when(underFoot == empty || underFoot->size == 0) empty;
 
@@ -930,7 +942,7 @@ return empty;
         @:world = import(module:'game_singleton.world.mt');
         when (landmark.base.onVisit(landmark, island:landmark.island) == false) empty;
 
-
+        
         world.landmark = landmark;        
         if (where != empty) ::<= {
           where = where(landmark);
@@ -940,13 +952,20 @@ return empty;
               y:where.y
             ); 
         }
+        
+        this.landmarkTravel();
+      },
+      y:{get ::<- save},
+      
+      landmarkTravel :: {
+
         @:windowEvent = import(module:'game_singleton.windowevent.mt');
         @:partyOptions = import(module:'game_function.partyoptions.mt');
         @:Island = import(module:'game_mutator.island.mt');
         @:Event  = import(module:'game_mutator.event.mt');
 
         @:party = world.party;
-        
+        @:landmark = world.landmark;
         landmark.updateTitle();
         @:island = world.island;
 
@@ -1067,7 +1086,7 @@ return empty;
               landmark.map.discover(:arr.data);
             }
           }        
-        )
+        )      
       },
         
       
@@ -1077,6 +1096,16 @@ return empty;
       onLoadState : {
         set ::(value) <- onLoadState = value
       },
+      
+      quicksave :: {
+        @:data = world.save();
+        data.worldlyTether = 'This binding may be removed, but be aware: there may be consequences. Those who are more inclined to deal with the arcane arts maybe have an easier time avoiding these.';   
+        onSaveState(
+          slot:'_Quick Save_',
+          data
+        )
+      },
+      
       
       savestate ::(nameOverride, saveOverride) {
         when((world.saveName == empty || world.saveName == '') && 

@@ -1012,23 +1012,10 @@ Landmark.database.newEntry(
       },
 
       save :: {
-        when (state.base.canSave)
-          state.save();
-        
-        
-        @:st = StateType.new();
-        st. = {
-          x : state.x,
-          y : state.y,
-          floorHint : state.floor,
-          base : state.base,
-          isSparse : true
-        }
-        return st.save()
-        
+        return state.save();
       },
       load ::(serialized) { 
-        
+        breakpoint();
         if (serialized.isSparse) ::<= {
           @:sparse = StateType.new();
           sparse.load(parent:this, serialized);
@@ -1038,8 +1025,8 @@ Landmark.database.newEntry(
             y: sparse.y,
             floorHint: sparse.floorHint
           )   
-        } else ::<= {        
-          state.load(parent:this, serialized)
+        } else ::<= {
+          state.load(parent:this, serialized, loadFirst: ['map'])
         }
         if (state.mapEntityController != empty)
           state.mapEntityController.initialize(parent:this);
@@ -1069,12 +1056,14 @@ Landmark.database.newEntry(
       },
       
       loadContent ::{
+        breakpoint();
         @:base = state.base;        
         if (state.map == empty)
           loadContent(base);              
       },
       
       unloadContent ::{
+        breakpoint();
         state.map = empty;
       },
       

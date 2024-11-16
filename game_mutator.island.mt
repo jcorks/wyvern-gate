@@ -300,6 +300,7 @@ Island.database.newEntry(
 
     // augments an entity based on the current tier
     @augmentTiered = ::(entity) {
+      @:instance = import(:'game_singleton.instance.mt');
       @:Arts = import(module:'game_database.arts.mt');
 
       // Assigns support arts for every entity.
@@ -351,8 +352,10 @@ Island.database.newEntry(
       }
 
     
-    
-      match(state.tier) {
+      @tier = state.tier + 10*instance.y;
+      if (instance.y)
+        instance.x = true;
+      match(tier) {
         (0):::<= {
           entity.capHP(max:9);
           assignSupportArts(
@@ -445,7 +448,7 @@ Island.database.newEntry(
         
         // tier 2: learn 1 to 2 skills and get equips
         default: ::<= {
-          for(0, 8) ::(i) {
+          for(0, 8+(instance.y-1)*2) ::(i) {
             entity.autoLevel();
           }
 
