@@ -1886,8 +1886,6 @@ return {
         location.ownedBy.supportArts = [
           'base:cancel',
           'base:bloods-summoning',
-          'base:brace',
-          'base:reevaluate',
           'base:foresight',
           'base:mind-games',
           'base:banishing-light'
@@ -2726,8 +2724,6 @@ return {
       equipEffects : [],
       traits : 
         Item.TRAIT.SHARP  |
-        Item.TRAIT.METAL |
-        Item.TRAIT.UNIQUE |
         Item.TRAIT.UNIQUE
       ,
       onCreate ::(item, user, creationHint) {   
@@ -2770,7 +2766,6 @@ return {
       ],
       traits : 
         Item.TRAIT.SHARP |
-        Item.TRAIT.METAL |
         Item.TRAIT.KEY_ITEM |
         Item.TRAIT.UNIQUE
       ,
@@ -2827,7 +2822,6 @@ return {
       ],
       traits : 
         Item.TRAIT.SHARP |
-        Item.TRAIT.METAL |
         Item.TRAIT.KEY_ITEM |
         Item.TRAIT.UNIQUE
       ,
@@ -2883,7 +2877,6 @@ return {
       ],
       traits : 
         Item.TRAIT.SHARP |
-        Item.TRAIT.METAL |
         Item.TRAIT.KEY_ITEM |
         Item.TRAIT.UNIQUE
 
@@ -2941,7 +2934,6 @@ return {
       ],
       traits : 
         Item.TRAIT.SHARP |
-        Item.TRAIT.METAL |
         Item.TRAIT.KEY_ITEM|
         Item.TRAIT.UNIQUE
 

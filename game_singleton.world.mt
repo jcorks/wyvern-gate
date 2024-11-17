@@ -875,8 +875,10 @@
         save.rng = random.save();
 
         // traveling always triggers a save.
-        if (skipSave == empty || skipSave == false)
+        if (skipSave == empty || skipSave == false) ::<= {
+          State.weightEmplace(:save);
           instance.savestate(saveOverride:save);      
+        }
       },
 
       // makes the key's island the current island. If the key's island 

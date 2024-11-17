@@ -294,7 +294,7 @@ MapEntity.Task.database.newEntry(
     );
 
     @:items = fetchAllPartyItems()->filter(by::(value) <- 
-      value.base.hasAnyTraits(:
+      value.base.hasAnyTrait(:
         Item.TRAIT.METAL |
         Item.TRAIT.APPAREL |
         Item.TRAIT.HAS_QUALITY

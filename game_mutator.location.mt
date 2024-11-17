@@ -1199,7 +1199,7 @@ Location.database.newEntry(data:{
           base:Item.database.getRandomFiltered(
             filter:::(value) <- 
               value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
-              value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) &&
+              value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) 
               && value.tier <= location.landmark.island.tier + 1
           ),
           rngEnchantHint:true, 
@@ -1472,7 +1472,7 @@ Location.database.newEntry(data:{
       location.inventory.add(item:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.hasTraits(:TRAIT.APPAREL)
+            filter:::(value) <- value.hasTraits(:Item.TRAIT.APPAREL)
           ),
           apparelHint: 'base:wool-plus',
           rngEnchantHint:true
@@ -1737,8 +1737,8 @@ Location.database.newEntry(data:{
       Item.new(
         base:Item.database.getRandomFiltered(
           filter:::(value) <- 
-            base.hasNoTrait(:TRAIT.UNIQUE) &&
-            base.hasTraits(:TRAIT.HAS_QUALITY)          
+            value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+            value.hasTraits(:Item.TRAIT.HAS_QUALITY)          
         ),
         qualityHint : 'base:masterwork',
         rngEnchantHint:true

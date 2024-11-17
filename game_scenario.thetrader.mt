@@ -305,126 +305,146 @@
             state.member.kill(silent:true);
         }
         
-        {:::} {
-          for(0, random.integer(from:6, to:12)) ::(i) {
-            (random.pickArrayItemWeighted(
-              list : [
-                // small chest
-                {
-                  rarity: 2,
-                  action::{
+        @:actions = {};
+        for(0, random.integer(from:4, to:6)) ::(i){
+          actions->push(::
+            {
+              spoils->push(value:
+                Item.new(
+                  base:Item.database.getRandomFiltered(
+                    filter:::(value) <- 
+                      value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                      value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                      && value.tier <= world.island.tier
+                  ),
+                  rngEnchantHint:true
+                )
+              );                    
+            }          
+          )
+        }
+
+        for(0, random.integer(from:3, to:6)) ::(i){
+          actions->push(:random.pickArrayItemWeighted(
+            list : [
+              // small chest
+              {
+                rarity: 2,
+                action::{
+                  spoils->push(value:
+                    Item.new(
+                      base:Item.database.getRandomFiltered(
+                        filter:::(value) <- 
+                          value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                          value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                          && value.tier <= world.island.tier
+                      ),
+                      rngEnchantHint:true
+                    )
+                  );                    
+                }
+              },
+              
+              // locked chest
+              {
+                rarity: 6,
+                action::{
+                  for(0, 3) ::{
                     spoils->push(value:
                       Item.new(
                         base:Item.database.getRandomFiltered(
                           filter:::(value) <- 
                             value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
                             value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
-                            && value.tier <= world.island.tier
+                            && value.tier <= world.island.tier + 1
                         ),
-                        rngEnchantHint:true
+                        rngEnchantHint:true, 
+                        forceEnchant:true
                       )
-                    );                    
-                  }
-                },
-                
-                // locked chest
-                {
-                  rarity: 6,
-                  action::{
-                    for(0, 3) ::{
-                      spoils->push(value:
-                        Item.new(
-                          base:Item.database.getRandomFiltered(
-                            filter:::(value) <- 
-                              value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
-                              value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
-                              && value.tier <= world.island.tier + 1
-                          ),
-                          rngEnchantHint:true, 
-                          forceEnchant:true
-                        )
-                      );       
-                    }               
-                  }                
-                },
-                
-                // normal hostile encounter
-                {
-                  rarity: 3,
-                  action::{
-                    @:world = import(module:'game_singleton.world.mt');                  
-                    @other;
-                    if (random.flipCoin()) ::<= {
-                      other = world.island.newInhabitant()
-                      other.anonymize();
-                    } else if (random.number() > 0.02) ::<= {
-                      other = world.island.newHostileCreature()
-                      other.nickname = correctA(word:other.name);
-                      breakpoint();
-                    } else ::<= {
-                      @:TheBeast = import(module:'game_class.landmarkevent_thebeast.mt');
-                      other = TheBeast.createEntity();
-                    } 
-                      
-                    state.lastAttackedBy = other.name;
-                    windowEvent.autoSkip = true;
-                      {:::} {
-                        forever ::{
-                          when(state.member.isIncapacitated()) send();
-                          when(other.isIncapacitated()) send();
-                          
-                          @:moodBonus = match(this.mood) {
-                            (0): 0.4,
-                            (1): 0.8,
-                            (2): 1,
-                            (3): 1.3,
-                            (4): 1.8
-                          }
-                          
-                          // give the benefit of the doubt, let our person attack first
-                          state.member.attack(
-                            target: other,
+                    );       
+                  }               
+                }                
+              },
+              
+              // normal hostile encounter
+              {
+                rarity: 3,
+                action::{
+                  @:world = import(module:'game_singleton.world.mt');                  
+                  @other;
+                  if (random.flipCoin()) ::<= {
+                    other = world.island.newInhabitant()
+                    other.anonymize();
+                  } else if (random.number() > 0.02) ::<= {
+                    other = world.island.newHostileCreature()
+                    other.nickname = correctA(word:other.name);
+                    breakpoint();
+                  } else ::<= {
+                    @:TheBeast = import(module:'game_class.landmarkevent_thebeast.mt');
+                    other = TheBeast.createEntity();
+                  } 
+                    
+                  state.lastAttackedBy = other.name;
+                  windowEvent.autoSkip = true;
+                    {:::} {
+                      forever ::{
+                        when(state.member.isIncapacitated()) send();
+                        when(other.isIncapacitated()) send();
+                        
+                        @:moodBonus = match(this.mood) {
+                          (0): 0.4,
+                          (1): 0.8,
+                          (2): 1,
+                          (3): 1.3,
+                          (4): 1.8
+                        }
+                        
+                        // give the benefit of the doubt, let our person attack first
+                        state.member.attack(
+                          target: other,
+                          damage: Damage.new(
+                            amount:state.member.stats.ATK * (0.5) * moodBonus,
+                            damageType : Damage.TYPE.PHYS,
+                            damageClass: Damage.CLASS.HP
+                          )
+                        );                           
+
+                        if (!other.isIncapacitated())
+                          other.attack(
+                            target: state.member,
                             damage: Damage.new(
-                              amount:state.member.stats.ATK * (0.5) * moodBonus,
+                              amount:other.stats.ATK * (0.5),
                               damageType : Damage.TYPE.PHYS,
                               damageClass: Damage.CLASS.HP
                             )
                           );                           
-
-                          if (!other.isIncapacitated())
-                            other.attack(
-                              target: state.member,
-                              damage: Damage.new(
-                                amount:other.stats.ATK * (0.5),
-                                damageType : Damage.TYPE.PHYS,
-                                damageClass: Damage.CLASS.HP
-                              )
-                            );                           
-                        }
                       }
-                    windowEvent.autoSkip = false;
-                    if (!state.member.isIncapacitated()) ::<={
-                      spoils->push(value:
-                        Item.new(
-                          base:Item.database.getRandomFiltered(
-                            filter:::(value) <- 
-                              value.hasNoTrait(:Item.TRAIT.UNIQUE)
-                              && value.tier <= world.island.tier
-                          ),
-                          rngEnchantHint:true
-                        )
-                      );                      
-                    } else
-                      defeat();
-                  }
+                    }
+                  windowEvent.autoSkip = false;
+                  if (!state.member.isIncapacitated()) ::<={
+                    spoils->push(value:
+                      Item.new(
+                        base:Item.database.getRandomFiltered(
+                          filter:::(value) <- 
+                            value.hasNoTrait(:Item.TRAIT.UNIQUE)
+                            && value.tier <= world.island.tier
+                        ),
+                        rngEnchantHint:true
+                      )
+                    );                      
+                  } else
+                    defeat();
                 }
-                 
-              ]
-            )).action();
-            
-            
+              }
+               
+            ]
+          ).action);          
+        }
+        
+        {:::} {
+          foreach(actions) ::(k, v) {
+            v();
             if (state.member.hp < state.member.stats.HP / 2) send();
-
           }  
           completed = true;          
           spoils->push(value:
@@ -4103,7 +4123,6 @@ return {
       equipEffects : [],
       traits : 
         Item.TRAIT.SHARP  |
-        Item.TRAIT.METAL  |
         Item.TRAIT.KEY_ITEM|
         Item.TRAIT.UNIQUE
 
@@ -4141,8 +4160,7 @@ return {
       equipEffects : [],
       traits : 
         Item.TRAIT.SHARP |
-        Item.TRAIT.METAL |
-        Item.TRAIT.HAS_MATERIAL
+        Item.TRAIT.METAL
       ,
       onCreate ::(item, creationHint) {}
 
@@ -4177,8 +4195,7 @@ return {
       equipEffects : [],
       traits : 
         Item.TRAIT.SHARP |
-        Item.TRAIT.METAL |
-        Item.TRAIT.HAS_MATERIAL
+        Item.TRAIT.METAL 
       ,
       onCreate ::(item, creationHint) {}
 
@@ -4260,7 +4277,7 @@ return {
             @:instance = import(module:'game_singleton.instance.mt');
 
 
-            instance.visitIsland(atGate:true);        
+            instance.visitCurrentIsland(atGate:true);        
           }
         ]
       }
@@ -4287,7 +4304,7 @@ return {
             @:instance = import(module:'game_singleton.instance.mt');
 
 
-            instance.visitIsland(atGate:true);        
+            instance.visitCurrentIsland(atGate:true);        
           }
         ]
       }
@@ -4339,7 +4356,7 @@ return {
             @:instance = import(module:'game_singleton.instance.mt');
 
 
-            instance.visitIsland(atGate:true);        
+            instance.visitCurrentIsland(atGate:true);        
             @:world = import(module:'game_singleton.world.mt');
             @:party = world.party;
             @:trader = world.scenario.data.trader;

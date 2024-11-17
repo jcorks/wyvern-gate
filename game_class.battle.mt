@@ -152,6 +152,7 @@
     if (inv != empty)
       forcedAcquisition->push(value:inv);
   }
+  breakpoint();
 
   foreach(forcedAcquisition) ::(i, inv) {
     foreach(inv.items) ::(n, item) {
@@ -510,9 +511,9 @@
       @:Effect = import(module:'game_database.effect.mt');  
       turn->sort(
         comparator:::(a, b) {
-          when ((a.effectStack.traits & Effect.TRAITS.ALWAYS_FIRST) != 0)
+          when ((a.effectStack.traits & Effect.TRAIT.ALWAYS_FIRST) != 0)
             false
-          when ((b.effectStack.traits & Effect.TRAITS.ALWAYS_FIRST) != 0)
+          when ((b.effectStack.traits & Effect.TRAIT.ALWAYS_FIRST) != 0)
             true
 
         
@@ -646,7 +647,7 @@
           foreach(ally.effectStack.getAll()) ::(k, v) {
             @:eff = Effect.find(:v.id);
             
-            categories[Effect.TRAIT_TO_DOMINANT_SYMBOL(:eff.flags)] += 1;
+            categories[Effect.TRAITS_TO_DOMINANT_SYMBOL(:eff.traits)] += 1;
           }
           
           // to preserve order

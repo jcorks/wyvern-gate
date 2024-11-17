@@ -341,7 +341,9 @@
   if (set.level >= profession.arts->size)      
     exp = 0;
 
-  when(exp == 0) empty;
+  when(exp == 0) 
+    if (onDone) onDone();
+
 
   if (set == empty) ::<= {
     levelUpProfession(this, state, profession);
@@ -709,10 +711,10 @@
         if (state.faveWeapon == empty)
           state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- 
             value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
-            (value.traits & Item.TRAIT.WEAPON) != 0 && value.tier <= island.tier)
+            (value.traits & Item.TRAIT.WEAPON) != 0)
       }
       state.inventory.addGold(amount:(random.number() * 100)->ceil);
-      state.favoriteItem = Item.database.getRandomFiltered(filter::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE)
+      state.favoriteItem = Item.database.getRandomFiltered(filter::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE))
 
 
 

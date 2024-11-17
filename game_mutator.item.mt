@@ -124,9 +124,9 @@ Item.database.newEntry(
     useEffects : [],
     equipEffects : [],
     traits : 
-      TRAIT.UNIQUE,
-      TRAIT.KEY_ITEM,
-      TRAIT.STACKABLE
+      TRAIT.UNIQUE |
+      TRAIT.KEY_ITEM |
+      TRAIT.STACKABLE,
     blockPoints : 0,
     onCreate ::(item, creationHint) {},
     possibleArts : [],
@@ -2945,7 +2945,6 @@ Item.database.newEntry(data : {
     equipEffects : [],
     traits : 
       TRAIT.SHARP  |
-      TRAIT.METAL |
       TRAIT.UNIQUE |
       TRAIT.HAS_COLOR
     ,
@@ -3192,6 +3191,7 @@ none.name = 'None';
       equipMod : StatSet.type,
       enchantLimit : Number,
       equipEffects : Object,
+      useEffects : Object,
       traits : Number,
       useTargetHint : Number,
       onCreate : Function,
@@ -3245,7 +3245,7 @@ none.name = 'None';
       state.improvementEXP = 0;
       state.data = {};
       
-      if (base.hasTraits(:TRAIT.SIZE))   
+      if (base.hasTraits(:TRAIT.HAS_SIZE))   
         assignSize(*_);
       foreach(base.equipEffects)::(i, effect) {
         state.equipEffects->push(value:effect);
@@ -3339,7 +3339,7 @@ none.name = 'None';
               else
                 ItemEnchant.database.getRandomFiltered(
                   filter::(value) <- 
-                  value.tier <= world.island.tier && (if (base.hasTraits(:TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS == false) value.triggerConditionEffects->keycount == 0 else true)
+                  value.tier <= world.island.tier 
                 )
             )
             this.addEnchant(mod);
@@ -3446,7 +3446,7 @@ none.name = 'None';
     },
       
       
-    setIslandGentraits ::(levelHint, nameHint, tierHint, extraLandmarks, idHint) {
+    setIslandGenTraits ::(levelHint, nameHint, tierHint, extraLandmarks, idHint) {
       @:state = _.state;
       if (levelHint)  
         state.islandLevelHint = levelHint;
@@ -3463,7 +3463,7 @@ none.name = 'None';
         state.islandIDhint = idHint;
     },
     
-    islandGentraits : {
+    islandGenTraits : {
       get ::{ 
         @:Island = import(:'game_mutator.island.mt');
         return {

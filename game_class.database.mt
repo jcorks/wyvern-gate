@@ -97,8 +97,8 @@
         item.hasTraits = hasTraits;
         item.hasAnyTrait = hasAnyTrait;
         item.hasNoTrait = hasNoTrait;
-        item->setIsInterface(enabled:true);
-        
+        item->setIsInterface(enabled:true, private:item);
+                
         items_[item.id] = item;
       },
 

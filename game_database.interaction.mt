@@ -519,7 +519,7 @@ Interaction.newEntry(
                                 filter::(value) <- value.hasTraits(:
                                     Item.TRAIT.UNIQUE |
                                     Item.HAS_QUALITY
-                                ) && value.hasAnyTraits(:
+                                ) && value.hasAnyTrait(:
                                     Item.TRAIT.METAL |
                                     Item.TRAIT.APPAREL
                                 ) 

@@ -224,9 +224,9 @@
       // no weight, as the value scales
       @:item = Item.new(
         base:Item.database.getRandomFiltered(
-          filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+          filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE)
                     && value.tier <= location.landmark.island.tier &&
-                    value.hasTraits(
+                    value.hasTraits(:
                       Item.TRAIT.HAS_QUALITY |
                       Item.TRAIT.METAL
                     ) &&
